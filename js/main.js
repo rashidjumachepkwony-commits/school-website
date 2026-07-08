@@ -1,108 +1,147 @@
 // ============================================
-// MOBILE MENU TOGGLE
+// API BASE URL (change when deployed)
 // ============================================
-function toggleMobileMenu() {
-    const nav = document.querySelector('.nav-links');
-    nav.classList.toggle('open');
+const API_URL = 'http://localhost:3000/api';
+
+// ============================================
+// VISITOR FUNCTIONS
+// ============================================
+
+// Visitor Check-In
+async function visitorCheckIn(id, name, phone, purpose) {
+    try {
+        const response = await fetch(`${API_URL}/visitor/checkin`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, name, phone, purpose })
+        });
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return { success: false, message: '❌ Error: ' + error.message };
+    }
+}
+
+// Visitor Check-Out
+async function visitorCheckOut(id) {
+    try {
+        const response = await fetch(`${API_URL}/visitor/checkout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return { success: false, message: '❌ Error: ' + error.message };
+    }
+}
+
+// Get Today's Visitors
+async function getTodayVisitors() {
+    try {
+        const response = await fetch(`${API_URL}/visitor/today`);
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return { success: false, message: '❌ Error: ' + error.message };
+    }
 }
 
 // ============================================
-// CLOSE MOBILE MENU ON LINK CLICK
+// STAFF FUNCTIONS
 // ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    const navLinks = document.querySelectorAll('.nav-links a');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            const nav = document.querySelector('.nav-links');
-            nav.classList.remove('open');
+
+// Staff Check-In
+async function staffCheckIn(staffId, pin) {
+    try {
+        const response = await fetch(`${API_URL}/staff/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ staffId, pin, action: 'IN' })
         });
-    });
-});
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return { success: false, message: '❌ Error: ' + error.message };
+    }
+}
 
-// ============================================
-// ANIMATED COUNTER FOR STATS
-// ============================================
-function animateCounters() {
-    const counters = document.querySelectorAll('.stat-number');
-    counters.forEach(counter => {
-        const text = counter.textContent;
-        const number = parseInt(text.replace(/[^0-9]/g, ''));
-        if (!number) return;
-
-        const suffix = text.replace(/[0-9]/g, '');
-        let current = 0;
-        const increment = Math.ceil(number / 60);
-        const duration = 2000;
-        const stepTime = Math.floor(duration / number);
-
-        const timer = setInterval(() => {
-            current += increment;
-            if (current >= number) {
-                current = number;
-                clearInterval(timer);
-            }
-            counter.textContent = current + suffix;
-        }, stepTime);
-    });
+// Staff Check-Out
+async function staffCheckOut(staffId, pin) {
+    try {
+        const response = await fetch(`${API_URL}/staff/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ staffId, pin, action: 'OUT' })
+        });
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return { success: false, message: '❌ Error: ' + error.message };
+    }
 }
 
 // ============================================
-// RUN COUNTER ANIMATION WHEN SCROLLED INTO VIEW
+// STUDENT FUNCTIONS
 // ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    const statsSection = document.querySelector('.stats');
-    if (!statsSection) return;
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                animateCounters();
-                observer.unobserve(statsSection);
-            }
+// Student Check-In
+async function studentCheckIn(studentId, pin) {
+    try {
+        const response = await fetch(`${API_URL}/student/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId, pin, action: 'IN' })
         });
-    }, { threshold: 0.5 });
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return { success: false, message: '❌ Error: ' + error.message };
+    }
+}
 
-    observer.observe(statsSection);
-});
-
-// ============================================
-// SMOOTH SCROLLING FOR NAV LINKS
-// ============================================
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        const href = this.getAttribute('href');
-        if (href === '#') return;
-        
-        e.preventDefault();
-        const target = document.querySelector(href);
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    });
-});
+// Student Check-Out
+async function studentCheckOut(studentId, pin) {
+    try {
+        const response = await fetch(`${API_URL}/student/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId, pin, action: 'OUT' })
+        });
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return { success: false, message: '❌ Error: ' + error.message };
+    }
+}
 
 // ============================================
-// CONTACT FORM HANDLING
+// ADMIN FUNCTIONS
 // ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    const contactForm = document.querySelector('.contact-form');
-    if (!contactForm) return;
 
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const name = this.querySelector('input[type="text"]').value;
-        const email = this.querySelector('input[type="email"]').value;
-        const message = this.querySelector('textarea').value;
+// Verify Admin PIN
+async function verifyAdminPin(pin) {
+    try {
+        const response = await fetch(`${API_URL}/admin/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pin })
+        });
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return { success: false, message: '❌ Error: ' + error.message };
+    }
+}
 
-        if (!name || !email || !message) {
-            alert('Please fill in all fields');
-            return;
-        }
-
-        alert('✅ Thank you for your message! We will get back to you soon.');
-        this.reset();
-    });
-});
+// Get Dashboard Data
+async function getDashboardData() {
+    try {
+        const response = await fetch(`${API_URL}/admin/dashboard`);
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return { success: false, message: '❌ Error: ' + error.message };
+    }
+}
