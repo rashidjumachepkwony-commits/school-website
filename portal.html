@@ -72,7 +72,7 @@
         // ============================================
         async function checkAPI() {
             try {
-                const response = await fetch('/api/health');
+                const response = await fetch('https://csa-backend.onrender.com/api/health');
                 const data = await response.json();
                 document.getElementById('apiStatus').innerHTML = 
                     '✅ API is running!<br><code>' + JSON.stringify(data, null, 2) + '</code>';

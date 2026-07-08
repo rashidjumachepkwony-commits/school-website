@@ -1,7 +1,7 @@
 // ============================================
 // API BASE URL (change when deployed)
 // ============================================
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://csa-backend.onrender.com/api';
 
 // ============================================
 // VISITOR FUNCTIONS
