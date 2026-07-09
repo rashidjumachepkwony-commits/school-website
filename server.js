@@ -23,7 +23,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB'
   .catch(err => console.error('❌ MongoDB Error:', err.message));
 
 // ============================================
-// CREATE CONTENT SCHEMA (If not already in models/)
+// CREATE CONTENT SCHEMA
 // ============================================
 const contentSchema = new mongoose.Schema({
   heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
@@ -94,12 +94,11 @@ app.get('/api/content', async (req, res) => {
   }
 });
 
-// UPDATE website content (Admin only - simple auth for now)
+// UPDATE website content
 app.put('/api/content', async (req, res) => {
   try {
     const content = await Content.getContent();
     
-    // Update all fields from request body
     Object.keys(req.body).forEach(key => {
       if (key === 'features' && Array.isArray(req.body.features)) {
         content.features = req.body.features;
@@ -131,11 +130,18 @@ app.put('/api/content', async (req, res) => {
 });
 
 // ============================================
-// CREATE FIRST ADMIN (Run once, then comment out)
+// CREATE FIRST ADMIN
 // ============================================
 app.post('/api/setup-admin', async (req, res) => {
   try {
     const { username, email, password, fullName } = req.body;
+    
+    if (!username || !email || !password || !fullName) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please provide username, email, password, and fullName' 
+      });
+    }
     
     const existing = await Admin.findOne({ $or: [{ username }, { email }] });
     if (existing) {
@@ -146,12 +152,23 @@ app.post('/api/setup-admin', async (req, res) => {
       username,
       email,
       password,
-      fullName
+      fullName,
+      role: 'Super Admin'
     });
     await admin.save();
     
-    res.json({ success: true, message: 'Admin created successfully!' });
+    res.json({ 
+      success: true, 
+      message: 'Admin created successfully!',
+      admin: {
+        username: admin.username,
+        email: admin.email,
+        fullName: admin.fullName,
+        role: admin.role
+      }
+    });
   } catch (error) {
+    console.error('Setup error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -160,6 +177,13 @@ app.post('/api/setup-admin', async (req, res) => {
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please provide username and password' 
+      });
+    }
     
     const admin = await Admin.findOne({ 
       $or: [{ username }, { email: username }] 
@@ -187,8 +211,29 @@ app.post('/api/admin/login', async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
+});
+
+// ============================================
+// TEST ROUTE - Check if server is working
+// ============================================
+app.get('/api/test', (req, res) => {
+  res.json({
+    success: true,
+    message: '🎉 Changara Star Academy is running!',
+    data: {
+      server: 'Online',
+      timestamp: new Date().toISOString(),
+      endpoints: {
+        test: '/api/test',
+        content: '/api/content',
+        admin: '/api/admin/login',
+        setup: '/api/setup-admin'
+      }
+    }
+  });
 });
 
 // ============================================
@@ -201,6 +246,16 @@ app.use(express.static(__dirname));
 // ============================================
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ============================================
+// 404 HANDLER - For routes that don't exist
+// ============================================
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
 });
 
 // ============================================
