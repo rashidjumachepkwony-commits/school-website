@@ -1,8 +1,19 @@
 {
+  "name": "school-website",
+  "version": "1.0.0",
+  "description": "Changara Star Academy - School Management System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mongoose": "^9.7.4"
-  }
+  },
+  "keywords": [],
+  "author": "Changara Star Academy",
+  "license": "ISC"
 }
