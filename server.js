@@ -87,7 +87,7 @@ const teacherSchema = new mongoose.Schema({
   firstName: { type: String, required: true, trim: true },
   lastName: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password: { type: String, required: true, minlength: 6 },
+  password: { type: String, required: true, minlength: 4 }, // PIN stored as password
   phoneNumber: { type: String, trim: true },
   employeeId: { type: String, required: true, unique: true },
   department: { type: String, default: 'Teaching' },
@@ -253,11 +253,14 @@ app.post('/api/admin/login', async (req, res) => {
 // API ROUTES - TEACHER CHECK-IN/OUT
 // ============================================
 
-// TEACHER REGISTRATION
+// TEACHER REGISTRATION (With PIN)
 app.post('/api/teacher/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, employeeId, phoneNumber, department } = req.body;
     
+    console.log('📝 Registering teacher:', { firstName, lastName, email, employeeId });
+    
+    // Check if teacher already exists
     const existing = await Teacher.findOne({ 
       $or: [{ email }, { employeeId }] 
     });
@@ -269,21 +272,32 @@ app.post('/api/teacher/register', async (req, res) => {
       });
     }
     
+    // Validate PIN (4-6 digits)
+    if (password && (password.length < 4 || password.length > 6)) {
+      return res.status(400).json({
+        success: false,
+        message: 'PIN must be 4-6 digits'
+      });
+    }
+    
+    // Create new teacher with PIN as password
     const teacher = new Teacher({
       firstName,
       lastName,
       email,
-      password,
+      password: password || '1234',
       employeeId,
-      phoneNumber,
+      phoneNumber: phoneNumber || '',
       department: department || 'Teaching'
     });
     
     await teacher.save();
     
+    console.log('✅ Teacher registered successfully:', teacher.employeeId);
+    
     res.json({ 
       success: true, 
-      message: 'Teacher registered successfully!',
+      message: 'Staff registered successfully!',
       teacher: {
         id: teacher._id,
         firstName: teacher.firstName,
@@ -294,7 +308,7 @@ app.post('/api/teacher/register', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('❌ Registration error:', error);
     res.status(500).json({ 
       success: false, 
       message: error.message 
@@ -305,16 +319,26 @@ app.post('/api/teacher/register', async (req, res) => {
 // TEACHER CHECK-IN
 app.post('/api/teacher/checkin', async (req, res) => {
   try {
-    const { employeeId, location } = req.body;
+    const { employeeId, pin } = req.body;
     
+    // 1. Check if teacher exists
     const teacher = await Teacher.findOne({ employeeId });
     if (!teacher) {
       return res.status(404).json({ 
         success: false, 
-        message: '❌ Teacher not found. Please contact admin.' 
+        message: '❌ Staff not found. Please contact admin.' 
       });
     }
     
+    // 2. Verify PIN
+    if (teacher.password !== pin) {
+      return res.status(401).json({
+        success: false,
+        message: '❌ Invalid PIN. Please try again.'
+      });
+    }
+    
+    // 3. Check if it's a weekend
     const today = new Date();
     const dayOfWeek = today.getDay();
     if (dayOfWeek === 0 || dayOfWeek === 6) {
@@ -324,6 +348,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
+    // 4. Check if already checked in today
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     
@@ -341,6 +366,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
+    // 5. Check if after 5:00 PM
     const currentHour = today.getHours();
     if (currentHour >= 17) {
       return res.status(400).json({
@@ -349,15 +375,17 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
+    // 6. Determine if late (after 7:00 AM)
     const checkInTime = new Date();
     const isLate = checkInTime.getHours() > 7 || (checkInTime.getHours() === 7 && checkInTime.getMinutes() > 0);
     const status = isLate ? 'Late' : 'Present';
     
+    // 7. Create attendance record
     teacher.attendance.push({
       date: new Date(),
       checkIn: new Date(),
       status: status,
-      location: location || 'School',
+      location: 'School',
       isLate: isLate,
       notes: isLate ? 'Late check-in' : ''
     });
@@ -392,16 +420,26 @@ app.post('/api/teacher/checkin', async (req, res) => {
 // TEACHER CHECK-OUT
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
-    const { employeeId, notes } = req.body;
+    const { employeeId, pin } = req.body;
     
+    // 1. Check if teacher exists
     const teacher = await Teacher.findOne({ employeeId });
     if (!teacher) {
       return res.status(404).json({ 
         success: false, 
-        message: '❌ Teacher not found. Please contact admin.' 
+        message: '❌ Staff not found. Please contact admin.' 
       });
     }
     
+    // 2. Verify PIN
+    if (teacher.password !== pin) {
+      return res.status(401).json({
+        success: false,
+        message: '❌ Invalid PIN. Please try again.'
+      });
+    }
+    
+    // 3. Find today's attendance
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     
@@ -426,6 +464,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
+    // 4. Check if check-out is before 3:00 PM
     const currentHour = new Date().getHours();
     if (currentHour < 15) {
       return res.status(400).json({
@@ -434,10 +473,12 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
+    // 5. Update checkout time
     const checkOutTime = new Date();
     todayAttendance.checkOut = checkOutTime;
     todayAttendance.notes = notes || todayAttendance.notes || '';
     
+    // 6. Calculate hours worked
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((checkOutTime - checkInTime) / (1000 * 60 * 60)).toFixed(2);
     todayAttendance.hoursWorked = parseFloat(hoursWorked);
@@ -606,6 +647,7 @@ app.put('/api/teachers/:id', async (req, res) => {
       });
     }
     
+    // Check if email or employeeId is taken by another teacher
     const existing = await Teacher.findOne({
       _id: { $ne: req.params.id },
       $or: [{ email }, { employeeId }]
@@ -670,10 +712,12 @@ app.delete('/api/teachers/:id', async (req, res) => {
   }
 });
 
-// RESET TEACHER PASSWORD (Admin)
-app.post('/api/teachers/:id/reset-password', async (req, res) => {
+// RESET TEACHER PIN (Admin)
+app.post('/api/teachers/:id/reset-pin', async (req, res) => {
   try {
+    const { pin } = req.body;
     const teacher = await Teacher.findById(req.params.id);
+    
     if (!teacher) {
       return res.status(404).json({ 
         success: false, 
@@ -681,12 +725,19 @@ app.post('/api/teachers/:id/reset-password', async (req, res) => {
       });
     }
     
-    teacher.password = 'teacher123';
+    if (!pin || pin.length < 4 || pin.length > 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'PIN must be 4-6 digits'
+      });
+    }
+    
+    teacher.password = pin;
     await teacher.save();
     
     res.json({
       success: true,
-      message: 'Password reset successfully! New password: teacher123'
+      message: 'PIN reset successfully!'
     });
   } catch (error) {
     res.status(500).json({ 
@@ -842,7 +893,7 @@ app.listen(PORT, () => {
   console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
   console.log(`🌐 Website: http://localhost:${PORT}/`);
   console.log(`📊 Admin: http://localhost:${PORT}/admin-login.html`);
-  console.log(`👨‍🏫 Teacher Check-in: http://localhost:${PORT}/teacher-checkin.html`);
+  console.log(`👨‍🏫 Staff Check-in: http://localhost:${PORT}/teacher-checkin.html`);
   console.log(`📋 Admin Attendance: http://localhost:${PORT}/admin-attendance.html`);
   console.log(`👨‍🏫 Manage Teachers: http://localhost:${PORT}/admin-teachers.html`);
   console.log('='.repeat(50));
