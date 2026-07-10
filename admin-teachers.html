@@ -306,6 +306,11 @@
             color: #0b5394;
             margin: 5px 0;
         }
+        .pin-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
 
         @media (max-width: 768px) {
             .sidebar {
@@ -368,7 +373,7 @@
                         <tr>
                             <th>#</th>
                             <th>Name</th>
-                            <th>Employee ID</th>
+                            <th>Staff ID</th>
                             <th>Department</th>
                             <th>Email</th>
                             <th>Phone</th>
@@ -402,7 +407,7 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Employee ID *</label>
+                        <label>Staff ID *</label>
                         <input type="text" id="employeeId" placeholder="T001" required>
                     </div>
                     <div class="form-group">
@@ -429,18 +434,24 @@
                     <label>Phone Number</label>
                     <input type="text" id="phoneNumber" placeholder="555-1234">
                 </div>
-                <div class="form-group">
-                    <label>Default Password</label>
-                    <input type="text" id="teacherPassword" value="teacher123" placeholder="Enter default password">
-                    <small style="color:#666;font-size:12px;">Teacher can change this after first login</small>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Staff PIN *</label>
+                        <input type="password" id="teacherPin" placeholder="Enter 4-digit PIN" required minlength="4" maxlength="6">
+                        <div class="pin-hint">PIN will be used for check-in/out. Must be 4-6 digits.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm PIN *</label>
+                        <input type="password" id="confirmPin" placeholder="Confirm PIN" required minlength="4" maxlength="6">
+                    </div>
                 </div>
                 <div id="credentialsSection" class="credentials-box">
-                    <div class="label">🔐 Teacher Login Credentials</div>
-                    <div><strong>Employee ID:</strong> <span id="credEmployeeId" class="value"></span></div>
-                    <div><strong>Default Password:</strong> <span id="credPassword" class="value">teacher123</span></div>
-                    <div style="font-size:12px;color:#666;margin-top:5px;">⚠️ Teacher should change password after first login</div>
+                    <div class="label">🔐 Staff Login Credentials</div>
+                    <div><strong>Staff ID:</strong> <span id="credEmployeeId" class="value"></span></div>
+                    <div><strong>Staff PIN:</strong> <span id="credPin" class="value"></span></div>
+                    <div style="font-size:12px;color:#666;margin-top:5px;">⚠️ Staff will use these credentials for check-in/out</div>
                 </div>
-                <button type="submit" class="btn-success" style="width:100%;padding:14px;">💾 Save Teacher</button>
+                <button type="submit" class="btn-success" style="width:100%;padding:14px;">💾 Register Staff</button>
             </form>
         </div>
     </div>
@@ -515,7 +526,7 @@
                         <div class="action-buttons">
                             <button class="btn-warning" onclick="editTeacher('${teacher._id}')">✏️ Edit</button>
                             <button class="btn-danger" onclick="deleteTeacher('${teacher._id}')">🗑️</button>
-                            <button class="btn-primary" onclick="resetPassword('${teacher._id}')">🔑 Reset</button>
+                            <button class="btn-primary" onclick="resetPin('${teacher._id}')">🔑 Reset PIN</button>
                         </div>
                     </td>
                 `;
@@ -528,17 +539,22 @@
         // OPEN ADD MODAL
         // ============================================
         function openAddModal() {
-            document.getElementById('modalTitle').textContent = '➕ Add New Teacher';
+            document.getElementById('modalTitle').textContent = '➕ Register New Staff';
             document.getElementById('teacherId').value = '';
             document.getElementById('teacherForm').reset();
-            document.getElementById('teacherPassword').value = 'teacher123';
             document.getElementById('credentialsSection').style.display = 'block';
-            document.getElementById('credEmployeeId').textContent = 'Auto-generated';
-            document.getElementById('credPassword').textContent = 'teacher123';
             // Auto-generate employee ID
             const count = teachersData.length + 1;
             document.getElementById('employeeId').value = 'T' + String(count).padStart(3, '0');
+            document.getElementById('credEmployeeId').textContent = document.getElementById('employeeId').value;
+            document.getElementById('credPin').textContent = '••••••';
             document.getElementById('teacherModal').classList.add('active');
+            
+            // Update PIN display when typing
+            document.getElementById('teacherPin').addEventListener('input', function() {
+                const pin = this.value;
+                document.getElementById('credPin').textContent = pin ? '•'.repeat(pin.length) : '••••••';
+            });
         }
 
         // ============================================
@@ -551,7 +567,7 @@
 
                 if (data.success) {
                     const teacher = data.teacher;
-                    document.getElementById('modalTitle').textContent = '✏️ Edit Teacher';
+                    document.getElementById('modalTitle').textContent = '✏️ Edit Staff';
                     document.getElementById('teacherId').value = teacher._id;
                     document.getElementById('firstName').value = teacher.firstName || '';
                     document.getElementById('lastName').value = teacher.lastName || '';
@@ -559,7 +575,8 @@
                     document.getElementById('department').value = teacher.department || '';
                     document.getElementById('email').value = teacher.email || '';
                     document.getElementById('phoneNumber').value = teacher.phoneNumber || '';
-                    document.getElementById('teacherPassword').value = '********';
+                    document.getElementById('teacherPin').value = '';
+                    document.getElementById('confirmPin').value = '';
                     document.getElementById('credentialsSection').style.display = 'none';
                     document.getElementById('teacherModal').classList.add('active');
                 }
@@ -594,25 +611,32 @@
         }
 
         // ============================================
-        // RESET PASSWORD
+        // RESET PIN
         // ============================================
-        async function resetPassword(id) {
-            if (!confirm('Reset password to "teacher123" for this teacher?')) return;
+        async function resetPin(id) {
+            const newPin = prompt('Enter new 4-6 digit PIN for this staff member:');
+            if (!newPin) return;
+            if (newPin.length < 4 || newPin.length > 6) {
+                showAlert('PIN must be 4-6 digits', 'error');
+                return;
+            }
 
             try {
-                const res = await fetch(`/api/teachers/${id}/reset-password`, {
-                    method: 'POST'
+                const res = await fetch(`/api/teachers/${id}/reset-pin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pin: newPin })
                 });
                 const data = await res.json();
 
                 if (data.success) {
-                    showAlert('Password reset successfully! New password: teacher123', 'success');
+                    showAlert(`PIN reset successfully! New PIN: ${newPin}`, 'success');
                 } else {
                     showAlert('Error: ' + data.message, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showAlert('Error resetting password', 'error');
+                showAlert('Error resetting PIN', 'error');
             }
         }
 
@@ -630,8 +654,20 @@
             e.preventDefault();
 
             const id = document.getElementById('teacherId').value;
-            const password = document.getElementById('teacherPassword').value;
-            
+            const pin = document.getElementById('teacherPin').value;
+            const confirmPin = document.getElementById('confirmPin').value;
+
+            // Validate PIN
+            if (!id && (!pin || pin.length < 4 || pin.length > 6)) {
+                showAlert('PIN must be 4-6 digits', 'error');
+                return;
+            }
+
+            if (!id && pin !== confirmPin) {
+                showAlert('PINs do not match', 'error');
+                return;
+            }
+
             const data = {
                 firstName: document.getElementById('firstName').value.trim(),
                 lastName: document.getElementById('lastName').value.trim(),
@@ -641,12 +677,12 @@
                 phoneNumber: document.getElementById('phoneNumber').value.trim()
             };
 
-            // Only send password if adding new teacher (not editing)
+            // Only send PIN if adding new teacher
             if (!id) {
-                data.password = password || 'teacher123';
+                data.password = pin; // Store PIN as password
             }
 
-            console.log('📤 Sending data:', data);
+            console.log('📤 Sending data:', { ...data, password: '••••••' });
 
             try {
                 const url = id ? `/api/teachers/${id}` : '/api/teacher/register';
@@ -662,7 +698,7 @@
                 console.log('📥 Response:', result);
 
                 if (result.success) {
-                    showAlert(id ? 'Teacher updated successfully!' : 'Teacher registered successfully!', 'success');
+                    showAlert(id ? 'Staff updated successfully!' : `Staff registered successfully! PIN: ${pin}`, 'success');
                     closeModal();
                     loadTeachers();
                 } else {
@@ -670,7 +706,7 @@
                 }
             } catch (error) {
                 console.error('❌ Error:', error);
-                showAlert('Error saving teacher: ' + error.message, 'error');
+                showAlert('Error saving staff: ' + error.message, 'error');
             }
         });
 
@@ -702,7 +738,7 @@
             window.location.href = 'admin-login.html';
         }
 
-        // Auto-generate employee ID suggestion
+        // Auto-generate employee ID
         document.getElementById('employeeId').addEventListener('focus', function() {
             if (!this.value) {
                 const count = teachersData.length + 1;
