@@ -898,4 +898,5 @@ app.listen(PORT, () => {
   console.log(`👨‍🏫 Manage Teachers: http://localhost:${PORT}/admin-teachers.html`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
-});
+});/ /   F o r c e   r e b u i l d  
+ 
