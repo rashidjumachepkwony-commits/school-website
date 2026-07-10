@@ -307,7 +307,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
   try {
     const { employeeId, location } = req.body;
     
-    // 1. Check if teacher exists
     const teacher = await Teacher.findOne({ employeeId });
     if (!teacher) {
       return res.status(404).json({ 
@@ -316,7 +315,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // 2. Check if it's a weekend
     const today = new Date();
     const dayOfWeek = today.getDay();
     if (dayOfWeek === 0 || dayOfWeek === 6) {
@@ -326,7 +324,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // 3. Check if already checked in today
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     
@@ -344,7 +341,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // 4. Check if after 5:00 PM
     const currentHour = today.getHours();
     if (currentHour >= 17) {
       return res.status(400).json({
@@ -353,12 +349,10 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // 5. Determine if late (after 7:00 AM)
     const checkInTime = new Date();
     const isLate = checkInTime.getHours() > 7 || (checkInTime.getHours() === 7 && checkInTime.getMinutes() > 0);
     const status = isLate ? 'Late' : 'Present';
     
-    // 6. Create attendance record
     teacher.attendance.push({
       date: new Date(),
       checkIn: new Date(),
@@ -400,7 +394,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
   try {
     const { employeeId, notes } = req.body;
     
-    // 1. Check if teacher exists
     const teacher = await Teacher.findOne({ employeeId });
     if (!teacher) {
       return res.status(404).json({ 
@@ -409,7 +402,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // 2. Find today's attendance
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     
@@ -434,7 +426,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // 3. Check if check-out is before 3:00 PM
     const currentHour = new Date().getHours();
     if (currentHour < 15) {
       return res.status(400).json({
@@ -443,12 +434,10 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // 4. Update checkout time
     const checkOutTime = new Date();
     todayAttendance.checkOut = checkOutTime;
     todayAttendance.notes = notes || todayAttendance.notes || '';
     
-    // 5. Calculate hours worked
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((checkOutTime - checkInTime) / (1000 * 60 * 60)).toFixed(2);
     todayAttendance.hoursWorked = parseFloat(hoursWorked);
@@ -561,7 +550,11 @@ app.get('/api/teacher/attendance/:employeeId', async (req, res) => {
   }
 });
 
-// GET ALL TEACHERS (Admin)
+// ============================================
+// ADMIN TEACHER MANAGEMENT ROUTES
+// ============================================
+
+// GET ALL TEACHERS (Admin) - KEEP THIS ONE, DELETE THE DUPLICATE EARLIER
 app.get('/api/teachers', async (req, res) => {
   try {
     const teachers = await Teacher.find({ isActive: true }).select('-password');
@@ -569,6 +562,216 @@ app.get('/api/teachers', async (req, res) => {
       success: true,
       count: teachers.length,
       teachers
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+// GET SINGLE TEACHER (Admin)
+app.get('/api/teachers/:id', async (req, res) => {
+  try {
+    const teacher = await Teacher.findById(req.params.id).select('-password');
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+    res.json({
+      success: true,
+      teacher
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+// UPDATE TEACHER (Admin)
+app.put('/api/teachers/:id', async (req, res) => {
+  try {
+    const { firstName, lastName, email, employeeId, phoneNumber, department } = req.body;
+    
+    const teacher = await Teacher.findById(req.params.id);
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+    
+    const existing = await Teacher.findOne({
+      _id: { $ne: req.params.id },
+      $or: [{ email }, { employeeId }]
+    });
+    
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email or Employee ID already in use by another teacher'
+      });
+    }
+    
+    teacher.firstName = firstName || teacher.firstName;
+    teacher.lastName = lastName || teacher.lastName;
+    teacher.email = email || teacher.email;
+    teacher.employeeId = employeeId || teacher.employeeId;
+    teacher.phoneNumber = phoneNumber || teacher.phoneNumber;
+    teacher.department = department || teacher.department;
+    
+    await teacher.save();
+    
+    res.json({
+      success: true,
+      message: 'Teacher updated successfully!',
+      teacher: {
+        id: teacher._id,
+        firstName: teacher.firstName,
+        lastName: teacher.lastName,
+        employeeId: teacher.employeeId,
+        email: teacher.email,
+        department: teacher.department
+      }
+    });
+  } catch (error) {
+    console.error('Update teacher error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+// DELETE TEACHER (Admin)
+app.delete('/api/teachers/:id', async (req, res) => {
+  try {
+    const teacher = await Teacher.findByIdAndDelete(req.params.id);
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+    res.json({
+      success: true,
+      message: 'Teacher deleted successfully!'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+// RESET TEACHER PASSWORD (Admin)
+app.post('/api/teachers/:id/reset-password', async (req, res) => {
+  try {
+    const teacher = await Teacher.findById(req.params.id);
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+    
+    teacher.password = 'teacher123';
+    await teacher.save();
+    
+    res.json({
+      success: true,
+      message: 'Password reset successfully! New password: teacher123'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+// ============================================
+// ADMIN ATTENDANCE ROUTES
+// ============================================
+
+// GET ALL TEACHERS ATTENDANCE (Admin)
+app.get('/api/admin/attendance/all', async (req, res) => {
+  try {
+    const teachers = await Teacher.find({ isActive: true });
+    
+    const allAttendance = teachers.map(teacher => {
+      return {
+        id: teacher._id,
+        name: `${teacher.firstName} ${teacher.lastName}`,
+        employeeId: teacher.employeeId,
+        department: teacher.department,
+        email: teacher.email,
+        phoneNumber: teacher.phoneNumber,
+        totalDays: teacher.attendance.length,
+        attendance: teacher.attendance.sort((a, b) => b.date - a.date)
+      };
+    });
+    
+    res.json({
+      success: true,
+      count: allAttendance.length,
+      teachers: allAttendance
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+// GET ATTENDANCE SUMMARY (Admin)
+app.get('/api/admin/attendance/summary', async (req, res) => {
+  try {
+    const teachers = await Teacher.find({ isActive: true });
+    
+    let totalTeachers = teachers.length;
+    let totalPresent = 0;
+    let totalLate = 0;
+    let totalAbsent = 0;
+    
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    
+    teachers.forEach(teacher => {
+      const todayRecord = teacher.attendance.find(a => {
+        const aDate = new Date(a.date);
+        aDate.setHours(0, 0, 0, 0);
+        return aDate.getTime() === todayStart.getTime();
+      });
+      
+      if (todayRecord) {
+        if (todayRecord.isLate) {
+          totalLate++;
+        } else {
+          totalPresent++;
+        }
+      } else {
+        totalAbsent++;
+      }
+    });
+    
+    res.json({
+      success: true,
+      today: {
+        date: todayStart,
+        total: totalTeachers,
+        present: totalPresent,
+        late: totalLate,
+        absent: totalAbsent,
+        attendanceRate: totalTeachers > 0 ? ((totalPresent / totalTeachers) * 100).toFixed(2) : 0
+      }
     });
   } catch (error) {
     res.status(500).json({ 
@@ -598,7 +801,8 @@ app.get('/api/test', (req, res) => {
           checkin: '/api/teacher/checkin',
           checkout: '/api/teacher/checkout',
           attendance: '/api/teacher/attendance/today'
-        }
+        },
+        adminAttendance: '/api/admin/attendance/all'
       }
     }
   });
@@ -639,6 +843,8 @@ app.listen(PORT, () => {
   console.log(`🌐 Website: http://localhost:${PORT}/`);
   console.log(`📊 Admin: http://localhost:${PORT}/admin-login.html`);
   console.log(`👨‍🏫 Teacher Check-in: http://localhost:${PORT}/teacher-checkin.html`);
+  console.log(`📋 Admin Attendance: http://localhost:${PORT}/admin-attendance.html`);
+  console.log(`👨‍🏫 Manage Teachers: http://localhost:${PORT}/admin-teachers.html`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
 });
