@@ -554,7 +554,7 @@ app.get('/api/teacher/attendance/:employeeId', async (req, res) => {
 // ADMIN TEACHER MANAGEMENT ROUTES
 // ============================================
 
-// GET ALL TEACHERS (Admin) - KEEP THIS ONE, DELETE THE DUPLICATE EARLIER
+// GET ALL TEACHERS (Admin)
 app.get('/api/teachers', async (req, res) => {
   try {
     const teachers = await Teacher.find({ isActive: true }).select('-password');
@@ -821,7 +821,7 @@ app.get('/', (req, res) => {
 });
 
 // ============================================
-// 404 HANDLER
+// 404 HANDLER - MUST BE LAST!
 // ============================================
 app.use((req, res) => {
   res.status(404).json({
