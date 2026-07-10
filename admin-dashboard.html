@@ -244,9 +244,10 @@
             <p>Changara Star Academy</p>
         </div>
         <div class="sidebar-menu">
-            <a onclick="showSection('dashboard')">📊 Dashboard</a>
+            <a onclick="showSection('dashboard')" style="background:rgba(212,160,23,0.2);color:#d4a017;">📊 Dashboard</a>
             <a onclick="showSection('content')">📝 Content Editor</a>
             <a href="admin-attendance.html">📋 Teacher Attendance</a>
+            <a href="admin-teachers.html">👨‍🏫 Manage Teachers</a>
             <div class="logout">
                 <a onclick="logout()">🚪 Logout</a>
             </div>
@@ -289,6 +290,8 @@
                 <h2>Quick Actions</h2>
                 <p style="color:#666;margin-bottom:15px;">Use the sidebar to manage your website content.</p>
                 <button class="btn-primary" onclick="showSection('content')">📝 Edit Website Content</button>
+                <button class="btn-primary" onclick="window.location.href='admin-teachers.html'" style="margin-left:10px;">👨‍🏫 Manage Teachers</button>
+                <button class="btn-primary" onclick="window.location.href='admin-attendance.html'" style="margin-left:10px;">📋 Attendance</button>
             </div>
         </div>
 

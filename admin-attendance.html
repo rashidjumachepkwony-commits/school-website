@@ -243,6 +243,7 @@
         <div class="sidebar-menu">
             <a href="admin-dashboard.html">📊 Dashboard</a>
             <a href="admin-attendance.html" style="background:rgba(212,160,23,0.2);color:#d4a017;">📋 Attendance</a>
+            <a href="admin-teachers.html">👨‍🏫 Manage Teachers</a>
             <div class="logout">
                 <a onclick="logout()">🚪 Logout</a>
             </div>
@@ -287,7 +288,11 @@
                 <option value="Mathematics">Mathematics</option>
                 <option value="Science">Science</option>
                 <option value="Languages">Languages</option>
+                <option value="Social Studies">Social Studies</option>
+                <option value="Arts">Arts</option>
+                <option value="Physical Education">Physical Education</option>
                 <option value="Administration">Administration</option>
+                <option value="Support Staff">Support Staff</option>
             </select>
             <button onclick="loadAttendance()">🔄 Refresh</button>
             <button class="export-btn" onclick="exportCSV()">📥 Export CSV</button>
@@ -405,7 +410,6 @@
                     isLate = todayRecord.isLate || false;
                 }
 
-                // Show status with Late badge
                 let statusDisplay = status;
                 if (isLate) {
                     statusDisplay = 'Late ⚠️';
