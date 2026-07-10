@@ -87,7 +87,7 @@ const teacherSchema = new mongoose.Schema({
   firstName: { type: String, required: true, trim: true },
   lastName: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password: { type: String, required: true, minlength: 4 }, // PIN stored as password
+  password: { type: String, required: true, minlength: 4 },
   phoneNumber: { type: String, trim: true },
   employeeId: { type: String, required: true, unique: true },
   department: { type: String, default: 'Teaching' },
@@ -260,7 +260,6 @@ app.post('/api/teacher/register', async (req, res) => {
     
     console.log('📝 Registering teacher:', { firstName, lastName, email, employeeId });
     
-    // Check if teacher already exists
     const existing = await Teacher.findOne({ 
       $or: [{ email }, { employeeId }] 
     });
@@ -272,7 +271,6 @@ app.post('/api/teacher/register', async (req, res) => {
       });
     }
     
-    // Validate PIN (4-6 digits)
     if (password && (password.length < 4 || password.length > 6)) {
       return res.status(400).json({
         success: false,
@@ -280,7 +278,6 @@ app.post('/api/teacher/register', async (req, res) => {
       });
     }
     
-    // Create new teacher with PIN as password
     const teacher = new Teacher({
       firstName,
       lastName,
@@ -321,7 +318,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
   try {
     const { employeeId, pin } = req.body;
     
-    // 1. Check if teacher exists
     const teacher = await Teacher.findOne({ employeeId });
     if (!teacher) {
       return res.status(404).json({ 
@@ -330,7 +326,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // 2. Verify PIN
     if (teacher.password !== pin) {
       return res.status(401).json({
         success: false,
@@ -338,7 +333,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // 3. Check if it's a weekend
     const today = new Date();
     const dayOfWeek = today.getDay();
     if (dayOfWeek === 0 || dayOfWeek === 6) {
@@ -348,7 +342,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // 4. Check if already checked in today
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     
@@ -366,7 +359,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // 5. Check if after 5:00 PM
     const currentHour = today.getHours();
     if (currentHour >= 17) {
       return res.status(400).json({
@@ -375,12 +367,10 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // 6. Determine if late (after 7:00 AM)
     const checkInTime = new Date();
     const isLate = checkInTime.getHours() > 7 || (checkInTime.getHours() === 7 && checkInTime.getMinutes() > 0);
     const status = isLate ? 'Late' : 'Present';
     
-    // 7. Create attendance record
     teacher.attendance.push({
       date: new Date(),
       checkIn: new Date(),
@@ -422,7 +412,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
   try {
     const { employeeId, pin } = req.body;
     
-    // 1. Check if teacher exists
     const teacher = await Teacher.findOne({ employeeId });
     if (!teacher) {
       return res.status(404).json({ 
@@ -431,7 +420,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // 2. Verify PIN
     if (teacher.password !== pin) {
       return res.status(401).json({
         success: false,
@@ -439,7 +427,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // 3. Find today's attendance
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     
@@ -464,7 +451,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // 4. Check if check-out is before 3:00 PM
     const currentHour = new Date().getHours();
     if (currentHour < 15) {
       return res.status(400).json({
@@ -473,12 +459,10 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // 5. Update checkout time
     const checkOutTime = new Date();
     todayAttendance.checkOut = checkOutTime;
     todayAttendance.notes = notes || todayAttendance.notes || '';
     
-    // 6. Calculate hours worked
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((checkOutTime - checkInTime) / (1000 * 60 * 60)).toFixed(2);
     todayAttendance.hoursWorked = parseFloat(hoursWorked);
@@ -647,7 +631,6 @@ app.put('/api/teachers/:id', async (req, res) => {
       });
     }
     
-    // Check if email or employeeId is taken by another teacher
     const existing = await Teacher.findOne({
       _id: { $ne: req.params.id },
       $or: [{ email }, { employeeId }]
@@ -898,5 +881,4 @@ app.listen(PORT, () => {
   console.log(`👨‍🏫 Manage Teachers: http://localhost:${PORT}/admin-teachers.html`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
-});/ /   F o r c e   r e b u i l d  
- 
+});
