@@ -51,6 +51,7 @@
             border-radius: 8px;
             margin-bottom: 5px;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         .sidebar-menu a:hover {
             background: rgba(212, 160, 23, 0.2);
@@ -129,6 +130,10 @@
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             margin-bottom: 25px;
+            display: none;
+        }
+        .editor-section.active {
+            display: block;
         }
         .editor-section h2 {
             color: #001f5c;
@@ -175,6 +180,20 @@
         .btn-success:hover {
             background: #1e7e34;
         }
+        .btn-primary {
+            padding: 12px 30px;
+            background: #0b5394;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: #001f5c;
+        }
         .alert {
             padding: 15px 20px;
             border-radius: 8px;
@@ -186,6 +205,17 @@
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
+        }
+        .alert.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
         @media (max-width: 768px) {
             .sidebar {
@@ -200,24 +230,29 @@
             .dashboard-cards {
                 grid-template-columns: 1fr 1fr;
             }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-brand">
             <h2>🏫 Admin</h2>
             <p>Changara Star Academy</p>
         </div>
         <div class="sidebar-menu">
-            <a href="#" onclick="showSection('dashboard')">📊 Dashboard</a>
-            <a href="#" onclick="showSection('content')">📝 Content Editor</a>
+            <a onclick="showSection('dashboard')">📊 Dashboard</a>
+            <a onclick="showSection('content')">📝 Content Editor</a>
             <div class="logout">
-                <a href="#" onclick="logout()">🚪 Logout</a>
+                <a onclick="logout()">🚪 Logout</a>
             </div>
         </div>
     </div>
 
+    <!-- Main Content -->
     <div class="main-content">
         <div class="header">
             <h1>Admin Dashboard</h1>
@@ -229,11 +264,12 @@
 
         <div id="alert" class="alert"></div>
 
-        <div id="section-dashboard">
+        <!-- Dashboard Section -->
+        <div id="section-dashboard" class="editor-section active">
             <div class="dashboard-cards">
                 <div class="card">
                     <span class="icon">📝</span>
-                    <h3 id="contentCount">4</h3>
+                    <h3>4</h3>
                     <p>Content Sections</p>
                 </div>
                 <div class="card">
@@ -248,31 +284,74 @@
                 </div>
             </div>
 
-            <div class="editor-section">
+            <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
                 <h2>Quick Actions</h2>
                 <p style="color:#666;margin-bottom:15px;">Use the sidebar to manage your website content.</p>
-                <button class="btn-success" onclick="showSection('content')">📝 Edit Website Content</button>
+                <button class="btn-primary" onclick="showSection('content')">📝 Edit Website Content</button>
             </div>
         </div>
 
-        <div id="section-content" class="editor-section" style="display:none;">
+        <!-- Content Editor Section -->
+        <div id="section-content" class="editor-section">
             <h2>📝 Website Content Editor</h2>
             <form id="contentForm">
                 <div class="form-group">
                     <label>Hero Title</label>
-                    <input type="text" id="heroTitle" value="Welcome to Changara Star Academy">
+                    <input type="text" id="heroTitle" class="form-control" placeholder="Hero Title">
                 </div>
                 <div class="form-group">
                     <label>Hero Subtitle</label>
-                    <input type="text" id="heroSubtitle" value="Your trusted partner in quality education and school management">
+                    <input type="text" id="heroSubtitle" class="form-control" placeholder="Hero Subtitle">
                 </div>
                 <div class="form-group">
                     <label>About Mission</label>
-                    <textarea id="aboutMission">To provide quality education that nurtures talent, builds character, and prepares students for a successful future.</textarea>
+                    <textarea id="aboutMission" rows="3" placeholder="Mission Statement"></textarea>
                 </div>
                 <div class="form-group">
                     <label>About Vision</label>
-                    <textarea id="aboutVision">To be a center of excellence in education, producing well-rounded individuals who contribute positively to society.</textarea>
+                    <textarea id="aboutVision" rows="3" placeholder="Vision Statement"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Contact Address</label>
+                    <input type="text" id="contactAddress" class="form-control" placeholder="School Address">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Contact Phone</label>
+                        <input type="text" id="contactPhone" class="form-control" placeholder="Phone Number">
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Email</label>
+                        <input type="text" id="contactEmail" class="form-control" placeholder="Email Address">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Working Hours</label>
+                    <input type="text" id="contactWorkingHours" class="form-control" placeholder="Working Hours">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Students Count</label>
+                        <input type="text" id="statStudents" class="form-control" placeholder="e.g., 500+">
+                    </div>
+                    <div class="form-group">
+                        <label>Staff Count</label>
+                        <input type="text" id="statStaff" class="form-control" placeholder="e.g., 50+">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Attendance Rate</label>
+                        <input type="text" id="statAttendance" class="form-control" placeholder="e.g., 98%">
+                    </div>
+                    <div class="form-group">
+                        <label>Years of Excellence</label>
+                        <input type="text" id="statYears" class="form-control" placeholder="e.g., 15+">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Footer Text</label>
+                    <input type="text" id="footerText" class="form-control" placeholder="Footer text">
                 </div>
                 <button type="submit" class="btn-success">💾 Save All Content</button>
             </form>
@@ -280,42 +359,132 @@
     </div>
 
     <script>
-        function showSection(section) {
-            document.querySelectorAll('.editor-section, #section-dashboard').forEach(el => {
-                el.style.display = 'none';
-            });
-            if (section === 'dashboard') {
-                document.getElementById('section-dashboard').style.display = 'block';
-            } else {
-                document.getElementById('section-' + section).style.display = 'block';
+        // ============================================
+        // CHECK LOGIN STATUS
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = 'admin-login.html';
+                return;
             }
+            
+            // Display admin name
+            const admin = JSON.parse(localStorage.getItem('admin') || '{}');
+            document.getElementById('adminName').textContent = admin.fullName || 'Admin';
+            document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
+            
+            // Load content
+            loadContent();
+        });
+
+        // ============================================
+        // SHOW SECTION
+        // ============================================
+        function showSection(section) {
+            document.querySelectorAll('.editor-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById('section-' + section).classList.add('active');
         }
 
+        // ============================================
+        // LOGOUT
+        // ============================================
         function logout() {
             localStorage.removeItem('adminToken');
             localStorage.removeItem('admin');
             window.location.href = 'admin-login.html';
         }
 
-        document.getElementById('contentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const alert = document.getElementById('alert');
-            alert.className = 'alert success';
-            alert.textContent = '✅ Content saved successfully! (This is a demo)';
-            setTimeout(() => {
-                alert.className = 'alert';
-                alert.style.display = 'none';
-            }, 3000);
-        });
+        // ============================================
+        // LOAD CONTENT FROM SERVER
+        // ============================================
+        async function loadContent() {
+            try {
+                const response = await fetch('/api/content');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const data = result.content;
+                    document.getElementById('heroTitle').value = data.heroTitle || '';
+                    document.getElementById('heroSubtitle').value = data.heroSubtitle || '';
+                    document.getElementById('aboutMission').value = data.aboutMission || '';
+                    document.getElementById('aboutVision').value = data.aboutVision || '';
+                    document.getElementById('contactAddress').value = data.contact?.address || '';
+                    document.getElementById('contactPhone').value = data.contact?.phone || '';
+                    document.getElementById('contactEmail').value = data.contact?.email || '';
+                    document.getElementById('contactWorkingHours').value = data.contact?.workingHours || '';
+                    document.getElementById('statStudents').value = data.stats?.students || '';
+                    document.getElementById('statStaff').value = data.stats?.staff || '';
+                    document.getElementById('statAttendance').value = data.stats?.attendance || '';
+                    document.getElementById('statYears').value = data.stats?.years || '';
+                    document.getElementById('footerText').value = data.footerText || '';
+                }
+            } catch (error) {
+                console.error('Error loading content:', error);
+                showAlert('Error loading content', 'error');
+            }
+        }
 
-        // Check if logged in (simple demo check)
-        document.addEventListener('DOMContentLoaded', function() {
-            const isLoggedIn = localStorage.getItem('adminToken');
-            if (!isLoggedIn) {
-                // Redirect to login if not logged in
-                window.location.href = 'admin-login.html';
+        // ============================================
+        // SAVE CONTENT
+        // ============================================
+        document.getElementById('contentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const data = {
+                heroTitle: document.getElementById('heroTitle').value,
+                heroSubtitle: document.getElementById('heroSubtitle').value,
+                aboutMission: document.getElementById('aboutMission').value,
+                aboutVision: document.getElementById('aboutVision').value,
+                contact: {
+                    address: document.getElementById('contactAddress').value,
+                    phone: document.getElementById('contactPhone').value,
+                    email: document.getElementById('contactEmail').value,
+                    workingHours: document.getElementById('contactWorkingHours').value
+                },
+                stats: {
+                    students: document.getElementById('statStudents').value,
+                    staff: document.getElementById('statStaff').value,
+                    attendance: document.getElementById('statAttendance').value,
+                    years: document.getElementById('statYears').value
+                },
+                footerText: document.getElementById('footerText').value
+            };
+            
+            try {
+                const response = await fetch('/api/content', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✅ Content saved successfully!', 'success');
+                } else {
+                    showAlert('❌ Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('❌ Error: ' + error.message, 'error');
             }
         });
+
+        // ============================================
+        // SHOW ALERT
+        // ============================================
+        function showAlert(message, type) {
+            const alertEl = document.getElementById('alert');
+            alertEl.className = 'alert ' + type;
+            alertEl.textContent = message;
+            alertEl.style.display = 'block';
+            
+            setTimeout(() => {
+                alertEl.style.display = 'none';
+            }, 4000);
+        }
     </script>
 </body>
 </html>
