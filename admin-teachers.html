@@ -429,7 +429,12 @@
                     <label>Phone Number</label>
                     <input type="text" id="phoneNumber" placeholder="555-1234">
                 </div>
-                <div id="credentialsSection" class="credentials-box" style="display:none;">
+                <div class="form-group">
+                    <label>Default Password</label>
+                    <input type="text" id="teacherPassword" value="teacher123" placeholder="Enter default password">
+                    <small style="color:#666;font-size:12px;">Teacher can change this after first login</small>
+                </div>
+                <div id="credentialsSection" class="credentials-box">
                     <div class="label">🔐 Teacher Login Credentials</div>
                     <div><strong>Employee ID:</strong> <span id="credEmployeeId" class="value"></span></div>
                     <div><strong>Default Password:</strong> <span id="credPassword" class="value">teacher123</span></div>
@@ -526,9 +531,13 @@
             document.getElementById('modalTitle').textContent = '➕ Add New Teacher';
             document.getElementById('teacherId').value = '';
             document.getElementById('teacherForm').reset();
+            document.getElementById('teacherPassword').value = 'teacher123';
             document.getElementById('credentialsSection').style.display = 'block';
             document.getElementById('credEmployeeId').textContent = 'Auto-generated';
             document.getElementById('credPassword').textContent = 'teacher123';
+            // Auto-generate employee ID
+            const count = teachersData.length + 1;
+            document.getElementById('employeeId').value = 'T' + String(count).padStart(3, '0');
             document.getElementById('teacherModal').classList.add('active');
         }
 
@@ -550,6 +559,7 @@
                     document.getElementById('department').value = teacher.department || '';
                     document.getElementById('email').value = teacher.email || '';
                     document.getElementById('phoneNumber').value = teacher.phoneNumber || '';
+                    document.getElementById('teacherPassword').value = '********';
                     document.getElementById('credentialsSection').style.display = 'none';
                     document.getElementById('teacherModal').classList.add('active');
                 }
@@ -620,6 +630,8 @@
             e.preventDefault();
 
             const id = document.getElementById('teacherId').value;
+            const password = document.getElementById('teacherPassword').value;
+            
             const data = {
                 firstName: document.getElementById('firstName').value.trim(),
                 lastName: document.getElementById('lastName').value.trim(),
@@ -628,6 +640,13 @@
                 email: document.getElementById('email').value.trim(),
                 phoneNumber: document.getElementById('phoneNumber').value.trim()
             };
+
+            // Only send password if adding new teacher (not editing)
+            if (!id) {
+                data.password = password || 'teacher123';
+            }
+
+            console.log('📤 Sending data:', data);
 
             try {
                 const url = id ? `/api/teachers/${id}` : '/api/teacher/register';
@@ -640,6 +659,7 @@
                 });
 
                 const result = await res.json();
+                console.log('📥 Response:', result);
 
                 if (result.success) {
                     showAlert(id ? 'Teacher updated successfully!' : 'Teacher registered successfully!', 'success');
@@ -649,8 +669,8 @@
                     showAlert('Error: ' + result.message, 'error');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showAlert('Error saving teacher', 'error');
+                console.error('❌ Error:', error);
+                showAlert('Error saving teacher: ' + error.message, 'error');
             }
         });
 
@@ -685,7 +705,6 @@
         // Auto-generate employee ID suggestion
         document.getElementById('employeeId').addEventListener('focus', function() {
             if (!this.value) {
-                // Auto-generate Txxx format
                 const count = teachersData.length + 1;
                 this.value = 'T' + String(count).padStart(3, '0');
             }
