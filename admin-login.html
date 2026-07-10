@@ -138,6 +138,15 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // If already logged in, go to dashboard
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                console.log('🔄 Token found, redirecting to dashboard...');
+                window.location.href = 'admin-dashboard.html';
+            }
+        });
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -148,18 +157,41 @@
             alertEl.className = 'alert';
             alertEl.style.display = 'none';
             
-            // For now, simple demo login
-            if (username === 'admin' && password === 'admin123') {
-                alertEl.className = 'alert success';
-                alertEl.style.display = 'block';
-                alertEl.textContent = '✅ Login successful! Redirecting...';
-                setTimeout(() => {
-                    window.location.href = 'admin-dashboard.html';
-                }, 1000);
-            } else {
+            try {
+                console.log('📤 Sending login request...');
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                console.log('📥 Login response:', result);
+                
+                if (result.success) {
+                    // Save to localStorage
+                    localStorage.setItem('adminToken', 'demo-token');
+                    localStorage.setItem('admin', JSON.stringify(result.admin));
+                    
+                    console.log('✅ Token saved:', localStorage.getItem('adminToken'));
+                    
+                    alertEl.className = 'alert success';
+                    alertEl.style.display = 'block';
+                    alertEl.textContent = '✅ Login successful! Redirecting...';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'admin-dashboard.html';
+                    }, 1000);
+                } else {
+                    alertEl.className = 'alert error';
+                    alertEl.style.display = 'block';
+                    alertEl.textContent = '❌ ' + (result.message || 'Login failed');
+                }
+            } catch (error) {
+                console.error('❌ Login error:', error);
                 alertEl.className = 'alert error';
                 alertEl.style.display = 'block';
-                alertEl.textContent = '❌ Invalid username or password';
+                alertEl.textContent = '❌ Error: ' + error.message;
             }
         });
     </script>
