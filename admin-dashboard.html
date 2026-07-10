@@ -357,20 +357,42 @@
             </form>
         </div>
     </div>
+    <div class="sidebar-menu">
+    <a onclick="showSection('dashboard')">📊 Dashboard</a>
+    <a onclick="showSection('content')">📝 Content Editor</a>
+    <a href="admin-attendance.html">📋 Teacher Attendance</a>
+    <div class="logout">
+        <a onclick="logout()">🚪 Logout</a>
+    </div>
+</div>
 
     <script>
         // ============================================
-        // CHECK LOGIN STATUS
+        // CHECK LOGIN STATUS - RUNS IMMEDIATELY
         // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
+        (function() {
+            console.log('🔐 Checking authentication...');
+            console.log('📦 Token from localStorage:', localStorage.getItem('adminToken'));
+            
             const token = localStorage.getItem('adminToken');
             if (!token) {
+                console.log('❌ No token found. Redirecting to login...');
                 window.location.href = 'admin-login.html';
                 return;
             }
+            console.log('✅ Token found. User is authenticated.');
+        })();
+
+        // ============================================
+        // LOAD DASHBOARD AFTER AUTH CHECK
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 Dashboard DOM loaded. Initializing...');
             
             // Display admin name
             const admin = JSON.parse(localStorage.getItem('admin') || '{}');
+            console.log('👤 Admin data:', admin);
+            
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
             
@@ -392,6 +414,7 @@
         // LOGOUT
         // ============================================
         function logout() {
+            console.log('🚪 Logging out...');
             localStorage.removeItem('adminToken');
             localStorage.removeItem('admin');
             window.location.href = 'admin-login.html';
@@ -401,9 +424,11 @@
         // LOAD CONTENT FROM SERVER
         // ============================================
         async function loadContent() {
+            console.log('📥 Loading content...');
             try {
                 const response = await fetch('/api/content');
                 const result = await response.json();
+                console.log('📥 Content response:', result);
                 
                 if (result.success) {
                     const data = result.content;
@@ -420,9 +445,12 @@
                     document.getElementById('statAttendance').value = data.stats?.attendance || '';
                     document.getElementById('statYears').value = data.stats?.years || '';
                     document.getElementById('footerText').value = data.footerText || '';
+                    console.log('✅ Content loaded successfully.');
+                } else {
+                    console.error('❌ Failed to load content:', result.message);
                 }
             } catch (error) {
-                console.error('Error loading content:', error);
+                console.error('❌ Error loading content:', error);
                 showAlert('Error loading content', 'error');
             }
         }
@@ -453,6 +481,8 @@
                 footerText: document.getElementById('footerText').value
             };
             
+            console.log('💾 Saving content:', data);
+            
             try {
                 const response = await fetch('/api/content', {
                     method: 'PUT',
@@ -461,6 +491,7 @@
                 });
                 
                 const result = await response.json();
+                console.log('💾 Save response:', result);
                 
                 if (result.success) {
                     showAlert('✅ Content saved successfully!', 'success');
@@ -468,6 +499,7 @@
                     showAlert('❌ Error: ' + result.message, 'error');
                 }
             } catch (error) {
+                console.error('❌ Error saving content:', error);
                 showAlert('❌ Error: ' + error.message, 'error');
             }
         });
