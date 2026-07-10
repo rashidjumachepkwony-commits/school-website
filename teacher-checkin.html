@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Check-in - Changara Star Academy</title>
+    <title>Staff Check-in/out - Changara Star Academy</title>
     <style>
         * {
             margin: 0;
@@ -25,7 +25,7 @@
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
         }
         .header {
             text-align: center;
@@ -44,29 +44,24 @@
             color: #666;
             margin-top: 5px;
         }
-        .rules-box {
-            background: #f8f9fa;
+        .day-info {
+            text-align: center;
+            color: #666;
+            margin: 5px 0 15px;
+            font-size: 14px;
+        }
+        .weekend-message {
+            background: #fff3cd;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #0b5394;
+            text-align: center;
+            border: 1px solid #ffeaa7;
+            margin: 10px 0;
+            display: none;
         }
-        .rules-box h4 {
-            color: #001f5c;
-            margin-bottom: 8px;
-        }
-        .rules-box ul {
-            list-style: none;
-            padding: 0;
-            font-size: 13px;
-            color: #555;
-        }
-        .rules-box ul li {
-            padding: 3px 0;
-        }
-        .rules-box ul li::before {
-            content: "• ";
-            color: #d4a017;
+        .weekend-message .icon {
+            font-size: 48px;
+            display: block;
         }
         .form-group {
             margin-bottom: 20px;
@@ -90,11 +85,14 @@
             border-color: #0b5394;
             outline: none;
         }
-        .btn-checkin {
-            width: 100%;
+        .btn-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+        .btn-row button {
+            flex: 1;
             padding: 14px;
-            background: #28a745;
-            color: white;
             border: none;
             border-radius: 8px;
             font-size: 18px;
@@ -102,30 +100,31 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        .btn-checkin:hover {
-            background: #1e7e34;
+        .btn-row button:hover {
             transform: scale(1.02);
         }
-        .btn-checkin:disabled {
-            background: #ccc;
+        .btn-row button:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
+        .btn-checkin {
+            background: #28a745;
+            color: white;
+        }
+        .btn-checkin:hover:not(:disabled) {
+            background: #1e7e34;
+        }
         .btn-checkout {
-            width: 100%;
-            padding: 14px;
             background: #dc3545;
             color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
         }
-        .btn-checkout:hover {
+        .btn-checkout:hover:not(:disabled) {
             background: #c82333;
-            transform: scale(1.02);
+        }
+        .btn-checkin:disabled, .btn-checkout:disabled {
+            background: #ccc;
+            color: #666;
         }
         .alert {
             padding: 12px 16px;
@@ -174,48 +173,43 @@
         .status-card .status-text.late {
             color: #ffc107;
         }
-        .status-card .status-text.absent {
-            color: #dc3545;
-        }
-        .day-info {
-            text-align: center;
-            color: #666;
-            margin: 5px 0 15px;
-            font-size: 14px;
-        }
-        .weekend-message {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #ffeaa7;
-            margin: 10px 0;
-            display: none;
-        }
-        .weekend-message .icon {
-            font-size: 48px;
-            display: block;
-        }
-        .back-link {
-            text-align: center;
+        .buttons-row {
+            display: flex;
+            gap: 10px;
             margin-top: 15px;
+            flex-wrap: wrap;
         }
-        .back-link a {
-            color: #0b5394;
-            text-decoration: none;
-        }
-        .back-link a:hover {
-            text-decoration: underline;
-        }
-        .late-badge {
-            background: #ffc107;
-            color: #333;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 12px;
+        .buttons-row button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
             font-weight: bold;
-            display: inline-block;
-            margin-left: 8px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+        .btn-home {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-home:hover {
+            background: #5a6268;
+        }
+        .btn-admin {
+            background: #0b5394;
+            color: white;
+        }
+        .btn-admin:hover {
+            background: #001f5c;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            .btn-row {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -223,7 +217,7 @@
     <div class="container">
         <div class="header">
             <span class="icon">👨‍🏫</span>
-            <h1>Teacher Check-in</h1>
+            <h1>Staff Check-in / Check-out</h1>
             <p>Changara Star Academy</p>
         </div>
 
@@ -231,19 +225,7 @@
         <div id="weekendMessage" class="weekend-message">
             <span class="icon">📅</span>
             <h3>Weekend</h3>
-            <p>Check-in is only available on weekdays<br>(Monday - Friday)</p>
-        </div>
-
-        <div class="rules-box">
-            <h4>📋 Check-in Rules</h4>
-            <ul>
-                <li>Check-in time: 7:00 AM - 5:00 PM</li>
-                <li>⚠️ After 7:00 AM = LATE</li>
-                <li>Check-out time: 3:00 PM - 7:00 PM</li>
-                <li>No multiple check-ins per day</li>
-                <li>No check-in = ABSENT</li>
-                <li>No check-ins on weekends</li>
-            </ul>
+            <p>Check-in/out is only available on weekdays<br>(Monday - Friday)</p>
         </div>
 
         <div id="alert" class="alert"></div>
@@ -256,35 +238,34 @@
 
         <form id="checkinForm">
             <div class="form-group">
-                <label>Employee ID</label>
-                <input type="text" id="employeeId" placeholder="Enter your employee ID" required autofocus>
+                <label>Staff ID</label>
+                <input type="text" id="employeeId" placeholder="Enter your Staff ID" required autofocus>
             </div>
             <div class="form-group">
-                <label>Location (Optional)</label>
-                <input type="text" id="location" placeholder="e.g., School, Home Office">
+                <label>PIN</label>
+                <input type="password" id="pin" placeholder="Enter your PIN" required>
             </div>
-            <button type="submit" id="actionBtn" class="btn-checkin">✅ Check In</button>
+            
+            <div class="btn-row">
+                <button type="button" id="checkinBtn" class="btn-checkin" onclick="handleAction('checkin')">✅ Check In</button>
+                <button type="button" id="checkoutBtn" class="btn-checkout" onclick="handleAction('checkout')">🚪 Check Out</button>
+            </div>
         </form>
 
-        <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
-            <button onclick="window.location.href='index.html'" style="flex:1;padding:10px;background:#6c757d;color:white;border:none;border-radius:8px;cursor:pointer;">🏠 Home</button>
-            <button onclick="window.location.href='admin-login.html'" style="flex:1;padding:10px;background:#0b5394;color:white;border:none;border-radius:8px;cursor:pointer;">🔐 Admin</button>
+        <div class="buttons-row">
+            <button onclick="window.location.href='index.html'" class="btn-home">🏠 Home</button>
+            <button onclick="window.location.href='admin-login.html'" class="btn-admin">🔐 Admin</button>
         </div>
     </div>
 
     <script>
         // ============================================
-        // CONFIG
-        // ============================================
-        const API_BASE = window.location.origin;
-
-        // ============================================
         // DOM ELEMENTS
         // ============================================
-        const form = document.getElementById('checkinForm');
         const employeeIdInput = document.getElementById('employeeId');
-        const locationInput = document.getElementById('location');
-        const actionBtn = document.getElementById('actionBtn');
+        const pinInput = document.getElementById('pin');
+        const checkinBtn = document.getElementById('checkinBtn');
+        const checkoutBtn = document.getElementById('checkoutBtn');
         const alertDiv = document.getElementById('alert');
         const statusCard = document.getElementById('statusCard');
         const statusText = document.getElementById('statusText');
@@ -331,93 +312,57 @@
             
             if (dayInfo.isWeekend) {
                 weekendMessage.style.display = 'block';
-                actionBtn.disabled = true;
-                actionBtn.textContent = '📅 Weekday Only';
-                actionBtn.style.background = '#6c757d';
+                checkinBtn.disabled = true;
+                checkoutBtn.disabled = true;
             } else {
                 weekendMessage.style.display = 'none';
-                actionBtn.disabled = false;
-                actionBtn.textContent = '✅ Check In';
-                actionBtn.style.background = '#28a745';
-                actionBtn.className = 'btn-checkin';
+                checkinBtn.disabled = false;
+                checkoutBtn.disabled = false;
             }
         }
 
         // ============================================
-        // CHECK TODAY'S STATUS
+        // HANDLE CHECK IN / CHECK OUT
         // ============================================
-        async function checkTodayStatus(employeeId) {
-            try {
-                const response = await fetch('/api/teacher/attendance/today');
-                const data = await response.json();
-                
-                if (data.success) {
-                    const teacherRecord = data.attendance.find(a => a.employeeId === employeeId);
-                    if (teacherRecord && teacherRecord.status === 'Checked In') {
-                        statusCard.style.display = 'block';
-                        statusText.textContent = '✅ Checked In';
-                        statusText.className = 'status-text checked-in';
-                        statusTime.textContent = `Time: ${new Date(teacherRecord.checkIn).toLocaleTimeString()}`;
-                        actionBtn.textContent = '🚪 Check Out';
-                        actionBtn.className = 'btn-checkout';
-                        if (teacherRecord.isLate) {
-                            statusText.textContent = '⚠️ Checked In (LATE)';
-                            statusText.className = 'status-text late';
-                        }
-                    } else if (teacherRecord && teacherRecord.status === 'Checked Out') {
-                        statusCard.style.display = 'block';
-                        statusText.textContent = '🚪 Checked Out';
-                        statusText.className = 'status-text checked-out';
-                        statusTime.textContent = `Check-in: ${new Date(teacherRecord.checkIn).toLocaleTimeString()} | Check-out: ${new Date(teacherRecord.checkOut).toLocaleTimeString()}`;
-                        if (teacherRecord.hoursWorked) {
-                            statusHours.textContent = `Hours Worked: ${teacherRecord.hoursWorked}`;
-                        }
-                        actionBtn.textContent = '✅ Check In';
-                        actionBtn.className = 'btn-checkin';
-                    } else if (teacherRecord && teacherRecord.status === 'Absent') {
-                        statusCard.style.display = 'block';
-                        statusText.textContent = '❌ Absent Today';
-                        statusText.className = 'status-text absent';
-                        statusTime.textContent = 'No check-in record for today';
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking status:', error);
-            }
-        }
-
-        // ============================================
-        // HANDLE FORM SUBMIT
-        // ============================================
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
+        async function handleAction(action) {
             const dayInfo = getDayInfo();
             if (dayInfo.isWeekend) {
-                showAlert('Check-in is only available on weekdays (Monday-Friday)', 'error');
+                showAlert('Check-in/out is only available on weekdays (Monday-Friday)', 'error');
                 return;
             }
             
             const employeeId = employeeIdInput.value.trim();
-            const location = locationInput.value.trim() || 'School';
+            const pin = pinInput.value.trim();
             
             if (!employeeId) {
-                showAlert('Please enter your Employee ID', 'error');
+                showAlert('Please enter your Staff ID', 'error');
+                employeeIdInput.focus();
                 return;
             }
             
-            // Determine if check-in or check-out
-            const isCheckIn = actionBtn.textContent.includes('Check In');
-            const endpoint = isCheckIn ? '/api/teacher/checkin' : '/api/teacher/checkout';
+            if (!pin) {
+                showAlert('Please enter your PIN', 'error');
+                pinInput.focus();
+                return;
+            }
+            
+            const endpoint = action === 'checkin' ? '/api/teacher/checkin' : '/api/teacher/checkout';
             
             try {
-                actionBtn.disabled = true;
-                actionBtn.textContent = '⏳ Processing...';
+                // Disable both buttons while processing
+                checkinBtn.disabled = true;
+                checkoutBtn.disabled = true;
+                checkinBtn.textContent = '⏳ ...';
+                checkoutBtn.textContent = '⏳ ...';
                 
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ employeeId, location })
+                    body: JSON.stringify({ 
+                        employeeId: employeeId, 
+                        location: 'School',
+                        pin: pin 
+                    })
                 });
                 
                 const result = await response.json();
@@ -428,20 +373,16 @@
                     // Update status card
                     statusCard.style.display = 'block';
                     
-                    if (isCheckIn) {
+                    if (action === 'checkin') {
                         statusText.textContent = result.isLate ? '⚠️ Checked In (LATE)' : '✅ Checked In';
                         statusText.className = result.isLate ? 'status-text late' : 'status-text checked-in';
                         statusTime.textContent = `Time: ${new Date(result.checkInTime).toLocaleTimeString()}`;
                         statusHours.textContent = '';
-                        actionBtn.textContent = '🚪 Check Out';
-                        actionBtn.className = 'btn-checkout';
                     } else {
                         statusText.textContent = '🚪 Checked Out';
                         statusText.className = 'status-text checked-out';
                         statusTime.textContent = `Time: ${new Date(result.checkOutTime).toLocaleTimeString()}`;
                         statusHours.textContent = `Hours Worked: ${result.hoursWorked}`;
-                        actionBtn.textContent = '✅ Check In';
-                        actionBtn.className = 'btn-checkin';
                     }
                 } else {
                     showAlert(result.message, 'error');
@@ -450,23 +391,13 @@
                 console.error('Error:', error);
                 showAlert('Error: ' + error.message, 'error');
             } finally {
-                actionBtn.disabled = false;
-                if (!actionBtn.textContent.includes('Check Out')) {
-                    actionBtn.textContent = '✅ Check In';
-                    actionBtn.className = 'btn-checkin';
-                }
+                // Re-enable buttons
+                checkinBtn.disabled = false;
+                checkoutBtn.disabled = false;
+                checkinBtn.textContent = '✅ Check In';
+                checkoutBtn.textContent = '🚪 Check Out';
             }
-        });
-
-        // ============================================
-        // AUTO-CHECK STATUS ON EMPLOYEE ID ENTER
-        // ============================================
-        employeeIdInput.addEventListener('blur', function() {
-            const employeeId = this.value.trim();
-            if (employeeId.length >= 3) {
-                checkTodayStatus(employeeId);
-            }
-        });
+        }
 
         // ============================================
         // INIT
