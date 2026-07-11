@@ -52,7 +52,7 @@
             margin-bottom: 5px;
             transition: all 0.3s ease;
         }
-        .sidebar-menu a:hover {
+        .sidebar-menu a:hover, .sidebar-menu a.active {
             background: rgba(212, 160, 23, 0.2);
             color: #d4a017;
         }
@@ -98,36 +98,72 @@
             font-weight: bold;
             font-size: 18px;
         }
+
+        /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
         }
         .stat-card {
             background: white;
-            padding: 20px;
+            padding: 18px;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             text-align: center;
         }
         .stat-card .number {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             display: block;
         }
         .stat-card .label {
             color: #666;
-            font-size: 14px;
+            font-size: 13px;
         }
         .stat-card .number.green { color: #28a745; }
         .stat-card .number.red { color: #dc3545; }
         .stat-card .number.orange { color: #ffc107; }
         .stat-card .number.blue { color: #0b5394; }
+        .stat-card .number.purple { color: #6f42c1; }
 
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 5px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
+        }
+        .tabs button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #666;
+            min-width: 100px;
+        }
+        .tabs button:hover {
+            background: #f0f2f5;
+        }
+        .tabs button.active {
+            background: #0b5394;
+            color: white;
+        }
+
+        /* Filter */
         .filter-section {
             background: white;
-            padding: 20px;
+            padding: 18px;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             margin-bottom: 20px;
@@ -156,6 +192,12 @@
         .filter-section button:hover {
             background: #001f5c;
         }
+        .filter-section .export-btn {
+            background: #28a745;
+        }
+        .filter-section .export-btn:hover {
+            background: #1e7e34;
+        }
 
         .table-container {
             background: white;
@@ -173,7 +215,7 @@
             color: white;
             padding: 12px;
             text-align: left;
-            font-size: 14px;
+            font-size: 13px;
         }
         td {
             padding: 10px 12px;
@@ -200,22 +242,29 @@
             padding: 40px;
             color: #666;
         }
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-        .export-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 20px;
+        .summary-box {
+            background: #f8f9fa;
+            padding: 15px 20px;
             border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
+            margin-bottom: 15px;
+            border-left: 4px solid #0b5394;
         }
-        .export-btn:hover {
-            background: #1e7e34;
+        .summary-box .title {
+            font-weight: bold;
+            color: #001f5c;
+        }
+        .summary-box .stats {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        .summary-box .stats span {
+            font-size: 14px;
+        }
+        .summary-box .stats .count {
+            font-weight: bold;
+            font-size: 18px;
         }
 
         @media (max-width: 768px) {
@@ -231,6 +280,17 @@
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
             }
+            .tabs button {
+                font-size: 13px;
+                padding: 10px;
+                min-width: 60px;
+            }
+            .filter-section {
+                flex-direction: column;
+            }
+            .filter-section input, .filter-section select {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -242,8 +302,8 @@
         </div>
         <div class="sidebar-menu">
             <a href="admin-dashboard.html">📊 Dashboard</a>
-            <a href="admin-attendance.html" style="background:rgba(212,160,23,0.2);color:#d4a017;">📋 Attendance</a>
-            <a href="admin-teachers.html">👨‍🏫 Manage Teachers</a>
+            <a href="admin-attendance.html" class="active">📋 Attendance</a>
+            <a href="admin-teachers.html">👨‍🏫 Teachers</a>
             <div class="logout">
                 <a onclick="logout()">🚪 Logout</a>
             </div>
@@ -252,18 +312,18 @@
 
     <div class="main-content">
         <div class="header">
-            <h1>📋 Teacher Attendance</h1>
+            <h1>📋 Staff Attendance Reports</h1>
             <div class="admin-info">
                 <span id="adminName">Admin</span>
                 <div class="avatar" id="adminAvatar">A</div>
             </div>
         </div>
 
-        <!-- Stats -->
+        <!-- Summary Stats -->
         <div id="statsContainer" class="stats-grid">
             <div class="stat-card">
-                <span class="number blue" id="totalTeachers">0</span>
-                <span class="label">Total Teachers</span>
+                <span class="number blue" id="totalStaff">0</span>
+                <span class="label">Total Staff</span>
             </div>
             <div class="stat-card">
                 <span class="number green" id="todayPresent">0</span>
@@ -277,6 +337,18 @@
                 <span class="number red" id="todayAbsent">0</span>
                 <span class="label">Today Absent</span>
             </div>
+            <div class="stat-card">
+                <span class="number purple" id="attendanceRate">0%</span>
+                <span class="label">Attendance Rate</span>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="active" onclick="switchTab('daily')">📅 Daily</button>
+            <button onclick="switchTab('weekly')">📆 Weekly</button>
+            <button onclick="switchTab('monthly')">📊 Monthly</button>
+            <button onclick="switchTab('custom')">📅 Custom Range</button>
         </div>
 
         <!-- Filter -->
@@ -294,8 +366,22 @@
                 <option value="Administration">Administration</option>
                 <option value="Support Staff">Support Staff</option>
             </select>
+            <input type="date" id="datePicker" onchange="loadCustomReport()">
             <button onclick="loadAttendance()">🔄 Refresh</button>
             <button class="export-btn" onclick="exportCSV()">📥 Export CSV</button>
+            <button class="export-btn" onclick="printReport()" style="background:#6c757d;">🖨️ Print</button>
+        </div>
+
+        <!-- Summary -->
+        <div id="summaryBox" class="summary-box">
+            <div class="title" id="reportTitle">📊 Daily Attendance Report</div>
+            <div class="stats" id="reportStats">
+                <span>Total Staff: <span class="count" id="reportTotal">0</span></span>
+                <span>Present: <span class="count" id="reportPresent">0</span></span>
+                <span>Late: <span class="count" id="reportLate">0</span></span>
+                <span>Absent: <span class="count" id="reportAbsent">0</span></span>
+                <span>Rate: <span class="count" id="reportRate">0%</span></span>
+            </div>
         </div>
 
         <!-- Table -->
@@ -307,13 +393,13 @@
                         <tr>
                             <th>#</th>
                             <th>Name</th>
-                            <th>Employee ID</th>
+                            <th>Staff ID</th>
                             <th>Department</th>
-                            <th>Today Status</th>
+                            <th>Status</th>
                             <th>Check In</th>
                             <th>Check Out</th>
                             <th>Hours</th>
-                            <th>Total Days</th>
+                            <th>Date</th>
                         </tr>
                     </thead>
                     <tbody id="attendanceBody">
@@ -325,6 +411,8 @@
 
     <script>
         let attendanceData = [];
+        let currentTab = 'daily';
+        let filteredData = [];
 
         // ============================================
         // CHECK AUTH
@@ -338,8 +426,36 @@
             const admin = JSON.parse(localStorage.getItem('admin') || '{}');
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
+            
+            // Set default date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('datePicker').value = today;
+            
             loadAttendance();
         });
+
+        // ============================================
+        // SWITCH TAB
+        // ============================================
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tabs button').forEach(btn => {
+                if (btn.textContent.includes(tab.charAt(0).toUpperCase() + tab.slice(1))) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Show/hide date picker
+            const datePicker = document.getElementById('datePicker');
+            if (tab === 'custom') {
+                datePicker.style.display = 'inline-block';
+            } else {
+                datePicker.style.display = 'none';
+            }
+            
+            loadAttendance();
+        }
 
         // ============================================
         // LOAD ATTENDANCE
@@ -354,10 +470,11 @@
                 const summaryData = await summaryRes.json();
 
                 if (summaryData.success) {
-                    document.getElementById('totalTeachers').textContent = summaryData.today.total || 0;
+                    document.getElementById('totalStaff').textContent = summaryData.today.total || 0;
                     document.getElementById('todayPresent').textContent = summaryData.today.present || 0;
                     document.getElementById('todayLate').textContent = summaryData.today.late || 0;
                     document.getElementById('todayAbsent').textContent = summaryData.today.absent || 0;
+                    document.getElementById('attendanceRate').textContent = summaryData.today.attendanceRate + '%' || '0%';
                 }
 
                 // Load all attendance
@@ -366,7 +483,10 @@
 
                 if (data.success) {
                     attendanceData = data.teachers;
-                    renderTable(attendanceData);
+                    
+                    // Filter based on tab
+                    filterByTab();
+                    
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('tableWrapper').style.display = 'block';
                 } else {
@@ -379,27 +499,59 @@
         }
 
         // ============================================
-        // RENDER TABLE
+        // FILTER BY TAB
         // ============================================
-        function renderTable(data) {
-            const tbody = document.getElementById('attendanceBody');
-            tbody.innerHTML = '';
+        function filterByTab() {
+            const today = new Date();
+            let filtered = [];
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:40px;">No teachers found</td></tr>';
-                return;
+            if (currentTab === 'daily') {
+                // Today's attendance
+                filtered = getDailyReport(today);
+                document.getElementById('reportTitle').textContent = '📅 Daily Attendance Report - ' + today.toLocaleDateString();
+            } else if (currentTab === 'weekly') {
+                // This week
+                filtered = getWeeklyReport(today);
+                document.getElementById('reportTitle').textContent = '📆 Weekly Attendance Report - Week of ' + getWeekStart(today).toLocaleDateString();
+            } else if (currentTab === 'monthly') {
+                // This month
+                filtered = getMonthlyReport(today);
+                document.getElementById('reportTitle').textContent = '📊 Monthly Attendance Report - ' + today.toLocaleString('default', { month: 'long', year: 'numeric' });
+            } else if (currentTab === 'custom') {
+                // Custom date
+                const datePicker = document.getElementById('datePicker');
+                if (datePicker.value) {
+                    const selectedDate = new Date(datePicker.value + 'T00:00:00');
+                    filtered = getDailyReport(selectedDate);
+                    document.getElementById('reportTitle').textContent = '📅 Attendance Report - ' + selectedDate.toLocaleDateString();
+                } else {
+                    filtered = getDailyReport(today);
+                    document.getElementById('reportTitle').textContent = '📅 Daily Attendance Report - ' + today.toLocaleDateString();
+                }
             }
 
-            let index = 1;
-            data.forEach(teacher => {
-                const todayRecord = getTodayRecord(teacher.attendance);
-                
+            filteredData = filtered;
+            renderTable(filtered);
+            updateSummary(filtered);
+        }
+
+        // ============================================
+        // GET DAILY REPORT
+        // ============================================
+        function getDailyReport(date) {
+            const dateStr = date.toDateString();
+            const result = [];
+
+            attendanceData.forEach(teacher => {
+                const todayRecord = teacher.attendance.find(a => {
+                    return new Date(a.date).toDateString() === dateStr;
+                });
+
                 let status = 'Not Checked In';
                 let statusClass = 'gray';
                 let checkIn = '-';
                 let checkOut = '-';
                 let hours = '-';
-                let isLate = false;
 
                 if (todayRecord) {
                     status = todayRecord.checkOut ? 'Checked Out' : (todayRecord.isLate ? 'Late' : 'Checked In');
@@ -407,44 +559,188 @@
                     checkIn = formatDate(todayRecord.checkIn);
                     checkOut = todayRecord.checkOut ? formatDate(todayRecord.checkOut) : '-';
                     hours = todayRecord.hoursWorked ? todayRecord.hoursWorked + 'h' : '-';
-                    isLate = todayRecord.isLate || false;
                 }
 
-                let statusDisplay = status;
-                if (isLate) {
-                    statusDisplay = 'Late ⚠️';
-                }
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index}</td>
-                    <td><strong>${teacher.name}</strong></td>
-                    <td>${teacher.employeeId}</td>
-                    <td>${teacher.department || 'N/A'}</td>
-                    <td><span class="badge ${statusClass}">${statusDisplay}</span></td>
-                    <td>${checkIn}</td>
-                    <td>${checkOut}</td>
-                    <td>${hours}</td>
-                    <td>${teacher.totalDays || 0}</td>
-                `;
-                tbody.appendChild(row);
-                index++;
+                result.push({
+                    name: `${teacher.firstName} ${teacher.lastName}`,
+                    employeeId: teacher.employeeId,
+                    department: teacher.department || 'N/A',
+                    status: status,
+                    statusClass: statusClass,
+                    checkIn: checkIn,
+                    checkOut: checkOut,
+                    hours: hours,
+                    date: dateStr,
+                    rawDate: date
+                });
             });
+
+            return result;
+        }
+
+        // ============================================
+        // GET WEEKLY REPORT
+        // ============================================
+        function getWeeklyReport(date) {
+            const weekStart = getWeekStart(date);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+
+            const result = [];
+
+            attendanceData.forEach(teacher => {
+                const weekRecords = teacher.attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= weekStart && aDate <= weekEnd;
+                });
+
+                // Count attendance for the week
+                let present = 0, late = 0, absent = 0;
+                const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+                const dayStatus = {};
+
+                // Initialize days
+                for (let d = 0; d < 5; d++) {
+                    const day = new Date(weekStart);
+                    day.setDate(day.getDate() + d);
+                    if (day.getDay() !== 0 && day.getDay() !== 6) {
+                        const dayStr = day.toDateString();
+                        dayStatus[dayStr] = 'Absent';
+                    }
+                }
+
+                // Fill with actual records
+                weekRecords.forEach(record => {
+                    const dayStr = new Date(record.date).toDateString();
+                    if (dayStatus.hasOwnProperty(dayStr)) {
+                        dayStatus[dayStr] = record.isLate ? 'Late' : 'Present';
+                    }
+                });
+
+                // Count stats
+                Object.values(dayStatus).forEach(status => {
+                    if (status === 'Present') present++;
+                    else if (status === 'Late') late++;
+                    else absent++;
+                });
+
+                const total = present + late + absent;
+                const rate = total > 0 ? ((present / total) * 100).toFixed(0) : 0;
+
+                // Determine overall status
+                let overallStatus = 'Absent';
+                let statusClass = 'red';
+                if (present > 0) {
+                    overallStatus = 'Present';
+                    statusClass = 'green';
+                }
+                if (late > 0 && present === 0) {
+                    overallStatus = 'Late';
+                    statusClass = 'orange';
+                }
+
+                result.push({
+                    name: `${teacher.firstName} ${teacher.lastName}`,
+                    employeeId: teacher.employeeId,
+                    department: teacher.department || 'N/A',
+                    status: overallStatus + ' (' + present + '/' + total + ')',
+                    statusClass: statusClass,
+                    checkIn: `${present} Present`,
+                    checkOut: `${late} Late`,
+                    hours: `${absent} Absent`,
+                    date: `${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`,
+                    rawDate: weekStart,
+                    weekData: dayStatus
+                });
+            });
+
+            return result;
+        }
+
+        // ============================================
+        // GET MONTHLY REPORT
+        // ============================================
+        function getMonthlyReport(date) {
+            const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+            const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+            const result = [];
+
+            attendanceData.forEach(teacher => {
+                const monthRecords = teacher.attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= monthStart && aDate <= monthEnd;
+                });
+
+                let present = 0, late = 0, absent = 0;
+                let totalDays = 0;
+
+                // Count working days in month (Mon-Fri)
+                const currentDate = new Date(monthStart);
+                while (currentDate <= monthEnd) {
+                    const dayOfWeek = currentDate.getDay();
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                        totalDays++;
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                monthRecords.forEach(record => {
+                    if (record.isLate) late++;
+                    else if (record.status === 'Present') present++;
+                });
+
+                absent = totalDays - present - late;
+
+                const rate = totalDays > 0 ? ((present / totalDays) * 100).toFixed(0) : 0;
+
+                let overallStatus = 'Absent';
+                let statusClass = 'red';
+                if (present > 0) {
+                    overallStatus = 'Present';
+                    statusClass = 'green';
+                }
+                if (late > 0 && present === 0) {
+                    overallStatus = 'Late';
+                    statusClass = 'orange';
+                }
+
+                result.push({
+                    name: `${teacher.firstName} ${teacher.lastName}`,
+                    employeeId: teacher.employeeId,
+                    department: teacher.department || 'N/A',
+                    status: overallStatus + ' (' + present + '/' + totalDays + ')',
+                    statusClass: statusClass,
+                    checkIn: `${present} Present`,
+                    checkOut: `${late} Late`,
+                    hours: `${absent} Absent`,
+                    date: monthStart.toLocaleString('default', { month: 'long', year: 'numeric' }),
+                    rawDate: monthStart
+                });
+            });
+
+            return result;
+        }
+
+        // ============================================
+        // CUSTOM DATE REPORT
+        // ============================================
+        function loadCustomReport() {
+            if (currentTab === 'custom') {
+                filterByTab();
+            }
         }
 
         // ============================================
         // HELPERS
         // ============================================
-        function getTodayRecord(attendance) {
-            if (!attendance) return null;
-            const todayStart = new Date();
-            todayStart.setHours(0, 0, 0, 0);
-            
-            return attendance.find(a => {
-                const aDate = new Date(a.date);
-                aDate.setHours(0, 0, 0, 0);
-                return aDate.getTime() === todayStart.getTime();
-            });
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            d.setDate(diff);
+            d.setHours(0, 0, 0, 0);
+            return d;
         }
 
         function formatDate(date) {
@@ -460,60 +756,103 @@
         }
 
         // ============================================
+        // UPDATE SUMMARY
+        // ============================================
+        function updateSummary(data) {
+            const total = data.length;
+            let present = 0, late = 0, absent = 0;
+
+            data.forEach(item => {
+                if (item.status.includes('Present')) present++;
+                else if (item.status.includes('Late')) late++;
+                else absent++;
+            });
+
+            document.getElementById('reportTotal').textContent = total;
+            document.getElementById('reportPresent').textContent = present;
+            document.getElementById('reportLate').textContent = late;
+            document.getElementById('reportAbsent').textContent = absent;
+            const rate = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+            document.getElementById('reportRate').textContent = rate + '%';
+        }
+
+        // ============================================
+        // RENDER TABLE
+        // ============================================
+        function renderTable(data) {
+            const tbody = document.getElementById('attendanceBody');
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:40px;">No records found</td></tr>';
+                return;
+            }
+
+            let index = 1;
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index}</td>
+                    <td><strong>${item.name}</strong></td>
+                    <td>${item.employeeId}</td>
+                    <td>${item.department}</td>
+                    <td><span class="badge ${item.statusClass}">${item.status}</span></td>
+                    <td>${item.checkIn}</td>
+                    <td>${item.checkOut}</td>
+                    <td>${item.hours}</td>
+                    <td>${item.date}</td>
+                `;
+                tbody.appendChild(row);
+                index++;
+            });
+        }
+
+        // ============================================
         // FILTER TABLE
         // ============================================
         function filterTable() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const dept = document.getElementById('departmentFilter').value;
 
-            const filtered = attendanceData.filter(teacher => {
-                const nameMatch = teacher.name.toLowerCase().includes(search);
-                const idMatch = teacher.employeeId.toLowerCase().includes(search);
-                const deptMatch = dept === '' || teacher.department === dept;
+            const filtered = filteredData.filter(item => {
+                const nameMatch = item.name.toLowerCase().includes(search);
+                const idMatch = item.employeeId.toLowerCase().includes(search);
+                const deptMatch = dept === '' || item.department === dept;
                 return (nameMatch || idMatch) && deptMatch;
             });
 
             renderTable(filtered);
+            updateSummary(filtered);
         }
 
         // ============================================
         // EXPORT CSV
         // ============================================
         function exportCSV() {
-            if (!attendanceData || attendanceData.length === 0) {
+            if (!filteredData || filteredData.length === 0) {
                 alert('No data to export');
                 return;
             }
 
-            let csv = 'Name,Employee ID,Department,Today Status,Check In,Check Out,Hours,Total Days\n';
+            let csv = 'Name,Staff ID,Department,Status,Check In,Check Out,Hours,Date\n';
             
-            attendanceData.forEach(teacher => {
-                const todayRecord = getTodayRecord(teacher.attendance);
-                let status = 'Not Checked In';
-                let checkIn = '-';
-                let checkOut = '-';
-                let hours = '-';
-                let isLate = false;
-
-                if (todayRecord) {
-                    status = todayRecord.checkOut ? 'Checked Out' : (todayRecord.isLate ? 'Late' : 'Checked In');
-                    checkIn = formatFullDate(todayRecord.checkIn);
-                    checkOut = todayRecord.checkOut ? formatFullDate(todayRecord.checkOut) : '-';
-                    hours = todayRecord.hoursWorked ? todayRecord.hoursWorked + 'h' : '-';
-                    isLate = todayRecord.isLate || false;
-                }
-
-                if (isLate) status = 'Late ⚠️';
-
-                csv += `${teacher.name},${teacher.employeeId},${teacher.department || 'N/A'},${status},${checkIn},${checkOut},${hours},${teacher.totalDays || 0}\n`;
+            filteredData.forEach(item => {
+                csv += `${item.name},${item.employeeId},${item.department},${item.status},${item.checkIn},${item.checkOut},${item.hours},${item.date}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `attendance_${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `attendance_${currentTab}_${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
+        }
+
+        // ============================================
+        // PRINT REPORT
+        // ============================================
+        function printReport() {
+            window.print();
         }
 
         // ============================================
