@@ -93,6 +93,7 @@
             padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px;
             font-size: 14px; flex: 1; min-width: 120px;
         }
+        .filter-section input[type="date"] { min-width: 160px; cursor: pointer; }
         .filter-section button {
             padding: 8px 18px; background: #0b5394; color: white; border: none;
             border-radius: 8px; cursor: pointer; font-weight: bold;
@@ -146,6 +147,21 @@
             .filter-section { flex-direction: column; }
             .filter-section input, .filter-section select { width: 100%; }
         }
+
+        /* PDF STYLES */
+        .pdf-content { font-family: Arial, sans-serif; padding: 20px; background: white; }
+        .pdf-content h1 { color: #001f5c; text-align: center; font-size: 24px; }
+        .pdf-content h2 { text-align: center; color: #0b5394; font-size: 18px; margin: 10px 0; }
+        .pdf-content .pdf-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
+        .pdf-content .pdf-stat { background: #f8f9fa; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #ddd; }
+        .pdf-content .pdf-stat .num { font-size: 20px; font-weight: bold; display: block; }
+        .pdf-content .pdf-stat .lbl { font-size: 11px; color: #666; }
+        .pdf-content table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        .pdf-content th { background: #001f5c; color: white; padding: 6px 8px; text-align: left; }
+        .pdf-content td { padding: 5px 8px; border-bottom: 1px solid #eee; }
+        .pdf-content .pdf-footer { text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 11px; color: #999; }
+        .pdf-content .badge-success { background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 10px; font-weight: bold; }
+        .pdf-content .badge-danger { background: #f8d7da; color: #721c24; padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -192,6 +208,7 @@
             <button class="active" onclick="switchReport('daily')">📅 Daily</button>
             <button onclick="switchReport('weekly')">📆 Weekly</button>
             <button onclick="switchReport('monthly')">📊 Monthly</button>
+            <button onclick="switchReport('custom')">📅 Custom Date</button>
         </div>
 
         <div class="filter-section">
@@ -201,6 +218,7 @@
                 <option value="Checked In">Checked In</option>
                 <option value="Checked Out">Checked Out</option>
             </select>
+            <input type="date" id="datePicker" style="display:none;" onchange="loadCustomReport()">
             <button onclick="loadVisitors()"><i class="fas fa-sync-alt"></i> Refresh</button>
             <button class="export-btn" onclick="exportCSV()"><i class="fas fa-file-export"></i> CSV</button>
             <button class="pdf-btn" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
@@ -251,6 +269,7 @@
     <script>
         let visitorsData = [];
         let currentReport = 'daily';
+        let filteredData = [];
 
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('adminToken');
@@ -258,6 +277,11 @@
             const admin = JSON.parse(localStorage.getItem('admin') || '{}');
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('datePicker').value = today;
+            
             loadVisitors();
         });
 
@@ -267,7 +291,20 @@
             document.querySelectorAll('#reportTabs button').forEach(b => {
                 if (b.textContent.toLowerCase().includes(type)) b.classList.add('active');
             });
+            
+            const datePicker = document.getElementById('datePicker');
+            if (type === 'custom') {
+                datePicker.style.display = 'inline-block';
+            } else {
+                datePicker.style.display = 'none';
+            }
             loadVisitors();
+        }
+
+        function loadCustomReport() {
+            if (currentReport === 'custom') {
+                loadVisitors();
+            }
         }
 
         async function loadVisitors() {
@@ -276,13 +313,34 @@
 
             let endpoint = '/api/visitors';
             let title = '📅 Daily Visitor Report';
+            let dateLabel = 'Today';
 
-            if (currentReport === 'weekly') {
+            const today = new Date();
+            
+            if (currentReport === 'daily') {
+                endpoint = '/api/visitors';
+                title = '📅 Daily Visitor Report - ' + today.toLocaleDateString();
+                dateLabel = 'Today';
+            } else if (currentReport === 'weekly') {
                 endpoint = '/api/visitors/weekly';
-                title = '📆 Weekly Visitor Report';
+                const weekStart = getWeekStart(today);
+                title = '📆 Weekly Visitor Report - Week of ' + weekStart.toLocaleDateString();
+                dateLabel = 'This Week';
             } else if (currentReport === 'monthly') {
                 endpoint = '/api/visitors/monthly';
-                title = '📊 Monthly Visitor Report';
+                title = '📊 Monthly Visitor Report - ' + today.toLocaleString('default', { month: 'long', year: 'numeric' });
+                dateLabel = 'This Month';
+            } else if (currentReport === 'custom') {
+                const datePicker = document.getElementById('datePicker');
+                if (datePicker.value) {
+                    const selectedDate = new Date(datePicker.value + 'T00:00:00');
+                    endpoint = '/api/visitors';
+                    title = '📅 Visitor Report - ' + selectedDate.toLocaleDateString();
+                    dateLabel = selectedDate.toLocaleDateString();
+                } else {
+                    endpoint = '/api/visitors';
+                    title = '📅 Daily Visitor Report - ' + today.toLocaleDateString();
+                }
             }
 
             try {
@@ -291,26 +349,41 @@
                 
                 if (data.success) {
                     visitorsData = data.visitors || [];
+                    
+                    // If custom date, filter by that date
+                    if (currentReport === 'custom') {
+                        const datePicker = document.getElementById('datePicker');
+                        if (datePicker.value) {
+                            const selectedDate = new Date(datePicker.value + 'T00:00:00');
+                            const dateStr = selectedDate.toDateString();
+                            visitorsData = visitorsData.filter(v => {
+                                const vDate = new Date(v.checkIn);
+                                return vDate.toDateString() === dateStr;
+                            });
+                        }
+                    }
+                    
                     document.getElementById('reportTitle').textContent = title;
                     
                     // Update stats
-                    document.getElementById('totalVisitors').textContent = data.total || visitorsData.length;
-                    document.getElementById('activeVisitors').textContent = data.active || visitorsData.filter(v => v.status === 'Checked In').length;
-                    document.getElementById('completedVisitors').textContent = data.completed || visitorsData.filter(v => v.status === 'Checked Out').length;
+                    const total = visitorsData.length;
+                    const active = visitorsData.filter(v => v.status === 'Checked In').length;
+                    const completed = visitorsData.filter(v => v.status === 'Checked Out').length;
+                    
+                    document.getElementById('totalVisitors').textContent = total;
+                    document.getElementById('activeVisitors').textContent = active;
+                    document.getElementById('completedVisitors').textContent = completed;
                     
                     const purposes = new Set(visitorsData.map(v => v.purpose).filter(p => p));
                     document.getElementById('purposeCount').textContent = purposes.size;
                     
-                    // Summary stats
-                    const total = visitorsData.length;
-                    const active = visitorsData.filter(v => v.status === 'Checked In').length;
-                    const completed = visitorsData.filter(v => v.status === 'Checked Out').length;
                     document.getElementById('reportTotal').textContent = total;
                     document.getElementById('reportActive').textContent = active;
                     document.getElementById('reportCompleted').textContent = completed;
                     document.getElementById('reportRate').textContent = total > 0 ? ((active / total) * 100).toFixed(1) + '%' : '0%';
                     document.getElementById('recordCount').textContent = total + ' records';
                     
+                    filteredData = visitorsData;
                     renderTable(visitorsData);
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('tableWrapper').style.display = 'block';
@@ -321,6 +394,15 @@
                 console.error('Error:', error);
                 showError('Error loading visitors: ' + error.message);
             }
+        }
+
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            d.setDate(diff);
+            d.setHours(0, 0, 0, 0);
+            return d;
         }
 
         function renderTable(data) {
@@ -349,7 +431,7 @@
                     <td style="font-size:12px;">${checkOut}</td>
                     <td><span class="badge ${statusClass}">${visitor.status}</span></td>
                     <td style="text-align:center;">
-                        <button class="btn btn-danger" style="background:#dc3545;color:white;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;" onclick="deleteVisitor('${visitor._id}')" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                        <button style="background:#dc3545;color:white;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;" onclick="deleteVisitor('${visitor._id}')" title="Delete"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -368,6 +450,7 @@
                 return (nameMatch || badgeMatch || phoneMatch) && statusMatch;
             });
 
+            filteredData = filtered;
             renderTable(filtered);
             document.getElementById('recordCount').textContent = filtered.length + ' records';
         }
@@ -390,9 +473,11 @@
         }
 
         function exportCSV() {
-            if (!visitorsData || visitorsData.length === 0) { alert('No data to export'); return; }
+            const data = filteredData.length > 0 ? filteredData : visitorsData;
+            if (!data || data.length === 0) { alert('No data to export'); return; }
+            
             let csv = 'Name,Badge,Phone,ID,Purpose,Visiting,Department,Check In,Check Out,Status\n';
-            visitorsData.forEach(v => {
+            data.forEach(v => {
                 csv += `${v.firstName || ''} ${v.lastName || ''},${v.badgeNumber || ''},${v.phoneNumber || ''},${v.idNumber || ''},${v.purpose || ''},${v.personToVisit || ''},${v.department || ''},${new Date(v.checkIn).toLocaleString()},${v.checkOut ? new Date(v.checkOut).toLocaleString() : 'Still In'},${v.status}\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -404,15 +489,17 @@
         }
 
         function exportPDF() {
-            if (!visitorsData || visitorsData.length === 0) { alert('No data to export'); return; }
+            const data = filteredData.length > 0 ? filteredData : visitorsData;
+            if (!data || data.length === 0) { alert('No data to export'); return; }
 
-            const total = visitorsData.length;
-            const active = visitorsData.filter(v => v.status === 'Checked In').length;
-            const completed = visitorsData.filter(v => v.status === 'Checked Out').length;
+            const total = data.length;
+            const active = data.filter(v => v.status === 'Checked In').length;
+            const completed = data.filter(v => v.status === 'Checked Out').length;
             const rate = total > 0 ? ((active / total) * 100).toFixed(1) : 0;
 
             let tableRows = '';
-            visitorsData.forEach((v, i) => {
+            data.forEach((v, i) => {
+                const statusBadge = v.status === 'Checked In' ? 'badge-success' : 'badge-danger';
                 tableRows += `
                     <tr>
                         <td>${i+1}</td>
@@ -424,51 +511,32 @@
                         <td>${v.personToVisit || ''}</td>
                         <td>${new Date(v.checkIn).toLocaleTimeString()}</td>
                         <td>${v.checkOut ? new Date(v.checkOut).toLocaleTimeString() : 'Still In'}</td>
-                        <td>${v.status}</td>
+                        <td><span class="${statusBadge}">${v.status}</span></td>
                     </tr>
                 `;
             });
 
             const pdfHTML = `
-                <div class="pdf-content" style="font-family:Arial,sans-serif;padding:20px;background:white;">
-                    <h1 style="color:#001f5c;text-align:center;">🏫 CHANGARA STAR ACADEMY</h1>
-                    <h2 style="text-align:center;color:#0b5394;">Visitor Report (${currentReport.toUpperCase()})</h2>
-                    <p style="text-align:center;color:#666;">Generated: ${new Date().toLocaleString()}</p>
-                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0;">
-                        <div style="background:#f8f9fa;padding:10px;border-radius:8px;text-align:center;border:1px solid #ddd;">
-                            <span style="font-size:20px;font-weight:bold;display:block;color:#0b5394;">${total}</span>
-                            <span style="font-size:11px;color:#666;">Total Visitors</span>
-                        </div>
-                        <div style="background:#f8f9fa;padding:10px;border-radius:8px;text-align:center;border:1px solid #ddd;">
-                            <span style="font-size:20px;font-weight:bold;display:block;color:#28a745;">${active}</span>
-                            <span style="font-size:11px;color:#666;">Checked In</span>
-                        </div>
-                        <div style="background:#f8f9fa;padding:10px;border-radius:8px;text-align:center;border:1px solid #ddd;">
-                            <span style="font-size:20px;font-weight:bold;display:block;color:#dc3545;">${completed}</span>
-                            <span style="font-size:11px;color:#666;">Checked Out</span>
-                        </div>
-                        <div style="background:#f8f9fa;padding:10px;border-radius:8px;text-align:center;border:1px solid #ddd;">
-                            <span style="font-size:20px;font-weight:bold;display:block;color:#6f42c1;">${rate}%</span>
-                            <span style="font-size:11px;color:#666;">Rate</span>
-                        </div>
+                <div class="pdf-content">
+                    <h1>🏫 CHANGARA STAR ACADEMY</h1>
+                    <h2>Visitor Report (${currentReport.toUpperCase()})</h2>
+                    <p style="text-align:center;color:#666;font-size:12px;">Generated: ${new Date().toLocaleString()}</p>
+                    <div class="pdf-stats">
+                        <div class="pdf-stat"><span class="num" style="color:#0b5394;">${total}</span><span class="lbl">Total Visitors</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#28a745;">${active}</span><span class="lbl">Checked In</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#dc3545;">${completed}</span><span class="lbl">Checked Out</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#6f42c1;">${rate}%</span><span class="lbl">Rate</span></div>
                     </div>
-                    <table style="width:100%;border-collapse:collapse;font-size:11px;">
-                        <thead><tr style="background:#001f5c;color:white;">
-                            <th style="padding:6px;text-align:left;">#</th>
-                            <th style="padding:6px;text-align:left;">Name</th>
-                            <th style="padding:6px;text-align:left;">Badge</th>
-                            <th style="padding:6px;text-align:left;">Phone</th>
-                            <th style="padding:6px;text-align:left;">ID</th>
-                            <th style="padding:6px;text-align:left;">Purpose</th>
-                            <th style="padding:6px;text-align:left;">Visiting</th>
-                            <th style="padding:6px;text-align:left;">In</th>
-                            <th style="padding:6px;text-align:left;">Out</th>
-                            <th style="padding:6px;text-align:left;">Status</th>
+                    <table>
+                        <thead><tr>
+                            <th>#</th><th>Name</th><th>Badge</th><th>Phone</th><th>ID</th>
+                            <th>Purpose</th><th>Visiting</th><th>In</th><th>Out</th><th>Status</th>
                         </tr></thead>
                         <tbody>${tableRows}</tbody>
                     </table>
-                    <div style="text-align:center;margin-top:20px;padding-top:10px;border-top:1px solid #ddd;font-size:11px;color:#999;">
+                    <div class="pdf-footer">
                         <p>© ${new Date().getFullYear()} Changara Star Academy. All rights reserved.</p>
+                        <p>Report Type: ${currentReport.toUpperCase()}</p>
                     </div>
                 </div>
             `;
