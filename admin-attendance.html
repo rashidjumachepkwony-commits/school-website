@@ -101,7 +101,7 @@
         }
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 12px;
             margin-bottom: 20px;
         }
@@ -113,7 +113,7 @@
             text-align: center;
         }
         .stat-card .number {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: bold;
             display: block;
         }
@@ -231,7 +231,6 @@
 
         .loading { text-align: center; padding: 30px; color: #666; }
 
-        /* Ranking Section */
         .ranking-section {
             background: white;
             padding: 20px;
@@ -455,6 +454,7 @@
 
                 if (data.success) {
                     attendanceData = data.teachers;
+                    console.log('Attendance Data:', attendanceData); // Debug log
                     filterByTab();
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('tableWrapper').style.display = 'block';
@@ -498,6 +498,13 @@
             renderRanking(data);
         }
 
+        function getTeacherName(teacher) {
+            const firstName = teacher.firstName || '';
+            const lastName = teacher.lastName || '';
+            const fullName = `${firstName} ${lastName}`.trim();
+            return fullName || teacher.employeeId || 'Unknown Staff';
+        }
+
         function getDailyReport(date) {
             const dateStr = date.toDateString();
             const result = [];
@@ -515,7 +522,7 @@
                 }
 
                 result.push({
-                    name: `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim() || 'Unknown',
+                    name: getTeacherName(teacher),
                     employeeId: teacher.employeeId || 'N/A',
                     department: teacher.department || 'N/A',
                     status: status,
@@ -573,7 +580,7 @@
                 if (late > 0 && present === 0) { overallStatus = 'Late'; statusClass = 'orange'; }
 
                 result.push({
-                    name: `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim() || 'Unknown',
+                    name: getTeacherName(teacher),
                     employeeId: teacher.employeeId || 'N/A',
                     department: teacher.department || 'N/A',
                     status: `${overallStatus} (${present}/${total})`,
@@ -619,7 +626,7 @@
                 if (late > 0 && present === 0) { overallStatus = 'Late'; statusClass = 'orange'; }
 
                 result.push({
-                    name: `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim() || 'Unknown',
+                    name: getTeacherName(teacher),
                     employeeId: teacher.employeeId || 'N/A',
                     department: teacher.department || 'N/A',
                     status: `${overallStatus} (${present}/${totalDays})`,
