@@ -6,11 +6,7 @@
     <title>Admin Attendance - Changara Star Academy</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f0f2f5;
@@ -28,22 +24,10 @@
             left: 0;
             bottom: 0;
         }
-        .sidebar-brand {
-            padding: 0 20px 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .sidebar-brand h2 {
-            color: #ffeb99;
-            font-size: 22px;
-        }
-        .sidebar-brand p {
-            color: #d4a017;
-            font-size: 13px;
-        }
-        .sidebar-menu {
-            padding: 20px;
-        }
+        .sidebar-brand { padding: 0 20px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-brand h2 { color: #ffeb99; font-size: 22px; }
+        .sidebar-brand p { color: #d4a017; font-size: 13px; }
+        .sidebar-menu { padding: 20px; }
         .sidebar-menu a {
             display: block;
             color: #ccc;
@@ -57,20 +41,9 @@
             background: rgba(212, 160, 23, 0.2);
             color: #d4a017;
         }
-        .sidebar-menu .logout {
-            margin-top: 30px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 20px;
-        }
-        .sidebar-menu .logout a {
-            color: #ff6b6b;
-            cursor: pointer;
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 30px;
-            width: 100%;
-        }
+        .sidebar-menu .logout { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+        .sidebar-menu .logout a { color: #ff6b6b; cursor: pointer; }
+        .main-content { margin-left: 250px; padding: 30px; width: 100%; }
         .header {
             display: flex;
             justify-content: space-between;
@@ -79,14 +52,8 @@
             padding-bottom: 20px;
             border-bottom: 2px solid #e0e0e0;
         }
-        .header h1 {
-            color: #001f5c;
-        }
-        .header .admin-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .header h1 { color: #001f5c; }
+        .header .admin-info { display: flex; align-items: center; gap: 15px; }
         .header .admin-info .avatar {
             width: 40px;
             height: 40px;
@@ -99,6 +66,7 @@
             font-weight: bold;
             font-size: 18px;
         }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -112,15 +80,8 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             text-align: center;
         }
-        .stat-card .number {
-            font-size: 24px;
-            font-weight: bold;
-            display: block;
-        }
-        .stat-card .label {
-            color: #666;
-            font-size: 12px;
-        }
+        .stat-card .number { font-size: 24px; font-weight: bold; display: block; }
+        .stat-card .label { color: #666; font-size: 12px; }
         .stat-card .number.green { color: #28a745; }
         .stat-card .number.red { color: #dc3545; }
         .stat-card .number.orange { color: #ffc107; }
@@ -238,10 +199,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             margin-bottom: 20px;
         }
-        .ranking-section h3 {
-            color: #001f5c;
-            margin-bottom: 15px;
-        }
+        .ranking-section h3 { color: #001f5c; margin-bottom: 15px; }
         .ranking-list {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -256,21 +214,9 @@
             border-radius: 8px;
             border-left: 4px solid #0b5394;
         }
-        .ranking-item .rank {
-            font-weight: bold;
-            color: #0b5394;
-            font-size: 14px;
-            min-width: 30px;
-        }
-        .ranking-item .name {
-            flex: 1;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .ranking-item .score {
-            font-weight: bold;
-            font-size: 14px;
-        }
+        .ranking-item .rank { font-weight: bold; color: #0b5394; font-size: 14px; min-width: 30px; }
+        .ranking-item .name { flex: 1; font-weight: 600; font-size: 14px; }
+        .ranking-item .score { font-weight: bold; font-size: 14px; }
         .ranking-item .score.green { color: #28a745; }
         .ranking-item .score.orange { color: #ffc107; }
         .ranking-item .score.red { color: #dc3545; }
@@ -286,14 +232,90 @@
             .filter-section input, .filter-section select { width: 100%; }
         }
 
+        /* PRINT & PDF STYLES */
         @media print {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; padding: 10px; }
-            .filter-section { display: none; }
-            .no-print { display: none; }
-            .table-container { box-shadow: none; }
+            .sidebar { display: none !important; }
+            .main-content { margin-left: 0 !important; padding: 10px !important; }
+            .filter-section { display: none !important; }
+            .no-print { display: none !important; }
+            .table-container { box-shadow: none !important; border: 1px solid #ddd !important; }
             .stats-grid { page-break-after: avoid; }
+            .ranking-section { page-break-after: avoid; }
+            .summary-box { page-break-after: avoid; }
+            .tabs { display: none !important; }
+            body { background: white !important; }
         }
+
+        /* PDF specific styles */
+        .pdf-content {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: white;
+        }
+        .pdf-content h1 { color: #001f5c; text-align: center; margin-bottom: 20px; }
+        .pdf-content .pdf-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .pdf-content .pdf-stat {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        .pdf-content .pdf-stat .num { font-size: 20px; font-weight: bold; display: block; }
+        .pdf-content .pdf-stat .lbl { font-size: 11px; color: #666; }
+        .pdf-content table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .pdf-content th {
+            background: #001f5c;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-size: 11px;
+        }
+        .pdf-content td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 11px;
+        }
+        .pdf-content .pdf-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .pdf-content .pdf-badge.green { background: #d4edda; color: #155724; }
+        .pdf-content .pdf-badge.red { background: #f8d7da; color: #721c24; }
+        .pdf-content .pdf-badge.orange { background: #fff3cd; color: #856404; }
+        .pdf-content .pdf-badge.blue { background: #d1ecf1; color: #0c5460; }
+        .pdf-content .pdf-badge.gray { background: #e2e3e5; color: #383d41; }
+        .pdf-content .pdf-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-size: 11px;
+            color: #999;
+        }
+        .pdf-content .pdf-ranking {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .pdf-content .pdf-ranking h3 { color: #001f5c; margin-bottom: 10px; }
+        .pdf-content .pdf-ranking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .pdf-content .pdf-ranking-item .rank { font-weight: bold; color: #0b5394; }
+        .pdf-content .pdf-ranking-item .score { font-weight: bold; }
     </style>
 </head>
 <body>
@@ -321,7 +343,6 @@
             </div>
         </div>
 
-        <!-- Stats -->
         <div id="statsContainer" class="stats-grid">
             <div class="stat-card"><span class="number blue" id="totalStaff">0</span><span class="label">Total Staff</span></div>
             <div class="stat-card"><span class="number green" id="todayPresent">0</span><span class="label">Today Present</span></div>
@@ -330,7 +351,6 @@
             <div class="stat-card"><span class="number purple" id="attendanceRate">0%</span><span class="label">Attendance Rate</span></div>
         </div>
 
-        <!-- Tabs -->
         <div class="tabs no-print">
             <button class="active" onclick="switchTab('daily')">📅 Daily</button>
             <button onclick="switchTab('weekly')">📆 Weekly</button>
@@ -338,7 +358,6 @@
             <button onclick="switchTab('custom')">📅 Custom</button>
         </div>
 
-        <!-- Filter -->
         <div class="filter-section no-print">
             <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterTable()">
             <select id="departmentFilter" onchange="filterTable()">
@@ -360,7 +379,6 @@
             <button onclick="printReport()" style="background:#6c757d;">🖨️ Print</button>
         </div>
 
-        <!-- Summary -->
         <div id="summaryBox" class="summary-box">
             <div class="title" id="reportTitle">📅 Daily Attendance Report</div>
             <div class="stats" id="reportStats">
@@ -372,7 +390,6 @@
             </div>
         </div>
 
-        <!-- Ranking -->
         <div id="rankingSection" class="ranking-section">
             <h3>🏆 Staff Attendance Ranking</h3>
             <div id="rankingList" class="ranking-list">
@@ -380,7 +397,6 @@
             </div>
         </div>
 
-        <!-- Table -->
         <div class="table-container">
             <div id="loading" class="loading">⏳ Loading attendance data...</div>
             <div id="tableWrapper" style="display:none;">
@@ -454,7 +470,11 @@
 
                 if (data.success) {
                     attendanceData = data.teachers;
-                    console.log('Attendance Data:', attendanceData); // Debug log
+                    console.log('Attendance Data loaded:', attendanceData.length, 'teachers');
+                    // Log first teacher to see structure
+                    if (attendanceData.length > 0) {
+                        console.log('Sample teacher:', attendanceData[0]);
+                    }
                     filterByTab();
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('tableWrapper').style.display = 'block';
@@ -499,8 +519,25 @@
         }
 
         function getTeacherName(teacher) {
-            const firstName = teacher.firstName || '';
-            const lastName = teacher.lastName || '';
+            // Try different ways to get the name
+            let firstName = teacher.firstName || '';
+            let lastName = teacher.lastName || '';
+            
+            // If firstName is empty, try other fields
+            if (!firstName) {
+                firstName = teacher.name || '';
+            }
+            
+            // If still empty, check if name is in a different format
+            if (!firstName && !lastName) {
+                // Some APIs might send fullName
+                if (teacher.fullName) {
+                    return teacher.fullName;
+                }
+                // Fallback to employeeId
+                return teacher.employeeId || 'Unknown Staff';
+            }
+            
             const fullName = `${firstName} ${lastName}`.trim();
             return fullName || teacher.employeeId || 'Unknown Staff';
         }
@@ -551,7 +588,6 @@
                 });
 
                 let present = 0, late = 0;
-                const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
                 const dayStatus = {};
                 for (let d = 0; d < 5; d++) {
                     const day = new Date(weekStart);
@@ -568,12 +604,12 @@
                     }
                 });
 
+                let total = Object.keys(dayStatus).length;
                 Object.values(dayStatus).forEach(s => {
                     if (s === 'Present') present++;
                     else if (s === 'Late') late++;
                 });
 
-                const total = Object.keys(dayStatus).length;
                 const rate = total > 0 ? ((present / total) * 100).toFixed(0) : 0;
                 let overallStatus = 'Absent', statusClass = 'red';
                 if (present > 0) { overallStatus = 'Present'; statusClass = 'green'; }
@@ -747,15 +783,128 @@
         }
 
         function exportPDF() {
-            const element = document.getElementById('reportContent');
+            const data = filteredData;
+            if (!data || data.length === 0) { alert('No data to export'); return; }
+
+            // Calculate stats
+            let total = data.length, present = 0, late = 0, absent = 0;
+            data.forEach(item => {
+                if (item.status.includes('Present')) present++;
+                else if (item.status.includes('Late')) late++;
+                else absent++;
+            });
+            const rate = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+
+            // Get ranking
+            const sorted = [...data].sort((a, b) => b.attendanceRate - a.attendanceRate);
+            const top = sorted.slice(0, 10);
+            const medals = ['🥇', '🥈', '🥉'];
+
+            // Build HTML content for PDF
+            let rankingHTML = '';
+            top.forEach((item, i) => {
+                const medal = i < 3 ? medals[i] : `${i+1}.`;
+                const scoreColor = item.attendanceRate >= 80 ? 'green' : item.attendanceRate >= 50 ? 'orange' : 'red';
+                rankingHTML += `
+                    <div class="pdf-ranking-item">
+                        <span class="rank">${medal} ${item.name}</span>
+                        <span class="score" style="color:${scoreColor === 'green' ? '#28a745' : scoreColor === 'orange' ? '#ffc107' : '#dc3545'}">${item.attendanceRate}%</span>
+                    </div>
+                `;
+            });
+
+            let tableRows = '';
+            data.forEach((item, i) => {
+                const badgeClass = item.statusClass === 'green' ? 'green' : item.statusClass === 'orange' ? 'orange' : item.statusClass === 'blue' ? 'blue' : 'gray';
+                tableRows += `
+                    <tr>
+                        <td>${i+1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.employeeId}</td>
+                        <td>${item.department}</td>
+                        <td><span class="pdf-badge ${badgeClass}">${item.status}</span></td>
+                        <td>${item.checkIn}</td>
+                        <td>${item.checkOut}</td>
+                        <td>${item.hours}</td>
+                        <td>${item.date}</td>
+                    </tr>
+                `;
+            });
+
+            const pdfHTML = `
+                <div class="pdf-content">
+                    <h1>🏫 CHANGARA STAR ACADEMY</h1>
+                    <h2 style="text-align:center;color:#0b5394;font-size:18px;margin-bottom:15px;">Staff Attendance Report</h2>
+                    <p style="text-align:center;color:#666;margin-bottom:20px;">Generated: ${new Date().toLocaleString()}</p>
+
+                    <div class="pdf-stats">
+                        <div class="pdf-stat"><span class="num" style="color:#0b5394;">${total}</span><span class="lbl">Total Staff</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#28a745;">${present}</span><span class="lbl">Present</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#ffc107;">${late}</span><span class="lbl">Late</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#dc3545;">${absent}</span><span class="lbl">Absent</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#6f42c1;">${rate}%</span><span class="lbl">Attendance Rate</span></div>
+                    </div>
+
+                    <div class="pdf-ranking">
+                        <h3>🏆 Top Staff by Attendance</h3>
+                        ${rankingHTML || '<p>No data available</p>'}
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Staff ID</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Hours</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+
+                    <div class="pdf-footer">
+                        <p>© ${new Date().getFullYear()} Changara Star Academy. All rights reserved.</p>
+                        <p>Report Type: ${currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}</p>
+                    </div>
+                </div>
+            `;
+
+            // Create a temporary container for PDF
+            const container = document.createElement('div');
+            container.innerHTML = pdfHTML;
+            container.style.position = 'absolute';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            document.body.appendChild(container);
+
             const opt = {
                 margin: [10, 10, 10, 10],
                 filename: `attendance_report_${currentTab}_${new Date().toISOString().split('T')[0]}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    logging: false,
+                    width: 1100
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'landscape' 
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
-            html2pdf().set(opt).from(element).save();
+
+            html2pdf().set(opt).from(container).save().then(function() {
+                document.body.removeChild(container);
+            });
         }
 
         function printReport() { window.print(); }
