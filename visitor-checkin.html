@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Check-in/out - Changara Star Academy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f0fe 0%, #f5f5f5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 550px;
+        }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header .icon { font-size: 64px; display: block; }
+        .header h1 { color: #001f5c; font-size: 28px; margin-top: 10px; }
+        .header p { color: #666; margin-top: 5px; }
+        .time-display { text-align: center; color: #0b5394; font-size: 16px; font-weight: bold; margin-bottom: 15px; }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-buttons button {
+            flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px;
+            background: white; cursor: pointer; font-weight: bold; font-size: 16px;
+            transition: all 0.3s ease; color: #666;
+        }
+        .tab-buttons button.active { background: #0b5394; color: white; border-color: #0b5394; }
+        .tab-buttons button:hover:not(.active) { border-color: #0b5394; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 600; color: #333; margin-bottom: 5px; font-size: 14px; }
+        .form-group label .required { color: #dc3545; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 15px; transition: border-color 0.3s ease; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #0b5394; outline: none;
+        }
+        .form-group textarea { min-height: 60px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .btn-checkin {
+            width: 100%; padding: 14px; background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        .btn-checkin:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4); }
+        .btn-checkin:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        .btn-checkout {
+            width: 100%; padding: 14px; background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s ease; margin-top: 10px;
+        }
+        .btn-checkout:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4); }
+        .alert {
+            padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; display: none; font-size: 14px;
+        }
+        .alert.success { display: block; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert.error { display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert.info { display: block; background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .badge-display {
+            background: #001f5c; color: #ffeb99; padding: 20px; border-radius: 12px;
+            text-align: center; margin: 15px 0; display: none; font-size: 20px; font-weight: bold; letter-spacing: 2px;
+        }
+        .badge-display .badge-number { font-size: 32px; color: #d4a017; display: block; margin-top: 5px; }
+        .visitor-details {
+            background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;
+            display: none; border-left: 4px solid #0b5394;
+        }
+        .visitor-details p { margin: 3px 0; font-size: 14px; color: #555; }
+        .visitor-details .label { font-weight: 600; color: #333; }
+        .buttons-row { display: flex; gap: 10px; margin-top: 15px; }
+        .buttons-row button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; }
+        .btn-home { background: #6c757d; color: white; }
+        .btn-home:hover { background: #5a6268; }
+        .btn-admin { background: #0b5394; color: white; }
+        .btn-admin:hover { background: #001f5c; }
+        #checkinForm, #checkoutForm { display: none; }
+        #checkinForm.active, #checkoutForm.active { display: block; }
+        .loading {
+            display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3;
+            border-top: 3px solid #28a745; border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 480px) { .container { padding: 20px; } .form-row { grid-template-columns: 1fr; } .tab-buttons button { font-size: 14px; padding: 10px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="icon">🚪</span>
+            <h1>Visitor Management</h1>
+            <p>Changara Star Academy</p>
+        </div>
+
+        <div id="timeDisplay" class="time-display">🕐 Loading time...</div>
+
+        <div id="alert" class="alert"></div>
+
+        <div id="badgeDisplay" class="badge-display">
+            🎫 Your Badge Number
+            <span id="badgeNumber" class="badge-number"></span>
+        </div>
+
+        <div id="visitorDetails" class="visitor-details">
+            <p><span class="label">👤 Name:</span> <span id="visitorName"></span></p>
+            <p><span class="label">📋 Purpose:</span> <span id="visitorPurpose"></span></p>
+            <p><span class="label">👤 Visiting:</span> <span id="visitorPerson"></span></p>
+            <p><span class="label">⏰ Check-in:</span> <span id="visitorCheckIn"></span></p>
+            <p><span class="label">📞 Phone:</span> <span id="visitorPhone"></span></p>
+            <p><span class="label">🆔 ID:</span> <span id="visitorId"></span></p>
+        </div>
+
+        <div class="tab-buttons">
+            <button class="active" onclick="switchTab('checkin')">✅ Check In</button>
+            <button onclick="switchTab('checkout')">🚪 Check Out</button>
+        </div>
+
+        <form id="checkinForm" class="active">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name <span class="required">*</span></label>
+                    <input type="text" id="firstName" placeholder="John" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name <span class="required">*</span></label>
+                    <input type="text" id="lastName" placeholder="Doe" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <input type="text" id="phoneNumber" placeholder="0712 345 678" required>
+                </div>
+                <div class="form-group">
+                    <label>ID Number <span class="required">*</span></label>
+                    <input type="text" id="idNumber" placeholder="ID/Passport" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="visitor@example.com">
+            </div>
+            <div class="form-group">
+                <label>Purpose of Visit <span class="required">*</span></label>
+                <select id="purpose" required>
+                    <option value="">Select Purpose</option>
+                    <option value="Interview">Interview</option>
+                    <option value="Meeting">Meeting</option>
+                    <option value="Delivery">Delivery</option>
+                    <option value="Parent Visit">Parent Visit</option>
+                    <option value="Visitor">Visitor</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Person to Visit <span class="required">*</span></label>
+                <input type="text" id="personToVisit" placeholder="Who are you visiting?" required>
+            </div>
+            <div class="form-group">
+                <label>Department</label>
+                <select id="department">
+                    <option value="">Select Department</option>
+                    <option value="Administration">Administration</option>
+                    <option value="Teaching">Teaching</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Human Resources">Human Resources</option>
+                    <option value="ICT">ICT</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Purpose Details</label>
+                <textarea id="purposeDetails" placeholder="Additional details about your visit"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Host Name</label>
+                <input type="text" id="hostName" placeholder="Name of person hosting you">
+            </div>
+            <button type="submit" id="checkinBtn" class="btn-checkin">✅ Check In</button>
+        </form>
+
+        <form id="checkoutForm">
+            <div class="form-group">
+                <label>Search by <span class="required">*</span></label>
+                <select id="checkoutSearchType" required>
+                    <option value="phone">Phone Number</option>
+                    <option value="id">ID Number</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Enter Value <span class="required">*</span></label>
+                <input type="text" id="checkoutValue" placeholder="Enter phone number or ID number" required>
+            </div>
+            <button type="submit" id="checkoutBtn" class="btn-checkout">🚪 Check Out</button>
+        </form>
+
+        <div class="buttons-row">
+            <button onclick="window.location.href='index.html'" class="btn-home">🏠 Home</button>
+            <button onclick="window.location.href='admin-login.html'" class="btn-admin">🔐 Admin</button>
+        </div>
+    </div>
+
+    <script>
+        const checkinForm = document.getElementById('checkinForm');
+        const checkoutForm = document.getElementById('checkoutForm');
+        const checkinBtn = document.getElementById('checkinBtn');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const alertDiv = document.getElementById('alert');
+        const badgeDisplay = document.getElementById('badgeDisplay');
+        const badgeNumber = document.getElementById('badgeNumber');
+        const visitorDetails = document.getElementById('visitorDetails');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const checkoutSearchType = document.getElementById('checkoutSearchType');
+        const checkoutValue = document.getElementById('checkoutValue');
+
+        function updateTime() {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Africa/Nairobi' };
+            timeDisplay.textContent = '🕐 Kenya Time: ' + now.toLocaleTimeString('en-KE', options);
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-buttons button').forEach(b => b.classList.remove('active'));
+            if (tab === 'checkin') {
+                document.querySelector('.tab-buttons button:first-child').classList.add('active');
+                checkinForm.classList.add('active');
+                checkoutForm.classList.remove('active');
+                hideAlert();
+            } else {
+                document.querySelector('.tab-buttons button:last-child').classList.add('active');
+                checkoutForm.classList.add('active');
+                checkinForm.classList.remove('active');
+                hideAlert();
+                badgeDisplay.style.display = 'none';
+                visitorDetails.style.display = 'none';
+            }
+        }
+
+        function showAlert(message, type) {
+            alertDiv.className = 'alert ' + type;
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+        }
+
+        function hideAlert() { alertDiv.style.display = 'none'; }
+
+        function refreshPage() { setTimeout(() => { window.location.reload(); }, 3000); }
+
+        checkinForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const data = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                phoneNumber: document.getElementById('phoneNumber').value.trim(),
+                idNumber: document.getElementById('idNumber').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                purpose: document.getElementById('purpose').value,
+                purposeDetails: document.getElementById('purposeDetails').value.trim(),
+                personToVisit: document.getElementById('personToVisit').value.trim(),
+                department: document.getElementById('department').value,
+                hostName: document.getElementById('hostName').value.trim()
+            };
+
+            if (!data.firstName || !data.lastName || !data.phoneNumber || !data.idNumber || !data.purpose || !data.personToVisit) {
+                showAlert('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                checkinBtn.disabled = true;
+                checkinBtn.innerHTML = '<span class="loading"></span> Processing...';
+                const response = await fetch('/api/visitor/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                const result = await response.json();
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    badgeDisplay.style.display = 'block';
+                    badgeNumber.textContent = result.visitor.badgeNumber;
+                    visitorDetails.style.display = 'block';
+                    document.getElementById('visitorName').textContent = result.visitor.fullName;
+                    document.getElementById('visitorPurpose').textContent = result.visitor.purpose;
+                    document.getElementById('visitorPerson').textContent = result.visitor.personToVisit;
+                    document.getElementById('visitorCheckIn').textContent = new Date(result.visitor.checkIn).toLocaleTimeString();
+                    document.getElementById('visitorPhone').textContent = data.phoneNumber;
+                    document.getElementById('visitorId').textContent = data.idNumber;
+                    refreshPage();
+                } else {
+                    showAlert(result.message || 'Check-in failed', 'error');
+                    checkinBtn.disabled = false;
+                    checkinBtn.innerHTML = '✅ Check In';
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+                checkinBtn.disabled = false;
+                checkinBtn.innerHTML = '✅ Check In';
+            }
+        });
+
+        checkoutForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const searchType = checkoutSearchType.value;
+            const searchValue = checkoutValue.value.trim();
+            if (!searchValue) { showAlert('Please enter a value to search', 'error'); return; }
+
+            try {
+                checkoutBtn.disabled = true;
+                checkoutBtn.innerHTML = '<span class="loading"></span> Searching...';
+                const response = await fetch('/api/visitors');
+                const data = await response.json();
+                if (!data.success) { showAlert('Error fetching visitors', 'error'); checkoutBtn.disabled = false; checkoutBtn.innerHTML = '🚪 Check Out'; return; }
+
+                let visitor = null;
+                if (searchType === 'phone') {
+                    visitor = data.visitors.find(v => v.phoneNumber === searchValue && v.status === 'Checked In');
+                } else {
+                    visitor = data.visitors.find(v => v.idNumber === searchValue && v.status === 'Checked In');
+                }
+
+                if (!visitor) {
+                    showAlert('No active visitor found with this ' + (searchType === 'phone' ? 'phone number' : 'ID number'), 'error');
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.innerHTML = '🚪 Check Out';
+                    return;
+                }
+
+                const checkoutResponse = await fetch(`/api/visitor/checkout/${visitor.badgeNumber}`, { method: 'PUT' });
+                const result = await checkoutResponse.json();
+                if (result.success) {
+                    showAlert(`✅ ${result.message} - Duration: ${result.visitor.duration}`, 'success');
+                    checkoutValue.value = '';
+                    refreshPage();
+                } else {
+                    showAlert(result.message || 'Check-out failed', 'error');
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.innerHTML = '🚪 Check Out';
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+                checkoutBtn.disabled = false;
+                checkoutBtn.innerHTML = '🚪 Check Out';
+            }
+        });
+    </script>
+</body>
+</html>

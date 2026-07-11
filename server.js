@@ -112,6 +112,48 @@ const teacherSchema = new mongoose.Schema({
 const Teacher = mongoose.model('Teacher', teacherSchema);
 
 // ============================================
+// VISITOR SCHEMA
+// ============================================
+const visitorSchema = new mongoose.Schema({
+  firstName: { type: String, required: true, trim: true },
+  lastName: { type: String, required: true, trim: true },
+  email: { type: String, lowercase: true, trim: true },
+  phoneNumber: { type: String, required: true },
+  idNumber: { type: String, required: true },
+  purpose: {
+    type: String,
+    enum: ['Interview', 'Meeting', 'Delivery', 'Parent Visit', 'Visitor', 'Other'],
+    required: true
+  },
+  purposeDetails: { type: String, trim: true },
+  personToVisit: { type: String, required: true },
+  department: { type: String, trim: true },
+  checkIn: { type: Date, required: true, default: Date.now },
+  checkOut: { type: Date },
+  status: { type: String, enum: ['Checked In', 'Checked Out'], default: 'Checked In' },
+  badgeNumber: { type: String, unique: true },
+  hostName: { type: String, trim: true },
+  notes: String,
+  isActive: { type: Boolean, default: true }
+}, { timestamps: true });
+
+visitorSchema.methods.checkOutVisitor = async function() {
+  if (this.checkOut) throw new Error('Already checked out');
+  this.checkOut = new Date();
+  this.status = 'Checked Out';
+  return await this.save();
+};
+
+visitorSchema.virtual('fullName').get(function() {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+visitorSchema.set('toJSON', { virtuals: true });
+visitorSchema.set('toObject', { virtuals: true });
+
+const Visitor = mongoose.model('Visitor', visitorSchema);
+
+// ============================================
 // API ROUTES - CONTENT
 // ============================================
 
@@ -816,6 +858,305 @@ app.get('/api/admin/attendance/summary', async (req, res) => {
 });
 
 // ============================================
+// VISITOR API ROUTES
+// ============================================
+
+// VISITOR CHECK-IN (Public)
+app.post('/api/visitor/checkin', async (req, res) => {
+  try {
+    const { 
+      firstName, lastName, email, phoneNumber, idNumber, 
+      purpose, purposeDetails, personToVisit, department, hostName, notes 
+    } = req.body;
+
+    if (!firstName || !lastName || !phoneNumber || !idNumber || !purpose || !personToVisit) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide: firstName, lastName, phoneNumber, idNumber, purpose, personToVisit'
+      });
+    }
+
+    const badgeNumber = 'V' + Date.now().toString().slice(-6);
+
+    const visitor = new Visitor({
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      idNumber,
+      purpose,
+      purposeDetails,
+      personToVisit,
+      department,
+      hostName,
+      notes,
+      badgeNumber,
+      checkIn: new Date(),
+      status: 'Checked In'
+    });
+
+    await visitor.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Visitor checked in successfully!',
+      visitor: {
+        id: visitor._id,
+        fullName: visitor.fullName,
+        badgeNumber: visitor.badgeNumber,
+        checkIn: visitor.checkIn,
+        purpose: visitor.purpose,
+        personToVisit: visitor.personToVisit,
+        hostName: visitor.hostName
+      }
+    });
+
+  } catch (error) {
+    console.error('Visitor check-in error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// VISITOR CHECK-OUT (by badge number)
+app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
+  try {
+    const visitor = await Visitor.findOne({ badgeNumber: req.params.badgeNumber });
+    
+    if (!visitor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Visitor not found. Please check the badge number.'
+      });
+    }
+    
+    if (visitor.status === 'Checked Out') {
+      return res.status(400).json({
+        success: false,
+        message: 'Visitor already checked out at ' + new Date(visitor.checkOut).toLocaleTimeString()
+      });
+    }
+    
+    visitor.checkOut = new Date();
+    visitor.status = 'Checked Out';
+    await visitor.save();
+    
+    const duration = ((visitor.checkOut - visitor.checkIn) / 1000 / 60).toFixed(0);
+    
+    res.json({
+      success: true,
+      message: 'Visitor checked out successfully!',
+      visitor: {
+        id: visitor._id,
+        fullName: visitor.fullName,
+        badgeNumber: visitor.badgeNumber,
+        checkIn: visitor.checkIn,
+        checkOut: visitor.checkOut,
+        duration: duration + ' minutes'
+      }
+    });
+
+  } catch (error) {
+    console.error('Visitor check-out error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET ALL VISITORS (Admin)
+app.get('/api/visitors', async (req, res) => {
+  try {
+    const visitors = await Visitor.find().sort({ checkIn: -1 });
+    res.json({
+      success: true,
+      count: visitors.length,
+      visitors
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET ACTIVE VISITORS (Admin)
+app.get('/api/visitors/active', async (req, res) => {
+  try {
+    const visitors = await Visitor.find({ status: 'Checked In' }).sort({ checkIn: -1 });
+    res.json({
+      success: true,
+      count: visitors.length,
+      visitors
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET VISITOR BY BADGE NUMBER
+app.get('/api/visitor/:badgeNumber', async (req, res) => {
+  try {
+    const visitor = await Visitor.findOne({ badgeNumber: req.params.badgeNumber });
+    if (!visitor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Visitor not found'
+      });
+    }
+    res.json({
+      success: true,
+      visitor
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET TODAY'S VISITORS (Admin)
+app.get('/api/visitors/today', async (req, res) => {
+  try {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    
+    const tomorrow = new Date(todayStart);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const visitors = await Visitor.find({
+      checkIn: { $gte: todayStart, $lt: tomorrow }
+    }).sort({ checkIn: -1 });
+    
+    const active = visitors.filter(v => v.status === 'Checked In');
+    const completed = visitors.filter(v => v.status === 'Checked Out');
+    
+    const purposeStats = {};
+    visitors.forEach(v => {
+      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
+    });
+    
+    res.json({
+      success: true,
+      date: todayStart,
+      total: visitors.length,
+      active: active.length,
+      completed: completed.length,
+      byPurpose: purposeStats,
+      visitors: visitors
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET WEEKLY VISITORS (Admin)
+app.get('/api/visitors/weekly', async (req, res) => {
+  try {
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+    weekStart.setHours(0, 0, 0, 0);
+    
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    const visitors = await Visitor.find({
+      checkIn: { $gte: weekStart, $lt: weekEnd }
+    }).sort({ checkIn: -1 });
+
+    const active = visitors.filter(v => v.status === 'Checked In');
+    const completed = visitors.filter(v => v.status === 'Checked Out');
+
+    const purposeStats = {};
+    visitors.forEach(v => {
+      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
+    });
+
+    // Daily breakdown
+    const dailyStats = {};
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(weekStart);
+      day.setDate(day.getDate() + d);
+      const dayStr = day.toDateString();
+      dailyStats[dayStr] = visitors.filter(v => new Date(v.checkIn).toDateString() === dayStr).length;
+    }
+
+    res.json({
+      success: true,
+      weekStart: weekStart,
+      weekEnd: weekEnd,
+      total: visitors.length,
+      active: active.length,
+      completed: completed.length,
+      byPurpose: purposeStats,
+      daily: dailyStats,
+      visitors: visitors
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET MONTHLY VISITORS (Admin)
+app.get('/api/visitors/monthly', async (req, res) => {
+  try {
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    
+    const monthEnd = new Date(monthStart);
+    monthEnd.setMonth(monthEnd.getMonth() + 1);
+
+    const visitors = await Visitor.find({
+      checkIn: { $gte: monthStart, $lt: monthEnd }
+    }).sort({ checkIn: -1 });
+
+    const active = visitors.filter(v => v.status === 'Checked In');
+    const completed = visitors.filter(v => v.status === 'Checked Out');
+
+    const purposeStats = {};
+    visitors.forEach(v => {
+      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
+    });
+
+    // Daily breakdown for month
+    const dailyStats = {};
+    for (let d = 1; d <= monthEnd.getDate(); d++) {
+      const day = new Date(monthStart);
+      day.setDate(d);
+      const dayStr = day.toDateString();
+      dailyStats[dayStr] = visitors.filter(v => new Date(v.checkIn).toDateString() === dayStr).length;
+    }
+
+    res.json({
+      success: true,
+      monthStart: monthStart,
+      monthEnd: monthEnd,
+      total: visitors.length,
+      active: active.length,
+      completed: completed.length,
+      byPurpose: purposeStats,
+      daily: dailyStats,
+      visitors: visitors
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// DELETE VISITOR RECORD (Admin)
+app.delete('/api/visitors/:id', async (req, res) => {
+  try {
+    const visitor = await Visitor.findByIdAndDelete(req.params.id);
+    if (!visitor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Visitor not found'
+      });
+    }
+    res.json({
+      success: true,
+      message: 'Visitor record deleted successfully!'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
 // TEST ROUTE
 // ============================================
 app.get('/api/test', (req, res) => {
@@ -836,7 +1177,14 @@ app.get('/api/test', (req, res) => {
           checkout: '/api/teacher/checkout',
           attendance: '/api/teacher/attendance/today'
         },
-        adminAttendance: '/api/admin/attendance/all'
+        adminAttendance: '/api/admin/attendance/all',
+        visitor: {
+          checkin: '/api/visitor/checkin',
+          checkout: '/api/visitor/checkout/:badgeNumber',
+          today: '/api/visitors/today',
+          weekly: '/api/visitors/weekly',
+          monthly: '/api/visitors/monthly'
+        }
       }
     }
   });
@@ -879,6 +1227,8 @@ app.listen(PORT, () => {
   console.log(`👨‍🏫 Staff Check-in: http://localhost:${PORT}/teacher-checkin.html`);
   console.log(`📋 Admin Attendance: http://localhost:${PORT}/admin-attendance.html`);
   console.log(`👨‍🏫 Manage Teachers: http://localhost:${PORT}/admin-teachers.html`);
+  console.log(`🚪 Visitor Check-in: http://localhost:${PORT}/visitor-checkin.html`);
+  console.log(`📋 Admin Visitors: http://localhost:${PORT}/admin-visitors.html`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
 });
