@@ -180,9 +180,6 @@
         .status-card .status-text.late {
             color: #ffc107;
         }
-        .status-card .status-text.not-checked {
-            color: #dc3545;
-        }
         .buttons-row {
             display: flex;
             gap: 10px;
@@ -287,13 +284,14 @@
         const kenyanTimeEl = document.getElementById('kenyanTime');
 
         // ============================================
-        // KENYAN TIME (EAT - UTC+3)
+        // KENYAN TIME (EAT - UTC+3) - CORRECTED
         // ============================================
         function getKenyanTime() {
+            // Use Nairobi timezone directly
             const now = new Date();
-            // Convert to Kenyan time (UTC+3)
-            const kenyanTime = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-            return kenyanTime;
+            // Format in Nairobi timezone
+            const nairobiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
+            return nairobiTime;
         }
 
         function updateKenyanTime() {
@@ -302,10 +300,9 @@
                 hour: '2-digit', 
                 minute: '2-digit', 
                 second: '2-digit',
-                hour12: true,
-                timeZone: 'Africa/Nairobi'
+                hour12: true
             };
-            kenyanTimeEl.textContent = '⏰ Kenya Time: ' + kenyanTime.toLocaleTimeString('en-KE', options);
+            kenyanTimeEl.textContent = '🕐 Kenya Time: ' + kenyanTime.toLocaleTimeString('en-KE', options);
         }
 
         // Update time every second
