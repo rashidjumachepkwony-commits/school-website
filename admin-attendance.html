@@ -133,6 +133,18 @@
             flex: 1;
             min-width: 120px;
         }
+        .filter-section input[type="date"] {
+            min-width: 160px;
+            cursor: pointer;
+        }
+        .filter-section .date-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
         .filter-section button {
             padding: 8px 18px;
             background: #0b5394;
@@ -220,7 +232,16 @@
         .ranking-item .score.green { color: #28a745; }
         .ranking-item .score.orange { color: #ffc107; }
         .ranking-item .score.red { color: #dc3545; }
-        .ranking-item .medal { font-size: 20px; margin-right: 5px; }
+
+        .selected-date-display {
+            background: #e8f0fe;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #0b5394;
+            display: inline-block;
+            border: 1px solid #0b5394;
+        }
 
         @media (max-width: 768px) {
             .sidebar { width: 100%; position: relative; min-height: auto; }
@@ -230,9 +251,9 @@
             .tabs button { font-size: 12px; padding: 8px; min-width: 60px; }
             .filter-section { flex-direction: column; }
             .filter-section input, .filter-section select { width: 100%; }
+            .filter-section .date-label { width: 100%; }
         }
 
-        /* PRINT & PDF STYLES */
         @media print {
             .sidebar { display: none !important; }
             .main-content { margin-left: 0 !important; padding: 10px !important; }
@@ -246,7 +267,6 @@
             body { background: white !important; }
         }
 
-        /* PDF specific styles */
         .pdf-content {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
@@ -345,9 +365,9 @@
 
         <div id="statsContainer" class="stats-grid">
             <div class="stat-card"><span class="number blue" id="totalStaff">0</span><span class="label">Total Staff</span></div>
-            <div class="stat-card"><span class="number green" id="todayPresent">0</span><span class="label">Today Present</span></div>
-            <div class="stat-card"><span class="number orange" id="todayLate">0</span><span class="label">Today Late</span></div>
-            <div class="stat-card"><span class="number red" id="todayAbsent">0</span><span class="label">Today Absent</span></div>
+            <div class="stat-card"><span class="number green" id="todayPresent">0</span><span class="label">Present</span></div>
+            <div class="stat-card"><span class="number orange" id="todayLate">0</span><span class="label">Late</span></div>
+            <div class="stat-card"><span class="number red" id="todayAbsent">0</span><span class="label">Absent</span></div>
             <div class="stat-card"><span class="number purple" id="attendanceRate">0%</span><span class="label">Attendance Rate</span></div>
         </div>
 
@@ -355,11 +375,11 @@
             <button class="active" onclick="switchTab('daily')">📅 Daily</button>
             <button onclick="switchTab('weekly')">📆 Weekly</button>
             <button onclick="switchTab('monthly')">📊 Monthly</button>
-            <button onclick="switchTab('custom')">📅 Custom</button>
+            <button onclick="switchTab('datepicker')">📅 Select Date</button>
         </div>
 
         <div class="filter-section no-print">
-            <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterTable()">
+            <input type="text" id="searchInput" placeholder="Search by name or ID..." onkeyup="filterTable()">
             <select id="departmentFilter" onchange="filterTable()">
                 <option value="">All Departments</option>
                 <option value="Teaching">Teaching</option>
@@ -372,7 +392,9 @@
                 <option value="Administration">Administration</option>
                 <option value="Support Staff">Support Staff</option>
             </select>
-            <input type="date" id="datePicker" onchange="loadCustomReport()">
+            <div class="date-label">📅 
+                <input type="date" id="datePicker" onchange="loadDatePickerReport()">
+            </div>
             <button onclick="loadAttendance()">🔄 Refresh</button>
             <button class="export-btn" onclick="exportCSV()">📥 CSV</button>
             <button class="pdf-btn" onclick="exportPDF()">📄 PDF</button>
@@ -424,6 +446,7 @@
         let attendanceData = [];
         let currentTab = 'daily';
         let filteredData = [];
+        let selectedDate = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('adminToken');
@@ -431,7 +454,12 @@
             const admin = JSON.parse(localStorage.getItem('admin') || '{}');
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
-            document.getElementById('datePicker').value = new Date().toISOString().split('T')[0];
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('datePicker').value = today;
+            selectedDate = new Date();
+            
             loadAttendance();
         });
 
@@ -441,13 +469,30 @@
             document.querySelectorAll('.tabs button').forEach(b => {
                 if (b.textContent.toLowerCase().includes(tab)) b.classList.add('active');
             });
-            const dp = document.getElementById('datePicker');
-            dp.style.display = tab === 'custom' ? 'inline-block' : 'none';
+            // Show/hide date picker label
+            const datePickerContainer = document.querySelector('.date-label');
+            if (tab === 'datepicker') {
+                datePickerContainer.style.display = 'flex';
+                document.getElementById('reportTitle').textContent = '📅 Attendance Report - Selected Date';
+            } else {
+                datePickerContainer.style.display = 'none';
+            }
             loadAttendance();
         }
 
+        function loadDatePickerReport() {
+            if (currentTab === 'datepicker') {
+                const dateVal = document.getElementById('datePicker').value;
+                if (dateVal) {
+                    selectedDate = new Date(dateVal + 'T00:00:00');
+                    document.getElementById('reportTitle').textContent = '📅 Attendance Report - ' + selectedDate.toLocaleDateString();
+                    loadAttendance();
+                }
+            }
+        }
+
         function loadCustomReport() {
-            if (currentTab === 'custom') loadAttendance();
+            if (currentTab === 'datepicker') loadDatePickerReport();
         }
 
         async function loadAttendance() {
@@ -470,11 +515,6 @@
 
                 if (data.success) {
                     attendanceData = data.teachers;
-                    console.log('Attendance Data loaded:', attendanceData.length, 'teachers');
-                    // Log first teacher to see structure
-                    if (attendanceData.length > 0) {
-                        console.log('Sample teacher:', attendanceData[0]);
-                    }
                     filterByTab();
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('tableWrapper').style.display = 'block';
@@ -488,25 +528,28 @@
         }
 
         function filterByTab() {
-            const today = new Date();
             let data = [];
 
             if (currentTab === 'daily') {
+                const today = new Date();
                 data = getDailyReport(today);
                 document.getElementById('reportTitle').textContent = '📅 Daily Attendance Report - ' + today.toLocaleDateString();
             } else if (currentTab === 'weekly') {
+                const today = new Date();
                 data = getWeeklyReport(today);
                 document.getElementById('reportTitle').textContent = '📆 Weekly Attendance Report - Week of ' + getWeekStart(today).toLocaleDateString();
             } else if (currentTab === 'monthly') {
+                const today = new Date();
                 data = getMonthlyReport(today);
                 document.getElementById('reportTitle').textContent = '📊 Monthly Attendance Report - ' + today.toLocaleString('default', { month: 'long', year: 'numeric' });
-            } else if (currentTab === 'custom') {
+            } else if (currentTab === 'datepicker') {
                 const datePicker = document.getElementById('datePicker');
                 if (datePicker.value) {
                     const selectedDate = new Date(datePicker.value + 'T00:00:00');
                     data = getDailyReport(selectedDate);
                     document.getElementById('reportTitle').textContent = '📅 Attendance Report - ' + selectedDate.toLocaleDateString();
                 } else {
+                    const today = new Date();
                     data = getDailyReport(today);
                     document.getElementById('reportTitle').textContent = '📅 Daily Attendance Report - ' + today.toLocaleDateString();
                 }
@@ -519,25 +562,14 @@
         }
 
         function getTeacherName(teacher) {
-            // Try different ways to get the name
             let firstName = teacher.firstName || '';
             let lastName = teacher.lastName || '';
             
-            // If firstName is empty, try other fields
-            if (!firstName) {
-                firstName = teacher.name || '';
-            }
-            
-            // If still empty, check if name is in a different format
+            if (!firstName) firstName = teacher.name || '';
             if (!firstName && !lastName) {
-                // Some APIs might send fullName
-                if (teacher.fullName) {
-                    return teacher.fullName;
-                }
-                // Fallback to employeeId
+                if (teacher.fullName) return teacher.fullName;
                 return teacher.employeeId || 'Unknown Staff';
             }
-            
             const fullName = `${firstName} ${lastName}`.trim();
             return fullName || teacher.employeeId || 'Unknown Staff';
         }
@@ -710,7 +742,7 @@
             const tbody = document.getElementById('attendanceBody');
             tbody.innerHTML = '';
             if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:30px;">No records found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:30px;">No records found for selected date</td></tr>';
                 return;
             }
             data.forEach((item, i) => {
@@ -786,7 +818,6 @@
             const data = filteredData;
             if (!data || data.length === 0) { alert('No data to export'); return; }
 
-            // Calculate stats
             let total = data.length, present = 0, late = 0, absent = 0;
             data.forEach(item => {
                 if (item.status.includes('Present')) present++;
@@ -795,12 +826,10 @@
             });
             const rate = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
 
-            // Get ranking
             const sorted = [...data].sort((a, b) => b.attendanceRate - a.attendanceRate);
             const top = sorted.slice(0, 10);
             const medals = ['🥇', '🥈', '🥉'];
 
-            // Build HTML content for PDF
             let rankingHTML = '';
             top.forEach((item, i) => {
                 const medal = i < 3 ? medals[i] : `${i+1}.`;
@@ -876,7 +905,6 @@
                 </div>
             `;
 
-            // Create a temporary container for PDF
             const container = document.createElement('div');
             container.innerHTML = pdfHTML;
             container.style.position = 'absolute';
@@ -888,17 +916,8 @@
                 margin: [10, 10, 10, 10],
                 filename: `attendance_report_${currentTab}_${new Date().toISOString().split('T')[0]}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, 
-                    useCORS: true,
-                    logging: false,
-                    width: 1100
-                },
-                jsPDF: { 
-                    unit: 'mm', 
-                    format: 'a4', 
-                    orientation: 'landscape' 
-                },
+                html2canvas: { scale: 2, useCORS: true, logging: false, width: 1100 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
                 pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
