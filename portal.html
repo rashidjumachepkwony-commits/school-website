@@ -63,6 +63,14 @@
             font-weight: bold;
             margin-top: 8px;
         }
+        .portal-card .badge.soon {
+            background: #ffc107;
+            color: #333;
+        }
+        .portal-card .badge.live {
+            background: #28a745;
+            color: white;
+        }
         .portal-section-title {
             text-align: center;
             color: #001f5c;
@@ -74,46 +82,6 @@
             color: #666;
             font-size: 18px;
             margin-bottom: 30px;
-        }
-        .admin-section {
-            background: #001f5c;
-            border-radius: 16px;
-            padding: 30px;
-            margin-top: 40px;
-            color: white;
-        }
-        .admin-section h3 {
-            color: #ffeb99;
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        .admin-section .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        .admin-section .admin-link {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            text-decoration: none;
-            color: white;
-            transition: all 0.3s ease;
-        }
-        .admin-section .admin-link:hover {
-            background: rgba(255,255,255,0.2);
-            transform: scale(1.02);
-        }
-        .admin-section .admin-link .icon {
-            font-size: 32px;
-            display: block;
-            margin-bottom: 5px;
-        }
-        .admin-section .admin-link span {
-            font-size: 14px;
-            font-weight: 500;
         }
         .portal-badge {
             display: inline-block;
@@ -139,6 +107,21 @@
             transform: scale(1.05);
             box-shadow: 0 8px 25px rgba(212, 160, 23, 0.4);
         }
+        .btn-secondary {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #0b5394;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        .btn-secondary:hover {
+            background: #001f5c;
+            transform: scale(1.05);
+        }
 
         @media (max-width: 768px) {
             .portal-grid {
@@ -146,6 +129,10 @@
             }
             .portal-section-title {
                 font-size: 24px;
+            }
+            .btn-secondary {
+                margin-left: 0;
+                margin-top: 10px;
             }
         }
         @media (max-width: 480px) {
@@ -188,118 +175,83 @@
                     <span class="icon">🏠</span>
                     <h3>Home Page</h3>
                     <p>Welcome message, school slogan, latest news, and announcements</p>
-                    <span class="badge">Coming Soon</span>
+                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="about.html" class="portal-card">
                     <span class="icon">📖</span>
                     <h3>About Us</h3>
                     <p>School history, vision, mission, core values, and location</p>
+                    <span class="badge live">Live</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">📚</span>
                     <h3>Academics</h3>
                     <p>Playgroup to Grade 6 - Subjects, activities, and learning approach</p>
-                    <span class="badge">Coming Soon</span>
+                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">📝</span>
                     <h3>Admissions</h3>
                     <p>Requirements, process, fees, and online enquiry form</p>
-                    <span class="badge">Coming Soon</span>
+                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">🏫</span>
                     <h3>School Facilities</h3>
                     <p>Classrooms, computer lab, library, playground, and more</p>
-                    <span class="badge">Coming Soon</span>
+                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">🖼️</span>
                     <h3>Gallery</h3>
                     <p>Classroom learning, Sports Day, music festivals, and trips</p>
-                    <span class="badge">Coming Soon</span>
+                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">📰</span>
                     <h3>News & Events</h3>
                     <p>Opening dates, parents' meetings, sports competitions, and more</p>
-                    <span class="badge">Coming Soon</span>
+                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">⚽</span>
                     <h3>Co-curricular Activities</h3>
                     <p>Football, athletics, music, drama, debate, clubs, and more</p>
-                    <span class="badge">Coming Soon</span>
+                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">🏆</span>
                     <h3>Academic Performance</h3>
                     <p>KCPE/KPSEA results, internal exams, awards, and top performers</p>
-                    <span class="badge">Coming Soon</span>
+                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">👨‍👩‍👧‍👦</span>
                     <h3>Parents Corner</h3>
                     <p>School calendar, homework, attendance policy, rules, and fees</p>
-                    <span class="badge">Coming Soon</span>
+                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">📄</span>
                     <h3>Downloads</h3>
                     <p>Admission form, school calendar, fee structure, book list, and more</p>
-                    <span class="badge">Coming Soon</span>
+                    <span class="badge soon">Coming Soon</span>
                 </a>
             </div>
 
-            <!-- ===== ADMIN SECTION (Visible only to logged-in admins) ===== -->
-            <div class="admin-section" style="margin-top:40px;">
-                <h3>🔐 School Management System</h3>
-                <p style="color:#ccc;margin-bottom:10px;">Manage school operations, staff, students, fees, and reports</p>
-                <div class="admin-grid">
-                    <a href="admin-dashboard.html" class="admin-link">
-                        <span class="icon">📊</span>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="admin-teachers.html" class="admin-link">
-                        <span class="icon">👨‍🏫</span>
-                        <span>Staff Management</span>
-                    </a>
-                    <a href="#" class="admin-link">
-                        <span class="icon">🎓</span>
-                        <span>Student Management</span>
-                    </a>
-                    <a href="#" class="admin-link">
-                        <span class="icon">💰</span>
-                        <span>Fee Management</span>
-                    </a>
-                    <a href="admin-attendance.html" class="admin-link">
-                        <span class="icon">📋</span>
-                        <span>Reports & Analytics</span>
-                    </a>
-                    <a href="admin-visitors.html" class="admin-link">
-                        <span class="icon">🚪</span>
-                        <span>Visitor Management</span>
-                    </a>
-                </div>
-                <div style="margin-top:15px;text-align:center;">
-                    <a href="admin-login.html" class="btn-primary" style="background:#d4a017;color:#001f5c;">⚙️ Admin Login</a>
-                    <a href="teacher-checkin.html" class="btn-primary" style="background:#28a745;color:white;margin-left:10px;">👨‍🏫 Staff Check-in</a>
-                    <a href="visitor-checkin.html" class="btn-primary" style="background:#17a2b8;color:white;margin-left:10px;">🚪 Visitor Check-in</a>
-                </div>
-            </div>
-
-            <div style="text-align:center;margin-top:30px;">
+            <div style="text-align:center;margin-top:40px;">
                 <a href="index.html" class="btn-primary">🏠 Return to Homepage</a>
+                <a href="contact.html" class="btn-secondary">📞 Contact Us</a>
             </div>
         </div>
     </main>
