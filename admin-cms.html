@@ -491,9 +491,6 @@
                 max-width: 90%;
                 right: 5%;
             }
-            .file-types {
-                gap: 8px;
-            }
         }
     </style>
 </head>
@@ -859,12 +856,12 @@
         });
 
         // ============================================
-        // INIT TINYMCE
+        // INIT TINYMCE (NO API KEY REQUIRED)
         // ============================================
         function initTinyMCE() {
             tinymce.init({
                 selector: '.tinymce-editor',
-                height: 200,
+                height: 250,
                 menubar: true,
                 plugins: [
                     'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
@@ -877,6 +874,7 @@
                     'removeformat | help',
                 content_style: 'body { font-family:Segoe UI, Arial, sans-serif; font-size:16px; }',
                 branding: false,
+                promotion: false,
                 setup: function(editor) {
                     editor.on('change', function() {
                         editor.save();
