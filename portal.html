@@ -55,8 +55,6 @@
         }
         .portal-card .badge {
             display: inline-block;
-            background: #d4a017;
-            color: #001f5c;
             padding: 2px 12px;
             border-radius: 20px;
             font-size: 11px;
@@ -69,6 +67,10 @@
         }
         .portal-card .badge.live {
             background: #28a745;
+            color: white;
+        }
+        .portal-card .badge.admin {
+            background: #001f5c;
             color: white;
         }
         .portal-section-title {
@@ -116,11 +118,94 @@
             border-radius: 50px;
             font-weight: bold;
             transition: all 0.3s ease;
-            margin-left: 10px;
         }
         .btn-secondary:hover {
             background: #001f5c;
             transform: scale(1.05);
+        }
+        .btn-success {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+            transform: scale(1.05);
+        }
+        .btn-info {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #17a2b8;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn-info:hover {
+            background: #138496;
+            transform: scale(1.05);
+        }
+
+        .management-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #e8ecf1;
+        }
+        .management-section h3 {
+            color: #001f5c;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .management-section .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .management-link {
+            background: #f8f9fc;
+            padding: 20px 15px;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: #001f5c;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .management-link:hover {
+            border-color: #d4a017;
+            background: white;
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .management-link .icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .management-link span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .management-link .link-badge {
+            display: block;
+            font-size: 10px;
+            color: #999;
+            margin-top: 3px;
         }
 
         @media (max-width: 768px) {
@@ -130,14 +215,16 @@
             .portal-section-title {
                 font-size: 24px;
             }
-            .btn-secondary {
-                margin-left: 0;
+            .btn-secondary, .btn-success, .btn-info {
                 margin-top: 10px;
             }
         }
         @media (max-width: 480px) {
             .portal-grid {
                 grid-template-columns: 1fr;
+            }
+            .management-grid {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -249,9 +336,50 @@
                 </a>
             </div>
 
-            <div style="text-align:center;margin-top:40px;">
-                <a href="index.html" class="btn-primary">🏠 Return to Homepage</a>
-                <a href="contact.html" class="btn-secondary">📞 Contact Us</a>
+            <!-- ===== MANAGEMENT SECTION ===== -->
+            <div class="management-section">
+                <h3>🔐 School Management</h3>
+                <p class="subtitle">Manage school operations, staff, visitors, and attendance</p>
+                <div class="management-grid">
+                    <a href="admin-dashboard.html" class="management-link">
+                        <span class="icon">📊</span>
+                        <span>Dashboard</span>
+                        <span class="link-badge">Admin</span>
+                    </a>
+                    <a href="admin-teachers.html" class="management-link">
+                        <span class="icon">👨‍🏫</span>
+                        <span>Staff Management</span>
+                        <span class="link-badge">Manage Teachers</span>
+                    </a>
+                    <a href="admin-attendance.html" class="management-link">
+                        <span class="icon">📋</span>
+                        <span>Attendance</span>
+                        <span class="link-badge">Reports</span>
+                    </a>
+                    <a href="admin-visitors.html" class="management-link">
+                        <span class="icon">🚪</span>
+                        <span>Visitor Management</span>
+                        <span class="link-badge">Check-in/out</span>
+                    </a>
+                    <a href="teacher-checkin.html" class="management-link" style="border-color:#28a745;">
+                        <span class="icon">👨‍🏫</span>
+                        <span>Staff Check-in</span>
+                        <span class="link-badge">Daily Check-in</span>
+                    </a>
+                    <a href="visitor-checkin.html" class="management-link" style="border-color:#17a2b8;">
+                        <span class="icon">🚪</span>
+                        <span>Visitor Check-in</span>
+                        <span class="link-badge">Daily Check-in</span>
+                    </a>
+                </div>
+                <div style="margin-top:20px;text-align:center;">
+                    <a href="admin-login.html" class="btn-primary">⚙️ Admin Login</a>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:30px;">
+                <a href="index.html" class="btn-secondary">🏠 Return to Homepage</a>
+                <a href="contact.html" class="btn-info">📞 Contact Us</a>
             </div>
         </div>
     </main>
