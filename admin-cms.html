@@ -992,7 +992,6 @@
                 }
             });
 
-            // Refresh gallery if gallery tab is clicked
             if (tab === 'gallery') {
                 renderMediaGallery();
             }
@@ -1098,8 +1097,6 @@
             document.getElementById('seoTitle').value = c.seoTitle || '';
             document.getElementById('seoDescription').value = c.seoDescription || '';
             document.getElementById('seoKeywords').value = c.seoKeywords || '';
-
-            // Gallery is handled by renderMediaGallery()
         }
 
         // ============================================
@@ -1447,7 +1444,6 @@
             const typeFilter = document.getElementById('mediaTypeFilter').value;
             const searchFilter = document.getElementById('mediaSearchFilter').value.toLowerCase();
 
-            // Get gallery items from websiteContent
             const galleryItems = websiteContent.gallery || [];
             mediaData = galleryItems;
 
@@ -1535,7 +1531,6 @@
                 item.category = newCategory;
             }
 
-            // Update the gallery in websiteContent
             websiteContent.gallery = mediaData;
             renderMediaGallery();
             showAlert('Media item updated successfully!', 'success');
@@ -1566,7 +1561,6 @@
             navigator.clipboard.writeText(url).then(() => {
                 showAlert('URL copied to clipboard!', 'success');
             }).catch(() => {
-                // Fallback
                 const textArea = document.createElement('textarea');
                 textArea.value = url;
                 document.body.appendChild(textArea);
@@ -1663,7 +1657,6 @@
                 return;
             }
 
-            // Get current gallery
             const gallery = websiteContent.gallery || [];
 
             const newItem = {
@@ -1676,7 +1669,6 @@
             gallery.push(newItem);
             websiteContent.gallery = gallery;
 
-            // Reset upload state
             document.getElementById('uploadedPreview').style.display = 'none';
             document.getElementById('uploadProgress').style.display = 'none';
             document.getElementById('fileUpload').value = '';
@@ -1698,11 +1690,9 @@
         // SAVE ALL CONTENT
         // ============================================
         async function saveAllContent() {
-            // Save gallery data back to websiteContent
             websiteContent.gallery = mediaData;
 
             const data = {
-                // Home
                 heroTitle: document.getElementById('heroTitle').value,
                 heroSubtitle: document.getElementById('heroSubtitle').value,
                 heroButtonText: document.getElementById('heroButtonText').value,
@@ -1711,7 +1701,6 @@
                 homeStats: getItemsData('statsContainer', 'stat'),
                 homeNews: getItemsData('newsContainer', 'news'),
 
-                // About
                 aboutMission: document.getElementById('aboutMission').value,
                 aboutVision: document.getElementById('aboutVision').value,
                 aboutValues: document.getElementById('aboutValues').value,
@@ -1719,33 +1708,24 @@
                 aboutMotto: document.getElementById('aboutMotto').value,
                 aboutWhy: document.getElementById('aboutWhy').value,
 
-                // Academics
                 academics: getItemsData('academicsContainer', 'academic'),
 
-                // Admissions
                 admissionsRequirements: document.getElementById('admissionsRequirements').value,
                 admissionsAge: document.getElementById('admissionsAge').value,
                 admissionsDocuments: document.getElementById('admissionsDocuments').value,
                 admissionsProcess: document.getElementById('admissionsProcess').value,
                 admissionsFees: document.getElementById('admissionsFees').value,
 
-                // Facilities
                 facilities: getItemsData('facilitiesContainer', 'facility'),
 
-                // Gallery
                 gallery: websiteContent.gallery || [],
 
-                // Events
                 events: getItemsData('eventsContainer', 'event'),
-
-                // Co-curricular
                 coCurricular: getItemsData('cocurricularContainer', 'cocurricular'),
 
-                // Performance
                 performanceKcpe: document.getElementById('performanceKcpe').value,
                 performanceInternal: document.getElementById('performanceInternal').value,
 
-                // Parents
                 parentsCalendar: document.getElementById('parentsCalendar').value,
                 parentsHomework: document.getElementById('parentsHomework').value,
                 parentsAttendance: document.getElementById('parentsAttendance').value,
@@ -1753,17 +1733,14 @@
                 parentsUniform: document.getElementById('parentsUniform').value,
                 parentsFees: document.getElementById('parentsFees').value,
 
-                // Downloads
                 downloads: getItemsData('downloadsContainer', 'download'),
 
-                // Contact
                 contactAddress: document.getElementById('contactAddress').value,
                 contactPhone: document.getElementById('contactPhone').value,
                 contactEmail: document.getElementById('contactEmail').value,
                 contactHours: document.getElementById('contactHours').value,
                 contactMap: document.getElementById('contactMap').value,
 
-                // SEO
                 seoTitle: document.getElementById('seoTitle').value,
                 seoDescription: document.getElementById('seoDescription').value,
                 seoKeywords: document.getElementById('seoKeywords').value
