@@ -8,6 +8,80 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
     <meta name="description" content="Changara Star Academy - Quality education from Playgroup to Grade 6 in Changara Market, Teso North Sub-County, Busia County, Kenya.">
     <style>
+        /* ===== RESET & BASE ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* ===== HEADER ===== */
+        .main-header {
+            background: linear-gradient(135deg, #001f5c, #0b5394);
+            color: white;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+        }
+        .main-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .main-header .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .main-header .school-icon {
+            font-size: 36px;
+        }
+        .main-header .logo-section h1 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .main-header .logo-section .subtitle {
+            font-size: 12px;
+            color: #d4a017;
+            display: block;
+        }
+        .main-header .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .main-header .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .main-header .nav-links a:hover {
+            background: rgba(212, 160, 23, 0.2);
+            color: #d4a017;
+        }
+        .main-header .nav-links a.active {
+            background: #d4a017;
+            color: #001f5c;
+        }
+        .main-header .nav-links a.portal-link {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .main-header .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
         /* ===== HERO SECTION ===== */
         .hero-section {
             background: linear-gradient(135deg, #001f5c 0%, #0b5394 100%);
@@ -227,11 +301,81 @@
             display: block;
         }
 
+        /* ===== FOOTER ===== */
         .main-footer {
-            display: none !important;
+            background: #0a1628;
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 0;
+        }
+        .main-footer .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .main-footer .footer-info h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #d4a017;
+        }
+        .main-footer .footer-info p {
+            color: rgba(255,255,255,0.7);
+            line-height: 1.8;
+            font-size: 14px;
+        }
+        .main-footer .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .main-footer .footer-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .main-footer .footer-links a:hover {
+            color: #d4a017;
+            padding-left: 5px;
+        }
+        .main-footer .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+        }
+        .main-footer .footer-social {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .main-footer .footer-social a {
+            color: rgba(255,255,255,0.7);
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+        .main-footer .footer-social a:hover {
+            color: #d4a017;
+            transform: scale(1.1);
         }
 
         @media (max-width: 768px) {
+            .main-header .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                padding: 15px 0;
+                gap: 10px;
+            }
+            .main-header .nav-links.show {
+                display: flex;
+            }
+            .main-header .mobile-menu-btn {
+                display: block;
+            }
+
             .hero-section h1 {
                 font-size: 32px;
             }
@@ -250,6 +394,10 @@
             }
             .news-grid {
                 grid-template-columns: 1fr;
+            }
+            .main-footer .footer-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
         }
         @media (max-width: 480px) {
@@ -276,7 +424,7 @@
                     <span class="subtitle">Assurance to Excellence</span>
                 </div>
             </div>
-            <nav class="nav-links">
+            <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
                 <a href="portal.html">🔐 Portal</a>
@@ -467,16 +615,25 @@
                     <h3>🏫 Changara Star Academy</h3>
                     <p>Changara Market, Teso North Sub-County, Busia County, Kenya</p>
                     <p>📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                    <p>🕐 Monday - Friday: 7:00 AM - 6:00 PM</p>
+                    <div class="footer-social">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
                 </div>
                 <div class="footer-links">
-                    <a href="index.html">Home</a>
-                    <a href="about.html">About</a>
-                    <a href="portal.html">Portal</a>
-                    <a href="contact.html">Contact</a>
+                    <h4 style="color:#d4a017;margin-bottom:10px;">Quick Links</h4>
+                    <a href="index.html">🏠 Home</a>
+                    <a href="about.html">📖 About Us</a>
+                    <a href="portal.html">🔐 School Portal</a>
+                    <a href="admissions.html">📝 Admissions</a>
+                    <a href="contact.html">📞 Contact Us</a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Changara Star Academy. All rights reserved.</p>
+                <p>&copy; 2026 Changara Star Academy. All rights reserved. | Designed with ❤️</p>
             </div>
         </div>
     </footer>
@@ -486,7 +643,7 @@
         // MOBILE MENU TOGGLE
         // ============================================
         function toggleMobileMenu() {
-            const nav = document.querySelector('.nav-links');
+            const nav = document.getElementById('navLinks');
             if (nav) nav.classList.toggle('show');
         }
 
