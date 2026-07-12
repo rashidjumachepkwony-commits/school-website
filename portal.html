@@ -8,6 +8,11 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
     <meta name="description" content="Changara Star Academy School Portal - School content, academics, admissions, and more.">
     <style>
+        /* HIDE FOOTER ON PORTAL PAGE ONLY */
+        .main-footer {
+            display: none !important;
+        }
+
         .portal-container {
             flex: 1;
             width: 100%;
@@ -61,16 +66,8 @@
             font-weight: bold;
             margin-top: 8px;
         }
-        .portal-card .badge.soon {
-            background: #ffc107;
-            color: #333;
-        }
         .portal-card .badge.live {
             background: #28a745;
-            color: white;
-        }
-        .portal-card .badge.admin {
-            background: #001f5c;
             color: white;
         }
         .portal-section-title {
@@ -121,20 +118,6 @@
         }
         .btn-secondary:hover {
             background: #001f5c;
-            transform: scale(1.05);
-        }
-        .btn-success {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #28a745;
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        .btn-success:hover {
-            background: #1e7e34;
             transform: scale(1.05);
         }
         .btn-info {
@@ -215,7 +198,7 @@
             .portal-section-title {
                 font-size: 24px;
             }
-            .btn-secondary, .btn-success, .btn-info {
+            .btn-secondary, .btn-info {
                 margin-top: 10px;
             }
         }
@@ -258,13 +241,6 @@
 
             <!-- ===== SCHOOL CONTENT SECTION ===== -->
             <div class="portal-grid">
-                <a href="#" class="portal-card">
-                    <span class="icon">🏠</span>
-                    <h3>Home Page</h3>
-                    <p>Welcome message, school slogan, latest news, and announcements</p>
-                    <span class="badge soon">Coming Soon</span>
-                </a>
-
                 <a href="about.html" class="portal-card">
                     <span class="icon">📖</span>
                     <h3>About Us</h3>
@@ -273,66 +249,63 @@
                 </a>
 
                 <a href="#" class="portal-card">
+                    <span class="icon">🏠</span>
+                    <h3>Home Page</h3>
+                    <p>Welcome message, school slogan, latest news, and announcements</p>
+                </a>
+
+                <a href="#" class="portal-card">
                     <span class="icon">📚</span>
                     <h3>Academics</h3>
                     <p>Playgroup to Grade 6 - Subjects, activities, and learning approach</p>
-                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">📝</span>
                     <h3>Admissions</h3>
                     <p>Requirements, process, fees, and online enquiry form</p>
-                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">🏫</span>
                     <h3>School Facilities</h3>
                     <p>Classrooms, computer lab, library, playground, and more</p>
-                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">🖼️</span>
                     <h3>Gallery</h3>
                     <p>Classroom learning, Sports Day, music festivals, and trips</p>
-                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">📰</span>
                     <h3>News & Events</h3>
                     <p>Opening dates, parents' meetings, sports competitions, and more</p>
-                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">⚽</span>
                     <h3>Co-curricular Activities</h3>
                     <p>Football, athletics, music, drama, debate, clubs, and more</p>
-                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">🏆</span>
                     <h3>Academic Performance</h3>
                     <p>KCPE/KPSEA results, internal exams, awards, and top performers</p>
-                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">👨‍👩‍👧‍👦</span>
                     <h3>Parents Corner</h3>
                     <p>School calendar, homework, attendance policy, rules, and fees</p>
-                    <span class="badge soon">Coming Soon</span>
                 </a>
 
                 <a href="#" class="portal-card">
                     <span class="icon">📄</span>
                     <h3>Downloads</h3>
                     <p>Admission form, school calendar, fee structure, book list, and more</p>
-                    <span class="badge soon">Coming Soon</span>
                 </a>
             </div>
 
@@ -384,32 +357,7 @@
         </div>
     </main>
 
-    <!-- ===== FOOTER ===== -->
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h4>🏫 Changara Star Academy</h4>
-                    <p>Committed to providing quality education and fostering excellence.</p>
-                </div>
-                <div class="footer-col">
-                    <h4>Quick Links</h4>
-                    <a href="portal.html">🔐 School Portal</a>
-                    <a href="about.html">About Us</a>
-                    <a href="contact.html">Contact Us</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Contact Information</h4>
-                    <p>📞 +254 721 556 252</p>
-                    <p>📧 info@changarastaracademy.co.ke</p>
-                    <p>📍 Nairobi, Kenya</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Changara Star Academy. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+    <!-- ===== FOOTER REMOVED - HIDDEN VIA CSS ===== -->
 
     <script src="js/main.js"></script>
 </body>
