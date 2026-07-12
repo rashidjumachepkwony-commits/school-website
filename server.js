@@ -136,6 +136,7 @@ const contentSchema = new mongoose.Schema({
   heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
   heroSubtitle: { type: String, default: 'Your trusted partner in quality education and school management' },
   heroButtonText: { type: String, default: 'Learn More' },
+  heroButtonLink: { type: String, default: '/about.html' },
   
   homeFeatures: [{
     icon: { type: String, default: '📚' },
@@ -236,6 +237,7 @@ const contentSchema = new mongoose.Schema({
   contactPhone: { type: String, default: '+254 721 556 252' },
   contactEmail: { type: String, default: 'starchangara@gmail.com' },
   contactHours: { type: String, default: 'Monday - Friday: 7:00 AM - 6:00 PM' },
+  contactMap: { type: String, default: '' },
 
   // ===== FOOTER =====
   footerText: { type: String, default: 'Committed to providing quality education and fostering excellence.' },
