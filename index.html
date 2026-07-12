@@ -6,7 +6,264 @@
     <title>🏫 Changara Star Academy - Home</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
-    <meta name="description" content="Changara Star Academy - Excellence in Education. School management system for students, staff, and parents.">
+    <meta name="description" content="Changara Star Academy - Quality education from Playgroup to Grade 6 in Changara Market, Teso North Sub-County, Busia County, Kenya.">
+    <style>
+        /* ===== HERO SECTION ===== */
+        .hero-section {
+            background: linear-gradient(135deg, #001f5c 0%, #0b5394 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+        .hero-section h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .hero-section h1 .highlight {
+            color: #d4a017;
+        }
+        .hero-section p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        .hero-section .btn-hero {
+            display: inline-block;
+            padding: 15px 40px;
+            background: #d4a017;
+            color: #001f5c;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        .hero-section .btn-hero:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(212, 160, 23, 0.4);
+        }
+
+        /* ===== CONTENT CARDS SECTION ===== */
+        .content-cards-section {
+            padding: 60px 0;
+            background: #f5f7fa;
+        }
+        .content-cards-section .section-title {
+            text-align: center;
+            color: #001f5c;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .content-cards-section .section-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .content-card {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            cursor: pointer;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            border-color: #d4a017;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .content-card .icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .content-card h3 {
+            color: #001f5c;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        .content-card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .content-card .badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        .content-card .badge.live {
+            background: #28a745;
+            color: white;
+        }
+        .content-card .badge.new {
+            background: #d4a017;
+            color: #001f5c;
+        }
+
+        /* ===== FEATURES SECTION ===== */
+        .features-section {
+            padding: 60px 0;
+            background: white;
+        }
+        .features-section .section-title {
+            text-align: center;
+            color: #001f5c;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .features-section .section-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        .feature-item {
+            text-align: center;
+            padding: 20px;
+        }
+        .feature-item .icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .feature-item h4 {
+            color: #001f5c;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .feature-item p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ===== STATS SECTION ===== */
+        .stats-section {
+            padding: 60px 0;
+            background: linear-gradient(135deg, #001f5c, #0b5394);
+            color: white;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+        .stat-item h3 {
+            font-size: 36px;
+            color: #d4a017;
+            margin-bottom: 5px;
+        }
+        .stat-item p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* ===== NEWS SECTION ===== */
+        .news-section {
+            padding: 60px 0;
+            background: #f5f7fa;
+        }
+        .news-section .section-title {
+            text-align: center;
+            color: #001f5c;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .news-section .section-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        .news-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border-left: 4px solid #d4a017;
+        }
+        .news-item h4 {
+            color: #001f5c;
+            margin-bottom: 8px;
+        }
+        .news-item p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .news-item .date {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .main-footer {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 32px;
+            }
+            .hero-section p {
+                font-size: 16px;
+                padding: 0 15px;
+            }
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .features-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .news-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 480px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- ===== HEADER ===== -->
@@ -16,13 +273,13 @@
                 <span class="school-icon">🏫</span>
                 <div>
                     <h1>Changara Star Academy</h1>
-                    <span class="subtitle">Excellence in Education</span>
+                    <span class="subtitle">Assurance to Excellence</span>
                 </div>
             </div>
             <nav class="nav-links">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <a href="portal.html" class="portal-link">🔐 Portal</a>
+                <a href="portal.html">🔐 Portal</a>
                 <a href="contact.html">Contact</a>
             </nav>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
@@ -30,44 +287,174 @@
     </header>
 
     <!-- ===== HERO SECTION ===== -->
-    <section class="hero">
+    <section class="hero-section" id="heroSection">
         <div class="container">
-            <div class="hero-content">
-                <h1 id="heroTitle">Welcome to Changara Star Academy</h1>
-                <p id="heroSubtitle">Your trusted partner in quality education and school management</p>
-                <div class="hero-buttons">
-                    <a href="portal.html" class="btn-primary" id="heroBtn">🔐 Access Portal</a>
-                    <a href="about.html" class="btn-secondary" id="heroBtnSecondary">Learn More</a>
+            <h1 id="heroTitle">Welcome to <span class="highlight">Changara Star Academy</span></h1>
+            <p id="heroSubtitle">Nurturing young minds through quality education, discipline, innovation, and strong moral values. We provide a safe and supportive learning environment where every child is encouraged to discover their potential and achieve academic excellence.</p>
+            <a href="about.html" class="btn-hero" id="heroButton">Learn More →</a>
+        </div>
+    </section>
+
+    <!-- ===== CONTENT CARDS SECTION ===== -->
+    <section class="content-cards-section">
+        <div class="container">
+            <h2 class="section-title">📚 Explore Our School</h2>
+            <p class="section-subtitle">Discover everything about Changara Star Academy</p>
+
+            <div class="content-grid">
+                <div class="content-card" onclick="window.location.href='about.html'">
+                    <span class="icon">📖</span>
+                    <h3>About Us</h3>
+                    <p id="displayAbout">Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya. We provide quality education from Playgroup to Grade 6.</p>
+                    <span class="badge live">Live</span>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='academics.html'">
+                    <span class="icon">📚</span>
+                    <h3>Academics</h3>
+                    <p id="displayAcademics">Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches.</p>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='admissions.html'">
+                    <span class="icon">📝</span>
+                    <h3>Admissions</h3>
+                    <p id="displayAdmissions">Open for registration. Contact us for details on admission requirements and process.</p>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='facilities.html'">
+                    <span class="icon">🏫</span>
+                    <h3>School Facilities</h3>
+                    <p id="displayFacilities">Modern classrooms, computer lab, library, playground, ECDE section, and more.</p>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='gallery.html'">
+                    <span class="icon">🖼️</span>
+                    <h3>Gallery</h3>
+                    <p id="displayGallery">Check out our school gallery showcasing various activities and facilities.</p>
+                    <span class="badge new">New</span>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='events.html'">
+                    <span class="icon">📰</span>
+                    <h3>News & Events</h3>
+                    <p id="displayNews">Stay tuned for upcoming events and announcements from the school.</p>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='cocurricular.html'">
+                    <span class="icon">⚽</span>
+                    <h3>Co-curricular Activities</h3>
+                    <p id="displayCoCurricular">Football, athletics, music, drama, debate, and various clubs.</p>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='performance.html'">
+                    <span class="icon">🏆</span>
+                    <h3>Academic Performance</h3>
+                    <p id="displayPerformance">Excellent academic performance in national examinations.</p>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='parents.html'">
+                    <span class="icon">👨‍👩‍👧‍👦</span>
+                    <h3>Parents Corner</h3>
+                    <p id="displayParents">Important information for parents including school calendar and policies.</p>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='downloads.html'">
+                    <span class="icon">📄</span>
+                    <h3>Downloads</h3>
+                    <p id="displayDownloads">Download admission forms, school calendar, and other documents.</p>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='fees.html'">
+                    <span class="icon">💰</span>
+                    <h3>Fees Structure</h3>
+                    <p id="displayFees">View our competitive school fees structure for all grades.</p>
+                </div>
+
+                <div class="content-card" onclick="window.location.href='contact.html'">
+                    <span class="icon">📞</span>
+                    <h3>Contact Us</h3>
+                    <p id="displayContact">Get in touch with us for any inquiries or visit our school.</p>
+                    <span class="badge live">Live</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ===== FEATURES SECTION ===== -->
-    <section class="features">
+    <section class="features-section" id="featuresSection">
         <div class="container">
-            <h2 id="featuresTitle">Why Choose Changara Star Academy?</h2>
-            <div class="feature-grid" id="featuresGrid">
-                <!-- Features will be loaded here -->
+            <h2 class="section-title">🌟 Why Choose Us</h2>
+            <p class="section-subtitle">We provide holistic education that nurtures talent and builds character for a successful future.</p>
+            <div class="features-grid" id="featuresGrid">
+                <div class="feature-item">
+                    <span class="icon">👨‍🏫</span>
+                    <h4>Qualified Teachers</h4>
+                    <p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p>
+                </div>
+                <div class="feature-item">
+                    <span class="icon">🏆</span>
+                    <h4>Excellence in Performance</h4>
+                    <p>We consistently produce top-performing students in national examinations and co-curricular activities.</p>
+                </div>
+                <div class="feature-item">
+                    <span class="icon">🏫</span>
+                    <h4>Modern Facilities</h4>
+                    <p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p>
+                </div>
+                <div class="feature-item">
+                    <span class="icon">💡</span>
+                    <h4>Innovative Learning</h4>
+                    <p>We use modern teaching methods including technology integration and hands-on learning experiences.</p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ===== STATS SECTION ===== -->
-    <section class="stats">
+    <section class="stats-section" id="statsSection">
         <div class="container">
-            <div class="stat-grid" id="statsGrid">
-                <!-- Stats will be loaded here -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-item">
+                    <h3 id="stat1Number">500+</h3>
+                    <p id="stat1Label">Students</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="stat2Number">50+</h3>
+                    <p id="stat2Label">Staff Members</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="stat3Number">98%</h3>
+                    <p id="stat3Label">Attendance Rate</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="stat4Number">15+</h3>
+                    <p id="stat4Label">Years of Excellence</p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ===== NEWS SECTION ===== -->
-    <section class="features" style="background:#f8f9fa;">
+    <section class="news-section" id="newsSection">
         <div class="container">
-            <h2 id="newsTitle">Latest News & Announcements</h2>
-            <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));" id="newsGrid">
-                <!-- News will be loaded here -->
+            <h2 class="section-title">📰 Latest News & Announcements</h2>
+            <p class="section-subtitle">Stay updated with our latest news and events</p>
+            <div class="news-grid" id="newsGrid">
+                <div class="news-item">
+                    <h4>📅 Term 3 Opening</h4>
+                    <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.</p>
+                    <span class="date">Posted: Recently</span>
+                </div>
+                <div class="news-item">
+                    <h4>🏆 Sports Day</h4>
+                    <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.</p>
+                    <span class="date">Posted: Recently</span>
+                </div>
+                <div class="news-item">
+                    <h4>📚 Parents' Meeting</h4>
+                    <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall.</p>
+                    <span class="date">Posted: Recently</span>
+                </div>
             </div>
         </div>
     </section>
@@ -75,175 +462,130 @@
     <!-- ===== FOOTER ===== -->
     <footer class="main-footer">
         <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h4>🏫 Changara Star Academy</h4>
-                    <p id="footerText">Committed to providing quality education and fostering excellence in every student.</p>
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>🏫 Changara Star Academy</h3>
+                    <p>Changara Market, Teso North Sub-County, Busia County, Kenya</p>
+                    <p>📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
                 </div>
-                <div class="footer-col">
-                    <h4>Quick Links</h4>
-                    <a href="portal.html">🔐 School Portal</a>
-                    <a href="about.html">About Us</a>
-                    <a href="contact.html">Contact Us</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Contact Information</h4>
-                    <p id="footerPhone">📞 +254 721 556 252</p>
-                    <p id="footerEmail">📧 info@changarastaracademy.co.ke</p>
-                    <p id="footerAddress">📍 Nairobi, Kenya</p>
+                <div class="footer-links">
+                    <a href="index.html">Home</a>
+                    <a href="about.html">About</a>
+                    <a href="portal.html">Portal</a>
+                    <a href="contact.html">Contact</a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p id="copyright">&copy; 2026 Changara Star Academy. All rights reserved.</p>
+                <p>&copy; 2026 Changara Star Academy. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <script src="js/main.js"></script>
     <script>
         // ============================================
-        // LOAD DYNAMIC CONTENT FROM DATABASE
+        // MOBILE MENU TOGGLE
         // ============================================
-        async function loadContent() {
+        function toggleMobileMenu() {
+            const nav = document.querySelector('.nav-links');
+            if (nav) nav.classList.toggle('show');
+        }
+
+        // ============================================
+        // LOAD CONTENT FROM CMS API
+        // ============================================
+        function stripHtml(html) {
+            if (!html) return '';
+            const tmp = document.createElement('DIV');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        async function loadWebsiteContent() {
             try {
                 const response = await fetch('/api/content');
                 const data = await response.json();
-                
                 if (data.success) {
                     const c = data.content;
-                    
+
                     // Hero Section
-                    document.getElementById('heroTitle').textContent = c.heroTitle || 'Welcome to Changara Star Academy';
-                    document.getElementById('heroSubtitle').textContent = c.heroSubtitle || 'Your trusted partner in quality education and school management';
+                    document.getElementById('heroTitle').innerHTML = c.heroTitle || 'Welcome to <span class="highlight">Changara Star Academy</span>';
+                    document.getElementById('heroSubtitle').textContent = c.heroSubtitle || 'Nurturing young minds through quality education, discipline, innovation, and strong moral values.';
+                    document.getElementById('heroButton').textContent = c.heroButtonText || 'Learn More →';
                     
-                    // Features Title
-                    document.getElementById('featuresTitle').textContent = 'Why Choose Changara Star Academy?';
-                    
-                    // Features
-                    const featuresGrid = document.getElementById('featuresGrid');
-                    featuresGrid.innerHTML = '';
-                    
+                    // Content Cards
+                    document.getElementById('displayAbout').textContent = stripHtml(c.aboutMission || 'Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.');
+                    document.getElementById('displayAcademics').textContent = stripHtml(c.academics || 'Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches.');
+                    document.getElementById('displayAdmissions').textContent = stripHtml(c.admissionsRequirements || 'Open for registration. Contact us for details on admission requirements and process.');
+                    document.getElementById('displayFacilities').textContent = stripHtml(c.facilities || 'Modern classrooms, computer lab, library, playground, ECDE section, and more.');
+                    document.getElementById('displayGallery').textContent = stripHtml(c.gallery || 'Check out our school gallery showcasing various activities and facilities.');
+                    document.getElementById('displayNews').textContent = stripHtml(c.events || 'Stay tuned for upcoming events and announcements from the school.');
+                    document.getElementById('displayCoCurricular').textContent = stripHtml(c.coCurricular || 'Football, athletics, music, drama, debate, and various clubs.');
+                    document.getElementById('displayPerformance').textContent = stripHtml(c.performanceKcpe || 'Excellent academic performance in national examinations.');
+                    document.getElementById('displayParents').textContent = stripHtml(c.parentsCalendar || 'Important information for parents including school calendar and policies.');
+                    document.getElementById('displayDownloads').textContent = stripHtml(c.downloads || 'Download admission forms, school calendar, and other documents.');
+                    document.getElementById('displayFees').textContent = stripHtml(c.feesContent || 'View our competitive school fees structure for all grades.');
+                    document.getElementById('displayContact').textContent = 'Get in touch with us for any inquiries or visit our school.';
+
+                    // Features (if available from CMS)
                     if (c.homeFeatures && c.homeFeatures.length > 0) {
+                        const featuresGrid = document.getElementById('featuresGrid');
+                        featuresGrid.innerHTML = '';
                         c.homeFeatures.forEach(feature => {
-                            const card = document.createElement('div');
-                            card.className = 'feature-card';
-                            card.innerHTML = `
-                                <div class="feature-icon">${feature.icon || '📚'}</div>
-                                <h3>${feature.title || 'Quality Education'}</h3>
-                                <p>${feature.description || 'Holistic education that nurtures talent and builds character for a successful future.'}</p>
+                            const div = document.createElement('div');
+                            div.className = 'feature-item';
+                            div.innerHTML = `
+                                <span class="icon">${feature.icon || '📚'}</span>
+                                <h4>${feature.title || 'Feature'}</h4>
+                                <p>${feature.description || ''}</p>
                             `;
-                            featuresGrid.appendChild(card);
-                        });
-                    } else {
-                        // Default features if none exist
-                        const defaultFeatures = [
-                            { icon: '📚', title: 'Quality Education', description: 'We provide holistic education that nurtures talent and builds character for a successful future.' },
-                            { icon: '👨‍🏫', title: 'Qualified Teachers', description: 'Our dedicated and experienced teachers are committed to excellence in teaching and learning.' },
-                            { icon: '🏆', title: 'Excellence in Performance', description: 'We consistently produce top-performing students in national examinations and co-curricular activities.' },
-                            { icon: '🏫', title: 'Modern Facilities', description: 'Our school is equipped with modern classrooms, laboratories, library, and sports facilities.' }
-                        ];
-                        defaultFeatures.forEach(feature => {
-                            const card = document.createElement('div');
-                            card.className = 'feature-card';
-                            card.innerHTML = `
-                                <div class="feature-icon">${feature.icon}</div>
-                                <h3>${feature.title}</h3>
-                                <p>${feature.description}</p>
-                            `;
-                            featuresGrid.appendChild(card);
+                            featuresGrid.appendChild(div);
                         });
                     }
-                    
-                    // Stats
-                    const statsGrid = document.getElementById('statsGrid');
-                    statsGrid.innerHTML = '';
-                    
+
+                    // Stats (if available from CMS)
                     if (c.homeStats && c.homeStats.length > 0) {
-                        c.homeStats.forEach(stat => {
-                            const item = document.createElement('div');
-                            item.className = 'stat-item';
-                            item.innerHTML = `
-                                <span class="stat-number">${stat.number || '0'}</span>
-                                <span class="stat-label">${stat.label || 'Stat'}</span>
-                            `;
-                            statsGrid.appendChild(item);
-                        });
-                    } else {
-                        // Default stats
-                        const defaultStats = [
-                            { number: '500+', label: 'Students' },
-                            { number: '50+', label: 'Staff Members' },
-                            { number: '98%', label: 'Attendance Rate' },
-                            { number: '15+', label: 'Years of Excellence' }
-                        ];
-                        defaultStats.forEach(stat => {
-                            const item = document.createElement('div');
-                            item.className = 'stat-item';
-                            item.innerHTML = `
-                                <span class="stat-number">${stat.number}</span>
-                                <span class="stat-label">${stat.label}</span>
-                            `;
-                            statsGrid.appendChild(item);
-                        });
+                        const stats = c.homeStats;
+                        if (stats.length >= 1) {
+                            document.getElementById('stat1Number').textContent = stats[0].number || '500+';
+                            document.getElementById('stat1Label').textContent = stats[0].label || 'Students';
+                        }
+                        if (stats.length >= 2) {
+                            document.getElementById('stat2Number').textContent = stats[1].number || '50+';
+                            document.getElementById('stat2Label').textContent = stats[1].label || 'Staff Members';
+                        }
+                        if (stats.length >= 3) {
+                            document.getElementById('stat3Number').textContent = stats[2].number || '98%';
+                            document.getElementById('stat3Label').textContent = stats[2].label || 'Attendance Rate';
+                        }
+                        if (stats.length >= 4) {
+                            document.getElementById('stat4Number').textContent = stats[3].number || '15+';
+                            document.getElementById('stat4Label').textContent = stats[3].label || 'Years of Excellence';
+                        }
                     }
-                    
-                    // News
-                    document.getElementById('newsTitle').textContent = 'Latest News & Announcements';
-                    const newsGrid = document.getElementById('newsGrid');
-                    newsGrid.innerHTML = '';
-                    
+
+                    // News (if available from CMS)
                     if (c.homeNews && c.homeNews.length > 0) {
+                        const newsGrid = document.getElementById('newsGrid');
+                        newsGrid.innerHTML = '';
                         c.homeNews.forEach(news => {
-                            const card = document.createElement('div');
-                            card.className = 'feature-card';
-                            card.style.textAlign = 'left';
-                            const date = news.date ? new Date(news.date).toLocaleDateString() : 'Recently';
-                            card.innerHTML = `
-                                <h4 style="color:#001f5c;">${news.title || 'Latest News'}</h4>
-                                <p style="color:#666;font-size:14px;">${news.content || ''}</p>
-                                <span style="font-size:12px;color:#999;">Posted: ${date}</span>
+                            const div = document.createElement('div');
+                            div.className = 'news-item';
+                            div.innerHTML = `
+                                <h4>${news.title || 'News'}</h4>
+                                <p>${news.content || ''}</p>
+                                <span class="date">Posted: Recently</span>
                             `;
-                            newsGrid.appendChild(card);
+                            newsGrid.appendChild(div);
                         });
-                    } else {
-                        // Default news
-                        const defaultNews = [
-                            { title: '📅 Term 3 Opening', content: 'School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.' },
-                            { title: '🏆 Sports Day', content: 'The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.' },
-                            { title: '📚 Parents\' Meeting', content: 'There will be a parents\' meeting on 20th September 2026 at 9:00 AM in the school hall.' }
-                        ];
-                        defaultNews.forEach(news => {
-                            const card = document.createElement('div');
-                            card.className = 'feature-card';
-                            card.style.textAlign = 'left';
-                            card.innerHTML = `
-                                <h4 style="color:#001f5c;">${news.title}</h4>
-                                <p style="color:#666;font-size:14px;">${news.content}</p>
-                                <span style="font-size:12px;color:#999;">Posted: Recently</span>
-                            `;
-                            newsGrid.appendChild(card);
-                        });
-                    }
-                    
-                    // Footer
-                    if (c.footerText) {
-                        document.getElementById('footerText').textContent = c.footerText;
-                    }
-                    
-                    // Contact Info
-                    if (c.contact) {
-                        document.getElementById('footerPhone').textContent = `📞 ${c.contact.phone || '+254 721 556 252'}`;
-                        document.getElementById('footerEmail').textContent = `📧 ${c.contact.email || 'info@changarastaracademy.co.ke'}`;
-                        document.getElementById('footerAddress').textContent = `📍 ${c.contact.address || 'Nairobi, Kenya'}`;
                     }
                 }
             } catch (error) {
                 console.error('Error loading content:', error);
             }
         }
-        
+
         // Load content when page loads
-        document.addEventListener('DOMContentLoaded', loadContent);
+        document.addEventListener('DOMContentLoaded', loadWebsiteContent);
     </script>
 </body>
 </html>
