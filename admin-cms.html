@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMS - Changara Star Academy</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Quill Editor CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- Quill Editor JS -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <style>
         * {
             margin: 0;
@@ -225,6 +229,34 @@
             gap: 16px;
         }
 
+        /* Quill Editor Styles */
+        .ql-container {
+            min-height: 200px;
+            border-radius: 0 0 8px 8px;
+            font-size: 15px;
+        }
+        .ql-toolbar {
+            border-radius: 8px 8px 0 0;
+            background: #fafbfc;
+        }
+        .ql-editor {
+            min-height: 200px;
+        }
+        .ql-editor p {
+            margin-bottom: 8px;
+        }
+        .ql-editor img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .ql-editor video {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .ql-editor audio {
+            width: 100%;
+        }
+
         .btn {
             padding: 10px 25px;
             border: none;
@@ -262,23 +294,12 @@
         .btn-danger:hover {
             background: #c82333;
         }
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-        .btn-info:hover {
-            background: #138496;
-        }
         .btn-block {
             width: 100%;
             padding: 14px;
             font-size: 16px;
             justify-content: center;
             margin-top: 20px;
-        }
-        .btn-sm {
-            padding: 5px 12px;
-            font-size: 12px;
         }
 
         .section-tabs {
@@ -412,88 +433,6 @@
             font-size: 12px;
             color: #666;
         }
-        .uploaded-preview .add-btn {
-            margin-top: 8px;
-        }
-
-        .media-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        .media-item {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border: 1px solid #e8ecf1;
-            position: relative;
-            transition: 0.3s;
-        }
-        .media-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-        }
-        .media-item .media-preview {
-            height: 150px;
-            background: #f8f9fc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
-        .media-item .media-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .media-item .media-preview video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .media-item .media-preview audio {
-            width: 100%;
-            padding: 20px;
-        }
-        .media-item .media-preview .file-icon {
-            font-size: 48px;
-            color: #999;
-        }
-        .media-item .media-preview .media-type-badge {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .media-item .media-info {
-            padding: 12px 15px;
-        }
-        .media-item .media-info h4 {
-            font-size: 14px;
-            color: #1a2a4a;
-            margin-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .media-item .media-info p {
-            font-size: 12px;
-            color: #999;
-        }
-        .media-item .media-actions {
-            padding: 8px 15px 12px;
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
 
         .item-box {
             background: #f8f9fc;
@@ -552,27 +491,6 @@
             color: #ddd;
         }
 
-        .media-filter {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-        .media-filter select,
-        .media-filter input {
-            padding: 8px 14px;
-            border: 2px solid #e8ecf1;
-            border-radius: 8px;
-            font-size: 13px;
-            background: white;
-        }
-        .media-filter select:focus,
-        .media-filter input:focus {
-            border-color: #d4a017;
-            outline: none;
-        }
-
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
@@ -590,9 +508,6 @@
             .section-tabs button {
                 font-size: 11px;
                 padding: 6px 12px;
-            }
-            .media-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
             .alert {
                 max-width: 90%;
@@ -616,7 +531,7 @@
             <a onclick="switchTab('academics')"><i class="fas fa-book"></i> Academics</a>
             <a onclick="switchTab('admissions')"><i class="fas fa-file-alt"></i> Admissions</a>
             <a onclick="switchTab('facilities')"><i class="fas fa-school"></i> Facilities</a>
-            <a onclick="switchTab('gallery')"><i class="fas fa-images"></i> Media Gallery</a>
+            <a onclick="switchTab('gallery')"><i class="fas fa-images"></i> Gallery</a>
             <a onclick="switchTab('events')"><i class="fas fa-calendar-alt"></i> Events</a>
             <a onclick="switchTab('cocurricular')"><i class="fas fa-futbol"></i> Co-curricular</a>
             <a onclick="switchTab('performance')"><i class="fas fa-trophy"></i> Performance</a>
@@ -654,7 +569,7 @@
                 </div>
                 <div class="form-group">
                     <label>Hero Subtitle</label>
-                    <textarea id="heroSubtitle" rows="2" placeholder="Hero subtitle"></textarea>
+                    <div id="heroSubtitle" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Hero Button Text</label>
@@ -683,23 +598,23 @@
         <div id="panel-about" class="panel">
             <div class="editor-container">
                 <h2>📖 About Page</h2>
-                <p class="desc">Edit the About Us page content.</p>
+                <p class="desc">Edit the About Us page content with full formatting.</p>
 
                 <div class="form-group">
                     <label>Mission Statement</label>
-                    <textarea id="aboutMission" rows="3"></textarea>
+                    <div id="aboutMission" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Vision Statement</label>
-                    <textarea id="aboutVision" rows="3"></textarea>
+                    <div id="aboutVision" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Core Values</label>
-                    <textarea id="aboutValues" rows="3"></textarea>
+                    <div id="aboutValues" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>School History</label>
-                    <textarea id="aboutHistory" rows="4"></textarea>
+                    <div id="aboutHistory" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>School Motto</label>
@@ -707,7 +622,7 @@
                 </div>
                 <div class="form-group">
                     <label>Why Choose Us</label>
-                    <textarea id="aboutWhy" rows="4"></textarea>
+                    <div id="aboutWhy" class="quill-editor"></div>
                 </div>
             </div>
         </div>
@@ -730,23 +645,23 @@
 
                 <div class="form-group">
                     <label>Admission Requirements</label>
-                    <textarea id="admissionsRequirements" rows="3"></textarea>
+                    <div id="admissionsRequirements" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Age Requirements</label>
-                    <textarea id="admissionsAge" rows="3"></textarea>
+                    <div id="admissionsAge" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Documents Needed</label>
-                    <textarea id="admissionsDocuments" rows="3"></textarea>
+                    <div id="admissionsDocuments" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Admission Process</label>
-                    <textarea id="admissionsProcess" rows="4"></textarea>
+                    <div id="admissionsProcess" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>School Fees</label>
-                    <textarea id="admissionsFees" rows="3"></textarea>
+                    <div id="admissionsFees" class="quill-editor"></div>
                 </div>
             </div>
         </div>
@@ -755,19 +670,18 @@
         <div id="panel-facilities" class="panel">
             <div class="editor-container">
                 <h2>🏫 Facilities</h2>
-                <p class="desc">Manage school facilities.</p>
+                <p class="desc">Manage school facilities with full content editing.</p>
                 <div id="facilitiesContainer"></div>
                 <button class="btn btn-primary" onclick="addFacility()">➕ Add Facility</button>
             </div>
         </div>
 
-        <!-- ===== MEDIA GALLERY PANEL ===== -->
+        <!-- ===== GALLERY PANEL ===== -->
         <div id="panel-gallery" class="panel">
             <div class="editor-container">
-                <h2>🖼️ Media Gallery</h2>
-                <p class="desc">Upload and manage images, videos, and audio files.</p>
+                <h2>🖼️ Gallery</h2>
+                <p class="desc">Manage images, videos, and audio files.</p>
 
-                <!-- Upload Area -->
                 <div class="upload-area">
                     <span class="icon">📤</span>
                     <h3>Upload Media</h3>
@@ -804,24 +718,8 @@
                     </div>
                 </div>
 
-                <!-- Media Gallery Display -->
-                <h3 style="margin-top:20px;color:#1a2a4a;font-size:16px;">📂 Gallery Items</h3>
-                <div class="media-filter">
-                    <select id="mediaTypeFilter" onchange="renderMediaGallery()">
-                        <option value="all">All Types</option>
-                        <option value="image">🖼️ Images</option>
-                        <option value="video">🎬 Videos</option>
-                        <option value="audio">🎵 Audio</option>
-                    </select>
-                    <input type="text" id="mediaSearchFilter" placeholder="Search media..." onkeyup="renderMediaGallery()">
-                    <button class="btn btn-danger btn-sm" onclick="deleteSelectedMedia()">
-                        <i class="fas fa-trash-alt"></i> Delete Selected
-                    </button>
-                </div>
-
-                <div id="mediaGalleryContainer" class="media-grid">
-                    <!-- Media items will be loaded here -->
-                </div>
+                <div id="galleryContainer"></div>
+                <button class="btn btn-primary" onclick="addGalleryItem()">➕ Add Manually</button>
             </div>
         </div>
 
@@ -829,7 +727,7 @@
         <div id="panel-events" class="panel">
             <div class="editor-container">
                 <h2>📰 Events</h2>
-                <p class="desc">Manage news and events.</p>
+                <p class="desc">Manage news and events with full formatting.</p>
                 <div id="eventsContainer"></div>
                 <button class="btn btn-primary" onclick="addEvent()">➕ Add Event</button>
             </div>
@@ -839,7 +737,7 @@
         <div id="panel-cocurricular" class="panel">
             <div class="editor-container">
                 <h2>⚽ Co-curricular Activities</h2>
-                <p class="desc">Manage co-curricular activities.</p>
+                <p class="desc">Manage co-curricular activities with full formatting.</p>
                 <div id="cocurricularContainer"></div>
                 <button class="btn btn-primary" onclick="addCocurricular()">➕ Add Activity</button>
             </div>
@@ -853,11 +751,11 @@
 
                 <div class="form-group">
                     <label>KCPE/KPSEA Results</label>
-                    <textarea id="performanceKcpe" rows="3"></textarea>
+                    <div id="performanceKcpe" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Internal Examinations</label>
-                    <textarea id="performanceInternal" rows="3"></textarea>
+                    <div id="performanceInternal" class="quill-editor"></div>
                 </div>
             </div>
         </div>
@@ -870,27 +768,27 @@
 
                 <div class="form-group">
                     <label>School Calendar</label>
-                    <textarea id="parentsCalendar" rows="3"></textarea>
+                    <div id="parentsCalendar" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Homework Policy</label>
-                    <textarea id="parentsHomework" rows="3"></textarea>
+                    <div id="parentsHomework" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Attendance Policy</label>
-                    <textarea id="parentsAttendance" rows="3"></textarea>
+                    <div id="parentsAttendance" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>School Rules</label>
-                    <textarea id="parentsRules" rows="3"></textarea>
+                    <div id="parentsRules" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Uniform Requirements</label>
-                    <textarea id="parentsUniform" rows="3"></textarea>
+                    <div id="parentsUniform" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Fee Payment Information</label>
-                    <textarea id="parentsFees" rows="3"></textarea>
+                    <div id="parentsFees" class="quill-editor"></div>
                 </div>
             </div>
         </div>
@@ -974,8 +872,62 @@
             const admin = JSON.parse(localStorage.getItem('admin') || '{}');
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
+            initQuillEditors();
             loadContent();
         });
+
+        // ============================================
+        // QUILL EDITORS
+        // ============================================
+        let quillEditors = {};
+
+        function initQuillEditors() {
+            const editorIds = [
+                'heroSubtitle',
+                'aboutMission', 'aboutVision', 'aboutValues', 'aboutHistory', 'aboutWhy',
+                'admissionsRequirements', 'admissionsAge', 'admissionsDocuments',
+                'admissionsProcess', 'admissionsFees',
+                'performanceKcpe', 'performanceInternal',
+                'parentsCalendar', 'parentsHomework', 'parentsAttendance',
+                'parentsRules', 'parentsUniform', 'parentsFees'
+            ];
+
+            editorIds.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    quillEditors[id] = new Quill('#' + id, {
+                        theme: 'snow',
+                        placeholder: 'Enter content here...',
+                        modules: {
+                            toolbar: [
+                                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                ['blockquote', 'code-block'],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['link', 'image', 'video'],
+                                ['clean']
+                            ]
+                        }
+                    });
+                }
+            });
+        }
+
+        // ============================================
+        // GET QUILL CONTENT
+        // ============================================
+        function getQuillContent(id) {
+            if (quillEditors[id]) {
+                return quillEditors[id].root.innerHTML;
+            }
+            return '';
+        }
+
+        function setQuillContent(id, content) {
+            if (quillEditors[id]) {
+                quillEditors[id].root.innerHTML = content || '';
+            }
+        }
 
         // ============================================
         // SWITCH TAB
@@ -992,9 +944,18 @@
                 }
             });
 
-            if (tab === 'gallery') {
-                renderMediaGallery();
-            }
+            setTimeout(() => {
+                const activePanel = document.querySelector('.panel.active');
+                if (activePanel) {
+                    const editors = activePanel.querySelectorAll('.quill-editor');
+                    editors.forEach(editor => {
+                        const id = editor.id;
+                        if (quillEditors[id]) {
+                            quillEditors[id].root.innerHTML = quillEditors[id].root.innerHTML || '';
+                        }
+                    });
+                }
+            }, 100);
         }
 
         // ============================================
@@ -1036,7 +997,7 @@
         function populateAllFields(c) {
             // Home
             document.getElementById('heroTitle').value = c.heroTitle || '';
-            document.getElementById('heroSubtitle').value = c.heroSubtitle || '';
+            setQuillContent('heroSubtitle', c.heroSubtitle || '');
             document.getElementById('heroButtonText').value = c.heroButtonText || 'Learn More';
             document.getElementById('heroButtonLink').value = c.heroButtonLink || '/about.html';
 
@@ -1045,25 +1006,28 @@
             renderItems('newsContainer', c.homeNews || [], 'news');
 
             // About
-            document.getElementById('aboutMission').value = c.aboutMission || '';
-            document.getElementById('aboutVision').value = c.aboutVision || '';
-            document.getElementById('aboutValues').value = c.aboutValues || '';
-            document.getElementById('aboutHistory').value = c.aboutHistory || '';
+            setQuillContent('aboutMission', c.aboutMission || '');
+            setQuillContent('aboutVision', c.aboutVision || '');
+            setQuillContent('aboutValues', c.aboutValues || '');
+            setQuillContent('aboutHistory', c.aboutHistory || '');
             document.getElementById('aboutMotto').value = c.aboutMotto || 'Excellence in Education';
-            document.getElementById('aboutWhy').value = c.aboutWhy || '';
+            setQuillContent('aboutWhy', c.aboutWhy || '');
 
             // Academics
             renderItems('academicsContainer', c.academics || [], 'academic');
 
             // Admissions
-            document.getElementById('admissionsRequirements').value = c.admissionsRequirements || '';
-            document.getElementById('admissionsAge').value = c.admissionsAge || '';
-            document.getElementById('admissionsDocuments').value = c.admissionsDocuments || '';
-            document.getElementById('admissionsProcess').value = c.admissionsProcess || '';
-            document.getElementById('admissionsFees').value = c.admissionsFees || '';
+            setQuillContent('admissionsRequirements', c.admissionsRequirements || '');
+            setQuillContent('admissionsAge', c.admissionsAge || '');
+            setQuillContent('admissionsDocuments', c.admissionsDocuments || '');
+            setQuillContent('admissionsProcess', c.admissionsProcess || '');
+            setQuillContent('admissionsFees', c.admissionsFees || '');
 
             // Facilities
             renderItems('facilitiesContainer', c.facilities || [], 'facility');
+
+            // Gallery
+            renderItems('galleryContainer', c.gallery || [], 'gallery');
 
             // Events
             renderItems('eventsContainer', c.events || [], 'event');
@@ -1072,16 +1036,16 @@
             renderItems('cocurricularContainer', c.coCurricular || [], 'cocurricular');
 
             // Performance
-            document.getElementById('performanceKcpe').value = c.performanceKcpe || '';
-            document.getElementById('performanceInternal').value = c.performanceInternal || '';
+            setQuillContent('performanceKcpe', c.performanceKcpe || '');
+            setQuillContent('performanceInternal', c.performanceInternal || '');
 
             // Parents
-            document.getElementById('parentsCalendar').value = c.parentsCalendar || '';
-            document.getElementById('parentsHomework').value = c.parentsHomework || '';
-            document.getElementById('parentsAttendance').value = c.parentsAttendance || '';
-            document.getElementById('parentsRules').value = c.parentsRules || '';
-            document.getElementById('parentsUniform').value = c.parentsUniform || '';
-            document.getElementById('parentsFees').value = c.parentsFees || '';
+            setQuillContent('parentsCalendar', c.parentsCalendar || '');
+            setQuillContent('parentsHomework', c.parentsHomework || '');
+            setQuillContent('parentsAttendance', c.parentsAttendance || '');
+            setQuillContent('parentsRules', c.parentsRules || '');
+            setQuillContent('parentsUniform', c.parentsUniform || '');
+            setQuillContent('parentsFees', c.parentsFees || '');
 
             // Downloads
             renderItems('downloadsContainer', c.downloads || [], 'download');
@@ -1166,6 +1130,25 @@
                             <div class="form-group"><label>Image URL</label><input type="text" class="field-image" value="${item.image || ''}"></div>
                         `;
                         break;
+                    case 'gallery':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
+                                <div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div>
+                            </div>
+                            <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select class="field-type">
+                                    <option value="image" ${item.type === 'image' ? 'selected' : ''}>🖼️ Image</option>
+                                    <option value="video" ${item.type === 'video' ? 'selected' : ''}>🎬 Video</option>
+                                    <option value="audio" ${item.type === 'audio' ? 'selected' : ''}>🎵 Audio</option>
+                                </select>
+                            </div>
+                            ${item.file ? `<div class="file-preview">${getMediaPreview(item.file, item.type || 'image')}</div>` : ''}
+                        `;
+                        break;
                     case 'event':
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
@@ -1207,7 +1190,7 @@
         }
 
         // ============================================
-        // ADD ITEMS
+        // ADD ITEMS FUNCTIONS
         // ============================================
         function addFeature() {
             const container = document.getElementById('featuresContainer');
@@ -1288,6 +1271,31 @@
                     <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="Facility description"></div>
                 </div>
                 <div class="form-group"><label>Image URL</label><input type="text" class="field-image" placeholder="/uploads/images/facility.jpg"></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addGalleryItem() {
+            const container = document.getElementById('galleryContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="Image title"></div>
+                    <div class="form-group"><label>Category</label><input type="text" class="field-category" placeholder="Category"></div>
+                </div>
+                <div class="form-group"><label>File URL</label><input type="text" class="field-file" placeholder="/uploads/images/photo.jpg"></div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select class="field-type">
+                        <option value="image">🖼️ Image</option>
+                        <option value="video">🎬 Video</option>
+                        <option value="audio">🎵 Audio</option>
+                    </select>
+                </div>
             `;
             container.appendChild(div);
         }
@@ -1404,6 +1412,14 @@
                             image: box.querySelector('.field-image')?.value || ''
                         };
                         break;
+                    case 'gallery':
+                        item = {
+                            title: box.querySelector('.field-title')?.value || '',
+                            category: box.querySelector('.field-category')?.value || '',
+                            file: box.querySelector('.field-file')?.value || '',
+                            type: box.querySelector('.field-type')?.value || 'image'
+                        };
+                        break;
                     case 'event':
                         item = {
                             title: box.querySelector('.field-title')?.value || '',
@@ -1440,135 +1456,64 @@
         let uploadedFileData = null;
 
         function renderMediaGallery() {
-            const container = document.getElementById('mediaGalleryContainer');
-            const typeFilter = document.getElementById('mediaTypeFilter').value;
-            const searchFilter = document.getElementById('mediaSearchFilter').value.toLowerCase();
-
+            const container = document.getElementById('galleryContainer');
             const galleryItems = websiteContent.gallery || [];
             mediaData = galleryItems;
 
-            let filteredItems = mediaData;
-
-            if (typeFilter !== 'all') {
-                filteredItems = filteredItems.filter(item => item.type === typeFilter);
-            }
-
-            if (searchFilter) {
-                filteredItems = filteredItems.filter(item =>
-                    (item.title || '').toLowerCase().includes(searchFilter) ||
-                    (item.category || '').toLowerCase().includes(searchFilter)
-                );
-            }
-
-            if (filteredItems.length === 0) {
+            if (mediaData.length === 0) {
                 container.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i>No media found. Upload files to get started.</div>`;
                 return;
             }
 
             container.innerHTML = '';
-            filteredItems.forEach((item, index) => {
+            mediaData.forEach((item, index) => {
                 const div = document.createElement('div');
-                div.className = 'media-item';
+                div.className = 'item-box';
 
                 let previewHtml = '';
                 const fileType = item.type || 'image';
 
                 if (fileType === 'image') {
-                    previewHtml = `<img src="${item.file || ''}" alt="${item.title || ''}" onerror="this.style.display='none'">`;
+                    previewHtml = `<img src="${item.file || ''}" alt="${item.title || ''}" style="max-width:100px;max-height:80px;border-radius:4px;">`;
                 } else if (fileType === 'video') {
-                    previewHtml = `<video src="${item.file || ''}" muted></video>`;
+                    previewHtml = `<video src="${item.file || ''}" controls style="max-width:100px;max-height:80px;border-radius:4px;"></video>`;
                 } else if (fileType === 'audio') {
-                    previewHtml = `<audio src="${item.file || ''}" controls></audio>`;
+                    previewHtml = `<audio src="${item.file || ''}" controls style="width:150px;"></audio>`;
                 } else {
-                    previewHtml = `<span class="file-icon">${getFileIcon(fileType)}</span>`;
+                    previewHtml = `<span style="font-size:32px;">📄</span>`;
                 }
 
-                const typeLabels = {
-                    image: '🖼️ Image',
-                    video: '🎬 Video',
-                    audio: '🎵 Audio'
-                };
-
                 div.innerHTML = `
-                    <div class="media-preview">
-                        ${previewHtml}
-                        <span class="media-type-badge">${typeLabels[fileType] || fileType}</span>
+                    <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                    <div class="form-row">
+                        <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
+                        <div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div>
                     </div>
-                    <div class="media-info">
-                        <h4>${item.title || 'Untitled'}</h4>
-                        <p>${item.category || 'General'}</p>
+                    <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select class="field-type">
+                            <option value="image" ${item.type === 'image' ? 'selected' : ''}>🖼️ Image</option>
+                            <option value="video" ${item.type === 'video' ? 'selected' : ''}>🎬 Video</option>
+                            <option value="audio" ${item.type === 'audio' ? 'selected' : ''}>🎵 Audio</option>
+                        </select>
                     </div>
-                    <div class="media-actions">
-                        <button class="btn btn-primary btn-sm" onclick="editMediaItem(${index})"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteMediaItem(${index})"><i class="fas fa-trash-alt"></i></button>
-                        <button class="btn btn-info btn-sm" onclick="copyMediaUrl('${item.file || ''}')"><i class="fas fa-copy"></i></button>
-                    </div>
+                    <div class="file-preview">${previewHtml}</div>
                 `;
                 container.appendChild(div);
             });
         }
 
-        function getFileIcon(type) {
-            const icons = {
-                image: '🖼️',
-                video: '🎬',
-                audio: '🎵'
-            };
-            return icons[type] || '📄';
-        }
-
-        function editMediaItem(index) {
-            const item = mediaData[index];
-            if (!item) return;
-
-            const newTitle = prompt('Enter new title:', item.title || '');
-            if (newTitle !== null) {
-                item.title = newTitle;
+        function getMediaPreview(file, type) {
+            if (!file) return '';
+            if (type === 'image') {
+                return `<img src="${file}" alt="Preview" style="max-width:100px;max-height:80px;border-radius:4px;"><span>${file}</span>`;
+            } else if (type === 'video') {
+                return `<video src="${file}" controls style="max-width:150px;max-height:100px;"></video><span>${file}</span>`;
+            } else if (type === 'audio') {
+                return `<audio src="${file}" controls style="width:150px;"></audio><span>${file}</span>`;
             }
-
-            const newCategory = prompt('Enter new category:', item.category || 'General');
-            if (newCategory !== null) {
-                item.category = newCategory;
-            }
-
-            websiteContent.gallery = mediaData;
-            renderMediaGallery();
-            showAlert('Media item updated successfully!', 'success');
-        }
-
-        function deleteMediaItem(index) {
-            if (!confirm('Are you sure you want to delete this media item?')) return;
-
-            mediaData.splice(index, 1);
-            websiteContent.gallery = mediaData;
-            renderMediaGallery();
-            showAlert('Media item deleted successfully!', 'success');
-        }
-
-        function deleteSelectedMedia() {
-            if (!confirm('Delete all media items?')) return;
-            mediaData = [];
-            websiteContent.gallery = mediaData;
-            renderMediaGallery();
-            showAlert('All media deleted successfully!', 'success');
-        }
-
-        function copyMediaUrl(url) {
-            if (!url) {
-                showAlert('No URL to copy', 'error');
-                return;
-            }
-            navigator.clipboard.writeText(url).then(() => {
-                showAlert('URL copied to clipboard!', 'success');
-            }).catch(() => {
-                const textArea = document.createElement('textarea');
-                textArea.value = url;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                showAlert('URL copied to clipboard!', 'success');
-            });
+            return `<span>${file}</span>`;
         }
 
         // ============================================
@@ -1694,27 +1639,27 @@
 
             const data = {
                 heroTitle: document.getElementById('heroTitle').value,
-                heroSubtitle: document.getElementById('heroSubtitle').value,
+                heroSubtitle: getQuillContent('heroSubtitle'),
                 heroButtonText: document.getElementById('heroButtonText').value,
                 heroButtonLink: document.getElementById('heroButtonLink').value,
                 homeFeatures: getItemsData('featuresContainer', 'feature'),
                 homeStats: getItemsData('statsContainer', 'stat'),
                 homeNews: getItemsData('newsContainer', 'news'),
 
-                aboutMission: document.getElementById('aboutMission').value,
-                aboutVision: document.getElementById('aboutVision').value,
-                aboutValues: document.getElementById('aboutValues').value,
-                aboutHistory: document.getElementById('aboutHistory').value,
+                aboutMission: getQuillContent('aboutMission'),
+                aboutVision: getQuillContent('aboutVision'),
+                aboutValues: getQuillContent('aboutValues'),
+                aboutHistory: getQuillContent('aboutHistory'),
                 aboutMotto: document.getElementById('aboutMotto').value,
-                aboutWhy: document.getElementById('aboutWhy').value,
+                aboutWhy: getQuillContent('aboutWhy'),
 
                 academics: getItemsData('academicsContainer', 'academic'),
 
-                admissionsRequirements: document.getElementById('admissionsRequirements').value,
-                admissionsAge: document.getElementById('admissionsAge').value,
-                admissionsDocuments: document.getElementById('admissionsDocuments').value,
-                admissionsProcess: document.getElementById('admissionsProcess').value,
-                admissionsFees: document.getElementById('admissionsFees').value,
+                admissionsRequirements: getQuillContent('admissionsRequirements'),
+                admissionsAge: getQuillContent('admissionsAge'),
+                admissionsDocuments: getQuillContent('admissionsDocuments'),
+                admissionsProcess: getQuillContent('admissionsProcess'),
+                admissionsFees: getQuillContent('admissionsFees'),
 
                 facilities: getItemsData('facilitiesContainer', 'facility'),
 
@@ -1723,15 +1668,15 @@
                 events: getItemsData('eventsContainer', 'event'),
                 coCurricular: getItemsData('cocurricularContainer', 'cocurricular'),
 
-                performanceKcpe: document.getElementById('performanceKcpe').value,
-                performanceInternal: document.getElementById('performanceInternal').value,
+                performanceKcpe: getQuillContent('performanceKcpe'),
+                performanceInternal: getQuillContent('performanceInternal'),
 
-                parentsCalendar: document.getElementById('parentsCalendar').value,
-                parentsHomework: document.getElementById('parentsHomework').value,
-                parentsAttendance: document.getElementById('parentsAttendance').value,
-                parentsRules: document.getElementById('parentsRules').value,
-                parentsUniform: document.getElementById('parentsUniform').value,
-                parentsFees: document.getElementById('parentsFees').value,
+                parentsCalendar: getQuillContent('parentsCalendar'),
+                parentsHomework: getQuillContent('parentsHomework'),
+                parentsAttendance: getQuillContent('parentsAttendance'),
+                parentsRules: getQuillContent('parentsRules'),
+                parentsUniform: getQuillContent('parentsUniform'),
+                parentsFees: getQuillContent('parentsFees'),
 
                 downloads: getItemsData('downloadsContainer', 'download'),
 
