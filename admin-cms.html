@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMS - Changara Star Academy</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Quill Editor -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <style>
@@ -47,14 +46,16 @@
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #d4a017; outline: none; background: white; box-shadow: 0 0 0 4px rgba(212,160,23,0.1); }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-        .ql-container { min-height: 150px; border-radius: 0 0 8px 8px; font-size: 15px; }
+        .ql-container { min-height: 200px; border-radius: 0 0 8px 8px; font-size: 15px; }
         .ql-toolbar { border-radius: 8px 8px 0 0; background: #fafbfc; }
-        .ql-editor { min-height: 150px; }
+        .ql-editor { min-height: 200px; }
         .ql-editor p { margin-bottom: 8px; }
         .ql-editor img { max-width: 100%; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: border 0.3s; }
         .ql-editor img:hover { border-color: #d4a017; }
         .ql-editor video { max-width: 100%; border-radius: 8px; }
         .ql-editor audio { width: 100%; }
+        .ql-editor table { border-collapse: collapse; width: 100%; }
+        .ql-editor table td, .ql-editor table th { border: 1px solid #ccc; padding: 8px; text-align: left; }
 
         .btn { padding: 10px 25px; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; }
         .btn-primary { background: linear-gradient(135deg, #d4a017, #f5c842); color: #1a2a4a; }
@@ -104,14 +105,12 @@
         .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; color: #ddd; }
 
         .media-insert-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; padding: 8px; background: #f8f9fc; border-radius: 8px; border: 1px solid #e8ecf1; align-items: center; }
-        .media-insert-bar .btn { font-size: 12px; padding: 5px 12px; }
 
         /* Image Editor Toolbar */
-        .image-editor-toolbar { display: none; position: fixed; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; border: 2px solid #d4a017; gap: 10px; align-items: center; }
-        .image-editor-toolbar.show { display: flex; }
-        .image-editor-toolbar .btn { font-size: 12px; padding: 5px 12px; }
-        .image-editor-toolbar .size-input { width: 60px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; }
-        .image-editor-toolbar .size-label { font-size: 12px; color: #666; }
+        .media-editor-toolbar { display: none; position: fixed; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; border: 2px solid #d4a017; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .media-editor-toolbar.show { display: flex; }
+        .media-editor-toolbar .btn { font-size: 12px; padding: 5px 12px; }
+        .media-editor-toolbar .size-input { width: 60px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; }
 
         /* Preview Modal */
         .preview-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 99999; overflow-y: auto; padding: 40px; }
@@ -122,9 +121,19 @@
         .preview-modal .preview-content .preview-body img { max-width: 100%; border-radius: 8px; }
         .preview-modal .preview-content .preview-body video { max-width: 100%; border-radius: 8px; }
         .preview-modal .preview-content .preview-body audio { width: 100%; }
-        .preview-modal .preview-content .preview-body table { border-collapse: collapse; width: 100%; }
-        .preview-modal .preview-content .preview-body table td, .preview-modal .preview-content .preview-body table th { border: 1px solid #ccc; padding: 8px; }
         .preview-modal .preview-content .preview-actions { margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end; border-top: 2px solid #e8ecf1; padding-top: 20px; }
+
+        /* Fees Table Editor */
+        .fees-editor { margin-top: 10px; }
+        .fees-editor .fees-table { width: 100%; border-collapse: collapse; }
+        .fees-editor .fees-table th, .fees-editor .fees-table td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+        .fees-editor .fees-table th { background: #f0f2f5; font-weight: 600; }
+        .fees-editor .fees-table td input { width: 100%; padding: 6px 8px; border: 1px solid #e8ecf1; border-radius: 4px; font-size: 14px; }
+        .fees-editor .fees-table td input:focus { border-color: #d4a017; outline: none; }
+        .fees-editor .fees-table .row-remove { background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; }
+        .fees-editor .fees-table .row-remove:hover { background: #c82333; }
+        .fees-editor .fees-table .row-add { background: #28a745; color: white; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 12px; }
+        .fees-editor .fees-table .row-add:hover { background: #1e7e34; }
 
         @media (max-width: 768px) {
             .sidebar { width: 100%; position: relative; min-height: auto; padding: 10px 0; }
@@ -133,7 +142,7 @@
             .alert { max-width: 90%; right: 5%; }
             .preview-modal { padding: 15px; }
             .preview-modal .preview-content { padding: 20px; }
-            .image-editor-toolbar { flex-wrap: wrap; padding: 10px; }
+            .media-editor-toolbar { flex-wrap: wrap; padding: 10px; }
         }
     </style>
 </head>
@@ -160,14 +169,15 @@
             <a onclick="switchTab('downloads')"><i class="fas fa-download"></i> Downloads</a>
             <a onclick="switchTab('contact')"><i class="fas fa-phone"></i> Contact</a>
             <a onclick="switchTab('seo')"><i class="fas fa-search"></i> SEO</a>
+            <a onclick="switchTab('fees')"><i class="fas fa-coins"></i> Fees Structure</a>
             <div class="logout">
                 <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
     </div>
 
-    <!-- ===== IMAGE EDITOR TOOLBAR ===== -->
-    <div class="image-editor-toolbar" id="imageEditorToolbar">
+    <!-- ===== MEDIA EDITOR TOOLBAR ===== -->
+    <div class="media-editor-toolbar" id="mediaEditorToolbar">
         <span style="font-weight:600;font-size:13px;color:#333;">✏️ Edit Media:</span>
         <div style="display:flex;align-items:center;gap:5px;">
             <span class="size-label">Width:</span>
@@ -184,9 +194,7 @@
     <div class="preview-modal" id="previewModal">
         <div class="preview-content">
             <h2><i class="fas fa-eye"></i> Preview Changes</h2>
-            <div class="preview-body" id="previewBody">
-                <!-- Content preview will be inserted here -->
-            </div>
+            <div class="preview-body" id="previewBody"></div>
             <div class="preview-actions">
                 <button class="btn btn-secondary" onclick="closePreview()"><i class="fas fa-times"></i> Close</button>
                 <button class="btn btn-success" onclick="saveAndClosePreview()"><i class="fas fa-save"></i> Save & Close</button>
@@ -214,11 +222,11 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('heroSubtitle','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('heroSubtitle','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('heroSubtitle','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('heroSubtitle')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-info btn-sm" onclick="previewContent('heroSubtitle')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success btn-sm" onclick="previewContent('heroSubtitle')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div class="form-group">
@@ -260,11 +268,11 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('aboutMission','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('aboutMission','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('aboutMission','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('aboutMission')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-info btn-sm" onclick="previewContent('aboutMission')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success btn-sm" onclick="previewContent('aboutMission')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div class="form-group">
@@ -312,11 +320,11 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('admissionsRequirements','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('admissionsRequirements','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('admissionsRequirements','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('admissionsRequirements')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-info btn-sm" onclick="previewContent('admissionsRequirements')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success btn-sm" onclick="previewContent('admissionsRequirements')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div class="form-group">
@@ -407,11 +415,11 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('eventsContent','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('eventsContent','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('eventsContent','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('eventsContent')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-info btn-sm" onclick="previewContent('eventsContent')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success btn-sm" onclick="previewContent('eventsContent')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div id="eventsContainer"></div>
@@ -427,11 +435,11 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('cocurricularContent','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('cocurricularContent','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('cocurricularContent','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('cocurricularContent')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-info btn-sm" onclick="previewContent('cocurricularContent')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success btn-sm" onclick="previewContent('cocurricularContent')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div id="cocurricularContainer"></div>
@@ -447,11 +455,11 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('performanceKcpe','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('performanceKcpe','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('performanceKcpe','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('performanceKcpe')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-info btn-sm" onclick="previewContent('performanceKcpe')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success btn-sm" onclick="previewContent('performanceKcpe')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div class="form-group">
@@ -473,11 +481,11 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('parentsCalendar','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('parentsCalendar','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('parentsCalendar','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('parentsCalendar')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-info btn-sm" onclick="previewContent('parentsCalendar')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success btn-sm" onclick="previewContent('parentsCalendar')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div class="form-group">
@@ -514,6 +522,45 @@
                 <p class="desc">Manage downloadable files.</p>
                 <div id="downloadsContainer"></div>
                 <button class="btn btn-primary" onclick="addDownload()">➕ Add Download</button>
+            </div>
+        </div>
+
+        <!-- ===== FEES STRUCTURE PANEL ===== -->
+        <div id="panel-fees" class="panel">
+            <div class="editor-container">
+                <h2>💰 Fees Structure</h2>
+                <p class="desc">Edit the school fees structure for all grades.</p>
+
+                <div class="media-insert-bar">
+                    <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('feesContent','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('feesContent','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-info btn-sm" onclick="openMediaUpload('feesContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-secondary btn-sm" onclick="insertTable('feesContent')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-success btn-sm" onclick="previewContent('feesContent')"><i class="fas fa-eye"></i> Preview</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Fees Structure Content</label>
+                    <div id="feesContent" class="quill-editor"></div>
+                </div>
+
+                <div style="margin-top:15px;padding:15px;background:#f8f9fc;border-radius:8px;border:1px solid #e8ecf1;">
+                    <h4 style="color:#1a2a4a;margin-bottom:10px;">📋 Quick Fees Table Templates</h4>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <button class="btn btn-primary btn-sm" onclick="insertFeesTable()"><i class="fas fa-table"></i> Day Scholars Fees</button>
+                        <button class="btn btn-primary btn-sm" onclick="insertBoardingTable()"><i class="fas fa-table"></i> Boarding Fees</button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:15px;">
+                    <label>M-Pesa Paybill Number</label>
+                    <input type="text" id="feesPaybill" placeholder="474752" value="474752">
+                </div>
+                <div class="form-group">
+                    <label>Fees Payment Instructions</label>
+                    <div id="feesInstructions" class="quill-editor"></div>
+                </div>
             </div>
         </div>
 
@@ -594,7 +641,6 @@
             initQuillEditors();
             loadContent();
             
-            // Click on media to show editor toolbar
             document.addEventListener('click', function(e) {
                 if ((e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') && e.target.closest('.ql-editor')) {
                     showMediaEditor(e.target);
@@ -618,7 +664,7 @@
                 'performanceKcpe', 'performanceInternal',
                 'parentsCalendar', 'parentsHomework', 'parentsAttendance',
                 'parentsRules', 'parentsUniform', 'parentsFees',
-                'eventsContent', 'cocurricularContent'
+                'eventsContent', 'cocurricularContent', 'feesContent', 'feesInstructions'
             ];
 
             editorIds.forEach(id => {
@@ -642,9 +688,6 @@
             });
         }
 
-        // ============================================
-        // GET/SET QUILL CONTENT
-        // ============================================
         function getQuillContent(id) {
             if (quillEditors[id]) {
                 return quillEditors[id].root.innerHTML;
@@ -659,38 +702,161 @@
         }
 
         // ============================================
+        // FEES TABLE TEMPLATES
+        // ============================================
+        function insertFeesTable() {
+            const editorId = 'feesContent';
+            if (quillEditors[editorId]) {
+                const range = quillEditors[editorId].getSelection();
+                const index = range ? range.index : 0;
+                const tableHtml = `
+                    <h3>📋 2026 FEES STRUCTURE - DAY SCHOLARS</h3>
+                    <table style="border-collapse:collapse;width:100%;margin:10px 0;">
+                        <tr>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">GRADE</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 1</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 2</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 3</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TOTAL</th>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">PLAYGROUP</td>
+                            <td style="border:1px solid #ccc;padding:8px;">6,000</td>
+                            <td style="border:1px solid #ccc;padding:8px;">5,350</td>
+                            <td style="border:1px solid #ccc;padding:8px;">4,100</td>
+                            <td style="border:1px solid #ccc;padding:8px;">15,450</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">PP1 - PP2</td>
+                            <td style="border:1px solid #ccc;padding:8px;">7,000</td>
+                            <td style="border:1px solid #ccc;padding:8px;">6,000</td>
+                            <td style="border:1px solid #ccc;padding:8px;">5,000</td>
+                            <td style="border:1px solid #ccc;padding:8px;">18,000</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">G1 - G3</td>
+                            <td style="border:1px solid #ccc;padding:8px;">7,500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">6,700</td>
+                            <td style="border:1px solid #ccc;padding:8px;">5,500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">19,700</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">G4 - G6</td>
+                            <td style="border:1px solid #ccc;padding:8px;">8,300</td>
+                            <td style="border:1px solid #ccc;padding:8px;">7,400</td>
+                            <td style="border:1px solid #ccc;padding:8px;">6,000</td>
+                            <td style="border:1px solid #ccc;padding:8px;">21,700</td>
+                        </tr>
+                    </table>
+                    <p><strong>📌 Note:</strong> Admission Fee: 500/- for new learners from PP2-G6</p>
+                    <p><strong>📌 Note:</strong> Interview Fee: 300/- for new learners</p>
+                `;
+                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
+                showAlert('✅ Day Scholars Fees Table inserted!', 'success');
+            }
+        }
+
+        function insertBoardingTable() {
+            const editorId = 'feesContent';
+            if (quillEditors[editorId]) {
+                const range = quillEditors[editorId].getSelection();
+                const index = range ? range.index : 0;
+                const tableHtml = `
+                    <h3>🏠 GRADE 3-6 BOARDING SECTION</h3>
+                    <table style="border-collapse:collapse;width:100%;margin:10px 0;">
+                        <tr>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">VOTE HEADS</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 1</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 2</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 3</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TOTAL</th>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">BOARDING</td>
+                            <td style="border:1px solid #ccc;padding:8px;">3,500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">2,500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">1,500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">7,500</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">TUITION</td>
+                            <td style="border:1px solid #ccc;padding:8px;">4,000</td>
+                            <td style="border:1px solid #ccc;padding:8px;">3,000</td>
+                            <td style="border:1px solid #ccc;padding:8px;">2,000</td>
+                            <td style="border:1px solid #ccc;padding:8px;">9,000</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">MEALS</td>
+                            <td style="border:1px solid #ccc;padding:8px;">3,500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">3,000</td>
+                            <td style="border:1px solid #ccc;padding:8px;">2,500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">9,000</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">REMEDIALS</td>
+                            <td style="border:1px solid #ccc;padding:8px;">700</td>
+                            <td style="border:1px solid #ccc;padding:8px;">700</td>
+                            <td style="border:1px solid #ccc;padding:8px;">600</td>
+                            <td style="border:1px solid #ccc;padding:8px;">2,000</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">STATIONARIES</td>
+                            <td style="border:1px solid #ccc;padding:8px;">500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">1,500</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">ACTIVITY</td>
+                            <td style="border:1px solid #ccc;padding:8px;">400</td>
+                            <td style="border:1px solid #ccc;padding:8px;">200</td>
+                            <td style="border:1px solid #ccc;padding:8px;">100</td>
+                            <td style="border:1px solid #ccc;padding:8px;">1,000</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">ASSESSMENT</td>
+                            <td style="border:1px solid #ccc;padding:8px;">500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">300</td>
+                            <td style="border:1px solid #ccc;padding:8px;">300</td>
+                            <td style="border:1px solid #ccc;padding:8px;">1,100</td>
+                        </tr>
+                        <tr style="font-weight:bold;background:#f0f2f5;">
+                            <td style="border:1px solid #ccc;padding:8px;">TOTALS</td>
+                            <td style="border:1px solid #ccc;padding:8px;">13,100</td>
+                            <td style="border:1px solid #ccc;padding:8px;">10,200</td>
+                            <td style="border:1px solid #ccc;padding:8px;">7,500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">31,100</td>
+                        </tr>
+                    </table>
+                `;
+                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
+                showAlert('✅ Boarding Fees Table inserted!', 'success');
+            }
+        }
+
+        // ============================================
         // MEDIA EDITOR TOOLBAR
         // ============================================
         let selectedMedia = null;
-        let selectedMediaEditor = null;
 
         function showMediaEditor(el) {
             selectedMedia = el;
-            const toolbar = document.getElementById('imageEditorToolbar');
+            const toolbar = document.getElementById('mediaEditorToolbar');
             toolbar.classList.add('show');
-            
-            // Position the toolbar near the media
             const rect = el.getBoundingClientRect();
             toolbar.style.top = (rect.top - 70) + 'px';
             toolbar.style.left = Math.max(10, (rect.left + rect.width/2 - 150)) + 'px';
-            
-            // Set width percentage
             const parentWidth = el.parentElement?.offsetWidth || 600;
             const currentPercent = Math.round((el.offsetWidth / parentWidth) * 100);
             document.getElementById('mediaWidth').value = Math.min(100, Math.max(10, currentPercent));
-            
-            // Determine media type
             if (el.tagName === 'IMG') activeMediaType = 'image';
             else if (el.tagName === 'VIDEO') activeMediaType = 'video';
             else if (el.tagName === 'AUDIO') activeMediaType = 'audio';
-            
-            selectedMediaEditor = el.closest('.ql-editor')?.id || '';
         }
 
         function closeMediaEditor() {
-            document.getElementById('imageEditorToolbar').classList.remove('show');
+            document.getElementById('mediaEditorToolbar').classList.remove('show');
             selectedMedia = null;
-            selectedMediaEditor = null;
         }
 
         function resizeMedia() {
@@ -698,7 +864,6 @@
             const percent = parseInt(document.getElementById('mediaWidth').value) || 100;
             const parentWidth = selectedMedia.parentElement?.offsetWidth || 600;
             const newWidth = (parentWidth * percent) / 100;
-            
             if (selectedMedia.tagName === 'IMG' || selectedMedia.tagName === 'VIDEO') {
                 selectedMedia.style.width = newWidth + 'px';
                 selectedMedia.style.height = 'auto';
@@ -710,9 +875,7 @@
 
         function replaceMedia() {
             if (!selectedMedia) return;
-            // Store the media to replace
             window.replaceMediaTarget = selectedMedia;
-            window.replaceMediaEditor = selectedMediaEditor;
             document.getElementById('fileUpload').click();
         }
 
@@ -732,19 +895,11 @@
             activeQuillId = editorId;
             activeMediaType = mediaType || 'image';
             window.replaceMediaTarget = null;
-            window.replaceMediaEditor = null;
-            
-            // Set accept attribute based on media type
             const fileInput = document.getElementById('fileUpload');
-            if (mediaType === 'image') {
-                fileInput.accept = 'image/*';
-            } else if (mediaType === 'video') {
-                fileInput.accept = 'video/*';
-            } else if (mediaType === 'audio') {
-                fileInput.accept = 'audio/*';
-            } else {
-                fileInput.accept = 'image/*,video/*,audio/*';
-            }
+            if (mediaType === 'image') fileInput.accept = 'image/*';
+            else if (mediaType === 'video') fileInput.accept = 'video/*';
+            else if (mediaType === 'audio') fileInput.accept = 'audio/*';
+            else fileInput.accept = 'image/*,video/*,audio/*';
             fileInput.click();
         }
 
@@ -767,11 +922,6 @@
                             <td style="border:1px solid #ccc;padding:8px;">Row 1, Col 2</td>
                             <td style="border:1px solid #ccc;padding:8px;">Row 1, Col 3</td>
                         </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">Row 2, Col 1</td>
-                            <td style="border:1px solid #ccc;padding:8px;">Row 2, Col 2</td>
-                            <td style="border:1px solid #ccc;padding:8px;">Row 2, Col 3</td>
-                        </tr>
                     </table>
                 `;
                 quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
@@ -784,12 +934,7 @@
         // ============================================
         function previewContent(editorId) {
             const content = getQuillContent(editorId);
-            const previewBody = document.getElementById('previewBody');
-            
-            // Show actual media with proper paths
-            const displayContent = content || '<p style="color:#999;text-align:center;padding:40px;">No content to preview</p>';
-            previewBody.innerHTML = displayContent;
-            
+            document.getElementById('previewBody').innerHTML = content || '<p style="color:#999;text-align:center;padding:40px;">No content to preview</p>';
             document.getElementById('previewModal').classList.add('show');
             window.previewMode = 'single';
             window.previewEditorId = editorId;
@@ -797,8 +942,6 @@
 
         function previewAllContent() {
             const previewBody = document.getElementById('previewBody');
-            let allContent = '';
-            
             const sections = {
                 '🏠 Hero Subtitle': getQuillContent('heroSubtitle'),
                 '📖 Mission': getQuillContent('aboutMission'),
@@ -807,20 +950,12 @@
                 '📖 History': getQuillContent('aboutHistory'),
                 '📖 Why Choose Us': getQuillContent('aboutWhy'),
                 '📝 Admission Requirements': getQuillContent('admissionsRequirements'),
-                '📝 Age Requirements': getQuillContent('admissionsAge'),
-                '📝 Documents Needed': getQuillContent('admissionsDocuments'),
                 '📝 Admission Process': getQuillContent('admissionsProcess'),
                 '📝 School Fees': getQuillContent('admissionsFees'),
                 '🏆 KCPE Results': getQuillContent('performanceKcpe'),
-                '🏆 Internal Exams': getQuillContent('performanceInternal'),
-                '👨‍👩‍👧‍👦 School Calendar': getQuillContent('parentsCalendar'),
-                '👨‍👩‍👧‍👦 Homework Policy': getQuillContent('parentsHomework'),
-                '👨‍👩‍👧‍👦 Attendance Policy': getQuillContent('parentsAttendance'),
-                '👨‍👩‍👧‍👦 School Rules': getQuillContent('parentsRules'),
-                '👨‍👩‍👧‍👦 Uniform Requirements': getQuillContent('parentsUniform'),
-                '👨‍👩‍👧‍👦 Fee Payment': getQuillContent('parentsFees')
+                '💰 Fees Structure': getQuillContent('feesContent'),
+                '💰 Fees Instructions': getQuillContent('feesInstructions')
             };
-
             let html = '<div style="padding:20px;">';
             for (const [title, content] of Object.entries(sections)) {
                 if (content && content.trim()) {
@@ -829,11 +964,9 @@
                 }
             }
             html += '</div>';
-
             previewBody.innerHTML = html || '<p style="color:#999;text-align:center;padding:40px;">No content to preview</p>';
             document.getElementById('previewModal').classList.add('show');
             window.previewMode = 'all';
-            window.previewEditorId = null;
         }
 
         function closePreview() {
@@ -841,11 +974,7 @@
         }
 
         function saveAndClosePreview() {
-            if (window.previewMode === 'single' && window.previewEditorId) {
-                showAlert('✅ Changes saved!', 'success');
-            } else {
-                saveAllContent();
-            }
+            saveAllContent();
             closePreview();
         }
 
@@ -856,24 +985,17 @@
             document.querySelectorAll('.sidebar-menu a').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
             document.getElementById('panel-' + tab).classList.add('active');
-
             document.querySelectorAll('.sidebar-menu a').forEach(el => {
                 const text = el.textContent.toLowerCase().trim();
-                if (text.includes(tab) || text === tab) {
-                    el.classList.add('active');
-                }
+                if (text.includes(tab) || text === tab) el.classList.add('active');
             });
-
             closeMediaEditor();
-
             setTimeout(() => {
                 const activePanel = document.querySelector('.panel.active');
                 if (activePanel) {
-                    const editors = activePanel.querySelectorAll('.quill-editor');
-                    editors.forEach(editor => {
-                        const id = editor.id;
-                        if (quillEditors[id]) {
-                            quillEditors[id].root.innerHTML = quillEditors[id].root.innerHTML || '';
+                    activePanel.querySelectorAll('.quill-editor').forEach(editor => {
+                        if (quillEditors[editor.id]) {
+                            quillEditors[editor.id].root.innerHTML = quillEditors[editor.id].root.innerHTML || '';
                         }
                     });
                 }
@@ -888,9 +1010,7 @@
             alertEl.className = 'alert ' + type;
             alertEl.textContent = message;
             alertEl.style.display = 'block';
-            setTimeout(() => {
-                alertEl.style.display = 'none';
-            }, 5000);
+            setTimeout(() => { alertEl.style.display = 'none'; }, 5000);
         }
 
         // ============================================
@@ -917,7 +1037,6 @@
         // POPULATE ALL FIELDS
         // ============================================
         function populateAllFields(c) {
-            // Home
             document.getElementById('heroTitle').value = c.heroTitle || '';
             setQuillContent('heroSubtitle', c.heroSubtitle || '');
             document.getElementById('heroButtonText').value = c.heroButtonText || 'Learn More';
@@ -927,7 +1046,6 @@
             renderItems('statsContainer', c.homeStats || [], 'stat');
             renderItems('newsContainer', c.homeNews || [], 'news');
 
-            // About
             setQuillContent('aboutMission', c.aboutMission || '');
             setQuillContent('aboutVision', c.aboutVision || '');
             setQuillContent('aboutValues', c.aboutValues || '');
@@ -935,33 +1053,22 @@
             document.getElementById('aboutMotto').value = c.aboutMotto || 'Excellence in Education';
             setQuillContent('aboutWhy', c.aboutWhy || '');
 
-            // Academics
             renderItems('academicsContainer', c.academics || [], 'academic');
 
-            // Admissions
             setQuillContent('admissionsRequirements', c.admissionsRequirements || '');
             setQuillContent('admissionsAge', c.admissionsAge || '');
             setQuillContent('admissionsDocuments', c.admissionsDocuments || '');
             setQuillContent('admissionsProcess', c.admissionsProcess || '');
             setQuillContent('admissionsFees', c.admissionsFees || '');
 
-            // Facilities
             renderItems('facilitiesContainer', c.facilities || [], 'facility');
-
-            // Gallery
             renderItems('galleryContainer', c.gallery || [], 'gallery');
-
-            // Events
             renderItems('eventsContainer', c.events || [], 'event');
-
-            // Co-curricular
             renderItems('cocurricularContainer', c.coCurricular || [], 'cocurricular');
 
-            // Performance
             setQuillContent('performanceKcpe', c.performanceKcpe || '');
             setQuillContent('performanceInternal', c.performanceInternal || '');
 
-            // Parents
             setQuillContent('parentsCalendar', c.parentsCalendar || '');
             setQuillContent('parentsHomework', c.parentsHomework || '');
             setQuillContent('parentsAttendance', c.parentsAttendance || '');
@@ -969,40 +1076,38 @@
             setQuillContent('parentsUniform', c.parentsUniform || '');
             setQuillContent('parentsFees', c.parentsFees || '');
 
-            // Downloads
             renderItems('downloadsContainer', c.downloads || [], 'download');
 
-            // Contact
+            // Fees
+            setQuillContent('feesContent', c.feesContent || '');
+            document.getElementById('feesPaybill').value = c.feesPaybill || '474752';
+            setQuillContent('feesInstructions', c.feesInstructions || '');
+
             document.getElementById('contactAddress').value = c.contactAddress || 'Nairobi, Kenya';
             document.getElementById('contactPhone').value = c.contactPhone || '+254 721 556 252';
             document.getElementById('contactEmail').value = c.contactEmail || 'starchangara@gmail.com';
             document.getElementById('contactHours').value = c.contactHours || 'Monday - Friday: 7:00 AM - 6:00 PM';
             document.getElementById('contactMap').value = c.contactMap || '';
 
-            // SEO
             document.getElementById('seoTitle').value = c.seoTitle || '';
             document.getElementById('seoDescription').value = c.seoDescription || '';
             document.getElementById('seoKeywords').value = c.seoKeywords || '';
         }
 
         // ============================================
-        // RENDER ITEMS
+        // RENDER ITEMS (Keep existing renderItems function)
         // ============================================
         function renderItems(containerId, items, type) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
-
             if (!items || items.length === 0) {
                 container.innerHTML = `<div class="empty-state"><i class="fas fa-plus-circle"></i>No items added yet. Click "Add" to add one.</div>`;
                 return;
             }
-
             items.forEach((item) => {
                 const div = document.createElement('div');
                 div.className = 'item-box';
-
                 let fieldsHtml = '';
-
                 switch (type) {
                     case 'feature':
                         fieldsHtml = `
@@ -1053,7 +1158,6 @@
                         `;
                         break;
                     case 'gallery':
-                        const previewHtml = item.file ? getMediaPreview(item.file, item.type || 'image') : '';
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
                             <div class="form-row">
@@ -1069,7 +1173,6 @@
                                     <option value="audio" ${item.type === 'audio' ? 'selected' : ''}>🎵 Audio</option>
                                 </select>
                             </div>
-                            ${previewHtml ? `<div class="file-preview">${previewHtml}</div>` : ''}
                         `;
                         break;
                     case 'event':
@@ -1103,10 +1206,7 @@
                             <div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div>
                         `;
                         break;
-                    default:
-                        fieldsHtml = '<p>Unknown item type</p>';
                 }
-
                 div.innerHTML = fieldsHtml;
                 container.appendChild(div);
             });
@@ -1275,9 +1375,6 @@
             container.appendChild(div);
         }
 
-        // ============================================
-        // REMOVE ITEM
-        // ============================================
         function removeItem(btn) {
             const box = btn.closest('.item-box');
             if (box) {
@@ -1289,14 +1386,10 @@
             }
         }
 
-        // ============================================
-        // GET ALL ITEMS DATA
-        // ============================================
         function getItemsData(containerId, type) {
             const container = document.getElementById(containerId);
             const items = [];
             const boxes = container.querySelectorAll('.item-box');
-
             boxes.forEach(box => {
                 let item = {};
                 switch (type) {
@@ -1368,23 +1461,7 @@
                 }
                 items.push(item);
             });
-
             return items;
-        }
-
-        // ============================================
-        // MEDIA PREVIEW
-        // ============================================
-        function getMediaPreview(file, type) {
-            if (!file) return '';
-            if (type === 'image') {
-                return `<img src="${file}" alt="Preview" style="max-width:100px;max-height:80px;border-radius:4px;"><span>${file}</span>`;
-            } else if (type === 'video') {
-                return `<video src="${file}" controls style="max-width:150px;max-height:100px;"></video><span>${file}</span>`;
-            } else if (type === 'audio') {
-                return `<audio src="${file}" controls style="width:150px;"></audio><span>${file}</span>`;
-            }
-            return `<span>${file}</span>`;
         }
 
         // ============================================
@@ -1395,30 +1472,23 @@
         function renderMediaGallery() {
             const container = document.getElementById('galleryContainer');
             const galleryItems = websiteContent.gallery || [];
-
             if (galleryItems.length === 0) {
                 container.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i>No media found. Upload files to get started.</div>`;
                 return;
             }
-
             container.innerHTML = '';
             galleryItems.forEach((item) => {
                 const div = document.createElement('div');
                 div.className = 'item-box';
-
                 let previewHtml = '';
                 const fileType = item.type || 'image';
-
                 if (fileType === 'image') {
                     previewHtml = `<img src="${item.file || ''}" alt="${item.title || ''}" style="max-width:100px;max-height:80px;border-radius:4px;">`;
                 } else if (fileType === 'video') {
                     previewHtml = `<video src="${item.file || ''}" controls style="max-width:100px;max-height:80px;border-radius:4px;"></video>`;
                 } else if (fileType === 'audio') {
                     previewHtml = `<audio src="${item.file || ''}" controls style="width:150px;"></audio>`;
-                } else {
-                    previewHtml = `<span style="font-size:32px;">📄</span>`;
                 }
-
                 div.innerHTML = `
                     <button class="remove-btn" onclick="removeGalleryItem(this)">✕</button>
                     <div class="form-row">
@@ -1463,9 +1533,7 @@
         async function uploadFile() {
             const fileInput = document.getElementById('fileUpload');
             const file = fileInput.files[0];
-
             if (!file) return;
-
             if (file.size > 100 * 1024 * 1024) {
                 showAlert('File is too large. Maximum size is 100MB.', 'error');
                 return;
@@ -1480,7 +1548,6 @@
 
             try {
                 const xhr = new XMLHttpRequest();
-
                 xhr.upload.addEventListener('progress', (e) => {
                     if (e.lengthComputable) {
                         const percentComplete = (e.loaded / e.total) * 100;
@@ -1500,38 +1567,30 @@
                             document.getElementById('uploadedPreview').style.display = 'block';
                             const previewDiv = document.getElementById('mediaPreview');
                             const fileType = result.file.type;
-
                             if (fileType === 'image') {
                                 previewDiv.innerHTML = `<img src="${result.file.path}" alt="Preview" style="max-width:100%;">`;
                             } else if (fileType === 'video') {
                                 previewDiv.innerHTML = `<video src="${result.file.path}" controls style="max-width:100%;"></video>`;
                             } else if (fileType === 'audio') {
                                 previewDiv.innerHTML = `<audio src="${result.file.path}" controls style="width:100%;"></audio>`;
-                            } else {
-                                previewDiv.innerHTML = `<span style="font-size:48px;">${result.file.icon || '📄'}</span>`;
                             }
-
-                            document.getElementById('fileInfo').textContent = `✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} uploaded successfully!`;
+                            document.getElementById('fileInfo').textContent = `✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} uploaded!`;
                             document.getElementById('filePath').textContent = `Path: ${result.file.path}`;
 
-                            // Check if we're replacing media
+                            // Replace or insert media
                             if (window.replaceMediaTarget) {
-                                // Replace the media
                                 const target = window.replaceMediaTarget;
                                 if (target.tagName === 'IMG') {
                                     target.src = result.file.path;
                                     target.style.width = 'auto';
                                     target.style.height = 'auto';
-                                } else if (target.tagName === 'VIDEO') {
-                                    target.src = result.file.path;
-                                } else if (target.tagName === 'AUDIO') {
+                                } else if (target.tagName === 'VIDEO' || target.tagName === 'AUDIO') {
                                     target.src = result.file.path;
                                 }
                                 closeMediaEditor();
                                 window.replaceMediaTarget = null;
                                 showAlert('✅ Media replaced successfully!', 'success');
                             } else if (activeQuillId && quillEditors[activeQuillId]) {
-                                // Insert into editor
                                 const editor = quillEditors[activeQuillId];
                                 const range = editor.getSelection();
                                 const index = range ? range.index : 0;
@@ -1545,7 +1604,7 @@
                                 }
                                 if (mediaHtml) {
                                     editor.clipboard.dangerouslyPasteHTML(index, mediaHtml);
-                                    showAlert(`✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} inserted into editor!`, 'success');
+                                    showAlert(`✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} inserted!`, 'success');
                                 }
                             }
                         } else {
@@ -1555,14 +1614,9 @@
                         showAlert('❌ Upload failed. Please try again.', 'error');
                     }
                 };
-
-                xhr.onerror = function() {
-                    showAlert('❌ Network error. Please try again.', 'error');
-                };
-
+                xhr.onerror = function() { showAlert('❌ Network error.', 'error'); };
                 xhr.open('POST', '/api/upload');
                 xhr.send(formData);
-
             } catch (error) {
                 console.error('Upload error:', error);
                 showAlert('❌ Error uploading file: ' + error.message, 'error');
@@ -1572,27 +1626,21 @@
 
         function addUploadedToGallery() {
             if (!uploadedFileData) {
-                showAlert('No file uploaded yet. Please upload a file first.', 'error');
+                showAlert('No file uploaded yet.', 'error');
                 return;
             }
-
             const gallery = websiteContent.gallery || [];
-
-            const newItem = {
+            gallery.push({
                 title: uploadedFileData.originalname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
                 category: 'General',
                 file: uploadedFileData.path,
                 type: uploadedFileData.type || 'image'
-            };
-
-            gallery.push(newItem);
+            });
             websiteContent.gallery = gallery;
-
             document.getElementById('uploadedPreview').style.display = 'none';
             document.getElementById('uploadProgress').style.display = 'none';
             document.getElementById('fileUpload').value = '';
             uploadedFileData = null;
-
             renderMediaGallery();
             showAlert('✅ File added to gallery!', 'success');
         }
@@ -1618,9 +1666,7 @@
                 const category = box.querySelector('.field-category')?.value || '';
                 const file = box.querySelector('.field-file')?.value || '';
                 const type = box.querySelector('.field-type')?.value || 'image';
-                if (file) {
-                    updatedGallery.push({ title, category, file, type });
-                }
+                if (file) updatedGallery.push({ title, category, file, type });
             });
             websiteContent.gallery = updatedGallery;
 
@@ -1649,9 +1695,7 @@
                 admissionsFees: getQuillContent('admissionsFees'),
 
                 facilities: getItemsData('facilitiesContainer', 'facility'),
-
                 gallery: websiteContent.gallery || [],
-
                 events: getItemsData('eventsContainer', 'event'),
                 coCurricular: getItemsData('cocurricularContainer', 'cocurricular'),
 
@@ -1666,6 +1710,11 @@
                 parentsFees: getQuillContent('parentsFees'),
 
                 downloads: getItemsData('downloadsContainer', 'download'),
+
+                // Fees
+                feesContent: getQuillContent('feesContent'),
+                feesPaybill: document.getElementById('feesPaybill').value,
+                feesInstructions: getQuillContent('feesInstructions'),
 
                 contactAddress: document.getElementById('contactAddress').value,
                 contactPhone: document.getElementById('contactPhone').value,
