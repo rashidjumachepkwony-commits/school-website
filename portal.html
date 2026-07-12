@@ -23,7 +23,7 @@
         }
         .portal-card {
             background: white;
-            padding: 30px 25px;
+            padding: 25px 20px;
             border-radius: 16px;
             text-align: center;
             transition: all 0.3s ease;
@@ -32,6 +32,7 @@
             text-decoration: none;
             color: inherit;
             display: block;
+            cursor: default;
         }
         .portal-card:hover {
             transform: translateY(-5px);
@@ -41,7 +42,7 @@
         .portal-card .icon {
             font-size: 48px;
             display: block;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .portal-card h3 {
             color: #001f5c;
@@ -51,7 +52,7 @@
         .portal-card p {
             color: #666;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         .portal-card .badge {
             display: inline-block;
@@ -115,20 +116,6 @@
             background: #001f5c;
             transform: scale(1.05);
         }
-        .btn-info {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #17a2b8;
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        .btn-info:hover {
-            background: #138496;
-            transform: scale(1.05);
-        }
 
         .management-section {
             background: white;
@@ -185,6 +172,14 @@
             color: #999;
             margin-top: 3px;
         }
+        .management-link .btn-yellow {
+            background: #d4a017;
+            color: #001f5c;
+            font-weight: bold;
+        }
+        .management-link .btn-yellow:hover {
+            background: #f5c842;
+        }
 
         .main-footer {
             display: none !important;
@@ -197,7 +192,8 @@
             .portal-section-title {
                 font-size: 24px;
             }
-            .btn-secondary, .btn-info {
+            .btn-secondary {
+                margin-left: 0;
                 margin-top: 10px;
             }
         }
@@ -236,6 +232,7 @@
             <h1 class="portal-section-title">🏫 Welcome to the School Portal</h1>
             <p class="portal-section-subtitle">Explore everything about Changara Star Academy</p>
 
+            <!-- ===== SCHOOL CONTENT SECTION ===== -->
             <div class="portal-grid">
                 <div class="portal-card">
                     <span class="icon">🏠</span>
@@ -305,55 +302,56 @@
                 </div>
             </div>
 
+            <!-- ===== MANAGEMENT SECTION ===== -->
             <div class="management-section">
                 <h3>🔐 School Management</h3>
-                <p class="subtitle">Manage school operations, staff, visitors, and attendance</p>
+                <p class="subtitle">Manage school operations, staff, visitors, and content</p>
                 <div class="management-grid">
-                    <a href="admin-dashboard.html" class="management-link">
-                        <span class="icon">📊</span>
-                        <span>Dashboard</span>
-                        <span class="link-badge">Admin</span>
-                    </a>
-                    <a href="admin-teachers.html" class="management-link">
-                        <span class="icon">👨‍🏫</span>
-                        <span>Staff Management</span>
-                        <span class="link-badge">Manage Teachers</span>
-                    </a>
-                    <a href="admin-attendance.html" class="management-link">
-                        <span class="icon">📋</span>
-                        <span>Attendance</span>
-                        <span class="link-badge">Reports</span>
-                    </a>
-                    <a href="admin-visitors.html" class="management-link">
-                        <span class="icon">🚪</span>
-                        <span>Visitor Management</span>
-                        <span class="link-badge">Check-in/out</span>
+                    <a href="admin-login.html" class="management-link" style="background:#d4a017;color:#001f5c;font-weight:bold;border-color:#d4a017;">
+                        <span class="icon">⚙️</span>
+                        <span>Admin Login</span>
+                        <span class="link-badge">🔐 Secure Access</span>
                     </a>
                     <a href="teacher-checkin.html" class="management-link" style="border-color:#28a745;">
                         <span class="icon">👨‍🏫</span>
-                        <span>Staff Check-in</span>
-                        <span class="link-badge">Daily Check-in</span>
+                        <span>Staff Check In/Out</span>
+                        <span class="link-badge">Daily Attendance</span>
                     </a>
                     <a href="visitor-checkin.html" class="management-link" style="border-color:#17a2b8;">
                         <span class="icon">🚪</span>
-                        <span>Visitor Check-in</span>
-                        <span class="link-badge">Daily Check-in</span>
+                        <span>Visitor Check In/Out</span>
+                        <span class="link-badge">Visitor Management</span>
                     </a>
-                </div>
-                <div style="margin-top:20px;text-align:center;">
-                    <a href="admin-login.html" class="btn-primary">⚙️ Admin Login</a>
+                    <a href="admin-attendance.html" class="management-link">
+                        <span class="icon">📋</span>
+                        <span>Attendance Reports</span>
+                        <span class="link-badge">View Reports</span>
+                    </a>
+                    <a href="admin-cms.html" class="management-link">
+                        <span class="icon">📝</span>
+                        <span>Content Editor</span>
+                        <span class="link-badge">Manage Content</span>
+                    </a>
                 </div>
             </div>
 
             <div style="text-align:center;margin-top:30px;">
                 <a href="index.html" class="btn-secondary">🏠 Return to Homepage</a>
-                <a href="contact.html" class="btn-info">📞 Contact Us</a>
+                <a href="contact.html" class="btn-secondary" style="margin-left:10px;">📞 Contact Us</a>
             </div>
         </div>
     </main>
 
     <script>
-        // Load portal content from the existing content API
+        // Helper function to strip HTML tags
+        function stripHtml(html) {
+            if (!html) return 'Loading...';
+            const tmp = document.createElement('DIV');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        // Load portal content from the content API
         async function loadPortalContent() {
             try {
                 const response = await fetch('/api/content');
@@ -361,17 +359,17 @@
                 if (data.success) {
                     const c = data.content;
                     
-                    document.getElementById('displayHomeMessage').textContent = c.heroTitle || 'Welcome to Changara Star Academy';
-                    document.getElementById('displayAbout').textContent = c.aboutMission || 'Committed to quality education.';
-                    document.getElementById('displayAcademics').textContent = c.aboutValues || 'Playgroup to Grade 6 - Comprehensive curriculum';
-                    document.getElementById('displayAdmissions').textContent = c.footerText || 'Open for registration. Contact us for details.';
-                    document.getElementById('displayFacilities').textContent = 'Modern classrooms, computer lab, library, playground, and more.';
-                    document.getElementById('displayGallery').textContent = 'Check out our school gallery showcasing various activities.';
-                    document.getElementById('displayNews').textContent = 'Stay tuned for upcoming events and announcements.';
-                    document.getElementById('displayCoCurricular').textContent = 'Football, athletics, music, drama, debate, and clubs.';
-                    document.getElementById('displayPerformance').textContent = 'Excellent academic performance in national examinations.';
-                    document.getElementById('displayParents').textContent = 'Important information for parents including school calendar and policies.';
-                    document.getElementById('displayDownloads').textContent = 'Download admission forms, school calendar, and other documents.';
+                    document.getElementById('displayHomeMessage').textContent = stripHtml(c.heroTitle || 'Welcome to Changara Star Academy');
+                    document.getElementById('displayAbout').textContent = stripHtml(c.aboutMission || 'Committed to quality education.');
+                    document.getElementById('displayAcademics').textContent = stripHtml(c.aboutValues || 'Playgroup to Grade 6 - Comprehensive curriculum');
+                    document.getElementById('displayAdmissions').textContent = stripHtml(c.admissionsRequirements || 'Open for registration. Contact us for details.');
+                    document.getElementById('displayFacilities').textContent = stripHtml(c.facilities || 'Modern classrooms, computer lab, library, playground, and more.');
+                    document.getElementById('displayGallery').textContent = stripHtml(c.gallery || 'Check out our school gallery showcasing various activities.');
+                    document.getElementById('displayNews').textContent = stripHtml(c.newsEvents || 'Stay tuned for upcoming events and announcements.');
+                    document.getElementById('displayCoCurricular').textContent = stripHtml(c.coCurricular || 'Football, athletics, music, drama, debate, and clubs.');
+                    document.getElementById('displayPerformance').textContent = stripHtml(c.academicPerformance || 'Excellent academic performance in national examinations.');
+                    document.getElementById('displayParents').textContent = stripHtml(c.parentsCorner || 'Important information for parents including school calendar and policies.');
+                    document.getElementById('displayDownloads').textContent = stripHtml(c.downloads || 'Download admission forms, school calendar, and other documents.');
                 }
             } catch (error) {
                 console.error('Error loading portal content:', error);
