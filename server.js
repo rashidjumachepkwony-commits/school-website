@@ -3,6 +3,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const mongoose = require('mongoose');
+const multer = require('multer');
+const fs = require('fs');
 
 // Load environment variables
 dotenv.config();
@@ -23,33 +25,227 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB'
   .catch(err => console.error('❌ MongoDB Error:', err.message));
 
 // ============================================
-// CREATE CONTENT SCHEMA
+// FILE UPLOAD SETUP (Images, Videos, Audio)
+// ============================================
+// Create upload directories
+const uploadDirs = ['./uploads', './uploads/images', './uploads/videos', './uploads/audio'];
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
+
+// Configure storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    let folder = 'uploads/';
+    if (file.mimetype.startsWith('image/')) {
+      folder = 'uploads/images/';
+    } else if (file.mimetype.startsWith('video/')) {
+      folder = 'uploads/videos/';
+    } else if (file.mimetype.startsWith('audio/')) {
+      folder = 'uploads/audio/';
+    }
+    cb(null, folder);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = file.originalname.split('.').pop();
+    cb(null, uniqueSuffix + '.' + ext);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = [
+    // Images
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    // Videos
+    'video/mp4', 'video/mpeg', 'video/quicktime', 'video/webm', 'video/ogg',
+    // Audio
+    'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm'
+  ];
+  
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only images, videos, and audio files are allowed'), false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
+});
+
+// ============================================
+// FILE UPLOAD ROUTE
+// ============================================
+app.post('/api/upload', upload.single('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No file uploaded' 
+      });
+    }
+    
+    // Determine file type
+    let fileType = 'image';
+    let icon = '🖼️';
+    if (req.file.mimetype.startsWith('video/')) {
+      fileType = 'video';
+      icon = '🎬';
+    } else if (req.file.mimetype.startsWith('audio/')) {
+      fileType = 'audio';
+      icon = '🎵';
+    }
+    
+    res.json({
+      success: true,
+      message: 'File uploaded successfully!',
+      file: {
+        filename: req.file.filename,
+        originalname: req.file.originalname,
+        path: `/${req.file.path.replace(/\\/g, '/')}`,
+        size: req.file.size,
+        type: fileType,
+        icon: icon,
+        mimetype: req.file.mimetype
+      }
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+// ============================================
+// SERVE UPLOADED FILES (Static)
+// ============================================
+app.use('/uploads', express.static('uploads'));
+
+// ============================================
+// COMPLETE WEBSITE CONTENT SCHEMA (CMS)
 // ============================================
 const contentSchema = new mongoose.Schema({
+  // ===== HOME PAGE =====
   heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
   heroSubtitle: { type: String, default: 'Your trusted partner in quality education and school management' },
+  heroButtonText: { type: String, default: 'Learn More' },
+  
+  homeFeatures: [{
+    icon: { type: String, default: '📚' },
+    title: { type: String, default: 'Quality Education' },
+    description: { type: String, default: 'Holistic education that nurtures talent.' }
+  }],
+  
+  homeStats: [{
+    number: { type: String, default: '500+' },
+    label: { type: String, default: 'Students' }
+  }],
+  
+  homeNews: [{
+    title: { type: String, default: 'Latest News' },
+    content: { type: String, default: 'Stay updated with our latest announcements.' },
+    date: { type: Date, default: Date.now }
+  }],
+
+  // ===== ABOUT PAGE =====
   aboutMission: { type: String, default: 'To provide quality education that nurtures talent, builds character, and prepares students for a successful future.' },
   aboutVision: { type: String, default: 'To be a center of excellence in education, producing well-rounded individuals who contribute positively to society.' },
   aboutValues: { type: String, default: 'Excellence, Integrity, Respect, Innovation, Community Engagement' },
-  aboutCommitment: { type: String, default: 'Changara Star Academy is dedicated to providing a safe, nurturing, and stimulating environment.' },
-  footerText: { type: String, default: 'Committed to providing quality education and fostering excellence.' },
-  contact: {
-    address: { type: String, default: 'Nairobi, Kenya' },
-    phone: { type: String, default: '+254 700 000 000' },
-    email: { type: String, default: 'info@changarastaracademy.co.ke' },
-    workingHours: { type: String, default: 'Monday - Friday: 7:00 AM - 6:00 PM' }
-  },
-  stats: {
-    students: { type: String, default: '500+' },
-    staff: { type: String, default: '50+' },
-    attendance: { type: String, default: '98%' },
-    years: { type: String, default: '15+' }
-  },
-  features: [{
-    icon: String,
-    title: String,
-    description: String
+  aboutHistory: { type: String, default: 'Changara Star Academy was founded with a vision to provide quality education to the community.' },
+  aboutMotto: { type: String, default: 'Excellence in Education' },
+  aboutWhy: { type: String, default: 'Holistic education, qualified teachers, modern facilities.' },
+
+  // ===== ACADEMICS =====
+  academics: [{
+    grade: { type: String, default: 'Grade 1' },
+    subjects: { type: String, default: 'Math, English, Science' },
+    learningApproach: { type: String, default: 'Child-centered learning' },
+    activities: { type: String, default: 'Group discussions, Projects' },
+    teacherSupport: { type: String, default: 'Individual attention' }
   }],
+
+  // ===== ADMISSIONS =====
+  admissionsRequirements: { type: String, default: 'Admission is open to all students who meet the age requirements.' },
+  admissionsAge: { type: String, default: 'Playgroup: 2-3 years, PP1: 4 years, PP2: 5 years, Grade 1: 6 years, Grade 2-6: 7-12 years' },
+  admissionsDocuments: { type: String, default: 'Birth certificate, Previous school records, Passport photo, Parent ID, Medical records' },
+  admissionsProcess: { type: String, default: '1. Visit the school for a tour. 2. Fill the admission form. 3. Submit required documents. 4. Pay registration fee.' },
+  admissionsFees: { type: String, default: 'Please contact the school administration for the current fee structure.' },
+
+  // ===== FACILITIES =====
+  facilities: [{
+    name: { type: String, default: 'Modern Classrooms' },
+    description: { type: String, default: 'Well-equipped classrooms with modern learning resources.' },
+    image: { type: String, default: '' }
+  }],
+
+  // ===== GALLERY =====
+  gallery: [{
+    title: { type: String, default: 'School Activity' },
+    description: { type: String, default: '' },
+    file: { type: String, default: '' },
+    type: { type: String, default: 'image' },
+    category: { type: String, default: 'General' }
+  }],
+
+  // ===== EVENTS =====
+  events: [{
+    title: { type: String, default: 'Event Title' },
+    content: { type: String, default: 'Event description' },
+    date: { type: Date, default: Date.now },
+    category: { type: String, default: 'General' },
+    image: { type: String, default: '' }
+  }],
+
+  // ===== CO-CURRICULAR =====
+  coCurricular: [{
+    name: { type: String, default: 'Football' },
+    description: { type: String, default: 'School football team.' },
+    category: { type: String, default: 'Sports' },
+    image: { type: String, default: '' }
+  }],
+
+  // ===== PERFORMANCE =====
+  performanceKcpe: { type: String, default: 'Our students consistently perform well in national examinations.' },
+  performanceInternal: { type: String, default: 'Regular internal assessments track student progress.' },
+
+  // ===== PARENTS CORNER =====
+  parentsCalendar: { type: String, default: 'School calendar for 2026 with all important dates.' },
+  parentsHomework: { type: String, default: 'Homework is given regularly to reinforce learning.' },
+  parentsAttendance: { type: String, default: 'Attendance is mandatory and monitored daily.' },
+  parentsRules: { type: String, default: 'School rules ensure a safe and conducive learning environment.' },
+  parentsUniform: { type: String, default: 'All students must wear the official school uniform.' },
+  parentsFees: { type: String, default: 'Fees must be paid at the beginning of each term.' },
+
+  // ===== DOWNLOADS =====
+  downloads: [{
+    name: { type: String, default: 'Admission Form' },
+    file: { type: String, default: '/downloads/admission-form.pdf' },
+    description: { type: String, default: 'Download the admission form.' },
+    icon: { type: String, default: '📄' }
+  }],
+
+  // ===== CONTACT =====
+  contactAddress: { type: String, default: 'Nairobi, Kenya' },
+  contactPhone: { type: String, default: '+254 721 556 252' },
+  contactEmail: { type: String, default: 'starchangara@gmail.com' },
+  contactHours: { type: String, default: 'Monday - Friday: 7:00 AM - 6:00 PM' },
+
+  // ===== FOOTER =====
+  footerText: { type: String, default: 'Committed to providing quality education and fostering excellence.' },
+
+  // ===== SEO =====
+  seoTitle: { type: String, default: 'Changara Star Academy - Excellence in Education' },
+  seoDescription: { type: String, default: 'Changara Star Academy - Excellence in Education. School management system for students, staff, and parents.' },
+  seoKeywords: { type: String, default: 'school, education, academy, Nairobi, Kenya' },
+
+  // ===== METADATA =====
   lastUpdated: { type: Date, default: Date.now },
   updatedBy: { type: String, default: 'Admin' }
 });
@@ -154,7 +350,7 @@ visitorSchema.set('toObject', { virtuals: true });
 const Visitor = mongoose.model('Visitor', visitorSchema);
 
 // ============================================
-// API ROUTES - CONTENT
+// API ROUTES - CONTENT (CMS)
 // ============================================
 
 // GET website content (Public)
@@ -167,18 +363,31 @@ app.get('/api/content', async (req, res) => {
   }
 });
 
-// UPDATE website content
+// UPDATE website content (Admin)
 app.put('/api/content', async (req, res) => {
   try {
     const content = await Content.getContent();
     
+    // Update all fields from request body
     Object.keys(req.body).forEach(key => {
-      if (key === 'features' && Array.isArray(req.body.features)) {
-        content.features = req.body.features;
-      } else if (key === 'stats') {
-        content.stats = { ...content.stats, ...req.body.stats };
-      } else if (key === 'contact') {
-        content.contact = { ...content.contact, ...req.body.contact };
+      if (key === 'homeFeatures' && Array.isArray(req.body.homeFeatures)) {
+        content.homeFeatures = req.body.homeFeatures;
+      } else if (key === 'homeStats' && Array.isArray(req.body.homeStats)) {
+        content.homeStats = req.body.homeStats;
+      } else if (key === 'homeNews' && Array.isArray(req.body.homeNews)) {
+        content.homeNews = req.body.homeNews;
+      } else if (key === 'academics' && Array.isArray(req.body.academics)) {
+        content.academics = req.body.academics;
+      } else if (key === 'facilities' && Array.isArray(req.body.facilities)) {
+        content.facilities = req.body.facilities;
+      } else if (key === 'gallery' && Array.isArray(req.body.gallery)) {
+        content.gallery = req.body.gallery;
+      } else if (key === 'events' && Array.isArray(req.body.events)) {
+        content.events = req.body.events;
+      } else if (key === 'coCurricular' && Array.isArray(req.body.coCurricular)) {
+        content.coCurricular = req.body.coCurricular;
+      } else if (key === 'downloads' && Array.isArray(req.body.downloads)) {
+        content.downloads = req.body.downloads;
       } else {
         content[key] = req.body[key];
       }
@@ -194,6 +403,7 @@ app.put('/api/content', async (req, res) => {
       content
     });
   } catch (error) {
+    console.error('Content update error:', error);
     res.status(500).json({
       success: false,
       message: 'Error updating content',
