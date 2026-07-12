@@ -300,6 +300,12 @@
                     <h3>Downloads</h3>
                     <p id="displayDownloads">Loading...</p>
                 </div>
+
+                <div class="portal-card">
+                    <span class="icon">💰</span>
+                    <h3>Fees Structure</h3>
+                    <p id="displayFees">Loading...</p>
+                </div>
             </div>
 
             <!-- ===== MANAGEMENT SECTION ===== -->
@@ -307,6 +313,7 @@
                 <h3>🔐 School Management</h3>
                 <p class="subtitle">Manage school operations, staff, visitors, and content</p>
                 <div class="management-grid">
+                    <!-- ADMIN LOGIN - Only one login button -->
                     <a href="admin-login.html" class="management-link" style="background:#d4a017;color:#001f5c;font-weight:bold;border-color:#d4a017;">
                         <span class="icon">⚙️</span>
                         <span>Admin Login</span>
@@ -326,11 +333,6 @@
                         <span class="icon">📋</span>
                         <span>Attendance Reports</span>
                         <span class="link-badge">View Reports</span>
-                    </a>
-                    <a href="admin-cms.html" class="management-link">
-                        <span class="icon">📝</span>
-                        <span>Content Editor</span>
-                        <span class="link-badge">Manage Content</span>
                     </a>
                 </div>
             </div>
@@ -370,6 +372,7 @@
                     document.getElementById('displayPerformance').textContent = stripHtml(c.academicPerformance || 'Excellent academic performance in national examinations.');
                     document.getElementById('displayParents').textContent = stripHtml(c.parentsCorner || 'Important information for parents including school calendar and policies.');
                     document.getElementById('displayDownloads').textContent = stripHtml(c.downloads || 'Download admission forms, school calendar, and other documents.');
+                    document.getElementById('displayFees').textContent = stripHtml(c.feesContent || 'View our competitive school fees structure.');
                 }
             } catch (error) {
                 console.error('Error loading portal content:', error);
