@@ -7,512 +7,111 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Quill Editor CSS -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.bubble.css" rel="stylesheet">
     <!-- Quill Editor JS -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
-            display: flex;
-            min-height: 100vh;
-        }
-        .sidebar {
-            width: 260px;
-            background: linear-gradient(180deg, #0a1628, #1a2a4a);
-            color: white;
-            padding: 20px 0;
-            min-height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            overflow-y: auto;
-            z-index: 100;
-        }
-        .sidebar-brand {
-            padding: 0 20px 25px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .sidebar-brand .logo-icon {
-            font-size: 40px;
-            display: block;
-            margin-bottom: 8px;
-        }
-        .sidebar-brand h2 {
-            color: #ffeb99;
-            font-size: 22px;
-            font-weight: 700;
-        }
-        .sidebar-brand p {
-            color: #d4a017;
-            font-size: 13px;
-        }
-        .sidebar-menu {
-            padding: 15px;
-        }
-        .sidebar-menu .menu-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.3);
-            padding: 10px;
-            letter-spacing: 1.5px;
-        }
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin-bottom: 2px;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-        .sidebar-menu a i {
-            width: 20px;
-            font-size: 15px;
-            text-align: center;
-        }
-        .sidebar-menu a:hover {
-            background: rgba(212,160,23,0.15);
-            color: #d4a017;
-        }
-        .sidebar-menu a.active {
-            background: rgba(212,160,23,0.2);
-            color: #d4a017;
-        }
-        .sidebar-menu .logout {
-            margin-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            padding-top: 15px;
-        }
-        .sidebar-menu .logout a {
-            color: rgba(255,107,107,0.7);
-        }
-        .sidebar-menu .logout a:hover {
-            color: #ff6b6b;
-            background: rgba(255,107,107,0.1);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, #0a1628, #1a2a4a); color: white; padding: 20px 0; min-height: 100vh; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; }
+        .sidebar-brand { padding: 0 20px 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .sidebar-brand .logo-icon { font-size: 40px; display: block; margin-bottom: 8px; }
+        .sidebar-brand h2 { color: #ffeb99; font-size: 22px; font-weight: 700; }
+        .sidebar-brand p { color: #d4a017; font-size: 13px; }
+        .sidebar-menu { padding: 15px; }
+        .sidebar-menu .menu-label { font-size: 10px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 10px; letter-spacing: 1.5px; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.7); text-decoration: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 2px; transition: all 0.3s ease; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .sidebar-menu a i { width: 20px; font-size: 15px; text-align: center; }
+        .sidebar-menu a:hover { background: rgba(212,160,23,0.15); color: #d4a017; }
+        .sidebar-menu a.active { background: rgba(212,160,23,0.2); color: #d4a017; }
+        .sidebar-menu .logout { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px; }
+        .sidebar-menu .logout a { color: rgba(255,107,107,0.7); }
+        .sidebar-menu .logout a:hover { color: #ff6b6b; background: rgba(255,107,107,0.1); }
 
-        .main-content {
-            margin-left: 260px;
-            padding: 25px 30px;
-            width: 100%;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e8ecf1;
-        }
-        .header h1 {
-            color: #1a2a4a;
-            font-size: 26px;
-            font-weight: 700;
-        }
-        .header h1 i {
-            color: #d4a017;
-            margin-right: 10px;
-        }
-        .header .admin-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: white;
-            padding: 5px 16px 5px 5px;
-            border-radius: 50px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .header .admin-info .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #d4a017, #f5c842);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #1a2a4a;
-            font-weight: 700;
-            font-size: 15px;
-        }
+        .main-content { margin-left: 260px; padding: 25px 30px; width: 100%; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e8ecf1; }
+        .header h1 { color: #1a2a4a; font-size: 26px; font-weight: 700; }
+        .header h1 i { color: #d4a017; margin-right: 10px; }
+        .header .admin-info { display: flex; align-items: center; gap: 12px; background: white; padding: 5px 16px 5px 5px; border-radius: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .header .admin-info .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #d4a017, #f5c842); display: flex; align-items: center; justify-content: center; color: #1a2a4a; font-weight: 700; font-size: 15px; }
 
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: none;
-            font-weight: 500;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            max-width: 400px;
-        }
-        .alert.success {
-            display: block;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert.error {
-            display: block;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+        .alert { padding: 15px 20px; border-radius: 10px; display: none; font-weight: 500; position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px; }
+        .alert.success { display: block; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert.error { display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        .editor-container {
-            background: white;
-            padding: 25px;
-            border-radius: 14px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            margin-bottom: 20px;
-        }
-        .editor-container h2 {
-            color: #1a2a4a;
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-        .editor-container .desc {
-            color: #888;
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-            font-size: 13px;
-        }
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 2px solid #e8ecf1;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: 0.3s;
-            font-family: inherit;
-            background: #fafbfc;
-        }
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            border-color: #d4a017;
-            outline: none;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(212,160,23,0.1);
-        }
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
+        .editor-container { background: white; padding: 25px; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .editor-container h2 { color: #1a2a4a; font-size: 20px; margin-bottom: 5px; }
+        .editor-container .desc { color: #888; font-size: 13px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; color: #333; margin-bottom: 5px; font-size: 13px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #e8ecf1; border-radius: 8px; font-size: 14px; transition: 0.3s; font-family: inherit; background: #fafbfc; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #d4a017; outline: none; background: white; box-shadow: 0 0 0 4px rgba(212,160,23,0.1); }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-        /* Quill Editor Styles */
-        .ql-container {
-            min-height: 200px;
-            border-radius: 0 0 8px 8px;
-            font-size: 15px;
-        }
-        .ql-toolbar {
-            border-radius: 8px 8px 0 0;
-            background: #fafbfc;
-        }
-        .ql-editor {
-            min-height: 200px;
-        }
-        .ql-editor p {
-            margin-bottom: 8px;
-        }
-        .ql-editor img {
-            max-width: 100%;
-            border-radius: 8px;
-        }
-        .ql-editor video {
-            max-width: 100%;
-            border-radius: 8px;
-        }
-        .ql-editor audio {
-            width: 100%;
-        }
+        .ql-container { min-height: 150px; border-radius: 0 0 8px 8px; font-size: 15px; }
+        .ql-toolbar { border-radius: 8px 8px 0 0; background: #fafbfc; }
+        .ql-editor { min-height: 150px; }
+        .ql-editor p { margin-bottom: 8px; }
+        .ql-editor img { max-width: 100%; border-radius: 8px; }
+        .ql-editor video { max-width: 100%; border-radius: 8px; }
+        .ql-editor audio { width: 100%; }
 
-        .btn {
-            padding: 10px 25px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-family: inherit;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #d4a017, #f5c842);
-            color: #1a2a4a;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212,160,23,0.35);
-        }
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        .btn-success:hover {
-            background: #1e7e34;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40,167,69,0.35);
-        }
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        .btn-block {
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            justify-content: center;
-            margin-top: 20px;
-        }
+        .btn { padding: 10px 25px; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; }
+        .btn-primary { background: linear-gradient(135deg, #d4a017, #f5c842); color: #1a2a4a; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,160,23,0.35); }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(40,167,69,0.35); }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-block { width: 100%; padding: 14px; font-size: 16px; justify-content: center; margin-top: 20px; }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+        .btn-upload { background: #17a2b8; color: white; }
+        .btn-upload:hover { background: #138496; }
 
-        .section-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 20px;
-            background: white;
-            padding: 10px 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        }
-        .section-tabs button {
-            padding: 8px 16px;
-            border: 2px solid #e8ecf1;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            color: #666;
-        }
-        .section-tabs button:hover {
-            border-color: #d4a017;
-        }
-        .section-tabs button.active {
-            background: #0b5394;
-            color: white;
-            border-color: #0b5394;
-        }
+        .panel { display: none; }
+        .panel.active { display: block; }
 
-        .panel {
-            display: none;
-        }
-        .panel.active {
-            display: block;
-        }
+        .upload-area { background: #f8f9fc; border: 2px dashed #d4a017; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 15px; transition: 0.3s; }
+        .upload-area:hover { border-color: #0b5394; background: #f0f4ff; }
+        .upload-area .icon { font-size: 32px; display: block; margin-bottom: 5px; }
+        .upload-area h3 { color: #001f5c; font-size: 16px; margin-bottom: 3px; }
+        .upload-area p { color: #666; font-size: 13px; margin-bottom: 10px; }
+        .upload-area .file-types { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        .upload-area .file-types span { background: white; padding: 3px 10px; border-radius: 20px; font-size: 11px; border: 1px solid #ddd; }
 
-        .upload-area {
-            background: #f8f9fc;
-            border: 2px dashed #d4a017;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 20px;
-            transition: 0.3s;
-        }
-        .upload-area:hover {
-            border-color: #0b5394;
-            background: #f0f4ff;
-        }
-        .upload-area .icon {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 10px;
-        }
-        .upload-area h3 {
-            color: #001f5c;
-            margin-bottom: 5px;
-        }
-        .upload-area p {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-        .upload-area .file-types {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-        .upload-area .file-types span {
-            background: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            border: 1px solid #ddd;
-        }
+        .upload-progress { display: none; margin-top: 10px; }
+        .progress-bar { background: #e8ecf1; border-radius: 10px; height: 20px; overflow: hidden; }
+        .progress-bar .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #d4a017, #f5c842); transition: width 0.3s; }
+        .upload-status { margin-top: 5px; color: #666; font-size: 13px; }
 
-        .upload-progress {
-            display: none;
-            margin-top: 15px;
-        }
-        .progress-bar {
-            background: #e8ecf1;
-            border-radius: 10px;
-            height: 20px;
-            overflow: hidden;
-        }
-        .progress-bar .progress-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #d4a017, #f5c842);
-            transition: width 0.3s;
-        }
-        .upload-status {
-            margin-top: 5px;
-            color: #666;
-            font-size: 13px;
-        }
+        .uploaded-preview { margin-top: 10px; display: none; }
+        .uploaded-preview .preview-box { background: white; padding: 15px; border-radius: 8px; border: 2px solid #d4a017; display: inline-block; }
+        .uploaded-preview img, .uploaded-preview video { max-width: 200px; max-height: 150px; border-radius: 6px; }
+        .uploaded-preview audio { width: 250px; }
+        .uploaded-preview .file-info { margin-top: 8px; font-size: 13px; color: #28a745; font-weight: bold; }
+        .uploaded-preview .file-path { font-size: 12px; color: #666; }
 
-        .uploaded-preview {
-            margin-top: 15px;
-            display: none;
-        }
-        .uploaded-preview .preview-box {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border: 2px solid #d4a017;
-            display: inline-block;
-        }
-        .uploaded-preview img,
-        .uploaded-preview video {
-            max-width: 200px;
-            max-height: 150px;
-            border-radius: 6px;
-        }
-        .uploaded-preview audio {
-            width: 250px;
-        }
-        .uploaded-preview .file-info {
-            margin-top: 8px;
-            font-size: 13px;
-            color: #28a745;
-            font-weight: bold;
-        }
-        .uploaded-preview .file-path {
-            font-size: 12px;
-            color: #666;
-        }
+        .item-box { background: #f8f9fc; padding: 15px; border-radius: 10px; border: 1px solid #e8ecf1; margin-bottom: 10px; position: relative; }
+        .item-box .remove-btn { position: absolute; top: 8px; right: 8px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .item-box .remove-btn:hover { background: #c82333; transform: scale(1.1); }
+        .item-box .file-preview { margin-top: 8px; padding: 8px; background: #e8ecf1; border-radius: 6px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .item-box .file-preview img, .item-box .file-preview video { max-width: 100px; max-height: 80px; border-radius: 4px; }
+        .item-box .file-preview audio { width: 150px; }
 
-        .item-box {
-            background: #f8f9fc;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #e8ecf1;
-            margin-bottom: 10px;
-            position: relative;
-        }
-        .item-box .remove-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .item-box .remove-btn:hover {
-            background: #c82333;
-            transform: scale(1.1);
-        }
-        .item-box .file-preview {
-            margin-top: 8px;
-            padding: 8px;
-            background: #e8ecf1;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .item-box .file-preview img,
-        .item-box .file-preview video {
-            max-width: 100px;
-            max-height: 80px;
-            border-radius: 4px;
-        }
-        .item-box .file-preview audio {
-            width: 150px;
-        }
+        .empty-state { text-align: center; padding: 30px; color: #999; }
+        .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; color: #ddd; }
 
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            color: #999;
-        }
-        .empty-state i {
-            font-size: 36px;
-            display: block;
-            margin-bottom: 10px;
-            color: #ddd;
-        }
+        .media-insert-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; padding: 8px; background: #f8f9fc; border-radius: 8px; border: 1px solid #e8ecf1; }
+        .media-insert-bar .btn { font-size: 12px; padding: 5px 12px; }
 
         @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                position: relative;
-                min-height: auto;
-                padding: 10px 0;
-            }
-            .main-content {
-                margin-left: 0;
-                padding: 15px;
-            }
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            .section-tabs button {
-                font-size: 11px;
-                padding: 6px 12px;
-            }
-            .alert {
-                max-width: 90%;
-                right: 5%;
-            }
+            .sidebar { width: 100%; position: relative; min-height: auto; padding: 10px 0; }
+            .main-content { margin-left: 0; padding: 15px; }
+            .form-row { grid-template-columns: 1fr; }
+            .alert { max-width: 90%; right: 5%; }
         }
     </style>
 </head>
@@ -563,6 +162,15 @@
                 <h2>🏠 Home Page</h2>
                 <p class="desc">Edit the main content displayed on the home page.</p>
 
+                <!-- Media Insert Bar for Home -->
+                <div class="media-insert-bar">
+                    <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-secondary btn-sm" onclick="insertTable('heroSubtitle')"><i class="fas fa-table"></i> Table</button>
+                </div>
+
                 <div class="form-group">
                     <label>Hero Title</label>
                     <input type="text" id="heroTitle" placeholder="Main hero title">
@@ -599,6 +207,14 @@
             <div class="editor-container">
                 <h2>📖 About Page</h2>
                 <p class="desc">Edit the About Us page content with full formatting.</p>
+
+                <div class="media-insert-bar">
+                    <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-secondary btn-sm" onclick="insertTable('aboutMission')"><i class="fas fa-table"></i> Table</button>
+                </div>
 
                 <div class="form-group">
                     <label>Mission Statement</label>
@@ -643,6 +259,14 @@
                 <h2>📝 Admissions</h2>
                 <p class="desc">Edit admissions requirements and process.</p>
 
+                <div class="media-insert-bar">
+                    <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-secondary btn-sm" onclick="insertTable('admissionsRequirements')"><i class="fas fa-table"></i> Table</button>
+                </div>
+
                 <div class="form-group">
                     <label>Admission Requirements</label>
                     <div id="admissionsRequirements" class="quill-editor"></div>
@@ -670,7 +294,7 @@
         <div id="panel-facilities" class="panel">
             <div class="editor-container">
                 <h2>🏫 Facilities</h2>
-                <p class="desc">Manage school facilities with full content editing.</p>
+                <p class="desc">Manage school facilities with images.</p>
                 <div id="facilitiesContainer"></div>
                 <button class="btn btn-primary" onclick="addFacility()">➕ Add Facility</button>
             </div>
@@ -728,6 +352,15 @@
             <div class="editor-container">
                 <h2>📰 Events</h2>
                 <p class="desc">Manage news and events with full formatting.</p>
+
+                <div class="media-insert-bar">
+                    <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-secondary btn-sm" onclick="insertTable('eventsContent')"><i class="fas fa-table"></i> Table</button>
+                </div>
+
                 <div id="eventsContainer"></div>
                 <button class="btn btn-primary" onclick="addEvent()">➕ Add Event</button>
             </div>
@@ -738,6 +371,15 @@
             <div class="editor-container">
                 <h2>⚽ Co-curricular Activities</h2>
                 <p class="desc">Manage co-curricular activities with full formatting.</p>
+
+                <div class="media-insert-bar">
+                    <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-secondary btn-sm" onclick="insertTable('cocurricularContent')"><i class="fas fa-table"></i> Table</button>
+                </div>
+
                 <div id="cocurricularContainer"></div>
                 <button class="btn btn-primary" onclick="addCocurricular()">➕ Add Activity</button>
             </div>
@@ -748,6 +390,14 @@
             <div class="editor-container">
                 <h2>🏆 Academic Performance</h2>
                 <p class="desc">Edit academic performance information.</p>
+
+                <div class="media-insert-bar">
+                    <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-secondary btn-sm" onclick="insertTable('performanceKcpe')"><i class="fas fa-table"></i> Table</button>
+                </div>
 
                 <div class="form-group">
                     <label>KCPE/KPSEA Results</label>
@@ -765,6 +415,14 @@
             <div class="editor-container">
                 <h2>👨‍👩‍👧‍👦 Parents Corner</h2>
                 <p class="desc">Edit parents corner information.</p>
+
+                <div class="media-insert-bar">
+                    <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-secondary btn-sm" onclick="insertTable('parentsCalendar')"><i class="fas fa-table"></i> Table</button>
+                </div>
 
                 <div class="form-group">
                     <label>School Calendar</label>
@@ -880,6 +538,7 @@
         // QUILL EDITORS
         // ============================================
         let quillEditors = {};
+        let activeQuillId = 'heroSubtitle';
 
         function initQuillEditors() {
             const editorIds = [
@@ -914,7 +573,7 @@
         }
 
         // ============================================
-        // GET QUILL CONTENT
+        // GET/SET QUILL CONTENT
         // ============================================
         function getQuillContent(id) {
             if (quillEditors[id]) {
@@ -926,6 +585,45 @@
         function setQuillContent(id, content) {
             if (quillEditors[id]) {
                 quillEditors[id].root.innerHTML = content || '';
+            }
+        }
+
+        // ============================================
+        // OPEN MEDIA UPLOAD
+        // ============================================
+        function openMediaUpload(editorId) {
+            activeQuillId = editorId;
+            document.getElementById('fileUpload').click();
+        }
+
+        // ============================================
+        // INSERT TABLE
+        // ============================================
+        function insertTable(editorId) {
+            if (quillEditors[editorId]) {
+                const range = quillEditors[editorId].getSelection();
+                const index = range ? range.index : 0;
+                const tableHtml = `
+                    <table style="border-collapse:collapse;width:100%;">
+                        <tr>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">Header 1</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">Header 2</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">Header 3</th>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">Row 1, Col 1</td>
+                            <td style="border:1px solid #ccc;padding:8px;">Row 1, Col 2</td>
+                            <td style="border:1px solid #ccc;padding:8px;">Row 1, Col 3</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">Row 2, Col 1</td>
+                            <td style="border:1px solid #ccc;padding:8px;">Row 2, Col 2</td>
+                            <td style="border:1px solid #ccc;padding:8px;">Row 2, Col 3</td>
+                        </tr>
+                    </table>
+                `;
+                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
+                showAlert('✅ Table inserted! You can edit it directly in the editor.', 'success');
             }
         }
 
@@ -1450,23 +1148,36 @@
         }
 
         // ============================================
+        // MEDIA PREVIEW
+        // ============================================
+        function getMediaPreview(file, type) {
+            if (!file) return '';
+            if (type === 'image') {
+                return `<img src="${file}" alt="Preview" style="max-width:100px;max-height:80px;border-radius:4px;"><span>${file}</span>`;
+            } else if (type === 'video') {
+                return `<video src="${file}" controls style="max-width:150px;max-height:100px;"></video><span>${file}</span>`;
+            } else if (type === 'audio') {
+                return `<audio src="${file}" controls style="width:150px;"></audio><span>${file}</span>`;
+            }
+            return `<span>${file}</span>`;
+        }
+
+        // ============================================
         // MEDIA GALLERY FUNCTIONS
         // ============================================
-        let mediaData = [];
         let uploadedFileData = null;
 
         function renderMediaGallery() {
             const container = document.getElementById('galleryContainer');
             const galleryItems = websiteContent.gallery || [];
-            mediaData = galleryItems;
 
-            if (mediaData.length === 0) {
+            if (galleryItems.length === 0) {
                 container.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i>No media found. Upload files to get started.</div>`;
                 return;
             }
 
             container.innerHTML = '';
-            mediaData.forEach((item, index) => {
+            galleryItems.forEach((item) => {
                 const div = document.createElement('div');
                 div.className = 'item-box';
 
@@ -1484,7 +1195,7 @@
                 }
 
                 div.innerHTML = `
-                    <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                    <button class="remove-btn" onclick="removeGalleryItem(this)">✕</button>
                     <div class="form-row">
                         <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
                         <div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div>
@@ -1504,16 +1215,21 @@
             });
         }
 
-        function getMediaPreview(file, type) {
-            if (!file) return '';
-            if (type === 'image') {
-                return `<img src="${file}" alt="Preview" style="max-width:100px;max-height:80px;border-radius:4px;"><span>${file}</span>`;
-            } else if (type === 'video') {
-                return `<video src="${file}" controls style="max-width:150px;max-height:100px;"></video><span>${file}</span>`;
-            } else if (type === 'audio') {
-                return `<audio src="${file}" controls style="width:150px;"></audio><span>${file}</span>`;
+        function removeGalleryItem(btn) {
+            const box = btn.closest('.item-box');
+            if (box) {
+                const fileInput = box.querySelector('.field-file');
+                const filePath = fileInput ? fileInput.value : '';
+                if (filePath) {
+                    websiteContent.gallery = websiteContent.gallery.filter(item => item.file !== filePath);
+                }
+                box.remove();
+                const container = box.parentElement;
+                if (container.children.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i>No media found. Upload files to get started.</div>`;
+                }
+                showAlert('✅ Media removed from gallery', 'success');
             }
-            return `<span>${file}</span>`;
         }
 
         // ============================================
@@ -1574,6 +1290,26 @@
                             document.getElementById('filePath').textContent = `Path: ${result.file.path}`;
 
                             showAlert(`✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} uploaded successfully!`, 'success');
+
+                            // Insert media into active Quill editor
+                            if (activeQuillId && quillEditors[activeQuillId]) {
+                                const editor = quillEditors[activeQuillId];
+                                const range = editor.getSelection();
+                                const index = range ? range.index : 0;
+                                let mediaHtml = '';
+                                if (fileType === 'image') {
+                                    mediaHtml = `<img src="${result.file.path}" alt="${uploadedFileData.originalname}" style="max-width:100%;border-radius:8px;">`;
+                                } else if (fileType === 'video') {
+                                    mediaHtml = `<video src="${result.file.path}" controls style="max-width:100%;border-radius:8px;"></video>`;
+                                } else if (fileType === 'audio') {
+                                    mediaHtml = `<audio src="${result.file.path}" controls style="width:100%;"></audio>`;
+                                }
+                                if (mediaHtml) {
+                                    editor.clipboard.dangerouslyPasteHTML(index, mediaHtml);
+                                    showAlert('✅ Media inserted into editor!', 'success');
+                                }
+                            }
+
                         } else {
                             showAlert('❌ Upload failed: ' + result.message, 'error');
                         }
@@ -1635,7 +1371,20 @@
         // SAVE ALL CONTENT
         // ============================================
         async function saveAllContent() {
-            websiteContent.gallery = mediaData;
+            // Update gallery from DOM
+            const galleryContainer = document.getElementById('galleryContainer');
+            const galleryBoxes = galleryContainer.querySelectorAll('.item-box');
+            const updatedGallery = [];
+            galleryBoxes.forEach(box => {
+                const title = box.querySelector('.field-title')?.value || '';
+                const category = box.querySelector('.field-category')?.value || '';
+                const file = box.querySelector('.field-file')?.value || '';
+                const type = box.querySelector('.field-type')?.value || 'image';
+                if (file) {
+                    updatedGallery.push({ title, category, file, type });
+                }
+            });
+            websiteContent.gallery = updatedGallery;
 
             const data = {
                 heroTitle: document.getElementById('heroTitle').value,
