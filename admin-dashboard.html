@@ -57,6 +57,10 @@
             background: rgba(212, 160, 23, 0.2);
             color: #d4a017;
         }
+        .sidebar-menu a.active {
+            background: rgba(212, 160, 23, 0.2);
+            color: #d4a017;
+        }
         .sidebar-menu .logout {
             margin-top: 30px;
             border-top: 1px solid rgba(255,255,255,0.1);
@@ -110,6 +114,10 @@
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             text-align: center;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
         }
         .card .icon {
             font-size: 40px;
@@ -244,11 +252,12 @@
             <p>Changara Star Academy</p>
         </div>
         <div class="sidebar-menu">
-            <a onclick="showSection('dashboard')" style="background:rgba(212,160,23,0.2);color:#d4a017;">📊 Dashboard</a>
+            <a onclick="showSection('dashboard')" class="active">📊 Dashboard</a>
             <a onclick="showSection('content')">📝 Content Editor</a>
             <a href="admin-attendance.html">📋 Teacher Attendance</a>
             <a href="admin-teachers.html">👨‍🏫 Manage Teachers</a>
             <a href="admin-visitors.html">🚪 Visitor Management</a>
+            <a href="admin-portal-editor.html">📝 Portal Editor</a>
             <div class="logout">
                 <a onclick="logout()">🚪 Logout</a>
             </div>
@@ -285,6 +294,11 @@
                     <h3>1</h3>
                     <p>Admin Users</p>
                 </div>
+                <div class="card">
+                    <span class="icon">👨‍🏫</span>
+                    <h3 id="teacherCount">0</h3>
+                    <p>Total Teachers</p>
+                </div>
             </div>
 
             <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
@@ -294,6 +308,7 @@
                 <button class="btn-primary" onclick="window.location.href='admin-teachers.html'" style="margin-left:10px;">👨‍🏫 Manage Teachers</button>
                 <button class="btn-primary" onclick="window.location.href='admin-attendance.html'" style="margin-left:10px;">📋 Attendance</button>
                 <button class="btn-primary" onclick="window.location.href='admin-visitors.html'" style="margin-left:10px;">🚪 Visitors</button>
+                <button class="btn-primary" onclick="window.location.href='admin-portal-editor.html'" style="margin-left:10px;">📝 Portal Editor</button>
             </div>
         </div>
 
@@ -387,22 +402,39 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('📄 Dashboard DOM loaded. Initializing...');
             
-            // Display admin name
             const admin = JSON.parse(localStorage.getItem('admin') || '{}');
             console.log('👤 Admin data:', admin);
             
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
             
-            // Load content
             loadContent();
+            loadTeacherCount();
         });
+
+        // ============================================
+        // LOAD TEACHER COUNT
+        // ============================================
+        async function loadTeacherCount() {
+            try {
+                const response = await fetch('/api/teachers');
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('teacherCount').textContent = data.count || 0;
+                }
+            } catch (error) {
+                console.error('Error loading teacher count:', error);
+            }
+        }
 
         // ============================================
         // SHOW SECTION
         // ============================================
         function showSection(section) {
             document.querySelectorAll('.editor-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.sidebar-menu a').forEach(el => {
                 el.classList.remove('active');
             });
             document.getElementById('section-' + section).classList.add('active');
