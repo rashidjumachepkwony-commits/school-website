@@ -6,7 +6,7 @@
     <title>🏫 Changara Star Academy - School Portal</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
-    <meta name="description" content="Changara Star Academy School Portal - School content, academics, admissions, and more.">
+    <meta name="description" content="Changara Star Academy School Portal - School management, staff, visitors, and content.">
     <style>
         .portal-container {
             flex: 1;
@@ -14,57 +14,6 @@
             background: #f5f7fa;
             min-height: calc(100vh - 150px);
             padding: 40px 0;
-        }
-        .portal-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
-        }
-        .portal-card {
-            background: white;
-            padding: 25px 20px;
-            border-radius: 16px;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            cursor: default;
-        }
-        .portal-card:hover {
-            transform: translateY(-5px);
-            border-color: #d4a017;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-        .portal-card .icon {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 10px;
-        }
-        .portal-card h3 {
-            color: #001f5c;
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
-        .portal-card p {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .portal-card .badge {
-            display: inline-block;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-top: 8px;
-        }
-        .portal-card .badge.live {
-            background: #28a745;
-            color: white;
         }
         .portal-section-title {
             text-align: center;
@@ -120,30 +69,35 @@
         .management-section {
             background: white;
             border-radius: 16px;
-            padding: 30px;
-            margin-top: 40px;
+            padding: 40px;
+            margin-top: 20px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             border: 1px solid #e8ecf1;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .management-section h3 {
             color: #001f5c;
             font-size: 24px;
             margin-bottom: 5px;
+            text-align: center;
         }
         .management-section .subtitle {
             color: #666;
             font-size: 14px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            text-align: center;
         }
         .management-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
             margin-top: 15px;
         }
         .management-link {
             background: #f8f9fc;
-            padding: 20px 15px;
+            padding: 25px 15px;
             border-radius: 12px;
             text-align: center;
             text-decoration: none;
@@ -158,7 +112,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
         .management-link .icon {
-            font-size: 32px;
+            font-size: 36px;
             display: block;
             margin-bottom: 5px;
         }
@@ -185,10 +139,12 @@
             display: none !important;
         }
 
+        .portal-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
         @media (max-width: 768px) {
-            .portal-grid {
-                grid-template-columns: 1fr 1fr;
-            }
             .portal-section-title {
                 font-size: 24px;
             }
@@ -196,13 +152,17 @@
                 margin-left: 0;
                 margin-top: 10px;
             }
-        }
-        @media (max-width: 480px) {
-            .portal-grid {
-                grid-template-columns: 1fr;
+            .management-section {
+                padding: 20px;
+                margin: 10px;
             }
             .management-grid {
                 grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 480px) {
+            .management-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -229,91 +189,13 @@
 
     <main class="portal-container">
         <div class="container">
-            <h1 class="portal-section-title">🏫 Welcome to the School Portal</h1>
-            <p class="portal-section-subtitle">Explore everything about Changara Star Academy</p>
-
-            <!-- ===== SCHOOL CONTENT SECTION ===== -->
-            <div class="portal-grid">
-                <div class="portal-card">
-                    <span class="icon">🏠</span>
-                    <h3>Home Page</h3>
-                    <p id="displayHomeMessage">Loading...</p>
-                </div>
-
-                <a href="about.html" class="portal-card">
-                    <span class="icon">📖</span>
-                    <h3>About Us</h3>
-                    <p id="displayAbout">Loading...</p>
-                    <span class="badge live">Live</span>
-                </a>
-
-                <div class="portal-card">
-                    <span class="icon">📚</span>
-                    <h3>Academics</h3>
-                    <p id="displayAcademics">Loading...</p>
-                </div>
-
-                <div class="portal-card">
-                    <span class="icon">📝</span>
-                    <h3>Admissions</h3>
-                    <p id="displayAdmissions">Loading...</p>
-                </div>
-
-                <div class="portal-card">
-                    <span class="icon">🏫</span>
-                    <h3>School Facilities</h3>
-                    <p id="displayFacilities">Loading...</p>
-                </div>
-
-                <div class="portal-card">
-                    <span class="icon">🖼️</span>
-                    <h3>Gallery</h3>
-                    <p id="displayGallery">Loading...</p>
-                </div>
-
-                <div class="portal-card">
-                    <span class="icon">📰</span>
-                    <h3>News & Events</h3>
-                    <p id="displayNews">Loading...</p>
-                </div>
-
-                <div class="portal-card">
-                    <span class="icon">⚽</span>
-                    <h3>Co-curricular Activities</h3>
-                    <p id="displayCoCurricular">Loading...</p>
-                </div>
-
-                <div class="portal-card">
-                    <span class="icon">🏆</span>
-                    <h3>Academic Performance</h3>
-                    <p id="displayPerformance">Loading...</p>
-                </div>
-
-                <div class="portal-card">
-                    <span class="icon">👨‍👩‍👧‍👦</span>
-                    <h3>Parents Corner</h3>
-                    <p id="displayParents">Loading...</p>
-                </div>
-
-                <div class="portal-card">
-                    <span class="icon">📄</span>
-                    <h3>Downloads</h3>
-                    <p id="displayDownloads">Loading...</p>
-                </div>
-
-                <div class="portal-card">
-                    <span class="icon">💰</span>
-                    <h3>Fees Structure</h3>
-                    <p id="displayFees">Loading...</p>
-                </div>
-            </div>
+            <h1 class="portal-section-title">🔐 School Management Portal</h1>
+            <p class="portal-section-subtitle">Manage school operations, staff, visitors, and content</p>
 
             <!-- ===== MANAGEMENT SECTION ===== -->
             <div class="management-section">
-                <h3>🔐 School Management</h3>
-                <p class="subtitle">Manage school operations, staff, visitors, and content</p>
                 <div class="management-grid">
-                    <!-- ADMIN LOGIN - Only one login button -->
+                    <!-- ADMIN LOGIN -->
                     <a href="admin-login.html" class="management-link" style="background:#d4a017;color:#001f5c;font-weight:bold;border-color:#d4a017;">
                         <span class="icon">⚙️</span>
                         <span>Admin Login</span>
@@ -337,7 +219,7 @@
                 </div>
             </div>
 
-            <div style="text-align:center;margin-top:30px;">
+            <div class="portal-actions">
                 <a href="index.html" class="btn-secondary">🏠 Return to Homepage</a>
                 <a href="contact.html" class="btn-secondary" style="margin-left:10px;">📞 Contact Us</a>
             </div>
@@ -345,41 +227,13 @@
     </main>
 
     <script>
-        // Helper function to strip HTML tags
-        function stripHtml(html) {
-            if (!html) return 'Loading...';
-            const tmp = document.createElement('DIV');
-            tmp.innerHTML = html;
-            return tmp.textContent || tmp.innerText || '';
-        }
-
-        // Load portal content from the content API
-        async function loadPortalContent() {
-            try {
-                const response = await fetch('/api/content');
-                const data = await response.json();
-                if (data.success) {
-                    const c = data.content;
-                    
-                    document.getElementById('displayHomeMessage').textContent = stripHtml(c.heroTitle || 'Welcome to Changara Star Academy');
-                    document.getElementById('displayAbout').textContent = stripHtml(c.aboutMission || 'Committed to quality education.');
-                    document.getElementById('displayAcademics').textContent = stripHtml(c.aboutValues || 'Playgroup to Grade 6 - Comprehensive curriculum');
-                    document.getElementById('displayAdmissions').textContent = stripHtml(c.admissionsRequirements || 'Open for registration. Contact us for details.');
-                    document.getElementById('displayFacilities').textContent = stripHtml(c.facilities || 'Modern classrooms, computer lab, library, playground, and more.');
-                    document.getElementById('displayGallery').textContent = stripHtml(c.gallery || 'Check out our school gallery showcasing various activities.');
-                    document.getElementById('displayNews').textContent = stripHtml(c.newsEvents || 'Stay tuned for upcoming events and announcements.');
-                    document.getElementById('displayCoCurricular').textContent = stripHtml(c.coCurricular || 'Football, athletics, music, drama, debate, and clubs.');
-                    document.getElementById('displayPerformance').textContent = stripHtml(c.academicPerformance || 'Excellent academic performance in national examinations.');
-                    document.getElementById('displayParents').textContent = stripHtml(c.parentsCorner || 'Important information for parents including school calendar and policies.');
-                    document.getElementById('displayDownloads').textContent = stripHtml(c.downloads || 'Download admission forms, school calendar, and other documents.');
-                    document.getElementById('displayFees').textContent = stripHtml(c.feesContent || 'View our competitive school fees structure.');
-                }
-            } catch (error) {
-                console.error('Error loading portal content:', error);
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const nav = document.querySelector('.nav-links');
+            if (nav) {
+                nav.classList.toggle('show');
             }
         }
-        
-        document.addEventListener('DOMContentLoaded', loadPortalContent);
     </script>
 </body>
 </html>
