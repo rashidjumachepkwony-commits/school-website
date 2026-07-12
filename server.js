@@ -154,43 +154,6 @@ visitorSchema.set('toObject', { virtuals: true });
 const Visitor = mongoose.model('Visitor', visitorSchema);
 
 // ============================================
-// PORTAL CONTENT SCHEMA
-// ============================================
-const portalContentSchema = new mongoose.Schema({
-  homeTitle: { type: String, default: 'Welcome to Changara Star Academy' },
-  homeSlogan: { type: String, default: 'Your trusted partner in quality education' },
-  homeMessage: { type: String, default: 'We are committed to providing quality education that nurtures talent, builds character, and prepares students for a successful future.' },
-  homeNews: { type: String, default: 'Stay tuned for the latest news and announcements from Changara Star Academy.' },
-  aboutMission: { type: String, default: 'To provide quality education that nurtures talent, builds character, and prepares students for a successful future.' },
-  aboutVision: { type: String, default: 'To be a center of excellence in education, producing well-rounded individuals who contribute positively to society.' },
-  aboutValues: { type: String, default: 'Excellence, Integrity, Respect, Innovation, Community Engagement' },
-  aboutHistory: { type: String, default: 'Changara Star Academy was founded with a vision to provide quality education to the community.' },
-  academics: [{
-    grade: String,
-    subjects: String,
-    learningApproach: String,
-    activities: String,
-    teacherSupport: String
-  }],
-  admissionsRequirements: { type: String, default: 'Admission is open to all students who meet the age requirements.' },
-  admissionsAgeRequirements: { type: String, default: 'Playgroup: 2-3 years, PP1: 4 years, PP2: 5 years, Grade 1: 6 years, Grade 2-6: 7-12 years' },
-  admissionsDocuments: { type: String, default: 'Birth certificate, Previous school records, Passport photo, Parent ID, Medical records' },
-  admissionsProcess: { type: String, default: '1. Visit the school for a tour. 2. Fill the admission form. 3. Submit required documents. 4. Pay registration fee.' },
-  admissionsFees: { type: String, default: 'Please contact the school administration for the current fee structure.' },
-  facilities: { type: String, default: 'Our school is equipped with modern classrooms, a computer laboratory, a well-stocked library, a playground, and a school bus.' },
-  gallery: { type: String, default: 'Check out our gallery featuring classroom learning, Sports Day, music festivals, academic trips, graduation, and prize giving.' },
-  newsEvents: { type: String, default: 'Upcoming events: Opening dates, Parents meetings, Sports competitions, Examination timetable, School trips, Holiday assignments.' },
-  coCurricular: { type: String, default: 'We offer a wide range of activities including Football, Athletics, Music, Drama, Debate, Scouting, Wildlife Club, Agriculture Club, and Computer Club.' },
-  academicPerformance: { type: String, default: 'Our students consistently perform well in national examinations. We celebrate academic excellence and improvement.' },
-  parentsCorner: { type: String, default: 'Find important information including school calendar, homework policy, attendance policy, school rules, uniform requirements, and fee payment information.' },
-  downloads: { type: String, default: 'Download important documents including Admission form, School calendar, Fee structure, Book list, Uniform guide, and School policies.' },
-  lastUpdated: { type: Date, default: Date.now },
-  updatedBy: { type: String, default: 'Admin' }
-});
-
-const PortalContent = mongoose.model('PortalContent', portalContentSchema);
-
-// ============================================
 // API ROUTES - CONTENT
 // ============================================
 
@@ -1173,58 +1136,6 @@ app.delete('/api/visitors/:id', async (req, res) => {
 });
 
 // ============================================
-// PORTAL CONTENT ROUTES
-// ============================================
-
-// GET Portal Content (Public)
-app.get('/api/portal/content', async (req, res) => {
-  try {
-    let content = await PortalContent.findOne();
-    if (!content) {
-      content = await PortalContent.create({});
-    }
-    res.json({ success: true, content });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// UPDATE Portal Content (Admin only)
-app.put('/api/portal/content', async (req, res) => {
-  try {
-    let content = await PortalContent.findOne();
-    if (!content) {
-      content = new PortalContent();
-    }
-    
-    Object.keys(req.body).forEach(key => {
-      if (key === 'academics' && Array.isArray(req.body.academics)) {
-        content.academics = req.body.academics;
-      } else {
-        content[key] = req.body[key];
-      }
-    });
-    
-    content.lastUpdated = new Date();
-    content.updatedBy = req.body.updatedBy || 'Admin';
-    await content.save();
-
-    res.json({
-      success: true,
-      message: 'Portal content updated successfully!',
-      content
-    });
-  } catch (error) {
-    console.error('Portal content update error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error updating portal content',
-      error: error.message
-    });
-  }
-});
-
-// ============================================
 // TEST ROUTE
 // ============================================
 app.get('/api/test', (req, res) => {
@@ -1252,8 +1163,7 @@ app.get('/api/test', (req, res) => {
           today: '/api/visitors/today',
           weekly: '/api/visitors/weekly',
           monthly: '/api/visitors/monthly'
-        },
-        portal: '/api/portal/content'
+        }
       }
     }
   });
@@ -1270,7 +1180,6 @@ app.use(express.static(__dirname));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
-
 
 // ============================================
 // 404 HANDLER - MUST BE LAST!
@@ -1299,7 +1208,6 @@ app.listen(PORT, () => {
   console.log(`👨‍🏫 Manage Teachers: http://localhost:${PORT}/admin-teachers.html`);
   console.log(`🚪 Visitor Check-in: http://localhost:${PORT}/visitor-checkin.html`);
   console.log(`📋 Admin Visitors: http://localhost:${PORT}/admin-visitors.html`);
-  console.log(`📝 Portal Editor: http://localhost:${PORT}/admin-portal-editor.html`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
 });

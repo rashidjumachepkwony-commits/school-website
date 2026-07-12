@@ -186,7 +186,6 @@
             margin-top: 3px;
         }
 
-        /* Hide footer on portal page */
         .main-footer {
             display: none !important;
         }
@@ -213,7 +212,6 @@
     </style>
 </head>
 <body>
-    <!-- ===== HEADER ===== -->
     <header class="main-header">
         <div class="container">
             <div class="logo-section">
@@ -233,13 +231,11 @@
         </div>
     </header>
 
-    <!-- ===== PORTAL CONTENT ===== -->
     <main class="portal-container">
         <div class="container">
             <h1 class="portal-section-title">🏫 Welcome to the School Portal</h1>
             <p class="portal-section-subtitle">Explore everything about Changara Star Academy</p>
 
-            <!-- ===== SCHOOL CONTENT SECTION ===== -->
             <div class="portal-grid">
                 <div class="portal-card">
                     <span class="icon">🏠</span>
@@ -309,7 +305,6 @@
                 </div>
             </div>
 
-            <!-- ===== MANAGEMENT SECTION ===== -->
             <div class="management-section">
                 <h3>🔐 School Management</h3>
                 <p class="subtitle">Manage school operations, staff, visitors, and attendance</p>
@@ -333,11 +328,6 @@
                         <span class="icon">🚪</span>
                         <span>Visitor Management</span>
                         <span class="link-badge">Check-in/out</span>
-                    </a>
-                    <a href="admin-portal-editor.html" class="management-link">
-                        <span class="icon">📝</span>
-                        <span>Portal Editor</span>
-                        <span class="link-badge">Edit Content</span>
                     </a>
                     <a href="teacher-checkin.html" class="management-link" style="border-color:#28a745;">
                         <span class="icon">👨‍🏫</span>
@@ -363,33 +353,25 @@
     </main>
 
     <script>
-        // Load portal content from database
+        // Load portal content from the existing content API
         async function loadPortalContent() {
             try {
-                const response = await fetch('/api/portal/content');
+                const response = await fetch('/api/content');
                 const data = await response.json();
                 if (data.success) {
                     const c = data.content;
                     
-                    document.getElementById('displayHomeMessage').textContent = c.homeMessage || 'Welcome to Changara Star Academy';
+                    document.getElementById('displayHomeMessage').textContent = c.heroTitle || 'Welcome to Changara Star Academy';
                     document.getElementById('displayAbout').textContent = c.aboutMission || 'Committed to quality education.';
-                    
-                    let academicsText = '';
-                    if (c.academics && c.academics.length > 0) {
-                        academicsText = c.academics.map(a => `${a.grade}: ${a.subjects}`).join(', ');
-                    } else {
-                        academicsText = 'Playgroup to Grade 6 - Comprehensive curriculum';
-                    }
-                    document.getElementById('displayAcademics').textContent = academicsText;
-                    
-                    document.getElementById('displayAdmissions').textContent = c.admissionsRequirements || 'Open for registration. Contact us for details.';
-                    document.getElementById('displayFacilities').textContent = c.facilities || 'Modern classrooms, computer lab, library, playground, and more.';
-                    document.getElementById('displayGallery').textContent = c.gallery || 'Check out our school gallery showcasing various activities.';
-                    document.getElementById('displayNews').textContent = c.newsEvents || 'Stay tuned for upcoming events and announcements.';
-                    document.getElementById('displayCoCurricular').textContent = c.coCurricular || 'Football, athletics, music, drama, debate, and clubs.';
-                    document.getElementById('displayPerformance').textContent = c.academicPerformance || 'Excellent academic performance in national examinations.';
-                    document.getElementById('displayParents').textContent = c.parentsCorner || 'Important information for parents including school calendar and policies.';
-                    document.getElementById('displayDownloads').textContent = c.downloads || 'Download admission forms, school calendar, and other documents.';
+                    document.getElementById('displayAcademics').textContent = c.aboutValues || 'Playgroup to Grade 6 - Comprehensive curriculum';
+                    document.getElementById('displayAdmissions').textContent = c.footerText || 'Open for registration. Contact us for details.';
+                    document.getElementById('displayFacilities').textContent = 'Modern classrooms, computer lab, library, playground, and more.';
+                    document.getElementById('displayGallery').textContent = 'Check out our school gallery showcasing various activities.';
+                    document.getElementById('displayNews').textContent = 'Stay tuned for upcoming events and announcements.';
+                    document.getElementById('displayCoCurricular').textContent = 'Football, athletics, music, drama, debate, and clubs.';
+                    document.getElementById('displayPerformance').textContent = 'Excellent academic performance in national examinations.';
+                    document.getElementById('displayParents').textContent = 'Important information for parents including school calendar and policies.';
+                    document.getElementById('displayDownloads').textContent = 'Download admission forms, school calendar, and other documents.';
                 }
             } catch (error) {
                 console.error('Error loading portal content:', error);

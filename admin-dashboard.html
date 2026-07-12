@@ -57,10 +57,6 @@
             background: rgba(212, 160, 23, 0.2);
             color: #d4a017;
         }
-        .sidebar-menu a.active {
-            background: rgba(212, 160, 23, 0.2);
-            color: #d4a017;
-        }
         .sidebar-menu .logout {
             margin-top: 30px;
             border-top: 1px solid rgba(255,255,255,0.1);
@@ -245,7 +241,6 @@
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-brand">
             <h2>🏫 Admin</h2>
@@ -257,14 +252,12 @@
             <a href="admin-attendance.html">📋 Teacher Attendance</a>
             <a href="admin-teachers.html">👨‍🏫 Manage Teachers</a>
             <a href="admin-visitors.html">🚪 Visitor Management</a>
-            <a href="admin-portal-editor.html">📝 Portal Editor</a>
             <div class="logout">
                 <a onclick="logout()">🚪 Logout</a>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="header">
             <h1>Admin Dashboard</h1>
@@ -276,7 +269,6 @@
 
         <div id="alert" class="alert"></div>
 
-        <!-- Dashboard Section -->
         <div id="section-dashboard" class="editor-section active">
             <div class="dashboard-cards">
                 <div class="card">
@@ -308,11 +300,9 @@
                 <button class="btn-primary" onclick="window.location.href='admin-teachers.html'" style="margin-left:10px;">👨‍🏫 Manage Teachers</button>
                 <button class="btn-primary" onclick="window.location.href='admin-attendance.html'" style="margin-left:10px;">📋 Attendance</button>
                 <button class="btn-primary" onclick="window.location.href='admin-visitors.html'" style="margin-left:10px;">🚪 Visitors</button>
-                <button class="btn-primary" onclick="window.location.href='admin-portal-editor.html'" style="margin-left:10px;">📝 Portal Editor</button>
             </div>
         </div>
 
-        <!-- Content Editor Section -->
         <div id="section-content" class="editor-section">
             <h2>📝 Website Content Editor</h2>
             <form id="contentForm">
@@ -380,13 +370,8 @@
     </div>
 
     <script>
-        // ============================================
-        // CHECK LOGIN STATUS - RUNS IMMEDIATELY
-        // ============================================
         (function() {
             console.log('🔐 Checking authentication...');
-            console.log('📦 Token from localStorage:', localStorage.getItem('adminToken'));
-            
             const token = localStorage.getItem('adminToken');
             if (!token) {
                 console.log('❌ No token found. Redirecting to login...');
@@ -396,25 +381,15 @@
             console.log('✅ Token found. User is authenticated.');
         })();
 
-        // ============================================
-        // LOAD DASHBOARD AFTER AUTH CHECK
-        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('📄 Dashboard DOM loaded. Initializing...');
-            
             const admin = JSON.parse(localStorage.getItem('admin') || '{}');
-            console.log('👤 Admin data:', admin);
-            
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
-            
             loadContent();
             loadTeacherCount();
         });
 
-        // ============================================
-        // LOAD TEACHER COUNT
-        // ============================================
         async function loadTeacherCount() {
             try {
                 const response = await fetch('/api/teachers');
@@ -427,9 +402,6 @@
             }
         }
 
-        // ============================================
-        // SHOW SECTION
-        // ============================================
         function showSection(section) {
             document.querySelectorAll('.editor-section').forEach(el => {
                 el.classList.remove('active');
@@ -440,9 +412,6 @@
             document.getElementById('section-' + section).classList.add('active');
         }
 
-        // ============================================
-        // LOGOUT
-        // ============================================
         function logout() {
             console.log('🚪 Logging out...');
             localStorage.removeItem('adminToken');
@@ -450,9 +419,6 @@
             window.location.href = 'admin-login.html';
         }
 
-        // ============================================
-        // LOAD CONTENT FROM SERVER
-        // ============================================
         async function loadContent() {
             console.log('📥 Loading content...');
             try {
@@ -485,9 +451,6 @@
             }
         }
 
-        // ============================================
-        // SAVE CONTENT
-        // ============================================
         document.getElementById('contentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -511,8 +474,6 @@
                 footerText: document.getElementById('footerText').value
             };
             
-            console.log('💾 Saving content:', data);
-            
             try {
                 const response = await fetch('/api/content', {
                     method: 'PUT',
@@ -521,7 +482,6 @@
                 });
                 
                 const result = await response.json();
-                console.log('💾 Save response:', result);
                 
                 if (result.success) {
                     showAlert('✅ Content saved successfully!', 'success');
@@ -534,15 +494,11 @@
             }
         });
 
-        // ============================================
-        // SHOW ALERT
-        // ============================================
         function showAlert(message, type) {
             const alertEl = document.getElementById('alert');
             alertEl.className = 'alert ' + type;
             alertEl.textContent = message;
             alertEl.style.display = 'block';
-            
             setTimeout(() => {
                 alertEl.style.display = 'none';
             }, 4000);
