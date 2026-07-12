@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS - Changara Star Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #0a1628, #1a2a4a);
+            color: white;
+            padding: 20px 0;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        .sidebar-brand {
+            padding: 0 20px 25px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .sidebar-brand .logo-icon {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .sidebar-brand h2 {
+            color: #ffeb99;
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .sidebar-brand p {
+            color: #d4a017;
+            font-size: 13px;
+        }
+        .sidebar-menu {
+            padding: 15px;
+        }
+        .sidebar-menu .menu-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            padding: 10px;
+            letter-spacing: 1.5px;
+        }
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 2px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .sidebar-menu a i {
+            width: 20px;
+            font-size: 15px;
+            text-align: center;
+        }
+        .sidebar-menu a:hover {
+            background: rgba(212,160,23,0.15);
+            color: #d4a017;
+        }
+        .sidebar-menu a.active {
+            background: rgba(212,160,23,0.2);
+            color: #d4a017;
+        }
+        .sidebar-menu .logout {
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 15px;
+        }
+        .sidebar-menu .logout a {
+            color: rgba(255,107,107,0.7);
+        }
+        .sidebar-menu .logout a:hover {
+            color: #ff6b6b;
+            background: rgba(255,107,107,0.1);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 25px 30px;
+            width: 100%;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e8ecf1;
+        }
+        .header h1 {
+            color: #1a2a4a;
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .header h1 i {
+            color: #d4a017;
+            margin-right: 10px;
+        }
+        .header .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 5px 16px 5px 5px;
+            border-radius: 50px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .header .admin-info .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d4a017, #f5c842);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2a4a;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+            font-weight: 500;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        }
+        .alert.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .editor-container {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+        .editor-container h2 {
+            color: #1a2a4a;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .editor-container .desc {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e8ecf1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+            font-family: inherit;
+            background: #fafbfc;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #d4a017;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(212,160,23,0.1);
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* TinyMCE Styles */
+        .tox-tinymce {
+            border-radius: 8px !important;
+            border: 2px solid #e8ecf1 !important;
+        }
+        .tox-tinymce:focus-within {
+            border-color: #d4a017 !important;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #d4a017, #f5c842);
+            color: #1a2a4a;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212,160,23,0.35);
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40,167,69,0.35);
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-block {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .section-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .section-tabs button {
+            padding: 8px 16px;
+            border: 2px solid #e8ecf1;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+        .section-tabs button:hover {
+            border-color: #d4a017;
+        }
+        .section-tabs button.active {
+            background: #0b5394;
+            color: white;
+            border-color: #0b5394;
+        }
+
+        .panel {
+            display: none;
+        }
+        .panel.active {
+            display: block;
+        }
+
+        .upload-area {
+            background: #f8f9fc;
+            border: 2px dashed #d4a017;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #0b5394;
+            background: #f0f4ff;
+        }
+        .upload-area .icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .upload-area h3 {
+            color: #001f5c;
+            margin-bottom: 5px;
+        }
+        .upload-area p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .upload-area .file-types {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .upload-area .file-types span {
+            background: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .upload-progress {
+            display: none;
+            margin-top: 15px;
+        }
+        .progress-bar {
+            background: #e8ecf1;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+        }
+        .progress-bar .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #d4a017, #f5c842);
+            transition: width 0.3s;
+        }
+        .upload-status {
+            margin-top: 5px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .uploaded-preview {
+            margin-top: 15px;
+            display: none;
+        }
+        .uploaded-preview .preview-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #d4a017;
+            display: inline-block;
+        }
+        .uploaded-preview img,
+        .uploaded-preview video {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 6px;
+        }
+        .uploaded-preview audio {
+            width: 250px;
+        }
+        .uploaded-preview .file-info {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .uploaded-preview .file-path {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .item-box {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .item-box .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .item-box .remove-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+        .item-box .file-preview {
+            margin-top: 8px;
+            padding: 8px;
+            background: #e8ecf1;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .item-box .file-preview img,
+        .item-box .file-preview video {
+            max-width: 100px;
+            max-height: 80px;
+            border-radius: 4px;
+        }
+        .item-box .file-preview audio {
+            width: 150px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+        .empty-state i {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 10px;
+            color: #ddd;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                min-height: auto;
+                padding: 10px 0;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .section-tabs button {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+            .alert {
+                max-width: 90%;
+                right: 5%;
+            }
+            .file-types {
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== SIDEBAR ===== -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <span class="logo-icon">🏫</span>
+            <h2>CMS</h2>
+            <p>Changara Star Academy</p>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-label">Content Management</div>
+            <a class="active" onclick="switchTab('home')"><i class="fas fa-home"></i> Home</a>
+            <a onclick="switchTab('about')"><i class="fas fa-info-circle"></i> About</a>
+            <a onclick="switchTab('academics')"><i class="fas fa-book"></i> Academics</a>
+            <a onclick="switchTab('admissions')"><i class="fas fa-file-alt"></i> Admissions</a>
+            <a onclick="switchTab('facilities')"><i class="fas fa-school"></i> Facilities</a>
+            <a onclick="switchTab('gallery')"><i class="fas fa-images"></i> Gallery</a>
+            <a onclick="switchTab('events')"><i class="fas fa-calendar-alt"></i> Events</a>
+            <a onclick="switchTab('cocurricular')"><i class="fas fa-futbol"></i> Co-curricular</a>
+            <a onclick="switchTab('performance')"><i class="fas fa-trophy"></i> Performance</a>
+            <a onclick="switchTab('parents')"><i class="fas fa-users"></i> Parents</a>
+            <a onclick="switchTab('downloads')"><i class="fas fa-download"></i> Downloads</a>
+            <a onclick="switchTab('contact')"><i class="fas fa-phone"></i> Contact</a>
+            <a onclick="switchTab('seo')"><i class="fas fa-search"></i> SEO</a>
+            <div class="logout">
+                <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="main-content">
+        <div class="header">
+            <h1><i class="fas fa-edit"></i> Visual Content Editor</h1>
+            <div class="admin-info">
+                <div class="avatar" id="adminAvatar">A</div>
+                <span class="name" id="adminName">Admin</span>
+            </div>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <!-- ===== HOME PANEL ===== -->
+        <div id="panel-home" class="panel active">
+            <div class="editor-container">
+                <h2>🏠 Home Page</h2>
+                <p class="desc">Edit the main content displayed on the home page.</p>
+
+                <div class="form-group">
+                    <label>Hero Title</label>
+                    <input type="text" id="heroTitle" placeholder="Main hero title">
+                </div>
+                <div class="form-group">
+                    <label>Hero Subtitle</label>
+                    <textarea id="heroSubtitle" rows="2" placeholder="Hero subtitle"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Hero Button Text</label>
+                    <input type="text" id="heroButtonText" placeholder="Button text">
+                </div>
+                <div class="form-group">
+                    <label>Hero Button Link</label>
+                    <input type="text" id="heroButtonLink" placeholder="/about.html" value="/about.html">
+                </div>
+
+                <h3 style="margin-top:20px;color:#1a2a4a;font-size:16px;">📌 Features</h3>
+                <div id="featuresContainer"></div>
+                <button class="btn btn-primary" onclick="addFeature()">➕ Add Feature</button>
+
+                <h3 style="margin-top:20px;color:#1a2a4a;font-size:16px;">📊 Statistics</h3>
+                <div id="statsContainer"></div>
+                <button class="btn btn-primary" onclick="addStat()">➕ Add Stat</button>
+
+                <h3 style="margin-top:20px;color:#1a2a4a;font-size:16px;">📰 News & Announcements</h3>
+                <div id="newsContainer"></div>
+                <button class="btn btn-primary" onclick="addNews()">➕ Add News</button>
+            </div>
+        </div>
+
+        <!-- ===== ABOUT PANEL ===== -->
+        <div id="panel-about" class="panel">
+            <div class="editor-container">
+                <h2>📖 About Page</h2>
+                <p class="desc">Edit the About Us page content with full formatting options.</p>
+
+                <div class="form-group">
+                    <label>Mission Statement</label>
+                    <textarea id="aboutMission" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Vision Statement</label>
+                    <textarea id="aboutVision" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Core Values</label>
+                    <textarea id="aboutValues" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>School History</label>
+                    <textarea id="aboutHistory" class="tinymce-editor" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>School Motto</label>
+                    <input type="text" id="aboutMotto" placeholder="School motto">
+                </div>
+                <div class="form-group">
+                    <label>Why Choose Us</label>
+                    <textarea id="aboutWhy" class="tinymce-editor" rows="4"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ACADEMICS PANEL ===== -->
+        <div id="panel-academics" class="panel">
+            <div class="editor-container">
+                <h2>📚 Academics</h2>
+                <p class="desc">Manage grades, subjects, and learning approaches.</p>
+                <div id="academicsContainer"></div>
+                <button class="btn btn-primary" onclick="addAcademic()">➕ Add Grade</button>
+            </div>
+        </div>
+
+        <!-- ===== ADMISSIONS PANEL ===== -->
+        <div id="panel-admissions" class="panel">
+            <div class="editor-container">
+                <h2>📝 Admissions</h2>
+                <p class="desc">Edit admissions requirements and process.</p>
+
+                <div class="form-group">
+                    <label>Admission Requirements</label>
+                    <textarea id="admissionsRequirements" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Age Requirements</label>
+                    <textarea id="admissionsAge" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Documents Needed</label>
+                    <textarea id="admissionsDocuments" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Admission Process</label>
+                    <textarea id="admissionsProcess" class="tinymce-editor" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>School Fees</label>
+                    <textarea id="admissionsFees" class="tinymce-editor" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== FACILITIES PANEL ===== -->
+        <div id="panel-facilities" class="panel">
+            <div class="editor-container">
+                <h2>🏫 Facilities</h2>
+                <p class="desc">Manage school facilities with images.</p>
+                <div id="facilitiesContainer"></div>
+                <button class="btn btn-primary" onclick="addFacility()">➕ Add Facility</button>
+            </div>
+        </div>
+
+        <!-- ===== GALLERY PANEL ===== -->
+        <div id="panel-gallery" class="panel">
+            <div class="editor-container">
+                <h2>🖼️ Gallery</h2>
+                <p class="desc">Manage images, videos, and audio files.</p>
+
+                <!-- Upload Area -->
+                <div class="upload-area" id="uploadArea">
+                    <span class="icon">📤</span>
+                    <h3>Upload Media</h3>
+                    <p>Upload images, videos, or audio files to use in the gallery.</p>
+                    <div class="file-types">
+                        <span>🖼️ Images (JPG, PNG, GIF)</span>
+                        <span>🎬 Videos (MP4, WebM)</span>
+                        <span>🎵 Audio (MP3, WAV, OGG)</span>
+                    </div>
+                    <input type="file" id="fileUpload" accept="image/*,video/*,audio/*" style="display:none;" onchange="uploadFile()">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileUpload').click()">
+                        <i class="fas fa-upload"></i> Choose File
+                    </button>
+
+                    <div class="upload-progress" id="uploadProgress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <p class="upload-status" id="uploadStatus">Uploading... 0%</p>
+                    </div>
+
+                    <div class="uploaded-preview" id="uploadedPreview">
+                        <div class="preview-box">
+                            <div id="mediaPreview"></div>
+                            <div class="file-info" id="fileInfo">✅ Uploaded Successfully!</div>
+                            <div class="file-path" id="filePath"></div>
+                            <button class="btn btn-success add-btn" onclick="addUploadedToGallery()">
+                                <i class="fas fa-plus"></i> Add to Gallery
+                            </button>
+                            <button class="btn btn-danger add-btn" onclick="cancelUpload()" style="margin-left:5px;">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="galleryContainer"></div>
+                <button class="btn btn-primary" onclick="addGalleryItem()">➕ Add Manually</button>
+            </div>
+        </div>
+
+        <!-- ===== EVENTS PANEL ===== -->
+        <div id="panel-events" class="panel">
+            <div class="editor-container">
+                <h2>📰 Events</h2>
+                <p class="desc">Manage news and events with full formatting.</p>
+                <div id="eventsContainer"></div>
+                <button class="btn btn-primary" onclick="addEvent()">➕ Add Event</button>
+            </div>
+        </div>
+
+        <!-- ===== CO-CURRICULAR PANEL ===== -->
+        <div id="panel-cocurricular" class="panel">
+            <div class="editor-container">
+                <h2>⚽ Co-curricular Activities</h2>
+                <p class="desc">Manage co-curricular activities.</p>
+                <div id="cocurricularContainer"></div>
+                <button class="btn btn-primary" onclick="addCocurricular()">➕ Add Activity</button>
+            </div>
+        </div>
+
+        <!-- ===== PERFORMANCE PANEL ===== -->
+        <div id="panel-performance" class="panel">
+            <div class="editor-container">
+                <h2>🏆 Academic Performance</h2>
+                <p class="desc">Edit academic performance information.</p>
+
+                <div class="form-group">
+                    <label>KCPE/KPSEA Results</label>
+                    <textarea id="performanceKcpe" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Internal Examinations</label>
+                    <textarea id="performanceInternal" class="tinymce-editor" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PARENTS PANEL ===== -->
+        <div id="panel-parents" class="panel">
+            <div class="editor-container">
+                <h2>👨‍👩‍👧‍👦 Parents Corner</h2>
+                <p class="desc">Edit parents corner information.</p>
+
+                <div class="form-group">
+                    <label>School Calendar</label>
+                    <textarea id="parentsCalendar" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Homework Policy</label>
+                    <textarea id="parentsHomework" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Attendance Policy</label>
+                    <textarea id="parentsAttendance" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>School Rules</label>
+                    <textarea id="parentsRules" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Uniform Requirements</label>
+                    <textarea id="parentsUniform" class="tinymce-editor" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Fee Payment Information</label>
+                    <textarea id="parentsFees" class="tinymce-editor" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== DOWNLOADS PANEL ===== -->
+        <div id="panel-downloads" class="panel">
+            <div class="editor-container">
+                <h2>📄 Downloads</h2>
+                <p class="desc">Manage downloadable files.</p>
+                <div id="downloadsContainer"></div>
+                <button class="btn btn-primary" onclick="addDownload()">➕ Add Download</button>
+            </div>
+        </div>
+
+        <!-- ===== CONTACT PANEL ===== -->
+        <div id="panel-contact" class="panel">
+            <div class="editor-container">
+                <h2>📞 Contact Information</h2>
+                <p class="desc">Edit contact page information.</p>
+
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="contactAddress" placeholder="School address">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="contactPhone" placeholder="Phone number">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="contactEmail" placeholder="Email address">
+                </div>
+                <div class="form-group">
+                    <label>Working Hours</label>
+                    <input type="text" id="contactHours" placeholder="Working hours">
+                </div>
+                <div class="form-group">
+                    <label>Map Embed Code</label>
+                    <textarea id="contactMap" rows="3" placeholder="Google Maps embed code"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SEO PANEL ===== -->
+        <div id="panel-seo" class="panel">
+            <div class="editor-container">
+                <h2>🔍 SEO Settings</h2>
+                <p class="desc">Edit search engine optimization settings.</p>
+
+                <div class="form-group">
+                    <label>Page Title</label>
+                    <input type="text" id="seoTitle" placeholder="SEO title">
+                </div>
+                <div class="form-group">
+                    <label>Meta Description</label>
+                    <textarea id="seoDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Keywords</label>
+                    <input type="text" id="seoKeywords" placeholder="Keywords separated by commas">
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SAVE BUTTON ===== -->
+        <button class="btn btn-success btn-block" onclick="saveAllContent()">
+            <i class="fas fa-save"></i> Save All Content
+        </button>
+    </div>
+
+    <script>
+        // ============================================
+        // CHECK AUTH
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+            const admin = JSON.parse(localStorage.getItem('admin') || '{}');
+            document.getElementById('adminName').textContent = admin.fullName || 'Admin';
+            document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
+            initTinyMCE();
+            loadContent();
+        });
+
+        // ============================================
+        // INIT TINYMCE
+        // ============================================
+        function initTinyMCE() {
+            tinymce.init({
+                selector: '.tinymce-editor',
+                height: 200,
+                menubar: true,
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                ],
+                toolbar: 'undo redo | blocks | ' +
+                    'bold italic backcolor | alignleft aligncenter ' +
+                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                    'removeformat | help',
+                content_style: 'body { font-family:Segoe UI, Arial, sans-serif; font-size:16px; }',
+                branding: false,
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+                }
+            });
+        }
+
+        // ============================================
+        // GET TINYMCE CONTENT
+        // ============================================
+        function getEditorContent(id) {
+            const editor = tinymce.get(id);
+            if (editor) {
+                return editor.getContent();
+            }
+            return document.getElementById(id).value;
+        }
+
+        // ============================================
+        // SWITCH TAB
+        // ============================================
+        function switchTab(tab) {
+            document.querySelectorAll('.sidebar-menu a').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+            document.getElementById('panel-' + tab).classList.add('active');
+
+            document.querySelectorAll('.sidebar-menu a').forEach(el => {
+                const text = el.textContent.toLowerCase().trim();
+                if (text.includes(tab) || text === tab) {
+                    el.classList.add('active');
+                }
+            });
+
+            // Re-initialize TinyMCE for the active panel
+            setTimeout(() => {
+                tinymce.remove();
+                initTinyMCE();
+                // Populate editors with content
+                const activePanel = document.querySelector('.panel.active');
+                if (activePanel) {
+                    const editors = activePanel.querySelectorAll('.tinymce-editor');
+                    editors.forEach(editor => {
+                        const content = editor.value;
+                        if (content) {
+                            tinymce.get(editor.id).setContent(content);
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        // ============================================
+        // SHOW ALERT
+        // ============================================
+        function showAlert(message, type) {
+            const alertEl = document.getElementById('alert');
+            alertEl.className = 'alert ' + type;
+            alertEl.textContent = message;
+            alertEl.style.display = 'block';
+            setTimeout(() => {
+                alertEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // ============================================
+        // LOAD CONTENT
+        // ============================================
+        async function loadContent() {
+            try {
+                const response = await fetch('/api/content');
+                const data = await response.json();
+                if (data.success) {
+                    const c = data.content;
+                    populateAllFields(c);
+                }
+            } catch (error) {
+                console.error('Error loading content:', error);
+                showAlert('Error loading content', 'error');
+            }
+        }
+
+        // ============================================
+        // POPULATE ALL FIELDS
+        // ============================================
+        function populateAllFields(c) {
+            // Home
+            document.getElementById('heroTitle').value = c.heroTitle || '';
+            document.getElementById('heroSubtitle').value = c.heroSubtitle || '';
+            document.getElementById('heroButtonText').value = c.heroButtonText || 'Learn More';
+            document.getElementById('heroButtonLink').value = c.heroButtonLink || '/about.html';
+
+            renderItems('featuresContainer', c.homeFeatures || [], 'feature');
+            renderItems('statsContainer', c.homeStats || [], 'stat');
+            renderItems('newsContainer', c.homeNews || [], 'news');
+
+            // About (TinyMCE will populate later)
+            document.getElementById('aboutMission').value = c.aboutMission || '';
+            document.getElementById('aboutVision').value = c.aboutVision || '';
+            document.getElementById('aboutValues').value = c.aboutValues || '';
+            document.getElementById('aboutHistory').value = c.aboutHistory || '';
+            document.getElementById('aboutMotto').value = c.aboutMotto || 'Excellence in Education';
+            document.getElementById('aboutWhy').value = c.aboutWhy || '';
+
+            // Academics
+            renderItems('academicsContainer', c.academics || [], 'academic');
+
+            // Admissions
+            document.getElementById('admissionsRequirements').value = c.admissionsRequirements || '';
+            document.getElementById('admissionsAge').value = c.admissionsAge || '';
+            document.getElementById('admissionsDocuments').value = c.admissionsDocuments || '';
+            document.getElementById('admissionsProcess').value = c.admissionsProcess || '';
+            document.getElementById('admissionsFees').value = c.admissionsFees || '';
+
+            // Facilities
+            renderItems('facilitiesContainer', c.facilities || [], 'facility');
+
+            // Gallery
+            renderItems('galleryContainer', c.gallery || [], 'gallery');
+
+            // Events
+            renderItems('eventsContainer', c.events || [], 'event');
+
+            // Co-curricular
+            renderItems('cocurricularContainer', c.coCurricular || [], 'cocurricular');
+
+            // Performance
+            document.getElementById('performanceKcpe').value = c.performanceKcpe || '';
+            document.getElementById('performanceInternal').value = c.performanceInternal || '';
+
+            // Parents
+            document.getElementById('parentsCalendar').value = c.parentsCalendar || '';
+            document.getElementById('parentsHomework').value = c.parentsHomework || '';
+            document.getElementById('parentsAttendance').value = c.parentsAttendance || '';
+            document.getElementById('parentsRules').value = c.parentsRules || '';
+            document.getElementById('parentsUniform').value = c.parentsUniform || '';
+            document.getElementById('parentsFees').value = c.parentsFees || '';
+
+            // Downloads
+            renderItems('downloadsContainer', c.downloads || [], 'download');
+
+            // Contact
+            document.getElementById('contactAddress').value = c.contactAddress || 'Nairobi, Kenya';
+            document.getElementById('contactPhone').value = c.contactPhone || '+254 721 556 252';
+            document.getElementById('contactEmail').value = c.contactEmail || 'starchangara@gmail.com';
+            document.getElementById('contactHours').value = c.contactHours || 'Monday - Friday: 7:00 AM - 6:00 PM';
+            document.getElementById('contactMap').value = c.contactMap || '';
+
+            // SEO
+            document.getElementById('seoTitle').value = c.seoTitle || '';
+            document.getElementById('seoDescription').value = c.seoDescription || '';
+            document.getElementById('seoKeywords').value = c.seoKeywords || '';
+        }
+
+        // ============================================
+        // RENDER ITEMS
+        // ============================================
+        function renderItems(containerId, items, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (!items || items.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-plus-circle"></i>No items added yet. Click "Add" to add one.</div>`;
+                return;
+            }
+
+            items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'item-box';
+
+                let fieldsHtml = '';
+
+                switch (type) {
+                    case 'feature':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Icon</label>
+                                    <input type="text" class="field-icon" value="${item.icon || '📚'}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Title</label>
+                                    <input type="text" class="field-title" value="${item.title || ''}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" class="field-description" value="${item.description || ''}">
+                            </div>
+                        `;
+                        break;
+                    case 'stat':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Number</label>
+                                    <input type="text" class="field-number" value="${item.number || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Label</label>
+                                    <input type="text" class="field-label" value="${item.label || ''}">
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'news':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" class="field-title" value="${item.title || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label>Content</label>
+                                <textarea class="field-content" rows="2">${item.content || ''}</textarea>
+                            </div>
+                        `;
+                        break;
+                    case 'academic':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Grade</label>
+                                    <input type="text" class="field-grade" value="${item.grade || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Subjects</label>
+                                    <input type="text" class="field-subjects" value="${item.subjects || ''}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Learning Approach</label>
+                                <input type="text" class="field-approach" value="${item.learningApproach || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label>Activities</label>
+                                <input type="text" class="field-activities" value="${item.activities || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label>Teacher Support</label>
+                                <input type="text" class="field-support" value="${item.teacherSupport || ''}">
+                            </div>
+                        `;
+                        break;
+                    case 'facility':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" class="field-name" value="${item.name || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <input type="text" class="field-description" value="${item.description || ''}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Image URL</label>
+                                <input type="text" class="field-image" value="${item.image || ''}" placeholder="/uploads/images/facility.jpg">
+                            </div>
+                            ${item.image ? `<div class="file-preview"><img src="${item.image}" alt="Preview" style="max-width:100px;max-height:80px;border-radius:4px;"><span>${item.image}</span></div>` : ''}
+                        `;
+                        break;
+                    case 'gallery':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Title</label>
+                                    <input type="text" class="field-title" value="${item.title || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <input type="text" class="field-category" value="${item.category || ''}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>File URL</label>
+                                <input type="text" class="field-file" value="${item.file || ''}" placeholder="/uploads/images/file.jpg">
+                            </div>
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select class="field-type">
+                                    <option value="image" ${item.type === 'image' ? 'selected' : ''}>🖼️ Image</option>
+                                    <option value="video" ${item.type === 'video' ? 'selected' : ''}>🎬 Video</option>
+                                    <option value="audio" ${item.type === 'audio' ? 'selected' : ''}>🎵 Audio</option>
+                                </select>
+                            </div>
+                            ${item.file ? `<div class="file-preview">${getMediaPreview(item.file, item.type || 'image')}</div>` : ''}
+                        `;
+                        break;
+                    case 'event':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Title</label>
+                                    <input type="text" class="field-title" value="${item.title || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <input type="text" class="field-category" value="${item.category || ''}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Content</label>
+                                <textarea class="field-content" rows="2">${item.content || ''}</textarea>
+                            </div>
+                        `;
+                        break;
+                    case 'cocurricular':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" class="field-name" value="${item.name || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <input type="text" class="field-category" value="${item.category || ''}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="field-description" rows="2">${item.description || ''}</textarea>
+                            </div>
+                        `;
+                        break;
+                    case 'download':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" class="field-name" value="${item.name || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Icon</label>
+                                    <input type="text" class="field-icon" value="${item.icon || '📄'}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>File URL</label>
+                                <input type="text" class="field-file" value="${item.file || ''}" placeholder="/downloads/file.pdf">
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" class="field-description" value="${item.description || ''}">
+                            </div>
+                        `;
+                        break;
+                    default:
+                        fieldsHtml = '<p>Unknown item type</p>';
+                }
+
+                div.innerHTML = fieldsHtml;
+                container.appendChild(div);
+            });
+        }
+
+        // ============================================
+        // GET MEDIA PREVIEW
+        // ============================================
+        function getMediaPreview(file, type) {
+            if (!file) return '';
+            if (type === 'image') {
+                return `<img src="${file}" alt="Preview" style="max-width:100px;max-height:80px;border-radius:4px;"><span>${file}</span>`;
+            } else if (type === 'video') {
+                return `<video src="${file}" controls style="max-width:150px;max-height:100px;"></video><span>${file}</span>`;
+            } else if (type === 'audio') {
+                return `<audio src="${file}" controls style="width:150px;"></audio><span>${file}</span>`;
+            }
+            return `<span>${file}</span>`;
+        }
+
+        // ============================================
+        // ADD ITEMS
+        // ============================================
+        function addFeature() {
+            const container = document.getElementById('featuresContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="📚"></div>
+                    <div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="Feature title"></div>
+                </div>
+                <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="Feature description"></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addStat() {
+            const container = document.getElementById('statsContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Number</label><input type="text" class="field-number" placeholder="500+"></div>
+                    <div class="form-group"><label>Label</label><input type="text" class="field-label" placeholder="Students"></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addNews() {
+            const container = document.getElementById('newsContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="News title"></div>
+                <div class="form-group"><label>Content</label><textarea class="field-content" rows="2" placeholder="News content"></textarea></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addAcademic() {
+            const container = document.getElementById('academicsContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Grade</label><input type="text" class="field-grade" placeholder="Grade 1"></div>
+                    <div class="form-group"><label>Subjects</label><input type="text" class="field-subjects" placeholder="Math, English, Science"></div>
+                </div>
+                <div class="form-group"><label>Learning Approach</label><input type="text" class="field-approach" placeholder="Child-centered learning"></div>
+                <div class="form-group"><label>Activities</label><input type="text" class="field-activities" placeholder="Group discussions, Projects"></div>
+                <div class="form-group"><label>Teacher Support</label><input type="text" class="field-support" placeholder="Individual attention"></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addFacility() {
+            const container = document.getElementById('facilitiesContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Name</label><input type="text" class="field-name" placeholder="Facility name"></div>
+                    <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="Facility description"></div>
+                </div>
+                <div class="form-group"><label>Image URL</label><input type="text" class="field-image" placeholder="/uploads/images/facility.jpg"></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addGalleryItem() {
+            const container = document.getElementById('galleryContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="Image title"></div>
+                    <div class="form-group"><label>Category</label><input type="text" class="field-category" placeholder="Category"></div>
+                </div>
+                <div class="form-group"><label>File URL</label><input type="text" class="field-file" placeholder="/uploads/images/photo.jpg"></div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select class="field-type">
+                        <option value="image">🖼️ Image</option>
+                        <option value="video">🎬 Video</option>
+                        <option value="audio">🎵 Audio</option>
+                    </select>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addEvent() {
+            const container = document.getElementById('eventsContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="Event title"></div>
+                    <div class="form-group"><label>Category</label><input type="text" class="field-category" placeholder="Category"></div>
+                </div>
+                <div class="form-group"><label>Content</label><textarea class="field-content" rows="2" placeholder="Event description"></textarea></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addCocurricular() {
+            const container = document.getElementById('cocurricularContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Name</label><input type="text" class="field-name" placeholder="Activity name"></div>
+                    <div class="form-group"><label>Category</label><input type="text" class="field-category" placeholder="Category"></div>
+                </div>
+                <div class="form-group"><label>Description</label><textarea class="field-description" rows="2" placeholder="Activity description"></textarea></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addDownload() {
+            const container = document.getElementById('downloadsContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Name</label><input type="text" class="field-name" placeholder="Download name"></div>
+                    <div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="📄"></div>
+                </div>
+                <div class="form-group"><label>File URL</label><input type="text" class="field-file" placeholder="/downloads/file.pdf"></div>
+                <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="File description"></div>
+            `;
+            container.appendChild(div);
+        }
+
+        // ============================================
+        // REMOVE ITEM
+        // ============================================
+        function removeItem(btn) {
+            const box = btn.closest('.item-box');
+            if (box) {
+                box.remove();
+                const container = box.parentElement;
+                if (container.children.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-plus-circle"></i>No items added yet. Click "Add" to add one.</div>`;
+                }
+            }
+        }
+
+        // ============================================
+        // GET ALL ITEMS DATA
+        // ============================================
+        function getItemsData(containerId, type) {
+            const container = document.getElementById(containerId);
+            const items = [];
+            const boxes = container.querySelectorAll('.item-box');
+
+            boxes.forEach(box => {
+                let item = {};
+                switch (type) {
+                    case 'feature':
+                        item = {
+                            icon: box.querySelector('.field-icon')?.value || '📚',
+                            title: box.querySelector('.field-title')?.value || '',
+                            description: box.querySelector('.field-description')?.value || ''
+                        };
+                        break;
+                    case 'stat':
+                        item = {
+                            number: box.querySelector('.field-number')?.value || '',
+                            label: box.querySelector('.field-label')?.value || ''
+                        };
+                        break;
+                    case 'news':
+                        item = {
+                            title: box.querySelector('.field-title')?.value || '',
+                            content: box.querySelector('.field-content')?.value || ''
+                        };
+                        break;
+                    case 'academic':
+                        item = {
+                            grade: box.querySelector('.field-grade')?.value || '',
+                            subjects: box.querySelector('.field-subjects')?.value || '',
+                            learningApproach: box.querySelector('.field-approach')?.value || '',
+                            activities: box.querySelector('.field-activities')?.value || '',
+                            teacherSupport: box.querySelector('.field-support')?.value || ''
+                        };
+                        break;
+                    case 'facility':
+                        item = {
+                            name: box.querySelector('.field-name')?.value || '',
+                            description: box.querySelector('.field-description')?.value || '',
+                            image: box.querySelector('.field-image')?.value || ''
+                        };
+                        break;
+                    case 'gallery':
+                        item = {
+                            title: box.querySelector('.field-title')?.value || '',
+                            category: box.querySelector('.field-category')?.value || '',
+                            file: box.querySelector('.field-file')?.value || '',
+                            type: box.querySelector('.field-type')?.value || 'image'
+                        };
+                        break;
+                    case 'event':
+                        item = {
+                            title: box.querySelector('.field-title')?.value || '',
+                            category: box.querySelector('.field-category')?.value || '',
+                            content: box.querySelector('.field-content')?.value || ''
+                        };
+                        break;
+                    case 'cocurricular':
+                        item = {
+                            name: box.querySelector('.field-name')?.value || '',
+                            category: box.querySelector('.field-category')?.value || '',
+                            description: box.querySelector('.field-description')?.value || ''
+                        };
+                        break;
+                    case 'download':
+                        item = {
+                            name: box.querySelector('.field-name')?.value || '',
+                            icon: box.querySelector('.field-icon')?.value || '📄',
+                            file: box.querySelector('.field-file')?.value || '',
+                            description: box.querySelector('.field-description')?.value || ''
+                        };
+                        break;
+                }
+                items.push(item);
+            });
+
+            return items;
+        }
+
+        // ============================================
+        // FILE UPLOAD
+        // ============================================
+        let uploadedFileData = null;
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileUpload');
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            if (file.size > 100 * 1024 * 1024) {
+                showAlert('File is too large. Maximum size is 100MB.', 'error');
+                return;
+            }
+
+            document.getElementById('uploadProgress').style.display = 'block';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('uploadStatus').textContent = 'Uploading... 0%';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const xhr = new XMLHttpRequest();
+
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        document.getElementById('progressFill').style.width = percentComplete + '%';
+                        document.getElementById('uploadStatus').textContent = `Uploading... ${Math.round(percentComplete)}%`;
+                    }
+                });
+
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        const result = JSON.parse(xhr.responseText);
+                        if (result.success) {
+                            uploadedFileData = result.file;
+                            document.getElementById('uploadStatus').textContent = '✅ Upload complete!';
+                            document.getElementById('progressFill').style.width = '100%';
+
+                            document.getElementById('uploadedPreview').style.display = 'block';
+                            const previewDiv = document.getElementById('mediaPreview');
+                            const fileType = result.file.type;
+
+                            if (fileType === 'image') {
+                                previewDiv.innerHTML = `<img src="${result.file.path}" alt="Preview">`;
+                            } else if (fileType === 'video') {
+                                previewDiv.innerHTML = `<video src="${result.file.path}" controls style="max-width:200px;max-height:150px;"></video>`;
+                            } else if (fileType === 'audio') {
+                                previewDiv.innerHTML = `<audio src="${result.file.path}" controls style="width:250px;"></audio>`;
+                            } else {
+                                previewDiv.innerHTML = `<span style="font-size:48px;">${result.file.icon || '📄'}</span>`;
+                            }
+
+                            document.getElementById('fileInfo').textContent = `✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} uploaded successfully!`;
+                            document.getElementById('filePath').textContent = `Path: ${result.file.path}`;
+
+                            showAlert(`✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} uploaded successfully!`, 'success');
+                        } else {
+                            showAlert('❌ Upload failed: ' + result.message, 'error');
+                        }
+                    } else {
+                        showAlert('❌ Upload failed. Please try again.', 'error');
+                    }
+                };
+
+                xhr.onerror = function() {
+                    showAlert('❌ Network error. Please try again.', 'error');
+                };
+
+                xhr.open('POST', '/api/upload');
+                xhr.send(formData);
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                showAlert('❌ Error uploading file: ' + error.message, 'error');
+                document.getElementById('uploadProgress').style.display = 'none';
+            }
+        }
+
+        function addUploadedToGallery() {
+            if (!uploadedFileData) {
+                showAlert('No file uploaded yet. Please upload a file first.', 'error');
+                return;
+            }
+
+            const container = document.getElementById('galleryContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" class="field-title" value="${uploadedFileData.originalname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')}">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" class="field-category" value="General">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>File URL</label>
+                    <input type="text" class="field-file" value="${uploadedFileData.path}">
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select class="field-type">
+                        <option value="image" ${uploadedFileData.type === 'image' ? 'selected' : ''}>🖼️ Image</option>
+                        <option value="video" ${uploadedFileData.type === 'video' ? 'selected' : ''}>🎬 Video</option>
+                        <option value="audio" ${uploadedFileData.type === 'audio' ? 'selected' : ''}>🎵 Audio</option>
+                    </select>
+                </div>
+                <div class="file-preview">
+                    ${getMediaPreview(uploadedFileData.path, uploadedFileData.type)}
+                </div>
+            `;
+            container.appendChild(div);
+
+            document.getElementById('uploadedPreview').style.display = 'none';
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('fileUpload').value = '';
+            uploadedFileData = null;
+
+            showAlert('✅ File added to gallery!', 'success');
+        }
+
+        function cancelUpload() {
+            document.getElementById('uploadedPreview').style.display = 'none';
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('fileUpload').value = '';
+            uploadedFileData = null;
+            showAlert('Upload cancelled', 'success');
+        }
+
+        // ============================================
+        // SAVE ALL CONTENT
+        // ============================================
+        async function saveAllContent() {
+            const data = {
+                // Home
+                heroTitle: document.getElementById('heroTitle').value,
+                heroSubtitle: document.getElementById('heroSubtitle').value,
+                heroButtonText: document.getElementById('heroButtonText').value,
+                heroButtonLink: document.getElementById('heroButtonLink').value,
+                homeFeatures: getItemsData('featuresContainer', 'feature'),
+                homeStats: getItemsData('statsContainer', 'stat'),
+                homeNews: getItemsData('newsContainer', 'news'),
+
+                // About (get from TinyMCE)
+                aboutMission: getEditorContent('aboutMission'),
+                aboutVision: getEditorContent('aboutVision'),
+                aboutValues: getEditorContent('aboutValues'),
+                aboutHistory: getEditorContent('aboutHistory'),
+                aboutMotto: document.getElementById('aboutMotto').value,
+                aboutWhy: getEditorContent('aboutWhy'),
+
+                // Academics
+                academics: getItemsData('academicsContainer', 'academic'),
+
+                // Admissions
+                admissionsRequirements: getEditorContent('admissionsRequirements'),
+                admissionsAge: getEditorContent('admissionsAge'),
+                admissionsDocuments: getEditorContent('admissionsDocuments'),
+                admissionsProcess: getEditorContent('admissionsProcess'),
+                admissionsFees: getEditorContent('admissionsFees'),
+
+                // Facilities
+                facilities: getItemsData('facilitiesContainer', 'facility'),
+
+                // Gallery
+                gallery: getItemsData('galleryContainer', 'gallery'),
+
+                // Events
+                events: getItemsData('eventsContainer', 'event'),
+
+                // Co-curricular
+                coCurricular: getItemsData('cocurricularContainer', 'cocurricular'),
+
+                // Performance
+                performanceKcpe: getEditorContent('performanceKcpe'),
+                performanceInternal: getEditorContent('performanceInternal'),
+
+                // Parents
+                parentsCalendar: getEditorContent('parentsCalendar'),
+                parentsHomework: getEditorContent('parentsHomework'),
+                parentsAttendance: getEditorContent('parentsAttendance'),
+                parentsRules: getEditorContent('parentsRules'),
+                parentsUniform: getEditorContent('parentsUniform'),
+                parentsFees: getEditorContent('parentsFees'),
+
+                // Downloads
+                downloads: getItemsData('downloadsContainer', 'download'),
+
+                // Contact
+                contactAddress: document.getElementById('contactAddress').value,
+                contactPhone: document.getElementById('contactPhone').value,
+                contactEmail: document.getElementById('contactEmail').value,
+                contactHours: document.getElementById('contactHours').value,
+                contactMap: document.getElementById('contactMap').value,
+
+                // SEO
+                seoTitle: document.getElementById('seoTitle').value,
+                seoDescription: document.getElementById('seoDescription').value,
+                seoKeywords: document.getElementById('seoKeywords').value
+            };
+
+            try {
+                const response = await fetch('/api/content', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('✅ All content saved successfully!', 'success');
+                } else {
+                    showAlert('❌ Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('❌ Error saving content: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================
+        // LOGOUT
+        // ============================================
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('admin');
+            window.location.href = 'admin-login.html';
+        }
+    </script>
+</body>
+</html>
