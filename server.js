@@ -1271,6 +1271,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+
 // ============================================
 // 404 HANDLER - MUST BE LAST!
 // ============================================
@@ -1301,5 +1302,4 @@ app.listen(PORT, () => {
   console.log(`📝 Portal Editor: http://localhost:${PORT}/admin-portal-editor.html`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
-});/ /   F o r c e   r e b u i l d  
- 
+});
