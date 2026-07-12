@@ -8,11 +8,6 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
     <meta name="description" content="Changara Star Academy School Portal - School content, academics, admissions, and more.">
     <style>
-        /* HIDE FOOTER ON PORTAL PAGE ONLY */
-        .main-footer {
-            display: none !important;
-        }
-
         .portal-container {
             flex: 1;
             width: 100%;
@@ -191,6 +186,11 @@
             margin-top: 3px;
         }
 
+        /* Hide footer on portal page */
+        .main-footer {
+            display: none !important;
+        }
+
         @media (max-width: 768px) {
             .portal-grid {
                 grid-template-columns: 1fr 1fr;
@@ -241,72 +241,72 @@
 
             <!-- ===== SCHOOL CONTENT SECTION ===== -->
             <div class="portal-grid">
+                <div class="portal-card">
+                    <span class="icon">🏠</span>
+                    <h3>Home Page</h3>
+                    <p id="displayHomeMessage">Loading...</p>
+                </div>
+
                 <a href="about.html" class="portal-card">
                     <span class="icon">📖</span>
                     <h3>About Us</h3>
-                    <p>School history, vision, mission, core values, and location</p>
+                    <p id="displayAbout">Loading...</p>
                     <span class="badge live">Live</span>
                 </a>
 
-                <a href="#" class="portal-card">
-                    <span class="icon">🏠</span>
-                    <h3>Home Page</h3>
-                    <p>Welcome message, school slogan, latest news, and announcements</p>
-                </a>
-
-                <a href="#" class="portal-card">
+                <div class="portal-card">
                     <span class="icon">📚</span>
                     <h3>Academics</h3>
-                    <p>Playgroup to Grade 6 - Subjects, activities, and learning approach</p>
-                </a>
+                    <p id="displayAcademics">Loading...</p>
+                </div>
 
-                <a href="#" class="portal-card">
+                <div class="portal-card">
                     <span class="icon">📝</span>
                     <h3>Admissions</h3>
-                    <p>Requirements, process, fees, and online enquiry form</p>
-                </a>
+                    <p id="displayAdmissions">Loading...</p>
+                </div>
 
-                <a href="#" class="portal-card">
+                <div class="portal-card">
                     <span class="icon">🏫</span>
                     <h3>School Facilities</h3>
-                    <p>Classrooms, computer lab, library, playground, and more</p>
-                </a>
+                    <p id="displayFacilities">Loading...</p>
+                </div>
 
-                <a href="#" class="portal-card">
+                <div class="portal-card">
                     <span class="icon">🖼️</span>
                     <h3>Gallery</h3>
-                    <p>Classroom learning, Sports Day, music festivals, and trips</p>
-                </a>
+                    <p id="displayGallery">Loading...</p>
+                </div>
 
-                <a href="#" class="portal-card">
+                <div class="portal-card">
                     <span class="icon">📰</span>
                     <h3>News & Events</h3>
-                    <p>Opening dates, parents' meetings, sports competitions, and more</p>
-                </a>
+                    <p id="displayNews">Loading...</p>
+                </div>
 
-                <a href="#" class="portal-card">
+                <div class="portal-card">
                     <span class="icon">⚽</span>
                     <h3>Co-curricular Activities</h3>
-                    <p>Football, athletics, music, drama, debate, clubs, and more</p>
-                </a>
+                    <p id="displayCoCurricular">Loading...</p>
+                </div>
 
-                <a href="#" class="portal-card">
+                <div class="portal-card">
                     <span class="icon">🏆</span>
                     <h3>Academic Performance</h3>
-                    <p>KCPE/KPSEA results, internal exams, awards, and top performers</p>
-                </a>
+                    <p id="displayPerformance">Loading...</p>
+                </div>
 
-                <a href="#" class="portal-card">
+                <div class="portal-card">
                     <span class="icon">👨‍👩‍👧‍👦</span>
                     <h3>Parents Corner</h3>
-                    <p>School calendar, homework, attendance policy, rules, and fees</p>
-                </a>
+                    <p id="displayParents">Loading...</p>
+                </div>
 
-                <a href="#" class="portal-card">
+                <div class="portal-card">
                     <span class="icon">📄</span>
                     <h3>Downloads</h3>
-                    <p>Admission form, school calendar, fee structure, book list, and more</p>
-                </a>
+                    <p id="displayDownloads">Loading...</p>
+                </div>
             </div>
 
             <!-- ===== MANAGEMENT SECTION ===== -->
@@ -334,6 +334,11 @@
                         <span>Visitor Management</span>
                         <span class="link-badge">Check-in/out</span>
                     </a>
+                    <a href="admin-portal-editor.html" class="management-link">
+                        <span class="icon">📝</span>
+                        <span>Portal Editor</span>
+                        <span class="link-badge">Edit Content</span>
+                    </a>
                     <a href="teacher-checkin.html" class="management-link" style="border-color:#28a745;">
                         <span class="icon">👨‍🏫</span>
                         <span>Staff Check-in</span>
@@ -357,8 +362,41 @@
         </div>
     </main>
 
-    <!-- ===== FOOTER REMOVED - HIDDEN VIA CSS ===== -->
-
-    <script src="js/main.js"></script>
+    <script>
+        // Load portal content from database
+        async function loadPortalContent() {
+            try {
+                const response = await fetch('/api/portal/content');
+                const data = await response.json();
+                if (data.success) {
+                    const c = data.content;
+                    
+                    document.getElementById('displayHomeMessage').textContent = c.homeMessage || 'Welcome to Changara Star Academy';
+                    document.getElementById('displayAbout').textContent = c.aboutMission || 'Committed to quality education.';
+                    
+                    let academicsText = '';
+                    if (c.academics && c.academics.length > 0) {
+                        academicsText = c.academics.map(a => `${a.grade}: ${a.subjects}`).join(', ');
+                    } else {
+                        academicsText = 'Playgroup to Grade 6 - Comprehensive curriculum';
+                    }
+                    document.getElementById('displayAcademics').textContent = academicsText;
+                    
+                    document.getElementById('displayAdmissions').textContent = c.admissionsRequirements || 'Open for registration. Contact us for details.';
+                    document.getElementById('displayFacilities').textContent = c.facilities || 'Modern classrooms, computer lab, library, playground, and more.';
+                    document.getElementById('displayGallery').textContent = c.gallery || 'Check out our school gallery showcasing various activities.';
+                    document.getElementById('displayNews').textContent = c.newsEvents || 'Stay tuned for upcoming events and announcements.';
+                    document.getElementById('displayCoCurricular').textContent = c.coCurricular || 'Football, athletics, music, drama, debate, and clubs.';
+                    document.getElementById('displayPerformance').textContent = c.academicPerformance || 'Excellent academic performance in national examinations.';
+                    document.getElementById('displayParents').textContent = c.parentsCorner || 'Important information for parents including school calendar and policies.';
+                    document.getElementById('displayDownloads').textContent = c.downloads || 'Download admission forms, school calendar, and other documents.';
+                }
+            } catch (error) {
+                console.error('Error loading portal content:', error);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadPortalContent);
+    </script>
 </body>
 </html>
