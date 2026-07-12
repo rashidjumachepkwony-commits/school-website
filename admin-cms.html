@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMS - Changara Star Academy</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- Quill Editor CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- Quill Editor JS -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <style>
         * {
             margin: 0;
@@ -226,13 +229,21 @@
             gap: 16px;
         }
 
-        /* TinyMCE Styles */
-        .tox-tinymce {
-            border-radius: 8px !important;
-            border: 2px solid #e8ecf1 !important;
+        /* Quill Editor Styles */
+        .ql-container {
+            min-height: 200px;
+            border-radius: 0 0 8px 8px;
+            font-size: 15px;
         }
-        .tox-tinymce:focus-within {
-            border-color: #d4a017 !important;
+        .ql-toolbar {
+            border-radius: 8px 8px 0 0;
+            background: #fafbfc;
+        }
+        .ql-editor {
+            min-height: 200px;
+        }
+        .ql-editor p {
+            margin-bottom: 8px;
         }
 
         .btn {
@@ -468,6 +479,9 @@
             margin-bottom: 10px;
             color: #ddd;
         }
+        .ql-editor {
+            min-height: 200px;
+        }
 
         @media (max-width: 768px) {
             .sidebar {
@@ -580,19 +594,19 @@
 
                 <div class="form-group">
                     <label>Mission Statement</label>
-                    <textarea id="aboutMission" class="tinymce-editor" rows="3"></textarea>
+                    <div id="aboutMission" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Vision Statement</label>
-                    <textarea id="aboutVision" class="tinymce-editor" rows="3"></textarea>
+                    <div id="aboutVision" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Core Values</label>
-                    <textarea id="aboutValues" class="tinymce-editor" rows="3"></textarea>
+                    <div id="aboutValues" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>School History</label>
-                    <textarea id="aboutHistory" class="tinymce-editor" rows="4"></textarea>
+                    <div id="aboutHistory" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>School Motto</label>
@@ -600,7 +614,7 @@
                 </div>
                 <div class="form-group">
                     <label>Why Choose Us</label>
-                    <textarea id="aboutWhy" class="tinymce-editor" rows="4"></textarea>
+                    <div id="aboutWhy" class="quill-editor"></div>
                 </div>
             </div>
         </div>
@@ -623,23 +637,23 @@
 
                 <div class="form-group">
                     <label>Admission Requirements</label>
-                    <textarea id="admissionsRequirements" class="tinymce-editor" rows="3"></textarea>
+                    <div id="admissionsRequirements" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Age Requirements</label>
-                    <textarea id="admissionsAge" class="tinymce-editor" rows="3"></textarea>
+                    <div id="admissionsAge" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Documents Needed</label>
-                    <textarea id="admissionsDocuments" class="tinymce-editor" rows="3"></textarea>
+                    <div id="admissionsDocuments" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Admission Process</label>
-                    <textarea id="admissionsProcess" class="tinymce-editor" rows="4"></textarea>
+                    <div id="admissionsProcess" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>School Fees</label>
-                    <textarea id="admissionsFees" class="tinymce-editor" rows="3"></textarea>
+                    <div id="admissionsFees" class="quill-editor"></div>
                 </div>
             </div>
         </div>
@@ -730,11 +744,11 @@
 
                 <div class="form-group">
                     <label>KCPE/KPSEA Results</label>
-                    <textarea id="performanceKcpe" class="tinymce-editor" rows="3"></textarea>
+                    <div id="performanceKcpe" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Internal Examinations</label>
-                    <textarea id="performanceInternal" class="tinymce-editor" rows="3"></textarea>
+                    <div id="performanceInternal" class="quill-editor"></div>
                 </div>
             </div>
         </div>
@@ -747,27 +761,27 @@
 
                 <div class="form-group">
                     <label>School Calendar</label>
-                    <textarea id="parentsCalendar" class="tinymce-editor" rows="3"></textarea>
+                    <div id="parentsCalendar" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Homework Policy</label>
-                    <textarea id="parentsHomework" class="tinymce-editor" rows="3"></textarea>
+                    <div id="parentsHomework" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Attendance Policy</label>
-                    <textarea id="parentsAttendance" class="tinymce-editor" rows="3"></textarea>
+                    <div id="parentsAttendance" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>School Rules</label>
-                    <textarea id="parentsRules" class="tinymce-editor" rows="3"></textarea>
+                    <div id="parentsRules" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Uniform Requirements</label>
-                    <textarea id="parentsUniform" class="tinymce-editor" rows="3"></textarea>
+                    <div id="parentsUniform" class="quill-editor"></div>
                 </div>
                 <div class="form-group">
                     <label>Fee Payment Information</label>
-                    <textarea id="parentsFees" class="tinymce-editor" rows="3"></textarea>
+                    <div id="parentsFees" class="quill-editor"></div>
                 </div>
             </div>
         </div>
@@ -851,47 +865,60 @@
             const admin = JSON.parse(localStorage.getItem('admin') || '{}');
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
-            initTinyMCE();
+            initQuillEditors();
             loadContent();
         });
 
         // ============================================
-        // INIT TINYMCE (NO API KEY REQUIRED)
+        // QUILL EDITORS
         // ============================================
-        function initTinyMCE() {
-            tinymce.init({
-                selector: '.tinymce-editor',
-                height: 250,
-                menubar: true,
-                plugins: [
-                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
-                ],
-                toolbar: 'undo redo | blocks | ' +
-                    'bold italic backcolor | alignleft aligncenter ' +
-                    'alignright alignjustify | bullist numlist outdent indent | ' +
-                    'removeformat | help',
-                content_style: 'body { font-family:Segoe UI, Arial, sans-serif; font-size:16px; }',
-                branding: false,
-                promotion: false,
-                setup: function(editor) {
-                    editor.on('change', function() {
-                        editor.save();
+        let quillEditors = {};
+
+        function initQuillEditors() {
+            const editorIds = [
+                'aboutMission', 'aboutVision', 'aboutValues', 'aboutHistory', 'aboutWhy',
+                'admissionsRequirements', 'admissionsAge', 'admissionsDocuments',
+                'admissionsProcess', 'admissionsFees',
+                'performanceKcpe', 'performanceInternal',
+                'parentsCalendar', 'parentsHomework', 'parentsAttendance',
+                'parentsRules', 'parentsUniform', 'parentsFees'
+            ];
+
+            editorIds.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    quillEditors[id] = new Quill('#' + id, {
+                        theme: 'snow',
+                        placeholder: 'Enter content here...',
+                        modules: {
+                            toolbar: [
+                                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                ['blockquote', 'code-block'],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['link', 'image'],
+                                ['clean']
+                            ]
+                        }
                     });
                 }
             });
         }
 
         // ============================================
-        // GET TINYMCE CONTENT
+        // GET QUILL CONTENT
         // ============================================
-        function getEditorContent(id) {
-            const editor = tinymce.get(id);
-            if (editor) {
-                return editor.getContent();
+        function getQuillContent(id) {
+            if (quillEditors[id]) {
+                return quillEditors[id].root.innerHTML;
             }
-            return document.getElementById(id).value;
+            return '';
+        }
+
+        function setQuillContent(id, content) {
+            if (quillEditors[id]) {
+                quillEditors[id].root.innerHTML = content || '';
+            }
         }
 
         // ============================================
@@ -909,18 +936,15 @@
                 }
             });
 
-            // Re-initialize TinyMCE for the active panel
+            // Refresh Quill editors in the active panel
             setTimeout(() => {
-                tinymce.remove();
-                initTinyMCE();
-                // Populate editors with content
                 const activePanel = document.querySelector('.panel.active');
                 if (activePanel) {
-                    const editors = activePanel.querySelectorAll('.tinymce-editor');
+                    const editors = activePanel.querySelectorAll('.quill-editor');
                     editors.forEach(editor => {
-                        const content = editor.value;
-                        if (content) {
-                            tinymce.get(editor.id).setContent(content);
+                        const id = editor.id;
+                        if (quillEditors[id]) {
+                            quillEditors[id].root.innerHTML = quillEditors[id].root.innerHTML || '';
                         }
                     });
                 }
@@ -971,23 +995,23 @@
             renderItems('statsContainer', c.homeStats || [], 'stat');
             renderItems('newsContainer', c.homeNews || [], 'news');
 
-            // About (TinyMCE will populate later)
-            document.getElementById('aboutMission').value = c.aboutMission || '';
-            document.getElementById('aboutVision').value = c.aboutVision || '';
-            document.getElementById('aboutValues').value = c.aboutValues || '';
-            document.getElementById('aboutHistory').value = c.aboutHistory || '';
+            // About (Quill)
+            setQuillContent('aboutMission', c.aboutMission || '');
+            setQuillContent('aboutVision', c.aboutVision || '');
+            setQuillContent('aboutValues', c.aboutValues || '');
+            setQuillContent('aboutHistory', c.aboutHistory || '');
             document.getElementById('aboutMotto').value = c.aboutMotto || 'Excellence in Education';
-            document.getElementById('aboutWhy').value = c.aboutWhy || '';
+            setQuillContent('aboutWhy', c.aboutWhy || '');
 
             // Academics
             renderItems('academicsContainer', c.academics || [], 'academic');
 
-            // Admissions
-            document.getElementById('admissionsRequirements').value = c.admissionsRequirements || '';
-            document.getElementById('admissionsAge').value = c.admissionsAge || '';
-            document.getElementById('admissionsDocuments').value = c.admissionsDocuments || '';
-            document.getElementById('admissionsProcess').value = c.admissionsProcess || '';
-            document.getElementById('admissionsFees').value = c.admissionsFees || '';
+            // Admissions (Quill)
+            setQuillContent('admissionsRequirements', c.admissionsRequirements || '');
+            setQuillContent('admissionsAge', c.admissionsAge || '');
+            setQuillContent('admissionsDocuments', c.admissionsDocuments || '');
+            setQuillContent('admissionsProcess', c.admissionsProcess || '');
+            setQuillContent('admissionsFees', c.admissionsFees || '');
 
             // Facilities
             renderItems('facilitiesContainer', c.facilities || [], 'facility');
@@ -1001,17 +1025,17 @@
             // Co-curricular
             renderItems('cocurricularContainer', c.coCurricular || [], 'cocurricular');
 
-            // Performance
-            document.getElementById('performanceKcpe').value = c.performanceKcpe || '';
-            document.getElementById('performanceInternal').value = c.performanceInternal || '';
+            // Performance (Quill)
+            setQuillContent('performanceKcpe', c.performanceKcpe || '');
+            setQuillContent('performanceInternal', c.performanceInternal || '');
 
-            // Parents
-            document.getElementById('parentsCalendar').value = c.parentsCalendar || '';
-            document.getElementById('parentsHomework').value = c.parentsHomework || '';
-            document.getElementById('parentsAttendance').value = c.parentsAttendance || '';
-            document.getElementById('parentsRules').value = c.parentsRules || '';
-            document.getElementById('parentsUniform').value = c.parentsUniform || '';
-            document.getElementById('parentsFees').value = c.parentsFees || '';
+            // Parents (Quill)
+            setQuillContent('parentsCalendar', c.parentsCalendar || '');
+            setQuillContent('parentsHomework', c.parentsHomework || '');
+            setQuillContent('parentsAttendance', c.parentsAttendance || '');
+            setQuillContent('parentsRules', c.parentsRules || '');
+            setQuillContent('parentsUniform', c.parentsUniform || '');
+            setQuillContent('parentsFees', c.parentsFees || '');
 
             // Downloads
             renderItems('downloadsContainer', c.downloads || [], 'download');
@@ -1678,23 +1702,23 @@
                 homeStats: getItemsData('statsContainer', 'stat'),
                 homeNews: getItemsData('newsContainer', 'news'),
 
-                // About (get from TinyMCE)
-                aboutMission: getEditorContent('aboutMission'),
-                aboutVision: getEditorContent('aboutVision'),
-                aboutValues: getEditorContent('aboutValues'),
-                aboutHistory: getEditorContent('aboutHistory'),
+                // About (Quill)
+                aboutMission: getQuillContent('aboutMission'),
+                aboutVision: getQuillContent('aboutVision'),
+                aboutValues: getQuillContent('aboutValues'),
+                aboutHistory: getQuillContent('aboutHistory'),
                 aboutMotto: document.getElementById('aboutMotto').value,
-                aboutWhy: getEditorContent('aboutWhy'),
+                aboutWhy: getQuillContent('aboutWhy'),
 
                 // Academics
                 academics: getItemsData('academicsContainer', 'academic'),
 
-                // Admissions
-                admissionsRequirements: getEditorContent('admissionsRequirements'),
-                admissionsAge: getEditorContent('admissionsAge'),
-                admissionsDocuments: getEditorContent('admissionsDocuments'),
-                admissionsProcess: getEditorContent('admissionsProcess'),
-                admissionsFees: getEditorContent('admissionsFees'),
+                // Admissions (Quill)
+                admissionsRequirements: getQuillContent('admissionsRequirements'),
+                admissionsAge: getQuillContent('admissionsAge'),
+                admissionsDocuments: getQuillContent('admissionsDocuments'),
+                admissionsProcess: getQuillContent('admissionsProcess'),
+                admissionsFees: getQuillContent('admissionsFees'),
 
                 // Facilities
                 facilities: getItemsData('facilitiesContainer', 'facility'),
@@ -1708,17 +1732,17 @@
                 // Co-curricular
                 coCurricular: getItemsData('cocurricularContainer', 'cocurricular'),
 
-                // Performance
-                performanceKcpe: getEditorContent('performanceKcpe'),
-                performanceInternal: getEditorContent('performanceInternal'),
+                // Performance (Quill)
+                performanceKcpe: getQuillContent('performanceKcpe'),
+                performanceInternal: getQuillContent('performanceInternal'),
 
-                // Parents
-                parentsCalendar: getEditorContent('parentsCalendar'),
-                parentsHomework: getEditorContent('parentsHomework'),
-                parentsAttendance: getEditorContent('parentsAttendance'),
-                parentsRules: getEditorContent('parentsRules'),
-                parentsUniform: getEditorContent('parentsUniform'),
-                parentsFees: getEditorContent('parentsFees'),
+                // Parents (Quill)
+                parentsCalendar: getQuillContent('parentsCalendar'),
+                parentsHomework: getQuillContent('parentsHomework'),
+                parentsAttendance: getQuillContent('parentsAttendance'),
+                parentsRules: getQuillContent('parentsRules'),
+                parentsUniform: getQuillContent('parentsUniform'),
+                parentsFees: getQuillContent('parentsFees'),
 
                 // Downloads
                 downloads: getItemsData('downloadsContainer', 'download'),
