@@ -8,8 +8,6 @@
     <!-- Quill Editor -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <!-- Resize Image Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; min-height: 100vh; }
@@ -108,14 +106,14 @@
         .media-insert-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; padding: 8px; background: #f8f9fc; border-radius: 8px; border: 1px solid #e8ecf1; align-items: center; }
         .media-insert-bar .btn { font-size: 12px; padding: 5px 12px; }
 
-        /* ===== IMAGE EDITOR TOOLBAR ===== */
+        /* Image Editor Toolbar */
         .image-editor-toolbar { display: none; position: fixed; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; border: 2px solid #d4a017; gap: 10px; align-items: center; }
         .image-editor-toolbar.show { display: flex; }
         .image-editor-toolbar .btn { font-size: 12px; padding: 5px 12px; }
         .image-editor-toolbar .size-input { width: 60px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; }
         .image-editor-toolbar .size-label { font-size: 12px; color: #666; }
 
-        /* ===== PREVIEW MODAL ===== */
+        /* Preview Modal */
         .preview-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 99999; overflow-y: auto; padding: 40px; }
         .preview-modal.show { display: flex; align-items: center; justify-content: center; }
         .preview-modal .preview-content { background: white; max-width: 900px; width: 100%; border-radius: 16px; padding: 30px; max-height: 90vh; overflow-y: auto; }
@@ -170,16 +168,16 @@
 
     <!-- ===== IMAGE EDITOR TOOLBAR ===== -->
     <div class="image-editor-toolbar" id="imageEditorToolbar">
-        <span style="font-weight:600;font-size:13px;color:#333;">✏️ Edit Image:</span>
+        <span style="font-weight:600;font-size:13px;color:#333;">✏️ Edit Media:</span>
         <div style="display:flex;align-items:center;gap:5px;">
             <span class="size-label">Width:</span>
-            <input type="number" class="size-input" id="imageWidth" value="100" min="10" max="1000">
+            <input type="number" class="size-input" id="mediaWidth" value="100" min="10" max="1000">
             <span class="size-label">%</span>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="resizeImage()"><i class="fas fa-expand"></i> Resize</button>
-        <button class="btn btn-info btn-sm" onclick="replaceImage()"><i class="fas fa-exchange-alt"></i> Replace</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteImage()"><i class="fas fa-trash"></i> Delete</button>
-        <button class="btn btn-secondary btn-sm" onclick="closeImageEditor()"><i class="fas fa-times"></i> Close</button>
+        <button class="btn btn-primary btn-sm" onclick="resizeMedia()"><i class="fas fa-expand"></i> Resize</button>
+        <button class="btn btn-info btn-sm" onclick="replaceMedia()"><i class="fas fa-exchange-alt"></i> Replace</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteMedia()"><i class="fas fa-trash"></i> Delete</button>
+        <button class="btn btn-secondary btn-sm" onclick="closeMediaEditor()"><i class="fas fa-times"></i> Close</button>
     </div>
 
     <!-- ===== PREVIEW MODAL ===== -->
@@ -216,9 +214,9 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('heroSubtitle')"><i class="fas fa-table"></i> Table</button>
                     <button class="btn btn-info btn-sm" onclick="previewContent('heroSubtitle')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
@@ -262,9 +260,9 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('aboutMission')"><i class="fas fa-table"></i> Table</button>
                     <button class="btn btn-info btn-sm" onclick="previewContent('aboutMission')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
@@ -314,9 +312,9 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('admissionsRequirements')"><i class="fas fa-table"></i> Table</button>
                     <button class="btn btn-info btn-sm" onclick="previewContent('admissionsRequirements')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
@@ -409,9 +407,9 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('eventsContent')"><i class="fas fa-table"></i> Table</button>
                     <button class="btn btn-info btn-sm" onclick="previewContent('eventsContent')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
@@ -429,9 +427,9 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('cocurricularContent')"><i class="fas fa-table"></i> Table</button>
                     <button class="btn btn-info btn-sm" onclick="previewContent('cocurricularContent')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
@@ -449,9 +447,9 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('performanceKcpe')"><i class="fas fa-table"></i> Table</button>
                     <button class="btn btn-info btn-sm" onclick="previewContent('performanceKcpe')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
@@ -475,9 +473,9 @@
 
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar','image')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar','video')"><i class="fas fa-video"></i> Video</button>
+                    <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar','audio')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('parentsCalendar')"><i class="fas fa-table"></i> Table</button>
                     <button class="btn btn-info btn-sm" onclick="previewContent('parentsCalendar')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
@@ -596,10 +594,10 @@
             initQuillEditors();
             loadContent();
             
-            // Click on image to show editor toolbar
+            // Click on media to show editor toolbar
             document.addEventListener('click', function(e) {
-                if (e.target.tagName === 'IMG' && e.target.closest('.ql-editor')) {
-                    showImageEditor(e.target);
+                if ((e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') && e.target.closest('.ql-editor')) {
+                    showMediaEditor(e.target);
                 }
             });
         });
@@ -609,6 +607,7 @@
         // ============================================
         let quillEditors = {};
         let activeQuillId = 'heroSubtitle';
+        let activeMediaType = 'image';
 
         function initQuillEditors() {
             const editorIds = [
@@ -660,61 +659,93 @@
         }
 
         // ============================================
-        // IMAGE EDITOR TOOLBAR
+        // MEDIA EDITOR TOOLBAR
         // ============================================
-        let selectedImage = null;
-        let selectedImageEditor = null;
+        let selectedMedia = null;
+        let selectedMediaEditor = null;
 
-        function showImageEditor(img) {
-            selectedImage = img;
+        function showMediaEditor(el) {
+            selectedMedia = el;
             const toolbar = document.getElementById('imageEditorToolbar');
             toolbar.classList.add('show');
-            toolbar.style.top = (img.getBoundingClientRect().top - 60) + 'px';
-            toolbar.style.left = (img.getBoundingClientRect().left + img.getBoundingClientRect().width/2 - 150) + 'px';
-            document.getElementById('imageWidth').value = Math.round((img.width / img.naturalWidth) * 100);
-            selectedImageEditor = img.closest('.ql-editor')?.id || '';
+            
+            // Position the toolbar near the media
+            const rect = el.getBoundingClientRect();
+            toolbar.style.top = (rect.top - 70) + 'px';
+            toolbar.style.left = Math.max(10, (rect.left + rect.width/2 - 150)) + 'px';
+            
+            // Set width percentage
+            const parentWidth = el.parentElement?.offsetWidth || 600;
+            const currentPercent = Math.round((el.offsetWidth / parentWidth) * 100);
+            document.getElementById('mediaWidth').value = Math.min(100, Math.max(10, currentPercent));
+            
+            // Determine media type
+            if (el.tagName === 'IMG') activeMediaType = 'image';
+            else if (el.tagName === 'VIDEO') activeMediaType = 'video';
+            else if (el.tagName === 'AUDIO') activeMediaType = 'audio';
+            
+            selectedMediaEditor = el.closest('.ql-editor')?.id || '';
         }
 
-        function closeImageEditor() {
+        function closeMediaEditor() {
             document.getElementById('imageEditorToolbar').classList.remove('show');
-            selectedImage = null;
-            selectedImageEditor = null;
+            selectedMedia = null;
+            selectedMediaEditor = null;
         }
 
-        function resizeImage() {
-            if (!selectedImage) return;
-            const percent = parseInt(document.getElementById('imageWidth').value) || 100;
-            const newWidth = (selectedImage.naturalWidth * percent) / 100;
-            selectedImage.style.width = newWidth + 'px';
-            selectedImage.style.height = 'auto';
-            showAlert('✅ Image resized to ' + percent + '%', 'success');
+        function resizeMedia() {
+            if (!selectedMedia) return;
+            const percent = parseInt(document.getElementById('mediaWidth').value) || 100;
+            const parentWidth = selectedMedia.parentElement?.offsetWidth || 600;
+            const newWidth = (parentWidth * percent) / 100;
+            
+            if (selectedMedia.tagName === 'IMG' || selectedMedia.tagName === 'VIDEO') {
+                selectedMedia.style.width = newWidth + 'px';
+                selectedMedia.style.height = 'auto';
+            } else if (selectedMedia.tagName === 'AUDIO') {
+                selectedMedia.style.width = newWidth + 'px';
+            }
+            showAlert('✅ Media resized to ' + percent + '%', 'success');
         }
 
-        function replaceImage() {
-            if (!selectedImage) return;
+        function replaceMedia() {
+            if (!selectedMedia) return;
+            // Store the media to replace
+            window.replaceMediaTarget = selectedMedia;
+            window.replaceMediaEditor = selectedMediaEditor;
             document.getElementById('fileUpload').click();
-            // Store that we're replacing an image
-            window.replaceImageTarget = selectedImage;
-            window.replaceImageEditor = selectedImageEditor;
         }
 
-        function deleteImage() {
-            if (!selectedImage) return;
-            if (confirm('Are you sure you want to delete this image?')) {
-                selectedImage.remove();
-                closeImageEditor();
-                showAlert('✅ Image deleted', 'success');
+        function deleteMedia() {
+            if (!selectedMedia) return;
+            if (confirm('Are you sure you want to delete this media?')) {
+                selectedMedia.remove();
+                closeMediaEditor();
+                showAlert('✅ Media deleted', 'success');
             }
         }
 
         // ============================================
         // OPEN MEDIA UPLOAD
         // ============================================
-        function openMediaUpload(editorId) {
+        function openMediaUpload(editorId, mediaType) {
             activeQuillId = editorId;
-            window.replaceImageTarget = null;
-            window.replaceImageEditor = null;
-            document.getElementById('fileUpload').click();
+            activeMediaType = mediaType || 'image';
+            window.replaceMediaTarget = null;
+            window.replaceMediaEditor = null;
+            
+            // Set accept attribute based on media type
+            const fileInput = document.getElementById('fileUpload');
+            if (mediaType === 'image') {
+                fileInput.accept = 'image/*';
+            } else if (mediaType === 'video') {
+                fileInput.accept = 'video/*';
+            } else if (mediaType === 'audio') {
+                fileInput.accept = 'audio/*';
+            } else {
+                fileInput.accept = 'image/*,video/*,audio/*';
+            }
+            fileInput.click();
         }
 
         // ============================================
@@ -744,7 +775,7 @@
                     </table>
                 `;
                 quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
-                showAlert('✅ Table inserted! You can edit it directly in the editor.', 'success');
+                showAlert('✅ Table inserted!', 'success');
             }
         }
 
@@ -754,7 +785,11 @@
         function previewContent(editorId) {
             const content = getQuillContent(editorId);
             const previewBody = document.getElementById('previewBody');
-            previewBody.innerHTML = content || '<p style="color:#999;text-align:center;padding:40px;">No content to preview</p>';
+            
+            // Show actual media with proper paths
+            const displayContent = content || '<p style="color:#999;text-align:center;padding:40px;">No content to preview</p>';
+            previewBody.innerHTML = displayContent;
+            
             document.getElementById('previewModal').classList.add('show');
             window.previewMode = 'single';
             window.previewEditorId = editorId;
@@ -764,33 +799,32 @@
             const previewBody = document.getElementById('previewBody');
             let allContent = '';
             
-            // Collect all content
             const sections = {
-                'Hero Subtitle': getQuillContent('heroSubtitle'),
-                'Mission': getQuillContent('aboutMission'),
-                'Vision': getQuillContent('aboutVision'),
-                'Values': getQuillContent('aboutValues'),
-                'History': getQuillContent('aboutHistory'),
-                'Why Choose Us': getQuillContent('aboutWhy'),
-                'Admission Requirements': getQuillContent('admissionsRequirements'),
-                'Age Requirements': getQuillContent('admissionsAge'),
-                'Documents Needed': getQuillContent('admissionsDocuments'),
-                'Admission Process': getQuillContent('admissionsProcess'),
-                'School Fees': getQuillContent('admissionsFees'),
-                'KCPE Results': getQuillContent('performanceKcpe'),
-                'Internal Exams': getQuillContent('performanceInternal'),
-                'School Calendar': getQuillContent('parentsCalendar'),
-                'Homework Policy': getQuillContent('parentsHomework'),
-                'Attendance Policy': getQuillContent('parentsAttendance'),
-                'School Rules': getQuillContent('parentsRules'),
-                'Uniform Requirements': getQuillContent('parentsUniform'),
-                'Fee Payment': getQuillContent('parentsFees')
+                '🏠 Hero Subtitle': getQuillContent('heroSubtitle'),
+                '📖 Mission': getQuillContent('aboutMission'),
+                '📖 Vision': getQuillContent('aboutVision'),
+                '📖 Values': getQuillContent('aboutValues'),
+                '📖 History': getQuillContent('aboutHistory'),
+                '📖 Why Choose Us': getQuillContent('aboutWhy'),
+                '📝 Admission Requirements': getQuillContent('admissionsRequirements'),
+                '📝 Age Requirements': getQuillContent('admissionsAge'),
+                '📝 Documents Needed': getQuillContent('admissionsDocuments'),
+                '📝 Admission Process': getQuillContent('admissionsProcess'),
+                '📝 School Fees': getQuillContent('admissionsFees'),
+                '🏆 KCPE Results': getQuillContent('performanceKcpe'),
+                '🏆 Internal Exams': getQuillContent('performanceInternal'),
+                '👨‍👩‍👧‍👦 School Calendar': getQuillContent('parentsCalendar'),
+                '👨‍👩‍👧‍👦 Homework Policy': getQuillContent('parentsHomework'),
+                '👨‍👩‍👧‍👦 Attendance Policy': getQuillContent('parentsAttendance'),
+                '👨‍👩‍👧‍👦 School Rules': getQuillContent('parentsRules'),
+                '👨‍👩‍👧‍👦 Uniform Requirements': getQuillContent('parentsUniform'),
+                '👨‍👩‍👧‍👦 Fee Payment': getQuillContent('parentsFees')
             };
 
             let html = '<div style="padding:20px;">';
             for (const [title, content] of Object.entries(sections)) {
                 if (content && content.trim()) {
-                    html += `<h3 style="color:#1a2a4a;margin-top:20px;border-bottom:2px solid #d4a017;padding-bottom:5px;">📌 ${title}</h3>`;
+                    html += `<h3 style="color:#1a2a4a;margin-top:20px;border-bottom:2px solid #d4a017;padding-bottom:5px;">${title}</h3>`;
                     html += `<div style="margin:10px 0;padding:10px;background:white;border-radius:8px;">${content}</div>`;
                 }
             }
@@ -808,10 +842,8 @@
 
         function saveAndClosePreview() {
             if (window.previewMode === 'single' && window.previewEditorId) {
-                // Content is already in the editor, just close
                 showAlert('✅ Changes saved!', 'success');
             } else {
-                // For all content, save everything
                 saveAllContent();
             }
             closePreview();
@@ -832,7 +864,7 @@
                 }
             });
 
-            closeImageEditor();
+            closeMediaEditor();
 
             setTimeout(() => {
                 const activePanel = document.querySelector('.panel.active');
@@ -1021,6 +1053,7 @@
                         `;
                         break;
                     case 'gallery':
+                        const previewHtml = item.file ? getMediaPreview(item.file, item.type || 'image') : '';
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
                             <div class="form-row">
@@ -1036,7 +1069,7 @@
                                     <option value="audio" ${item.type === 'audio' ? 'selected' : ''}>🎵 Audio</option>
                                 </select>
                             </div>
-                            ${item.file ? `<div class="file-preview">${getMediaPreview(item.file, item.type || 'image')}</div>` : ''}
+                            ${previewHtml ? `<div class="file-preview">${previewHtml}</div>` : ''}
                         `;
                         break;
                     case 'event':
@@ -1469,11 +1502,11 @@
                             const fileType = result.file.type;
 
                             if (fileType === 'image') {
-                                previewDiv.innerHTML = `<img src="${result.file.path}" alt="Preview">`;
+                                previewDiv.innerHTML = `<img src="${result.file.path}" alt="Preview" style="max-width:100%;">`;
                             } else if (fileType === 'video') {
-                                previewDiv.innerHTML = `<video src="${result.file.path}" controls style="max-width:200px;max-height:150px;"></video>`;
+                                previewDiv.innerHTML = `<video src="${result.file.path}" controls style="max-width:100%;"></video>`;
                             } else if (fileType === 'audio') {
-                                previewDiv.innerHTML = `<audio src="${result.file.path}" controls style="width:250px;"></audio>`;
+                                previewDiv.innerHTML = `<audio src="${result.file.path}" controls style="width:100%;"></audio>`;
                             } else {
                                 previewDiv.innerHTML = `<span style="font-size:48px;">${result.file.icon || '📄'}</span>`;
                             }
@@ -1481,15 +1514,22 @@
                             document.getElementById('fileInfo').textContent = `✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} uploaded successfully!`;
                             document.getElementById('filePath').textContent = `Path: ${result.file.path}`;
 
-                            // Check if we're replacing an image
-                            if (window.replaceImageTarget && window.replaceImageTarget.tagName === 'IMG') {
-                                // Replace the image
-                                window.replaceImageTarget.src = result.file.path;
-                                window.replaceImageTarget.style.width = 'auto';
-                                window.replaceImageTarget.style.height = 'auto';
-                                closeImageEditor();
-                                window.replaceImageTarget = null;
-                                showAlert('✅ Image replaced successfully!', 'success');
+                            // Check if we're replacing media
+                            if (window.replaceMediaTarget) {
+                                // Replace the media
+                                const target = window.replaceMediaTarget;
+                                if (target.tagName === 'IMG') {
+                                    target.src = result.file.path;
+                                    target.style.width = 'auto';
+                                    target.style.height = 'auto';
+                                } else if (target.tagName === 'VIDEO') {
+                                    target.src = result.file.path;
+                                } else if (target.tagName === 'AUDIO') {
+                                    target.src = result.file.path;
+                                }
+                                closeMediaEditor();
+                                window.replaceMediaTarget = null;
+                                showAlert('✅ Media replaced successfully!', 'success');
                             } else if (activeQuillId && quillEditors[activeQuillId]) {
                                 // Insert into editor
                                 const editor = quillEditors[activeQuillId];
@@ -1505,7 +1545,7 @@
                                 }
                                 if (mediaHtml) {
                                     editor.clipboard.dangerouslyPasteHTML(index, mediaHtml);
-                                    showAlert('✅ Media inserted into editor!', 'success');
+                                    showAlert(`✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} inserted into editor!`, 'success');
                                 }
                             }
                         } else {
