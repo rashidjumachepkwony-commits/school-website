@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMS - Changara Star Academy</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Quill Editor CSS -->
+    <!-- Quill Editor -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.bubble.css" rel="stylesheet">
-    <!-- Quill Editor JS -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <!-- Resize Image Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; min-height: 100vh; }
+        
         .sidebar { width: 260px; background: linear-gradient(180deg, #0a1628, #1a2a4a); color: white; padding: 20px 0; min-height: 100vh; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; }
         .sidebar-brand { padding: 0 20px 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); }
         .sidebar-brand .logo-icon { font-size: 40px; display: block; margin-bottom: 8px; }
@@ -46,14 +47,14 @@
         .form-group label { display: block; font-weight: 600; color: #333; margin-bottom: 5px; font-size: 13px; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #e8ecf1; border-radius: 8px; font-size: 14px; transition: 0.3s; font-family: inherit; background: #fafbfc; }
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #d4a017; outline: none; background: white; box-shadow: 0 0 0 4px rgba(212,160,23,0.1); }
-        .form-group textarea { min-height: 80px; resize: vertical; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
         .ql-container { min-height: 150px; border-radius: 0 0 8px 8px; font-size: 15px; }
         .ql-toolbar { border-radius: 8px 8px 0 0; background: #fafbfc; }
         .ql-editor { min-height: 150px; }
         .ql-editor p { margin-bottom: 8px; }
-        .ql-editor img { max-width: 100%; border-radius: 8px; }
+        .ql-editor img { max-width: 100%; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: border 0.3s; }
+        .ql-editor img:hover { border-color: #d4a017; }
         .ql-editor video { max-width: 100%; border-radius: 8px; }
         .ql-editor audio { width: 100%; }
 
@@ -66,10 +67,10 @@
         .btn-danger:hover { background: #c82333; }
         .btn-secondary { background: #6c757d; color: white; }
         .btn-secondary:hover { background: #5a6268; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
         .btn-block { width: 100%; padding: 14px; font-size: 16px; justify-content: center; margin-top: 20px; }
         .btn-sm { padding: 5px 12px; font-size: 12px; }
-        .btn-upload { background: #17a2b8; color: white; }
-        .btn-upload:hover { background: #138496; }
 
         .panel { display: none; }
         .panel.active { display: block; }
@@ -104,14 +105,37 @@
         .empty-state { text-align: center; padding: 30px; color: #999; }
         .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; color: #ddd; }
 
-        .media-insert-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; padding: 8px; background: #f8f9fc; border-radius: 8px; border: 1px solid #e8ecf1; }
+        .media-insert-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; padding: 8px; background: #f8f9fc; border-radius: 8px; border: 1px solid #e8ecf1; align-items: center; }
         .media-insert-bar .btn { font-size: 12px; padding: 5px 12px; }
+
+        /* ===== IMAGE EDITOR TOOLBAR ===== */
+        .image-editor-toolbar { display: none; position: fixed; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; border: 2px solid #d4a017; gap: 10px; align-items: center; }
+        .image-editor-toolbar.show { display: flex; }
+        .image-editor-toolbar .btn { font-size: 12px; padding: 5px 12px; }
+        .image-editor-toolbar .size-input { width: 60px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; }
+        .image-editor-toolbar .size-label { font-size: 12px; color: #666; }
+
+        /* ===== PREVIEW MODAL ===== */
+        .preview-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 99999; overflow-y: auto; padding: 40px; }
+        .preview-modal.show { display: flex; align-items: center; justify-content: center; }
+        .preview-modal .preview-content { background: white; max-width: 900px; width: 100%; border-radius: 16px; padding: 30px; max-height: 90vh; overflow-y: auto; }
+        .preview-modal .preview-content h2 { color: #1a2a4a; margin-bottom: 20px; border-bottom: 2px solid #e8ecf1; padding-bottom: 15px; }
+        .preview-modal .preview-content .preview-body { padding: 20px; background: #fafbfc; border-radius: 8px; min-height: 200px; }
+        .preview-modal .preview-content .preview-body img { max-width: 100%; border-radius: 8px; }
+        .preview-modal .preview-content .preview-body video { max-width: 100%; border-radius: 8px; }
+        .preview-modal .preview-content .preview-body audio { width: 100%; }
+        .preview-modal .preview-content .preview-body table { border-collapse: collapse; width: 100%; }
+        .preview-modal .preview-content .preview-body table td, .preview-modal .preview-content .preview-body table th { border: 1px solid #ccc; padding: 8px; }
+        .preview-modal .preview-content .preview-actions { margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end; border-top: 2px solid #e8ecf1; padding-top: 20px; }
 
         @media (max-width: 768px) {
             .sidebar { width: 100%; position: relative; min-height: auto; padding: 10px 0; }
             .main-content { margin-left: 0; padding: 15px; }
             .form-row { grid-template-columns: 1fr; }
             .alert { max-width: 90%; right: 5%; }
+            .preview-modal { padding: 15px; }
+            .preview-modal .preview-content { padding: 20px; }
+            .image-editor-toolbar { flex-wrap: wrap; padding: 10px; }
         }
     </style>
 </head>
@@ -144,6 +168,34 @@
         </div>
     </div>
 
+    <!-- ===== IMAGE EDITOR TOOLBAR ===== -->
+    <div class="image-editor-toolbar" id="imageEditorToolbar">
+        <span style="font-weight:600;font-size:13px;color:#333;">✏️ Edit Image:</span>
+        <div style="display:flex;align-items:center;gap:5px;">
+            <span class="size-label">Width:</span>
+            <input type="number" class="size-input" id="imageWidth" value="100" min="10" max="1000">
+            <span class="size-label">%</span>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="resizeImage()"><i class="fas fa-expand"></i> Resize</button>
+        <button class="btn btn-info btn-sm" onclick="replaceImage()"><i class="fas fa-exchange-alt"></i> Replace</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteImage()"><i class="fas fa-trash"></i> Delete</button>
+        <button class="btn btn-secondary btn-sm" onclick="closeImageEditor()"><i class="fas fa-times"></i> Close</button>
+    </div>
+
+    <!-- ===== PREVIEW MODAL ===== -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <h2><i class="fas fa-eye"></i> Preview Changes</h2>
+            <div class="preview-body" id="previewBody">
+                <!-- Content preview will be inserted here -->
+            </div>
+            <div class="preview-actions">
+                <button class="btn btn-secondary" onclick="closePreview()"><i class="fas fa-times"></i> Close</button>
+                <button class="btn btn-success" onclick="saveAndClosePreview()"><i class="fas fa-save"></i> Save & Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
         <div class="header">
@@ -162,13 +214,13 @@
                 <h2>🏠 Home Page</h2>
                 <p class="desc">Edit the main content displayed on the home page.</p>
 
-                <!-- Media Insert Bar for Home -->
                 <div class="media-insert-bar">
                     <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle')"><i class="fas fa-image"></i> Image</button>
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('heroSubtitle')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('heroSubtitle')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-info btn-sm" onclick="previewContent('heroSubtitle')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div class="form-group">
@@ -214,6 +266,7 @@
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('aboutMission')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('aboutMission')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-info btn-sm" onclick="previewContent('aboutMission')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div class="form-group">
@@ -265,6 +318,7 @@
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('admissionsRequirements')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('admissionsRequirements')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-info btn-sm" onclick="previewContent('admissionsRequirements')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div class="form-group">
@@ -359,6 +413,7 @@
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('eventsContent')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('eventsContent')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-info btn-sm" onclick="previewContent('eventsContent')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div id="eventsContainer"></div>
@@ -378,6 +433,7 @@
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('cocurricularContent')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('cocurricularContent')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-info btn-sm" onclick="previewContent('cocurricularContent')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div id="cocurricularContainer"></div>
@@ -397,6 +453,7 @@
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('performanceKcpe')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('performanceKcpe')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-info btn-sm" onclick="previewContent('performanceKcpe')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div class="form-group">
@@ -422,6 +479,7 @@
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-upload btn-sm" onclick="openMediaUpload('parentsCalendar')"><i class="fas fa-music"></i> Audio</button>
                     <button class="btn btn-secondary btn-sm" onclick="insertTable('parentsCalendar')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-info btn-sm" onclick="previewContent('parentsCalendar')"><i class="fas fa-eye"></i> Preview</button>
                 </div>
 
                 <div class="form-group">
@@ -511,10 +569,15 @@
             </div>
         </div>
 
-        <!-- ===== SAVE BUTTON ===== -->
-        <button class="btn btn-success btn-block" onclick="saveAllContent()">
-            <i class="fas fa-save"></i> Save All Content
-        </button>
+        <!-- ===== ACTION BUTTONS ===== -->
+        <div style="display:flex;gap:15px;flex-wrap:wrap;">
+            <button class="btn btn-success btn-block" onclick="saveAllContent()" style="flex:1;">
+                <i class="fas fa-save"></i> Save All Content
+            </button>
+            <button class="btn btn-info btn-block" onclick="previewAllContent()" style="flex:1;">
+                <i class="fas fa-eye"></i> Preview All Changes
+            </button>
+        </div>
     </div>
 
     <script>
@@ -532,6 +595,13 @@
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
             initQuillEditors();
             loadContent();
+            
+            // Click on image to show editor toolbar
+            document.addEventListener('click', function(e) {
+                if (e.target.tagName === 'IMG' && e.target.closest('.ql-editor')) {
+                    showImageEditor(e.target);
+                }
+            });
         });
 
         // ============================================
@@ -548,7 +618,8 @@
                 'admissionsProcess', 'admissionsFees',
                 'performanceKcpe', 'performanceInternal',
                 'parentsCalendar', 'parentsHomework', 'parentsAttendance',
-                'parentsRules', 'parentsUniform', 'parentsFees'
+                'parentsRules', 'parentsUniform', 'parentsFees',
+                'eventsContent', 'cocurricularContent'
             ];
 
             editorIds.forEach(id => {
@@ -589,10 +660,60 @@
         }
 
         // ============================================
+        // IMAGE EDITOR TOOLBAR
+        // ============================================
+        let selectedImage = null;
+        let selectedImageEditor = null;
+
+        function showImageEditor(img) {
+            selectedImage = img;
+            const toolbar = document.getElementById('imageEditorToolbar');
+            toolbar.classList.add('show');
+            toolbar.style.top = (img.getBoundingClientRect().top - 60) + 'px';
+            toolbar.style.left = (img.getBoundingClientRect().left + img.getBoundingClientRect().width/2 - 150) + 'px';
+            document.getElementById('imageWidth').value = Math.round((img.width / img.naturalWidth) * 100);
+            selectedImageEditor = img.closest('.ql-editor')?.id || '';
+        }
+
+        function closeImageEditor() {
+            document.getElementById('imageEditorToolbar').classList.remove('show');
+            selectedImage = null;
+            selectedImageEditor = null;
+        }
+
+        function resizeImage() {
+            if (!selectedImage) return;
+            const percent = parseInt(document.getElementById('imageWidth').value) || 100;
+            const newWidth = (selectedImage.naturalWidth * percent) / 100;
+            selectedImage.style.width = newWidth + 'px';
+            selectedImage.style.height = 'auto';
+            showAlert('✅ Image resized to ' + percent + '%', 'success');
+        }
+
+        function replaceImage() {
+            if (!selectedImage) return;
+            document.getElementById('fileUpload').click();
+            // Store that we're replacing an image
+            window.replaceImageTarget = selectedImage;
+            window.replaceImageEditor = selectedImageEditor;
+        }
+
+        function deleteImage() {
+            if (!selectedImage) return;
+            if (confirm('Are you sure you want to delete this image?')) {
+                selectedImage.remove();
+                closeImageEditor();
+                showAlert('✅ Image deleted', 'success');
+            }
+        }
+
+        // ============================================
         // OPEN MEDIA UPLOAD
         // ============================================
         function openMediaUpload(editorId) {
             activeQuillId = editorId;
+            window.replaceImageTarget = null;
+            window.replaceImageEditor = null;
             document.getElementById('fileUpload').click();
         }
 
@@ -628,6 +749,75 @@
         }
 
         // ============================================
+        // PREVIEW FUNCTIONS
+        // ============================================
+        function previewContent(editorId) {
+            const content = getQuillContent(editorId);
+            const previewBody = document.getElementById('previewBody');
+            previewBody.innerHTML = content || '<p style="color:#999;text-align:center;padding:40px;">No content to preview</p>';
+            document.getElementById('previewModal').classList.add('show');
+            window.previewMode = 'single';
+            window.previewEditorId = editorId;
+        }
+
+        function previewAllContent() {
+            const previewBody = document.getElementById('previewBody');
+            let allContent = '';
+            
+            // Collect all content
+            const sections = {
+                'Hero Subtitle': getQuillContent('heroSubtitle'),
+                'Mission': getQuillContent('aboutMission'),
+                'Vision': getQuillContent('aboutVision'),
+                'Values': getQuillContent('aboutValues'),
+                'History': getQuillContent('aboutHistory'),
+                'Why Choose Us': getQuillContent('aboutWhy'),
+                'Admission Requirements': getQuillContent('admissionsRequirements'),
+                'Age Requirements': getQuillContent('admissionsAge'),
+                'Documents Needed': getQuillContent('admissionsDocuments'),
+                'Admission Process': getQuillContent('admissionsProcess'),
+                'School Fees': getQuillContent('admissionsFees'),
+                'KCPE Results': getQuillContent('performanceKcpe'),
+                'Internal Exams': getQuillContent('performanceInternal'),
+                'School Calendar': getQuillContent('parentsCalendar'),
+                'Homework Policy': getQuillContent('parentsHomework'),
+                'Attendance Policy': getQuillContent('parentsAttendance'),
+                'School Rules': getQuillContent('parentsRules'),
+                'Uniform Requirements': getQuillContent('parentsUniform'),
+                'Fee Payment': getQuillContent('parentsFees')
+            };
+
+            let html = '<div style="padding:20px;">';
+            for (const [title, content] of Object.entries(sections)) {
+                if (content && content.trim()) {
+                    html += `<h3 style="color:#1a2a4a;margin-top:20px;border-bottom:2px solid #d4a017;padding-bottom:5px;">📌 ${title}</h3>`;
+                    html += `<div style="margin:10px 0;padding:10px;background:white;border-radius:8px;">${content}</div>`;
+                }
+            }
+            html += '</div>';
+
+            previewBody.innerHTML = html || '<p style="color:#999;text-align:center;padding:40px;">No content to preview</p>';
+            document.getElementById('previewModal').classList.add('show');
+            window.previewMode = 'all';
+            window.previewEditorId = null;
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
+
+        function saveAndClosePreview() {
+            if (window.previewMode === 'single' && window.previewEditorId) {
+                // Content is already in the editor, just close
+                showAlert('✅ Changes saved!', 'success');
+            } else {
+                // For all content, save everything
+                saveAllContent();
+            }
+            closePreview();
+        }
+
+        // ============================================
         // SWITCH TAB
         // ============================================
         function switchTab(tab) {
@@ -641,6 +831,8 @@
                     el.classList.add('active');
                 }
             });
+
+            closeImageEditor();
 
             setTimeout(() => {
                 const activePanel = document.querySelector('.panel.active');
@@ -773,7 +965,7 @@
                 return;
             }
 
-            items.forEach((item, index) => {
+            items.forEach((item) => {
                 const div = document.createElement('div');
                 div.className = 'item-box';
 
@@ -1289,16 +1481,23 @@
                             document.getElementById('fileInfo').textContent = `✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} uploaded successfully!`;
                             document.getElementById('filePath').textContent = `Path: ${result.file.path}`;
 
-                            showAlert(`✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} uploaded successfully!`, 'success');
-
-                            // Insert media into active Quill editor
-                            if (activeQuillId && quillEditors[activeQuillId]) {
+                            // Check if we're replacing an image
+                            if (window.replaceImageTarget && window.replaceImageTarget.tagName === 'IMG') {
+                                // Replace the image
+                                window.replaceImageTarget.src = result.file.path;
+                                window.replaceImageTarget.style.width = 'auto';
+                                window.replaceImageTarget.style.height = 'auto';
+                                closeImageEditor();
+                                window.replaceImageTarget = null;
+                                showAlert('✅ Image replaced successfully!', 'success');
+                            } else if (activeQuillId && quillEditors[activeQuillId]) {
+                                // Insert into editor
                                 const editor = quillEditors[activeQuillId];
                                 const range = editor.getSelection();
                                 const index = range ? range.index : 0;
                                 let mediaHtml = '';
                                 if (fileType === 'image') {
-                                    mediaHtml = `<img src="${result.file.path}" alt="${uploadedFileData.originalname}" style="max-width:100%;border-radius:8px;">`;
+                                    mediaHtml = `<img src="${result.file.path}" alt="${uploadedFileData.originalname}" style="max-width:100%;border-radius:8px;cursor:pointer;">`;
                                 } else if (fileType === 'video') {
                                     mediaHtml = `<video src="${result.file.path}" controls style="max-width:100%;border-radius:8px;"></video>`;
                                 } else if (fileType === 'audio') {
@@ -1309,7 +1508,6 @@
                                     showAlert('✅ Media inserted into editor!', 'success');
                                 }
                             }
-
                         } else {
                             showAlert('❌ Upload failed: ' + result.message, 'error');
                         }
