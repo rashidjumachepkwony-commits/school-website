@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMS - Changara Star Academy</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Quill Editor CSS -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <!-- Quill Editor JS -->
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <style>
         * {
             margin: 0;
@@ -229,23 +225,6 @@
             gap: 16px;
         }
 
-        /* Quill Editor Styles */
-        .ql-container {
-            min-height: 200px;
-            border-radius: 0 0 8px 8px;
-            font-size: 15px;
-        }
-        .ql-toolbar {
-            border-radius: 8px 8px 0 0;
-            background: #fafbfc;
-        }
-        .ql-editor {
-            min-height: 200px;
-        }
-        .ql-editor p {
-            margin-bottom: 8px;
-        }
-
         .btn {
             padding: 10px 25px;
             border: none;
@@ -283,12 +262,23 @@
         .btn-danger:hover {
             background: #c82333;
         }
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        .btn-info:hover {
+            background: #138496;
+        }
         .btn-block {
             width: 100%;
             padding: 14px;
             font-size: 16px;
             justify-content: center;
             margin-top: 20px;
+        }
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 12px;
         }
 
         .section-tabs {
@@ -422,6 +412,88 @@
             font-size: 12px;
             color: #666;
         }
+        .uploaded-preview .add-btn {
+            margin-top: 8px;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .media-item {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e8ecf1;
+            position: relative;
+            transition: 0.3s;
+        }
+        .media-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        .media-item .media-preview {
+            height: 150px;
+            background: #f8f9fc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .media-item .media-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .media-item .media-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .media-item .media-preview audio {
+            width: 100%;
+            padding: 20px;
+        }
+        .media-item .media-preview .file-icon {
+            font-size: 48px;
+            color: #999;
+        }
+        .media-item .media-preview .media-type-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .media-item .media-info {
+            padding: 12px 15px;
+        }
+        .media-item .media-info h4 {
+            font-size: 14px;
+            color: #1a2a4a;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .media-item .media-info p {
+            font-size: 12px;
+            color: #999;
+        }
+        .media-item .media-actions {
+            padding: 8px 15px 12px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
 
         .item-box {
             background: #f8f9fc;
@@ -479,8 +551,26 @@
             margin-bottom: 10px;
             color: #ddd;
         }
-        .ql-editor {
-            min-height: 200px;
+
+        .media-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .media-filter select,
+        .media-filter input {
+            padding: 8px 14px;
+            border: 2px solid #e8ecf1;
+            border-radius: 8px;
+            font-size: 13px;
+            background: white;
+        }
+        .media-filter select:focus,
+        .media-filter input:focus {
+            border-color: #d4a017;
+            outline: none;
         }
 
         @media (max-width: 768px) {
@@ -500,6 +590,9 @@
             .section-tabs button {
                 font-size: 11px;
                 padding: 6px 12px;
+            }
+            .media-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
             .alert {
                 max-width: 90%;
@@ -523,7 +616,7 @@
             <a onclick="switchTab('academics')"><i class="fas fa-book"></i> Academics</a>
             <a onclick="switchTab('admissions')"><i class="fas fa-file-alt"></i> Admissions</a>
             <a onclick="switchTab('facilities')"><i class="fas fa-school"></i> Facilities</a>
-            <a onclick="switchTab('gallery')"><i class="fas fa-images"></i> Gallery</a>
+            <a onclick="switchTab('gallery')"><i class="fas fa-images"></i> Media Gallery</a>
             <a onclick="switchTab('events')"><i class="fas fa-calendar-alt"></i> Events</a>
             <a onclick="switchTab('cocurricular')"><i class="fas fa-futbol"></i> Co-curricular</a>
             <a onclick="switchTab('performance')"><i class="fas fa-trophy"></i> Performance</a>
@@ -540,7 +633,7 @@
     <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
         <div class="header">
-            <h1><i class="fas fa-edit"></i> Visual Content Editor</h1>
+            <h1><i class="fas fa-edit"></i> Content Management System</h1>
             <div class="admin-info">
                 <div class="avatar" id="adminAvatar">A</div>
                 <span class="name" id="adminName">Admin</span>
@@ -590,23 +683,23 @@
         <div id="panel-about" class="panel">
             <div class="editor-container">
                 <h2>📖 About Page</h2>
-                <p class="desc">Edit the About Us page content with full formatting options.</p>
+                <p class="desc">Edit the About Us page content.</p>
 
                 <div class="form-group">
                     <label>Mission Statement</label>
-                    <div id="aboutMission" class="quill-editor"></div>
+                    <textarea id="aboutMission" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Vision Statement</label>
-                    <div id="aboutVision" class="quill-editor"></div>
+                    <textarea id="aboutVision" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Core Values</label>
-                    <div id="aboutValues" class="quill-editor"></div>
+                    <textarea id="aboutValues" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>School History</label>
-                    <div id="aboutHistory" class="quill-editor"></div>
+                    <textarea id="aboutHistory" rows="4"></textarea>
                 </div>
                 <div class="form-group">
                     <label>School Motto</label>
@@ -614,7 +707,7 @@
                 </div>
                 <div class="form-group">
                     <label>Why Choose Us</label>
-                    <div id="aboutWhy" class="quill-editor"></div>
+                    <textarea id="aboutWhy" rows="4"></textarea>
                 </div>
             </div>
         </div>
@@ -637,23 +730,23 @@
 
                 <div class="form-group">
                     <label>Admission Requirements</label>
-                    <div id="admissionsRequirements" class="quill-editor"></div>
+                    <textarea id="admissionsRequirements" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Age Requirements</label>
-                    <div id="admissionsAge" class="quill-editor"></div>
+                    <textarea id="admissionsAge" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Documents Needed</label>
-                    <div id="admissionsDocuments" class="quill-editor"></div>
+                    <textarea id="admissionsDocuments" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Admission Process</label>
-                    <div id="admissionsProcess" class="quill-editor"></div>
+                    <textarea id="admissionsProcess" rows="4"></textarea>
                 </div>
                 <div class="form-group">
                     <label>School Fees</label>
-                    <div id="admissionsFees" class="quill-editor"></div>
+                    <textarea id="admissionsFees" rows="3"></textarea>
                 </div>
             </div>
         </div>
@@ -662,27 +755,27 @@
         <div id="panel-facilities" class="panel">
             <div class="editor-container">
                 <h2>🏫 Facilities</h2>
-                <p class="desc">Manage school facilities with images.</p>
+                <p class="desc">Manage school facilities.</p>
                 <div id="facilitiesContainer"></div>
                 <button class="btn btn-primary" onclick="addFacility()">➕ Add Facility</button>
             </div>
         </div>
 
-        <!-- ===== GALLERY PANEL ===== -->
+        <!-- ===== MEDIA GALLERY PANEL ===== -->
         <div id="panel-gallery" class="panel">
             <div class="editor-container">
-                <h2>🖼️ Gallery</h2>
-                <p class="desc">Manage images, videos, and audio files.</p>
+                <h2>🖼️ Media Gallery</h2>
+                <p class="desc">Upload and manage images, videos, and audio files.</p>
 
                 <!-- Upload Area -->
-                <div class="upload-area" id="uploadArea">
+                <div class="upload-area">
                     <span class="icon">📤</span>
                     <h3>Upload Media</h3>
-                    <p>Upload images, videos, or audio files to use in the gallery.</p>
+                    <p>Upload images, videos, or audio files to use on your website.</p>
                     <div class="file-types">
-                        <span>🖼️ Images (JPG, PNG, GIF)</span>
-                        <span>🎬 Videos (MP4, WebM)</span>
-                        <span>🎵 Audio (MP3, WAV, OGG)</span>
+                        <span>🖼️ Images (JPG, PNG, GIF, WebP)</span>
+                        <span>🎬 Videos (MP4, WebM, OGG)</span>
+                        <span>🎵 Audio (MP3, WAV, OGG, WebM)</span>
                     </div>
                     <input type="file" id="fileUpload" accept="image/*,video/*,audio/*" style="display:none;" onchange="uploadFile()">
                     <button class="btn btn-primary" onclick="document.getElementById('fileUpload').click()">
@@ -711,8 +804,24 @@
                     </div>
                 </div>
 
-                <div id="galleryContainer"></div>
-                <button class="btn btn-primary" onclick="addGalleryItem()">➕ Add Manually</button>
+                <!-- Media Gallery Display -->
+                <h3 style="margin-top:20px;color:#1a2a4a;font-size:16px;">📂 Gallery Items</h3>
+                <div class="media-filter">
+                    <select id="mediaTypeFilter" onchange="renderMediaGallery()">
+                        <option value="all">All Types</option>
+                        <option value="image">🖼️ Images</option>
+                        <option value="video">🎬 Videos</option>
+                        <option value="audio">🎵 Audio</option>
+                    </select>
+                    <input type="text" id="mediaSearchFilter" placeholder="Search media..." onkeyup="renderMediaGallery()">
+                    <button class="btn btn-danger btn-sm" onclick="deleteSelectedMedia()">
+                        <i class="fas fa-trash-alt"></i> Delete Selected
+                    </button>
+                </div>
+
+                <div id="mediaGalleryContainer" class="media-grid">
+                    <!-- Media items will be loaded here -->
+                </div>
             </div>
         </div>
 
@@ -720,7 +829,7 @@
         <div id="panel-events" class="panel">
             <div class="editor-container">
                 <h2>📰 Events</h2>
-                <p class="desc">Manage news and events with full formatting.</p>
+                <p class="desc">Manage news and events.</p>
                 <div id="eventsContainer"></div>
                 <button class="btn btn-primary" onclick="addEvent()">➕ Add Event</button>
             </div>
@@ -744,11 +853,11 @@
 
                 <div class="form-group">
                     <label>KCPE/KPSEA Results</label>
-                    <div id="performanceKcpe" class="quill-editor"></div>
+                    <textarea id="performanceKcpe" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Internal Examinations</label>
-                    <div id="performanceInternal" class="quill-editor"></div>
+                    <textarea id="performanceInternal" rows="3"></textarea>
                 </div>
             </div>
         </div>
@@ -761,27 +870,27 @@
 
                 <div class="form-group">
                     <label>School Calendar</label>
-                    <div id="parentsCalendar" class="quill-editor"></div>
+                    <textarea id="parentsCalendar" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Homework Policy</label>
-                    <div id="parentsHomework" class="quill-editor"></div>
+                    <textarea id="parentsHomework" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Attendance Policy</label>
-                    <div id="parentsAttendance" class="quill-editor"></div>
+                    <textarea id="parentsAttendance" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>School Rules</label>
-                    <div id="parentsRules" class="quill-editor"></div>
+                    <textarea id="parentsRules" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Uniform Requirements</label>
-                    <div id="parentsUniform" class="quill-editor"></div>
+                    <textarea id="parentsUniform" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Fee Payment Information</label>
-                    <div id="parentsFees" class="quill-editor"></div>
+                    <textarea id="parentsFees" rows="3"></textarea>
                 </div>
             </div>
         </div>
@@ -865,61 +974,8 @@
             const admin = JSON.parse(localStorage.getItem('admin') || '{}');
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
-            initQuillEditors();
             loadContent();
         });
-
-        // ============================================
-        // QUILL EDITORS
-        // ============================================
-        let quillEditors = {};
-
-        function initQuillEditors() {
-            const editorIds = [
-                'aboutMission', 'aboutVision', 'aboutValues', 'aboutHistory', 'aboutWhy',
-                'admissionsRequirements', 'admissionsAge', 'admissionsDocuments',
-                'admissionsProcess', 'admissionsFees',
-                'performanceKcpe', 'performanceInternal',
-                'parentsCalendar', 'parentsHomework', 'parentsAttendance',
-                'parentsRules', 'parentsUniform', 'parentsFees'
-            ];
-
-            editorIds.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    quillEditors[id] = new Quill('#' + id, {
-                        theme: 'snow',
-                        placeholder: 'Enter content here...',
-                        modules: {
-                            toolbar: [
-                                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                                ['bold', 'italic', 'underline', 'strike'],
-                                ['blockquote', 'code-block'],
-                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                                ['link', 'image'],
-                                ['clean']
-                            ]
-                        }
-                    });
-                }
-            });
-        }
-
-        // ============================================
-        // GET QUILL CONTENT
-        // ============================================
-        function getQuillContent(id) {
-            if (quillEditors[id]) {
-                return quillEditors[id].root.innerHTML;
-            }
-            return '';
-        }
-
-        function setQuillContent(id, content) {
-            if (quillEditors[id]) {
-                quillEditors[id].root.innerHTML = content || '';
-            }
-        }
 
         // ============================================
         // SWITCH TAB
@@ -936,19 +992,10 @@
                 }
             });
 
-            // Refresh Quill editors in the active panel
-            setTimeout(() => {
-                const activePanel = document.querySelector('.panel.active');
-                if (activePanel) {
-                    const editors = activePanel.querySelectorAll('.quill-editor');
-                    editors.forEach(editor => {
-                        const id = editor.id;
-                        if (quillEditors[id]) {
-                            quillEditors[id].root.innerHTML = quillEditors[id].root.innerHTML || '';
-                        }
-                    });
-                }
-            }, 100);
+            // Refresh gallery if gallery tab is clicked
+            if (tab === 'gallery') {
+                renderMediaGallery();
+            }
         }
 
         // ============================================
@@ -967,13 +1014,16 @@
         // ============================================
         // LOAD CONTENT
         // ============================================
+        let websiteContent = {};
+
         async function loadContent() {
             try {
                 const response = await fetch('/api/content');
                 const data = await response.json();
                 if (data.success) {
-                    const c = data.content;
-                    populateAllFields(c);
+                    websiteContent = data.content;
+                    populateAllFields(websiteContent);
+                    renderMediaGallery();
                 }
             } catch (error) {
                 console.error('Error loading content:', error);
@@ -995,29 +1045,26 @@
             renderItems('statsContainer', c.homeStats || [], 'stat');
             renderItems('newsContainer', c.homeNews || [], 'news');
 
-            // About (Quill)
-            setQuillContent('aboutMission', c.aboutMission || '');
-            setQuillContent('aboutVision', c.aboutVision || '');
-            setQuillContent('aboutValues', c.aboutValues || '');
-            setQuillContent('aboutHistory', c.aboutHistory || '');
+            // About
+            document.getElementById('aboutMission').value = c.aboutMission || '';
+            document.getElementById('aboutVision').value = c.aboutVision || '';
+            document.getElementById('aboutValues').value = c.aboutValues || '';
+            document.getElementById('aboutHistory').value = c.aboutHistory || '';
             document.getElementById('aboutMotto').value = c.aboutMotto || 'Excellence in Education';
-            setQuillContent('aboutWhy', c.aboutWhy || '');
+            document.getElementById('aboutWhy').value = c.aboutWhy || '';
 
             // Academics
             renderItems('academicsContainer', c.academics || [], 'academic');
 
-            // Admissions (Quill)
-            setQuillContent('admissionsRequirements', c.admissionsRequirements || '');
-            setQuillContent('admissionsAge', c.admissionsAge || '');
-            setQuillContent('admissionsDocuments', c.admissionsDocuments || '');
-            setQuillContent('admissionsProcess', c.admissionsProcess || '');
-            setQuillContent('admissionsFees', c.admissionsFees || '');
+            // Admissions
+            document.getElementById('admissionsRequirements').value = c.admissionsRequirements || '';
+            document.getElementById('admissionsAge').value = c.admissionsAge || '';
+            document.getElementById('admissionsDocuments').value = c.admissionsDocuments || '';
+            document.getElementById('admissionsProcess').value = c.admissionsProcess || '';
+            document.getElementById('admissionsFees').value = c.admissionsFees || '';
 
             // Facilities
             renderItems('facilitiesContainer', c.facilities || [], 'facility');
-
-            // Gallery
-            renderItems('galleryContainer', c.gallery || [], 'gallery');
 
             // Events
             renderItems('eventsContainer', c.events || [], 'event');
@@ -1025,17 +1072,17 @@
             // Co-curricular
             renderItems('cocurricularContainer', c.coCurricular || [], 'cocurricular');
 
-            // Performance (Quill)
-            setQuillContent('performanceKcpe', c.performanceKcpe || '');
-            setQuillContent('performanceInternal', c.performanceInternal || '');
+            // Performance
+            document.getElementById('performanceKcpe').value = c.performanceKcpe || '';
+            document.getElementById('performanceInternal').value = c.performanceInternal || '';
 
-            // Parents (Quill)
-            setQuillContent('parentsCalendar', c.parentsCalendar || '');
-            setQuillContent('parentsHomework', c.parentsHomework || '');
-            setQuillContent('parentsAttendance', c.parentsAttendance || '');
-            setQuillContent('parentsRules', c.parentsRules || '');
-            setQuillContent('parentsUniform', c.parentsUniform || '');
-            setQuillContent('parentsFees', c.parentsFees || '');
+            // Parents
+            document.getElementById('parentsCalendar').value = c.parentsCalendar || '';
+            document.getElementById('parentsHomework').value = c.parentsHomework || '';
+            document.getElementById('parentsAttendance').value = c.parentsAttendance || '';
+            document.getElementById('parentsRules').value = c.parentsRules || '';
+            document.getElementById('parentsUniform').value = c.parentsUniform || '';
+            document.getElementById('parentsFees').value = c.parentsFees || '';
 
             // Downloads
             renderItems('downloadsContainer', c.downloads || [], 'download');
@@ -1051,6 +1098,8 @@
             document.getElementById('seoTitle').value = c.seoTitle || '';
             document.getElementById('seoDescription').value = c.seoDescription || '';
             document.getElementById('seoKeywords').value = c.seoKeywords || '';
+
+            // Gallery is handled by renderMediaGallery()
         }
 
         // ============================================
@@ -1076,183 +1125,79 @@
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label>Icon</label>
-                                    <input type="text" class="field-icon" value="${item.icon || '📚'}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Title</label>
-                                    <input type="text" class="field-title" value="${item.title || ''}">
-                                </div>
+                                <div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="${item.icon || '📚'}"></div>
+                                <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
                             </div>
-                            <div class="form-group">
-                                <label>Description</label>
-                                <input type="text" class="field-description" value="${item.description || ''}">
-                            </div>
+                            <div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div>
                         `;
                         break;
                     case 'stat':
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label>Number</label>
-                                    <input type="text" class="field-number" value="${item.number || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Label</label>
-                                    <input type="text" class="field-label" value="${item.label || ''}">
-                                </div>
+                                <div class="form-group"><label>Number</label><input type="text" class="field-number" value="${item.number || ''}"></div>
+                                <div class="form-group"><label>Label</label><input type="text" class="field-label" value="${item.label || ''}"></div>
                             </div>
                         `;
                         break;
                     case 'news':
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-group">
-                                <label>Title</label>
-                                <input type="text" class="field-title" value="${item.title || ''}">
-                            </div>
-                            <div class="form-group">
-                                <label>Content</label>
-                                <textarea class="field-content" rows="2">${item.content || ''}</textarea>
-                            </div>
+                            <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
+                            <div class="form-group"><label>Content</label><textarea class="field-content" rows="2">${item.content || ''}</textarea></div>
                         `;
                         break;
                     case 'academic':
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label>Grade</label>
-                                    <input type="text" class="field-grade" value="${item.grade || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Subjects</label>
-                                    <input type="text" class="field-subjects" value="${item.subjects || ''}">
-                                </div>
+                                <div class="form-group"><label>Grade</label><input type="text" class="field-grade" value="${item.grade || ''}"></div>
+                                <div class="form-group"><label>Subjects</label><input type="text" class="field-subjects" value="${item.subjects || ''}"></div>
                             </div>
-                            <div class="form-group">
-                                <label>Learning Approach</label>
-                                <input type="text" class="field-approach" value="${item.learningApproach || ''}">
-                            </div>
-                            <div class="form-group">
-                                <label>Activities</label>
-                                <input type="text" class="field-activities" value="${item.activities || ''}">
-                            </div>
-                            <div class="form-group">
-                                <label>Teacher Support</label>
-                                <input type="text" class="field-support" value="${item.teacherSupport || ''}">
-                            </div>
+                            <div class="form-group"><label>Learning Approach</label><input type="text" class="field-approach" value="${item.learningApproach || ''}"></div>
+                            <div class="form-group"><label>Activities</label><input type="text" class="field-activities" value="${item.activities || ''}"></div>
+                            <div class="form-group"><label>Teacher Support</label><input type="text" class="field-support" value="${item.teacherSupport || ''}"></div>
                         `;
                         break;
                     case 'facility':
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label>Name</label>
-                                    <input type="text" class="field-name" value="${item.name || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Description</label>
-                                    <input type="text" class="field-description" value="${item.description || ''}">
-                                </div>
+                                <div class="form-group"><label>Name</label><input type="text" class="field-name" value="${item.name || ''}"></div>
+                                <div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div>
                             </div>
-                            <div class="form-group">
-                                <label>Image URL</label>
-                                <input type="text" class="field-image" value="${item.image || ''}" placeholder="/uploads/images/facility.jpg">
-                            </div>
-                            ${item.image ? `<div class="file-preview"><img src="${item.image}" alt="Preview" style="max-width:100px;max-height:80px;border-radius:4px;"><span>${item.image}</span></div>` : ''}
-                        `;
-                        break;
-                    case 'gallery':
-                        fieldsHtml = `
-                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Title</label>
-                                    <input type="text" class="field-title" value="${item.title || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Category</label>
-                                    <input type="text" class="field-category" value="${item.category || ''}">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>File URL</label>
-                                <input type="text" class="field-file" value="${item.file || ''}" placeholder="/uploads/images/file.jpg">
-                            </div>
-                            <div class="form-group">
-                                <label>Type</label>
-                                <select class="field-type">
-                                    <option value="image" ${item.type === 'image' ? 'selected' : ''}>🖼️ Image</option>
-                                    <option value="video" ${item.type === 'video' ? 'selected' : ''}>🎬 Video</option>
-                                    <option value="audio" ${item.type === 'audio' ? 'selected' : ''}>🎵 Audio</option>
-                                </select>
-                            </div>
-                            ${item.file ? `<div class="file-preview">${getMediaPreview(item.file, item.type || 'image')}</div>` : ''}
+                            <div class="form-group"><label>Image URL</label><input type="text" class="field-image" value="${item.image || ''}"></div>
                         `;
                         break;
                     case 'event':
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label>Title</label>
-                                    <input type="text" class="field-title" value="${item.title || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Category</label>
-                                    <input type="text" class="field-category" value="${item.category || ''}">
-                                </div>
+                                <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
+                                <div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div>
                             </div>
-                            <div class="form-group">
-                                <label>Content</label>
-                                <textarea class="field-content" rows="2">${item.content || ''}</textarea>
-                            </div>
+                            <div class="form-group"><label>Content</label><textarea class="field-content" rows="2">${item.content || ''}</textarea></div>
                         `;
                         break;
                     case 'cocurricular':
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label>Name</label>
-                                    <input type="text" class="field-name" value="${item.name || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Category</label>
-                                    <input type="text" class="field-category" value="${item.category || ''}">
-                                </div>
+                                <div class="form-group"><label>Name</label><input type="text" class="field-name" value="${item.name || ''}"></div>
+                                <div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div>
                             </div>
-                            <div class="form-group">
-                                <label>Description</label>
-                                <textarea class="field-description" rows="2">${item.description || ''}</textarea>
-                            </div>
+                            <div class="form-group"><label>Description</label><textarea class="field-description" rows="2">${item.description || ''}</textarea></div>
                         `;
                         break;
                     case 'download':
                         fieldsHtml = `
                             <button class="remove-btn" onclick="removeItem(this)">✕</button>
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label>Name</label>
-                                    <input type="text" class="field-name" value="${item.name || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Icon</label>
-                                    <input type="text" class="field-icon" value="${item.icon || '📄'}">
-                                </div>
+                                <div class="form-group"><label>Name</label><input type="text" class="field-name" value="${item.name || ''}"></div>
+                                <div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="${item.icon || '📄'}"></div>
                             </div>
-                            <div class="form-group">
-                                <label>File URL</label>
-                                <input type="text" class="field-file" value="${item.file || ''}" placeholder="/downloads/file.pdf">
-                            </div>
-                            <div class="form-group">
-                                <label>Description</label>
-                                <input type="text" class="field-description" value="${item.description || ''}">
-                            </div>
+                            <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
+                            <div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div>
                         `;
                         break;
                     default:
@@ -1265,28 +1210,12 @@
         }
 
         // ============================================
-        // GET MEDIA PREVIEW
-        // ============================================
-        function getMediaPreview(file, type) {
-            if (!file) return '';
-            if (type === 'image') {
-                return `<img src="${file}" alt="Preview" style="max-width:100px;max-height:80px;border-radius:4px;"><span>${file}</span>`;
-            } else if (type === 'video') {
-                return `<video src="${file}" controls style="max-width:150px;max-height:100px;"></video><span>${file}</span>`;
-            } else if (type === 'audio') {
-                return `<audio src="${file}" controls style="width:150px;"></audio><span>${file}</span>`;
-            }
-            return `<span>${file}</span>`;
-        }
-
-        // ============================================
         // ADD ITEMS
         // ============================================
         function addFeature() {
             const container = document.getElementById('featuresContainer');
             const empty = container.querySelector('.empty-state');
             if (empty) empty.remove();
-
             const div = document.createElement('div');
             div.className = 'item-box';
             div.innerHTML = `
@@ -1304,7 +1233,6 @@
             const container = document.getElementById('statsContainer');
             const empty = container.querySelector('.empty-state');
             if (empty) empty.remove();
-
             const div = document.createElement('div');
             div.className = 'item-box';
             div.innerHTML = `
@@ -1321,7 +1249,6 @@
             const container = document.getElementById('newsContainer');
             const empty = container.querySelector('.empty-state');
             if (empty) empty.remove();
-
             const div = document.createElement('div');
             div.className = 'item-box';
             div.innerHTML = `
@@ -1336,7 +1263,6 @@
             const container = document.getElementById('academicsContainer');
             const empty = container.querySelector('.empty-state');
             if (empty) empty.remove();
-
             const div = document.createElement('div');
             div.className = 'item-box';
             div.innerHTML = `
@@ -1356,7 +1282,6 @@
             const container = document.getElementById('facilitiesContainer');
             const empty = container.querySelector('.empty-state');
             if (empty) empty.remove();
-
             const div = document.createElement('div');
             div.className = 'item-box';
             div.innerHTML = `
@@ -1370,37 +1295,10 @@
             container.appendChild(div);
         }
 
-        function addGalleryItem() {
-            const container = document.getElementById('galleryContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
-
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-row">
-                    <div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="Image title"></div>
-                    <div class="form-group"><label>Category</label><input type="text" class="field-category" placeholder="Category"></div>
-                </div>
-                <div class="form-group"><label>File URL</label><input type="text" class="field-file" placeholder="/uploads/images/photo.jpg"></div>
-                <div class="form-group">
-                    <label>Type</label>
-                    <select class="field-type">
-                        <option value="image">🖼️ Image</option>
-                        <option value="video">🎬 Video</option>
-                        <option value="audio">🎵 Audio</option>
-                    </select>
-                </div>
-            `;
-            container.appendChild(div);
-        }
-
         function addEvent() {
             const container = document.getElementById('eventsContainer');
             const empty = container.querySelector('.empty-state');
             if (empty) empty.remove();
-
             const div = document.createElement('div');
             div.className = 'item-box';
             div.innerHTML = `
@@ -1418,7 +1316,6 @@
             const container = document.getElementById('cocurricularContainer');
             const empty = container.querySelector('.empty-state');
             if (empty) empty.remove();
-
             const div = document.createElement('div');
             div.className = 'item-box';
             div.innerHTML = `
@@ -1436,7 +1333,6 @@
             const container = document.getElementById('downloadsContainer');
             const empty = container.querySelector('.empty-state');
             if (empty) empty.remove();
-
             const div = document.createElement('div');
             div.className = 'item-box';
             div.innerHTML = `
@@ -1511,14 +1407,6 @@
                             image: box.querySelector('.field-image')?.value || ''
                         };
                         break;
-                    case 'gallery':
-                        item = {
-                            title: box.querySelector('.field-title')?.value || '',
-                            category: box.querySelector('.field-category')?.value || '',
-                            file: box.querySelector('.field-file')?.value || '',
-                            type: box.querySelector('.field-type')?.value || 'image'
-                        };
-                        break;
                     case 'event':
                         item = {
                             title: box.querySelector('.field-title')?.value || '',
@@ -1549,10 +1437,149 @@
         }
 
         // ============================================
-        // FILE UPLOAD
+        // MEDIA GALLERY FUNCTIONS
         // ============================================
+        let mediaData = [];
         let uploadedFileData = null;
 
+        function renderMediaGallery() {
+            const container = document.getElementById('mediaGalleryContainer');
+            const typeFilter = document.getElementById('mediaTypeFilter').value;
+            const searchFilter = document.getElementById('mediaSearchFilter').value.toLowerCase();
+
+            // Get gallery items from websiteContent
+            const galleryItems = websiteContent.gallery || [];
+            mediaData = galleryItems;
+
+            let filteredItems = mediaData;
+
+            if (typeFilter !== 'all') {
+                filteredItems = filteredItems.filter(item => item.type === typeFilter);
+            }
+
+            if (searchFilter) {
+                filteredItems = filteredItems.filter(item =>
+                    (item.title || '').toLowerCase().includes(searchFilter) ||
+                    (item.category || '').toLowerCase().includes(searchFilter)
+                );
+            }
+
+            if (filteredItems.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i>No media found. Upload files to get started.</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            filteredItems.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'media-item';
+
+                let previewHtml = '';
+                const fileType = item.type || 'image';
+
+                if (fileType === 'image') {
+                    previewHtml = `<img src="${item.file || ''}" alt="${item.title || ''}" onerror="this.style.display='none'">`;
+                } else if (fileType === 'video') {
+                    previewHtml = `<video src="${item.file || ''}" muted></video>`;
+                } else if (fileType === 'audio') {
+                    previewHtml = `<audio src="${item.file || ''}" controls></audio>`;
+                } else {
+                    previewHtml = `<span class="file-icon">${getFileIcon(fileType)}</span>`;
+                }
+
+                const typeLabels = {
+                    image: '🖼️ Image',
+                    video: '🎬 Video',
+                    audio: '🎵 Audio'
+                };
+
+                div.innerHTML = `
+                    <div class="media-preview">
+                        ${previewHtml}
+                        <span class="media-type-badge">${typeLabels[fileType] || fileType}</span>
+                    </div>
+                    <div class="media-info">
+                        <h4>${item.title || 'Untitled'}</h4>
+                        <p>${item.category || 'General'}</p>
+                    </div>
+                    <div class="media-actions">
+                        <button class="btn btn-primary btn-sm" onclick="editMediaItem(${index})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteMediaItem(${index})"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn btn-info btn-sm" onclick="copyMediaUrl('${item.file || ''}')"><i class="fas fa-copy"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function getFileIcon(type) {
+            const icons = {
+                image: '🖼️',
+                video: '🎬',
+                audio: '🎵'
+            };
+            return icons[type] || '📄';
+        }
+
+        function editMediaItem(index) {
+            const item = mediaData[index];
+            if (!item) return;
+
+            const newTitle = prompt('Enter new title:', item.title || '');
+            if (newTitle !== null) {
+                item.title = newTitle;
+            }
+
+            const newCategory = prompt('Enter new category:', item.category || 'General');
+            if (newCategory !== null) {
+                item.category = newCategory;
+            }
+
+            // Update the gallery in websiteContent
+            websiteContent.gallery = mediaData;
+            renderMediaGallery();
+            showAlert('Media item updated successfully!', 'success');
+        }
+
+        function deleteMediaItem(index) {
+            if (!confirm('Are you sure you want to delete this media item?')) return;
+
+            mediaData.splice(index, 1);
+            websiteContent.gallery = mediaData;
+            renderMediaGallery();
+            showAlert('Media item deleted successfully!', 'success');
+        }
+
+        function deleteSelectedMedia() {
+            if (!confirm('Delete all media items?')) return;
+            mediaData = [];
+            websiteContent.gallery = mediaData;
+            renderMediaGallery();
+            showAlert('All media deleted successfully!', 'success');
+        }
+
+        function copyMediaUrl(url) {
+            if (!url) {
+                showAlert('No URL to copy', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(url).then(() => {
+                showAlert('URL copied to clipboard!', 'success');
+            }).catch(() => {
+                // Fallback
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showAlert('URL copied to clipboard!', 'success');
+            });
+        }
+
+        // ============================================
+        // FILE UPLOAD
+        // ============================================
         async function uploadFile() {
             const fileInput = document.getElementById('fileUpload');
             const file = fileInput.files[0];
@@ -1636,47 +1663,26 @@
                 return;
             }
 
-            const container = document.getElementById('galleryContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
+            // Get current gallery
+            const gallery = websiteContent.gallery || [];
 
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Title</label>
-                        <input type="text" class="field-title" value="${uploadedFileData.originalname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')}">
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <input type="text" class="field-category" value="General">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>File URL</label>
-                    <input type="text" class="field-file" value="${uploadedFileData.path}">
-                </div>
-                <div class="form-group">
-                    <label>Type</label>
-                    <select class="field-type">
-                        <option value="image" ${uploadedFileData.type === 'image' ? 'selected' : ''}>🖼️ Image</option>
-                        <option value="video" ${uploadedFileData.type === 'video' ? 'selected' : ''}>🎬 Video</option>
-                        <option value="audio" ${uploadedFileData.type === 'audio' ? 'selected' : ''}>🎵 Audio</option>
-                    </select>
-                </div>
-                <div class="file-preview">
-                    ${getMediaPreview(uploadedFileData.path, uploadedFileData.type)}
-                </div>
-            `;
-            container.appendChild(div);
+            const newItem = {
+                title: uploadedFileData.originalname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+                category: 'General',
+                file: uploadedFileData.path,
+                type: uploadedFileData.type || 'image'
+            };
 
+            gallery.push(newItem);
+            websiteContent.gallery = gallery;
+
+            // Reset upload state
             document.getElementById('uploadedPreview').style.display = 'none';
             document.getElementById('uploadProgress').style.display = 'none';
             document.getElementById('fileUpload').value = '';
             uploadedFileData = null;
 
+            renderMediaGallery();
             showAlert('✅ File added to gallery!', 'success');
         }
 
@@ -1692,6 +1698,9 @@
         // SAVE ALL CONTENT
         // ============================================
         async function saveAllContent() {
+            // Save gallery data back to websiteContent
+            websiteContent.gallery = mediaData;
+
             const data = {
                 // Home
                 heroTitle: document.getElementById('heroTitle').value,
@@ -1702,29 +1711,29 @@
                 homeStats: getItemsData('statsContainer', 'stat'),
                 homeNews: getItemsData('newsContainer', 'news'),
 
-                // About (Quill)
-                aboutMission: getQuillContent('aboutMission'),
-                aboutVision: getQuillContent('aboutVision'),
-                aboutValues: getQuillContent('aboutValues'),
-                aboutHistory: getQuillContent('aboutHistory'),
+                // About
+                aboutMission: document.getElementById('aboutMission').value,
+                aboutVision: document.getElementById('aboutVision').value,
+                aboutValues: document.getElementById('aboutValues').value,
+                aboutHistory: document.getElementById('aboutHistory').value,
                 aboutMotto: document.getElementById('aboutMotto').value,
-                aboutWhy: getQuillContent('aboutWhy'),
+                aboutWhy: document.getElementById('aboutWhy').value,
 
                 // Academics
                 academics: getItemsData('academicsContainer', 'academic'),
 
-                // Admissions (Quill)
-                admissionsRequirements: getQuillContent('admissionsRequirements'),
-                admissionsAge: getQuillContent('admissionsAge'),
-                admissionsDocuments: getQuillContent('admissionsDocuments'),
-                admissionsProcess: getQuillContent('admissionsProcess'),
-                admissionsFees: getQuillContent('admissionsFees'),
+                // Admissions
+                admissionsRequirements: document.getElementById('admissionsRequirements').value,
+                admissionsAge: document.getElementById('admissionsAge').value,
+                admissionsDocuments: document.getElementById('admissionsDocuments').value,
+                admissionsProcess: document.getElementById('admissionsProcess').value,
+                admissionsFees: document.getElementById('admissionsFees').value,
 
                 // Facilities
                 facilities: getItemsData('facilitiesContainer', 'facility'),
 
                 // Gallery
-                gallery: getItemsData('galleryContainer', 'gallery'),
+                gallery: websiteContent.gallery || [],
 
                 // Events
                 events: getItemsData('eventsContainer', 'event'),
@@ -1732,17 +1741,17 @@
                 // Co-curricular
                 coCurricular: getItemsData('cocurricularContainer', 'cocurricular'),
 
-                // Performance (Quill)
-                performanceKcpe: getQuillContent('performanceKcpe'),
-                performanceInternal: getQuillContent('performanceInternal'),
+                // Performance
+                performanceKcpe: document.getElementById('performanceKcpe').value,
+                performanceInternal: document.getElementById('performanceInternal').value,
 
-                // Parents (Quill)
-                parentsCalendar: getQuillContent('parentsCalendar'),
-                parentsHomework: getQuillContent('parentsHomework'),
-                parentsAttendance: getQuillContent('parentsAttendance'),
-                parentsRules: getQuillContent('parentsRules'),
-                parentsUniform: getQuillContent('parentsUniform'),
-                parentsFees: getQuillContent('parentsFees'),
+                // Parents
+                parentsCalendar: document.getElementById('parentsCalendar').value,
+                parentsHomework: document.getElementById('parentsHomework').value,
+                parentsAttendance: document.getElementById('parentsAttendance').value,
+                parentsRules: document.getElementById('parentsRules').value,
+                parentsUniform: document.getElementById('parentsUniform').value,
+                parentsFees: document.getElementById('parentsFees').value,
 
                 // Downloads
                 downloads: getItemsData('downloadsContainer', 'download'),
@@ -1769,6 +1778,8 @@
                 const result = await response.json();
                 if (result.success) {
                     showAlert('✅ All content saved successfully!', 'success');
+                    websiteContent = result.content;
+                    renderMediaGallery();
                 } else {
                     showAlert('❌ Error: ' + result.message, 'error');
                 }
