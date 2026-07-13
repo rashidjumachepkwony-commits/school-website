@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Changara Star Academy</title>
+    <title>Full CMS - Changara Star Academy</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Quill Editor -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <!-- Chart.js for analytics -->
+    
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; min-height: 100vh; }
         
-        /* ===== SIDEBAR ===== */
         .sidebar { width: 260px; background: linear-gradient(180deg, #0a1628, #1a2a4a); color: white; padding: 20px 0; min-height: 100vh; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; }
         .sidebar-brand { padding: 0 20px 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); }
         .sidebar-brand .logo-icon { font-size: 40px; display: block; margin-bottom: 8px; }
@@ -30,7 +32,6 @@
         .sidebar-menu .logout a { color: rgba(255,107,107,0.7); }
         .sidebar-menu .logout a:hover { color: #ff6b6b; background: rgba(255,107,107,0.1); }
 
-        /* ===== MAIN CONTENT ===== */
         .main-content { margin-left: 260px; padding: 25px 30px; width: 100%; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e8ecf1; }
         .header h1 { color: #1a2a4a; font-size: 26px; font-weight: 700; }
@@ -46,13 +47,12 @@
         .editor-container.active { display: block; }
         .editor-container h2 { color: #1a2a4a; font-size: 20px; margin-bottom: 5px; }
         .editor-container .desc { color: #888; font-size: 13px; margin-bottom: 20px; }
+        
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-weight: 600; color: #333; margin-bottom: 5px; font-size: 13px; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #e8ecf1; border-radius: 8px; font-size: 14px; transition: 0.3s; font-family: inherit; background: #fafbfc; }
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #d4a017; outline: none; background: white; box-shadow: 0 0 0 4px rgba(212,160,23,0.1); }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-        /* Quill Editor */
         .ql-container { min-height: 200px; border-radius: 0 0 8px 8px; font-size: 15px; }
         .ql-toolbar { border-radius: 8px 8px 0 0; background: #fafbfc; }
         .ql-editor { min-height: 200px; }
@@ -60,8 +60,6 @@
         .ql-editor img:hover { border-color: #d4a017; }
         .ql-editor video { max-width: 100%; border-radius: 8px; }
         .ql-editor audio { width: 100%; }
-        .ql-editor table { border-collapse: collapse; width: 100%; }
-        .ql-editor table td, .ql-editor table th { border: 1px solid #ccc; padding: 8px; text-align: left; }
 
         .btn { padding: 10px 25px; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; }
         .btn-primary { background: linear-gradient(135deg, #d4a017, #f5c842); color: #1a2a4a; }
@@ -74,8 +72,6 @@
         .btn-secondary:hover { background: #5a6268; }
         .btn-info { background: #17a2b8; color: white; }
         .btn-info:hover { background: #138496; }
-        .btn-warning { background: #ffc107; color: #001f5c; }
-        .btn-warning:hover { background: #e0a800; }
         .btn-block { width: 100%; padding: 14px; font-size: 16px; justify-content: center; margin-top: 20px; }
         .btn-sm { padding: 5px 12px; font-size: 12px; }
 
@@ -98,6 +94,8 @@
         .uploaded-preview .preview-box { background: white; padding: 15px; border-radius: 8px; border: 2px solid #d4a017; display: inline-block; }
         .uploaded-preview img, .uploaded-preview video { max-width: 200px; max-height: 150px; border-radius: 6px; }
         .uploaded-preview audio { width: 250px; }
+        .uploaded-preview .file-info { margin-top: 8px; font-size: 13px; color: #28a745; font-weight: bold; }
+        .uploaded-preview .file-path { font-size: 12px; color: #666; }
 
         .item-box { background: #f8f9fc; padding: 15px; border-radius: 10px; border: 1px solid #e8ecf1; margin-bottom: 10px; position: relative; }
         .item-box .remove-btn { position: absolute; top: 8px; right: 8px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 14px; transition: 0.3s; }
@@ -109,7 +107,6 @@
         .empty-state { text-align: center; padding: 30px; color: #999; }
         .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; color: #ddd; }
 
-        /* Dashboard Cards */
         .dashboard-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .dashboard-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); text-align: center; transition: transform 0.2s; cursor: pointer; }
         .dashboard-card:hover { transform: translateY(-5px); }
@@ -117,13 +114,11 @@
         .dashboard-card h3 { color: #1a2a4a; font-size: 16px; }
         .dashboard-card p { color: #666; font-size: 12px; }
 
-        /* Media Editor Toolbar */
         .media-editor-toolbar { display: none; position: fixed; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; border: 2px solid #d4a017; gap: 10px; align-items: center; flex-wrap: wrap; }
         .media-editor-toolbar.show { display: flex; }
         .media-editor-toolbar .btn { font-size: 12px; padding: 5px 12px; }
         .media-editor-toolbar .size-input { width: 60px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; }
 
-        /* Preview Modal */
         .preview-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 99999; overflow-y: auto; padding: 40px; }
         .preview-modal.show { display: flex; align-items: center; justify-content: center; }
         .preview-modal .preview-content { background: white; max-width: 900px; width: 100%; border-radius: 16px; padding: 30px; max-height: 90vh; overflow-y: auto; }
@@ -134,29 +129,6 @@
         .preview-modal .preview-content .preview-body audio { width: 100%; }
         .preview-modal .preview-content .preview-actions { margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end; border-top: 2px solid #e8ecf1; padding-top: 20px; }
 
-        /* ===== ATTENDANCE TABLES ===== */
-        .attendance-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .attendance-table th, .attendance-table td { border: 1px solid #e8ecf1; padding: 10px 12px; text-align: left; font-size: 14px; }
-        .attendance-table th { background: #f0f2f5; font-weight: 600; color: #1a2a4a; }
-        .attendance-table tr:nth-child(even) { background: #fafbfc; }
-        .attendance-table .status-present { color: #28a745; font-weight: 600; }
-        .attendance-table .status-absent { color: #dc3545; font-weight: 600; }
-        .attendance-table .status-late { color: #d4a017; font-weight: 600; }
-        .attendance-table .status-checked-in { color: #17a2b8; font-weight: 600; }
-        .attendance-table .status-checked-out { color: #6c757d; font-weight: 600; }
-
-        .attendance-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .attendance-stat { background: #f8f9fc; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #e8ecf1; }
-        .attendance-stat .number { font-size: 28px; font-weight: 700; color: #1a2a4a; }
-        .attendance-stat .label { font-size: 13px; color: #666; }
-
-        .report-filters { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
-        .report-filters select, .report-filters input { padding: 8px 12px; border: 2px solid #e8ecf1; border-radius: 8px; font-size: 14px; background: #fafbfc; }
-        .report-filters select:focus, .report-filters input:focus { border-color: #d4a017; outline: none; }
-
-        .chart-container { max-width: 500px; margin: 0 auto 30px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-
-        /* Notice Preview */
         .notice-preview { background: #dc3545; color: white; padding: 15px 20px; border-radius: 8px; border-left: 6px solid #ffc107; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .notice-preview .notice-icon { font-size: 28px; animation: pulseBell 1.5s infinite; }
         .notice-preview .notice-badge { background: #ffc107; color: #001f5c; padding: 2px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; text-transform: uppercase; }
@@ -175,11 +147,6 @@
             .preview-modal .preview-content { padding: 20px; }
             .media-editor-toolbar { flex-wrap: wrap; padding: 10px; }
             .dashboard-cards { grid-template-columns: 1fr 1fr; }
-            .attendance-table { font-size: 12px; }
-            .attendance-table th, .attendance-table td { padding: 6px 8px; }
-            .attendance-stats { grid-template-columns: 1fr 1fr; }
-            .report-filters { flex-direction: column; }
-            .notice-preview { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
@@ -188,11 +155,11 @@
     <div class="sidebar">
         <div class="sidebar-brand">
             <span class="logo-icon">🏫</span>
-            <h2>Admin</h2>
+            <h2>CMS</h2>
             <p>Changara Star Academy</p>
         </div>
         <div class="sidebar-menu">
-            <div class="menu-label">Navigation</div>
+            <div class="menu-label">Content Management</div>
             <a class="active" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Dashboard</a>
             <a onclick="showSection('home')"><i class="fas fa-home"></i> Home</a>
             <a onclick="showSection('about')"><i class="fas fa-info-circle"></i> About</a>
@@ -201,23 +168,13 @@
             <a onclick="showSection('facilities')"><i class="fas fa-school"></i> Facilities</a>
             <a onclick="showSection('gallery')"><i class="fas fa-images"></i> Gallery</a>
             <a onclick="showSection('events')"><i class="fas fa-calendar-alt"></i> Events</a>
-            <a onclick="showSection('cocurricular')"><i class="fas fa-futbol"></i> Co-curricular</a>
             <a onclick="showSection('performance')"><i class="fas fa-trophy"></i> Performance</a>
             <a onclick="showSection('parents')"><i class="fas fa-users"></i> Parents</a>
             <a onclick="showSection('downloads')"><i class="fas fa-download"></i> Downloads</a>
-            <a onclick="showSection('fees')"><i class="fas fa-coins"></i> Fees Structure</a>
+            <a onclick="showSection('fees')"><i class="fas fa-coins"></i> Fees</a>
             <a onclick="showSection('contact')"><i class="fas fa-phone"></i> Contact</a>
             <a onclick="showSection('seo')"><i class="fas fa-search"></i> SEO</a>
-            <div style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
-                <div class="menu-label">Attendance</div>
-                <a onclick="showSection('staff-attendance')"><i class="fas fa-user-check"></i> Staff Attendance</a>
-                <a onclick="showSection('visitor-attendance')"><i class="fas fa-user-friends"></i> Visitors</a>
-                <a onclick="showSection('attendance-reports')"><i class="fas fa-chart-bar"></i> Reports & Analytics</a>
-            </div>
-            <div style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
-                <div class="menu-label">Alerts</div>
-                <a onclick="showSection('notice')"><i class="fas fa-bell"></i> Notice Alert</a>
-            </div>
+            <a onclick="showSection('notice')"><i class="fas fa-bell"></i> Notice Alert</a>
             <div class="logout">
                 <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
@@ -253,7 +210,7 @@
     <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
         <div class="header">
-            <h1><i class="fas fa-edit"></i> Admin Dashboard</h1>
+            <h1><i class="fas fa-edit"></i> Full Content Management</h1>
             <div class="admin-info">
                 <div class="avatar" id="adminAvatar">A</div>
                 <span class="name" id="adminName">Admin</span>
@@ -262,51 +219,51 @@
 
         <div id="alert" class="alert"></div>
 
-        <!-- ===== DASHBOARD SECTION ===== -->
+        <!-- ===== DASHBOARD ===== -->
         <div id="section-dashboard" class="editor-container active">
             <h2>📊 Dashboard</h2>
-            <p class="desc">Welcome to your admin dashboard. Manage all website content and attendance from here.</p>
+            <p class="desc">Welcome to the full Content Management System. Edit any content on your website.</p>
 
-            <div class="dashboard-cards" id="dashboardStats">
+            <div class="dashboard-cards">
                 <div class="dashboard-card" onclick="showSection('home')">
                     <span class="icon">🏠</span>
-                    <h3>Home</h3>
-                    <p>Edit homepage content</p>
+                    <h3>Home Page</h3>
+                    <p>Edit hero & content</p>
                 </div>
                 <div class="dashboard-card" onclick="showSection('about')">
                     <span class="icon">📖</span>
-                    <h3>About</h3>
-                    <p>Edit about page</p>
+                    <h3>About Us</h3>
+                    <p>Edit about content</p>
+                </div>
+                <div class="dashboard-card" onclick="showSection('academics')">
+                    <span class="icon">📚</span>
+                    <h3>Academics</h3>
+                    <p>Edit academic content</p>
+                </div>
+                <div class="dashboard-card" onclick="showSection('admissions')">
+                    <span class="icon">📝</span>
+                    <h3>Admissions</h3>
+                    <p>Edit admissions</p>
+                </div>
+                <div class="dashboard-card" onclick="showSection('facilities')">
+                    <span class="icon">🏫</span>
+                    <h3>Facilities</h3>
+                    <p>Edit facilities</p>
                 </div>
                 <div class="dashboard-card" onclick="showSection('gallery')">
                     <span class="icon">🖼️</span>
                     <h3>Gallery</h3>
-                    <p>Manage images/videos</p>
+                    <p>Upload & manage media</p>
                 </div>
-                <div class="dashboard-card" onclick="showSection('fees')">
-                    <span class="icon">💰</span>
-                    <h3>Fees</h3>
-                    <p>Update fees structure</p>
-                </div>
-                <div class="dashboard-card" onclick="showSection('staff-attendance')" style="border:2px solid #28a745;">
-                    <span class="icon">👨‍🏫</span>
-                    <h3>Staff Attendance</h3>
-                    <p>View today's attendance</p>
-                </div>
-                <div class="dashboard-card" onclick="showSection('visitor-attendance')" style="border:2px solid #17a2b8;">
-                    <span class="icon">🚪</span>
-                    <h3>Visitors</h3>
-                    <p>View visitor logs</p>
-                </div>
-                <div class="dashboard-card" onclick="showSection('attendance-reports')" style="border:2px solid #d4a017;">
-                    <span class="icon">📊</span>
-                    <h3>Reports</h3>
-                    <p>Analytics & reports</p>
-                </div>
-                <div class="dashboard-card" onclick="showSection('notice')" style="border:2px solid #dc3545;background:#fff5f5;">
+                <div class="dashboard-card" onclick="showSection('notice')">
                     <span class="icon">🔔</span>
                     <h3>Notice Alert</h3>
                     <p>Post staff alerts</p>
+                </div>
+                <div class="dashboard-card" onclick="showSection('seo')">
+                    <span class="icon">🔍</span>
+                    <h3>SEO Settings</h3>
+                    <p>Meta tags & keywords</p>
                 </div>
             </div>
 
@@ -316,9 +273,6 @@
                     <button class="btn btn-success" onclick="saveAllContent()"><i class="fas fa-save"></i> Save All Content</button>
                     <button class="btn btn-info" onclick="previewAllContent()"><i class="fas fa-eye"></i> Preview All</button>
                     <button class="btn btn-primary" onclick="showSection('gallery')"><i class="fas fa-images"></i> Upload Media</button>
-                    <button class="btn btn-success" onclick="showSection('staff-attendance')"><i class="fas fa-user-check"></i> Staff Attendance</button>
-                    <button class="btn btn-info" onclick="showSection('visitor-attendance')"><i class="fas fa-user-friends"></i> Visitors</button>
-                    <button class="btn btn-warning" onclick="showSection('attendance-reports')" style="background:#d4a017;color:#001f5c;"><i class="fas fa-chart-bar"></i> Reports</button>
                     <button class="btn btn-danger" onclick="showSection('notice')"><i class="fas fa-bell"></i> Notice Alert</button>
                 </div>
             </div>
@@ -327,20 +281,20 @@
         <!-- ===== HOME SECTION ===== -->
         <div id="section-home" class="editor-container">
             <h2>🏠 Home Page</h2>
-            <p class="desc">Edit the main content displayed on the home page.</p>
+            <p class="desc">Edit all content on the home page. You can add images, videos, and audio anywhere.</p>
 
             <div class="media-insert-bar">
                 <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('heroSubtitle','image')"><i class="fas fa-image"></i> Image</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('heroSubtitle','video')"><i class="fas fa-video"></i> Video</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('heroSubtitle','audio')"><i class="fas fa-music"></i> Audio</button>
-                <button class="btn btn-secondary btn-sm" onclick="insertTable('heroSubtitle')"><i class="fas fa-table"></i> Table</button>
-                <button class="btn btn-success btn-sm" onclick="previewContent('heroSubtitle')"><i class="fas fa-eye"></i> Preview</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('heroTitle','image')"><i class="fas fa-image"></i> Image</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('heroTitle','video')"><i class="fas fa-video"></i> Video</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('heroTitle','audio')"><i class="fas fa-music"></i> Audio</button>
+                <button class="btn btn-secondary btn-sm" onclick="insertTable('heroTitle')"><i class="fas fa-table"></i> Table</button>
+                <button class="btn btn-success btn-sm" onclick="previewContent('heroTitle')"><i class="fas fa-eye"></i> Preview</button>
             </div>
 
             <div class="form-group">
                 <label>Hero Title</label>
-                <input type="text" id="heroTitle" placeholder="Main hero title">
+                <div id="heroTitle" class="quill-editor" style="min-height:80px;"></div>
             </div>
             <div class="form-group">
                 <label>Hero Subtitle</label>
@@ -370,8 +324,8 @@
 
         <!-- ===== ABOUT SECTION ===== -->
         <div id="section-about" class="editor-container">
-            <h2>📖 About Page</h2>
-            <p class="desc">Edit the About Us page content with full formatting.</p>
+            <h2>📖 About Us</h2>
+            <p class="desc">Edit all content on the About page.</p>
 
             <div class="media-insert-bar">
                 <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
@@ -411,7 +365,22 @@
         <!-- ===== ACADEMICS SECTION ===== -->
         <div id="section-academics" class="editor-container">
             <h2>📚 Academics</h2>
-            <p class="desc">Manage grades, subjects, and learning approaches.</p>
+            <p class="desc">Edit all content on the Academics page.</p>
+
+            <div class="media-insert-bar">
+                <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('academicsContent','image')"><i class="fas fa-image"></i> Image</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('academicsContent','video')"><i class="fas fa-video"></i> Video</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('academicsContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                <button class="btn btn-secondary btn-sm" onclick="insertTable('academicsContent')"><i class="fas fa-table"></i> Table</button>
+                <button class="btn btn-success btn-sm" onclick="previewContent('academicsContent')"><i class="fas fa-eye"></i> Preview</button>
+            </div>
+
+            <div class="form-group">
+                <label>Academics Content</label>
+                <div id="academicsContent" class="quill-editor"></div>
+            </div>
+
             <div id="academicsContainer"></div>
             <button class="btn btn-primary" onclick="addAcademic()">➕ Add Grade</button>
         </div>
@@ -419,15 +388,20 @@
         <!-- ===== ADMISSIONS SECTION ===== -->
         <div id="section-admissions" class="editor-container">
             <h2>📝 Admissions</h2>
-            <p class="desc">Edit admissions requirements and process.</p>
+            <p class="desc">Edit all content on the Admissions page.</p>
 
             <div class="media-insert-bar">
                 <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('admissionsRequirements','image')"><i class="fas fa-image"></i> Image</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('admissionsRequirements','video')"><i class="fas fa-video"></i> Video</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('admissionsRequirements','audio')"><i class="fas fa-music"></i> Audio</button>
-                <button class="btn btn-secondary btn-sm" onclick="insertTable('admissionsRequirements')"><i class="fas fa-table"></i> Table</button>
-                <button class="btn btn-success btn-sm" onclick="previewContent('admissionsRequirements')"><i class="fas fa-eye"></i> Preview</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('admissionsContent','image')"><i class="fas fa-image"></i> Image</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('admissionsContent','video')"><i class="fas fa-video"></i> Video</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('admissionsContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                <button class="btn btn-secondary btn-sm" onclick="insertTable('admissionsContent')"><i class="fas fa-table"></i> Table</button>
+                <button class="btn btn-success btn-sm" onclick="previewContent('admissionsContent')"><i class="fas fa-eye"></i> Preview</button>
+            </div>
+
+            <div class="form-group">
+                <label>Admissions Content</label>
+                <div id="admissionsContent" class="quill-editor"></div>
             </div>
 
             <div class="form-group">
@@ -455,7 +429,22 @@
         <!-- ===== FACILITIES SECTION ===== -->
         <div id="section-facilities" class="editor-container">
             <h2>🏫 Facilities</h2>
-            <p class="desc">Manage school facilities with images.</p>
+            <p class="desc">Edit all content on the Facilities page.</p>
+
+            <div class="media-insert-bar">
+                <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('facilitiesContent','image')"><i class="fas fa-image"></i> Image</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('facilitiesContent','video')"><i class="fas fa-video"></i> Video</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('facilitiesContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                <button class="btn btn-secondary btn-sm" onclick="insertTable('facilitiesContent')"><i class="fas fa-table"></i> Table</button>
+                <button class="btn btn-success btn-sm" onclick="previewContent('facilitiesContent')"><i class="fas fa-eye"></i> Preview</button>
+            </div>
+
+            <div class="form-group">
+                <label>Facilities Content</label>
+                <div id="facilitiesContent" class="quill-editor"></div>
+            </div>
+
             <div id="facilitiesContainer"></div>
             <button class="btn btn-primary" onclick="addFacility()">➕ Add Facility</button>
         </div>
@@ -463,12 +452,12 @@
         <!-- ===== GALLERY SECTION ===== -->
         <div id="section-gallery" class="editor-container">
             <h2>🖼️ Gallery</h2>
-            <p class="desc">Manage images, videos, and audio files.</p>
+            <p class="desc">Upload and manage all media files.</p>
 
             <div class="upload-area">
                 <span class="icon">📤</span>
                 <h3>Upload Media</h3>
-                <p>Upload images, videos, or audio files to use on your website.</p>
+                <p>Upload images, videos, or audio files to use anywhere on your website.</p>
                 <div class="file-types">
                     <span>🖼️ Images (JPG, PNG, GIF, WebP)</span>
                     <span>🎬 Videos (MP4, WebM, OGG)</span>
@@ -505,54 +494,23 @@
             <button class="btn btn-primary" onclick="addGalleryItem()">➕ Add Manually</button>
         </div>
 
-        <!-- ===== EVENTS SECTION ===== -->
-        <div id="section-events" class="editor-container">
-            <h2>📰 Events</h2>
-            <p class="desc">Manage news and events with full formatting.</p>
-
-            <div class="media-insert-bar">
-                <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('eventsContent','image')"><i class="fas fa-image"></i> Image</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('eventsContent','video')"><i class="fas fa-video"></i> Video</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('eventsContent','audio')"><i class="fas fa-music"></i> Audio</button>
-                <button class="btn btn-secondary btn-sm" onclick="insertTable('eventsContent')"><i class="fas fa-table"></i> Table</button>
-                <button class="btn btn-success btn-sm" onclick="previewContent('eventsContent')"><i class="fas fa-eye"></i> Preview</button>
-            </div>
-
-            <div id="eventsContainer"></div>
-            <button class="btn btn-primary" onclick="addEvent()">➕ Add Event</button>
-        </div>
-
-        <!-- ===== CO-CURRICULAR SECTION ===== -->
-        <div id="section-cocurricular" class="editor-container">
-            <h2>⚽ Co-curricular Activities</h2>
-            <p class="desc">Manage co-curricular activities with full formatting.</p>
-
-            <div class="media-insert-bar">
-                <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('cocurricularContent','image')"><i class="fas fa-image"></i> Image</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('cocurricularContent','video')"><i class="fas fa-video"></i> Video</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('cocurricularContent','audio')"><i class="fas fa-music"></i> Audio</button>
-                <button class="btn btn-secondary btn-sm" onclick="insertTable('cocurricularContent')"><i class="fas fa-table"></i> Table</button>
-                <button class="btn btn-success btn-sm" onclick="previewContent('cocurricularContent')"><i class="fas fa-eye"></i> Preview</button>
-            </div>
-
-            <div id="cocurricularContainer"></div>
-            <button class="btn btn-primary" onclick="addCocurricular()">➕ Add Activity</button>
-        </div>
-
         <!-- ===== PERFORMANCE SECTION ===== -->
         <div id="section-performance" class="editor-container">
-            <h2>🏆 Academic Performance</h2>
-            <p class="desc">Edit academic performance information.</p>
+            <h2>🏆 Performance</h2>
+            <p class="desc">Edit all content on the Performance page.</p>
 
             <div class="media-insert-bar">
                 <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('performanceKcpe','image')"><i class="fas fa-image"></i> Image</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('performanceKcpe','video')"><i class="fas fa-video"></i> Video</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('performanceKcpe','audio')"><i class="fas fa-music"></i> Audio</button>
-                <button class="btn btn-secondary btn-sm" onclick="insertTable('performanceKcpe')"><i class="fas fa-table"></i> Table</button>
-                <button class="btn btn-success btn-sm" onclick="previewContent('performanceKcpe')"><i class="fas fa-eye"></i> Preview</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('performanceContent','image')"><i class="fas fa-image"></i> Image</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('performanceContent','video')"><i class="fas fa-video"></i> Video</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('performanceContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                <button class="btn btn-secondary btn-sm" onclick="insertTable('performanceContent')"><i class="fas fa-table"></i> Table</button>
+                <button class="btn btn-success btn-sm" onclick="previewContent('performanceContent')"><i class="fas fa-eye"></i> Preview</button>
+            </div>
+
+            <div class="form-group">
+                <label>Performance Content</label>
+                <div id="performanceContent" class="quill-editor"></div>
             </div>
 
             <div class="form-group">
@@ -565,18 +523,23 @@
             </div>
         </div>
 
-        <!-- ===== PARENTS SECTION ===== -->
+        <!-- ===== PARENTS CORNER ===== -->
         <div id="section-parents" class="editor-container">
             <h2>👨‍👩‍👧‍👦 Parents Corner</h2>
-            <p class="desc">Edit parents corner information.</p>
+            <p class="desc">Edit all content on the Parents Corner page.</p>
 
             <div class="media-insert-bar">
                 <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('parentsCalendar','image')"><i class="fas fa-image"></i> Image</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('parentsCalendar','video')"><i class="fas fa-video"></i> Video</button>
-                <button class="btn btn-info btn-sm" onclick="openMediaUpload('parentsCalendar','audio')"><i class="fas fa-music"></i> Audio</button>
-                <button class="btn btn-secondary btn-sm" onclick="insertTable('parentsCalendar')"><i class="fas fa-table"></i> Table</button>
-                <button class="btn btn-success btn-sm" onclick="previewContent('parentsCalendar')"><i class="fas fa-eye"></i> Preview</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('parentsContent','image')"><i class="fas fa-image"></i> Image</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('parentsContent','video')"><i class="fas fa-video"></i> Video</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('parentsContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                <button class="btn btn-secondary btn-sm" onclick="insertTable('parentsContent')"><i class="fas fa-table"></i> Table</button>
+                <button class="btn btn-success btn-sm" onclick="previewContent('parentsContent')"><i class="fas fa-eye"></i> Preview</button>
+            </div>
+
+            <div class="form-group">
+                <label>Parents Corner Content</label>
+                <div id="parentsContent" class="quill-editor"></div>
             </div>
 
             <div class="form-group">
@@ -609,14 +572,29 @@
         <div id="section-downloads" class="editor-container">
             <h2>📄 Downloads</h2>
             <p class="desc">Manage downloadable files.</p>
+
+            <div class="media-insert-bar">
+                <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('downloadsContent','image')"><i class="fas fa-image"></i> Image</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('downloadsContent','video')"><i class="fas fa-video"></i> Video</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('downloadsContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                <button class="btn btn-secondary btn-sm" onclick="insertTable('downloadsContent')"><i class="fas fa-table"></i> Table</button>
+                <button class="btn btn-success btn-sm" onclick="previewContent('downloadsContent')"><i class="fas fa-eye"></i> Preview</button>
+            </div>
+
+            <div class="form-group">
+                <label>Downloads Content</label>
+                <div id="downloadsContent" class="quill-editor"></div>
+            </div>
+
             <div id="downloadsContainer"></div>
             <button class="btn btn-primary" onclick="addDownload()">➕ Add Download</button>
         </div>
 
-        <!-- ===== FEES STRUCTURE SECTION ===== -->
+        <!-- ===== FEES STRUCTURE ===== -->
         <div id="section-fees" class="editor-container">
             <h2>💰 Fees Structure</h2>
-            <p class="desc">Edit the school fees structure for all grades.</p>
+            <p class="desc">Edit all content on the Fees page.</p>
 
             <div class="media-insert-bar">
                 <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
@@ -650,172 +628,67 @@
             </div>
         </div>
 
-        <!-- ===== STAFF ATTENDANCE SECTION ===== -->
-        <div id="section-staff-attendance" class="editor-container">
-            <h2>👨‍🏫 Staff Attendance</h2>
-            <p class="desc">View and manage staff attendance records.</p>
+        <!-- ===== CONTACT ===== -->
+        <div id="section-contact" class="editor-container">
+            <h2>📞 Contact</h2>
+            <p class="desc">Edit all content on the Contact page.</p>
 
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:15px;">
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button class="btn btn-success btn-sm" onclick="loadStaffAttendance()"><i class="fas fa-sync"></i> Refresh</button>
-                    <button class="btn btn-info btn-sm" onclick="exportStaffAttendance()"><i class="fas fa-download"></i> Export CSV</button>
-                </div>
-                <span style="color:#666;font-size:13px;" id="staffAttendanceDate">Loading...</span>
+            <div class="media-insert-bar">
+                <span style="font-weight:600;font-size:13px;color:#333;">📎 Insert Media:</span>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('contactContent','image')"><i class="fas fa-image"></i> Image</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('contactContent','video')"><i class="fas fa-video"></i> Video</button>
+                <button class="btn btn-info btn-sm" onclick="openMediaUpload('contactContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                <button class="btn btn-secondary btn-sm" onclick="insertTable('contactContent')"><i class="fas fa-table"></i> Table</button>
+                <button class="btn btn-success btn-sm" onclick="previewContent('contactContent')"><i class="fas fa-eye"></i> Preview</button>
             </div>
 
-            <div class="attendance-stats" id="staffAttendanceStats">
-                <div class="attendance-stat">
-                    <div class="number" id="staffTotal">0</div>
-                    <div class="label">Total Staff</div>
-                </div>
-                <div class="attendance-stat">
-                    <div class="number" id="staffPresent" style="color:#28a745;">0</div>
-                    <div class="label">Present</div>
-                </div>
-                <div class="attendance-stat">
-                    <div class="number" id="staffLate" style="color:#d4a017;">0</div>
-                    <div class="label">Late</div>
-                </div>
-                <div class="attendance-stat">
-                    <div class="number" id="staffAbsent" style="color:#dc3545;">0</div>
-                    <div class="label">Absent</div>
-                </div>
+            <div class="form-group">
+                <label>Contact Page Content</label>
+                <div id="contactContent" class="quill-editor"></div>
             </div>
 
-            <div style="overflow-x:auto;">
-                <table class="attendance-table" id="staffAttendanceTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Staff Name</th>
-                            <th>Employee ID</th>
-                            <th>Department</th>
-                            <th>Status</th>
-                            <th>Check In</th>
-                            <th>Check Out</th>
-                            <th>Hours Worked</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staffAttendanceBody">
-                        <tr><td colspan="8" style="text-align:center;color:#999;">Loading attendance data...</td></tr>
-                    </tbody>
-                </table>
+            <div class="form-group">
+                <label>Address</label>
+                <input type="text" id="contactAddress" placeholder="School address">
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" id="contactPhone" placeholder="Phone number">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="contactEmail" placeholder="Email address">
+            </div>
+            <div class="form-group">
+                <label>Working Hours</label>
+                <input type="text" id="contactHours" placeholder="Working hours">
+            </div>
+            <div class="form-group">
+                <label>Map Embed Code</label>
+                <textarea id="contactMap" rows="3" placeholder="Google Maps embed code"></textarea>
             </div>
         </div>
 
-        <!-- ===== VISITOR ATTENDANCE SECTION ===== -->
-        <div id="section-visitor-attendance" class="editor-container">
-            <h2>🚪 Visitor Management</h2>
-            <p class="desc">View and manage visitor check-in/out records.</p>
+        <!-- ===== SEO ===== -->
+        <div id="section-seo" class="editor-container">
+            <h2>🔍 SEO Settings</h2>
+            <p class="desc">Edit search engine optimization settings.</p>
 
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:15px;">
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button class="btn btn-success btn-sm" onclick="loadVisitorAttendance()"><i class="fas fa-sync"></i> Refresh</button>
-                    <button class="btn btn-info btn-sm" onclick="exportVisitorAttendance()"><i class="fas fa-download"></i> Export CSV</button>
-                    <button class="btn btn-primary btn-sm" onclick="window.location.href='visitor-checkin.html'"><i class="fas fa-plus"></i> New Visitor</button>
-                </div>
-                <span style="color:#666;font-size:13px;" id="visitorAttendanceDate">Loading...</span>
+            <div class="form-group">
+                <label>Page Title</label>
+                <input type="text" id="seoTitle" placeholder="SEO title">
             </div>
-
-            <div class="attendance-stats" id="visitorAttendanceStats">
-                <div class="attendance-stat">
-                    <div class="number" id="visitorTotal">0</div>
-                    <div class="label">Total Today</div>
-                </div>
-                <div class="attendance-stat">
-                    <div class="number" id="visitorActive" style="color:#17a2b8;">0</div>
-                    <div class="label">Active (Checked In)</div>
-                </div>
-                <div class="attendance-stat">
-                    <div class="number" id="visitorCompleted" style="color:#6c757d;">0</div>
-                    <div class="label">Completed (Checked Out)</div>
-                </div>
+            <div class="form-group">
+                <label>Meta Description</label>
+                <textarea id="seoDescription" rows="3"></textarea>
             </div>
-
-            <div style="overflow-x:auto;">
-                <table class="attendance-table" id="visitorAttendanceTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Visitor Name</th>
-                            <th>Badge #</th>
-                            <th>Purpose</th>
-                            <th>Person to Visit</th>
-                            <th>Check In</th>
-                            <th>Check Out</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="visitorAttendanceBody">
-                        <tr><td colspan="9" style="text-align:center;color:#999;">Loading visitor data...</td></tr>
-                    </tbody>
-                </table>
+            <div class="form-group">
+                <label>Keywords</label>
+                <input type="text" id="seoKeywords" placeholder="Keywords separated by commas">
             </div>
         </div>
 
-        <!-- ===== REPORTS & ANALYTICS SECTION ===== -->
-        <div id="section-attendance-reports" class="editor-container">
-            <h2>📊 Attendance Reports & Analytics</h2>
-            <p class="desc">Generate and download attendance reports for staff and visitors.</p>
-
-            <div class="report-filters">
-                <div>
-                    <label style="font-weight:600;margin-right:5px;">Report Type:</label>
-                    <select id="reportType" onchange="generateReport()">
-                        <option value="staff">Staff Attendance</option>
-                        <option value="visitor">Visitor Attendance</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-weight:600;margin-right:5px;">Period:</label>
-                    <select id="reportPeriod" onchange="generateReport()">
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-weight:600;margin-right:5px;">Date:</label>
-                    <input type="date" id="reportDate" onchange="generateReport()">
-                </div>
-                <button class="btn btn-success btn-sm" onclick="downloadReport()"><i class="fas fa-download"></i> Download Report</button>
-                <button class="btn btn-info btn-sm" onclick="generateReport()"><i class="fas fa-sync"></i> Generate</button>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px;">
-                <div class="chart-container">
-                    <h4 style="text-align:center;color:#1a2a4a;margin-bottom:15px;">Attendance Status</h4>
-                    <canvas id="statusChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h4 style="text-align:center;color:#1a2a4a;margin-bottom:15px;">Daily Trend</h4>
-                    <canvas id="trendChart"></canvas>
-                </div>
-            </div>
-
-            <div style="overflow-x:auto;">
-                <h4 style="color:#1a2a4a;margin-bottom:10px;">📋 Report Details</h4>
-                <table class="attendance-table" id="reportTable">
-                    <thead id="reportTableHead">
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>ID/Employee</th>
-                            <th>Status</th>
-                            <th>Check In</th>
-                            <th>Check Out</th>
-                            <th>Hours</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reportTableBody">
-                        <tr><td colspan="7" style="text-align:center;color:#999;">Select filters and click Generate</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ===== NOTICE ALERT SECTION ===== -->
+        <!-- ===== NOTICE ALERT ===== -->
         <div id="section-notice" class="editor-container">
             <h2>🔔 Staff Notice Alert</h2>
             <p class="desc">Set a notice alert that will appear at the top of the website for all staff to see.</p>
@@ -848,81 +721,18 @@
                     <span class="notice-badge">STAFF NOTICE</span>
                     <span style="flex:1;" id="noticePreviewText">No active notice. Click "Publish Notice" to create one.</span>
                 </div>
-                <p style="font-size:12px;color:#888;margin-top:8px;">This is exactly how it will appear on the website.</p>
-            </div>
-
-            <div style="margin-top:15px;padding:15px;background:#fff3cd;border-radius:8px;border:1px solid #ffc107;">
-                <h4 style="color:#856404;">💡 Tips</h4>
-                <ul style="color:#856404;font-size:13px;padding-left:20px;line-height:1.8;">
-                    <li>Keep notices short and clear - staff should understand immediately</li>
-                    <li>Use <strong>Emergency Alert</strong> for urgent matters</li>
-                    <li>Use <strong>Important</strong> for important announcements</li>
-                    <li>Use <strong>Information</strong> for general updates</li>
-                    <li>The notice will stay at the top until you dismiss it</li>
-                </ul>
             </div>
         </div>
 
-        <!-- ===== CONTACT SECTION ===== -->
-        <div id="section-contact" class="editor-container">
-            <h2>📞 Contact Information</h2>
-            <p class="desc">Edit contact page information.</p>
-
-            <div class="form-group">
-                <label>Address</label>
-                <input type="text" id="contactAddress" placeholder="School address">
-            </div>
-            <div class="form-group">
-                <label>Phone Number</label>
-                <input type="text" id="contactPhone" placeholder="Phone number">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="contactEmail" placeholder="Email address">
-            </div>
-            <div class="form-group">
-                <label>Working Hours</label>
-                <input type="text" id="contactHours" placeholder="Working hours">
-            </div>
-            <div class="form-group">
-                <label>Map Embed Code</label>
-                <textarea id="contactMap" rows="3" placeholder="Google Maps embed code"></textarea>
-            </div>
-        </div>
-
-        <!-- ===== SEO SECTION ===== -->
-        <div id="section-seo" class="editor-container">
-            <h2>🔍 SEO Settings</h2>
-            <p class="desc">Edit search engine optimization settings.</p>
-
-            <div class="form-group">
-                <label>Page Title</label>
-                <input type="text" id="seoTitle" placeholder="SEO title">
-            </div>
-            <div class="form-group">
-                <label>Meta Description</label>
-                <textarea id="seoDescription" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Keywords</label>
-                <input type="text" id="seoKeywords" placeholder="Keywords separated by commas">
-            </div>
-        </div>
-
-        <!-- ===== ACTION BUTTONS ===== -->
-        <div style="display:flex;gap:15px;flex-wrap:wrap;margin-top:20px;">
-            <button class="btn btn-success btn-block" onclick="saveAllContent()" style="flex:1;">
-                <i class="fas fa-save"></i> Save All Content
-            </button>
-            <button class="btn btn-info btn-block" onclick="previewAllContent()" style="flex:1;">
-                <i class="fas fa-eye"></i> Preview All Changes
-            </button>
-        </div>
+        <!-- ===== SAVE BUTTON ===== -->
+        <button class="btn btn-success btn-block" onclick="saveAllContent()">
+            <i class="fas fa-save"></i> Save All Content
+        </button>
     </div>
 
     <script>
         // ============================================
-        // CHECK AUTH - RUNS IMMEDIATELY
+        // CHECK AUTH
         // ============================================
         (function() {
             const token = localStorage.getItem('adminToken');
@@ -932,28 +742,12 @@
             }
         })();
 
-        // ============================================
-        // DOM LOADED
-        // ============================================
-        let statusChart = null;
-        let trendChart = null;
-
         document.addEventListener('DOMContentLoaded', function() {
             const admin = JSON.parse(localStorage.getItem('admin') || '{}');
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
             initQuillEditors();
             loadContent();
-            loadStaffAttendance();
-            loadVisitorAttendance();
-            loadNoticeAlert();
-            
-            // Set default date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('reportDate').value = today;
-            
-            // Generate initial report
-            setTimeout(generateReport, 500);
             
             document.addEventListener('click', function(e) {
                 if ((e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') && e.target.closest('.ql-editor')) {
@@ -966,16 +760,24 @@
         // QUILL EDITORS
         // ============================================
         let quillEditors = {};
-        let activeQuillId = 'heroSubtitle';
+        let activeQuillId = 'heroTitle';
+        let uploadedFileData = null;
 
         function initQuillEditors() {
             const editorIds = [
-                'heroSubtitle', 'aboutMission', 'aboutVision', 'aboutValues', 'aboutHistory', 'aboutWhy',
-                'admissionsRequirements', 'admissionsAge', 'admissionsDocuments', 'admissionsProcess', 'admissionsFees',
-                'performanceKcpe', 'performanceInternal',
-                'parentsCalendar', 'parentsHomework', 'parentsAttendance', 'parentsRules', 'parentsUniform', 'parentsFees',
-                'eventsContent', 'cocurricularContent', 'feesContent', 'feesInstructions', 'noticeAlert'
+                'heroTitle', 'heroSubtitle',
+                'aboutMission', 'aboutVision', 'aboutValues', 'aboutHistory', 'aboutWhy',
+                'academicsContent',
+                'admissionsContent', 'admissionsRequirements', 'admissionsAge', 'admissionsDocuments', 'admissionsProcess', 'admissionsFees',
+                'facilitiesContent',
+                'performanceContent', 'performanceKcpe', 'performanceInternal',
+                'parentsContent', 'parentsCalendar', 'parentsHomework', 'parentsAttendance', 'parentsRules', 'parentsUniform', 'parentsFees',
+                'downloadsContent',
+                'feesContent', 'feesInstructions',
+                'contactContent',
+                'noticeAlert'
             ];
+
             editorIds.forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
@@ -1033,11 +835,6 @@
             
             closeMediaEditor();
             
-            if (section === 'staff-attendance') loadStaffAttendance();
-            if (section === 'visitor-attendance') loadVisitorAttendance();
-            if (section === 'attendance-reports') setTimeout(generateReport, 300);
-            if (section === 'notice') loadNoticeAlert();
-            
             setTimeout(() => {
                 document.querySelectorAll('.editor-container.active .quill-editor').forEach(editor => {
                     if (quillEditors[editor.id]) {
@@ -1048,66 +845,455 @@
         }
 
         // ============================================
-        // FEES TABLE TEMPLATES
+        // SHOW ALERT
         // ============================================
-        function insertFeesTable() {
-            const editorId = 'feesContent';
-            if (quillEditors[editorId]) {
-                const range = quillEditors[editorId].getSelection();
-                const index = range ? range.index : 0;
-                const tableHtml = `
-                    <h3>📋 2026 FEES STRUCTURE - DAY SCHOLARS</h3>
-                    <table style="border-collapse:collapse;width:100%;margin:10px 0;">
-                        <tr><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">GRADE</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 1</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 2</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 3</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TOTAL</th></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">PLAYGROUP</td><td style="border:1px solid #ccc;padding:8px;">6,000</td><td style="border:1px solid #ccc;padding:8px;">5,350</td><td style="border:1px solid #ccc;padding:8px;">4,100</td><td style="border:1px solid #ccc;padding:8px;">15,450</td></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">PP1 - PP2</td><td style="border:1px solid #ccc;padding:8px;">7,000</td><td style="border:1px solid #ccc;padding:8px;">6,000</td><td style="border:1px solid #ccc;padding:8px;">5,000</td><td style="border:1px solid #ccc;padding:8px;">18,000</td></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">G1 - G3</td><td style="border:1px solid #ccc;padding:8px;">7,500</td><td style="border:1px solid #ccc;padding:8px;">6,700</td><td style="border:1px solid #ccc;padding:8px;">5,500</td><td style="border:1px solid #ccc;padding:8px;">19,700</td></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">G4 - G6</td><td style="border:1px solid #ccc;padding:8px;">8,300</td><td style="border:1px solid #ccc;padding:8px;">7,400</td><td style="border:1px solid #ccc;padding:8px;">6,000</td><td style="border:1px solid #ccc;padding:8px;">21,700</td></tr>
-                    </table>
-                    <p><strong>📌 Admission Fee:</strong> 500/- for new learners from PP2-G6</p>
-                    <p><strong>📌 Interview Fee:</strong> 300/- for new learners</p>
-                `;
-                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
-                showAlert('✅ Day Scholars Fees Table inserted!', 'success');
+        function showAlert(message, type) {
+            const alertEl = document.getElementById('alert');
+            alertEl.className = 'alert ' + type;
+            alertEl.textContent = message;
+            alertEl.style.display = 'block';
+            setTimeout(() => { alertEl.style.display = 'none'; }, 5000);
+        }
+
+        // ============================================
+        // LOAD CONTENT
+        // ============================================
+        let websiteContent = {};
+
+        async function loadContent() {
+            try {
+                const response = await fetch('/api/content');
+                const data = await response.json();
+                if (data.success) {
+                    websiteContent = data.content;
+                    populateAllFields(websiteContent);
+                    renderMediaGallery();
+                }
+            } catch (error) {
+                console.error('Error loading content:', error);
+                showAlert('Error loading content', 'error');
             }
         }
 
-        function insertBoardingTable() {
-            const editorId = 'feesContent';
-            if (quillEditors[editorId]) {
-                const range = quillEditors[editorId].getSelection();
-                const index = range ? range.index : 0;
-                const tableHtml = `
-                    <h3>🏠 GRADE 3-6 BOARDING SECTION</h3>
-                    <table style="border-collapse:collapse;width:100%;margin:10px 0;">
-                        <tr><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">VOTE HEADS</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 1</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 2</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 3</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TOTAL</th></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">BOARDING</td><td style="border:1px solid #ccc;padding:8px;">3,500</td><td style="border:1px solid #ccc;padding:8px;">2,500</td><td style="border:1px solid #ccc;padding:8px;">1,500</td><td style="border:1px solid #ccc;padding:8px;">7,500</td></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">TUITION</td><td style="border:1px solid #ccc;padding:8px;">4,000</td><td style="border:1px solid #ccc;padding:8px;">3,000</td><td style="border:1px solid #ccc;padding:8px;">2,000</td><td style="border:1px solid #ccc;padding:8px;">9,000</td></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">MEALS</td><td style="border:1px solid #ccc;padding:8px;">3,500</td><td style="border:1px solid #ccc;padding:8px;">3,000</td><td style="border:1px solid #ccc;padding:8px;">2,500</td><td style="border:1px solid #ccc;padding:8px;">9,000</td></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">REMEDIALS</td><td style="border:1px solid #ccc;padding:8px;">700</td><td style="border:1px solid #ccc;padding:8px;">700</td><td style="border:1px solid #ccc;padding:8px;">600</td><td style="border:1px solid #ccc;padding:8px;">2,000</td></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">STATIONARIES</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">1,500</td></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">ACTIVITY</td><td style="border:1px solid #ccc;padding:8px;">400</td><td style="border:1px solid #ccc;padding:8px;">200</td><td style="border:1px solid #ccc;padding:8px;">100</td><td style="border:1px solid #ccc;padding:8px;">1,000</td></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">ASSESSMENT</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">300</td><td style="border:1px solid #ccc;padding:8px;">300</td><td style="border:1px solid #ccc;padding:8px;">1,100</td></tr>
-                        <tr style="font-weight:bold;background:#f0f2f5;"><td style="border:1px solid #ccc;padding:8px;">TOTALS</td><td style="border:1px solid #ccc;padding:8px;">13,100</td><td style="border:1px solid #ccc;padding:8px;">10,200</td><td style="border:1px solid #ccc;padding:8px;">7,500</td><td style="border:1px solid #ccc;padding:8px;">31,100</td></tr>
-                    </table>
-                `;
-                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
-                showAlert('✅ Boarding Fees Table inserted!', 'success');
+        // ============================================
+        // POPULATE ALL FIELDS
+        // ============================================
+        function populateAllFields(c) {
+            // Home
+            setQuillContent('heroTitle', c.heroTitle || '');
+            setQuillContent('heroSubtitle', c.heroSubtitle || '');
+            document.getElementById('heroButtonText').value = c.heroButtonText || 'Learn More';
+            document.getElementById('heroButtonLink').value = c.heroButtonLink || '/about.html';
+
+            renderItems('featuresContainer', c.homeFeatures || [], 'feature');
+            renderItems('statsContainer', c.homeStats || [], 'stat');
+            renderItems('newsContainer', c.homeNews || [], 'news');
+
+            // About
+            setQuillContent('aboutMission', c.aboutMission || '');
+            setQuillContent('aboutVision', c.aboutVision || '');
+            setQuillContent('aboutValues', c.aboutValues || '');
+            setQuillContent('aboutHistory', c.aboutHistory || '');
+            document.getElementById('aboutMotto').value = c.aboutMotto || 'Excellence in Education';
+            setQuillContent('aboutWhy', c.aboutWhy || '');
+
+            // Academics
+            setQuillContent('academicsContent', c.academicsContent || '');
+            renderItems('academicsContainer', c.academics || [], 'academic');
+
+            // Admissions
+            setQuillContent('admissionsContent', c.admissionsContent || '');
+            setQuillContent('admissionsRequirements', c.admissionsRequirements || '');
+            setQuillContent('admissionsAge', c.admissionsAge || '');
+            setQuillContent('admissionsDocuments', c.admissionsDocuments || '');
+            setQuillContent('admissionsProcess', c.admissionsProcess || '');
+            setQuillContent('admissionsFees', c.admissionsFees || '');
+
+            // Facilities
+            setQuillContent('facilitiesContent', c.facilitiesContent || '');
+            renderItems('facilitiesContainer', c.facilities || [], 'facility');
+
+            // Gallery
+            renderItems('galleryContainer', c.gallery || [], 'gallery');
+
+            // Performance
+            setQuillContent('performanceContent', c.performanceContent || '');
+            setQuillContent('performanceKcpe', c.performanceKcpe || '');
+            setQuillContent('performanceInternal', c.performanceInternal || '');
+
+            // Parents
+            setQuillContent('parentsContent', c.parentsContent || '');
+            setQuillContent('parentsCalendar', c.parentsCalendar || '');
+            setQuillContent('parentsHomework', c.parentsHomework || '');
+            setQuillContent('parentsAttendance', c.parentsAttendance || '');
+            setQuillContent('parentsRules', c.parentsRules || '');
+            setQuillContent('parentsUniform', c.parentsUniform || '');
+            setQuillContent('parentsFees', c.parentsFees || '');
+
+            // Downloads
+            setQuillContent('downloadsContent', c.downloadsContent || '');
+            renderItems('downloadsContainer', c.downloads || [], 'download');
+
+            // Fees
+            setQuillContent('feesContent', c.feesContent || '');
+            document.getElementById('feesPaybill').value = c.feesPaybill || '474752';
+            setQuillContent('feesInstructions', c.feesInstructions || '');
+
+            // Contact
+            setQuillContent('contactContent', c.contactContent || '');
+            document.getElementById('contactAddress').value = c.contactAddress || 'Nairobi, Kenya';
+            document.getElementById('contactPhone').value = c.contactPhone || '+254 721 556 252';
+            document.getElementById('contactEmail').value = c.contactEmail || 'starchangara@gmail.com';
+            document.getElementById('contactHours').value = c.contactHours || 'Monday - Friday: 7:00 AM - 6:00 PM';
+            document.getElementById('contactMap').value = c.contactMap || '';
+
+            // SEO
+            document.getElementById('seoTitle').value = c.seoTitle || '';
+            document.getElementById('seoDescription').value = c.seoDescription || '';
+            document.getElementById('seoKeywords').value = c.seoKeywords || '';
+
+            // Notice
+            setQuillContent('noticeAlert', c.noticeAlert || '');
+            if (c.noticeAlert) {
+                document.getElementById('noticePreviewText').innerHTML = stripHtml(c.noticeAlert) || 'No active notice.';
             }
         }
 
-        function insertTable(editorId) {
-            if (quillEditors[editorId]) {
-                const range = quillEditors[editorId].getSelection();
-                const index = range ? range.index : 0;
-                const tableHtml = `
-                    <table style="border-collapse:collapse;width:100%;">
-                        <tr><th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">Header 1</th><th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">Header 2</th><th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">Header 3</th></tr>
-                        <tr><td style="border:1px solid #ccc;padding:8px;">Row 1, Col 1</td><td style="border:1px solid #ccc;padding:8px;">Row 1, Col 2</td><td style="border:1px solid #ccc;padding:8px;">Row 1, Col 3</td></tr>
-                    </table>
+        // ============================================
+        // RENDER ITEMS
+        // ============================================
+        function renderItems(containerId, items, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (!items || items.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-plus-circle"></i>No items added yet. Click "Add" to add one.</div>`;
+                return;
+            }
+
+            items.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = 'item-box';
+                let fieldsHtml = '';
+
+                switch (type) {
+                    case 'feature':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="${item.icon || '📚'}"></div>
+                                <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
+                            </div>
+                            <div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div>
+                        `;
+                        break;
+                    case 'stat':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group"><label>Number</label><input type="text" class="field-number" value="${item.number || ''}"></div>
+                                <div class="form-group"><label>Label</label><input type="text" class="field-label" value="${item.label || ''}"></div>
+                            </div>
+                        `;
+                        break;
+                    case 'news':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
+                            <div class="form-group"><label>Content</label><textarea class="field-content" rows="2">${item.content || ''}</textarea></div>
+                        `;
+                        break;
+                    case 'academic':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group"><label>Grade</label><input type="text" class="field-grade" value="${item.grade || ''}"></div>
+                                <div class="form-group"><label>Subjects</label><input type="text" class="field-subjects" value="${item.subjects || ''}"></div>
+                            </div>
+                            <div class="form-group"><label>Learning Approach</label><input type="text" class="field-approach" value="${item.learningApproach || ''}"></div>
+                            <div class="form-group"><label>Activities</label><input type="text" class="field-activities" value="${item.activities || ''}"></div>
+                            <div class="form-group"><label>Teacher Support</label><input type="text" class="field-support" value="${item.teacherSupport || ''}"></div>
+                        `;
+                        break;
+                    case 'facility':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group"><label>Name</label><input type="text" class="field-name" value="${item.name || ''}"></div>
+                                <div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div>
+                            </div>
+                            <div class="form-group"><label>Image URL</label><input type="text" class="field-image" value="${item.image || ''}"></div>
+                        `;
+                        break;
+                    case 'gallery':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
+                                <div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div>
+                            </div>
+                            <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select class="field-type">
+                                    <option value="image" ${item.type === 'image' ? 'selected' : ''}>🖼️ Image</option>
+                                    <option value="video" ${item.type === 'video' ? 'selected' : ''}>🎬 Video</option>
+                                    <option value="audio" ${item.type === 'audio' ? 'selected' : ''}>🎵 Audio</option>
+                                </select>
+                            </div>
+                        `;
+                        break;
+                    case 'download':
+                        fieldsHtml = `
+                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                            <div class="form-row">
+                                <div class="form-group"><label>Name</label><input type="text" class="field-name" value="${item.name || ''}"></div>
+                                <div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="${item.icon || '📄'}"></div>
+                            </div>
+                            <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
+                            <div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div>
+                        `;
+                        break;
+                    default:
+                        fieldsHtml = '<p>Unknown item type</p>';
+                }
+
+                div.innerHTML = fieldsHtml;
+                container.appendChild(div);
+            });
+        }
+
+        // ============================================
+        // ADD ITEMS FUNCTIONS
+        // ============================================
+        function addFeature() {
+            const container = document.getElementById('featuresContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="📚"></div>
+                    <div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="Feature title"></div>
+                </div>
+                <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="Feature description"></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addStat() {
+            const container = document.getElementById('statsContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Number</label><input type="text" class="field-number" placeholder="500+"></div>
+                    <div class="form-group"><label>Label</label><input type="text" class="field-label" placeholder="Students"></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addNews() {
+            const container = document.getElementById('newsContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="News title"></div>
+                <div class="form-group"><label>Content</label><textarea class="field-content" rows="2" placeholder="News content"></textarea></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addAcademic() {
+            const container = document.getElementById('academicsContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Grade</label><input type="text" class="field-grade" placeholder="Grade 1"></div>
+                    <div class="form-group"><label>Subjects</label><input type="text" class="field-subjects" placeholder="Math, English, Science"></div>
+                </div>
+                <div class="form-group"><label>Learning Approach</label><input type="text" class="field-approach" placeholder="Child-centered learning"></div>
+                <div class="form-group"><label>Activities</label><input type="text" class="field-activities" placeholder="Group discussions, Projects"></div>
+                <div class="form-group"><label>Teacher Support</label><input type="text" class="field-support" placeholder="Individual attention"></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addFacility() {
+            const container = document.getElementById('facilitiesContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Name</label><input type="text" class="field-name" placeholder="Facility name"></div>
+                    <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="Facility description"></div>
+                </div>
+                <div class="form-group"><label>Image URL</label><input type="text" class="field-image" placeholder="/uploads/images/facility.jpg"></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addGalleryItem() {
+            const container = document.getElementById('galleryContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="Image title"></div>
+                    <div class="form-group"><label>Category</label><input type="text" class="field-category" placeholder="Category"></div>
+                </div>
+                <div class="form-group"><label>File URL</label><input type="text" class="field-file" placeholder="/uploads/images/photo.jpg"></div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select class="field-type">
+                        <option value="image">🖼️ Image</option>
+                        <option value="video">🎬 Video</option>
+                        <option value="audio">🎵 Audio</option>
+                    </select>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addDownload() {
+            const container = document.getElementById('downloadsContainer');
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Name</label><input type="text" class="field-name" placeholder="Download name"></div>
+                    <div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="📄"></div>
+                </div>
+                <div class="form-group"><label>File URL</label><input type="text" class="field-file" placeholder="/downloads/file.pdf"></div>
+                <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="File description"></div>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeItem(btn) {
+            const box = btn.closest('.item-box');
+            if (box) {
+                box.remove();
+                const container = box.parentElement;
+                if (container.children.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-plus-circle"></i>No items added yet. Click "Add" to add one.</div>`;
+                }
+            }
+        }
+
+        // ============================================
+        // GET ITEMS DATA
+        // ============================================
+        function getItemsData(containerId, type) {
+            const container = document.getElementById(containerId);
+            const items = [];
+            const boxes = container.querySelectorAll('.item-box');
+            boxes.forEach(box => {
+                let item = {};
+                switch (type) {
+                    case 'feature':
+                        item = { icon: box.querySelector('.field-icon')?.value || '📚', title: box.querySelector('.field-title')?.value || '', description: box.querySelector('.field-description')?.value || '' };
+                        break;
+                    case 'stat':
+                        item = { number: box.querySelector('.field-number')?.value || '', label: box.querySelector('.field-label')?.value || '' };
+                        break;
+                    case 'news':
+                        item = { title: box.querySelector('.field-title')?.value || '', content: box.querySelector('.field-content')?.value || '' };
+                        break;
+                    case 'academic':
+                        item = { grade: box.querySelector('.field-grade')?.value || '', subjects: box.querySelector('.field-subjects')?.value || '', learningApproach: box.querySelector('.field-approach')?.value || '', activities: box.querySelector('.field-activities')?.value || '', teacherSupport: box.querySelector('.field-support')?.value || '' };
+                        break;
+                    case 'facility':
+                        item = { name: box.querySelector('.field-name')?.value || '', description: box.querySelector('.field-description')?.value || '', image: box.querySelector('.field-image')?.value || '' };
+                        break;
+                    case 'gallery':
+                        item = { title: box.querySelector('.field-title')?.value || '', category: box.querySelector('.field-category')?.value || '', file: box.querySelector('.field-file')?.value || '', type: box.querySelector('.field-type')?.value || 'image' };
+                        break;
+                    case 'download':
+                        item = { name: box.querySelector('.field-name')?.value || '', icon: box.querySelector('.field-icon')?.value || '📄', file: box.querySelector('.field-file')?.value || '', description: box.querySelector('.field-description')?.value || '' };
+                        break;
+                }
+                items.push(item);
+            });
+            return items;
+        }
+
+        // ============================================
+        // MEDIA GALLERY
+        // ============================================
+        function renderMediaGallery() {
+            const container = document.getElementById('galleryContainer');
+            const galleryItems = websiteContent.gallery || [];
+            if (galleryItems.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i>No media found. Upload files to get started.</div>`;
+                return;
+            }
+            container.innerHTML = '';
+            galleryItems.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = 'item-box';
+                let previewHtml = '';
+                const fileType = item.type || 'image';
+                if (fileType === 'image') previewHtml = `<img src="${item.file || ''}" alt="${item.title || ''}" style="max-width:100px;max-height:80px;border-radius:4px;">`;
+                else if (fileType === 'video') previewHtml = `<video src="${item.file || ''}" controls style="max-width:100px;max-height:80px;border-radius:4px;"></video>`;
+                else if (fileType === 'audio') previewHtml = `<audio src="${item.file || ''}" controls style="width:150px;"></audio>`;
+                div.innerHTML = `
+                    <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                    <div class="form-row">
+                        <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
+                        <div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div>
+                    </div>
+                    <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select class="field-type">
+                            <option value="image" ${item.type === 'image' ? 'selected' : ''}>🖼️ Image</option>
+                            <option value="video" ${item.type === 'video' ? 'selected' : ''}>🎬 Video</option>
+                            <option value="audio" ${item.type === 'audio' ? 'selected' : ''}>🎵 Audio</option>
+                        </select>
+                    </div>
+                    <div class="file-preview">${previewHtml}</div>
                 `;
-                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
-                showAlert('✅ Table inserted!', 'success');
+                container.appendChild(div);
+            });
+        }
+
+        function removeGalleryItem(btn) {
+            const box = btn.closest('.item-box');
+            if (box) {
+                const fileInput = box.querySelector('.field-file');
+                const filePath = fileInput ? fileInput.value : '';
+                if (filePath) {
+                    websiteContent.gallery = websiteContent.gallery.filter(item => item.file !== filePath);
+                }
+                box.remove();
+                const container = box.parentElement;
+                if (container.children.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i>No media found. Upload files to get started.</div>`;
+                }
+                showAlert('✅ Media removed from gallery', 'success');
             }
         }
 
@@ -1177,6 +1363,99 @@
         }
 
         // ============================================
+        // INSERT TABLE
+        // ============================================
+        function insertTable(editorId) {
+            if (quillEditors[editorId]) {
+                const range = quillEditors[editorId].getSelection();
+                const index = range ? range.index : 0;
+                const tableHtml = `
+                    <table style="border-collapse:collapse;width:100%;">
+                        <tr>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">Header 1</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">Header 2</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">Header 3</th>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px;">Row 1, Col 1</td>
+                            <td style="border:1px solid #ccc;padding:8px;">Row 1, Col 2</td>
+                            <td style="border:1px solid #ccc;padding:8px;">Row 1, Col 3</td>
+                        </tr>
+                    </table>
+                `;
+                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
+                showAlert('✅ Table inserted!', 'success');
+            }
+        }
+
+        // ============================================
+        // FEES TABLE TEMPLATES
+        // ============================================
+        function insertFeesTable() {
+            const editorId = 'feesContent';
+            if (quillEditors[editorId]) {
+                const range = quillEditors[editorId].getSelection();
+                const index = range ? range.index : 0;
+                const tableHtml = `
+                    <h3>📋 2026 FEES STRUCTURE - DAY SCHOLARS</h3>
+                    <table style="border-collapse:collapse;width:100%;margin:10px 0;">
+                        <tr>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">GRADE</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 1</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 2</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 3</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TOTAL</th>
+                        </tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">PLAYGROUP</td><td style="border:1px solid #ccc;padding:8px;">6,000</td><td style="border:1px solid #ccc;padding:8px;">5,350</td><td style="border:1px solid #ccc;padding:8px;">4,100</td><td style="border:1px solid #ccc;padding:8px;">15,450</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">PP1 - PP2</td><td style="border:1px solid #ccc;padding:8px;">7,000</td><td style="border:1px solid #ccc;padding:8px;">6,000</td><td style="border:1px solid #ccc;padding:8px;">5,000</td><td style="border:1px solid #ccc;padding:8px;">18,000</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">G1 - G3</td><td style="border:1px solid #ccc;padding:8px;">7,500</td><td style="border:1px solid #ccc;padding:8px;">6,700</td><td style="border:1px solid #ccc;padding:8px;">5,500</td><td style="border:1px solid #ccc;padding:8px;">19,700</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">G4 - G6</td><td style="border:1px solid #ccc;padding:8px;">8,300</td><td style="border:1px solid #ccc;padding:8px;">7,400</td><td style="border:1px solid #ccc;padding:8px;">6,000</td><td style="border:1px solid #ccc;padding:8px;">21,700</td></tr>
+                    </table>
+                    <p><strong>📌 Admission Fee:</strong> 500/- for new learners from PP2-G6</p>
+                    <p><strong>📌 Interview Fee:</strong> 300/- for new learners</p>
+                `;
+                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
+                showAlert('✅ Day Scholars Fees Table inserted!', 'success');
+            }
+        }
+
+        function insertBoardingTable() {
+            const editorId = 'feesContent';
+            if (quillEditors[editorId]) {
+                const range = quillEditors[editorId].getSelection();
+                const index = range ? range.index : 0;
+                const tableHtml = `
+                    <h3>🏠 GRADE 3-6 BOARDING SECTION</h3>
+                    <table style="border-collapse:collapse;width:100%;margin:10px 0;">
+                        <tr>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">VOTE HEADS</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 1</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 2</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 3</th>
+                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TOTAL</th>
+                        </tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">BOARDING</td><td style="border:1px solid #ccc;padding:8px;">3,500</td><td style="border:1px solid #ccc;padding:8px;">2,500</td><td style="border:1px solid #ccc;padding:8px;">1,500</td><td style="border:1px solid #ccc;padding:8px;">7,500</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">TUITION</td><td style="border:1px solid #ccc;padding:8px;">4,000</td><td style="border:1px solid #ccc;padding:8px;">3,000</td><td style="border:1px solid #ccc;padding:8px;">2,000</td><td style="border:1px solid #ccc;padding:8px;">9,000</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">MEALS</td><td style="border:1px solid #ccc;padding:8px;">3,500</td><td style="border:1px solid #ccc;padding:8px;">3,000</td><td style="border:1px solid #ccc;padding:8px;">2,500</td><td style="border:1px solid #ccc;padding:8px;">9,000</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">REMEDIALS</td><td style="border:1px solid #ccc;padding:8px;">700</td><td style="border:1px solid #ccc;padding:8px;">700</td><td style="border:1px solid #ccc;padding:8px;">600</td><td style="border:1px solid #ccc;padding:8px;">2,000</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">STATIONARIES</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">1,500</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">ACTIVITY</td><td style="border:1px solid #ccc;padding:8px;">400</td><td style="border:1px solid #ccc;padding:8px;">200</td><td style="border:1px solid #ccc;padding:8px;">100</td><td style="border:1px solid #ccc;padding:8px;">1,000</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">ASSESSMENT</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">300</td><td style="border:1px solid #ccc;padding:8px;">300</td><td style="border:1px solid #ccc;padding:8px;">1,100</td></tr>
+                        <tr style="font-weight:bold;background:#f0f2f5;">
+                            <td style="border:1px solid #ccc;padding:8px;">TOTALS</td>
+                            <td style="border:1px solid #ccc;padding:8px;">13,100</td>
+                            <td style="border:1px solid #ccc;padding:8px;">10,200</td>
+                            <td style="border:1px solid #ccc;padding:8px;">7,500</td>
+                            <td style="border:1px solid #ccc;padding:8px;">31,100</td>
+                        </tr>
+                    </table>
+                `;
+                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
+                showAlert('✅ Boarding Fees Table inserted!', 'success');
+            }
+        }
+
+        // ============================================
         // PREVIEW FUNCTIONS
         // ============================================
         function previewContent(editorId) {
@@ -1190,18 +1469,21 @@
         function previewAllContent() {
             const previewBody = document.getElementById('previewBody');
             const sections = {
+                '🏠 Hero Title': getQuillContent('heroTitle'),
                 '🏠 Hero Subtitle': getQuillContent('heroSubtitle'),
                 '📖 Mission': getQuillContent('aboutMission'),
                 '📖 Vision': getQuillContent('aboutVision'),
                 '📖 Values': getQuillContent('aboutValues'),
                 '📖 History': getQuillContent('aboutHistory'),
                 '📖 Why Choose Us': getQuillContent('aboutWhy'),
-                '📝 Admission Requirements': getQuillContent('admissionsRequirements'),
-                '📝 Admission Process': getQuillContent('admissionsProcess'),
-                '📝 School Fees': getQuillContent('admissionsFees'),
-                '🏆 KCPE Results': getQuillContent('performanceKcpe'),
-                '💰 Fees Structure': getQuillContent('feesContent'),
-                '💰 Fees Instructions': getQuillContent('feesInstructions')
+                '📚 Academics': getQuillContent('academicsContent'),
+                '📝 Admissions': getQuillContent('admissionsContent'),
+                '🏫 Facilities': getQuillContent('facilitiesContent'),
+                '🏆 Performance': getQuillContent('performanceContent'),
+                '👨‍👩‍👧‍👦 Parents': getQuillContent('parentsContent'),
+                '📄 Downloads': getQuillContent('downloadsContent'),
+                '💰 Fees': getQuillContent('feesContent'),
+                '📞 Contact': getQuillContent('contactContent')
             };
             let html = '<div style="padding:20px;">';
             for (const [title, content] of Object.entries(sections)) {
@@ -1223,398 +1505,6 @@
         function saveAndClosePreview() {
             saveAllContent();
             closePreview();
-        }
-
-        // ============================================
-        // SHOW ALERT
-        // ============================================
-        function showAlert(message, type) {
-            const alertEl = document.getElementById('alert');
-            alertEl.className = 'alert ' + type;
-            alertEl.textContent = message;
-            alertEl.style.display = 'block';
-            setTimeout(() => { alertEl.style.display = 'none'; }, 5000);
-        }
-
-        // ============================================
-        // LOAD CONTENT
-        // ============================================
-        let websiteContent = {};
-
-        async function loadContent() {
-            try {
-                const response = await fetch('/api/content');
-                const data = await response.json();
-                if (data.success) {
-                    websiteContent = data.content;
-                    populateAllFields(websiteContent);
-                    renderMediaGallery();
-                }
-            } catch (error) {
-                console.error('Error loading content:', error);
-                showAlert('Error loading content', 'error');
-            }
-        }
-
-        // ============================================
-        // POPULATE ALL FIELDS
-        // ============================================
-        function populateAllFields(c) {
-            document.getElementById('heroTitle').value = c.heroTitle || '';
-            setQuillContent('heroSubtitle', c.heroSubtitle || '');
-            document.getElementById('heroButtonText').value = c.heroButtonText || 'Learn More';
-            document.getElementById('heroButtonLink').value = c.heroButtonLink || '/about.html';
-
-            renderItems('featuresContainer', c.homeFeatures || [], 'feature');
-            renderItems('statsContainer', c.homeStats || [], 'stat');
-            renderItems('newsContainer', c.homeNews || [], 'news');
-
-            setQuillContent('aboutMission', c.aboutMission || '');
-            setQuillContent('aboutVision', c.aboutVision || '');
-            setQuillContent('aboutValues', c.aboutValues || '');
-            setQuillContent('aboutHistory', c.aboutHistory || '');
-            document.getElementById('aboutMotto').value = c.aboutMotto || 'Excellence in Education';
-            setQuillContent('aboutWhy', c.aboutWhy || '');
-
-            renderItems('academicsContainer', c.academics || [], 'academic');
-
-            setQuillContent('admissionsRequirements', c.admissionsRequirements || '');
-            setQuillContent('admissionsAge', c.admissionsAge || '');
-            setQuillContent('admissionsDocuments', c.admissionsDocuments || '');
-            setQuillContent('admissionsProcess', c.admissionsProcess || '');
-            setQuillContent('admissionsFees', c.admissionsFees || '');
-
-            renderItems('facilitiesContainer', c.facilities || [], 'facility');
-            renderItems('galleryContainer', c.gallery || [], 'gallery');
-            renderItems('eventsContainer', c.events || [], 'event');
-            renderItems('cocurricularContainer', c.coCurricular || [], 'cocurricular');
-
-            setQuillContent('performanceKcpe', c.performanceKcpe || '');
-            setQuillContent('performanceInternal', c.performanceInternal || '');
-
-            setQuillContent('parentsCalendar', c.parentsCalendar || '');
-            setQuillContent('parentsHomework', c.parentsHomework || '');
-            setQuillContent('parentsAttendance', c.parentsAttendance || '');
-            setQuillContent('parentsRules', c.parentsRules || '');
-            setQuillContent('parentsUniform', c.parentsUniform || '');
-            setQuillContent('parentsFees', c.parentsFees || '');
-
-            renderItems('downloadsContainer', c.downloads || [], 'download');
-
-            setQuillContent('feesContent', c.feesContent || '');
-            document.getElementById('feesPaybill').value = c.feesPaybill || '474752';
-            setQuillContent('feesInstructions', c.feesInstructions || '');
-
-            document.getElementById('contactAddress').value = c.contactAddress || 'Nairobi, Kenya';
-            document.getElementById('contactPhone').value = c.contactPhone || '+254 721 556 252';
-            document.getElementById('contactEmail').value = c.contactEmail || 'starchangara@gmail.com';
-            document.getElementById('contactHours').value = c.contactHours || 'Monday - Friday: 7:00 AM - 6:00 PM';
-            document.getElementById('contactMap').value = c.contactMap || '';
-
-            document.getElementById('seoTitle').value = c.seoTitle || '';
-            document.getElementById('seoDescription').value = c.seoDescription || '';
-            document.getElementById('seoKeywords').value = c.seoKeywords || '';
-        }
-
-        // ============================================
-        // RENDER ITEMS (Keep existing implementation)
-        // ============================================
-        function renderItems(containerId, items, type) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            if (!items || items.length === 0) {
-                container.innerHTML = `<div class="empty-state"><i class="fas fa-plus-circle"></i>No items added yet. Click "Add" to add one.</div>`;
-                return;
-            }
-            items.forEach((item) => {
-                const div = document.createElement('div');
-                div.className = 'item-box';
-                let fieldsHtml = '';
-                switch (type) {
-                    case 'feature':
-                        fieldsHtml = `
-                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-row"><div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="${item.icon || '📚'}"></div><div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div></div>
-                            <div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div>
-                        `;
-                        break;
-                    case 'stat':
-                        fieldsHtml = `
-                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-row"><div class="form-group"><label>Number</label><input type="text" class="field-number" value="${item.number || ''}"></div><div class="form-group"><label>Label</label><input type="text" class="field-label" value="${item.label || ''}"></div></div>
-                        `;
-                        break;
-                    case 'news':
-                        fieldsHtml = `
-                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div>
-                            <div class="form-group"><label>Content</label><textarea class="field-content" rows="2">${item.content || ''}</textarea></div>
-                        `;
-                        break;
-                    case 'academic':
-                        fieldsHtml = `
-                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-row"><div class="form-group"><label>Grade</label><input type="text" class="field-grade" value="${item.grade || ''}"></div><div class="form-group"><label>Subjects</label><input type="text" class="field-subjects" value="${item.subjects || ''}"></div></div>
-                            <div class="form-group"><label>Learning Approach</label><input type="text" class="field-approach" value="${item.learningApproach || ''}"></div>
-                            <div class="form-group"><label>Activities</label><input type="text" class="field-activities" value="${item.activities || ''}"></div>
-                            <div class="form-group"><label>Teacher Support</label><input type="text" class="field-support" value="${item.teacherSupport || ''}"></div>
-                        `;
-                        break;
-                    case 'facility':
-                        fieldsHtml = `
-                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-row"><div class="form-group"><label>Name</label><input type="text" class="field-name" value="${item.name || ''}"></div><div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div></div>
-                            <div class="form-group"><label>Image URL</label><input type="text" class="field-image" value="${item.image || ''}"></div>
-                        `;
-                        break;
-                    case 'gallery':
-                        fieldsHtml = `
-                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-row"><div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div><div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div></div>
-                            <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
-                            <div class="form-group"><label>Type</label><select class="field-type"><option value="image" ${item.type === 'image' ? 'selected' : ''}>🖼️ Image</option><option value="video" ${item.type === 'video' ? 'selected' : ''}>🎬 Video</option><option value="audio" ${item.type === 'audio' ? 'selected' : ''}>🎵 Audio</option></select></div>
-                        `;
-                        break;
-                    case 'event':
-                        fieldsHtml = `
-                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-row"><div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div><div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div></div>
-                            <div class="form-group"><label>Content</label><textarea class="field-content" rows="2">${item.content || ''}</textarea></div>
-                        `;
-                        break;
-                    case 'cocurricular':
-                        fieldsHtml = `
-                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-row"><div class="form-group"><label>Name</label><input type="text" class="field-name" value="${item.name || ''}"></div><div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div></div>
-                            <div class="form-group"><label>Description</label><textarea class="field-description" rows="2">${item.description || ''}</textarea></div>
-                        `;
-                        break;
-                    case 'download':
-                        fieldsHtml = `
-                            <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                            <div class="form-row"><div class="form-group"><label>Name</label><input type="text" class="field-name" value="${item.name || ''}"></div><div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="${item.icon || '📄'}"></div></div>
-                            <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
-                            <div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div>
-                        `;
-                        break;
-                }
-                div.innerHTML = fieldsHtml;
-                container.appendChild(div);
-            });
-        }
-
-        // ============================================
-        // ADD ITEMS FUNCTIONS (Keep existing implementation)
-        // ============================================
-        function addFeature() {
-            const container = document.getElementById('featuresContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-row"><div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="📚"></div><div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="Feature title"></div></div>
-                <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="Feature description"></div>
-            `;
-            container.appendChild(div);
-        }
-
-        function addStat() {
-            const container = document.getElementById('statsContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-row"><div class="form-group"><label>Number</label><input type="text" class="field-number" placeholder="500+"></div><div class="form-group"><label>Label</label><input type="text" class="field-label" placeholder="Students"></div></div>
-            `;
-            container.appendChild(div);
-        }
-
-        function addNews() {
-            const container = document.getElementById('newsContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="News title"></div>
-                <div class="form-group"><label>Content</label><textarea class="field-content" rows="2" placeholder="News content"></textarea></div>
-            `;
-            container.appendChild(div);
-        }
-
-        function addAcademic() {
-            const container = document.getElementById('academicsContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-row"><div class="form-group"><label>Grade</label><input type="text" class="field-grade" placeholder="Grade 1"></div><div class="form-group"><label>Subjects</label><input type="text" class="field-subjects" placeholder="Math, English, Science"></div></div>
-                <div class="form-group"><label>Learning Approach</label><input type="text" class="field-approach" placeholder="Child-centered learning"></div>
-                <div class="form-group"><label>Activities</label><input type="text" class="field-activities" placeholder="Group discussions, Projects"></div>
-                <div class="form-group"><label>Teacher Support</label><input type="text" class="field-support" placeholder="Individual attention"></div>
-            `;
-            container.appendChild(div);
-        }
-
-        function addFacility() {
-            const container = document.getElementById('facilitiesContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-row"><div class="form-group"><label>Name</label><input type="text" class="field-name" placeholder="Facility name"></div><div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="Facility description"></div></div>
-                <div class="form-group"><label>Image URL</label><input type="text" class="field-image" placeholder="/uploads/images/facility.jpg"></div>
-            `;
-            container.appendChild(div);
-        }
-
-        function addGalleryItem() {
-            const container = document.getElementById('galleryContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-row"><div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="Image title"></div><div class="form-group"><label>Category</label><input type="text" class="field-category" placeholder="Category"></div></div>
-                <div class="form-group"><label>File URL</label><input type="text" class="field-file" placeholder="/uploads/images/photo.jpg"></div>
-                <div class="form-group"><label>Type</label><select class="field-type"><option value="image">🖼️ Image</option><option value="video">🎬 Video</option><option value="audio">🎵 Audio</option></select></div>
-            `;
-            container.appendChild(div);
-        }
-
-        function addEvent() {
-            const container = document.getElementById('eventsContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-row"><div class="form-group"><label>Title</label><input type="text" class="field-title" placeholder="Event title"></div><div class="form-group"><label>Category</label><input type="text" class="field-category" placeholder="Category"></div></div>
-                <div class="form-group"><label>Content</label><textarea class="field-content" rows="2" placeholder="Event description"></textarea></div>
-            `;
-            container.appendChild(div);
-        }
-
-        function addCocurricular() {
-            const container = document.getElementById('cocurricularContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-row"><div class="form-group"><label>Name</label><input type="text" class="field-name" placeholder="Activity name"></div><div class="form-group"><label>Category</label><input type="text" class="field-category" placeholder="Category"></div></div>
-                <div class="form-group"><label>Description</label><textarea class="field-description" rows="2" placeholder="Activity description"></textarea></div>
-            `;
-            container.appendChild(div);
-        }
-
-        function addDownload() {
-            const container = document.getElementById('downloadsContainer');
-            const empty = container.querySelector('.empty-state');
-            if (empty) empty.remove();
-            const div = document.createElement('div');
-            div.className = 'item-box';
-            div.innerHTML = `
-                <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                <div class="form-row"><div class="form-group"><label>Name</label><input type="text" class="field-name" placeholder="Download name"></div><div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="📄"></div></div>
-                <div class="form-group"><label>File URL</label><input type="text" class="field-file" placeholder="/downloads/file.pdf"></div>
-                <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="File description"></div>
-            `;
-            container.appendChild(div);
-        }
-
-        function removeItem(btn) {
-            const box = btn.closest('.item-box');
-            if (box) {
-                box.remove();
-                const container = box.parentElement;
-                if (container.children.length === 0) {
-                    container.innerHTML = `<div class="empty-state"><i class="fas fa-plus-circle"></i>No items added yet. Click "Add" to add one.</div>`;
-                }
-            }
-        }
-
-        function getItemsData(containerId, type) {
-            const container = document.getElementById(containerId);
-            const items = [];
-            const boxes = container.querySelectorAll('.item-box');
-            boxes.forEach(box => {
-                let item = {};
-                switch (type) {
-                    case 'feature': item = { icon: box.querySelector('.field-icon')?.value || '📚', title: box.querySelector('.field-title')?.value || '', description: box.querySelector('.field-description')?.value || '' }; break;
-                    case 'stat': item = { number: box.querySelector('.field-number')?.value || '', label: box.querySelector('.field-label')?.value || '' }; break;
-                    case 'news': item = { title: box.querySelector('.field-title')?.value || '', content: box.querySelector('.field-content')?.value || '' }; break;
-                    case 'academic': item = { grade: box.querySelector('.field-grade')?.value || '', subjects: box.querySelector('.field-subjects')?.value || '', learningApproach: box.querySelector('.field-approach')?.value || '', activities: box.querySelector('.field-activities')?.value || '', teacherSupport: box.querySelector('.field-support')?.value || '' }; break;
-                    case 'facility': item = { name: box.querySelector('.field-name')?.value || '', description: box.querySelector('.field-description')?.value || '', image: box.querySelector('.field-image')?.value || '' }; break;
-                    case 'gallery': item = { title: box.querySelector('.field-title')?.value || '', category: box.querySelector('.field-category')?.value || '', file: box.querySelector('.field-file')?.value || '', type: box.querySelector('.field-type')?.value || 'image' }; break;
-                    case 'event': item = { title: box.querySelector('.field-title')?.value || '', category: box.querySelector('.field-category')?.value || '', content: box.querySelector('.field-content')?.value || '' }; break;
-                    case 'cocurricular': item = { name: box.querySelector('.field-name')?.value || '', category: box.querySelector('.field-category')?.value || '', description: box.querySelector('.field-description')?.value || '' }; break;
-                    case 'download': item = { name: box.querySelector('.field-name')?.value || '', icon: box.querySelector('.field-icon')?.value || '📄', file: box.querySelector('.field-file')?.value || '', description: box.querySelector('.field-description')?.value || '' }; break;
-                }
-                items.push(item);
-            });
-            return items;
-        }
-
-        // ============================================
-        // MEDIA GALLERY FUNCTIONS
-        // ============================================
-        let uploadedFileData = null;
-
-        function renderMediaGallery() {
-            const container = document.getElementById('galleryContainer');
-            const galleryItems = websiteContent.gallery || [];
-            if (galleryItems.length === 0) {
-                container.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i>No media found. Upload files to get started.</div>`;
-                return;
-            }
-            container.innerHTML = '';
-            galleryItems.forEach((item) => {
-                const div = document.createElement('div');
-                div.className = 'item-box';
-                let previewHtml = '';
-                const fileType = item.type || 'image';
-                if (fileType === 'image') previewHtml = `<img src="${item.file || ''}" alt="${item.title || ''}" style="max-width:100px;max-height:80px;border-radius:4px;">`;
-                else if (fileType === 'video') previewHtml = `<video src="${item.file || ''}" controls style="max-width:100px;max-height:80px;border-radius:4px;"></video>`;
-                else if (fileType === 'audio') previewHtml = `<audio src="${item.file || ''}" controls style="width:150px;"></audio>`;
-                div.innerHTML = `
-                    <button class="remove-btn" onclick="removeGalleryItem(this)">✕</button>
-                    <div class="form-row"><div class="form-group"><label>Title</label><input type="text" class="field-title" value="${item.title || ''}"></div><div class="form-group"><label>Category</label><input type="text" class="field-category" value="${item.category || ''}"></div></div>
-                    <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
-                    <div class="form-group"><label>Type</label><select class="field-type"><option value="image" ${item.type === 'image' ? 'selected' : ''}>🖼️ Image</option><option value="video" ${item.type === 'video' ? 'selected' : ''}>🎬 Video</option><option value="audio" ${item.type === 'audio' ? 'selected' : ''}>🎵 Audio</option></select></div>
-                    <div class="file-preview">${previewHtml}</div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function removeGalleryItem(btn) {
-            const box = btn.closest('.item-box');
-            if (box) {
-                const fileInput = box.querySelector('.field-file');
-                const filePath = fileInput ? fileInput.value : '';
-                if (filePath) {
-                    websiteContent.gallery = websiteContent.gallery.filter(item => item.file !== filePath);
-                }
-                box.remove();
-                const container = box.parentElement;
-                if (container.children.length === 0) {
-                    container.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i>No media found. Upload files to get started.</div>`;
-                }
-                showAlert('✅ Media removed from gallery', 'success');
-            }
         }
 
         // ============================================
@@ -1730,390 +1620,8 @@
         }
 
         // ============================================
-        // STAFF ATTENDANCE
-        // ============================================
-        async function loadStaffAttendance() {
-            try {
-                const response = await fetch('/api/teacher/attendance/today');
-                const data = await response.json();
-                
-                document.getElementById('staffAttendanceDate').textContent = '📅 ' + new Date().toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                
-                if (data.success) {
-                    const attendance = data.attendance || [];
-                    const total = attendance.length;
-                    const present = attendance.filter(a => a.status === 'Checked In' || a.status === 'Checked Out').length;
-                    const late = attendance.filter(a => a.isLate === true).length;
-                    const absent = attendance.filter(a => a.status === 'Absent').length;
-                    
-                    document.getElementById('staffTotal').textContent = total;
-                    document.getElementById('staffPresent').textContent = present;
-                    document.getElementById('staffLate').textContent = late;
-                    document.getElementById('staffAbsent').textContent = absent;
-                    
-                    const tbody = document.getElementById('staffAttendanceBody');
-                    if (attendance.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#999;">No staff attendance records found for today.</td></tr>`;
-                        return;
-                    }
-                    
-                    tbody.innerHTML = '';
-                    attendance.forEach((staff, index) => {
-                        const tr = document.createElement('tr');
-                        let statusClass = 'status-absent';
-                        let statusText = 'Absent';
-                        if (staff.status === 'Checked In') {
-                            statusClass = 'status-checked-in';
-                            statusText = '✅ Checked In';
-                        } else if (staff.status === 'Checked Out') {
-                            statusClass = 'status-checked-out';
-                            statusText = '✅ Checked Out';
-                        } else if (staff.status === 'Late') {
-                            statusClass = 'status-late';
-                            statusText = '⚠️ Late';
-                        }
-                        
-                        tr.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td><strong>${staff.name || 'Unknown'}</strong></td>
-                            <td>${staff.employeeId || '-'}</td>
-                            <td>${staff.department || '-'}</td>
-                            <td><span class="${statusClass}">${statusText}</span></td>
-                            <td>${staff.checkIn ? new Date(staff.checkIn).toLocaleTimeString() : '-'}</td>
-                            <td>${staff.checkOut ? new Date(staff.checkOut).toLocaleTimeString() : '-'}</td>
-                            <td>${staff.hoursWorked ? staff.hoursWorked + ' hrs' : '-'}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading staff attendance:', error);
-                document.getElementById('staffAttendanceBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc3545;">Error loading attendance data</td></tr>`;
-            }
-        }
-
-        function exportStaffAttendance() {
-            const table = document.getElementById('staffAttendanceTable');
-            let csv = '\uFEFF';
-            const rows = table.querySelectorAll('tr');
-            rows.forEach(row => {
-                const cols = row.querySelectorAll('th, td');
-                const rowData = [];
-                cols.forEach(col => rowData.push('"' + col.textContent.trim() + '"'));
-                csv += rowData.join(',') + '\n';
-            });
-            downloadCSV(csv, 'staff_attendance_' + new Date().toISOString().split('T')[0] + '.csv');
-        }
-
-        // ============================================
-        // VISITOR ATTENDANCE
-        // ============================================
-        async function loadVisitorAttendance() {
-            try {
-                const response = await fetch('/api/visitors/today');
-                const data = await response.json();
-                
-                document.getElementById('visitorAttendanceDate').textContent = '📅 ' + new Date().toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                
-                if (data.success) {
-                    const visitors = data.visitors || [];
-                    const total = visitors.length;
-                    const active = visitors.filter(v => v.status === 'Checked In').length;
-                    const completed = visitors.filter(v => v.status === 'Checked Out').length;
-                    
-                    document.getElementById('visitorTotal').textContent = total;
-                    document.getElementById('visitorActive').textContent = active;
-                    document.getElementById('visitorCompleted').textContent = completed;
-                    
-                    const tbody = document.getElementById('visitorAttendanceBody');
-                    if (visitors.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#999;">No visitors today.</td></tr>`;
-                        return;
-                    }
-                    
-                    tbody.innerHTML = '';
-                    visitors.forEach((visitor, index) => {
-                        const tr = document.createElement('tr');
-                        const isCheckedIn = visitor.status === 'Checked In';
-                        
-                        tr.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td><strong>${visitor.fullName || visitor.firstName + ' ' + visitor.lastName}</strong></td>
-                            <td>${visitor.badgeNumber || '-'}</td>
-                            <td>${visitor.purpose || '-'}</td>
-                            <td>${visitor.personToVisit || '-'}</td>
-                            <td>${visitor.checkIn ? new Date(visitor.checkIn).toLocaleTimeString() : '-'}</td>
-                            <td>${visitor.checkOut ? new Date(visitor.checkOut).toLocaleTimeString() : '-'}</td>
-                            <td><span class="${isCheckedIn ? 'status-checked-in' : 'status-checked-out'}">${isCheckedIn ? '✅ Checked In' : '✅ Checked Out'}</span></td>
-                            <td>
-                                ${isCheckedIn ? `<button class="btn btn-primary btn-sm" onclick="checkoutVisitor('${visitor.badgeNumber}')"><i class="fas fa-sign-out-alt"></i> Check Out</button>` : '<span style="color:#6c757d;">Completed</span>'}
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading visitor attendance:', error);
-                document.getElementById('visitorAttendanceBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc3545;">Error loading visitor data</td></tr>`;
-            }
-        }
-
-        async function checkoutVisitor(badgeNumber) {
-            if (!confirm('Are you sure you want to check out this visitor?')) return;
-            
-            try {
-                const response = await fetch('/api/visitor/checkout/' + badgeNumber, {
-                    method: 'PUT'
-                });
-                const data = await response.json();
-                if (data.success) {
-                    showAlert('✅ Visitor checked out successfully!', 'success');
-                    loadVisitorAttendance();
-                } else {
-                    showAlert('❌ Error: ' + data.message, 'error');
-                }
-            } catch (error) {
-                console.error('Error checking out visitor:', error);
-                showAlert('❌ Error checking out visitor', 'error');
-            }
-        }
-
-        function exportVisitorAttendance() {
-            const table = document.getElementById('visitorAttendanceTable');
-            let csv = '\uFEFF';
-            const rows = table.querySelectorAll('tr');
-            rows.forEach(row => {
-                const cols = row.querySelectorAll('th, td');
-                const rowData = [];
-                cols.forEach(col => rowData.push('"' + col.textContent.trim() + '"'));
-                csv += rowData.join(',') + '\n';
-            });
-            downloadCSV(csv, 'visitor_attendance_' + new Date().toISOString().split('T')[0] + '.csv');
-        }
-
-        // ============================================
-        // REPORTS & ANALYTICS
-        // ============================================
-        async function generateReport() {
-            const reportType = document.getElementById('reportType').value;
-            const period = document.getElementById('reportPeriod').value;
-            const date = document.getElementById('reportDate').value;
-
-            try {
-                let data = [];
-                let headers = [];
-                let title = '';
-
-                if (reportType === 'staff') {
-                    const response = await fetch('/api/admin/attendance/all');
-                    const result = await response.json();
-                    if (result.success) {
-                        data = result.teachers || [];
-                        headers = ['#', 'Name', 'Employee ID', 'Department', 'Total Days', 'Present', 'Late', 'Absent', 'Attendance Rate'];
-                        title = 'Staff Attendance Report';
-                    }
-                } else {
-                    const response = await fetch('/api/visitors/today');
-                    const result = await response.json();
-                    if (result.success) {
-                        data = result.visitors || [];
-                        headers = ['#', 'Visitor Name', 'Badge #', 'Purpose', 'Person to Visit', 'Check In', 'Check Out', 'Status'];
-                        title = 'Visitor Attendance Report';
-                    }
-                }
-
-                const tbody = document.getElementById('reportTableBody');
-                const thead = document.getElementById('reportTableHead');
-                
-                thead.innerHTML = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-                
-                if (data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="${headers.length}" style="text-align:center;color:#999;">No data available for the selected period</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = '';
-                data.forEach((item, index) => {
-                    const tr = document.createElement('tr');
-                    let rowData = [];
-                    
-                    if (reportType === 'staff') {
-                        const totalDays = item.attendance ? item.attendance.length : 0;
-                        const present = item.attendance ? item.attendance.filter(a => a.status === 'Present' || a.status === 'Checked In' || a.status === 'Checked Out').length : 0;
-                        const late = item.attendance ? item.attendance.filter(a => a.isLate === true).length : 0;
-                        const absent = totalDays - present;
-                        const rate = totalDays > 0 ? ((present / totalDays) * 100).toFixed(1) : 0;
-                        
-                        rowData = [
-                            index + 1,
-                            item.name || item.firstName + ' ' + item.lastName,
-                            item.employeeId || '-',
-                            item.department || '-',
-                            totalDays,
-                            present,
-                            late,
-                            absent,
-                            rate + '%'
-                        ];
-                    } else {
-                        rowData = [
-                            index + 1,
-                            item.fullName || item.firstName + ' ' + item.lastName,
-                            item.badgeNumber || '-',
-                            item.purpose || '-',
-                            item.personToVisit || '-',
-                            item.checkIn ? new Date(item.checkIn).toLocaleString() : '-',
-                            item.checkOut ? new Date(item.checkOut).toLocaleString() : '-',
-                            item.status || 'Unknown'
-                        ];
-                    }
-                    
-                    tr.innerHTML = rowData.map(d => `<td>${d}</td>`).join('');
-                    tbody.appendChild(tr);
-                });
-
-                updateCharts(data, reportType);
-
-            } catch (error) {
-                console.error('Error generating report:', error);
-                document.getElementById('reportTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc3545;">Error generating report</td></tr>`;
-            }
-        }
-
-        function updateCharts(data, reportType) {
-            const ctx1 = document.getElementById('statusChart').getContext('2d');
-            if (statusChart) statusChart.destroy();
-
-            let labels = [];
-            let values = [];
-            let colors = [];
-
-            if (reportType === 'staff') {
-                let present = 0, late = 0, absent = 0;
-                data.forEach(item => {
-                    if (item.attendance && item.attendance.length > 0) {
-                        const lastRecord = item.attendance[item.attendance.length - 1];
-                        if (lastRecord.status === 'Present' || lastRecord.status === 'Checked In' || lastRecord.status === 'Checked Out') present++;
-                        else if (lastRecord.isLate) late++;
-                        else absent++;
-                    } else {
-                        absent++;
-                    }
-                });
-                labels = ['Present', 'Late', 'Absent'];
-                values = [present, late, absent];
-                colors = ['#28a745', '#d4a017', '#dc3545'];
-            } else {
-                const active = data.filter(v => v.status === 'Checked In').length;
-                const completed = data.filter(v => v.status === 'Checked Out').length;
-                labels = ['Active (Checked In)', 'Completed (Checked Out)'];
-                values = [active, completed];
-                colors = ['#17a2b8', '#6c757d'];
-            }
-
-            statusChart = new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: colors,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-
-            const ctx2 = document.getElementById('trendChart').getContext('2d');
-            if (trendChart) trendChart.destroy();
-
-            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            const trendData = days.map(() => Math.floor(Math.random() * 20) + 5);
-
-            trendChart = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: days,
-                    datasets: [{
-                        label: reportType === 'staff' ? 'Staff Present' : 'Visitors',
-                        data: trendData,
-                        backgroundColor: '#d4a017',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        function downloadReport() {
-            const table = document.getElementById('reportTable');
-            let csv = '\uFEFF';
-            const rows = table.querySelectorAll('tr');
-            rows.forEach(row => {
-                const cols = row.querySelectorAll('th, td');
-                const rowData = [];
-                cols.forEach(col => rowData.push('"' + col.textContent.trim() + '"'));
-                csv += rowData.join(',') + '\n';
-            });
-            const reportType = document.getElementById('reportType').value;
-            const period = document.getElementById('reportPeriod').value;
-            const date = document.getElementById('reportDate').value;
-            downloadCSV(csv, `${reportType}_attendance_${period}_${date}.csv`);
-        }
-
-        function downloadCSV(csv, filename) {
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // ============================================
         // NOTICE ALERT FUNCTIONS
         // ============================================
-        async function loadNoticeAlert() {
-            try {
-                const response = await fetch('/api/content/notice');
-                const data = await response.json();
-                if (data.success && data.notice) {
-                    const notice = data.notice;
-                    setQuillContent('noticeAlert', notice.message || '');
-                    document.getElementById('noticeType').value = notice.type || 'staff';
-                    document.getElementById('noticePreviewText').innerHTML = stripHtml(notice.message) || 'No active notice.';
-                    document.getElementById('noticePreview').style.borderLeftColor = getNoticeColor(notice.type);
-                }
-            } catch (error) {
-                console.error('Error loading notice:', error);
-            }
-        }
-
-        function getNoticeColor(type) {
-            switch(type) {
-                case 'emergency': return '#dc3545';
-                case 'important': return '#ffc107';
-                case 'info': return '#17a2b8';
-                default: return '#ffc107';
-            }
-        }
-
         async function saveNoticeAlert() {
             const content = getQuillContent('noticeAlert');
             const type = document.getElementById('noticeType').value;
@@ -2135,9 +1643,8 @@
                 });
                 const result = await response.json();
                 if (result.success) {
-                    showAlert('✅ Notice published successfully! Staff will see it immediately.', 'success');
+                    showAlert('✅ Notice published successfully!', 'success');
                     document.getElementById('noticePreviewText').innerHTML = stripHtml(content);
-                    document.getElementById('noticePreview').style.borderLeftColor = getNoticeColor(type);
                 } else {
                     showAlert('❌ Error: ' + result.message, 'error');
                 }
@@ -2172,6 +1679,7 @@
         // SAVE ALL CONTENT
         // ============================================
         async function saveAllContent() {
+            // Update gallery from DOM
             const galleryContainer = document.getElementById('galleryContainer');
             const galleryBoxes = galleryContainer.querySelectorAll('.item-box');
             const updatedGallery = [];
@@ -2185,46 +1693,74 @@
             websiteContent.gallery = updatedGallery;
 
             const data = {
-                heroTitle: document.getElementById('heroTitle').value,
+                // Home
+                heroTitle: getQuillContent('heroTitle'),
                 heroSubtitle: getQuillContent('heroSubtitle'),
                 heroButtonText: document.getElementById('heroButtonText').value,
                 heroButtonLink: document.getElementById('heroButtonLink').value,
                 homeFeatures: getItemsData('featuresContainer', 'feature'),
                 homeStats: getItemsData('statsContainer', 'stat'),
                 homeNews: getItemsData('newsContainer', 'news'),
+
+                // About
                 aboutMission: getQuillContent('aboutMission'),
                 aboutVision: getQuillContent('aboutVision'),
                 aboutValues: getQuillContent('aboutValues'),
                 aboutHistory: getQuillContent('aboutHistory'),
                 aboutMotto: document.getElementById('aboutMotto').value,
                 aboutWhy: getQuillContent('aboutWhy'),
+
+                // Academics
+                academicsContent: getQuillContent('academicsContent'),
                 academics: getItemsData('academicsContainer', 'academic'),
+
+                // Admissions
+                admissionsContent: getQuillContent('admissionsContent'),
                 admissionsRequirements: getQuillContent('admissionsRequirements'),
                 admissionsAge: getQuillContent('admissionsAge'),
                 admissionsDocuments: getQuillContent('admissionsDocuments'),
                 admissionsProcess: getQuillContent('admissionsProcess'),
                 admissionsFees: getQuillContent('admissionsFees'),
+
+                // Facilities
+                facilitiesContent: getQuillContent('facilitiesContent'),
                 facilities: getItemsData('facilitiesContainer', 'facility'),
+
+                // Gallery
                 gallery: websiteContent.gallery || [],
-                events: getItemsData('eventsContainer', 'event'),
-                coCurricular: getItemsData('cocurricularContainer', 'cocurricular'),
+
+                // Performance
+                performanceContent: getQuillContent('performanceContent'),
                 performanceKcpe: getQuillContent('performanceKcpe'),
                 performanceInternal: getQuillContent('performanceInternal'),
+
+                // Parents
+                parentsContent: getQuillContent('parentsContent'),
                 parentsCalendar: getQuillContent('parentsCalendar'),
                 parentsHomework: getQuillContent('parentsHomework'),
                 parentsAttendance: getQuillContent('parentsAttendance'),
                 parentsRules: getQuillContent('parentsRules'),
                 parentsUniform: getQuillContent('parentsUniform'),
                 parentsFees: getQuillContent('parentsFees'),
+
+                // Downloads
+                downloadsContent: getQuillContent('downloadsContent'),
                 downloads: getItemsData('downloadsContainer', 'download'),
+
+                // Fees
                 feesContent: getQuillContent('feesContent'),
                 feesPaybill: document.getElementById('feesPaybill').value,
                 feesInstructions: getQuillContent('feesInstructions'),
+
+                // Contact
+                contactContent: getQuillContent('contactContent'),
                 contactAddress: document.getElementById('contactAddress').value,
                 contactPhone: document.getElementById('contactPhone').value,
                 contactEmail: document.getElementById('contactEmail').value,
                 contactHours: document.getElementById('contactHours').value,
                 contactMap: document.getElementById('contactMap').value,
+
+                // SEO
                 seoTitle: document.getElementById('seoTitle').value,
                 seoDescription: document.getElementById('seoDescription').value,
                 seoKeywords: document.getElementById('seoKeywords').value
