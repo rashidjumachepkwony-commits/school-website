@@ -47,7 +47,7 @@
             color: #1a1a2e;
             overflow-x: hidden;
             line-height: 1.6;
-            padding-top: 62px; /* Space for fixed header */
+            padding-top: 62px;
         }
 
         .container {
@@ -268,7 +268,7 @@
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
         }
         .news-ticker-section.show-notice {
-            top: 98px; /* Moves down when notice is visible */
+            top: 98px;
         }
         .news-ticker-section .container {
             display: flex;
@@ -322,7 +322,7 @@
         }
 
         /* ========================================
-           HERO SECTION - ADJUSTED FOR FIXED HEADER
+           HERO SECTION
            ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
@@ -606,6 +606,38 @@
         }
         .content-card:hover .card-cta {
             transform: scale(1.05);
+        }
+
+        /* ========================================
+           READ MORE BUTTON
+           ======================================== */
+        .read-more-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 4px 16px;
+            background: transparent;
+            color: var(--school-gold);
+            border: 2px solid var(--school-gold);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 11px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .read-more-btn:hover {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            transform: translateX(4px);
+        }
+        .read-more-btn i {
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+        .read-more-btn:hover i {
+            transform: translateX(3px);
         }
 
         /* ========================================
@@ -896,7 +928,7 @@
         }
 
         /* ========================================
-           NEWS
+           NEWS - WITH READ MORE
            ======================================== */
         .news-section {
             padding: 50px 0;
@@ -904,37 +936,40 @@
         }
         .news-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
         .news-item {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
             border-left: 4px solid var(--school-gold);
             transition: all 0.3s ease;
         }
         .news-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 35px rgba(0,0,0,0.06);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
         }
         .news-item h4 {
             color: var(--school-blue-dark);
-            font-size: 16px;
-            margin-bottom: 5px;
+            font-size: 18px;
+            margin-bottom: 8px;
             font-weight: 700;
         }
         .news-item p {
             color: #666;
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 14px;
+            line-height: 1.6;
         }
         .news-item .date {
-            font-size: 11px;
+            font-size: 12px;
             color: #999;
-            margin-top: 8px;
+            margin-top: 10px;
             display: block;
+        }
+        .news-item .read-more-btn {
+            margin-top: 10px;
         }
 
         /* ========================================
@@ -1119,9 +1154,7 @@
 </head>
 <body>
 
-    <!-- ========================================
-    NOTICE ALERT BAR - FIXED AT TOP
-    ======================================== -->
+    <!-- ===== NOTICE ALERT BAR ===== -->
     <div class="notice-alert-bar" id="noticeAlertBar">
         <div class="container">
             <div class="notice-icon">
@@ -1138,9 +1171,7 @@
         </div>
     </div>
 
-    <!-- ========================================
-    NEWS TICKER - FIXED BELOW HEADER
-    ======================================== -->
+    <!-- ===== NEWS TICKER ===== -->
     <div class="news-ticker-section" id="newsTicker">
         <div class="container">
             <div class="ticker-label">
@@ -1169,9 +1200,7 @@
         </div>
     </div>
 
-    <!-- ========================================
-    HEADER - FIXED AT TOP (WITH KENYA FLAG)
-    ======================================== -->
+    <!-- ===== HEADER ===== -->
     <header class="main-header">
         <div class="kenya-flag-strip"></div>
         <div class="container">
@@ -1192,9 +1221,7 @@
         </div>
     </header>
 
-    <!-- ========================================
-    HERO SECTION
-    ======================================== -->
+    <!-- ===== HERO SECTION ===== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-bg-pattern"></div>
         <div class="hero-content">
@@ -1229,9 +1256,7 @@
         </div>
     </section>
 
-    <!-- ========================================
-    CONTENT CARDS SECTION
-    ======================================== -->
+    <!-- ===== CONTENT CARDS SECTION ===== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
@@ -1348,9 +1373,7 @@
         </div>
     </section>
 
-    <!-- ========================================
-    FEATURES SECTION
-    ======================================== -->
+    <!-- ===== FEATURES SECTION ===== -->
     <section class="features-section" id="slide-features">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🌟 Why <span style="color:var(--school-gold);">Choose Us</span></h2>
@@ -1362,29 +1385,31 @@
                     <span class="icon">👨‍🏫</span>
                     <h4>Qualified Teachers</h4>
                     <p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p>
+                    <a href="about.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-item" data-aos="zoom-in" data-aos-delay="200">
                     <span class="icon">🏆</span>
                     <h4>Excellence in Performance</h4>
                     <p>We consistently produce top-performing students in national examinations and co-curricular activities.</p>
+                    <a href="performance.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-item" data-aos="zoom-in" data-aos-delay="300">
                     <span class="icon">🏫</span>
                     <h4>Modern Facilities</h4>
                     <p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p>
+                    <a href="facilities.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-item" data-aos="zoom-in" data-aos-delay="400">
                     <span class="icon">💡</span>
                     <h4>Innovative Learning</h4>
                     <p>We use modern teaching methods including technology integration and hands-on learning experiences.</p>
+                    <a href="academics.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ========================================
-    STATS SECTION
-    ======================================== -->
+    <!-- ===== STATS SECTION ===== -->
     <section class="stats-section" id="slide-stats">
         <div class="container">
             <div class="stats-grid" id="statsGrid">
@@ -1408,9 +1433,7 @@
         </div>
     </section>
 
-    <!-- ========================================
-    GALLERY SECTION
-    ======================================== -->
+    <!-- ===== GALLERY SECTION ===== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
@@ -1425,6 +1448,7 @@
                                 <h4>🏫 School Compound</h4>
                                 <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
                                 <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1435,6 +1459,7 @@
                                 <h4>🧸 E.C.D.E Section</h4>
                                 <p>Our Early Childhood Development Education section where young learners begin.</p>
                                 <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1445,6 +1470,7 @@
                                 <h4>📚 Classroom Learning</h4>
                                 <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
                                 <span class="tag">Academics</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1455,6 +1481,7 @@
                                 <h4>💻 Computer Lab</h4>
                                 <p>Students learning essential computer skills in our modern computer laboratory.</p>
                                 <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1466,9 +1493,7 @@
         </div>
     </section>
 
-    <!-- ========================================
-    NEWS SECTION
-    ======================================== -->
+    <!-- ===== NEWS SECTION - WITH READ MORE ===== -->
     <section class="news-section" id="slide-news">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
@@ -1478,24 +1503,25 @@
                     <h4>📅 Term 3 Opening</h4>
                     <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.</p>
                     <span class="date">Posted: Recently</span>
+                    <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="200">
                     <h4>🏆 Sports Day</h4>
                     <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.</p>
                     <span class="date">Posted: Recently</span>
+                    <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="300">
                     <h4>📚 Parents' Meeting</h4>
                     <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall.</p>
                     <span class="date">Posted: Recently</span>
+                    <a href="parents-corner.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ========================================
-    FOOTER
-    ======================================== -->
+    <!-- ===== FOOTER ===== -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
@@ -1535,9 +1561,7 @@
         </div>
     </footer>
 
-    <!-- ========================================
-    SCRIPTS
-    ======================================== -->
+    <!-- ===== SCRIPTS ===== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -1568,7 +1592,6 @@
             const bar = document.getElementById('noticeAlertBar');
             bar.classList.remove('show');
             localStorage.setItem('noticeClosed', 'true');
-            // Adjust news ticker position when notice is closed
             const ticker = document.getElementById('newsTicker');
             if (ticker) {
                 ticker.classList.remove('show-notice');
@@ -1583,7 +1606,6 @@
             }
             bar.classList.add('show');
             localStorage.removeItem('noticeClosed');
-            // Adjust news ticker position when notice is shown
             const ticker = document.getElementById('newsTicker');
             if (ticker) {
                 ticker.classList.add('show-notice');
@@ -1680,6 +1702,7 @@
                                 <span class="icon">${feature.icon || '📚'}</span>
                                 <h4>${feature.title || 'Feature'}</h4>
                                 <p>${feature.description || ''}</p>
+                                <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                             `;
                             featuresGrid.appendChild(div);
                         });
@@ -1707,6 +1730,7 @@
                                 <h4>${news.title || 'News'}</h4>
                                 <p>${news.content || ''}</p>
                                 <span class="date">Posted: ${new Date().toLocaleDateString()}</span>
+                                <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                             `;
                             newsGrid.appendChild(div);
                         });
