@@ -47,6 +47,7 @@
             color: #1a1a2e;
             overflow-x: hidden;
             line-height: 1.6;
+            padding-top: 62px; /* Space for fixed header */
         }
 
         .container {
@@ -56,165 +57,36 @@
         }
 
         /* ========================================
-           KENYAN FLAG STRIP
+           KENYAN FLAG STRIP - INSIDE HEADER
            ======================================== */
         .kenya-flag-strip {
-            height: 5px;
+            height: 4px;
             background: linear-gradient(to right, 
                 var(--kenya-black) 0%, var(--kenya-black) 25%,
                 var(--kenya-red) 25%, var(--kenya-red) 50%,
                 var(--kenya-green) 50%, var(--kenya-green) 75%,
                 var(--kenya-black) 75%, var(--kenya-black) 100%
             );
-            position: sticky;
-            top: 0;
+            position: relative;
             z-index: 1001;
         }
 
         /* ========================================
-           NOTICE ALERT BAR
-           ======================================== */
-        .notice-alert-bar {
-            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
-            color: white;
-            padding: 10px 0;
-            position: sticky;
-            top: 5px;
-            z-index: 1000;
-            border-bottom: 3px solid var(--school-gold);
-            display: none;
-            animation: slideDownNotice 0.6s ease forwards;
-        }
-        .notice-alert-bar.show { display: block; }
-        .notice-alert-bar .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .notice-alert-bar .notice-icon {
-            font-size: 22px;
-            animation: pulseBell 1.5s infinite;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .notice-alert-bar .notice-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .notice-alert-bar .notice-content .badge {
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            padding: 3px 14px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            animation: pulseBadge 1.5s infinite;
-        }
-        .notice-alert-bar .notice-content .message {
-            font-size: 14px;
-            font-weight: 500;
-            flex: 1;
-        }
-        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
-        .notice-alert-bar .notice-close {
-            background: rgba(255,255,255,0.15);
-            border: none;
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        .notice-alert-bar .notice-close:hover {
-            background: rgba(255,255,255,0.3);
-            transform: rotate(90deg);
-        }
-
-        /* ========================================
-           NEWS TICKER
-           ======================================== */
-        .news-ticker-section {
-            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
-            color: white;
-            padding: 6px 0;
-            border-bottom: 2px solid var(--school-gold);
-            position: sticky;
-            top: 52px;
-            z-index: 100;
-        }
-        .news-ticker-section .container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .news-ticker-section .ticker-label {
-            background: var(--kenya-red);
-            color: white;
-            padding: 3px 16px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 10px;
-            text-transform: uppercase;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            letter-spacing: 1px;
-        }
-        .news-ticker-section .ticker-label .icon { font-size: 12px; }
-        .news-ticker-section .ticker-wrapper {
-            flex: 1;
-            overflow: hidden;
-            height: 24px;
-            position: relative;
-        }
-        .news-ticker-section .ticker-content {
-            position: absolute;
-            width: 100%;
-            animation: tickerScroll 16s infinite;
-        }
-        .news-ticker-section .ticker-content .ticker-item {
-            height: 24px;
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-            font-size: 13px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .news-ticker-section .ticker-content .ticker-item .tag {
-            background: rgba(255,255,255,0.12);
-            padding: 1px 10px;
-            border-radius: 20px;
-            font-size: 9px;
-            margin-right: 8px;
-            color: var(--school-gold);
-            font-weight: 600;
-        }
-
-        /* ========================================
-           HEADER
+           HEADER - PERMANENTLY FIXED AT TOP
            ======================================== */
         .main-header {
-            background: rgba(10, 22, 40, 0.95);
+            background: rgba(10, 22, 40, 0.96);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             color: white;
-            padding: 10px 0;
-            position: sticky;
+            padding: 8px 0;
+            position: fixed;
             top: 0;
-            z-index: 90;
+            left: 0;
+            right: 0;
+            z-index: 1000;
             border-bottom: 1px solid rgba(212, 160, 23, 0.15);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
         .main-header .container {
             display: flex;
@@ -225,15 +97,15 @@
         .main-header .logo-section {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
         .main-header .school-icon {
-            font-size: 32px;
+            font-size: 28px;
             animation: float 3s ease-in-out infinite;
         }
         .main-header .logo-section h1 {
             font-family: var(--font-primary);
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
             -webkit-background-clip: text;
@@ -241,25 +113,26 @@
             background-clip: text;
         }
         .main-header .logo-section .subtitle {
-            font-size: 10px;
-            color: rgba(255,255,255,0.5);
+            font-size: 8px;
+            color: rgba(255,255,255,0.4);
             display: block;
             letter-spacing: 2px;
             text-transform: uppercase;
+            -webkit-text-fill-color: rgba(255,255,255,0.4);
         }
         .main-header .nav-links {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             align-items: center;
         }
         .main-header .nav-links a {
-            color: rgba(255,255,255,0.8);
+            color: rgba(255,255,255,0.7);
             text-decoration: none;
             font-weight: 500;
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 50px;
             transition: all 0.3s ease;
-            font-size: 13px;
+            font-size: 12px;
             position: relative;
         }
         .main-header .nav-links a::after {
@@ -288,10 +161,10 @@
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
             font-weight: 600;
-            padding: 6px 20px;
+            padding: 5px 16px;
             border-radius: 50px;
             transition: all 0.3s ease;
-            font-size: 12px;
+            font-size: 11px;
         }
         .main-header .nav-links a.portal-link:hover {
             transform: translateY(-2px);
@@ -303,15 +176,157 @@
             background: none;
             border: none;
             color: white;
-            font-size: 26px;
+            font-size: 24px;
             cursor: pointer;
         }
 
         /* ========================================
-           HERO SECTION
+           NOTICE ALERT BAR - FIXED BELOW HEADER
+           ======================================== */
+        .notice-alert-bar {
+            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
+            color: white;
+            padding: 6px 0;
+            position: fixed;
+            top: 62px;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            border-bottom: 3px solid var(--school-gold);
+            display: none;
+            animation: slideDownNotice 0.6s ease forwards;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .notice-alert-bar.show { display: block; }
+        .notice-alert-bar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .notice-alert-bar .notice-icon {
+            font-size: 18px;
+            animation: pulseBell 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .notice-alert-bar .notice-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .notice-alert-bar .notice-content .badge {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulseBadge 1.5s infinite;
+        }
+        .notice-alert-bar .notice-content .message {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+        }
+        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
+        .notice-alert-bar .notice-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .notice-alert-bar .notice-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        /* ========================================
+           NEWS TICKER - FIXED BELOW NOTICE
+           ======================================== */
+        .news-ticker-section {
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            color: white;
+            padding: 4px 0;
+            border-bottom: 2px solid var(--school-gold);
+            position: fixed;
+            top: 62px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+        }
+        .news-ticker-section.show-notice {
+            top: 98px; /* Moves down when notice is visible */
+        }
+        .news-ticker-section .container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .news-ticker-section .ticker-label {
+            background: var(--kenya-red);
+            color: white;
+            padding: 2px 14px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 9px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            letter-spacing: 1px;
+        }
+        .news-ticker-section .ticker-label .icon { font-size: 10px; }
+        .news-ticker-section .ticker-wrapper {
+            flex: 1;
+            overflow: hidden;
+            height: 22px;
+            position: relative;
+        }
+        .news-ticker-section .ticker-content {
+            position: absolute;
+            width: 100%;
+            animation: tickerScroll 16s infinite;
+        }
+        .news-ticker-section .ticker-content .ticker-item {
+            height: 22px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .news-ticker-section .ticker-content .ticker-item .tag {
+            background: rgba(255,255,255,0.12);
+            padding: 1px 8px;
+            border-radius: 20px;
+            font-size: 8px;
+            margin-right: 6px;
+            color: var(--school-gold);
+            font-weight: 600;
+        }
+
+        /* ========================================
+           HERO SECTION - ADJUSTED FOR FIXED HEADER
            ======================================== */
         .hero-section {
-            min-height: 85vh;
+            min-height: calc(100vh - 62px);
+            margin-top: 0;
             display: flex;
             align-items: center;
             text-align: center;
@@ -492,7 +507,7 @@
         .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
         /* ========================================
-           CONTENT CARDS - ALL EYE-CATCHING
+           CONTENT CARDS
            ======================================== */
         .content-cards-section {
             padding: 50px 0;
@@ -596,7 +611,6 @@
         /* ========================================
            INDIVIDUAL CARD STYLES
            ======================================== */
-        /* Academics Card */
         .card-academics {
             border-color: var(--school-gold) !important;
             background: linear-gradient(135deg, #ffffff, #fff8e7) !important;
@@ -611,7 +625,6 @@
             color: var(--kenya-black);
         }
 
-        /* Admissions Card */
         .card-admissions {
             border-color: var(--kenya-green) !important;
             background: linear-gradient(135deg, #ffffff, #f0fff4) !important;
@@ -626,7 +639,6 @@
             color: white;
         }
 
-        /* Facilities Card */
         .card-facilities {
             border-color: #17a2b8 !important;
             background: linear-gradient(135deg, #ffffff, #f0faff) !important;
@@ -641,7 +653,6 @@
             color: white;
         }
 
-        /* Performance Card */
         .card-performance {
             border-color: #6f42c1 !important;
             background: linear-gradient(135deg, #ffffff, #f8f0ff) !important;
@@ -655,7 +666,6 @@
             color: white;
         }
 
-        /* Parents Corner Card */
         .card-parents {
             border-color: #fd7e14 !important;
             background: linear-gradient(135deg, #ffffff, #fff5eb) !important;
@@ -669,7 +679,6 @@
             color: white;
         }
 
-        /* Downloads Card */
         .card-downloads {
             border-color: #20c997 !important;
             background: linear-gradient(135deg, #ffffff, #f0fff8) !important;
@@ -683,7 +692,6 @@
             color: white;
         }
 
-        /* Fees Structure Card */
         .card-fees {
             border-color: #dc3545 !important;
             background: linear-gradient(135deg, #ffffff, #fff0f0) !important;
@@ -1044,6 +1052,7 @@
             .main-header .nav-links.show { display: flex; }
             .main-header .mobile-menu-btn { display: block; }
             
+            .hero-section { padding: 40px 0; }
             .hero-section h1 { font-size: 32px; }
             .hero-section p { font-size: 16px; }
             .hero-section .btn-group { flex-direction: column; align-items: center; }
@@ -1060,10 +1069,14 @@
             
             .notice-alert-bar .container { flex-direction: column; text-align: center; }
             .news-ticker-section .container { flex-direction: column; gap: 4px; }
-            .news-ticker-section .ticker-label { font-size: 9px; padding: 2px 12px; }
+            .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
             .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
             
             .gallery-card img { height: 160px; }
+            
+            .main-header .logo-section h1 { font-size: 16px; }
+            .main-header .school-icon { font-size: 24px; }
+            .main-header .nav-links a { font-size: 11px; padding: 4px 10px; }
         }
 
         @media (max-width: 480px) {
@@ -1072,6 +1085,8 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .hero-section h1 { font-size: 26px; }
             .section-title { font-size: 22px; }
+            .main-header .logo-section h1 { font-size: 14px; }
+            .main-header .school-icon { font-size: 20px; }
         }
 
         /* ========================================
@@ -1091,9 +1106,9 @@
         }
         @keyframes tickerScroll {
             0%, 20% { transform: translateY(0); }
-            25%, 45% { transform: translateY(-24px); }
-            50%, 70% { transform: translateY(-48px); }
-            75%, 95% { transform: translateY(-72px); }
+            25%, 45% { transform: translateY(-22px); }
+            50%, 70% { transform: translateY(-44px); }
+            75%, 95% { transform: translateY(-66px); }
             100% { transform: translateY(0); }
         }
         @keyframes float {
@@ -1104,15 +1119,14 @@
 </head>
 <body>
 
-    <!-- ===== KENYA FLAG STRIP ===== -->
-    <div class="kenya-flag-strip"></div>
-
-    <!-- ===== NOTICE ALERT BAR ===== -->
+    <!-- ========================================
+    NOTICE ALERT BAR - FIXED AT TOP
+    ======================================== -->
     <div class="notice-alert-bar" id="noticeAlertBar">
         <div class="container">
             <div class="notice-icon">
                 <span class="bell">🔔</span>
-                <span style="font-weight:700;font-size:12px;">ALERT</span>
+                <span style="font-weight:700;font-size:11px;">ALERT</span>
             </div>
             <div class="notice-content">
                 <span class="badge">⚠️ STAFF NOTICE</span>
@@ -1124,8 +1138,10 @@
         </div>
     </div>
 
-    <!-- ===== NEWS TICKER ===== -->
-    <div class="news-ticker-section">
+    <!-- ========================================
+    NEWS TICKER - FIXED BELOW HEADER
+    ======================================== -->
+    <div class="news-ticker-section" id="newsTicker">
         <div class="container">
             <div class="ticker-label">
                 <span class="icon">📰</span> News
@@ -1154,9 +1170,10 @@
     </div>
 
     <!-- ========================================
-    HEADER
+    HEADER - FIXED AT TOP (WITH KENYA FLAG)
     ======================================== -->
     <header class="main-header">
+        <div class="kenya-flag-strip"></div>
         <div class="container">
             <div class="logo-section">
                 <span class="school-icon">🏫</span>
@@ -1213,7 +1230,7 @@
     </section>
 
     <!-- ========================================
-    CONTENT CARDS SECTION - ALL EYE-CATCHING
+    CONTENT CARDS SECTION
     ======================================== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
@@ -1222,7 +1239,7 @@
 
             <div class="content-grid">
 
-                <!-- ===== CARD 1: ACADEMICS ===== -->
+                <!-- CARD 1: ACADEMICS -->
                 <div class="content-card card-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
                         🔥 NEW
@@ -1237,7 +1254,7 @@
                     <div class="card-cta">👆 Click to Explore</div>
                 </div>
 
-                <!-- ===== CARD 2: ADMISSIONS ===== -->
+                <!-- CARD 2: ADMISSIONS -->
                 <div class="content-card card-admissions" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
                         📢 ENROLLING
@@ -1252,7 +1269,7 @@
                     <div class="card-cta">👆 Apply Now</div>
                 </div>
 
-                <!-- ===== CARD 3: FACILITIES ===== -->
+                <!-- CARD 3: FACILITIES -->
                 <div class="content-card card-facilities" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
                     <div style="position: absolute; top: -8px; right: -8px; background: #17a2b8; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeBlue 2s infinite; box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4);">
                         🏫 MODERN
@@ -1267,7 +1284,7 @@
                     <div class="card-cta">👆 View Facilities</div>
                 </div>
 
-                <!-- ===== CARD 4: PERFORMANCE ===== -->
+                <!-- CARD 4: PERFORMANCE -->
                 <div class="content-card card-performance" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
                     <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);">
                         🏆 EXCELLENCE
@@ -1282,7 +1299,7 @@
                     <div class="card-cta">👆 See Results</div>
                 </div>
 
-                <!-- ===== CARD 5: PARENTS CORNER ===== -->
+                <!-- CARD 5: PARENTS CORNER -->
                 <div class="content-card card-parents" onclick="window.location.href='parents-corner.html'" data-aos="fade-up" data-aos-delay="220">
                     <div style="position: absolute; top: -8px; right: -8px; background: #fd7e14; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(253, 126, 20, 0.4);">
                         👨‍👩‍👧‍👦 FAMILY
@@ -1297,7 +1314,7 @@
                     <div class="card-cta">👆 View Info</div>
                 </div>
 
-                <!-- ===== CARD 6: DOWNLOADS ===== -->
+                <!-- CARD 6: DOWNLOADS -->
                 <div class="content-card card-downloads" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
                     <div style="position: absolute; top: -8px; right: -8px; background: #20c997; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(32, 201, 151, 0.4);">
                         📥 DOWNLOAD
@@ -1312,7 +1329,7 @@
                     <div class="card-cta">👆 Download</div>
                 </div>
 
-                <!-- ===== CARD 7: FEES STRUCTURE ===== -->
+                <!-- CARD 7: FEES STRUCTURE -->
                 <div class="content-card card-fees" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
                     <div style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 2.2s infinite; box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);">
                         💰 AFFORDABLE
@@ -1551,6 +1568,11 @@
             const bar = document.getElementById('noticeAlertBar');
             bar.classList.remove('show');
             localStorage.setItem('noticeClosed', 'true');
+            // Adjust news ticker position when notice is closed
+            const ticker = document.getElementById('newsTicker');
+            if (ticker) {
+                ticker.classList.remove('show-notice');
+            }
         }
 
         function showNotice(message) {
@@ -1561,13 +1583,22 @@
             }
             bar.classList.add('show');
             localStorage.removeItem('noticeClosed');
+            // Adjust news ticker position when notice is shown
+            const ticker = document.getElementById('newsTicker');
+            if (ticker) {
+                ticker.classList.add('show-notice');
+            }
         }
 
         function checkNoticeStatus() {
             const closed = localStorage.getItem('noticeClosed');
             const bar = document.getElementById('noticeAlertBar');
+            const ticker = document.getElementById('newsTicker');
             if (!closed) {
                 bar.classList.add('show');
+                if (ticker) {
+                    ticker.classList.add('show-notice');
+                }
             }
         }
         checkNoticeStatus();
