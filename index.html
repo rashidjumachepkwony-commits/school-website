@@ -181,7 +181,93 @@
         }
 
         /* ========================================
-           NOTICE ALERT BAR - FIXED BELOW HEADER
+           SECTION NAVIGATION TABS - CREATIVE
+           ======================================== */
+        .section-tabs {
+            background: white;
+            padding: 10px 0;
+            position: sticky;
+            top: 62px;
+            z-index: 998;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border-bottom: 2px solid var(--school-gold);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .section-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .section-tabs .container {
+            display: flex;
+            gap: 6px;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .section-tabs .tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            background: transparent;
+            color: #555;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-family: var(--font-secondary);
+            position: relative;
+        }
+        .section-tabs .tab-btn:hover {
+            background: rgba(212, 160, 23, 0.08);
+            color: var(--school-gold);
+            transform: translateY(-2px);
+        }
+        .section-tabs .tab-btn.active {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            border-color: var(--school-gold);
+            box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3);
+        }
+        .section-tabs .tab-btn .tab-icon {
+            font-size: 14px;
+        }
+        .section-tabs .tab-btn .tab-badge {
+            background: var(--kenya-red);
+            color: white;
+            font-size: 8px;
+            padding: 1px 8px;
+            border-radius: 50px;
+            font-weight: 700;
+            animation: pulseBadgeRed 1.5s infinite;
+        }
+        .section-tabs .tab-scroll-btn {
+            display: none;
+            background: white;
+            border: 1px solid #e8ecf1;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #555;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+        }
+        .section-tabs .tab-scroll-btn:hover {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            border-color: var(--school-gold);
+        }
+
+        /* ========================================
+           NOTICE ALERT BAR
            ======================================== */
         .notice-alert-bar {
             background: linear-gradient(135deg, var(--kenya-red), #8B0000);
@@ -253,7 +339,7 @@
         }
 
         /* ========================================
-           NEWS TICKER - FIXED BELOW NOTICE
+           NEWS TICKER
            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
@@ -261,14 +347,11 @@
             padding: 4px 0;
             border-bottom: 2px solid var(--school-gold);
             position: fixed;
-            top: 62px;
+            top: 106px;
             left: 0;
             right: 0;
-            z-index: 999;
+            z-index: 997;
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
-        }
-        .news-ticker-section.show-notice {
-            top: 98px;
         }
         .news-ticker-section .container {
             display: flex;
@@ -326,7 +409,7 @@
            ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
-            margin-top: 0;
+            margin-top: 50px;
             display: flex;
             align-items: center;
             text-align: center;
@@ -512,6 +595,7 @@
         .content-cards-section {
             padding: 50px 0;
             background: #f0f2f5;
+            scroll-margin-top: 50px;
         }
         .content-grid {
             display: grid;
@@ -593,7 +677,6 @@
         .content-card .badge.live { background: var(--kenya-green); color: white; }
         .content-card .badge.new { background: var(--school-gold); color: var(--kenya-black); }
         
-        /* Card CTA Button */
         .card-cta {
             margin-top: 10px;
             padding: 6px 18px;
@@ -606,38 +689,6 @@
         }
         .content-card:hover .card-cta {
             transform: scale(1.05);
-        }
-
-        /* ========================================
-           READ MORE BUTTON
-           ======================================== */
-        .read-more-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 8px;
-            padding: 4px 16px;
-            background: transparent;
-            color: var(--school-gold);
-            border: 2px solid var(--school-gold);
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 11px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .read-more-btn:hover {
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            transform: translateX(4px);
-        }
-        .read-more-btn i {
-            font-size: 10px;
-            transition: transform 0.3s ease;
-        }
-        .read-more-btn:hover i {
-            transform: translateX(3px);
         }
 
         /* ========================================
@@ -762,6 +813,7 @@
             background: linear-gradient(135deg, #000000, #1a0000, #0a1628);
             position: relative;
             overflow: hidden;
+            scroll-margin-top: 50px;
         }
         .features-grid {
             display: grid;
@@ -805,6 +857,7 @@
             background: linear-gradient(135deg, var(--kenya-black), var(--school-blue-dark));
             position: relative;
             overflow: hidden;
+            scroll-margin-top: 50px;
         }
         .stats-grid {
             display: grid;
@@ -846,6 +899,7 @@
         .gallery-section {
             padding: 50px 0;
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            scroll-margin-top: 50px;
         }
         .gallery-swiper {
             padding: 15px 0;
@@ -928,11 +982,12 @@
         }
 
         /* ========================================
-           NEWS - WITH READ MORE
+           NEWS
            ======================================== */
         .news-section {
             padding: 50px 0;
             background: #f0f2f5;
+            scroll-margin-top: 50px;
         }
         .news-grid {
             display: grid;
@@ -967,9 +1022,6 @@
             color: #999;
             margin-top: 10px;
             display: block;
-        }
-        .news-item .read-more-btn {
-            margin-top: 10px;
         }
 
         /* ========================================
@@ -1087,7 +1139,19 @@
             .main-header .nav-links.show { display: flex; }
             .main-header .mobile-menu-btn { display: block; }
             
-            .hero-section { padding: 40px 0; }
+            .section-tabs .container {
+                justify-content: flex-start;
+                padding: 0 10px;
+            }
+            .section-tabs .tab-btn {
+                font-size: 10px;
+                padding: 6px 12px;
+            }
+            .section-tabs .tab-btn .tab-icon {
+                font-size: 12px;
+            }
+            
+            .hero-section { padding: 40px 0; margin-top: 30px; }
             .hero-section h1 { font-size: 32px; }
             .hero-section p { font-size: 16px; }
             .hero-section .btn-group { flex-direction: column; align-items: center; }
@@ -1103,15 +1167,18 @@
             .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
             
             .notice-alert-bar .container { flex-direction: column; text-align: center; }
-            .news-ticker-section .container { flex-direction: column; gap: 4px; }
-            .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
-            .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
             
             .gallery-card img { height: 160px; }
             
             .main-header .logo-section h1 { font-size: 16px; }
             .main-header .school-icon { font-size: 24px; }
             .main-header .nav-links a { font-size: 11px; padding: 4px 10px; }
+            
+            .news-ticker-section {
+                top: 62px;
+            }
+            .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
+            .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
         }
 
         @media (max-width: 480px) {
@@ -1120,6 +1187,8 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .hero-section h1 { font-size: 26px; }
             .section-title { font-size: 22px; }
+            .section-tabs .tab-btn { font-size: 9px; padding: 4px 10px; }
+            .section-tabs .tab-btn .tab-icon { font-size: 10px; }
             .main-header .logo-section h1 { font-size: 14px; }
             .main-header .school-icon { font-size: 20px; }
         }
@@ -1221,6 +1290,37 @@
         </div>
     </header>
 
+    <!-- ========================================
+    SECTION NAVIGATION TABS - CREATIVE QUICK ACCESS
+    ======================================== -->
+    <div class="section-tabs" id="sectionTabs">
+        <div class="container">
+            <button class="tab-btn active" onclick="scrollToSection('slide-hero')">
+                <span class="tab-icon">🏠</span> Home
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-content')">
+                <span class="tab-icon">📚</span> Explore
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-features')">
+                <span class="tab-icon">🌟</span> Features
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-stats')">
+                <span class="tab-icon">📊</span> Stats
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-gallery')">
+                <span class="tab-icon">🖼️</span> Gallery
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-news')">
+                <span class="tab-icon">📰</span> News
+                <span class="tab-badge">New</span>
+            </button>
+            <button class="tab-btn" onclick="window.location.href='admissions.html'">
+                <span class="tab-icon">📝</span> Apply Now
+                <span class="tab-badge">🔥</span>
+            </button>
+        </div>
+    </div>
+
     <!-- ===== HERO SECTION ===== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-bg-pattern"></div>
@@ -1263,7 +1363,6 @@
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
 
             <div class="content-grid">
-
                 <!-- CARD 1: ACADEMICS -->
                 <div class="content-card card-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
@@ -1385,25 +1484,21 @@
                     <span class="icon">👨‍🏫</span>
                     <h4>Qualified Teachers</h4>
                     <p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p>
-                    <a href="about.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-item" data-aos="zoom-in" data-aos-delay="200">
                     <span class="icon">🏆</span>
                     <h4>Excellence in Performance</h4>
                     <p>We consistently produce top-performing students in national examinations and co-curricular activities.</p>
-                    <a href="performance.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-item" data-aos="zoom-in" data-aos-delay="300">
                     <span class="icon">🏫</span>
                     <h4>Modern Facilities</h4>
                     <p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p>
-                    <a href="facilities.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-item" data-aos="zoom-in" data-aos-delay="400">
                     <span class="icon">💡</span>
                     <h4>Innovative Learning</h4>
                     <p>We use modern teaching methods including technology integration and hands-on learning experiences.</p>
-                    <a href="academics.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </div>
@@ -1448,7 +1543,6 @@
                                 <h4>🏫 School Compound</h4>
                                 <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
                                 <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1459,7 +1553,6 @@
                                 <h4>🧸 E.C.D.E Section</h4>
                                 <p>Our Early Childhood Development Education section where young learners begin.</p>
                                 <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1470,7 +1563,6 @@
                                 <h4>📚 Classroom Learning</h4>
                                 <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
                                 <span class="tag">Academics</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1481,7 +1573,6 @@
                                 <h4>💻 Computer Lab</h4>
                                 <p>Students learning essential computer skills in our modern computer laboratory.</p>
                                 <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1493,7 +1584,7 @@
         </div>
     </section>
 
-    <!-- ===== NEWS SECTION - WITH READ MORE ===== -->
+    <!-- ===== NEWS SECTION ===== -->
     <section class="news-section" id="slide-news">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
@@ -1503,19 +1594,16 @@
                     <h4>📅 Term 3 Opening</h4>
                     <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.</p>
                     <span class="date">Posted: Recently</span>
-                    <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="200">
                     <h4>🏆 Sports Day</h4>
                     <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.</p>
                     <span class="date">Posted: Recently</span>
-                    <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="300">
                     <h4>📚 Parents' Meeting</h4>
                     <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall.</p>
                     <span class="date">Posted: Recently</span>
-                    <a href="parents-corner.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </div>
@@ -1586,6 +1674,53 @@
         }
 
         // ============================================
+        // SECTION TABS - SCROLL TO SECTION
+        // ============================================
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const offset = 120;
+                const top = section.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({ top: top, behavior: 'smooth' });
+                
+                // Update active tab
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                const tabs = document.querySelectorAll('.tab-btn');
+                const index = Array.from(tabs).findIndex(btn => {
+                    const onclick = btn.getAttribute('onclick');
+                    return onclick && onclick.includes(sectionId);
+                });
+                if (index !== -1) {
+                    tabs[index].classList.add('active');
+                }
+            }
+        }
+
+        // Update active tab on scroll
+        document.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('.slide-section, .content-cards-section, .features-section, .stats-section, .gallery-section, .news-section');
+            const tabs = document.querySelectorAll('.tab-btn');
+            const scrollPosition = window.scrollY + 150;
+            
+            sections.forEach((section, index) => {
+                const sectionTop = section.offsetTop;
+                const sectionBottom = sectionTop + section.offsetHeight;
+                
+                if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                    tabs.forEach(btn => btn.classList.remove('active'));
+                    // Find the corresponding tab
+                    const sectionId = section.id;
+                    tabs.forEach(btn => {
+                        const onclick = btn.getAttribute('onclick');
+                        if (onclick && onclick.includes(sectionId)) {
+                            btn.classList.add('active');
+                        }
+                    });
+                }
+            });
+        });
+
+        // ============================================
         // NOTICE ALERT
         // ============================================
         function closeNotice() {
@@ -1594,7 +1729,7 @@
             localStorage.setItem('noticeClosed', 'true');
             const ticker = document.getElementById('newsTicker');
             if (ticker) {
-                ticker.classList.remove('show-notice');
+                ticker.style.top = '106px';
             }
         }
 
@@ -1608,7 +1743,7 @@
             localStorage.removeItem('noticeClosed');
             const ticker = document.getElementById('newsTicker');
             if (ticker) {
-                ticker.classList.add('show-notice');
+                ticker.style.top = '142px';
             }
         }
 
@@ -1619,7 +1754,7 @@
             if (!closed) {
                 bar.classList.add('show');
                 if (ticker) {
-                    ticker.classList.add('show-notice');
+                    ticker.style.top = '142px';
                 }
             }
         }
@@ -1702,7 +1837,6 @@
                                 <span class="icon">${feature.icon || '📚'}</span>
                                 <h4>${feature.title || 'Feature'}</h4>
                                 <p>${feature.description || ''}</p>
-                                <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                             `;
                             featuresGrid.appendChild(div);
                         });
@@ -1730,7 +1864,6 @@
                                 <h4>${news.title || 'News'}</h4>
                                 <p>${news.content || ''}</p>
                                 <span class="date">Posted: ${new Date().toLocaleDateString()}</span>
-                                <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                             `;
                             newsGrid.appendChild(div);
                         });
