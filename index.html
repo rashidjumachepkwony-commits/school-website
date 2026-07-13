@@ -14,15 +14,159 @@
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
+        /* ===== TOP NOTICE ALERT BAR - STAFF ALERTS ===== */
+        .notice-alert-bar {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            border-bottom: 4px solid #ffc107;
+            display: none;
+            animation: slideDownNotice 0.6s ease forwards;
+        }
+        .notice-alert-bar.show {
+            display: block;
+        }
+        .notice-alert-bar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .notice-alert-bar .notice-icon {
+            font-size: 28px;
+            animation: pulseBell 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .notice-alert-bar .notice-icon .bell {
+            animation: ringBell 2s infinite;
+            display: inline-block;
+        }
+        .notice-alert-bar .notice-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .notice-alert-bar .notice-content .badge {
+            background: #ffc107;
+            color: #001f5c;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            animation: pulseBadge 1.5s infinite;
+        }
+        .notice-alert-bar .notice-content .message {
+            font-size: 16px;
+            font-weight: 500;
+            flex: 1;
+        }
+        .notice-alert-bar .notice-content .message strong {
+            color: #ffc107;
+        }
+        .notice-alert-bar .notice-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .notice-alert-bar .notice-close:hover {
+            background: rgba(255,255,255,0.4);
+            transform: rotate(90deg);
+        }
+
+        /* ===== LATEST NEWS TICKER ===== */
+        .news-ticker-section {
+            background: #001f5c;
+            color: white;
+            padding: 10px 0;
+            border-bottom: 3px solid #d4a017;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .news-ticker-section .container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .news-ticker-section .ticker-label {
+            background: #d4a017;
+            color: #001f5c;
+            padding: 4px 18px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: pulseLabel 2s infinite;
+        }
+        .news-ticker-section .ticker-label .icon {
+            font-size: 16px;
+        }
+        .news-ticker-section .ticker-wrapper {
+            flex: 1;
+            overflow: hidden;
+            height: 30px;
+            position: relative;
+        }
+        .news-ticker-section .ticker-content {
+            position: absolute;
+            width: 100%;
+            animation: tickerScroll 12s infinite;
+        }
+        .news-ticker-section .ticker-content .ticker-item {
+            height: 30px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .news-ticker-section .ticker-content .ticker-item .tag {
+            background: rgba(255,255,255,0.15);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-right: 10px;
+            color: #d4a017;
+        }
+        .news-ticker-section .ticker-content .ticker-item .date-tag {
+            color: #aaa;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
         /* ===== HEADER ===== */
         .main-header {
-            background: linear-gradient(135deg, #001f5c, #0b5394);
+            background: linear-gradient(135deg, #0a1628, #1a2a4a);
             color: white;
             padding: 15px 0;
             position: sticky;
             top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+            z-index: 90;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
         }
         .main-header .container {
             display: flex;
@@ -361,6 +505,36 @@
             transform: scale(1.1);
         }
 
+        /* ===== ANIMATIONS ===== */
+        @keyframes slideDownNotice {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulseBell {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        @keyframes ringBell {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30% { transform: rotate(15deg); }
+            20%, 40% { transform: rotate(-15deg); }
+        }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes pulseLabel {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        @keyframes tickerScroll {
+            0%, 20% { transform: translateY(0); }
+            25%, 45% { transform: translateY(-30px); }
+            50%, 70% { transform: translateY(-60px); }
+            75%, 95% { transform: translateY(-90px); }
+            100% { transform: translateY(0); }
+        }
+
         @media (max-width: 768px) {
             .main-header .nav-links {
                 display: none;
@@ -399,6 +573,25 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
+            .notice-alert-bar .container {
+                flex-direction: column;
+                text-align: center;
+            }
+            .notice-alert-bar .notice-content {
+                justify-content: center;
+            }
+            .news-ticker-section .container {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .news-ticker-section .ticker-label {
+                font-size: 11px;
+                padding: 2px 12px;
+            }
+            .news-ticker-section .ticker-content .ticker-item {
+                font-size: 13px;
+                white-space: normal;
+            }
         }
         @media (max-width: 480px) {
             .content-grid {
@@ -414,6 +607,57 @@
     </style>
 </head>
 <body>
+
+    <!-- ===== TOP NOTICE ALERT BAR - STAFF ALERTS ===== -->
+    <div class="notice-alert-bar" id="noticeAlertBar">
+        <div class="container">
+            <div class="notice-icon">
+                <span class="bell">🔔</span>
+                <span style="font-weight:700;font-size:14px;">ALERT</span>
+            </div>
+            <div class="notice-content">
+                <span class="badge">⚠️ STAFF NOTICE</span>
+                <span class="message" id="noticeMessage">
+                    <strong>📢 Important:</strong> Staff meeting on Friday at 4:00 PM in the staff room.
+                </span>
+            </div>
+            <button class="notice-close" onclick="closeNotice()">✕</button>
+        </div>
+    </div>
+
+    <!-- ===== LATEST NEWS TICKER ===== -->
+    <div class="news-ticker-section" id="newsTicker">
+        <div class="container">
+            <div class="ticker-label">
+                <span class="icon">📰</span> Latest News
+            </div>
+            <div class="ticker-wrapper">
+                <div class="ticker-content" id="tickerContent">
+                    <div class="ticker-item">
+                        <span class="tag">🎉 NEW</span>
+                        School will open for Term 3 on 1st September 2026
+                        <span class="date-tag">📅 Today</span>
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">🏆 EVENT</span>
+                        Annual Sports Day on 15th September 2026 - Parents invited!
+                        <span class="date-tag">📅 2 days</span>
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">📚 MEETING</span>
+                        Parents' Meeting on 20th September 2026 at 9:00 AM
+                        <span class="date-tag">📅 5 days</span>
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">📢 ANNOUNCEMENT</span>
+                        New computer lab now open for students!
+                        <span class="date-tag">📅 This week</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== HEADER ===== -->
     <header class="main-header">
         <div class="container">
@@ -648,6 +892,35 @@
         }
 
         // ============================================
+        // NOTICE ALERT FUNCTIONS
+        // ============================================
+        function closeNotice() {
+            const bar = document.getElementById('noticeAlertBar');
+            bar.classList.remove('show');
+            // Store that user closed it
+            localStorage.setItem('noticeClosed', 'true');
+        }
+
+        function showNotice(message) {
+            const bar = document.getElementById('noticeAlertBar');
+            const msgEl = document.getElementById('noticeMessage');
+            if (message) {
+                msgEl.innerHTML = message;
+            }
+            bar.classList.add('show');
+            localStorage.removeItem('noticeClosed');
+        }
+
+        // Check if notice was closed before
+        function checkNoticeStatus() {
+            const closed = localStorage.getItem('noticeClosed');
+            const bar = document.getElementById('noticeAlertBar');
+            if (!closed) {
+                bar.classList.add('show');
+            }
+        }
+
+        // ============================================
         // LOAD CONTENT FROM CMS API
         // ============================================
         function stripHtml(html) {
@@ -669,8 +942,7 @@
                     document.getElementById('heroSubtitle').textContent = c.heroSubtitle || 'Nurturing young minds through quality education, discipline, innovation, and strong moral values.';
                     document.getElementById('heroButton').textContent = c.heroButtonText || 'Learn More →';
                     
-                    // Content Cards
-                    document.getElementById('displayAbout').textContent = stripHtml(c.aboutMission || 'Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.');
+                    // Content Cards                    document.getElementById('displayAbout').textContent = stripHtml(c.aboutMission || 'Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.');
                     document.getElementById('displayAcademics').textContent = stripHtml(c.academics || 'Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches.');
                     document.getElementById('displayAdmissions').textContent = stripHtml(c.admissionsRequirements || 'Open for registration. Contact us for details on admission requirements and process.');
                     document.getElementById('displayFacilities').textContent = stripHtml(c.facilities || 'Modern classrooms, computer lab, library, playground, ECDE section, and more.');
@@ -683,7 +955,32 @@
                     document.getElementById('displayFees').textContent = stripHtml(c.feesContent || 'View our competitive school fees structure for all grades.');
                     document.getElementById('displayContact').textContent = 'Get in touch with us for any inquiries or visit our school.';
 
-                    // Features (if available from CMS)
+                    // News Ticker - Update from CMS
+                    if (c.homeNews && c.homeNews.length > 0) {
+                        const tickerContent = document.getElementById('tickerContent');
+                        let tickerHtml = '';
+                        const tags = ['🎉 NEW', '🏆 EVENT', '📚 MEETING', '📢 ANNOUNCEMENT', '⭐ UPDATE', '📅 IMPORTANT'];
+                        c.homeNews.forEach((news, index) => {
+                            const tag = tags[index % tags.length];
+                            tickerHtml += `
+                                <div class="ticker-item">
+                                    <span class="tag">${tag}</span>
+                                    ${stripHtml(news.title || 'News')} - ${stripHtml(news.content || '')}
+                                    <span class="date-tag">📅 ${new Date().toLocaleDateString()}</span>
+                                </div>
+                            `;
+                        });
+                        tickerContent.innerHTML = tickerHtml;
+                    }
+
+                    // Check for notice alert from CMS
+                    if (c.noticeAlert) {
+                        showNotice(c.noticeAlert);
+                    } else {
+                        checkNoticeStatus();
+                    }
+
+                    // Features
                     if (c.homeFeatures && c.homeFeatures.length > 0) {
                         const featuresGrid = document.getElementById('featuresGrid');
                         featuresGrid.innerHTML = '';
@@ -699,7 +996,7 @@
                         });
                     }
 
-                    // Stats (if available from CMS)
+                    // Stats
                     if (c.homeStats && c.homeStats.length > 0) {
                         const stats = c.homeStats;
                         if (stats.length >= 1) {
@@ -720,7 +1017,7 @@
                         }
                     }
 
-                    // News (if available from CMS)
+                    // News Grid
                     if (c.homeNews && c.homeNews.length > 0) {
                         const newsGrid = document.getElementById('newsGrid');
                         newsGrid.innerHTML = '';
@@ -730,7 +1027,7 @@
                             div.innerHTML = `
                                 <h4>${news.title || 'News'}</h4>
                                 <p>${news.content || ''}</p>
-                                <span class="date">Posted: Recently</span>
+                                <span class="date">Posted: ${new Date().toLocaleDateString()}</span>
                             `;
                             newsGrid.appendChild(div);
                         });
@@ -741,8 +1038,13 @@
             }
         }
 
-        // Load content when page loads
-        document.addEventListener('DOMContentLoaded', loadWebsiteContent);
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            checkNoticeStatus();
+            loadWebsiteContent();
+        });
     </script>
 </body>
 </html>
