@@ -56,7 +56,7 @@
         }
 
         /* ========================================
-           KENYAN FLAG STRIP
+           KENYAN FLAG STRIP - FIXED AT VERY TOP
            ======================================== */
         .kenya-flag-strip {
             height: 5px;
@@ -204,15 +204,15 @@
         }
 
         /* ========================================
-           HEADER
+           HEADER - FIXED AT VERY TOP
            ======================================== */
         .main-header {
-            background: rgba(10, 22, 40, 0.92);
+            background: rgba(10, 22, 40, 0.95);
             backdrop-filter: blur(20px);
             color: white;
-            padding: 8px 0;
+            padding: 10px 0;
             position: sticky;
-            top: 100px;
+            top: 0;
             z-index: 90;
             border-bottom: 1px solid rgba(212, 160, 23, 0.15);
         }
@@ -228,12 +228,12 @@
             gap: 12px;
         }
         .main-header .school-icon {
-            font-size: 30px;
+            font-size: 32px;
             animation: float 3s ease-in-out infinite;
         }
         .main-header .logo-section h1 {
             font-family: var(--font-primary);
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
             -webkit-background-clip: text;
@@ -241,7 +241,7 @@
             background-clip: text;
         }
         .main-header .logo-section .subtitle {
-            font-size: 9px;
+            font-size: 10px;
             color: rgba(255,255,255,0.5);
             display: block;
             letter-spacing: 2px;
@@ -249,17 +249,17 @@
         }
         .main-header .nav-links {
             display: flex;
-            gap: 4px;
+            gap: 6px;
             align-items: center;
         }
         .main-header .nav-links a {
-            color: rgba(255,255,255,0.7);
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
             font-weight: 500;
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 50px;
             transition: all 0.3s ease;
-            font-size: 12px;
+            font-size: 13px;
             position: relative;
         }
         .main-header .nav-links a::after {
@@ -288,7 +288,7 @@
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
             font-weight: 600;
-            padding: 6px 18px;
+            padding: 6px 20px;
             border-radius: 50px;
             transition: all 0.3s ease;
             font-size: 12px;
@@ -303,7 +303,7 @@
             background: none;
             border: none;
             color: white;
-            font-size: 24px;
+            font-size: 26px;
             cursor: pointer;
         }
 
@@ -900,9 +900,6 @@
             .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
             
             .gallery-card img { height: 160px; }
-            .main-header { top: 95px; }
-            .main-header .logo-section h1 { font-size: 16px; }
-            .main-header .school-icon { font-size: 24px; }
         }
 
         @media (max-width: 480px) {
@@ -938,6 +935,10 @@
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-6px); }
+        }
+        @keyframes pulseBadgeRed {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 4px 25px rgba(187, 0, 0, 0.6); }
         }
     </style>
 </head>
@@ -992,7 +993,9 @@
         </div>
     </div>
 
-    <!-- ===== HEADER ===== -->
+    <!-- ========================================
+    HEADER - FIXED AT TOP (TOP MARGIN FIXED)
+    ======================================== -->
     <header class="main-header">
         <div class="container">
             <div class="logo-section">
@@ -1050,7 +1053,7 @@
     </section>
 
     <!-- ========================================
-    CONTENT CARDS SECTION
+    CONTENT CARDS SECTION - 7 CARDS (Gallery & Contact Removed)
     ======================================== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
@@ -1058,9 +1061,9 @@
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
 
             <div class="content-grid">
-                <!-- Card 1: Academics - UPGRADED WITH CTA -->
+                <!-- Card 1: Academics - ATTENTION GRABBING -->
                 <div class="content-card" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100" style="border: 2px solid var(--school-gold); background: linear-gradient(135deg, #ffffff, #fff8e7); position: relative; overflow: visible;">
-                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadge 1.5s infinite; box-shadow: 0 4px 15px rgba(187, 0, 0, 0.4);">
+                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
                         🔥 NEW
                     </div>
                     <span class="icon">📚</span>
@@ -1076,62 +1079,57 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Admissions -->
-                <div class="content-card" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="150">
+                <!-- Card 2: Admissions - ATTENTION GRABBING -->
+                <div class="content-card" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130" style="border: 2px solid var(--kenya-green); background: linear-gradient(135deg, #ffffff, #f0fff4); position: relative; overflow: visible;">
+                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
+                        📢 ENROLLING
+                    </div>
                     <span class="icon">📝</span>
                     <h3>Admissions</h3>
-                    <p id="displayAdmissions">Open for registration. Contact us for details on admission requirements, process, and fee structure.</p>
+                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 Open for Registration • Playgroup to Grade 6</p>
+                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                        <span>✅ Simple Process</span> • 
+                        <span>✅ Affordable Fees</span> • 
+                        <span>✅ Quality Education</span>
+                    </div>
+                    <div style="margin-top: 8px; padding: 6px 16px; background: linear-gradient(135deg, var(--kenya-green), #004d00); color: white; border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 102, 0, 0.3);">
+                        👆 Apply Now
+                    </div>
                 </div>
 
                 <!-- Card 3: Facilities -->
-                <div class="content-card" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="200">
+                <div class="content-card" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
                     <span class="icon">🏫</span>
                     <h3>School Facilities</h3>
                     <p id="displayFacilities">Modern classrooms, computer lab, library, playground, ECDE section, sports facilities, and more.</p>
                 </div>
 
-                <!-- Card 4: Gallery -->
-                <div class="content-card" onclick="window.location.href='gallery.html'" data-aos="fade-up" data-aos-delay="250">
-                    <span class="icon">🖼️</span>
-                    <h3>Gallery</h3>
-                    <p id="displayGallery">Check out our school gallery showcasing various activities, events, facilities, and memorable moments.</p>
-                    <span class="badge new">New</span>
-                </div>
-
-                <!-- Card 5: Performance -->
-                <div class="content-card" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="300">
+                <!-- Card 4: Performance -->
+                <div class="content-card" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
                     <span class="icon">🏆</span>
                     <h3>Performance</h3>
                     <p id="displayPerformance">Excellent academic performance in national examinations with a track record of producing top-performing students.</p>
                 </div>
 
-                <!-- Card 6: Parents Corner -->
-                <div class="content-card" onclick="window.location.href='parents.html'" data-aos="fade-up" data-aos-delay="350">
+                <!-- Card 5: Parents Corner -->
+                <div class="content-card" onclick="window.location.href='parents.html'" data-aos="fade-up" data-aos-delay="220">
                     <span class="icon">👨‍👩‍👧‍👦</span>
                     <h3>Parents Corner</h3>
                     <p id="displayParents">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
                 </div>
 
-                <!-- Card 7: Downloads -->
-                <div class="content-card" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="400">
+                <!-- Card 6: Downloads -->
+                <div class="content-card" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
                     <span class="icon">📄</span>
                     <h3>Downloads</h3>
                     <p id="displayDownloads">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
                 </div>
 
-                <!-- Card 8: Fees Structure -->
-                <div class="content-card" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="450">
+                <!-- Card 7: Fees Structure -->
+                <div class="content-card" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
                     <span class="icon">💰</span>
                     <h3>Fees Structure</h3>
                     <p id="displayFees">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
-                </div>
-
-                <!-- Card 9: Contact Us -->
-                <div class="content-card" onclick="window.location.href='contact.html'" data-aos="fade-up" data-aos-delay="500">
-                    <span class="icon">📞</span>
-                    <h3>Contact Us</h3>
-                    <p id="displayContact">Get in touch with us for any inquiries, visit our school, or reach out to our administrative team.</p>
-                    <span class="badge live">Live</span>
                 </div>
             </div>
         </div>
@@ -1429,15 +1427,13 @@
                     }
 
                     const cardIds = [
-                        'displayAdmissions', 'displayFacilities', 'displayGallery',
-                        'displayPerformance', 'displayParents', 'displayDownloads',
-                        'displayFees', 'displayContact'
+                        'displayFacilities', 'displayPerformance', 'displayParents',
+                        'displayDownloads', 'displayFees'
                     ];
                     
                     const cmsData = [
-                        c.admissionsRequirements, c.facilities, c.gallery,
-                        c.performanceKcpe, c.parentsCalendar, c.downloads,
-                        c.feesContent, 'Get in touch with us for any inquiries or visit our school.'
+                        c.facilities, c.performanceKcpe, c.parentsCalendar,
+                        c.downloads, c.feesContent
                     ];
 
                     cardIds.forEach((id, index) => {
