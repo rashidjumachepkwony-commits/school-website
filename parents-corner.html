@@ -140,7 +140,7 @@
         }
 
         /* ========================================
-           NEWS TICKER
+           NEWS TICKER - STATIC (No API)
            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
@@ -456,38 +456,6 @@
         }
 
         /* ========================================
-           PARTNERSHIP LIST
-           ======================================== */
-        .partnership-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 12px;
-        }
-        .partnership-item {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 12px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
-        .partnership-item:hover {
-            background: rgba(255,255,255,0.12);
-            border-color: var(--school-gold);
-        }
-        .partnership-item .partnership-icon {
-            font-size: 18px;
-            color: var(--school-gold);
-        }
-        .partnership-item .partnership-text {
-            font-size: 13px;
-            color: white;
-            font-weight: 500;
-        }
-
-        /* ========================================
            COMMUNICATION GRID
            ======================================== */
         .communication-grid {
@@ -552,7 +520,7 @@
         }
 
         /* ========================================
-           TOGETHER FOR EXCELLENCE
+           EXCELLENCE BOX
            ======================================== */
         .excellence-box {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
@@ -725,7 +693,6 @@
             .section-title { font-size: 24px; }
             
             .content-grid { grid-template-columns: 1fr 1fr; }
-            .partnership-grid { grid-template-columns: 1fr 1fr; }
             .communication-grid { grid-template-columns: 1fr 1fr; }
             .resources-grid { grid-template-columns: 1fr 1fr; }
             
@@ -741,7 +708,6 @@
 
         @media (max-width: 480px) {
             .content-grid { grid-template-columns: 1fr; }
-            .partnership-grid { grid-template-columns: 1fr; }
             .communication-grid { grid-template-columns: 1fr; }
             .resources-grid { grid-template-columns: 1fr; }
             .page-hero h1 { font-size: 24px; }
@@ -801,14 +767,14 @@
         </div>
     </div>
 
-    <!-- ===== NEWS TICKER ===== -->
+    <!-- ===== NEWS TICKER - STATIC ===== -->
     <div class="news-ticker-section">
         <div class="container">
             <div class="ticker-label">
                 <span class="icon">📰</span> News
             </div>
             <div class="ticker-wrapper">
-                <div class="ticker-content" id="tickerContent">
+                <div class="ticker-content">
                     <div class="ticker-item">
                         <span class="tag">🎉 NEW</span>
                         School opens Term 3 on 1st September 2026
@@ -1215,37 +1181,9 @@
         checkNoticeStatus();
 
         // ============================================
-        // LOAD NEWS TICKER
+        // NO API CALL - Static content only
         // ============================================
-        async function loadNewsTicker() {
-            try {
-                const response = await fetch('/api/content');
-                const data = await response.json();
-                if (data.success && data.content.homeNews) {
-                    const tickerContent = document.getElementById('tickerContent');
-                    let tickerHtml = '';
-                    const tags = ['🎉 NEW', '🏆 EVENT', '📚 MEETING', '📢 ANNOUNCEMENT'];
-                    data.content.homeNews.forEach((news, index) => {
-                        const tag = tags[index % tags.length];
-                        tickerHtml += `
-                            <div class="ticker-item">
-                                <span class="tag">${tag}</span>
-                                ${news.title || 'News'} - ${news.content || ''}
-                            </div>
-                        `;
-                    });
-                    if (tickerHtml) {
-                        tickerContent.innerHTML = tickerHtml;
-                    }
-                }
-            } catch (error) {
-                console.log('News ticker not available');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadNewsTicker();
-        });
+        console.log('Parents page loaded - No API dependency');
     </script>
 
 </body>
