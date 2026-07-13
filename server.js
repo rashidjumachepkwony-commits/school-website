@@ -27,7 +27,6 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB'
 // ============================================
 // FILE UPLOAD SETUP (Images, Videos, Audio)
 // ============================================
-// Create upload directories
 const uploadDirs = ['./uploads', './uploads/images', './uploads/videos', './uploads/audio'];
 uploadDirs.forEach(dir => {
   if (!fs.existsSync(dir)) {
@@ -35,7 +34,6 @@ uploadDirs.forEach(dir => {
   }
 });
 
-// Configure storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     let folder = 'uploads/';
@@ -57,11 +55,8 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
-    // Images
     'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-    // Videos
     'video/mp4', 'video/mpeg', 'video/quicktime', 'video/webm', 'video/ogg',
-    // Audio
     'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm'
   ];
   
@@ -75,7 +70,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ 
   storage: storage,
   fileFilter: fileFilter,
-  limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
+  limits: { fileSize: 100 * 1024 * 1024 }
 });
 
 // ============================================
@@ -90,7 +85,6 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
       });
     }
     
-    // Determine file type
     let fileType = 'image';
     let icon = '🖼️';
     if (req.file.mimetype.startsWith('video/')) {
@@ -123,16 +117,12 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   }
 });
 
-// ============================================
-// SERVE UPLOADED FILES (Static)
-// ============================================
 app.use('/uploads', express.static('uploads'));
 
 // ============================================
 // COMPLETE WEBSITE CONTENT SCHEMA (CMS)
 // ============================================
 const contentSchema = new mongoose.Schema({
-  // ===== HOME PAGE =====
   heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
   heroSubtitle: { type: String, default: 'Your trusted partner in quality education and school management' },
   heroButtonText: { type: String, default: 'Learn More' },
@@ -155,7 +145,6 @@ const contentSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
   }],
 
-  // ===== ABOUT PAGE =====
   aboutMission: { type: String, default: 'To provide quality education that nurtures talent, builds character, and prepares students for a successful future.' },
   aboutVision: { type: String, default: 'To be a center of excellence in education, producing well-rounded individuals who contribute positively to society.' },
   aboutValues: { type: String, default: 'Excellence, Integrity, Respect, Innovation, Community Engagement' },
@@ -163,7 +152,6 @@ const contentSchema = new mongoose.Schema({
   aboutMotto: { type: String, default: 'Excellence in Education' },
   aboutWhy: { type: String, default: 'Holistic education, qualified teachers, modern facilities.' },
 
-  // ===== ACADEMICS =====
   academics: [{
     grade: { type: String, default: 'Grade 1' },
     subjects: { type: String, default: 'Math, English, Science' },
@@ -172,21 +160,18 @@ const contentSchema = new mongoose.Schema({
     teacherSupport: { type: String, default: 'Individual attention' }
   }],
 
-  // ===== ADMISSIONS =====
   admissionsRequirements: { type: String, default: 'Admission is open to all students who meet the age requirements.' },
   admissionsAge: { type: String, default: 'Playgroup: 2-3 years, PP1: 4 years, PP2: 5 years, Grade 1: 6 years, Grade 2-6: 7-12 years' },
   admissionsDocuments: { type: String, default: 'Birth certificate, Previous school records, Passport photo, Parent ID, Medical records' },
   admissionsProcess: { type: String, default: '1. Visit the school for a tour. 2. Fill the admission form. 3. Submit required documents. 4. Pay registration fee.' },
   admissionsFees: { type: String, default: 'Please contact the school administration for the current fee structure.' },
 
-  // ===== FACILITIES =====
   facilities: [{
     name: { type: String, default: 'Modern Classrooms' },
     description: { type: String, default: 'Well-equipped classrooms with modern learning resources.' },
     image: { type: String, default: '' }
   }],
 
-  // ===== GALLERY =====
   gallery: [{
     title: { type: String, default: 'School Activity' },
     description: { type: String, default: '' },
@@ -195,7 +180,6 @@ const contentSchema = new mongoose.Schema({
     category: { type: String, default: 'General' }
   }],
 
-  // ===== EVENTS =====
   events: [{
     title: { type: String, default: 'Event Title' },
     content: { type: String, default: 'Event description' },
@@ -204,7 +188,6 @@ const contentSchema = new mongoose.Schema({
     image: { type: String, default: '' }
   }],
 
-  // ===== CO-CURRICULAR =====
   coCurricular: [{
     name: { type: String, default: 'Football' },
     description: { type: String, default: 'School football team.' },
@@ -212,11 +195,9 @@ const contentSchema = new mongoose.Schema({
     image: { type: String, default: '' }
   }],
 
-  // ===== PERFORMANCE =====
   performanceKcpe: { type: String, default: 'Our students consistently perform well in national examinations.' },
   performanceInternal: { type: String, default: 'Regular internal assessments track student progress.' },
 
-  // ===== PARENTS CORNER =====
   parentsCalendar: { type: String, default: 'School calendar for 2026 with all important dates.' },
   parentsHomework: { type: String, default: 'Homework is given regularly to reinforce learning.' },
   parentsAttendance: { type: String, default: 'Attendance is mandatory and monitored daily.' },
@@ -224,7 +205,6 @@ const contentSchema = new mongoose.Schema({
   parentsUniform: { type: String, default: 'All students must wear the official school uniform.' },
   parentsFees: { type: String, default: 'Fees must be paid at the beginning of each term.' },
 
-  // ===== DOWNLOADS =====
   downloads: [{
     name: { type: String, default: 'Admission Form' },
     file: { type: String, default: '/downloads/admission-form.pdf' },
@@ -232,27 +212,22 @@ const contentSchema = new mongoose.Schema({
     icon: { type: String, default: '📄' }
   }],
 
-  // ===== CONTACT =====
   contactAddress: { type: String, default: 'Nairobi, Kenya' },
   contactPhone: { type: String, default: '+254 721 556 252' },
   contactEmail: { type: String, default: 'starchangara@gmail.com' },
   contactHours: { type: String, default: 'Monday - Friday: 7:00 AM - 6:00 PM' },
   contactMap: { type: String, default: '' },
 
-  // ===== FOOTER =====
   footerText: { type: String, default: 'Committed to providing quality education and fostering excellence.' },
 
-  // ===== SEO =====
   seoTitle: { type: String, default: 'Changara Star Academy - Excellence in Education' },
   seoDescription: { type: String, default: 'Changara Star Academy - Excellence in Education. School management system for students, staff, and parents.' },
   seoKeywords: { type: String, default: 'school, education, academy, Nairobi, Kenya' },
 
-  // ===== METADATA =====
   lastUpdated: { type: Date, default: Date.now },
   updatedBy: { type: String, default: 'Admin' }
 });
 
-// Singleton - only one content document
 contentSchema.statics.getContent = async function() {
   let content = await this.findOne();
   if (!content) {
@@ -264,7 +239,7 @@ contentSchema.statics.getContent = async function() {
 const Content = mongoose.model('Content', contentSchema);
 
 // ============================================
-// ADMIN SCHEMA (For authentication)
+// ADMIN SCHEMA
 // ============================================
 const adminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -279,7 +254,7 @@ const adminSchema = new mongoose.Schema({
 const Admin = mongoose.model('Admin', adminSchema);
 
 // ============================================
-// TEACHER SCHEMA (For check-in/out)
+// TEACHER SCHEMA
 // ============================================
 const teacherSchema = new mongoose.Schema({
   firstName: { type: String, required: true, trim: true },
@@ -355,7 +330,6 @@ const Visitor = mongoose.model('Visitor', visitorSchema);
 // API ROUTES - CONTENT (CMS)
 // ============================================
 
-// GET website content (Public)
 app.get('/api/content', async (req, res) => {
   try {
     const content = await Content.getContent();
@@ -365,12 +339,10 @@ app.get('/api/content', async (req, res) => {
   }
 });
 
-// UPDATE website content (Admin)
 app.put('/api/content', async (req, res) => {
   try {
     const content = await Content.getContent();
     
-    // Update all fields from request body
     Object.keys(req.body).forEach(key => {
       if (key === 'homeFeatures' && Array.isArray(req.body.homeFeatures)) {
         content.homeFeatures = req.body.homeFeatures;
@@ -418,7 +390,6 @@ app.put('/api/content', async (req, res) => {
 // API ROUTES - ADMIN
 // ============================================
 
-// CREATE FIRST ADMIN
 app.post('/api/setup-admin', async (req, res) => {
   try {
     const { username, email, password, fullName } = req.body;
@@ -460,7 +431,6 @@ app.post('/api/setup-admin', async (req, res) => {
   }
 });
 
-// ADMIN LOGIN
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -504,10 +474,9 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ============================================
-// API ROUTES - TEACHER CHECK-IN/OUT
+// API ROUTES - TEACHER
 // ============================================
 
-// TEACHER REGISTRATION (With PIN)
 app.post('/api/teacher/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, employeeId, phoneNumber, department } = req.body;
@@ -662,7 +631,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-OUT - FIXED WITH KENYA TIME
+// TEACHER CHECK-OUT - FIXED
 // ============================================
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
@@ -728,8 +697,14 @@ app.post('/api/teacher/checkout', async (req, res) => {
     
     const checkOutTime = kenyaDate;
     todayAttendance.checkOut = checkOutTime;
-    todayAttendance.status = 'Checked Out';
-    todayAttendance.notes = req.body.notes || todayAttendance.notes || '';
+    
+    // ============================================
+    // FIX: Don't change status - keep as 'Present' or 'Late'
+    // The checkOut field already indicates they checked out
+    // ============================================
+    // Status remains as is (Present or Late)
+    // Add note about check-out time
+    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + checkOutTime.toLocaleTimeString();
     
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((checkOutTime - checkInTime) / (1000 * 60 * 60)).toFixed(2);
@@ -757,7 +732,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
   }
 });
 
-// GET TODAY'S ATTENDANCE (Admin)
+// GET TODAY'S ATTENDANCE
 app.get('/api/teacher/attendance/today', async (req, res) => {
   try {
     const todayStart = new Date();
@@ -799,7 +774,7 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
   }
 });
 
-// GET TEACHER ATTENDANCE HISTORY (Admin)
+// GET TEACHER ATTENDANCE HISTORY
 app.get('/api/teacher/attendance/:employeeId', async (req, res) => {
   try {
     const teacher = await Teacher.findOne({ 
@@ -847,7 +822,6 @@ app.get('/api/teacher/attendance/:employeeId', async (req, res) => {
 // ADMIN TEACHER MANAGEMENT ROUTES
 // ============================================
 
-// GET ALL TEACHERS (Admin)
 app.get('/api/teachers', async (req, res) => {
   try {
     const teachers = await Teacher.find({ isActive: true }).select('-password');
@@ -864,7 +838,6 @@ app.get('/api/teachers', async (req, res) => {
   }
 });
 
-// GET SINGLE TEACHER (Admin)
 app.get('/api/teachers/:id', async (req, res) => {
   try {
     const teacher = await Teacher.findById(req.params.id).select('-password');
@@ -886,7 +859,6 @@ app.get('/api/teachers/:id', async (req, res) => {
   }
 });
 
-// UPDATE TEACHER (Admin)
 app.put('/api/teachers/:id', async (req, res) => {
   try {
     const { firstName, lastName, email, employeeId, phoneNumber, department } = req.body;
@@ -941,7 +913,6 @@ app.put('/api/teachers/:id', async (req, res) => {
   }
 });
 
-// DELETE TEACHER (Admin)
 app.delete('/api/teachers/:id', async (req, res) => {
   try {
     const teacher = await Teacher.findByIdAndDelete(req.params.id);
@@ -963,7 +934,6 @@ app.delete('/api/teachers/:id', async (req, res) => {
   }
 });
 
-// RESET TEACHER PIN (Admin)
 app.post('/api/teachers/:id/reset-pin', async (req, res) => {
   try {
     const { pin } = req.body;
@@ -1002,7 +972,6 @@ app.post('/api/teachers/:id/reset-pin', async (req, res) => {
 // ADMIN ATTENDANCE ROUTES
 // ============================================
 
-// GET ALL TEACHERS ATTENDANCE (Admin)
 app.get('/api/admin/attendance/all', async (req, res) => {
   try {
     const teachers = await Teacher.find({ isActive: true });
@@ -1033,7 +1002,6 @@ app.get('/api/admin/attendance/all', async (req, res) => {
   }
 });
 
-// GET ATTENDANCE SUMMARY (Admin)
 app.get('/api/admin/attendance/summary', async (req, res) => {
   try {
     const teachers = await Teacher.find({ isActive: true });
@@ -1087,7 +1055,6 @@ app.get('/api/admin/attendance/summary', async (req, res) => {
 // VISITOR API ROUTES
 // ============================================
 
-// VISITOR CHECK-IN (Public)
 app.post('/api/visitor/checkin', async (req, res) => {
   try {
     const { 
@@ -1143,7 +1110,6 @@ app.post('/api/visitor/checkin', async (req, res) => {
   }
 });
 
-// VISITOR CHECK-OUT (by badge number)
 app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
   try {
     const visitor = await Visitor.findOne({ badgeNumber: req.params.badgeNumber });
@@ -1187,7 +1153,6 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
   }
 });
 
-// GET ALL VISITORS (Admin)
 app.get('/api/visitors', async (req, res) => {
   try {
     const visitors = await Visitor.find().sort({ checkIn: -1 });
@@ -1201,7 +1166,6 @@ app.get('/api/visitors', async (req, res) => {
   }
 });
 
-// GET ACTIVE VISITORS (Admin)
 app.get('/api/visitors/active', async (req, res) => {
   try {
     const visitors = await Visitor.find({ status: 'Checked In' }).sort({ checkIn: -1 });
@@ -1215,7 +1179,6 @@ app.get('/api/visitors/active', async (req, res) => {
   }
 });
 
-// GET TODAY'S VISITORS (Admin)
 app.get('/api/visitors/today', async (req, res) => {
   try {
     const todayStart = new Date();
@@ -1250,7 +1213,6 @@ app.get('/api/visitors/today', async (req, res) => {
   }
 });
 
-// GET WEEKLY VISITORS (Admin)
 app.get('/api/visitors/weekly', async (req, res) => {
   try {
     const weekStart = new Date();
@@ -1296,7 +1258,6 @@ app.get('/api/visitors/weekly', async (req, res) => {
   }
 });
 
-// GET MONTHLY VISITORS (Admin)
 app.get('/api/visitors/monthly', async (req, res) => {
   try {
     const monthStart = new Date();
@@ -1342,7 +1303,6 @@ app.get('/api/visitors/monthly', async (req, res) => {
   }
 });
 
-// DELETE VISITOR RECORD (Admin)
 app.delete('/api/visitors/:id', async (req, res) => {
   try {
     const visitor = await Visitor.findByIdAndDelete(req.params.id);
