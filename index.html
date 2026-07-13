@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏫 Changara Star Academy - Excellence in Education</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+    <meta name="description" content="Changara Star Academy - Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya. Quality education from Playgroup to Grade 6.">
+    
+    <!-- ===== FONTS ===== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- ===== CSS LIBRARIES ===== -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <style>
+        /* ========================================
+           ROOT VARIABLES - KENYAN COLORS
+           ======================================== */
+        :root {
+            --kenya-black: #000000;
+            --kenya-red: #BB0000;
+            --kenya-green: #006600;
+            --kenya-white: #FFFFFF;
+            
+            --school-gold: #D4A017;
+            --school-gold-light: #F5C842;
+            --school-gold-dark: #B8890A;
+            
+            --school-blue: #001F5C;
+            --school-blue-light: #0B5394;
+            --school-blue-dark: #0A1628;
+            
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            
+            --font-primary: 'Playfair Display', serif;
+            --font-secondary: 'Poppins', sans-serif;
+            
+            --shadow-premium: 0 20px 60px rgba(0, 0, 0, 0.15);
+            --shadow-glow: 0 0 40px rgba(212, 160, 23, 0.3);
+        }
+
+        /* ========================================
+           RESET & BASE
+           ======================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: var(--font-secondary);
+            background: var(--kenya-white);
+            color: #1a1a2e;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ========================================
+           KENYAN FLAG STRIP
+           ======================================== */
+        .kenya-flag-strip {
+            height: 6px;
+            background: linear-gradient(to right, 
+                var(--kenya-black) 0%, var(--kenya-black) 25%,
+                var(--kenya-red) 25%, var(--kenya-red) 50%,
+                var(--kenya-green) 50%, var(--kenya-green) 75%,
+                var(--kenya-black) 75%, var(--kenya-black) 100%
+            );
+            position: sticky;
+            top: 0;
+            z-index: 1001;
+        }
+
+        /* ========================================
+           NOTICE ALERT BAR - KENYAN THEME
+           ======================================== */
+        .notice-alert-bar {
+            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
+            color: white;
+            padding: 14px 0;
+            position: sticky;
+            top: 6px;
+            z-index: 1000;
+            border-bottom: 3px solid var(--school-gold);
+            display: none;
+            animation: slideDownNotice 0.6s ease forwards;
+            backdrop-filter: blur(10px);
+        }
+        .notice-alert-bar.show { display: block; }
+        .notice-alert-bar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .notice-alert-bar .notice-icon {
+            font-size: 28px;
+            animation: pulseBell 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .notice-alert-bar .notice-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .notice-alert-bar .notice-content .badge {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            padding: 4px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulseBadge 1.5s infinite;
+        }
+        .notice-alert-bar .notice-content .message {
+            font-size: 15px;
+            font-weight: 500;
+            flex: 1;
+        }
+        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
+        .notice-alert-bar .notice-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        .notice-alert-bar .notice-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        /* ========================================
+           NEWS TICKER
+           ======================================== */
+        .news-ticker-section {
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            color: white;
+            padding: 10px 0;
+            border-bottom: 3px solid var(--school-gold);
+            position: sticky;
+            top: 56px;
+            z-index: 100;
+        }
+        .news-ticker-section .container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .news-ticker-section .ticker-label {
+            background: var(--kenya-red);
+            color: white;
+            padding: 4px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 1px;
+        }
+        .news-ticker-section .ticker-label .icon { font-size: 14px; }
+        .news-ticker-section .ticker-wrapper {
+            flex: 1;
+            overflow: hidden;
+            height: 28px;
+            position: relative;
+        }
+        .news-ticker-section .ticker-content {
+            position: absolute;
+            width: 100%;
+            animation: tickerScroll 16s infinite;
+        }
+        .news-ticker-section .ticker-content .ticker-item {
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .news-ticker-section .ticker-content .ticker-item .tag {
+            background: rgba(255,255,255,0.12);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            margin-right: 10px;
+            color: var(--school-gold);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========================================
+           HEADER - PREMIUM GLASS
+           ======================================== */
+        .main-header {
+            background: rgba(10, 22, 40, 0.92);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 12px 0;
+            position: sticky;
+            top: 106px;
+            z-index: 90;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.2);
+        }
+        .main-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .main-header .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .main-header .school-icon {
+            font-size: 38px;
+            animation: float 3s ease-in-out infinite;
+        }
+        .main-header .logo-section h1 {
+            font-family: var(--font-primary);
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .main-header .logo-section .subtitle {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            display: block;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            -webkit-text-fill-color: rgba(255,255,255,0.6);
+        }
+        .main-header .nav-links {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .main-header .nav-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+        .main-header .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--school-gold);
+            transition: width 0.3s ease;
+        }
+        .main-header .nav-links a:hover::after,
+        .main-header .nav-links a.active::after {
+            width: 60%;
+        }
+        .main-header .nav-links a:hover {
+            color: white;
+        }
+        .main-header .nav-links a.active {
+            background: rgba(212, 160, 23, 0.15);
+            color: var(--school-gold);
+        }
+        .main-header .nav-links a.portal-link {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            font-weight: 600;
+            padding: 8px 22px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        .main-header .nav-links a.portal-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.4);
+        }
+        .main-header .nav-links a.portal-link::after { display: none; }
+        .main-header .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        /* ========================================
+           SLIDE SECTIONS
+           ======================================== */
+        .slide-section {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            scroll-snap-align: start;
+            padding: 80px 0;
+        }
+
+        .slides-container {
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            height: 100vh;
+            height: 100dvh;
+            scroll-behavior: smooth;
+        }
+
+        .slide-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+        .slide-overlay.dark {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(10, 22, 40, 0.7) 100%);
+        }
+        .slide-overlay.gold {
+            background: linear-gradient(135deg, rgba(212, 160, 23, 0.9) 0%, rgba(184, 137, 10, 0.7) 100%);
+        }
+        .slide-overlay.gradient-kenya {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(187, 0, 0, 0.6) 50%, rgba(0, 102, 0, 0.4) 100%);
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ========================================
+           SLIDE NAVIGATION DOTS - KENYAN FLAG
+           ======================================== */
+        .slide-dots {
+            position: fixed;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .slide-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+        .slide-dot::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            transition: all 0.4s ease;
+        }
+        .slide-dot:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.2);
+        }
+        .slide-dot.active {
+            background: var(--school-gold);
+            border-color: var(--school-gold);
+            transform: scale(1.4);
+            box-shadow: 0 0 30px rgba(212, 160, 23, 0.5);
+        }
+        .slide-dot.active::before {
+            border-color: rgba(212, 160, 23, 0.3);
+            animation: rippleDot 1.5s ease-out infinite;
+        }
+
+        @keyframes rippleDot {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        /* ========================================
+           HERO SECTION - KENYAN THEME
+           ======================================== */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            background: linear-gradient(135deg, #000000 0%, #1a0000 30%, #003300 70%, #0a1628 100%);
+        }
+        .hero-section .hero-bg-pattern {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 100%, rgba(212, 160, 23, 0.03) 0%, transparent 70%);
+            z-index: 0;
+        }
+        .hero-section .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Kenya Flag Badge */
+        .hero-flag-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(10px);
+            padding: 6px 20px 6px 6px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease forwards;
+        }
+        .hero-flag-badge .flag-strip {
+            display: flex;
+            width: 40px;
+            height: 20px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .hero-flag-badge .flag-strip span {
+            flex: 1;
+            height: 100%;
+        }
+        .hero-flag-badge .flag-strip .b { background: #000000; }
+        .hero-flag-badge .flag-strip .r { background: #BB0000; }
+        .hero-flag-badge .flag-strip .g { background: #006600; }
+        .hero-flag-badge .flag-strip .w { background: #FFFFFF; }
+        .hero-flag-badge .flag-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .hero-section h1 {
+            font-family: var(--font-primary);
+            font-size: 58px;
+            margin-bottom: 20px;
+            font-weight: 900;
+            line-height: 1.1;
+            animation: fadeInUp 1.2s ease forwards;
+        }
+        .hero-section h1 .highlight {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-section p {
+            font-size: 20px;
+            opacity: 0.9;
+            line-height: 1.8;
+            margin-bottom: 35px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 1.4s ease forwards;
+        }
+        .hero-section .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1.6s ease forwards;
+        }
+        .hero-section .btn-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(212, 160, 23, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section .btn-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--school-gold-light), var(--school-gold));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .hero-section .btn-hero:hover::before {
+            opacity: 1;
+        }
+        .hero-section .btn-hero:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(212, 160, 23, 0.5);
+        }
+        .hero-section .btn-hero span { position: relative; z-index: 1; }
+        .hero-section .btn-hero i { position: relative; z-index: 1; }
+
+        .hero-section .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 40px;
+            background: transparent;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        .hero-section .btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--school-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255,255,255,0.1);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: fadeInUp 2s ease forwards;
+        }
+        .scroll-indicator .mouse {
+            width: 24px;
+            height: 38px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        .scroll-indicator .mouse .dot {
+            width: 4px;
+            height: 8px;
+            background: var(--school-gold);
+            border-radius: 2px;
+            margin-top: 6px;
+            animation: scrollDot 2s ease-in-out infinite;
+        }
+        @keyframes scrollDot {
+            0%, 100% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(14px); opacity: 0.3; }
+        }
+
+        /* ========================================
+           SECTION TITLES
+           ======================================== */
+        .section-title {
+            font-family: var(--font-primary);
+            font-size: 40px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--school-blue-dark);
+        }
+        .section-title .highlight {
+            color: var(--school-gold);
+        }
+        .section-title.light { color: white; }
+        .section-subtitle {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+        .section-subtitle.light { color: rgba(255,255,255,0.7); }
+
+        /* ========================================
+           CONTENT CARDS - PREMIUM GLASS
+           ======================================== */
+        .content-cards-section {
+            padding: 80px 0;
+            background: linear-gradient(180deg, #f8f9fa, #ffffff);
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+        }
+        .content-card {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(10px);
+            padding: 30px 20px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .content-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            border-radius: 20px;
+        }
+        .content-card:hover::before {
+            opacity: 0.05;
+        }
+        .content-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--school-gold);
+            box-shadow: 0 20px 60px rgba(212, 160, 23, 0.15);
+        }
+        .content-card .icon {
+            font-size: 44px;
+            display: block;
+            margin-bottom: 12px;
+        }
+        .content-card h3 {
+            color: var(--school-blue-dark);
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .content-card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .content-card .badge {
+            display: inline-block;
+            padding: 3px 14px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .content-card .badge.live {
+            background: var(--kenya-green);
+            color: white;
+        }
+        .content-card .badge.new {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+        }
+
+        /* ========================================
+           FEATURES - KENYAN FLAG THEME
+           ======================================== */
+        .features-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #000000, #1a0000, #0a1628);
+            position: relative;
+            overflow: hidden;
+        }
+        .features-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(212, 160, 23, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(212, 160, 23, 0.03) 0%, transparent 50%);
+        }
+        .features-section .section-title { color: white; }
+        .features-section .section-subtitle { color: rgba(255,255,255,0.6); }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        .feature-item {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--kenya-black), var(--kenya-red), var(--kenya-green));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .feature-item:hover::after {
+            opacity: 1;
+        }
+        .feature-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(212, 160, 23, 0.2);
+        }
+        .feature-item .icon { font-size: 44px; display: block; margin-bottom: 15px; }
+        .feature-item h4 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .feature-item p {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ========================================
+           STATS - KENYAN FLAG
+           ======================================== */
+        .stats-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--kenya-black), var(--school-blue-dark));
+            position: relative;
+            overflow: hidden;
+        }
+        .stats-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 10% 50%, rgba(187, 0, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 90% 50%, rgba(0, 102, 0, 0.1) 0%, transparent 50%);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .stat-item {
+            padding: 30px 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+        }
+        .stat-item:hover {
+            background: rgba(255,255,255,0.06);
+            transform: scale(1.02);
+        }
+        .stat-item h3 {
+            font-family: var(--font-primary);
+            font-size: 42px;
+            color: var(--school-gold);
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .stat-item p {
+            font-size: 15px;
+            opacity: 0.7;
+            color: white;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* ========================================
+           GALLERY - PREMIUM
+           ======================================== */
+        .gallery-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+        }
+        .gallery-section .section-title { color: white; }
+        .gallery-section .section-subtitle { color: rgba(255,255,255,0.6); }
+        
+        .gallery-swiper {
+            padding: 20px 0;
+        }
+        .gallery-swiper .swiper-slide {
+            height: auto;
+        }
+        .gallery-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            transition: all 0.4s ease;
+            height: 100%;
+        }
+        .gallery-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        }
+        .gallery-card img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .gallery-card:hover img {
+            transform: scale(1.05);
+        }
+        .gallery-card .gallery-content {
+            padding: 22px;
+        }
+        .gallery-card .gallery-content h4 {
+            color: var(--school-blue-dark);
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .gallery-card .gallery-content p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .gallery-card .gallery-content .tag {
+            display: inline-block;
+            padding: 3px 14px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 10px;
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: var(--school-gold) !important;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 50% !important;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .swiper-button-next:hover,
+        .swiper-button-prev:hover {
+            background: rgba(212, 160, 23, 0.2);
+            border-color: var(--school-gold);
+        }
+        .swiper-button-next::after,
+        .swiper-button-prev::after {
+            font-size: 18px !important;
+        }
+        .swiper-pagination-bullet {
+            background: rgba(255,255,255,0.3) !important;
+            width: 10px !important;
+            height: 10px !important;
+        }
+        .swiper-pagination-bullet-active {
+            background: var(--school-gold) !important;
+            box-shadow: 0 0 20px rgba(212, 160, 23, 0.4);
+        }
+
+        /* ========================================
+           NEWS
+           ======================================== */
+        .news-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        .news-item {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.04);
+            border-left: 4px solid var(--school-gold);
+            transition: all 0.3s ease;
+        }
+        .news-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.08);
+        }
+        .news-item h4 {
+            color: var(--school-blue-dark);
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .news-item p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .news-item .date {
+            font-size: 12px;
+            color: #999;
+            margin-top: 12px;
+            display: block;
+        }
+
+        /* ========================================
+           FOOTER - KENYAN THEME
+           ======================================== */
+        .main-footer {
+            background: var(--kenya-black);
+            color: white;
+            padding: 50px 0 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .main-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--kenya-black), var(--kenya-red), var(--kenya-green), var(--kenya-black));
+        }
+        .main-footer .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .main-footer .footer-info h3 {
+            font-family: var(--font-primary);
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: var(--school-gold);
+        }
+        .main-footer .footer-info p {
+            color: rgba(255,255,255,0.6);
+            line-height: 1.8;
+            font-size: 14px;
+        }
+        .main-footer .footer-info .ministry-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.05);
+            padding: 8px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .main-footer .footer-info .ministry-badge i {
+            color: var(--school-gold);
+            margin-right: 8px;
+        }
+        .main-footer .footer-links h4 {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .main-footer .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .main-footer .footer-links a {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .main-footer .footer-links a:hover {
+            color: var(--school-gold);
+            padding-left: 5px;
+        }
+        .main-footer .footer-bottom {
+            text-align: center;
+            padding-top: 25px;
+            color: rgba(255,255,255,0.3);
+            font-size: 13px;
+        }
+        .main-footer .footer-social {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .main-footer .footer-social a {
+            color: rgba(255,255,255,0.4);
+            font-size: 18px;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        .main-footer .footer-social a:hover {
+            color: var(--school-gold);
+            border-color: var(--school-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.2);
+        }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 1024px) {
+            .main-footer .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+            .hero-section h1 {
+                font-size: 44px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-header .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                padding: 20px 0;
+                gap: 8px;
+            }
+            .main-header .nav-links.show { display: flex; }
+            .main-header .mobile-menu-btn { display: block; }
+            
+            .slide-dots { display: none; }
+            
+            .hero-section h1 {
+                font-size: 32px;
+            }
+            .hero-section p {
+                font-size: 16px;
+                padding: 0 10px;
+            }
+            .hero-section .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .features-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .news-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-footer .footer-content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .notice-alert-bar .container {
+                flex-direction: column;
+                text-align: center;
+            }
+            .news-ticker-section .container {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .news-ticker-section .ticker-label {
+                font-size: 10px;
+                padding: 3px 14px;
+            }
+            .news-ticker-section .ticker-content .ticker-item {
+                font-size: 12px;
+                white-space: normal;
+            }
+            
+            .gallery-card img {
+                height: 180px;
+            }
+            
+            .main-header {
+                top: 106px;
+            }
+            .main-header .logo-section h1 {
+                font-size: 18px;
+            }
+            .main-header .school-icon {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .hero-section h1 {
+                font-size: 26px;
+            }
+            .hero-section .btn-hero,
+            .hero-section .btn-outline {
+                padding: 12px 28px;
+                font-size: 14px;
+                width: 100%;
+                justify-content: center;
+            }
+            .section-title {
+                font-size: 24px;
+            }
+        }
+
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
+        @keyframes slideDownNotice {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulseBell {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes tickerScroll {
+            0%, 20% { transform: translateY(0); }
+            25%, 45% { transform: translateY(-28px); }
+            50%, 70% { transform: translateY(-56px); }
+            75%, 95% { transform: translateY(-84px); }
+            100% { transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== KENYA FLAG STRIP ===== -->
+    <div class="kenya-flag-strip"></div>
+
+    <!-- ===== NOTICE ALERT BAR ===== -->
+    <div class="notice-alert-bar" id="noticeAlertBar">
+        <div class="container">
+            <div class="notice-icon">
+                <span class="bell">🔔</span>
+                <span style="font-weight:700;font-size:14px;">ALERT</span>
+            </div>
+            <div class="notice-content">
+                <span class="badge">⚠️ STAFF NOTICE</span>
+                <span class="message" id="noticeMessage">
+                    <strong>📢 Important:</strong> Staff meeting on Friday at 4:00 PM in the staff room.
+                </span>
+            </div>
+            <button class="notice-close" onclick="closeNotice()">✕</button>
+        </div>
+    </div>
+
+    <!-- ===== NEWS TICKER ===== -->
+    <div class="news-ticker-section">
+        <div class="container">
+            <div class="ticker-label">
+                <span class="icon">📰</span> Latest News
+            </div>
+            <div class="ticker-wrapper">
+                <div class="ticker-content" id="tickerContent">
+                    <div class="ticker-item">
+                        <span class="tag">🎉 NEW</span>
+                        School will open for Term 3 on 1st September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">🏆 EVENT</span>
+                        Annual Sports Day on 15th September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">📚 MEETING</span>
+                        Parents' Meeting on 20th September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">📢 ANNOUNCEMENT</span>
+                        New computer lab now open for students!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo-section">
+                <span class="school-icon">🏫</span>
+                <div>
+                    <h1>Changara Star Academy</h1>
+                    <span class="subtitle">Assurance to Excellence</span>
+                </div>
+            </div>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html" class="active">Home</a>
+                <a href="about.html">About</a>
+                <a href="portal.html">🔐 Portal</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </header>
+
+    <!-- ===== SLIDES CONTAINER ===== -->
+    <div class="slides-container">
+
+        <!-- ========================================
+        SLIDE 1: HERO
+        ======================================== -->
+        <section class="slide-section hero-section" id="slide-hero">
+            <div class="hero-bg-pattern"></div>
+            <div class="hero-content">
+                <div class="hero-flag-badge">
+                    <div class="flag-strip">
+                        <span class="b"></span>
+                        <span class="r"></span>
+                        <span class="g"></span>
+                        <span class="w"></span>
+                    </div>
+                    <span class="flag-text">🇰🇪 Proudly Kenyan</span>
+                </div>
+                <h1 id="heroTitle">
+                    Welcome to <br><span class="highlight">Changara Star Academy</span>
+                </h1>
+                <p id="heroSubtitle">
+                    Nurturing young minds through quality education, discipline, innovation, and strong moral values. 
+                    We provide a safe and supportive learning environment where every child is encouraged to discover 
+                    their potential and achieve academic excellence.
+                </p>
+                <div class="btn-group">
+                    <a href="about.html" class="btn-hero" id="heroButton">
+                        <span>Explore More</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="admissions.html" class="btn-outline">
+                        <i class="fas fa-pen-fancy"></i> Apply Now
+                    </a>
+                </div>
+            </div>
+            <div class="scroll-indicator">
+                <div class="mouse">
+                    <div class="dot"></div>
+                </div>
+                <span>Scroll</span>
+            </div>
+        </section>
+
+        <!-- ========================================
+        SLIDE 2: CONTENT CARDS
+        ======================================== -->
+        <section class="slide-section content-cards-section" id="slide-content">
+            <div class="slide-content">
+                <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
+
+                <div class="content-grid">
+                    <div class="content-card" onclick="window.location.href='about.html'" data-aos="fade-up" data-aos-delay="100">
+                        <span class="icon">📖</span>
+                        <h3>About Us</h3>
+                        <p id="displayAbout">Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.</p>
+                        <span class="badge live">Live</span>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="150">
+                        <span class="icon">📚</span>
+                        <h3>Academics</h3>
+                        <p id="displayAcademics">Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="200">
+                        <span class="icon">📝</span>
+                        <h3>Admissions</h3>
+                        <p id="displayAdmissions">Open for registration. Contact us for details on admission requirements and process.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="250">
+                        <span class="icon">🏫</span>
+                        <h3>School Facilities</h3>
+                        <p id="displayFacilities">Modern classrooms, computer lab, library, playground, ECDE section, and more.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='gallery.html'" data-aos="fade-up" data-aos-delay="300">
+                        <span class="icon">🖼️</span>
+                        <h3>Gallery</h3>
+                        <p id="displayGallery">Check out our school gallery showcasing various activities and facilities.</p>
+                        <span class="badge new">New</span>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='events.html'" data-aos="fade-up" data-aos-delay="350">
+                        <span class="icon">📰</span>
+                        <h3>News & Events</h3>
+                        <p id="displayNews">Stay tuned for upcoming events and announcements from the school.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='cocurricular.html'" data-aos="fade-up" data-aos-delay="400">
+                        <span class="icon">⚽</span>
+                        <h3>Co-curricular</h3>
+                        <p id="displayCoCurricular">Football, athletics, music, drama, debate, and various clubs.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="450">
+                        <span class="icon">🏆</span>
+                        <h3>Performance</h3>
+                        <p id="displayPerformance">Excellent academic performance in national examinations.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='parents.html'" data-aos="fade-up" data-aos-delay="500">
+                        <span class="icon">👨‍👩‍👧‍👦</span>
+                        <h3>Parents Corner</h3>
+                        <p id="displayParents">Important information for parents including school calendar and policies.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="550">
+                        <span class="icon">📄</span>
+                        <h3>Downloads</h3>
+                        <p id="displayDownloads">Download admission forms, school calendar, and other documents.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="600">
+                        <span class="icon">💰</span>
+                        <h3>Fees Structure</h3>
+                        <p id="displayFees">View our competitive school fees structure for all grades.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='contact.html'" data-aos="fade-up" data-aos-delay="650">
+                        <span class="icon">📞</span>
+                        <h3>Contact Us</h3>
+                        <p id="displayContact">Get in touch with us for any inquiries or visit our school.</p>
+                        <span class="badge live">Live</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+        SLIDE 3: FEATURES - KENYAN THEME
+        ======================================== -->
+        <section class="slide-section features-section" id="slide-features">
+            <div class="slide-content">
+                <h2 class="section-title" data-aos="fade-up">🌟 Why <span class="highlight">Choose Us</span></h2>
+                <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">
+                    We provide holistic education that nurtures talent and builds character for a successful future.
+                </p>
+                <div class="features-grid" id="featuresGrid">
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="100">
+                        <span class="icon">👨‍🏫</span>
+                        <h4>Qualified Teachers</h4>
+                        <p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p>
+                    </div>
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="200">
+                        <span class="icon">🏆</span>
+                        <h4>Excellence in Performance</h4>
+                        <p>We consistently produce top-performing students in national examinations and co-curricular activities.</p>
+                    </div>
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="300">
+                        <span class="icon">🏫</span>
+                        <h4>Modern Facilities</h4>
+                        <p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p>
+                    </div>
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="400">
+                        <span class="icon">💡</span>
+                        <h4>Innovative Learning</h4>
+                        <p>We use modern teaching methods including technology integration and hands-on learning experiences.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+        SLIDE 4: STATS
+        ======================================== -->
+        <section class="slide-section stats-section" id="slide-stats">
+            <div class="slide-content">
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="100">
+                        <h3 id="stat1Number">500+</h3>
+                        <p>Students</p>
+                    </div>
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="200">
+                        <h3 id="stat2Number">50+</h3>
+                        <p>Staff Members</p>
+                    </div>
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="300">
+                        <h3 id="stat3Number">98%</h3>
+                        <p>Attendance Rate</p>
+                    </div>
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="400">
+                        <h3 id="stat4Number">15+</h3>
+                        <p>Years of Excellence</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+        SLIDE 5: GALLERY
+        ======================================== -->
+        <section class="slide-section gallery-section" id="slide-gallery">
+            <div class="slide-content">
+                <h2 class="section-title" data-aos="fade-up">🖼️ School <span class="highlight">Gallery</span></h2>
+                <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">Explore our school facilities and activities</p>
+
+                <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="/images/school-compound.jpg" alt="School Compound">
+                                <div class="gallery-content">
+                                    <h4>🏫 School Compound</h4>
+                                    <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
+                                    <span class="tag">Facilities</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="/images/ecde-section.jpg" alt="ECDE Section">
+                                <div class="gallery-content">
+                                    <h4>🧸 E.C.D.E Section</h4>
+                                    <p>Our Early Childhood Development Education section where young learners begin.</p>
+                                    <span class="tag">Facilities</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="/images/classroom-learning.jpg" alt="Classroom">
+                                <div class="gallery-content">
+                                    <h4>📚 Classroom Learning</h4>
+                                    <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
+                                    <span class="tag">Academics</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="/images/computer-lab.jpg" alt="Computer Lab">
+                                <div class="gallery-content">
+                                    <h4>💻 Computer Lab</h4>
+                                    <p>Students learning essential computer skills in our modern computer laboratory.</p>
+                                    <span class="tag">Facilities</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+        SLIDE 6: NEWS
+        ======================================== -->
+        <section class="slide-section news-section" id="slide-news">
+            <div class="slide-content">
+                <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Stay updated with our latest news and events</p>
+                <div class="news-grid" id="newsGrid">
+                    <div class="news-item" data-aos="fade-up" data-aos-delay="100">
+                        <h4>📅 Term 3 Opening</h4>
+                        <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.</p>
+                        <span class="date">Posted: Recently</span>
+                    </div>
+                    <div class="news-item" data-aos="fade-up" data-aos-delay="200">
+                        <h4>🏆 Sports Day</h4>
+                        <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.</p>
+                        <span class="date">Posted: Recently</span>
+                    </div>
+                    <div class="news-item" data-aos="fade-up" data-aos-delay="300">
+                        <h4>📚 Parents' Meeting</h4>
+                        <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall.</p>
+                        <span class="date">Posted: Recently</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div><!-- end slides-container -->
+
+    <!-- ========================================
+    FOOTER - KENYAN THEME
+    ======================================== -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>🏫 Changara Star Academy</h3>
+                    <p>Changara Market, Teso North Sub-County, Busia County, Kenya</p>
+                    <p>📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                    <p>📅 Monday - Friday: 7:00 AM - 6:00 PM</p>
+                    <div class="footer-social">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="ministry-badge">
+                        <i class="fas fa-certificate"></i>
+                        Registered under the Ministry of Education, Kenya
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">🏠 Home</a>
+                    <a href="about.html">📖 About Us</a>
+                    <a href="portal.html">🔐 School Portal</a>
+                    <a href="admissions.html">📝 Admissions</a>
+                    <a href="contact.html">📞 Contact Us</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <a href="gallery.html">🖼️ Gallery</a>
+                    <a href="events.html">📰 Events</a>
+                    <a href="downloads.html">📄 Downloads</a>
+                    <a href="fees.html">💰 Fees Structure</a>
+                    <a href="parents.html">👨‍👩‍👧‍👦 Parents Corner</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Changara Star Academy. All rights reserved. | <span style="color:var(--school-gold);">🇰🇪 Proudly Kenyan</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================
+    SCRIPTS
+    ======================================== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <script>
+        // ============================================
+        // INITIALIZE AOS
+        // ============================================
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 80,
+            easing: 'ease-in-out'
+        });
+
+        // ============================================
+        // MOBILE MENU
+        // ============================================
+        function toggleMobileMenu() {
+            const nav = document.getElementById('navLinks');
+            if (nav) nav.classList.toggle('show');
+        }
+
+        // ============================================
+        // NOTICE ALERT
+        // ============================================
+        function closeNotice() {
+            const bar = document.getElementById('noticeAlertBar');
+            bar.classList.remove('show');
+            localStorage.setItem('noticeClosed', 'true');
+        }
+
+        function showNotice(message) {
+            const bar = document.getElementById('noticeAlertBar');
+            const msgEl = document.getElementById('noticeMessage');
+            if (message) {
+                msgEl.innerHTML = message;
+            }
+            bar.classList.add('show');
+            localStorage.removeItem('noticeClosed');
+        }
+
+        function checkNoticeStatus() {
+            const closed = localStorage.getItem('noticeClosed');
+            const bar = document.getElementById('noticeAlertBar');
+            if (!closed) {
+                bar.classList.add('show');
+            }
+        }
+        checkNoticeStatus();
+
+        // ============================================
+        // SWIPER GALLERY
+        // ============================================
+        const swiper = new Swiper('.gallery-swiper', {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: true,
+            autoplay: {
+                delay: 4000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            breakpoints: {
+                640: { slidesPerView: 1 },
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+            },
+        });
+
+        // ============================================
+        // SLIDE NAVIGATION DOTS
+        // ============================================
+        const slides = document.querySelectorAll('.slide-section');
+        const dots = document.querySelectorAll('.slide-dot');
+        let currentSlide = 0;
+
+        function updateDots(index) {
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        const dotObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    if (index !== -1) {
+                        currentSlide = index;
+                        updateDots(index);
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        slides.forEach(slide => dotObserver.observe(slide));
+
+        // ============================================
+        // LOAD CONTENT FROM CMS API
+        // ============================================
+        function stripHtml(html) {
+            if (!html) return '';
+            const tmp = document.createElement('DIV');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        async function loadWebsiteContent() {
+            try {
+                const response = await fetch('/api/content');
+                const data = await response.json();
+                if (data.success) {
+                    const c = data.content;
+
+                    document.getElementById('heroTitle').innerHTML = c.heroTitle || 'Welcome to <br><span class="highlight">Changara Star Academy</span>';
+                    document.getElementById('heroSubtitle').textContent = c.heroSubtitle || 'Nurturing young minds through quality education, discipline, innovation, and strong moral values.';
+                    document.getElementById('heroButton').innerHTML = '<span>Explore More</span> <i class="fas fa-arrow-right"></i>';
+                    
+                    document.getElementById('displayAbout').textContent = stripHtml(c.aboutMission || 'Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.');
+                    document.getElementById('displayAcademics').textContent = stripHtml(c.academics || 'Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches.');
+                    document.getElementById('displayAdmissions').textContent = stripHtml(c.admissionsRequirements || 'Open for registration. Contact us for details on admission requirements and process.');
+                    document.getElementById('displayFacilities').textContent = stripHtml(c.facilities || 'Modern classrooms, computer lab, library, playground, ECDE section, and more.');
+                    document.getElementById('displayGallery').textContent = stripHtml(c.gallery || 'Check out our school gallery showcasing various activities and facilities.');
+                    document.getElementById('displayNews').textContent = stripHtml(c.events || 'Stay tuned for upcoming events and announcements from the school.');
+                    document.getElementById('displayCoCurricular').textContent = stripHtml(c.coCurricular || 'Football, athletics, music, drama, debate, and various clubs.');
+                    document.getElementById('displayPerformance').textContent = stripHtml(c.performanceKcpe || 'Excellent academic performance in national examinations.');
+                    document.getElementById('displayParents').textContent = stripHtml(c.parentsCalendar || 'Important information for parents including school calendar and policies.');
+                    document.getElementById('displayDownloads').textContent = stripHtml(c.downloads || 'Download admission forms, school calendar, and other documents.');
+                    document.getElementById('displayFees').textContent = stripHtml(c.feesContent || 'View our competitive school fees structure for all grades.');
+                    document.getElementById('displayContact').textContent = 'Get in touch with us for any inquiries or visit our school.';
+
+                    // News Ticker
+                    if (c.homeNews && c.homeNews.length > 0) {
+                        const tickerContent = document.getElementById('tickerContent');
+                        let tickerHtml = '';
+                        const tags = ['🎉 NEW', '🏆 EVENT', '📚 MEETING', '📢 ANNOUNCEMENT'];
+                        c.homeNews.forEach((news, index) => {
+                            const tag = tags[index % tags.length];
+                            tickerHtml += `
+                                <div class="ticker-item">
+                                    <span class="tag">${tag}</span>
+                                    ${stripHtml(news.title || 'News')} - ${stripHtml(news.content || '')}
+                                </div>
+                            `;
+                        });
+                        tickerContent.innerHTML = tickerHtml;
+                    }
+
+                    // Features
+                    if (c.homeFeatures && c.homeFeatures.length > 0) {
+                        const featuresGrid = document.getElementById('featuresGrid');
+                        featuresGrid.innerHTML = '';
+                        c.homeFeatures.forEach((feature) => {
+                            const div = document.createElement('div');
+                            div.className = 'feature-item';
+                            div.setAttribute('data-aos', 'zoom-in');
+                            div.innerHTML = `
+                                <span class="icon">${feature.icon || '📚'}</span>
+                                <h4>${feature.title || 'Feature'}</h4>
+                                <p>${feature.description || ''}</p>
+                            `;
+                            featuresGrid.appendChild(div);
+                        });
+                    }
+
+                    // Stats
+                    if (c.homeStats && c.homeStats.length > 0) {
+                        const stats = c.homeStats;
+                        if (stats.length >= 1) {
+                            document.getElementById('stat1Number').textContent = stats[0].number || '500+';
+                        }
+                        if (stats.length >= 2) {
+                            document.getElementById('stat2Number').textContent = stats[1].number || '50+';
+                        }
+                        if (stats.length >= 3) {
+                            document.getElementById('stat3Number').textContent = stats[2].number || '98%';
+                        }
+                        if (stats.length >= 4) {
+                            document.getElementById('stat4Number').textContent = stats[3].number || '15+';
+                        }
+                    }
+
+                    // News Grid
+                    if (c.homeNews && c.homeNews.length > 0) {
+                        const newsGrid = document.getElementById('newsGrid');
+                        newsGrid.innerHTML = '';
+                        c.homeNews.forEach((news) => {
+                            const div = document.createElement('div');
+                            div.className = 'news-item';
+                            div.setAttribute('data-aos', 'fade-up');
+                            div.innerHTML = `
+                                <h4>${news.title || 'News'}</h4>
+                                <p>${news.content || ''}</p>
+                                <span class="date">Posted: ${new Date().toLocaleDateString()}</span>
+                            `;
+                            newsGrid.appendChild(div);
+                        });
+                    }
+
+                    if (c.noticeAlert) {
+                        showNotice(c.noticeAlert);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading content:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadWebsiteContent);
+    </script>
+
+</body>
+</html>
