@@ -4,17 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏫 Changara Star Academy - Home</title>
+    
+    <!-- ===== STYLES ===== -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
     <meta name="description" content="Changara Star Academy - Quality education from Playgroup to Grade 6 in Changara Market, Teso North Sub-County, Busia County, Kenya.">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Swiper.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         /* ===== RESET & BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f5f7fa; 
+            overflow-x: hidden;
+        }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-        /* ===== TOP NOTICE ALERT BAR - STAFF ALERTS ===== */
+        /* ===== TOP NOTICE ALERT BAR ===== */
         .notice-alert-bar {
             background: linear-gradient(135deg, #dc3545, #c82333);
             color: white;
@@ -26,9 +42,7 @@
             display: none;
             animation: slideDownNotice 0.6s ease forwards;
         }
-        .notice-alert-bar.show {
-            display: block;
-        }
+        .notice-alert-bar.show { display: block; }
         .notice-alert-bar .container {
             display: flex;
             align-items: center;
@@ -69,9 +83,7 @@
             font-weight: 500;
             flex: 1;
         }
-        .notice-alert-bar .notice-content .message strong {
-            color: #ffc107;
-        }
+        .notice-alert-bar .notice-content .message strong { color: #ffc107; }
         .notice-alert-bar .notice-close {
             background: rgba(255,255,255,0.2);
             border: none;
@@ -91,7 +103,7 @@
             transform: rotate(90deg);
         }
 
-        /* ===== LATEST NEWS TICKER ===== */
+        /* ===== NEWS TICKER ===== */
         .news-ticker-section {
             background: #001f5c;
             color: white;
@@ -120,9 +132,7 @@
             gap: 8px;
             animation: pulseLabel 2s infinite;
         }
-        .news-ticker-section .ticker-label .icon {
-            font-size: 16px;
-        }
+        .news-ticker-section .ticker-label .icon { font-size: 16px; }
         .news-ticker-section .ticker-wrapper {
             flex: 1;
             overflow: hidden;
@@ -179,9 +189,7 @@
             align-items: center;
             gap: 12px;
         }
-        .main-header .school-icon {
-            font-size: 36px;
-        }
+        .main-header .school-icon { font-size: 36px; }
         .main-header .logo-section h1 {
             font-size: 22px;
             font-weight: 700;
@@ -226,21 +234,112 @@
             cursor: pointer;
         }
 
+        /* ===== FULL SCREEN SLIDES ===== */
+        .slide-section {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            scroll-snap-align: start;
+            padding: 80px 0;
+        }
+        .slides-container {
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            height: 100vh;
+            height: 100dvh;
+            scroll-behavior: smooth;
+        }
+        .slide-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+        .slide-overlay.dark {
+            background: linear-gradient(135deg, rgba(0, 31, 92, 0.85) 0%, rgba(10, 22, 40, 0.7) 100%);
+        }
+        .slide-overlay.gold {
+            background: linear-gradient(135deg, rgba(212, 160, 23, 0.85) 0%, rgba(184, 137, 10, 0.7) 100%);
+        }
+        .slide-overlay.gradient {
+            background: linear-gradient(135deg, rgba(0, 31, 92, 0.8) 0%, rgba(212, 160, 23, 0.3) 100%);
+        }
+        .slide-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ===== VIDEO BACKGROUND ===== */
+        .video-background {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .video-background .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 31, 92, 0.8) 0%, rgba(10, 22, 40, 0.6) 100%);
+        }
+
+        /* ===== SLIDE NAVIGATION DOTS ===== */
+        .slide-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .slide-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .slide-dot:hover {
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(1.2);
+        }
+        .slide-dot.active {
+            background: #d4a017;
+            border-color: #d4a017;
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(212, 160, 23, 0.4);
+        }
+
         /* ===== HERO SECTION ===== */
         .hero-section {
             background: linear-gradient(135deg, #001f5c 0%, #0b5394 100%);
             color: white;
-            padding: 80px 0;
             text-align: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
         }
         .hero-section h1 {
             font-size: 48px;
             margin-bottom: 20px;
             font-weight: 700;
         }
-        .hero-section h1 .highlight {
-            color: #d4a017;
-        }
+        .hero-section h1 .highlight { color: #d4a017; }
         .hero-section p {
             font-size: 20px;
             max-width: 700px;
@@ -264,11 +363,8 @@
             box-shadow: 0 8px 30px rgba(212, 160, 23, 0.4);
         }
 
-        /* ===== CONTENT CARDS SECTION ===== */
-        .content-cards-section {
-            padding: 60px 0;
-            background: #f5f7fa;
-        }
+        /* ===== CONTENT CARDS ===== */
+        .content-cards-section { padding: 80px 0; background: #f5f7fa; }
         .content-cards-section .section-title {
             text-align: center;
             color: #001f5c;
@@ -304,11 +400,7 @@
             border-color: #d4a017;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
-        .content-card .icon {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 10px;
-        }
+        .content-card .icon { font-size: 48px; display: block; margin-bottom: 10px; }
         .content-card h3 {
             color: #001f5c;
             font-size: 20px;
@@ -327,20 +419,11 @@
             font-weight: bold;
             margin-top: 8px;
         }
-        .content-card .badge.live {
-            background: #28a745;
-            color: white;
-        }
-        .content-card .badge.new {
-            background: #d4a017;
-            color: #001f5c;
-        }
+        .content-card .badge.live { background: #28a745; color: white; }
+        .content-card .badge.new { background: #d4a017; color: #001f5c; }
 
-        /* ===== FEATURES SECTION ===== */
-        .features-section {
-            padding: 60px 0;
-            background: white;
-        }
+        /* ===== FEATURES ===== */
+        .features-section { padding: 80px 0; background: white; }
         .features-section .section-title {
             text-align: center;
             color: #001f5c;
@@ -362,11 +445,7 @@
             text-align: center;
             padding: 20px;
         }
-        .feature-item .icon {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 15px;
-        }
+        .feature-item .icon { font-size: 48px; display: block; margin-bottom: 15px; }
         .feature-item h4 {
             color: #001f5c;
             font-size: 18px;
@@ -378,9 +457,9 @@
             line-height: 1.6;
         }
 
-        /* ===== STATS SECTION ===== */
+        /* ===== STATS ===== */
         .stats-section {
-            padding: 60px 0;
+            padding: 80px 0;
             background: linear-gradient(135deg, #001f5c, #0b5394);
             color: white;
         }
@@ -400,11 +479,8 @@
             opacity: 0.9;
         }
 
-        /* ===== NEWS SECTION ===== */
-        .news-section {
-            padding: 60px 0;
-            background: #f5f7fa;
-        }
+        /* ===== NEWS ===== */
+        .news-section { padding: 80px 0; background: #f5f7fa; }
         .news-section .section-title {
             text-align: center;
             color: #001f5c;
@@ -429,10 +505,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.06);
             border-left: 4px solid #d4a017;
         }
-        .news-item h4 {
-            color: #001f5c;
-            margin-bottom: 8px;
-        }
+        .news-item h4 { color: #001f5c; margin-bottom: 8px; }
         .news-item p {
             color: #666;
             font-size: 14px;
@@ -445,12 +518,65 @@
             display: block;
         }
 
+        /* ===== GALLERY SWIPER ===== */
+        .gallery-swiper {
+            padding: 20px 0;
+        }
+        .gallery-swiper .swiper-slide {
+            height: auto;
+        }
+        .gallery-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+        .gallery-card:hover {
+            transform: translateY(-5px);
+        }
+        .gallery-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        .gallery-card .gallery-content {
+            padding: 20px;
+        }
+        .gallery-card .gallery-content h4 {
+            color: #001f5c;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .gallery-card .gallery-content p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .gallery-card .gallery-content .tag {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 8px;
+            background: #d4a017;
+            color: #001f5c;
+        }
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: #d4a017 !important;
+        }
+        .swiper-pagination-bullet-active {
+            background: #d4a017 !important;
+        }
+
         /* ===== FOOTER ===== */
         .main-footer {
             background: #0a1628;
             color: white;
             padding: 40px 0 20px;
-            margin-top: 0;
         }
         .main-footer .footer-content {
             display: grid;
@@ -534,7 +660,13 @@
             75%, 95% { transform: translateY(-90px); }
             100% { transform: translateY(0); }
         }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        .float-animation { animation: float 3s ease-in-out infinite; }
 
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .main-header .nav-links {
                 display: none;
@@ -543,72 +675,33 @@
                 padding: 15px 0;
                 gap: 10px;
             }
-            .main-header .nav-links.show {
-                display: flex;
-            }
-            .main-header .mobile-menu-btn {
-                display: block;
-            }
-
-            .hero-section h1 {
-                font-size: 32px;
-            }
-            .hero-section p {
-                font-size: 16px;
-                padding: 0 15px;
-            }
-            .content-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .features-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .news-grid {
-                grid-template-columns: 1fr;
-            }
-            .main-footer .footer-content {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            .notice-alert-bar .container {
-                flex-direction: column;
-                text-align: center;
-            }
-            .notice-alert-bar .notice-content {
-                justify-content: center;
-            }
-            .news-ticker-section .container {
-                flex-direction: column;
-                gap: 5px;
-            }
-            .news-ticker-section .ticker-label {
-                font-size: 11px;
-                padding: 2px 12px;
-            }
-            .news-ticker-section .ticker-content .ticker-item {
-                font-size: 13px;
-                white-space: normal;
-            }
+            .main-header .nav-links.show { display: flex; }
+            .main-header .mobile-menu-btn { display: block; }
+            .slide-dots { display: none; }
+            .hero-section h1 { font-size: 32px; }
+            .hero-section p { font-size: 16px; padding: 0 15px; }
+            .content-grid { grid-template-columns: 1fr 1fr; }
+            .features-grid { grid-template-columns: 1fr 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .news-grid { grid-template-columns: 1fr; }
+            .main-footer .footer-content { grid-template-columns: 1fr; gap: 20px; }
+            .notice-alert-bar .container { flex-direction: column; text-align: center; }
+            .notice-alert-bar .notice-content { justify-content: center; }
+            .news-ticker-section .container { flex-direction: column; gap: 5px; }
+            .news-ticker-section .ticker-label { font-size: 11px; padding: 2px 12px; }
+            .news-ticker-section .ticker-content .ticker-item { font-size: 13px; white-space: normal; }
+            .gallery-card img { height: 180px; }
         }
         @media (max-width: 480px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
+            .content-grid { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== TOP NOTICE ALERT BAR - STAFF ALERTS ===== -->
+    <!-- ===== TOP NOTICE ALERT BAR ===== -->
     <div class="notice-alert-bar" id="noticeAlertBar">
         <div class="container">
             <div class="notice-icon">
@@ -658,6 +751,17 @@
         </div>
     </div>
 
+    <!-- ===== SLIDE NAVIGATION DOTS ===== -->
+    <div class="slide-dots" id="slideDots">
+        <div class="slide-dot active" data-slide="0"></div>
+        <div class="slide-dot" data-slide="1"></div>
+        <div class="slide-dot" data-slide="2"></div>
+        <div class="slide-dot" data-slide="3"></div>
+        <div class="slide-dot" data-slide="4"></div>
+        <div class="slide-dot" data-slide="5"></div>
+        <div class="slide-dot" data-slide="6"></div>
+    </div>
+
     <!-- ===== HEADER ===== -->
     <header class="main-header">
         <div class="container">
@@ -678,178 +782,261 @@
         </div>
     </header>
 
-    <!-- ===== HERO SECTION ===== -->
-    <section class="hero-section" id="heroSection">
-        <div class="container">
-            <h1 id="heroTitle">Welcome to <span class="highlight">Changara Star Academy</span></h1>
-            <p id="heroSubtitle">Nurturing young minds through quality education, discipline, innovation, and strong moral values. We provide a safe and supportive learning environment where every child is encouraged to discover their potential and achieve academic excellence.</p>
-            <a href="about.html" class="btn-hero" id="heroButton">Learn More →</a>
-        </div>
-    </section>
+    <!-- ===== SLIDES CONTAINER ===== -->
+    <div class="slides-container">
 
-    <!-- ===== CONTENT CARDS SECTION ===== -->
-    <section class="content-cards-section">
-        <div class="container">
-            <h2 class="section-title">📚 Explore Our School</h2>
-            <p class="section-subtitle">Discover everything about Changara Star Academy</p>
-
-            <div class="content-grid">
-                <div class="content-card" onclick="window.location.href='about.html'">
-                    <span class="icon">📖</span>
-                    <h3>About Us</h3>
-                    <p id="displayAbout">Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya. We provide quality education from Playgroup to Grade 6.</p>
-                    <span class="badge live">Live</span>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='academics.html'">
-                    <span class="icon">📚</span>
-                    <h3>Academics</h3>
-                    <p id="displayAcademics">Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='admissions.html'">
-                    <span class="icon">📝</span>
-                    <h3>Admissions</h3>
-                    <p id="displayAdmissions">Open for registration. Contact us for details on admission requirements and process.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='facilities.html'">
-                    <span class="icon">🏫</span>
-                    <h3>School Facilities</h3>
-                    <p id="displayFacilities">Modern classrooms, computer lab, library, playground, ECDE section, and more.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='gallery.html'">
-                    <span class="icon">🖼️</span>
-                    <h3>Gallery</h3>
-                    <p id="displayGallery">Check out our school gallery showcasing various activities and facilities.</p>
-                    <span class="badge new">New</span>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='events.html'">
-                    <span class="icon">📰</span>
-                    <h3>News & Events</h3>
-                    <p id="displayNews">Stay tuned for upcoming events and announcements from the school.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='cocurricular.html'">
-                    <span class="icon">⚽</span>
-                    <h3>Co-curricular Activities</h3>
-                    <p id="displayCoCurricular">Football, athletics, music, drama, debate, and various clubs.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='performance.html'">
-                    <span class="icon">🏆</span>
-                    <h3>Academic Performance</h3>
-                    <p id="displayPerformance">Excellent academic performance in national examinations.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='parents.html'">
-                    <span class="icon">👨‍👩‍👧‍👦</span>
-                    <h3>Parents Corner</h3>
-                    <p id="displayParents">Important information for parents including school calendar and policies.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='downloads.html'">
-                    <span class="icon">📄</span>
-                    <h3>Downloads</h3>
-                    <p id="displayDownloads">Download admission forms, school calendar, and other documents.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='fees.html'">
-                    <span class="icon">💰</span>
-                    <h3>Fees Structure</h3>
-                    <p id="displayFees">View our competitive school fees structure for all grades.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='contact.html'">
-                    <span class="icon">📞</span>
-                    <h3>Contact Us</h3>
-                    <p id="displayContact">Get in touch with us for any inquiries or visit our school.</p>
-                    <span class="badge live">Live</span>
+        <!-- ===== SLIDE 1: HERO ===== -->
+        <section class="slide-section" data-slide="0" id="slide-hero">
+            <div class="video-background">
+                <video autoplay muted loop playsinline poster="/images/school-compound.jpg">
+                    <source src="/videos/school-hero.mp4" type="video/mp4">
+                </video>
+                <div class="video-overlay"></div>
+            </div>
+            <div class="slide-content" data-aos="fade-up">
+                <div class="hero-section" style="background:transparent;min-height:auto;padding:40px 0;">
+                    <h1 id="heroTitle" data-aos="fade-up" data-aos-delay="100">
+                        Welcome to <span class="highlight">Changara Star Academy</span>
+                    </h1>
+                    <p id="heroSubtitle" data-aos="fade-up" data-aos-delay="200">
+                        Nurturing young minds through quality education, discipline, innovation, and strong moral values. 
+                        We provide a safe and supportive learning environment where every child is encouraged to discover 
+                        their potential and achieve academic excellence.
+                    </p>
+                    <a href="about.html" class="btn-hero" id="heroButton" data-aos="fade-up" data-aos-delay="300">
+                        Learn More →
+                    </a>
                 </div>
             </div>
-        </div>
-    </section>
+            <!-- Scroll indicator -->
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/60 flex flex-col items-center" style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:10;">
+                <span class="text-sm mb-2 text-white/60">Scroll to explore</span>
+                <div style="animation:float 2s ease-in-out infinite;">↓</div>
+            </div>
+        </section>
 
-    <!-- ===== FEATURES SECTION ===== -->
-    <section class="features-section" id="featuresSection">
-        <div class="container">
-            <h2 class="section-title">🌟 Why Choose Us</h2>
-            <p class="section-subtitle">We provide holistic education that nurtures talent and builds character for a successful future.</p>
-            <div class="features-grid" id="featuresGrid">
-                <div class="feature-item">
-                    <span class="icon">👨‍🏫</span>
-                    <h4>Qualified Teachers</h4>
-                    <p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p>
-                </div>
-                <div class="feature-item">
-                    <span class="icon">🏆</span>
-                    <h4>Excellence in Performance</h4>
-                    <p>We consistently produce top-performing students in national examinations and co-curricular activities.</p>
-                </div>
-                <div class="feature-item">
-                    <span class="icon">🏫</span>
-                    <h4>Modern Facilities</h4>
-                    <p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p>
-                </div>
-                <div class="feature-item">
-                    <span class="icon">💡</span>
-                    <h4>Innovative Learning</h4>
-                    <p>We use modern teaching methods including technology integration and hands-on learning experiences.</p>
+        <!-- ===== SLIDE 2: CONTENT CARDS ===== -->
+        <section class="slide-section content-cards-section" data-slide="1" id="slide-content" style="background:#f5f7fa;padding:60px 0;">
+            <div class="slide-content">
+                <h2 class="section-title" data-aos="fade-up">📚 Explore Our School</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
+
+                <div class="content-grid">
+                    <div class="content-card" onclick="window.location.href='about.html'" data-aos="fade-up" data-aos-delay="100">
+                        <span class="icon">📖</span>
+                        <h3>About Us</h3>
+                        <p id="displayAbout">Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.</p>
+                        <span class="badge live">Live</span>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="150">
+                        <span class="icon">📚</span>
+                        <h3>Academics</h3>
+                        <p id="displayAcademics">Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="200">
+                        <span class="icon">📝</span>
+                        <h3>Admissions</h3>
+                        <p id="displayAdmissions">Open for registration. Contact us for details on admission requirements and process.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="250">
+                        <span class="icon">🏫</span>
+                        <h3>School Facilities</h3>
+                        <p id="displayFacilities">Modern classrooms, computer lab, library, playground, ECDE section, and more.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='gallery.html'" data-aos="fade-up" data-aos-delay="300">
+                        <span class="icon">🖼️</span>
+                        <h3>Gallery</h3>
+                        <p id="displayGallery">Check out our school gallery showcasing various activities and facilities.</p>
+                        <span class="badge new">New</span>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='events.html'" data-aos="fade-up" data-aos-delay="350">
+                        <span class="icon">📰</span>
+                        <h3>News & Events</h3>
+                        <p id="displayNews">Stay tuned for upcoming events and announcements from the school.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='cocurricular.html'" data-aos="fade-up" data-aos-delay="400">
+                        <span class="icon">⚽</span>
+                        <h3>Co-curricular Activities</h3>
+                        <p id="displayCoCurricular">Football, athletics, music, drama, debate, and various clubs.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="450">
+                        <span class="icon">🏆</span>
+                        <h3>Academic Performance</h3>
+                        <p id="displayPerformance">Excellent academic performance in national examinations.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='parents.html'" data-aos="fade-up" data-aos-delay="500">
+                        <span class="icon">👨‍👩‍👧‍👦</span>
+                        <h3>Parents Corner</h3>
+                        <p id="displayParents">Important information for parents including school calendar and policies.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="550">
+                        <span class="icon">📄</span>
+                        <h3>Downloads</h3>
+                        <p id="displayDownloads">Download admission forms, school calendar, and other documents.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="600">
+                        <span class="icon">💰</span>
+                        <h3>Fees Structure</h3>
+                        <p id="displayFees">View our competitive school fees structure for all grades.</p>
+                    </div>
+                    <div class="content-card" onclick="window.location.href='contact.html'" data-aos="fade-up" data-aos-delay="650">
+                        <span class="icon">📞</span>
+                        <h3>Contact Us</h3>
+                        <p id="displayContact">Get in touch with us for any inquiries or visit our school.</p>
+                        <span class="badge live">Live</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ===== STATS SECTION ===== -->
-    <section class="stats-section" id="statsSection">
-        <div class="container">
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-item">
-                    <h3 id="stat1Number">500+</h3>
-                    <p id="stat1Label">Students</p>
-                </div>
-                <div class="stat-item">
-                    <h3 id="stat2Number">50+</h3>
-                    <p id="stat2Label">Staff Members</p>
-                </div>
-                <div class="stat-item">
-                    <h3 id="stat3Number">98%</h3>
-                    <p id="stat3Label">Attendance Rate</p>
-                </div>
-                <div class="stat-item">
-                    <h3 id="stat4Number">15+</h3>
-                    <p id="stat4Label">Years of Excellence</p>
+        <!-- ===== SLIDE 3: FEATURES ===== -->
+        <section class="slide-section features-section" data-slide="2" id="slide-features" style="background:white;padding:60px 0;">
+            <div class="slide-content">
+                <h2 class="section-title" data-aos="fade-up">🌟 Why Choose Us</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                    We provide holistic education that nurtures talent and builds character for a successful future.
+                </p>
+                <div class="features-grid" id="featuresGrid">
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="100">
+                        <span class="icon">👨‍🏫</span>
+                        <h4>Qualified Teachers</h4>
+                        <p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p>
+                    </div>
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="200">
+                        <span class="icon">🏆</span>
+                        <h4>Excellence in Performance</h4>
+                        <p>We consistently produce top-performing students in national examinations and co-curricular activities.</p>
+                    </div>
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="300">
+                        <span class="icon">🏫</span>
+                        <h4>Modern Facilities</h4>
+                        <p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p>
+                    </div>
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="400">
+                        <span class="icon">💡</span>
+                        <h4>Innovative Learning</h4>
+                        <p>We use modern teaching methods including technology integration and hands-on learning experiences.</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ===== NEWS SECTION ===== -->
-    <section class="news-section" id="newsSection">
-        <div class="container">
-            <h2 class="section-title">📰 Latest News & Announcements</h2>
-            <p class="section-subtitle">Stay updated with our latest news and events</p>
-            <div class="news-grid" id="newsGrid">
-                <div class="news-item">
-                    <h4>📅 Term 3 Opening</h4>
-                    <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.</p>
-                    <span class="date">Posted: Recently</span>
-                </div>
-                <div class="news-item">
-                    <h4>🏆 Sports Day</h4>
-                    <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.</p>
-                    <span class="date">Posted: Recently</span>
-                </div>
-                <div class="news-item">
-                    <h4>📚 Parents' Meeting</h4>
-                    <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall.</p>
-                    <span class="date">Posted: Recently</span>
+        <!-- ===== SLIDE 4: STATS ===== -->
+        <section class="slide-section stats-section" data-slide="3" id="slide-stats" style="padding:60px 0;">
+            <div class="slide-overlay dark"></div>
+            <div class="slide-content">
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="100">
+                        <h3 id="stat1Number">500+</h3>
+                        <p id="stat1Label">Students</p>
+                    </div>
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="200">
+                        <h3 id="stat2Number">50+</h3>
+                        <p id="stat2Label">Staff Members</p>
+                    </div>
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="300">
+                        <h3 id="stat3Number">98%</h3>
+                        <p id="stat3Label">Attendance Rate</p>
+                    </div>
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="400">
+                        <h3 id="stat4Number">15+</h3>
+                        <p id="stat4Label">Years of Excellence</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+
+        <!-- ===== SLIDE 5: GALLERY ===== -->
+        <section class="slide-section" data-slide="4" id="slide-gallery" style="background:#001f5c;color:white;padding:60px 0;">
+            <div class="slide-overlay dark"></div>
+            <div class="slide-content">
+                <h2 class="section-title text-white" data-aos="fade-up" style="color:white;text-align:center;">🖼️ School Gallery</h2>
+                <p class="section-subtitle text-gray-300" data-aos="fade-up" data-aos-delay="100" style="color:#ccc;text-align:center;font-size:18px;margin-bottom:30px;">
+                    Explore our school facilities and activities
+                </p>
+
+                <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
+                    <div class="swiper-wrapper">
+                        <!-- Slide 1 -->
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="/images/school-compound.jpg" alt="School Compound">
+                                <div class="gallery-content">
+                                    <h4>🏫 School Compound</h4>
+                                    <p>The beautiful Changara Star Academy compound showcasing our modern facilities and serene learning environment.</p>
+                                    <span class="tag">Facilities</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Slide 2 -->
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="/images/ecde-section.jpg" alt="ECDE Section">
+                                <div class="gallery-content">
+                                    <h4>🧸 E.C.D.E Section</h4>
+                                    <p>Our Early Childhood Development Education (E.C.D.E) section where young learners begin their educational journey.</p>
+                                    <span class="tag">Facilities</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Slide 3 -->
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="/images/classroom-learning.jpg" alt="Classroom Learning">
+                                <div class="gallery-content">
+                                    <h4>📚 Classroom Learning</h4>
+                                    <p>Pupils engaged in active learning in our well-equipped classrooms with dedicated teachers.</p>
+                                    <span class="tag">Academics</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Slide 4 -->
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="/images/computer-lab.jpg" alt="Computer Lab">
+                                <div class="gallery-content">
+                                    <h4>💻 Computer Lab</h4>
+                                    <p>Students learning essential computer skills in our modern computer laboratory.</p>
+                                    <span class="tag">Facilities</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Swiper Navigation -->
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SLIDE 6: NEWS ===== -->
+        <section class="slide-section news-section" data-slide="5" id="slide-news" style="background:#f5f7fa;padding:60px 0;">
+            <div class="slide-content">
+                <h2 class="section-title" data-aos="fade-up">📰 Latest News & Announcements</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Stay updated with our latest news and events</p>
+                <div class="news-grid" id="newsGrid">
+                    <div class="news-item" data-aos="fade-up" data-aos-delay="100">
+                        <h4>📅 Term 3 Opening</h4>
+                        <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.</p>
+                        <span class="date">Posted: Recently</span>
+                    </div>
+                    <div class="news-item" data-aos="fade-up" data-aos-delay="200">
+                        <h4>🏆 Sports Day</h4>
+                        <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.</p>
+                        <span class="date">Posted: Recently</span>
+                    </div>
+                    <div class="news-item" data-aos="fade-up" data-aos-delay="300">
+                        <h4>📚 Parents' Meeting</h4>
+                        <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall.</p>
+                        <span class="date">Posted: Recently</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div><!-- end slides-container -->
 
     <!-- ===== FOOTER ===== -->
     <footer class="main-footer">
@@ -882,7 +1069,28 @@
         </div>
     </footer>
 
+    <!-- ===== SCRIPTS ===== -->
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- AOS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Swiper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
     <script>
+        // ============================================
+        // INITIALIZE AOS
+        // ============================================
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100,
+            easing: 'ease-in-out'
+        });
+
         // ============================================
         // MOBILE MENU TOGGLE
         // ============================================
@@ -897,7 +1105,6 @@
         function closeNotice() {
             const bar = document.getElementById('noticeAlertBar');
             bar.classList.remove('show');
-            // Store that user closed it
             localStorage.setItem('noticeClosed', 'true');
         }
 
@@ -911,7 +1118,6 @@
             localStorage.removeItem('noticeClosed');
         }
 
-        // Check if notice was closed before
         function checkNoticeStatus() {
             const closed = localStorage.getItem('noticeClosed');
             const bar = document.getElementById('noticeAlertBar');
@@ -919,6 +1125,110 @@
                 bar.classList.add('show');
             }
         }
+        checkNoticeStatus();
+
+        // ============================================
+        // SLIDE NAVIGATION
+        // ============================================
+        const slides = document.querySelectorAll('.slide-section');
+        const dots = document.querySelectorAll('.slide-dot');
+        let currentSlide = 0;
+
+        function updateDots(index) {
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        function goToSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= slides.length) index = slides.length - 1;
+            currentSlide = index;
+            slides[index].scrollIntoView({ behavior: 'smooth' });
+            updateDots(index);
+        }
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => goToSlide(index));
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                goToSlide(currentSlide + 1);
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                goToSlide(currentSlide - 1);
+            }
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    if (index !== -1) {
+                        currentSlide = index;
+                        updateDots(index);
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        slides.forEach(slide => observer.observe(slide));
+
+        // ============================================
+        // SWIPER GALLERY
+        // ============================================
+        const swiper = new Swiper('.gallery-swiper', {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: true,
+            autoplay: {
+                delay: 4000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            breakpoints: {
+                640: { slidesPerView: 1 },
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+            },
+        });
+
+        // ============================================
+        // GSAP ANIMATIONS
+        // ============================================
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Animate hero text on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const tl = gsap.timeline();
+            tl.from('.hero-section h1', {
+                y: 80,
+                opacity: 0,
+                duration: 1.2,
+                ease: 'power3.out'
+            })
+            .from('.hero-section p', {
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                ease: 'power3.out'
+            }, '-=0.6')
+            .from('.hero-section .btn-hero', {
+                y: 30,
+                opacity: 0,
+                duration: 0.8,
+                ease: 'power3.out'
+            }, '-=0.4');
+        });
 
         // ============================================
         // LOAD CONTENT FROM CMS API
@@ -942,7 +1252,8 @@
                     document.getElementById('heroSubtitle').textContent = c.heroSubtitle || 'Nurturing young minds through quality education, discipline, innovation, and strong moral values.';
                     document.getElementById('heroButton').textContent = c.heroButtonText || 'Learn More →';
                     
-                    // Content Cards                    document.getElementById('displayAbout').textContent = stripHtml(c.aboutMission || 'Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.');
+                    // Content Cards
+                    document.getElementById('displayAbout').textContent = stripHtml(c.aboutMission || 'Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.');
                     document.getElementById('displayAcademics').textContent = stripHtml(c.academics || 'Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches.');
                     document.getElementById('displayAdmissions').textContent = stripHtml(c.admissionsRequirements || 'Open for registration. Contact us for details on admission requirements and process.');
                     document.getElementById('displayFacilities').textContent = stripHtml(c.facilities || 'Modern classrooms, computer lab, library, playground, ECDE section, and more.');
@@ -955,11 +1266,11 @@
                     document.getElementById('displayFees').textContent = stripHtml(c.feesContent || 'View our competitive school fees structure for all grades.');
                     document.getElementById('displayContact').textContent = 'Get in touch with us for any inquiries or visit our school.';
 
-                    // News Ticker - Update from CMS
+                    // News Ticker
                     if (c.homeNews && c.homeNews.length > 0) {
                         const tickerContent = document.getElementById('tickerContent');
                         let tickerHtml = '';
-                        const tags = ['🎉 NEW', '🏆 EVENT', '📚 MEETING', '📢 ANNOUNCEMENT', '⭐ UPDATE', '📅 IMPORTANT'];
+                        const tags = ['🎉 NEW', '🏆 EVENT', '📚 MEETING', '📢 ANNOUNCEMENT'];
                         c.homeNews.forEach((news, index) => {
                             const tag = tags[index % tags.length];
                             tickerHtml += `
@@ -973,20 +1284,14 @@
                         tickerContent.innerHTML = tickerHtml;
                     }
 
-                    // Check for notice alert from CMS
-                    if (c.noticeAlert) {
-                        showNotice(c.noticeAlert);
-                    } else {
-                        checkNoticeStatus();
-                    }
-
                     // Features
                     if (c.homeFeatures && c.homeFeatures.length > 0) {
                         const featuresGrid = document.getElementById('featuresGrid');
                         featuresGrid.innerHTML = '';
-                        c.homeFeatures.forEach(feature => {
+                        c.homeFeatures.forEach((feature) => {
                             const div = document.createElement('div');
                             div.className = 'feature-item';
+                            div.setAttribute('data-aos', 'zoom-in');
                             div.innerHTML = `
                                 <span class="icon">${feature.icon || '📚'}</span>
                                 <h4>${feature.title || 'Feature'}</h4>
@@ -1021,9 +1326,10 @@
                     if (c.homeNews && c.homeNews.length > 0) {
                         const newsGrid = document.getElementById('newsGrid');
                         newsGrid.innerHTML = '';
-                        c.homeNews.forEach(news => {
+                        c.homeNews.forEach((news) => {
                             const div = document.createElement('div');
                             div.className = 'news-item';
+                            div.setAttribute('data-aos', 'fade-up');
                             div.innerHTML = `
                                 <h4>${news.title || 'News'}</h4>
                                 <p>${news.content || ''}</p>
@@ -1032,19 +1338,18 @@
                             newsGrid.appendChild(div);
                         });
                     }
+
+                    // Notice Alert
+                    if (c.noticeAlert) {
+                        showNotice(c.noticeAlert);
+                    }
                 }
             } catch (error) {
                 console.error('Error loading content:', error);
             }
         }
 
-        // ============================================
-        // INITIALIZE
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            checkNoticeStatus();
-            loadWebsiteContent();
-        });
+        document.addEventListener('DOMContentLoaded', loadWebsiteContent);
     </script>
 </body>
 </html>
