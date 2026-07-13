@@ -181,7 +181,7 @@
         }
 
         /* ========================================
-           SECTION NAVIGATION TABS
+           SECTION NAVIGATION TABS - CARDS ONLY
            ======================================== */
         .section-tabs {
             background: white;
@@ -321,7 +321,7 @@
         }
 
         /* ========================================
-           NEWS TICKER - PUSHED DOWN BELOW TABS
+           NEWS TICKER
            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
@@ -577,7 +577,7 @@
         .content-cards-section {
             padding: 50px 0;
             background: #f0f2f5;
-            scroll-margin-top: 120px;
+            scroll-margin-top: 140px;
         }
         .content-grid {
             display: grid;
@@ -795,7 +795,7 @@
             background: linear-gradient(135deg, #000000, #1a0000, #0a1628);
             position: relative;
             overflow: hidden;
-            scroll-margin-top: 120px;
+            scroll-margin-top: 140px;
         }
         .features-grid {
             display: grid;
@@ -839,7 +839,7 @@
             background: linear-gradient(135deg, var(--kenya-black), var(--school-blue-dark));
             position: relative;
             overflow: hidden;
-            scroll-margin-top: 120px;
+            scroll-margin-top: 140px;
         }
         .stats-grid {
             display: grid;
@@ -881,7 +881,7 @@
         .gallery-section {
             padding: 50px 0;
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
-            scroll-margin-top: 120px;
+            scroll-margin-top: 140px;
         }
         .gallery-swiper {
             padding: 15px 0;
@@ -969,7 +969,7 @@
         .news-section {
             padding: 50px 0;
             background: #f0f2f5;
-            scroll-margin-top: 120px;
+            scroll-margin-top: 140px;
         }
         .news-grid {
             display: grid;
@@ -1208,11 +1208,6 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-6px); }
         }
-
-        /* Scroll offset for anchor links */
-        .scroll-offset {
-            scroll-margin-top: 140px;
-        }
     </style>
 </head>
 <body>
@@ -1234,7 +1229,7 @@
         </div>
     </div>
 
-    <!-- ===== SECTION NAVIGATION TABS ===== -->
+    <!-- ===== SECTION NAVIGATION TABS - CARDS ONLY ===== -->
     <div class="section-tabs" id="sectionTabs">
         <div class="container">
             <button class="tab-btn active" onclick="scrollToSection('slide-hero')">
@@ -1255,10 +1250,6 @@
             <button class="tab-btn" onclick="scrollToSection('slide-news')">
                 <span class="tab-icon">📰</span> News
                 <span class="tab-badge">New</span>
-            </button>
-            <button class="tab-btn" onclick="window.location.href='admissions.html'">
-                <span class="tab-icon">📝</span> Apply Now
-                <span class="tab-badge">🔥</span>
             </button>
         </div>
     </div>
