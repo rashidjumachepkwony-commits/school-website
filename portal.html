@@ -190,7 +190,7 @@
     <main class="portal-container">
         <div class="container">
             <h1 class="portal-section-title">🔐 School Management Portal</h1>
-            <p class="portal-section-subtitle">Manage school operations, staff, visitors, and content</p>
+            <p class="portal-section-subtitle">Manage school operations, staff, and visitors</p>
 
             <!-- ===== MANAGEMENT SECTION ===== -->
             <div class="management-section">
@@ -211,11 +211,6 @@
                         <span>Visitor Check In/Out</span>
                         <span class="link-badge">Visitor Management</span>
                     </a>
-                    <a href="admin-attendance.html" class="management-link">
-                        <span class="icon">📋</span>
-                        <span>Attendance Reports</span>
-                        <span class="link-badge">View Reports</span>
-                    </a>
                 </div>
             </div>
 
@@ -227,12 +222,9 @@
     </main>
 
     <script>
-        // Mobile menu toggle
         function toggleMobileMenu() {
             const nav = document.querySelector('.nav-links');
-            if (nav) {
-                nav.classList.toggle('show');
-            }
+            if (nav) nav.classList.toggle('show');
         }
     </script>
 </body>
