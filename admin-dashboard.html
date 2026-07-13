@@ -130,6 +130,25 @@
         .preview-modal .preview-content .preview-body audio { width: 100%; }
         .preview-modal .preview-content .preview-actions { margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end; border-top: 2px solid #e8ecf1; padding-top: 20px; }
 
+        /* ===== ATTENDANCE TABLES ===== */
+        .attendance-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .attendance-table th, .attendance-table td { border: 1px solid #e8ecf1; padding: 10px 12px; text-align: left; font-size: 14px; }
+        .attendance-table th { background: #f0f2f5; font-weight: 600; color: #1a2a4a; }
+        .attendance-table tr:nth-child(even) { background: #fafbfc; }
+        .attendance-table .status-present { color: #28a745; font-weight: 600; }
+        .attendance-table .status-absent { color: #dc3545; font-weight: 600; }
+        .attendance-table .status-late { color: #d4a017; font-weight: 600; }
+        .attendance-table .status-checked-in { color: #17a2b8; font-weight: 600; }
+        .attendance-table .status-checked-out { color: #6c757d; font-weight: 600; }
+
+        .attendance-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .attendance-stat { background: #f8f9fc; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #e8ecf1; }
+        .attendance-stat .number { font-size: 28px; font-weight: 700; color: #1a2a4a; }
+        .attendance-stat .label { font-size: 13px; color: #666; }
+
+        .refresh-btn { background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .refresh-btn:hover { background: #138496; }
+
         @media (max-width: 768px) {
             .sidebar { width: 100%; position: relative; min-height: auto; padding: 10px 0; }
             .main-content { margin-left: 0; padding: 15px; }
@@ -139,6 +158,9 @@
             .preview-modal .preview-content { padding: 20px; }
             .media-editor-toolbar { flex-wrap: wrap; padding: 10px; }
             .dashboard-cards { grid-template-columns: 1fr 1fr; }
+            .attendance-table { font-size: 12px; }
+            .attendance-table th, .attendance-table td { padding: 6px 8px; }
+            .attendance-stats { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -167,6 +189,11 @@
             <a onclick="showSection('fees')"><i class="fas fa-coins"></i> Fees Structure</a>
             <a onclick="showSection('contact')"><i class="fas fa-phone"></i> Contact</a>
             <a onclick="showSection('seo')"><i class="fas fa-search"></i> SEO</a>
+            <div style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
+                <div class="menu-label">Attendance</div>
+                <a onclick="showSection('staff-attendance')"><i class="fas fa-user-check"></i> Staff Attendance</a>
+                <a onclick="showSection('visitor-attendance')"><i class="fas fa-user-friends"></i> Visitors</a>
+            </div>
             <div class="logout">
                 <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
@@ -214,9 +241,9 @@
         <!-- ===== DASHBOARD SECTION ===== -->
         <div id="section-dashboard" class="editor-container active">
             <h2>📊 Dashboard</h2>
-            <p class="desc">Welcome to your admin dashboard. Manage all website content from here.</p>
+            <p class="desc">Welcome to your admin dashboard. Manage all website content and attendance from here.</p>
 
-            <div class="dashboard-cards">
+            <div class="dashboard-cards" id="dashboardStats">
                 <div class="dashboard-card" onclick="showSection('home')">
                     <span class="icon">🏠</span>
                     <h3>Home</h3>
@@ -237,6 +264,16 @@
                     <h3>Fees</h3>
                     <p>Update fees structure</p>
                 </div>
+                <div class="dashboard-card" onclick="showSection('staff-attendance')" style="border:2px solid #28a745;">
+                    <span class="icon">👨‍🏫</span>
+                    <h3>Staff Attendance</h3>
+                    <p>View today's attendance</p>
+                </div>
+                <div class="dashboard-card" onclick="showSection('visitor-attendance')" style="border:2px solid #17a2b8;">
+                    <span class="icon">🚪</span>
+                    <h3>Visitors</h3>
+                    <p>View visitor logs</p>
+                </div>
             </div>
 
             <div style="background:white;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);">
@@ -245,6 +282,8 @@
                     <button class="btn btn-success" onclick="saveAllContent()"><i class="fas fa-save"></i> Save All Content</button>
                     <button class="btn btn-info" onclick="previewAllContent()"><i class="fas fa-eye"></i> Preview All</button>
                     <button class="btn btn-primary" onclick="showSection('gallery')"><i class="fas fa-images"></i> Upload Media</button>
+                    <button class="btn btn-success" onclick="showSection('staff-attendance')"><i class="fas fa-user-check"></i> Staff Attendance</button>
+                    <button class="btn btn-info" onclick="showSection('visitor-attendance')"><i class="fas fa-user-friends"></i> Visitors</button>
                 </div>
             </div>
         </div>
@@ -575,6 +614,110 @@
             </div>
         </div>
 
+        <!-- ===== STAFF ATTENDANCE SECTION ===== -->
+        <div id="section-staff-attendance" class="editor-container">
+            <h2>👨‍🏫 Staff Attendance</h2>
+            <p class="desc">View and manage staff attendance records.</p>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:15px;">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-success btn-sm" onclick="loadStaffAttendance()"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-info btn-sm" onclick="exportStaffAttendance()"><i class="fas fa-download"></i> Export CSV</button>
+                </div>
+                <span style="color:#666;font-size:13px;" id="staffAttendanceDate">Loading...</span>
+            </div>
+
+            <div class="attendance-stats" id="staffAttendanceStats">
+                <div class="attendance-stat">
+                    <div class="number" id="staffTotal">0</div>
+                    <div class="label">Total Staff</div>
+                </div>
+                <div class="attendance-stat">
+                    <div class="number" id="staffPresent" style="color:#28a745;">0</div>
+                    <div class="label">Present</div>
+                </div>
+                <div class="attendance-stat">
+                    <div class="number" id="staffLate" style="color:#d4a017;">0</div>
+                    <div class="label">Late</div>
+                </div>
+                <div class="attendance-stat">
+                    <div class="number" id="staffAbsent" style="color:#dc3545;">0</div>
+                    <div class="label">Absent</div>
+                </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="attendance-table" id="staffAttendanceTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Staff Name</th>
+                            <th>Employee ID</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Hours Worked</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffAttendanceBody">
+                        <tr><td colspan="8" style="text-align:center;color:#999;">Loading attendance data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== VISITOR ATTENDANCE SECTION ===== -->
+        <div id="section-visitor-attendance" class="editor-container">
+            <h2>🚪 Visitor Management</h2>
+            <p class="desc">View and manage visitor check-in/out records.</p>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:15px;">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-success btn-sm" onclick="loadVisitorAttendance()"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-info btn-sm" onclick="exportVisitorAttendance()"><i class="fas fa-download"></i> Export CSV</button>
+                    <button class="btn btn-primary btn-sm" onclick="window.location.href='visitor-checkin.html'"><i class="fas fa-plus"></i> New Visitor</button>
+                </div>
+                <span style="color:#666;font-size:13px;" id="visitorAttendanceDate">Loading...</span>
+            </div>
+
+            <div class="attendance-stats" id="visitorAttendanceStats">
+                <div class="attendance-stat">
+                    <div class="number" id="visitorTotal">0</div>
+                    <div class="label">Total Today</div>
+                </div>
+                <div class="attendance-stat">
+                    <div class="number" id="visitorActive" style="color:#17a2b8;">0</div>
+                    <div class="label">Active (Checked In)</div>
+                </div>
+                <div class="attendance-stat">
+                    <div class="number" id="visitorCompleted" style="color:#6c757d;">0</div>
+                    <div class="label">Completed (Checked Out)</div>
+                </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="attendance-table" id="visitorAttendanceTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Visitor Name</th>
+                            <th>Badge #</th>
+                            <th>Purpose</th>
+                            <th>Person to Visit</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitorAttendanceBody">
+                        <tr><td colspan="9" style="text-align:center;color:#999;">Loading visitor data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- ===== CONTACT SECTION ===== -->
         <div id="section-contact" class="editor-container">
             <h2>📞 Contact Information</h2>
@@ -653,6 +796,8 @@
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
             initQuillEditors();
             loadContent();
+            loadStaffAttendance();
+            loadVisitorAttendance();
             
             document.addEventListener('click', function(e) {
                 if ((e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') && e.target.closest('.ql-editor')) {
@@ -728,6 +873,15 @@
             if (target) target.classList.add('active');
             
             closeMediaEditor();
+            
+            // Load attendance data when switching to attendance sections
+            if (section === 'staff-attendance') {
+                loadStaffAttendance();
+            }
+            if (section === 'visitor-attendance') {
+                loadVisitorAttendance();
+            }
+            
             setTimeout(() => {
                 document.querySelectorAll('.editor-container.active .quill-editor').forEach(editor => {
                     if (quillEditors[editor.id]) {
@@ -1536,6 +1690,180 @@
             document.getElementById('fileUpload').value = '';
             uploadedFileData = null;
             showAlert('Upload cancelled', 'success');
+        }
+
+        // ============================================
+        // STAFF ATTENDANCE
+        // ============================================
+        async function loadStaffAttendance() {
+            try {
+                const response = await fetch('/api/teacher/attendance/today');
+                const data = await response.json();
+                
+                document.getElementById('staffAttendanceDate').textContent = '📅 ' + new Date().toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                
+                if (data.success) {
+                    const attendance = data.attendance || [];
+                    const total = attendance.length;
+                    const present = attendance.filter(a => a.status === 'Checked In' || a.status === 'Checked Out').length;
+                    const late = attendance.filter(a => a.isLate === true).length;
+                    const absent = attendance.filter(a => a.status === 'Absent').length;
+                    
+                    document.getElementById('staffTotal').textContent = total;
+                    document.getElementById('staffPresent').textContent = present;
+                    document.getElementById('staffLate').textContent = late;
+                    document.getElementById('staffAbsent').textContent = absent;
+                    
+                    const tbody = document.getElementById('staffAttendanceBody');
+                    if (attendance.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#999;">No staff attendance records found for today.</td></tr>`;
+                        return;
+                    }
+                    
+                    tbody.innerHTML = '';
+                    attendance.forEach((staff, index) => {
+                        const tr = document.createElement('tr');
+                        let statusClass = 'status-absent';
+                        let statusText = 'Absent';
+                        if (staff.status === 'Checked In') {
+                            statusClass = 'status-checked-in';
+                            statusText = '✅ Checked In';
+                        } else if (staff.status === 'Checked Out') {
+                            statusClass = 'status-checked-out';
+                            statusText = '✅ Checked Out';
+                        } else if (staff.status === 'Late') {
+                            statusClass = 'status-late';
+                            statusText = '⚠️ Late';
+                        }
+                        
+                        tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td><strong>${staff.name || 'Unknown'}</strong></td>
+                            <td>${staff.employeeId || '-'}</td>
+                            <td>${staff.department || '-'}</td>
+                            <td><span class="${statusClass}">${statusText}</span></td>
+                            <td>${staff.checkIn ? new Date(staff.checkIn).toLocaleTimeString() : '-'}</td>
+                            <td>${staff.checkOut ? new Date(staff.checkOut).toLocaleTimeString() : '-'}</td>
+                            <td>${staff.hoursWorked ? staff.hoursWorked + ' hrs' : '-'}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading staff attendance:', error);
+                document.getElementById('staffAttendanceBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc3545;">Error loading attendance data</td></tr>`;
+            }
+        }
+
+        function exportStaffAttendance() {
+            const table = document.getElementById('staffAttendanceTable');
+            let csv = '\uFEFF'; // BOM for Excel
+            const rows = table.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('th, td');
+                const rowData = [];
+                cols.forEach(col => rowData.push('"' + col.textContent.trim() + '"'));
+                csv += rowData.join(',') + '\n';
+            });
+            downloadCSV(csv, 'staff_attendance_' + new Date().toISOString().split('T')[0] + '.csv');
+        }
+
+        // ============================================
+        // VISITOR ATTENDANCE
+        // ============================================
+        async function loadVisitorAttendance() {
+            try {
+                const response = await fetch('/api/visitors/today');
+                const data = await response.json();
+                
+                document.getElementById('visitorAttendanceDate').textContent = '📅 ' + new Date().toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                
+                if (data.success) {
+                    const visitors = data.visitors || [];
+                    const total = visitors.length;
+                    const active = visitors.filter(v => v.status === 'Checked In').length;
+                    const completed = visitors.filter(v => v.status === 'Checked Out').length;
+                    
+                    document.getElementById('visitorTotal').textContent = total;
+                    document.getElementById('visitorActive').textContent = active;
+                    document.getElementById('visitorCompleted').textContent = completed;
+                    
+                    const tbody = document.getElementById('visitorAttendanceBody');
+                    if (visitors.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#999;">No visitors today.</td></tr>`;
+                        return;
+                    }
+                    
+                    tbody.innerHTML = '';
+                    visitors.forEach((visitor, index) => {
+                        const tr = document.createElement('tr');
+                        const isCheckedIn = visitor.status === 'Checked In';
+                        
+                        tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td><strong>${visitor.fullName || visitor.firstName + ' ' + visitor.lastName}</strong></td>
+                            <td>${visitor.badgeNumber || '-'}</td>
+                            <td>${visitor.purpose || '-'}</td>
+                            <td>${visitor.personToVisit || '-'}</td>
+                            <td>${visitor.checkIn ? new Date(visitor.checkIn).toLocaleTimeString() : '-'}</td>
+                            <td>${visitor.checkOut ? new Date(visitor.checkOut).toLocaleTimeString() : '-'}</td>
+                            <td><span class="${isCheckedIn ? 'status-checked-in' : 'status-checked-out'}">${isCheckedIn ? '✅ Checked In' : '✅ Checked Out'}</span></td>
+                            <td>
+                                ${isCheckedIn ? `<button class="btn btn-primary btn-sm" onclick="checkoutVisitor('${visitor.badgeNumber}')"><i class="fas fa-sign-out-alt"></i> Check Out</button>` : '<span style="color:#6c757d;">Completed</span>'}
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading visitor attendance:', error);
+                document.getElementById('visitorAttendanceBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc3545;">Error loading visitor data</td></tr>`;
+            }
+        }
+
+        async function checkoutVisitor(badgeNumber) {
+            if (!confirm('Are you sure you want to check out this visitor?')) return;
+            
+            try {
+                const response = await fetch('/api/visitor/checkout/' + badgeNumber, {
+                    method: 'PUT'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showAlert('✅ Visitor checked out successfully!', 'success');
+                    loadVisitorAttendance();
+                } else {
+                    showAlert('❌ Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error checking out visitor:', error);
+                showAlert('❌ Error checking out visitor', 'error');
+            }
+        }
+
+        function exportVisitorAttendance() {
+            const table = document.getElementById('visitorAttendanceTable');
+            let csv = '\uFEFF'; // BOM for Excel
+            const rows = table.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('th, td');
+                const rowData = [];
+                cols.forEach(col => rowData.push('"' + col.textContent.trim() + '"'));
+                csv += rowData.join(',') + '\n';
+            });
+            downloadCSV(csv, 'visitor_attendance_' + new Date().toISOString().split('T')[0] + '.csv');
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // ============================================
