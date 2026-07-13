@@ -56,7 +56,7 @@
         }
 
         /* ========================================
-           KENYAN FLAG STRIP - FIXED AT VERY TOP
+           KENYAN FLAG STRIP
            ======================================== */
         .kenya-flag-strip {
             height: 5px;
@@ -204,7 +204,7 @@
         }
 
         /* ========================================
-           HEADER - FIXED AT VERY TOP
+           HEADER
            ======================================== */
         .main-header {
             background: rgba(10, 22, 40, 0.95);
@@ -492,7 +492,7 @@
         .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
         /* ========================================
-           CONTENT CARDS
+           CONTENT CARDS - ALL EYE-CATCHING
            ======================================== */
         .content-cards-section {
             padding: 50px 0;
@@ -500,55 +500,219 @@
         }
         .content-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
         }
         .content-card {
             background: white;
-            padding: 25px 18px;
-            border-radius: 16px;
+            padding: 28px 20px;
+            border-radius: 18px;
             text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid #e8ecf1;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+            transition: all 0.4s ease;
+            border: 2px solid #e8ecf1;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
             text-decoration: none;
             color: inherit;
             display: block;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .content-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--school-gold), var(--school-gold-light), var(--school-gold-dark));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .content-card:hover::before {
+            opacity: 1;
         }
         .content-card:hover {
-            transform: translateY(-6px);
+            transform: translateY(-8px);
             border-color: var(--school-gold);
-            box-shadow: 0 12px 40px rgba(212, 160, 23, 0.12);
+            box-shadow: 0 16px 50px rgba(212, 160, 23, 0.15);
         }
         .content-card .icon {
-            font-size: 36px;
+            font-size: 40px;
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            background: rgba(212, 160, 23, 0.08);
+            width: 65px;
+            height: 65px;
+            line-height: 65px;
+            border-radius: 50%;
+            margin-left: auto;
+            margin-right: auto;
+            transition: all 0.4s ease;
+        }
+        .content-card:hover .icon {
+            background: var(--school-gold);
+            transform: scale(1.1) rotate(-5deg);
         }
         .content-card h3 {
             color: var(--school-blue-dark);
-            font-size: 16px;
+            font-size: 17px;
             margin-bottom: 6px;
             font-weight: 700;
         }
         .content-card p {
             color: #666;
             font-size: 13px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         .content-card .badge {
             display: inline-block;
-            padding: 2px 12px;
+            padding: 3px 14px;
             border-radius: 50px;
             font-size: 9px;
             font-weight: 700;
-            margin-top: 8px;
+            margin-top: 10px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         .content-card .badge.live { background: var(--kenya-green); color: white; }
         .content-card .badge.new { background: var(--school-gold); color: var(--kenya-black); }
+        
+        /* Card CTA Button */
+        .card-cta {
+            margin-top: 10px;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 11px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 160, 23, 0.25);
+        }
+        .content-card:hover .card-cta {
+            transform: scale(1.05);
+        }
+
+        /* ========================================
+           INDIVIDUAL CARD STYLES
+           ======================================== */
+        /* Academics Card */
+        .card-academics {
+            border-color: var(--school-gold) !important;
+            background: linear-gradient(135deg, #ffffff, #fff8e7) !important;
+        }
+        .card-academics .badge {
+            background: var(--kenya-red);
+            color: white;
+            animation: pulseBadgeRed 1.5s infinite;
+        }
+        .card-academics .card-cta {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+        }
+
+        /* Admissions Card */
+        .card-admissions {
+            border-color: var(--kenya-green) !important;
+            background: linear-gradient(135deg, #ffffff, #f0fff4) !important;
+        }
+        .card-admissions .badge {
+            background: var(--kenya-green);
+            color: white;
+            animation: pulseBadgeGreen 1.8s infinite;
+        }
+        .card-admissions .card-cta {
+            background: linear-gradient(135deg, var(--kenya-green), #004d00);
+            color: white;
+        }
+
+        /* Facilities Card */
+        .card-facilities {
+            border-color: #17a2b8 !important;
+            background: linear-gradient(135deg, #ffffff, #f0faff) !important;
+        }
+        .card-facilities .badge {
+            background: #17a2b8;
+            color: white;
+            animation: pulseBadgeBlue 2s infinite;
+        }
+        .card-facilities .card-cta {
+            background: linear-gradient(135deg, #17a2b8, #0d6e7a);
+            color: white;
+        }
+
+        /* Performance Card */
+        .card-performance {
+            border-color: #6f42c1 !important;
+            background: linear-gradient(135deg, #ffffff, #f8f0ff) !important;
+        }
+        .card-performance .badge {
+            background: #6f42c1;
+            color: white;
+        }
+        .card-performance .card-cta {
+            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
+            color: white;
+        }
+
+        /* Parents Corner Card */
+        .card-parents {
+            border-color: #fd7e14 !important;
+            background: linear-gradient(135deg, #ffffff, #fff5eb) !important;
+        }
+        .card-parents .badge {
+            background: #fd7e14;
+            color: white;
+        }
+        .card-parents .card-cta {
+            background: linear-gradient(135deg, #fd7e14, #c96a0a);
+            color: white;
+        }
+
+        /* Downloads Card */
+        .card-downloads {
+            border-color: #20c997 !important;
+            background: linear-gradient(135deg, #ffffff, #f0fff8) !important;
+        }
+        .card-downloads .badge {
+            background: #20c997;
+            color: white;
+        }
+        .card-downloads .card-cta {
+            background: linear-gradient(135deg, #20c997, #128f6e);
+            color: white;
+        }
+
+        /* Fees Structure Card */
+        .card-fees {
+            border-color: #dc3545 !important;
+            background: linear-gradient(135deg, #ffffff, #fff0f0) !important;
+        }
+        .card-fees .badge {
+            background: #dc3545;
+            color: white;
+            animation: pulseBadgeRed 2.2s infinite;
+        }
+        .card-fees .card-cta {
+            background: linear-gradient(135deg, #dc3545, #a71d2a);
+            color: white;
+        }
+
+        /* ========================================
+           BADGE ANIMATIONS
+           ======================================== */
+        @keyframes pulseBadgeRed {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(187, 0, 0, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(187, 0, 0, 0.7); }
+        }
+        @keyframes pulseBadgeGreen {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(0, 102, 0, 0.7); }
+        }
+        @keyframes pulseBadgeBlue {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(23, 162, 184, 0.7); }
+        }
 
         /* ========================================
            FEATURES
@@ -936,10 +1100,6 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-6px); }
         }
-        @keyframes pulseBadgeRed {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); box-shadow: 0 4px 25px rgba(187, 0, 0, 0.6); }
-        }
     </style>
 </head>
 <body>
@@ -994,7 +1154,7 @@
     </div>
 
     <!-- ========================================
-    HEADER - FIXED AT TOP (TOP MARGIN FIXED)
+    HEADER
     ======================================== -->
     <header class="main-header">
         <div class="container">
@@ -1053,7 +1213,7 @@
     </section>
 
     <!-- ========================================
-    CONTENT CARDS SECTION - 7 CARDS (Gallery & Contact Removed)
+    CONTENT CARDS SECTION - ALL EYE-CATCHING
     ======================================== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
@@ -1061,8 +1221,9 @@
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
 
             <div class="content-grid">
-                <!-- Card 1: Academics - ATTENTION GRABBING -->
-                <div class="content-card" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100" style="border: 2px solid var(--school-gold); background: linear-gradient(135deg, #ffffff, #fff8e7); position: relative; overflow: visible;">
+
+                <!-- ===== CARD 1: ACADEMICS ===== -->
+                <div class="content-card card-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
                         🔥 NEW
                     </div>
@@ -1070,67 +1231,102 @@
                     <h3>Academics</h3>
                     <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📖 Playgroup to Grade 6 • CBC Curriculum</p>
                     <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Qualified Teachers</span> • 
-                        <span>✅ Modern Facilities</span> • 
-                        <span>✅ CBC Curriculum</span>
+                        <span>✅ Qualified Teachers</span> • <span>✅ Modern Facilities</span> • <span>✅ CBC</span>
                     </div>
-                    <div style="margin-top: 8px; padding: 6px 16px; background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark)); color: var(--kenya-black); border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3);">
-                        👆 Click to Explore
-                    </div>
+                    <span class="badge">📢 Explore</span>
+                    <div class="card-cta">👆 Click to Explore</div>
                 </div>
 
-                <!-- Card 2: Admissions - ATTENTION GRABBING -->
-                <div class="content-card" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130" style="border: 2px solid var(--kenya-green); background: linear-gradient(135deg, #ffffff, #f0fff4); position: relative; overflow: visible;">
-                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
+                <!-- ===== CARD 2: ADMISSIONS ===== -->
+                <div class="content-card card-admissions" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130">
+                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
                         📢 ENROLLING
                     </div>
                     <span class="icon">📝</span>
                     <h3>Admissions</h3>
-                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 Open for Registration • Playgroup to Grade 6</p>
+                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 Open • Playgroup to Grade 6</p>
                     <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Simple Process</span> • 
-                        <span>✅ Affordable Fees</span> • 
-                        <span>✅ Quality Education</span>
+                        <span>✅ Simple Process</span> • <span>✅ Affordable Fees</span> • <span>✅ Quality</span>
                     </div>
-                    <div style="margin-top: 8px; padding: 6px 16px; background: linear-gradient(135deg, var(--kenya-green), #004d00); color: white; border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 102, 0, 0.3);">
-                        👆 Apply Now
-                    </div>
+                    <span class="badge">📢 Apply Now</span>
+                    <div class="card-cta">👆 Apply Now</div>
                 </div>
 
-                <!-- Card 3: Facilities -->
-                <div class="content-card" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
+                <!-- ===== CARD 3: FACILITIES ===== -->
+                <div class="content-card card-facilities" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
+                    <div style="position: absolute; top: -8px; right: -8px; background: #17a2b8; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeBlue 2s infinite; box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4);">
+                        🏫 MODERN
+                    </div>
                     <span class="icon">🏫</span>
                     <h3>School Facilities</h3>
-                    <p id="displayFacilities">Modern classrooms, computer lab, library, playground, ECDE section, sports facilities, and more.</p>
+                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">🏗️ Modern Classrooms • Computer Lab • Library</p>
+                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                        <span>✅ Safe Environment</span> • <span>✅ Sports Facilities</span> • <span>✅ Meals</span>
+                    </div>
+                    <span class="badge">🏗️ Explore</span>
+                    <div class="card-cta">👆 View Facilities</div>
                 </div>
 
-                <!-- Card 4: Performance -->
-                <div class="content-card" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
+                <!-- ===== CARD 4: PERFORMANCE ===== -->
+                <div class="content-card card-performance" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
+                    <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);">
+                        🏆 EXCELLENCE
+                    </div>
                     <span class="icon">🏆</span>
                     <h3>Performance</h3>
-                    <p id="displayPerformance">Excellent academic performance in national examinations with a track record of producing top-performing students.</p>
+                    <p id="displayPerformance" style="font-weight: 500;">Excellent academic performance in national examinations with top-performing students.</p>
+                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                        <span>✅ Top Grades</span> • <span>✅ National Exams</span> • <span>✅ Track Record</span>
+                    </div>
+                    <span class="badge">🏆 Results</span>
+                    <div class="card-cta">👆 See Results</div>
                 </div>
 
-                <!-- Card 5: Parents Corner -->
-                <div class="content-card" onclick="window.location.href='parents.html'" data-aos="fade-up" data-aos-delay="220">
+                <!-- ===== CARD 5: PARENTS CORNER ===== -->
+                <div class="content-card card-parents" onclick="window.location.href='parents.html'" data-aos="fade-up" data-aos-delay="220">
+                    <div style="position: absolute; top: -8px; right: -8px; background: #fd7e14; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(253, 126, 20, 0.4);">
+                        👨‍👩‍👧‍👦 FAMILY
+                    </div>
                     <span class="icon">👨‍👩‍👧‍👦</span>
                     <h3>Parents Corner</h3>
-                    <p id="displayParents">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
+                    <p id="displayParents" style="font-weight: 500;">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
+                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                        <span>✅ Calendar</span> • <span>✅ Policies</span> • <span>✅ Communication</span>
+                    </div>
+                    <span class="badge">📋 Info</span>
+                    <div class="card-cta">👆 View Info</div>
                 </div>
 
-                <!-- Card 6: Downloads -->
-                <div class="content-card" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
+                <!-- ===== CARD 6: DOWNLOADS ===== -->
+                <div class="content-card card-downloads" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
+                    <div style="position: absolute; top: -8px; right: -8px; background: #20c997; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(32, 201, 151, 0.4);">
+                        📥 DOWNLOAD
+                    </div>
                     <span class="icon">📄</span>
                     <h3>Downloads</h3>
-                    <p id="displayDownloads">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
+                    <p id="displayDownloads" style="font-weight: 500;">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
+                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                        <span>✅ Forms</span> • <span>✅ Calendar</span> • <span>✅ Documents</span>
+                    </div>
+                    <span class="badge">📥 Get</span>
+                    <div class="card-cta">👆 Download</div>
                 </div>
 
-                <!-- Card 7: Fees Structure -->
-                <div class="content-card" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
+                <!-- ===== CARD 7: FEES STRUCTURE ===== -->
+                <div class="content-card card-fees" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
+                    <div style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 2.2s infinite; box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);">
+                        💰 AFFORDABLE
+                    </div>
                     <span class="icon">💰</span>
                     <h3>Fees Structure</h3>
-                    <p id="displayFees">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
+                    <p id="displayFees" style="font-weight: 500;">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
+                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                        <span>✅ Affordable</span> • <span>✅ Day Scholars</span> • <span>✅ Boarding</span>
+                    </div>
+                    <span class="badge">💰 View</span>
+                    <div class="card-cta">👆 View Fees</div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -1427,13 +1623,11 @@
                     }
 
                     const cardIds = [
-                        'displayFacilities', 'displayPerformance', 'displayParents',
-                        'displayDownloads', 'displayFees'
+                        'displayPerformance', 'displayParents', 'displayDownloads', 'displayFees'
                     ];
                     
                     const cmsData = [
-                        c.facilities, c.performanceKcpe, c.parentsCalendar,
-                        c.downloads, c.feesContent
+                        c.performanceKcpe, c.parentsCalendar, c.downloads, c.feesContent
                     ];
 
                     cardIds.forEach((id, index) => {
