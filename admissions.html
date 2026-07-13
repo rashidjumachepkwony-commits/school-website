@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admissions - Changara Star Academy</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+    <meta name="description" content="Changara Star Academy Admissions - Join us from Playgroup to Grade 6. Quality education with Competency-Based Curriculum (CBC).">
+    
+    <!-- ===== FONTS ===== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- ===== CSS LIBRARIES ===== -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        /* ========================================
+           ROOT VARIABLES
+           ======================================== */
+        :root {
+            --kenya-black: #000000;
+            --kenya-red: #BB0000;
+            --kenya-green: #006600;
+            --kenya-white: #FFFFFF;
+            --school-gold: #D4A017;
+            --school-gold-light: #F5C842;
+            --school-gold-dark: #B8890A;
+            --school-blue: #001F5C;
+            --school-blue-dark: #0A1628;
+            --font-primary: 'Playfair Display', serif;
+            --font-secondary: 'Poppins', sans-serif;
+        }
+
+        /* ========================================
+           RESET & BASE
+           ======================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: var(--font-secondary);
+            background: #f0f2f5;
+            color: #1a1a2e;
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ========================================
+           KENYAN FLAG STRIP
+           ======================================== */
+        .kenya-flag-strip {
+            height: 5px;
+            background: linear-gradient(to right, 
+                var(--kenya-black) 0%, var(--kenya-black) 25%,
+                var(--kenya-red) 25%, var(--kenya-red) 50%,
+                var(--kenya-green) 50%, var(--kenya-green) 75%,
+                var(--kenya-black) 75%, var(--kenya-black) 100%
+            );
+            position: sticky;
+            top: 0;
+            z-index: 1001;
+        }
+
+        /* ========================================
+           NOTICE ALERT BAR
+           ======================================== */
+        .notice-alert-bar {
+            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
+            color: white;
+            padding: 10px 0;
+            position: sticky;
+            top: 5px;
+            z-index: 1000;
+            border-bottom: 3px solid var(--school-gold);
+            display: none;
+            animation: slideDownNotice 0.6s ease forwards;
+        }
+        .notice-alert-bar.show { display: block; }
+        .notice-alert-bar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .notice-alert-bar .notice-icon {
+            font-size: 22px;
+            animation: pulseBell 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .notice-alert-bar .notice-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .notice-alert-bar .notice-content .badge {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            padding: 3px 14px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulseBadge 1.5s infinite;
+        }
+        .notice-alert-bar .notice-content .message {
+            font-size: 14px;
+            font-weight: 500;
+            flex: 1;
+        }
+        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
+        .notice-alert-bar .notice-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .notice-alert-bar .notice-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        /* ========================================
+           NEWS TICKER
+           ======================================== */
+        .news-ticker-section {
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            color: white;
+            padding: 6px 0;
+            border-bottom: 2px solid var(--school-gold);
+            position: sticky;
+            top: 52px;
+            z-index: 100;
+        }
+        .news-ticker-section .container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .news-ticker-section .ticker-label {
+            background: var(--kenya-red);
+            color: white;
+            padding: 3px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 1px;
+        }
+        .news-ticker-section .ticker-label .icon { font-size: 12px; }
+        .news-ticker-section .ticker-wrapper {
+            flex: 1;
+            overflow: hidden;
+            height: 24px;
+            position: relative;
+        }
+        .news-ticker-section .ticker-content {
+            position: absolute;
+            width: 100%;
+            animation: tickerScroll 16s infinite;
+        }
+        .news-ticker-section .ticker-content .ticker-item {
+            height: 24px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .news-ticker-section .ticker-content .ticker-item .tag {
+            background: rgba(255,255,255,0.12);
+            padding: 1px 10px;
+            border-radius: 20px;
+            font-size: 9px;
+            margin-right: 8px;
+            color: var(--school-gold);
+            font-weight: 600;
+        }
+
+        /* ========================================
+           HEADER
+           ======================================== */
+        .main-header {
+            background: rgba(10, 22, 40, 0.92);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 8px 0;
+            position: sticky;
+            top: 100px;
+            z-index: 90;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.15);
+        }
+        .main-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .main-header .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .main-header .school-icon {
+            font-size: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+        .main-header .logo-section h1 {
+            font-family: var(--font-primary);
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .main-header .logo-section .subtitle {
+            font-size: 9px;
+            color: rgba(255,255,255,0.5);
+            display: block;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .main-header .nav-links {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .main-header .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            position: relative;
+        }
+        .main-header .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--school-gold);
+            transition: width 0.3s ease;
+        }
+        .main-header .nav-links a:hover::after,
+        .main-header .nav-links a.active::after {
+            width: 50%;
+        }
+        .main-header .nav-links a:hover {
+            color: white;
+        }
+        .main-header .nav-links a.active {
+            background: rgba(212, 160, 23, 0.12);
+            color: var(--school-gold);
+        }
+        .main-header .nav-links a.portal-link {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            font-weight: 600;
+            padding: 6px 18px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+        .main-header .nav-links a.portal-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.3);
+        }
+        .main-header .nav-links a.portal-link::after { display: none; }
+        .main-header .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* ========================================
+           PAGE HERO
+           ======================================== */
+        .page-hero {
+            background: linear-gradient(135deg, #000000 0%, #1a0000 30%, #003300 70%, #0a1628 100%);
+            color: white;
+            padding: 50px 0 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.05) 0%, transparent 50%);
+        }
+        .page-hero .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        .page-hero .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(10px);
+            padding: 4px 16px 4px 4px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 15px;
+        }
+        .page-hero .hero-badge .flag-strip {
+            display: flex;
+            width: 32px;
+            height: 16px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .page-hero .hero-badge .flag-strip span { flex: 1; height: 100%; }
+        .page-hero .hero-badge .flag-strip .b { background: #000000; }
+        .page-hero .hero-badge .flag-strip .r { background: #BB0000; }
+        .page-hero .hero-badge .flag-strip .g { background: #006600; }
+        .page-hero .hero-badge .flag-strip .w { background: #FFFFFF; }
+        .page-hero .hero-badge .flag-text {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .page-hero h1 {
+            font-family: var(--font-primary);
+            font-size: 40px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+        .page-hero h1 .highlight {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .page-hero p {
+            font-size: 17px;
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* ========================================
+           SECTION STYLES
+           ======================================== */
+        .section {
+            padding: 40px 0;
+        }
+        .section-alt {
+            background: white;
+        }
+        .section-gray {
+            background: #f8f9fa;
+        }
+        .section-dark {
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            color: white;
+        }
+        .section-dark .section-title { color: white; }
+        .section-dark .section-subtitle { color: rgba(255,255,255,0.6); }
+
+        .section-title {
+            font-family: var(--font-primary);
+            font-size: 30px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+            color: var(--school-blue-dark);
+        }
+        .section-title .highlight { color: var(--school-gold); }
+        .section-title.light { color: white; }
+        .section-subtitle {
+            text-align: center;
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+        .section-subtitle.light { color: rgba(255,255,255,0.6); }
+
+        /* ========================================
+           CONTENT CARDS
+           ======================================== */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        .content-card {
+            background: white;
+            padding: 22px 18px;
+            border-radius: 14px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #e8ecf1;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--school-gold);
+            box-shadow: 0 10px 35px rgba(212, 160, 23, 0.12);
+        }
+        .content-card .icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .content-card h4 {
+            color: var(--school-blue-dark);
+            font-size: 15px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .content-card p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* ========================================
+           STEPS / PROCESS
+           ======================================== */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            counter-reset: step;
+        }
+        .step-item {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 14px;
+            text-align: center;
+            border: 1px solid #e8ecf1;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+            position: relative;
+            counter-increment: step;
+        }
+        .step-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--school-gold);
+            box-shadow: 0 10px 35px rgba(212, 160, 23, 0.12);
+        }
+        .step-item .step-number {
+            font-family: var(--font-primary);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--school-gold);
+            display: block;
+            margin-bottom: 5px;
+        }
+        .step-item .step-number::before {
+            content: "Step " counter(step);
+        }
+        .step-item .step-icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .step-item h4 {
+            color: var(--school-blue-dark);
+            font-size: 15px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .step-item p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* ========================================
+           CLASSES GRID
+           ======================================== */
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+        }
+        .class-item {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        .class-item:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-3px);
+            border-color: var(--school-gold);
+        }
+        .class-item .class-icon {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .class-item .class-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+        .class-item .class-desc {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* ========================================
+           REQUIREMENTS LIST
+           ======================================== */
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .requirement-item {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        .requirement-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--school-gold);
+        }
+        .requirement-item .req-icon {
+            font-size: 18px;
+            color: var(--school-gold);
+        }
+        .requirement-item .req-name {
+            font-size: 13px;
+            color: white;
+            font-weight: 500;
+        }
+
+        /* ========================================
+           WHY CHOOSE LIST
+           ======================================== */
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .why-item {
+            background: white;
+            padding: 18px 16px;
+            border-radius: 12px;
+            border-left: 4px solid var(--school-gold);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .why-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        .why-item .why-icon {
+            font-size: 24px;
+            color: var(--school-gold);
+        }
+        .why-item .why-text {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* ========================================
+           BACK TO HOME
+           ======================================== */
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 28px;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(212, 160, 23, 0.3);
+            margin-top: 10px;
+        }
+        .back-home:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(212, 160, 23, 0.4);
+        }
+
+        /* ========================================
+           FOOTER
+           ======================================== */
+        .main-footer {
+            background: var(--kenya-black);
+            color: white;
+            padding: 25px 0 12px;
+            position: relative;
+        }
+        .main-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--kenya-black), var(--kenya-red), var(--kenya-green), var(--kenya-black));
+        }
+        .main-footer .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .main-footer .footer-info h3 {
+            font-family: var(--font-primary);
+            font-size: 18px;
+            margin-bottom: 6px;
+            color: var(--school-gold);
+        }
+        .main-footer .footer-info p {
+            color: rgba(255,255,255,0.4);
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .main-footer .footer-info .ministry-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.04);
+            padding: 4px 14px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.35);
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .main-footer .footer-info .ministry-badge i {
+            color: var(--school-gold);
+            margin-right: 6px;
+        }
+        .main-footer .footer-links h4 {
+            color: white;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .main-footer .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .main-footer .footer-links a {
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        .main-footer .footer-links a:hover {
+            color: var(--school-gold);
+            padding-left: 4px;
+        }
+        .main-footer .footer-bottom {
+            text-align: center;
+            padding-top: 12px;
+            color: rgba(255,255,255,0.2);
+            font-size: 11px;
+        }
+        .main-footer .footer-social {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .main-footer .footer-social a {
+            color: rgba(255,255,255,0.25);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        .main-footer .footer-social a:hover {
+            color: var(--school-gold);
+            border-color: var(--school-gold);
+            transform: translateY(-2px);
+        }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 768px) {
+            .main-header .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                padding: 15px 0;
+                gap: 5px;
+            }
+            .main-header .nav-links.show { display: flex; }
+            .main-header .mobile-menu-btn { display: block; }
+            
+            .page-hero h1 { font-size: 30px; }
+            .page-hero p { font-size: 15px; }
+            .section-title { font-size: 24px; }
+            
+            .content-grid { grid-template-columns: 1fr 1fr; }
+            .steps-grid { grid-template-columns: 1fr 1fr; }
+            .classes-grid { grid-template-columns: 1fr 1fr 1fr; }
+            .requirements-grid { grid-template-columns: 1fr 1fr; }
+            .why-grid { grid-template-columns: 1fr; }
+            
+            .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
+            
+            .notice-alert-bar .container { flex-direction: column; text-align: center; }
+            .news-ticker-section .container { flex-direction: column; gap: 4px; }
+        }
+
+        @media (max-width: 480px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .classes-grid { grid-template-columns: 1fr 1fr; }
+            .requirements-grid { grid-template-columns: 1fr; }
+            .page-hero h1 { font-size: 24px; }
+            .section-title { font-size: 20px; }
+        }
+
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
+        @keyframes slideDownNotice {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulseBell {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes tickerScroll {
+            0%, 20% { transform: translateY(0); }
+            25%, 45% { transform: translateY(-24px); }
+            50%, 70% { transform: translateY(-48px); }
+            75%, 95% { transform: translateY(-72px); }
+            100% { transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== KENYA FLAG STRIP ===== -->
+    <div class="kenya-flag-strip"></div>
+
+    <!-- ===== NOTICE ALERT BAR ===== -->
+    <div class="notice-alert-bar" id="noticeAlertBar">
+        <div class="container">
+            <div class="notice-icon">
+                <span class="bell">🔔</span>
+                <span style="font-weight:700;font-size:12px;">ALERT</span>
+            </div>
+            <div class="notice-content">
+                <span class="badge">⚠️ STAFF NOTICE</span>
+                <span class="message" id="noticeMessage">
+                    <strong>📢 Important:</strong> Staff meeting on Friday at 4:00 PM in the staff room.
+                </span>
+            </div>
+            <button class="notice-close" onclick="closeNotice()">✕</button>
+        </div>
+    </div>
+
+    <!-- ===== NEWS TICKER ===== -->
+    <div class="news-ticker-section">
+        <div class="container">
+            <div class="ticker-label">
+                <span class="icon">📰</span> News
+            </div>
+            <div class="ticker-wrapper">
+                <div class="ticker-content" id="tickerContent">
+                    <div class="ticker-item">
+                        <span class="tag">🎉 NEW</span>
+                        School opens Term 3 on 1st September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">🏆 EVENT</span>
+                        Sports Day on 15th September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">📚 MEETING</span>
+                        Parents' Meeting on 20th September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">📢 ANNOUNCEMENT</span>
+                        New computer lab now open!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo-section">
+                <span class="school-icon">🏫</span>
+                <div>
+                    <h1>Changara Star Academy</h1>
+                    <span class="subtitle">Assurance to Excellence</span>
+                </div>
+            </div>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="academics.html">Academics</a>
+                <a href="admissions.html" class="active">Admissions</a>
+                <a href="portal.html">🔐 Portal</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </header>
+
+    <!-- ========================================
+    PAGE HERO
+    ======================================== -->
+    <section class="page-hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <div class="flag-strip">
+                        <span class="b"></span><span class="r"></span>
+                        <span class="g"></span><span class="w"></span>
+                    </div>
+                    <span class="flag-text">🇰🇪 Proudly Kenyan</span>
+                </div>
+                <h1>📝 Admission <span class="highlight">Guide</span></h1>
+                <p>
+                    Thank you for considering <strong>Changara Star Academy</strong> for your child's education. 
+                    We are committed to providing a safe, caring, and academically enriching environment where 
+                    every learner is encouraged to reach their full potential.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    ADMISSION OVERVIEW
+    ======================================== -->
+    <section class="section section-alt" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title">🎯 Join <span class="highlight">Changara Star Academy</span></h2>
+            <p class="section-subtitle">
+                Admissions are open to learners from <strong>Playgroup to Grade 6</strong>. We welcome applications 
+                from families who value quality education, good discipline, and holistic child development.
+            </p>
+            <div class="content-grid">
+                <div class="content-card" data-aos="fade-up" data-aos-delay="100">
+                    <span class="icon">👨‍👩‍👧‍👦</span>
+                    <h4>Open to All</h4>
+                    <p>We welcome learners from all backgrounds who are ready to learn and grow.</p>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="150">
+                    <span class="icon">📚</span>
+                    <h4>Playgroup to Grade 6</h4>
+                    <p>Quality education from early years through upper primary levels.</p>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="200">
+                    <span class="icon">💎</span>
+                    <h4>Holistic Development</h4>
+                    <p>We nurture academic excellence, discipline, and character development.</p>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="250">
+                    <span class="icon">🏫</span>
+                    <h4>Safe Environment</h4>
+                    <p>A caring and supportive learning environment for every child.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    ADMISSION PROCESS
+    ======================================== -->
+    <section class="section section-gray" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title">📋 Admission <span class="highlight">Process</span></h2>
+            <p class="section-subtitle">
+                Our admission process is simple and straightforward. Follow these steps to enroll your child.
+            </p>
+            <div class="steps-grid">
+                <div class="step-item" data-aos="fade-up" data-aos-delay="100">
+                    <span class="step-number"></span>
+                    <span class="step-icon">🏫</span>
+                    <h4>Visit the School</h4>
+                    <p>Parents or guardians are encouraged to visit the school to learn more about our academic programmes, facilities, and learning environment.</p>
+                </div>
+                <div class="step-item" data-aos="fade-up" data-aos-delay="150">
+                    <span class="step-number"></span>
+                    <span class="step-icon">📝</span>
+                    <h4>Complete the Admission Form</h4>
+                    <p>Collect an admission form from the school office or complete the online application form available on our website.</p>
+                </div>
+                <div class="step-item" data-aos="fade-up" data-aos-delay="200">
+                    <span class="step-number"></span>
+                    <span class="step-icon">📄</span>
+                    <h4>Submit Required Documents</h4>
+                    <p>Submit all required documents including birth certificate, photos, and previous school reports.</p>
+                </div>
+                <div class="step-item" data-aos="fade-up" data-aos-delay="250">
+                    <span class="step-number"></span>
+                    <span class="step-icon">📊</span>
+                    <h4>Assessment (Where Applicable)</h4>
+                    <p>Learners joining from another school may be given a simple assessment for appropriate class placement.</p>
+                </div>
+                <div class="step-item" data-aos="fade-up" data-aos-delay="300">
+                    <span class="step-number"></span>
+                    <span class="step-icon">✅</span>
+                    <h4>Admission Confirmation</h4>
+                    <p>Successful applicants will receive an admission letter with information on reporting dates, uniforms, and fees.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    WHO CAN APPLY
+    ======================================== -->
+    <section class="section section-dark" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title light">👨‍🎓 Who <span style="color:var(--school-gold);">Can Apply?</span></h2>
+            <p class="section-subtitle light">
+                Admissions are available for the following levels:
+            </p>
+            <div class="classes-grid">
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="100">
+                    <span class="class-icon">🧸</span>
+                    <div class="class-name">Playgroup</div>
+                    <div class="class-desc">Early Years</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="130">
+                    <span class="class-icon">🎨</span>
+                    <div class="class-name">PP1</div>
+                    <div class="class-desc">Pre-Primary 1</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="160">
+                    <span class="class-icon">📚</span>
+                    <div class="class-name">PP2</div>
+                    <div class="class-desc">Pre-Primary 2</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="190">
+                    <span class="class-icon">📖</span>
+                    <div class="class-name">Grade 1</div>
+                    <div class="class-desc">Lower Primary</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="220">
+                    <span class="class-icon">✏️</span>
+                    <div class="class-name">Grade 2</div>
+                    <div class="class-desc">Lower Primary</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="250">
+                    <span class="class-icon">📝</span>
+                    <div class="class-name">Grade 3</div>
+                    <div class="class-desc">Lower Primary</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="280">
+                    <span class="class-icon">📐</span>
+                    <div class="class-name">Grade 4</div>
+                    <div class="class-desc">Upper Primary</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="310">
+                    <span class="class-icon">🔬</span>
+                    <div class="class-name">Grade 5</div>
+                    <div class="class-desc">Upper Primary</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="340">
+                    <span class="class-icon">💻</span>
+                    <div class="class-name">Grade 6</div>
+                    <div class="class-desc">Upper Primary</div>
+                </div>
+            </div>
+            <p style="text-align:center;color:rgba(255,255,255,0.5);font-size:13px;margin-top:15px;">
+                * Grade 6 admission is subject to available vacancies.
+            </p>
+        </div>
+    </section>
+
+    <!-- ========================================
+    REQUIRED DOCUMENTS
+    ======================================== -->
+    <section class="section" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title">📄 Required <span class="highlight">Documents</span></h2>
+            <p class="section-subtitle">
+                Please submit the following documents when applying for admission.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;">
+                <div class="content-card" data-aos="fade-up" data-aos-delay="100" style="text-align:left;display:flex;align-items:center;gap:12px;padding:15px 18px;">
+                    <span style="font-size:24px;">📄</span>
+                    <div>
+                        <h4 style="font-size:14px;">Birth Certificate</h4>
+                        <p style="font-size:12px;">Copy of the learner's birth certificate</p>
+                    </div>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="130" style="text-align:left;display:flex;align-items:center;gap:12px;padding:15px 18px;">
+                    <span style="font-size:24px;">📸</span>
+                    <div>
+                        <h4 style="font-size:14px;">Passport Photos</h4>
+                        <p style="font-size:12px;">Two recent passport-size photographs</p>
+                    </div>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="160" style="text-align:left;display:flex;align-items:center;gap:12px;padding:15px 18px;">
+                    <span style="font-size:24px;">📊</span>
+                    <div>
+                        <h4 style="font-size:14px;">Previous School Report</h4>
+                        <p style="font-size:12px;">Previous school report (where applicable)</p>
+                    </div>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="190" style="text-align:left;display:flex;align-items:center;gap:12px;padding:15px 18px;">
+                    <span style="font-size:24px;">📩</span>
+                    <div>
+                        <h4 style="font-size:14px;">Transfer Letter</h4>
+                        <p style="font-size:12px;">Transfer letter from previous school (for transferring learners)</p>
+                    </div>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="220" style="text-align:left;display:flex;align-items:center;gap:12px;padding:15px 18px;">
+                    <span style="font-size:24px;">🪪</span>
+                    <div>
+                        <h4 style="font-size:14px;">Parent/Guardian ID</h4>
+                        <p style="font-size:12px;">Parent or guardian identification details</p>
+                    </div>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="250" style="text-align:left;display:flex;align-items:center;gap:12px;padding:15px 18px;">
+                    <span style="font-size:24px;">🏥</span>
+                    <div>
+                        <h4 style="font-size:14px;">Medical Information</h4>
+                        <p style="font-size:12px;">Any relevant medical information about the learner</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    SCHOOL REQUIREMENTS
+    ======================================== -->
+    <section class="section section-gray" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title">🎒 School <span class="highlight">Requirements</span></h2>
+            <p class="section-subtitle">
+                Before reporting, parents should ensure that learners have the following items.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;">
+                <div class="content-card" data-aos="fade-up" data-aos-delay="100" style="text-align:left;display:flex;align-items:center;gap:12px;padding:15px 18px;">
+                    <span style="font-size:24px;">👕</span>
+                    <div>
+                        <h4 style="font-size:14px;">Full School Uniform</h4>
+                        <p style="font-size:12px;">Complete school uniform as per school requirements</p>
+                    </div>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="130" style="text-align:left;display:flex;align-items:center;gap:12px;padding:15px 18px;">
+                    <span style="font-size:24px;">📚</span>
+                    <div>
+                        <h4 style="font-size:14px;">Textbooks & Exercise Books</h4>
+                        <p style="font-size:12px;">Required textbooks and exercise books as advised by the school</p>
+                    </div>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="160" style="text-align:left;display:flex;align-items:center;gap:12px;padding:15px 18px;">
+                    <span style="font-size:24px;">✏️</span>
+                    <div>
+                        <h4 style="font-size:14px;">Writing Materials</h4>
+                        <p style="font-size:12px;">Pens, pencils, rulers, erasers, and other writing materials</p>
+                    </div>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="190" style="text-align:left;display:flex;align-items:center;gap:12px;padding:15px 18px;">
+                    <span style="font-size:24px;">🎒</span>
+                    <div>
+                        <h4 style="font-size:14px;">Personal Items</h4>
+                        <p style="font-size:12px;">Personal items as listed in the admission package</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    SCHOOL FEES
+    ======================================== -->
+    <section class="section section-dark" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title light">💰 School <span style="color:var(--school-gold);">Fees</span></h2>
+            <p class="section-subtitle light">
+                Our school offers quality education at an affordable fee structure.
+            </p>
+            <div style="text-align:center;padding:20px;background:rgba(255,255,255,0.05);border-radius:16px;border:1px solid rgba(255,255,255,0.08);">
+                <p style="color:rgba(255,255,255,0.7);font-size:15px;max-width:700px;margin:0 auto;">
+                    Fee details are available from the school office. Parents are encouraged to pay fees on time 
+                    to support uninterrupted learning.
+                </p>
+                <div style="margin-top:15px;display:flex;gap:15px;justify-content:center;flex-wrap:wrap;">
+                    <span style="background:rgba(255,255,255,0.06);padding:6px 18px;border-radius:50px;font-size:12px;color:rgba(255,255,255,0.6);">
+                        <i class="fas fa-wallet" style="color:var(--school-gold);"></i> Affordable Fees
+                    </span>
+                    <span style="background:rgba(255,255,255,0.06);padding:6px 18px;border-radius:50px;font-size:12px;color:rgba(255,255,255,0.6);">
+                        <i class="fas fa-credit-card" style="color:var(--school-gold);"></i> Flexible Payment Plans
+                    </span>
+                    <span style="background:rgba(255,255,255,0.06);padding:6px 18px;border-radius:50px;font-size:12px;color:rgba(255,255,255,0.6);">
+                        <i class="fas fa-graduation-cap" style="color:var(--school-gold);"></i> Quality Education
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    WHY CHOOSE US
+    ======================================== -->
+    <section class="section section-gray" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title">⭐ Why Choose <span class="highlight">Changara Star Academy</span></h2>
+            <p class="section-subtitle">
+                At Changara Star Academy, learners benefit from a quality education and holistic development.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+                <div class="why-item" data-aos="fade-up" data-aos-delay="100">
+                    <span class="why-icon">👨‍🏫</span>
+                    <span class="why-text">Qualified and dedicated teachers</span>
+                </div>
+                <div class="why-item" data-aos="fade-up" data-aos-delay="130">
+                    <span class="why-icon">📚</span>
+                    <span class="why-text">Competency-Based Curriculum (CBC)</span>
+                </div>
+                <div class="why-item" data-aos="fade-up" data-aos-delay="160">
+                    <span class="why-icon">📊</span>
+                    <span class="why-text">Strong academic support</span>
+                </div>
+                <div class="why-item" data-aos="fade-up" data-aos-delay="190">
+                    <span class="why-icon">💎</span>
+                    <span class="why-text">Good discipline and moral values</span>
+                </div>
+                <div class="why-item" data-aos="fade-up" data-aos-delay="220">
+                    <span class="why-icon">🏫</span>
+                    <span class="why-text">Safe and friendly learning environment</span>
+                </div>
+                <div class="why-item" data-aos="fade-up" data-aos-delay="250">
+                    <span class="why-icon">⚽</span>
+                    <span class="why-text">Co-curricular activities that nurture talents</span>
+                </div>
+                <div class="why-item" data-aos="fade-up" data-aos-delay="280">
+                    <span class="why-icon">👩‍🎓</span>
+                    <span class="why-text">Individual attention to every learner</span>
+                </div>
+                <div class="why-item" data-aos="fade-up" data-aos-delay="310">
+                    <span class="why-icon">💰</span>
+                    <span class="why-text">Affordable quality education</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    CONTACT ADMISSIONS OFFICE
+    ======================================== -->
+    <section class="section section-dark" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title light">📞 Contact <span style="color:var(--school-gold);">Admissions Office</span></h2>
+            <p class="section-subtitle light">
+                If you would like more information or assistance with the admission process, please reach out to us.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;text-align:center;max-width:800px;margin:0 auto;">
+                <div style="background:rgba(255,255,255,0.05);padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);">
+                    <span style="font-size:32px;display:block;">🏫</span>
+                    <h4 style="color:white;font-size:14px;margin-top:5px;">Visit Us</h4>
+                    <p style="color:rgba(255,255,255,0.5);font-size:12px;">Changara Market, Teso North Sub-County, Busia County, Kenya</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.05);padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);">
+                    <span style="font-size:32px;display:block;">📞</span>
+                    <h4 style="color:white;font-size:14px;margin-top:5px;">Call Us</h4>
+                    <p style="color:rgba(255,255,255,0.5);font-size:12px;">+254 721 556 252</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.05);padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);">
+                    <span style="font-size:32px;display:block;">📧</span>
+                    <h4 style="color:white;font-size:14px;margin-top:5px;">Email Us</h4>
+                    <p style="color:rgba(255,255,255,0.5);font-size:12px;">starchangara@gmail.com</p>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:20px;">
+                <p style="color:rgba(255,255,255,0.5);font-size:13px;">
+                    <i class="fas fa-clock" style="color:var(--school-gold);"></i> 
+                    Visit our school office during working hours: Monday - Friday, 7:00 AM - 6:00 PM
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    BACK TO HOME
+    ======================================== -->
+    <section class="section section-gray" style="text-align:center;padding:30px 0;">
+        <div class="container">
+            <a href="index.html" class="back-home">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </section>
+
+    <!-- ========================================
+    FOOTER
+    ======================================== -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>🏫 Changara Star Academy</h3>
+                    <p>Changara Market, Teso North Sub-County, Busia County, Kenya</p>
+                    <p>📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                    <div class="footer-social">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="ministry-badge">
+                        <i class="fas fa-certificate"></i> Registered under Ministry of Education, Kenya
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">🏠 Home</a>
+                    <a href="about.html">📖 About Us</a>
+                    <a href="academics.html">📚 Academics</a>
+                    <a href="admissions.html">📝 Admissions</a>
+                    <a href="portal.html">🔐 Portal</a>
+                    <a href="contact.html">📞 Contact</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <a href="gallery.html">🖼️ Gallery</a>
+                    <a href="events.html">📰 Events</a>
+                    <a href="downloads.html">📄 Downloads</a>
+                    <a href="fees.html">💰 Fees</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Changara Star Academy. All rights reserved. | <span style="color:var(--school-gold);">🇰🇪 Proudly Kenyan</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================
+    SCRIPTS
+    ======================================== -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        // ============================================
+        // INITIALIZE AOS
+        // ============================================
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 60,
+            easing: 'ease-in-out'
+        });
+
+        // ============================================
+        // MOBILE MENU
+        // ============================================
+        function toggleMobileMenu() {
+            const nav = document.getElementById('navLinks');
+            if (nav) nav.classList.toggle('show');
+        }
+
+        // ============================================
+        // NOTICE ALERT
+        // ============================================
+        function closeNotice() {
+            const bar = document.getElementById('noticeAlertBar');
+            bar.classList.remove('show');
+            localStorage.setItem('noticeClosed', 'true');
+        }
+
+        function showNotice(message) {
+            const bar = document.getElementById('noticeAlertBar');
+            const msgEl = document.getElementById('noticeMessage');
+            if (message) {
+                msgEl.innerHTML = message;
+            }
+            bar.classList.add('show');
+            localStorage.removeItem('noticeClosed');
+        }
+
+        function checkNoticeStatus() {
+            const closed = localStorage.getItem('noticeClosed');
+            const bar = document.getElementById('noticeAlertBar');
+            if (!closed) {
+                bar.classList.add('show');
+            }
+        }
+        checkNoticeStatus();
+
+        // ============================================
+        // LOAD NEWS TICKER
+        // ============================================
+        async function loadNewsTicker() {
+            try {
+                const response = await fetch('/api/content');
+                const data = await response.json();
+                if (data.success && data.content.homeNews) {
+                    const tickerContent = document.getElementById('tickerContent');
+                    let tickerHtml = '';
+                    const tags = ['🎉 NEW', '🏆 EVENT', '📚 MEETING', '📢 ANNOUNCEMENT'];
+                    data.content.homeNews.forEach((news, index) => {
+                        const tag = tags[index % tags.length];
+                        tickerHtml += `
+                            <div class="ticker-item">
+                                <span class="tag">${tag}</span>
+                                ${news.title || 'News'} - ${news.content || ''}
+                            </div>
+                        `;
+                    });
+                    if (tickerHtml) {
+                        tickerContent.innerHTML = tickerHtml;
+                    }
+                }
+            } catch (error) {
+                console.log('News ticker not available');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNewsTicker();
+        });
+    </script>
+
+</body>
+</html>
