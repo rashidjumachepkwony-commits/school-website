@@ -36,7 +36,7 @@
         }
 
         /* ========================================
-           RESET & BASE - UNIFIED BACKGROUND
+           RESET & BASE
            ======================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -204,7 +204,7 @@
         }
 
         /* ========================================
-           HEADER - COMPACT
+           HEADER
            ======================================== */
         .main-header {
             background: rgba(10, 22, 40, 0.92);
@@ -308,7 +308,7 @@
         }
 
         /* ========================================
-           HERO SECTION - COMPACT
+           HERO SECTION
            ======================================== */
         .hero-section {
             min-height: 85vh;
@@ -470,7 +470,7 @@
         }
 
         /* ========================================
-           SECTION TITLES - COMPACT
+           SECTION TITLES
            ======================================== */
         .section-title {
             font-family: var(--font-primary);
@@ -492,7 +492,7 @@
         .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
         /* ========================================
-           CONTENT CARDS - FULLY VISIBLE
+           CONTENT CARDS
            ======================================== */
         .content-cards-section {
             padding: 50px 0;
@@ -551,7 +551,7 @@
         .content-card .badge.new { background: var(--school-gold); color: var(--kenya-black); }
 
         /* ========================================
-           FEATURES - COMPACT
+           FEATURES
            ======================================== */
         .features-section {
             padding: 50px 0;
@@ -594,7 +594,7 @@
         }
 
         /* ========================================
-           STATS - COMPACT
+           STATS
            ======================================== */
         .stats-section {
             padding: 50px 0;
@@ -637,7 +637,7 @@
         }
 
         /* ========================================
-           GALLERY - COMPACT
+           GALLERY
            ======================================== */
         .gallery-section {
             padding: 50px 0;
@@ -724,7 +724,7 @@
         }
 
         /* ========================================
-           NEWS - COMPACT
+           NEWS
            ======================================== */
         .news-section {
             padding: 50px 0;
@@ -766,7 +766,7 @@
         }
 
         /* ========================================
-           FOOTER - MINIMUM SPACE
+           FOOTER
            ======================================== */
         .main-footer {
             background: var(--kenya-black);
@@ -1050,7 +1050,7 @@
     </section>
 
     <!-- ========================================
-    CONTENT CARDS SECTION - ALL VISIBLE
+    CONTENT CARDS SECTION
     ======================================== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
@@ -1058,75 +1058,76 @@
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
 
             <div class="content-grid">
-                <div class="content-card" onclick="window.location.href='about.html'" data-aos="fade-up" data-aos-delay="100">
-                    <span class="icon">📖</span>
-                    <h3>About Us</h3>
-                    <p id="displayAbout">Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.</p>
-                    <span class="badge live">Live</span>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="150">
+                <!-- Card 1: Academics - UPGRADED WITH CTA -->
+                <div class="content-card" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100" style="border: 2px solid var(--school-gold); background: linear-gradient(135deg, #ffffff, #fff8e7); position: relative; overflow: visible;">
+                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadge 1.5s infinite; box-shadow: 0 4px 15px rgba(187, 0, 0, 0.4);">
+                        🔥 NEW
+                    </div>
                     <span class="icon">📚</span>
                     <h3>Academics</h3>
-                    <p id="displayAcademics">Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches and modern teaching methods.</p>
+                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📖 Playgroup to Grade 6 • CBC Curriculum</p>
+                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                        <span>✅ Qualified Teachers</span> • 
+                        <span>✅ Modern Facilities</span> • 
+                        <span>✅ CBC Curriculum</span>
+                    </div>
+                    <div style="margin-top: 8px; padding: 6px 16px; background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark)); color: var(--kenya-black); border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3);">
+                        👆 Click to Explore
+                    </div>
                 </div>
 
-                <div class="content-card" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="200">
+                <!-- Card 2: Admissions -->
+                <div class="content-card" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="150">
                     <span class="icon">📝</span>
                     <h3>Admissions</h3>
                     <p id="displayAdmissions">Open for registration. Contact us for details on admission requirements, process, and fee structure.</p>
                 </div>
 
-                <div class="content-card" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="250">
+                <!-- Card 3: Facilities -->
+                <div class="content-card" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="200">
                     <span class="icon">🏫</span>
                     <h3>School Facilities</h3>
                     <p id="displayFacilities">Modern classrooms, computer lab, library, playground, ECDE section, sports facilities, and more.</p>
                 </div>
 
-                <div class="content-card" onclick="window.location.href='gallery.html'" data-aos="fade-up" data-aos-delay="300">
+                <!-- Card 4: Gallery -->
+                <div class="content-card" onclick="window.location.href='gallery.html'" data-aos="fade-up" data-aos-delay="250">
                     <span class="icon">🖼️</span>
                     <h3>Gallery</h3>
                     <p id="displayGallery">Check out our school gallery showcasing various activities, events, facilities, and memorable moments.</p>
                     <span class="badge new">New</span>
                 </div>
 
-                <div class="content-card" onclick="window.location.href='events.html'" data-aos="fade-up" data-aos-delay="350">
-                    <span class="icon">📰</span>
-                    <h3>News & Events</h3>
-                    <p id="displayNews">Stay tuned for upcoming events, announcements, sports days, parents' meetings, and other school activities.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='cocurricular.html'" data-aos="fade-up" data-aos-delay="400">
-                    <span class="icon">⚽</span>
-                    <h3>Co-curricular</h3>
-                    <p id="displayCoCurricular">Football, athletics, music, drama, debate, and various clubs that develop talents and build character.</p>
-                </div>
-
-                <div class="content-card" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="450">
+                <!-- Card 5: Performance -->
+                <div class="content-card" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="300">
                     <span class="icon">🏆</span>
                     <h3>Performance</h3>
                     <p id="displayPerformance">Excellent academic performance in national examinations with a track record of producing top-performing students.</p>
                 </div>
 
-                <div class="content-card" onclick="window.location.href='parents.html'" data-aos="fade-up" data-aos-delay="500">
+                <!-- Card 6: Parents Corner -->
+                <div class="content-card" onclick="window.location.href='parents.html'" data-aos="fade-up" data-aos-delay="350">
                     <span class="icon">👨‍👩‍👧‍👦</span>
                     <h3>Parents Corner</h3>
                     <p id="displayParents">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
                 </div>
 
-                <div class="content-card" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="550">
+                <!-- Card 7: Downloads -->
+                <div class="content-card" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="400">
                     <span class="icon">📄</span>
                     <h3>Downloads</h3>
                     <p id="displayDownloads">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
                 </div>
 
-                <div class="content-card" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="600">
+                <!-- Card 8: Fees Structure -->
+                <div class="content-card" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="450">
                     <span class="icon">💰</span>
                     <h3>Fees Structure</h3>
                     <p id="displayFees">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
                 </div>
 
-                <div class="content-card" onclick="window.location.href='contact.html'" data-aos="fade-up" data-aos-delay="650">
+                <!-- Card 9: Contact Us -->
+                <div class="content-card" onclick="window.location.href='contact.html'" data-aos="fade-up" data-aos-delay="500">
                     <span class="icon">📞</span>
                     <h3>Contact Us</h3>
                     <p id="displayContact">Get in touch with us for any inquiries, visit our school, or reach out to our administrative team.</p>
@@ -1282,7 +1283,7 @@
     </section>
 
     <!-- ========================================
-    FOOTER - MINIMUM SPACE
+    FOOTER
     ======================================== -->
     <footer class="main-footer">
         <div class="container">
@@ -1428,17 +1429,15 @@
                     }
 
                     const cardIds = [
-                        'displayAbout', 'displayAcademics', 'displayAdmissions', 
-                        'displayFacilities', 'displayGallery', 'displayNews',
-                        'displayCoCurricular', 'displayPerformance', 'displayParents',
-                        'displayDownloads', 'displayFees', 'displayContact'
+                        'displayAdmissions', 'displayFacilities', 'displayGallery',
+                        'displayPerformance', 'displayParents', 'displayDownloads',
+                        'displayFees', 'displayContact'
                     ];
                     
                     const cmsData = [
-                        c.aboutMission, c.academics, c.admissionsRequirements,
-                        c.facilities, c.gallery, c.events,
-                        c.coCurricular, c.performanceKcpe, c.parentsCalendar,
-                        c.downloads, c.feesContent, 'Get in touch with us for any inquiries or visit our school.'
+                        c.admissionsRequirements, c.facilities, c.gallery,
+                        c.performanceKcpe, c.parentsCalendar, c.downloads,
+                        c.feesContent, 'Get in touch with us for any inquiries or visit our school.'
                     ];
 
                     cardIds.forEach((id, index) => {
@@ -1504,13 +1503,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadWebsiteContent();
             
-            // Fix hero button text
             const heroBtn = document.getElementById('heroButton');
             if (heroBtn) {
                 heroBtn.innerHTML = '<span>Explore More</span> <i class="fas fa-arrow-right"></i>';
             }
         });
     </script>
-
 </body>
 </html>
