@@ -661,7 +661,9 @@ app.post('/api/teacher/checkin', async (req, res) => {
   }
 });
 
-// TEACHER CHECK-OUT
+// ============================================
+// TEACHER CHECK-OUT - FIXED WITH KENYA TIME
+// ============================================
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
     const { employeeId, pin } = req.body;
@@ -705,7 +707,18 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    const currentHour = new Date().getHours();
+    // ============================================
+    // FIX: Get Kenya time (UTC+3)
+    // ============================================
+    const kenyaTime = new Date();
+    const kenyaTimeString = kenyaTime.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
+    const kenyaDate = new Date(kenyaTimeString);
+    const currentHour = kenyaDate.getHours();
+    
+    console.log('📍 Check-out attempt at:', kenyaDate.toLocaleString());
+    console.log('🕐 Current hour (Kenya time):', currentHour);
+    
+    // Allow check-out after 3:00 PM (15:00) Kenya time
     if (currentHour < 15) {
       return res.status(400).json({
         success: false,
@@ -713,9 +726,10 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    const checkOutTime = new Date();
+    const checkOutTime = kenyaDate;
     todayAttendance.checkOut = checkOutTime;
-    todayAttendance.notes = notes || todayAttendance.notes || '';
+    todayAttendance.status = 'Checked Out';
+    todayAttendance.notes = req.body.notes || todayAttendance.notes || '';
     
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((checkOutTime - checkInTime) / (1000 * 60 * 60)).toFixed(2);
