@@ -1350,64 +1350,64 @@
                     <div class="content-card" onclick="window.location.href='about.html'" data-aos="fade-up" data-aos-delay="100">
                         <span class="icon">📖</span>
                         <h3>About Us</h3>
-                        <p id="displayAbout">Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.</p>
+                        <p>Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya. We provide quality education from Playgroup to Grade 6.</p>
                         <span class="badge live">Live</span>
                     </div>
                     <div class="content-card" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="150">
                         <span class="icon">📚</span>
                         <h3>Academics</h3>
-                        <p id="displayAcademics">Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches.</p>
+                        <p>Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches, dedicated teachers, and modern teaching methods.</p>
                     </div>
                     <div class="content-card" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="200">
                         <span class="icon">📝</span>
                         <h3>Admissions</h3>
-                        <p id="displayAdmissions">Open for registration. Contact us for details on admission requirements and process.</p>
+                        <p>Open for registration. Contact us for details on admission requirements, process, and fee structure for all grades.</p>
                     </div>
                     <div class="content-card" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="250">
                         <span class="icon">🏫</span>
                         <h3>School Facilities</h3>
-                        <p id="displayFacilities">Modern classrooms, computer lab, library, playground, ECDE section, and more.</p>
+                        <p>Modern classrooms, computer lab, library, playground, ECDE section, sports facilities, and more for holistic development.</p>
                     </div>
                     <div class="content-card" onclick="window.location.href='gallery.html'" data-aos="fade-up" data-aos-delay="300">
                         <span class="icon">🖼️</span>
                         <h3>Gallery</h3>
-                        <p id="displayGallery">Check out our school gallery showcasing various activities and facilities.</p>
+                        <p>Check out our school gallery showcasing various activities, events, facilities, and memorable moments at Changara Star Academy.</p>
                         <span class="badge new">New</span>
                     </div>
                     <div class="content-card" onclick="window.location.href='events.html'" data-aos="fade-up" data-aos-delay="350">
                         <span class="icon">📰</span>
                         <h3>News & Events</h3>
-                        <p id="displayNews">Stay tuned for upcoming events and announcements from the school.</p>
+                        <p>Stay tuned for upcoming events, announcements, sports days, parents' meetings, and other school activities.</p>
                     </div>
                     <div class="content-card" onclick="window.location.href='cocurricular.html'" data-aos="fade-up" data-aos-delay="400">
                         <span class="icon">⚽</span>
                         <h3>Co-curricular</h3>
-                        <p id="displayCoCurricular">Football, athletics, music, drama, debate, and various clubs.</p>
+                        <p>Football, athletics, music, drama, debate, and various clubs that develop talents and build character beyond the classroom.</p>
                     </div>
                     <div class="content-card" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="450">
                         <span class="icon">🏆</span>
                         <h3>Performance</h3>
-                        <p id="displayPerformance">Excellent academic performance in national examinations.</p>
+                        <p>Excellent academic performance in national examinations with a track record of producing top-performing students.</p>
                     </div>
                     <div class="content-card" onclick="window.location.href='parents.html'" data-aos="fade-up" data-aos-delay="500">
                         <span class="icon">👨‍👩‍👧‍👦</span>
                         <h3>Parents Corner</h3>
-                        <p id="displayParents">Important information for parents including school calendar and policies.</p>
+                        <p>Important information for parents including school calendar, policies, homework guidelines, and parent-teacher communication.</p>
                     </div>
                     <div class="content-card" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="550">
                         <span class="icon">📄</span>
                         <h3>Downloads</h3>
-                        <p id="displayDownloads">Download admission forms, school calendar, and other documents.</p>
+                        <p>Download admission forms, school calendar, fee structure, newsletters, and other important school documents.</p>
                     </div>
                     <div class="content-card" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="600">
                         <span class="icon">💰</span>
                         <h3>Fees Structure</h3>
-                        <p id="displayFees">View our competitive school fees structure for all grades.</p>
+                        <p>View our competitive school fees structure for all grades including day scholars and boarding options.</p>
                     </div>
                     <div class="content-card" onclick="window.location.href='contact.html'" data-aos="fade-up" data-aos-delay="650">
                         <span class="icon">📞</span>
                         <h3>Contact Us</h3>
-                        <p id="displayContact">Get in touch with us for any inquiries or visit our school.</p>
+                        <p>Get in touch with us for any inquiries, visit our school, or reach out to our administrative team.</p>
                         <span class="badge live">Live</span>
                     </div>
                 </div>
@@ -1714,7 +1714,7 @@
         slides.forEach(slide => dotObserver.observe(slide));
 
         // ============================================
-        // LOAD CONTENT FROM CMS API
+        // LOAD CONTENT FROM CMS API (Optional - updates if available)
         // ============================================
         function stripHtml(html) {
             if (!html) return '';
@@ -1730,41 +1730,37 @@
                 if (data.success) {
                     const c = data.content;
 
-                    document.getElementById('heroTitle').innerHTML = c.heroTitle || 'Welcome to <br><span class="highlight">Changara Star Academy</span>';
-                    document.getElementById('heroSubtitle').textContent = c.heroSubtitle || 'Nurturing young minds through quality education, discipline, innovation, and strong moral values.';
-                    document.getElementById('heroButton').innerHTML = '<span>Explore More</span> <i class="fas fa-arrow-right"></i>';
-                    
-                    document.getElementById('displayAbout').textContent = stripHtml(c.aboutMission || 'Changara Star Academy is a private primary school located in Changara Market, Teso North Sub-County, Busia County, Kenya.');
-                    document.getElementById('displayAcademics').textContent = stripHtml(c.academics || 'Playgroup to Grade 6 - Comprehensive curriculum with child-centered learning approaches.');
-                    document.getElementById('displayAdmissions').textContent = stripHtml(c.admissionsRequirements || 'Open for registration. Contact us for details on admission requirements and process.');
-                    document.getElementById('displayFacilities').textContent = stripHtml(c.facilities || 'Modern classrooms, computer lab, library, playground, ECDE section, and more.');
-                    document.getElementById('displayGallery').textContent = stripHtml(c.gallery || 'Check out our school gallery showcasing various activities and facilities.');
-                    document.getElementById('displayNews').textContent = stripHtml(c.events || 'Stay tuned for upcoming events and announcements from the school.');
-                    document.getElementById('displayCoCurricular').textContent = stripHtml(c.coCurricular || 'Football, athletics, music, drama, debate, and various clubs.');
-                    document.getElementById('displayPerformance').textContent = stripHtml(c.performanceKcpe || 'Excellent academic performance in national examinations.');
-                    document.getElementById('displayParents').textContent = stripHtml(c.parentsCalendar || 'Important information for parents including school calendar and policies.');
-                    document.getElementById('displayDownloads').textContent = stripHtml(c.downloads || 'Download admission forms, school calendar, and other documents.');
-                    document.getElementById('displayFees').textContent = stripHtml(c.feesContent || 'View our competitive school fees structure for all grades.');
-                    document.getElementById('displayContact').textContent = 'Get in touch with us for any inquiries or visit our school.';
-
-                    // News Ticker
-                    if (c.homeNews && c.homeNews.length > 0) {
-                        const tickerContent = document.getElementById('tickerContent');
-                        let tickerHtml = '';
-                        const tags = ['🎉 NEW', '🏆 EVENT', '📚 MEETING', '📢 ANNOUNCEMENT'];
-                        c.homeNews.forEach((news, index) => {
-                            const tag = tags[index % tags.length];
-                            tickerHtml += `
-                                <div class="ticker-item">
-                                    <span class="tag">${tag}</span>
-                                    ${stripHtml(news.title || 'News')} - ${stripHtml(news.content || '')}
-                                </div>
-                            `;
-                        });
-                        tickerContent.innerHTML = tickerHtml;
+                    // Update hero if CMS has data
+                    if (c.heroTitle) {
+                        document.getElementById('heroTitle').innerHTML = c.heroTitle;
+                    }
+                    if (c.heroSubtitle) {
+                        document.getElementById('heroSubtitle').textContent = c.heroSubtitle;
                     }
 
-                    // Features
+                    // Update content cards if CMS has data
+                    const cardDescriptions = [
+                        'displayAbout', 'displayAcademics', 'displayAdmissions', 
+                        'displayFacilities', 'displayGallery', 'displayNews',
+                        'displayCoCurricular', 'displayPerformance', 'displayParents',
+                        'displayDownloads', 'displayFees'
+                    ];
+                    
+                    const cmsFields = [
+                        c.aboutMission, c.academics, c.admissionsRequirements,
+                        c.facilities, c.gallery, c.events,
+                        c.coCurricular, c.performanceKcpe, c.parentsCalendar,
+                        c.downloads, c.feesContent
+                    ];
+
+                    cardDescriptions.forEach((id, index) => {
+                        const el = document.getElementById(id);
+                        if (el && cmsFields[index]) {
+                            el.textContent = stripHtml(cmsFields[index]);
+                        }
+                    });
+
+                    // Update features if available
                     if (c.homeFeatures && c.homeFeatures.length > 0) {
                         const featuresGrid = document.getElementById('featuresGrid');
                         featuresGrid.innerHTML = '';
@@ -1781,24 +1777,18 @@
                         });
                     }
 
-                    // Stats
+                    // Update stats if available
                     if (c.homeStats && c.homeStats.length > 0) {
                         const stats = c.homeStats;
-                        if (stats.length >= 1) {
-                            document.getElementById('stat1Number').textContent = stats[0].number || '500+';
-                        }
-                        if (stats.length >= 2) {
-                            document.getElementById('stat2Number').textContent = stats[1].number || '50+';
-                        }
-                        if (stats.length >= 3) {
-                            document.getElementById('stat3Number').textContent = stats[2].number || '98%';
-                        }
-                        if (stats.length >= 4) {
-                            document.getElementById('stat4Number').textContent = stats[3].number || '15+';
-                        }
+                        const statIds = ['stat1Number', 'stat2Number', 'stat3Number', 'stat4Number'];
+                        statIds.forEach((id, index) => {
+                            if (stats[index]) {
+                                document.getElementById(id).textContent = stats[index].number || '0';
+                            }
+                        });
                     }
 
-                    // News Grid
+                    // Update news if available
                     if (c.homeNews && c.homeNews.length > 0) {
                         const newsGrid = document.getElementById('newsGrid');
                         newsGrid.innerHTML = '';
@@ -1815,16 +1805,27 @@
                         });
                     }
 
+                    // Update notice if available
                     if (c.noticeAlert) {
                         showNotice(c.noticeAlert);
                     }
                 }
             } catch (error) {
-                console.error('Error loading content:', error);
+                console.error('Error loading content from CMS:', error);
+                // Don't show error to user - default content is already displayed
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadWebsiteContent);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load CMS content if available
+            loadWebsiteContent();
+            
+            // Update hero button text
+            const heroBtn = document.getElementById('heroButton');
+            if (heroBtn) {
+                heroBtn.innerHTML = '<span>Explore More</span> <i class="fas fa-arrow-right"></i>';
+            }
+        });
     </script>
 
 </body>
