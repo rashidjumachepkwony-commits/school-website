@@ -181,11 +181,11 @@
         }
 
         /* ========================================
-           SECTION NAVIGATION TABS - CARDS ONLY
+           SECTION NAVIGATION TABS - 7 CARDS
            ======================================== */
         .section-tabs {
             background: white;
-            padding: 10px 0;
+            padding: 8px 0;
             position: fixed;
             top: 62px;
             left: 0;
@@ -202,7 +202,7 @@
         }
         .section-tabs .container {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             flex-wrap: nowrap;
             justify-content: center;
             align-items: center;
@@ -210,13 +210,13 @@
         .section-tabs .tab-btn {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 16px;
+            gap: 5px;
+            padding: 5px 14px;
             border: 2px solid transparent;
             border-radius: 50px;
             background: transparent;
             color: #555;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -236,13 +236,13 @@
             box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3);
         }
         .section-tabs .tab-btn .tab-icon {
-            font-size: 14px;
+            font-size: 13px;
         }
         .section-tabs .tab-btn .tab-badge {
             background: var(--kenya-red);
             color: white;
-            font-size: 8px;
-            padding: 1px 8px;
+            font-size: 7px;
+            padding: 1px 7px;
             border-radius: 50px;
             font-weight: 700;
             animation: pulseBadgeRed 1.5s infinite;
@@ -321,7 +321,7 @@
         }
 
         /* ========================================
-           NEWS TICKER
+           NEWS TICKER - DIRECTLY BELOW TABS
            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
@@ -329,7 +329,7 @@
             padding: 4px 0;
             border-bottom: 2px solid var(--school-gold);
             position: fixed;
-            top: 148px;
+            top: 112px;
             left: 0;
             right: 0;
             z-index: 98;
@@ -391,7 +391,7 @@
            ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
-            margin-top: 90px;
+            margin-top: 50px;
             display: flex;
             align-items: center;
             text-align: center;
@@ -572,12 +572,12 @@
         .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
         /* ========================================
-           CONTENT CARDS
+           CONTENT CARDS - 7 CARDS
            ======================================== */
         .content-cards-section {
             padding: 50px 0;
             background: #f0f2f5;
-            scroll-margin-top: 140px;
+            scroll-margin-top: 50px;
         }
         .content-grid {
             display: grid;
@@ -795,7 +795,7 @@
             background: linear-gradient(135deg, #000000, #1a0000, #0a1628);
             position: relative;
             overflow: hidden;
-            scroll-margin-top: 140px;
+            scroll-margin-top: 50px;
         }
         .features-grid {
             display: grid;
@@ -839,7 +839,7 @@
             background: linear-gradient(135deg, var(--kenya-black), var(--school-blue-dark));
             position: relative;
             overflow: hidden;
-            scroll-margin-top: 140px;
+            scroll-margin-top: 50px;
         }
         .stats-grid {
             display: grid;
@@ -881,7 +881,7 @@
         .gallery-section {
             padding: 50px 0;
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
-            scroll-margin-top: 140px;
+            scroll-margin-top: 50px;
         }
         .gallery-swiper {
             padding: 15px 0;
@@ -969,7 +969,7 @@
         .news-section {
             padding: 50px 0;
             background: #f0f2f5;
-            scroll-margin-top: 140px;
+            scroll-margin-top: 50px;
         }
         .news-grid {
             display: grid;
@@ -1126,11 +1126,11 @@
                 padding: 0 10px;
             }
             .section-tabs .tab-btn {
-                font-size: 10px;
-                padding: 4px 12px;
+                font-size: 9px;
+                padding: 4px 10px;
             }
             .section-tabs .tab-btn .tab-icon {
-                font-size: 12px;
+                font-size: 11px;
             }
             
             .hero-section { padding: 40px 0; margin-top: 70px; }
@@ -1140,9 +1140,9 @@
             .hero-section .btn-hero, .hero-section .btn-outline { width: 100%; justify-content: center; }
             
             body { padding-top: 100px; }
-            .section-tabs { top: 55px; }
+            .section-tabs { top: 55px; padding: 6px 0; }
             .notice-alert-bar { top: 100px; }
-            .news-ticker-section { top: 136px; }
+            .news-ticker-section { top: 100px; }
             
             .section-title { font-size: 26px; }
             
@@ -1171,14 +1171,14 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .hero-section h1 { font-size: 26px; }
             .section-title { font-size: 22px; }
-            .section-tabs .tab-btn { font-size: 9px; padding: 4px 10px; }
+            .section-tabs .tab-btn { font-size: 8px; padding: 3px 8px; }
             .section-tabs .tab-btn .tab-icon { font-size: 10px; }
             .main-header .logo-section h1 { font-size: 14px; }
             .main-header .school-icon { font-size: 20px; }
             body { padding-top: 90px; }
-            .section-tabs { top: 48px; padding: 6px 0; }
+            .section-tabs { top: 48px; padding: 4px 0; }
             .notice-alert-bar { top: 90px; }
-            .news-ticker-section { top: 126px; }
+            .news-ticker-section { top: 90px; }
             .hero-section { margin-top: 60px; }
         }
 
@@ -1229,32 +1229,35 @@
         </div>
     </div>
 
-    <!-- ===== SECTION NAVIGATION TABS - CARDS ONLY ===== -->
+    <!-- ===== SECTION NAVIGATION TABS - 7 CARDS ===== -->
     <div class="section-tabs" id="sectionTabs">
         <div class="container">
-            <button class="tab-btn active" onclick="scrollToSection('slide-hero')">
-                <span class="tab-icon">🏠</span> Home
+            <button class="tab-btn active" onclick="scrollToSection('slide-academics')">
+                <span class="tab-icon">📚</span> Academics
+                <span class="tab-badge">🔥</span>
             </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-content')">
-                <span class="tab-icon">📚</span> Explore
+            <button class="tab-btn" onclick="scrollToSection('slide-admissions')">
+                <span class="tab-icon">📝</span> Admissions
             </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-features')">
-                <span class="tab-icon">🌟</span> Features
+            <button class="tab-btn" onclick="scrollToSection('slide-facilities')">
+                <span class="tab-icon">🏫</span> Facilities
             </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-stats')">
-                <span class="tab-icon">📊</span> Stats
+            <button class="tab-btn" onclick="scrollToSection('slide-performance')">
+                <span class="tab-icon">🏆</span> Performance
             </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-gallery')">
-                <span class="tab-icon">🖼️</span> Gallery
+            <button class="tab-btn" onclick="scrollToSection('slide-parents')">
+                <span class="tab-icon">👨‍👩‍👧‍👦</span> Parents
             </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-news')">
-                <span class="tab-icon">📰</span> News
-                <span class="tab-badge">New</span>
+            <button class="tab-btn" onclick="scrollToSection('slide-downloads')">
+                <span class="tab-icon">📥</span> Downloads
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-fees')">
+                <span class="tab-icon">💰</span> Fees
             </button>
         </div>
     </div>
 
-    <!-- ===== NEWS TICKER ===== -->
+    <!-- ===== NEWS TICKER - DIRECTLY BELOW TABS ===== -->
     <div class="news-ticker-section" id="newsTicker">
         <div class="container">
             <div class="ticker-label">
@@ -1304,7 +1307,9 @@
         </div>
     </header>
 
-    <!-- ===== HERO SECTION ===== -->
+    <!-- ========================================
+    HERO SECTION
+    ======================================== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-bg-pattern"></div>
         <div class="hero-content">
@@ -1339,15 +1344,18 @@
         </div>
     </section>
 
-    <!-- ===== CONTENT CARDS SECTION ===== -->
+    <!-- ========================================
+    CONTENT CARDS SECTION - 7 CARDS
+    ======================================== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
 
             <div class="content-grid">
-                <!-- CARD 1: ACADEMICS -->
-                <div class="content-card card-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
+
+                <!-- ===== CARD 1: ACADEMICS ===== -->
+                <div class="content-card card-academics" id="slide-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
                         🔥 NEW
                     </div>
@@ -1361,8 +1369,8 @@
                     <div class="card-cta">👆 Click to Explore</div>
                 </div>
 
-                <!-- CARD 2: ADMISSIONS -->
-                <div class="content-card card-admissions" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130">
+                <!-- ===== CARD 2: ADMISSIONS ===== -->
+                <div class="content-card card-admissions" id="slide-admissions" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
                         📢 ENROLLING
                     </div>
@@ -1376,8 +1384,8 @@
                     <div class="card-cta">👆 Apply Now</div>
                 </div>
 
-                <!-- CARD 3: FACILITIES -->
-                <div class="content-card card-facilities" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
+                <!-- ===== CARD 3: FACILITIES ===== -->
+                <div class="content-card card-facilities" id="slide-facilities" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
                     <div style="position: absolute; top: -8px; right: -8px; background: #17a2b8; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeBlue 2s infinite; box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4);">
                         🏫 MODERN
                     </div>
@@ -1391,8 +1399,8 @@
                     <div class="card-cta">👆 View Facilities</div>
                 </div>
 
-                <!-- CARD 4: PERFORMANCE -->
-                <div class="content-card card-performance" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
+                <!-- ===== CARD 4: PERFORMANCE ===== -->
+                <div class="content-card card-performance" id="slide-performance" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
                     <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);">
                         🏆 EXCELLENCE
                     </div>
@@ -1406,8 +1414,8 @@
                     <div class="card-cta">👆 See Results</div>
                 </div>
 
-                <!-- CARD 5: PARENTS CORNER -->
-                <div class="content-card card-parents" onclick="window.location.href='parents-corner.html'" data-aos="fade-up" data-aos-delay="220">
+                <!-- ===== CARD 5: PARENTS CORNER ===== -->
+                <div class="content-card card-parents" id="slide-parents" onclick="window.location.href='parents-corner.html'" data-aos="fade-up" data-aos-delay="220">
                     <div style="position: absolute; top: -8px; right: -8px; background: #fd7e14; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(253, 126, 20, 0.4);">
                         👨‍👩‍👧‍👦 FAMILY
                     </div>
@@ -1421,8 +1429,8 @@
                     <div class="card-cta">👆 View Info</div>
                 </div>
 
-                <!-- CARD 6: DOWNLOADS -->
-                <div class="content-card card-downloads" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
+                <!-- ===== CARD 6: DOWNLOADS ===== -->
+                <div class="content-card card-downloads" id="slide-downloads" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
                     <div style="position: absolute; top: -8px; right: -8px; background: #20c997; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(32, 201, 151, 0.4);">
                         📥 DOWNLOAD
                     </div>
@@ -1436,8 +1444,8 @@
                     <div class="card-cta">👆 Download</div>
                 </div>
 
-                <!-- CARD 7: FEES STRUCTURE -->
-                <div class="content-card card-fees" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
+                <!-- ===== CARD 7: FEES STRUCTURE ===== -->
+                <div class="content-card card-fees" id="slide-fees" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
                     <div style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 2.2s infinite; box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);">
                         💰 AFFORDABLE
                     </div>
@@ -1455,7 +1463,9 @@
         </div>
     </section>
 
-    <!-- ===== FEATURES SECTION ===== -->
+    <!-- ========================================
+    FEATURES SECTION
+    ======================================== -->
     <section class="features-section" id="slide-features">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🌟 Why <span style="color:var(--school-gold);">Choose Us</span></h2>
@@ -1487,7 +1497,9 @@
         </div>
     </section>
 
-    <!-- ===== STATS SECTION ===== -->
+    <!-- ========================================
+    STATS SECTION
+    ======================================== -->
     <section class="stats-section" id="slide-stats">
         <div class="container">
             <div class="stats-grid" id="statsGrid">
@@ -1511,7 +1523,9 @@
         </div>
     </section>
 
-    <!-- ===== GALLERY SECTION ===== -->
+    <!-- ========================================
+    GALLERY SECTION
+    ======================================== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
@@ -1567,7 +1581,9 @@
         </div>
     </section>
 
-    <!-- ===== NEWS SECTION ===== -->
+    <!-- ========================================
+    NEWS SECTION
+    ======================================== -->
     <section class="news-section" id="slide-news">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
@@ -1592,7 +1608,9 @@
         </div>
     </section>
 
-    <!-- ===== FOOTER ===== -->
+    <!-- ========================================
+    FOOTER
+    ======================================== -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
@@ -1632,7 +1650,9 @@
         </div>
     </footer>
 
-    <!-- ===== SCRIPTS ===== -->
+    <!-- ========================================
+    SCRIPTS
+    ======================================== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -1681,7 +1701,7 @@
 
         // Update active tab on scroll
         document.addEventListener('scroll', function() {
-            const sections = document.querySelectorAll('.hero-section, .content-cards-section, .features-section, .stats-section, .gallery-section, .news-section');
+            const sections = document.querySelectorAll('.content-card');
             const tabs = document.querySelectorAll('.tab-btn');
             const scrollPosition = window.scrollY + 170;
             
