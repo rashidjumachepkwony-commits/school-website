@@ -3,142 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Check-in/out - Changara Star Academy</title>
+    <title>Staff Check-in / Check-out - Changara Star Academy</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👨‍🏫</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #e8f0fe 0%, #f5f5f5 100%);
+            background: linear-gradient(135deg, #0a1628, #1a2a4a);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             padding: 20px;
         }
         .container {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            max-width: 450px;
             width: 100%;
-            max-width: 500px;
+            background: white;
+            border-radius: 24px;
+            padding: 35px 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         .header .icon {
-            font-size: 64px;
-            display: block;
-        }
-        .header h1 {
-            color: #001f5c;
-            font-size: 28px;
-            margin-top: 10px;
-        }
-        .header p {
-            color: #666;
-            margin-top: 5px;
-        }
-        .day-info {
-            text-align: center;
-            color: #666;
-            margin: 5px 0 15px;
-            font-size: 14px;
-        }
-        .kenyan-time {
-            text-align: center;
-            color: #0b5394;
-            font-size: 20px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .weekend-message {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #ffeaa7;
-            margin: 10px 0;
-            display: none;
-        }
-        .weekend-message .icon {
             font-size: 48px;
             display: block;
+            margin-bottom: 5px;
+        }
+        .header h1 {
+            font-size: 22px;
+            color: #0a1628;
+            font-weight: 700;
+        }
+        .header .subtitle {
+            color: #888;
+            font-size: 13px;
+        }
+        .kenya-time {
+            background: linear-gradient(135deg, #0a1628, #1a2a4a);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .kenya-time .time {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .kenya-time .date {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .kenya-time .label {
+            font-size: 11px;
+            opacity: 0.6;
+            display: block;
+        }
+        .status-card {
+            background: #f8f9fc;
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px solid #e8ecf1;
+        }
+        .status-card .status-badge {
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .status-card .status-badge.checked-in {
+            background: #28a745;
+            color: white;
+        }
+        .status-card .status-badge.checked-out {
+            background: #6c757d;
+            color: white;
+        }
+        .status-card .status-badge.absent {
+            background: #dc3545;
+            color: white;
+        }
+        .status-card .status-badge.late {
+            background: #d4a017;
+            color: white;
+        }
+        .status-card .time-info {
+            font-size: 14px;
+            color: #555;
+        }
+        .status-card .time-info strong {
+            color: #0a1628;
         }
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .form-group label {
             display: block;
             font-weight: 600;
             color: #333;
             margin-bottom: 5px;
-            font-size: 14px;
+            font-size: 13px;
         }
         .form-group input {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border: 2px solid #e8ecf1;
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s ease;
+            transition: 0.3s;
         }
         .form-group input:focus {
-            border-color: #0b5394;
+            border-color: #d4a017;
             outline: none;
         }
-        .btn-row {
-            display: flex;
-            gap: 15px;
-            margin-top: 5px;
+        .form-group input::placeholder {
+            color: #aaa;
         }
-        .btn-row button {
-            flex: 1;
+        .btn {
+            width: 100%;
             padding: 14px;
             border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .btn-row button:hover {
-            transform: scale(1.02);
+        .btn-checkin {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
         }
-        .btn-row button:disabled {
+        .btn-checkin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+        .btn-checkin:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
-        .btn-checkin {
-            background: #28a745;
-            color: white;
-        }
-        .btn-checkin:hover:not(:disabled) {
-            background: #1e7e34;
-        }
         .btn-checkout {
-            background: #dc3545;
+            background: linear-gradient(135deg, #dc3545, #a71d2a);
             color: white;
         }
-        .btn-checkout:hover:not(:disabled) {
-            background: #c82333;
+        .btn-checkout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
         }
-        .btn-checkin:disabled, .btn-checkout:disabled {
-            background: #ccc;
-            color: #666;
+        .btn-checkout:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: #e8ecf1;
+            color: #333;
+            margin-top: 10px;
+        }
+        .btn-secondary:hover {
+            background: #d5d9e0;
         }
         .alert {
             padding: 12px 16px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 15px;
-            display: none;
             font-size: 14px;
+            display: none;
         }
         .alert.success {
             display: block;
@@ -154,371 +197,407 @@
         }
         .alert.info {
             display: block;
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
         }
-        .status-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
+        .footer-links {
             text-align: center;
-            border: 2px solid #e0e0e0;
-            display: none;
-        }
-        .status-card .status-text {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .status-card .status-text.checked-in {
-            color: #28a745;
-        }
-        .status-card .status-text.checked-out {
-            color: #dc3545;
-        }
-        .status-card .status-text.late {
-            color: #ffc107;
-        }
-        .buttons-row {
-            display: flex;
-            gap: 10px;
             margin-top: 15px;
-            flex-wrap: wrap;
+            font-size: 13px;
         }
-        .buttons-row button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            min-width: 100px;
+        .footer-links a {
+            color: #0a1628;
+            text-decoration: none;
+            font-weight: 600;
         }
-        .btn-home {
-            background: #6c757d;
-            color: white;
+        .footer-links a:hover {
+            color: #d4a017;
         }
-        .btn-home:hover {
-            background: #5a6268;
+        .hidden { display: none; }
+        .employee-info {
+            background: #f8f9fc;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #333;
+            border: 1px solid #e8ecf1;
+            text-align: center;
         }
-        .btn-admin {
-            background: #0b5394;
-            color: white;
-        }
-        .btn-admin:hover {
-            background: #001f5c;
+        .employee-info strong {
+            color: #0a1628;
         }
         @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
-            .btn-row {
-                flex-direction: column;
-            }
+            .container { padding: 25px 20px; }
+            .header h1 { font-size: 20px; }
+            .kenya-time .time { font-size: 22px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <span class="icon">👨‍🏫</span>
-            <h1>Staff Check-in / Check-out</h1>
-            <p>Changara Star Academy</p>
-        </div>
 
-        <div id="kenyanTime" class="kenyan-time">⏰ Loading time...</div>
-        <div id="dayInfo" class="day-info"></div>
-        <div id="weekendMessage" class="weekend-message">
-            <span class="icon">📅</span>
-            <h3>Weekend</h3>
-            <p>Check-in/out is only available on weekdays<br>(Monday - Friday)</p>
-        </div>
+<div class="container">
+    <div class="header">
+        <span class="icon">👨‍🏫</span>
+        <h1>Staff Check-in / Check-out</h1>
+        <span class="subtitle">Changara Star Academy</span>
+    </div>
 
-        <div id="alert" class="alert"></div>
+    <!-- Kenya Time Display -->
+    <div class="kenya-time">
+        <span class="label">🔒 Kenya Time</span>
+        <div class="time" id="kenyaTime">--:--:--</div>
+        <div class="date" id="kenyaDate">Loading...</div>
+    </div>
 
-        <div id="statusCard" class="status-card">
-            <div id="statusText" class="status-text"></div>
-            <div id="statusTime" style="margin-top:5px;color:#666;"></div>
-            <div id="statusHours" style="color:#666;"></div>
-        </div>
+    <!-- Alert Messages -->
+    <div id="alert" class="alert"></div>
 
-        <form id="checkinForm">
-            <div class="form-group">
-                <label>Staff ID</label>
-                <input type="text" id="employeeId" placeholder="Enter your Staff ID" required autofocus>
-            </div>
-            <div class="form-group">
-                <label>PIN</label>
-                <input type="password" id="pin" placeholder="Enter your PIN" required>
-            </div>
-            
-            <div class="btn-row">
-                <button type="button" id="checkinBtn" class="btn-checkin" onclick="handleAction('checkin')">✅ Check In</button>
-                <button type="button" id="checkoutBtn" class="btn-checkout" onclick="handleAction('checkout')">🚪 Check Out</button>
-            </div>
-        </form>
-
-        <div class="buttons-row">
-            <button onclick="window.location.href='index.html'" class="btn-home">🏠 Home</button>
-            <button onclick="window.location.href='admin-login.html'" class="btn-admin">🔐 Admin</button>
+    <!-- Status Card -->
+    <div class="status-card" id="statusCard">
+        <div class="status-badge absent" id="statusBadge">⚪ Not Checked In</div>
+        <div class="time-info" id="statusDetails">
+            <span id="statusMessage">Please check in to start your day</span>
         </div>
     </div>
 
-    <script>
-        // ============================================
-        // DOM ELEMENTS
-        // ============================================
-        const employeeIdInput = document.getElementById('employeeId');
-        const pinInput = document.getElementById('pin');
-        const checkinBtn = document.getElementById('checkinBtn');
-        const checkoutBtn = document.getElementById('checkoutBtn');
-        const alertDiv = document.getElementById('alert');
-        const statusCard = document.getElementById('statusCard');
-        const statusText = document.getElementById('statusText');
-        const statusTime = document.getElementById('statusTime');
-        const statusHours = document.getElementById('statusHours');
-        const dayInfo = document.getElementById('dayInfo');
-        const weekendMessage = document.getElementById('weekendMessage');
-        const kenyanTimeEl = document.getElementById('kenyanTime');
+    <!-- Employee Info -->
+    <div id="employeeInfo" class="employee-info hidden">
+        <strong>👤 Staff:</strong> <span id="displayName">---</span> &nbsp;|&nbsp;
+        <strong>🆔 ID:</strong> <span id="displayEmployeeId">---</span>
+    </div>
 
-        // ============================================
-        // KENYAN TIME (EAT - UTC+3) - CORRECTED
-        // ============================================
-        function getKenyanTime() {
-            // Use Nairobi timezone directly
-            const now = new Date();
-            // Format in Nairobi timezone
-            const nairobiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
-            return nairobiTime;
-        }
+    <!-- Login Form -->
+    <div id="loginForm">
+        <div class="form-group">
+            <label><i class="fas fa-id-card"></i> Staff ID</label>
+            <input type="text" id="employeeId" placeholder="Enter your Staff ID" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-lock"></i> PIN</label>
+            <input type="password" id="pin" placeholder="Enter your PIN" maxlength="6" autocomplete="off">
+        </div>
+        <button class="btn btn-checkin" id="checkinBtn" onclick="handleCheckIn()">
+            <i class="fas fa-sign-in-alt"></i> Check In
+        </button>
+        <button class="btn btn-checkout hidden" id="checkoutBtn" onclick="handleCheckOut()">
+            <i class="fas fa-sign-out-alt"></i> Check Out
+        </button>
+    </div>
 
-        function updateKenyanTime() {
-            const kenyanTime = getKenyanTime();
-            const options = { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit',
-                hour12: true
-            };
-            kenyanTimeEl.textContent = '🕐 Kenya Time: ' + kenyanTime.toLocaleTimeString('en-KE', options);
-        }
+    <!-- Logout Button -->
+    <button class="btn btn-secondary hidden" id="logoutBtn" onclick="logoutUser()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
 
-        // Update time every second
-        setInterval(updateKenyanTime, 1000);
+    <div class="footer-links">
+        <a href="index.html">🏠 Return to Home</a>
+    </div>
+</div>
 
-        // ============================================
-        // CHECK DAY (Kenyan Time)
-        // ============================================
-        function getDayInfo() {
-            const kenyanTime = getKenyanTime();
-            const dayOfWeek = kenyanTime.getDay();
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+<script>
+    // ============================================
+    // GLOBALS
+    // ============================================
+    let currentTeacher = null;
+    let statusCheckInterval = null;
+
+    // ============================================
+    // GET KENYA TIME HELPERS
+    // ============================================
+    function formatKenyaTime(date) {
+        if (!date) return '--:--';
+        const d = new Date(date);
+        return d.toLocaleTimeString('en-KE', {
+            timeZone: 'Africa/Nairobi',
+            hour12: true,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+
+    function formatKenyaDate() {
+        return new Date().toLocaleDateString('en-KE', {
+            timeZone: 'Africa/Nairobi',
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    function formatKenyaTimeShort(date) {
+        if (!date) return '--:--';
+        const d = new Date(date);
+        return d.toLocaleTimeString('en-KE', {
+            timeZone: 'Africa/Nairobi',
+            hour12: true,
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function getCurrentKenyaTime() {
+        return new Date().toLocaleTimeString('en-KE', {
+            timeZone: 'Africa/Nairobi',
+            hour12: true,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+
+    // ============================================
+    // UPDATE CLOCK
+    // ============================================
+    function updateClock() {
+        document.getElementById('kenyaTime').textContent = getCurrentKenyaTime();
+        document.getElementById('kenyaDate').textContent = formatKenyaDate();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ============================================
+    // CHECK CURRENT STATUS
+    // ============================================
+    async function checkCurrentStatus(employeeId) {
+        try {
+            const response = await fetch('/api/teacher/attendance/today');
+            const data = await response.json();
             
-            return {
-                dayName: days[dayOfWeek],
-                isWeekend: isWeekend,
-                date: kenyanTime.toDateString()
-            };
+            if (data.success && data.attendance) {
+                const teacherRecord = data.attendance.find(t => t.employeeId === employeeId);
+                if (teacherRecord) {
+                    return teacherRecord;
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error('Error checking status:', error);
+            return null;
+        }
+    }
+
+    // ============================================
+    // UPDATE UI BASED ON STATUS
+    // ============================================
+    function updateUI(status, teacher) {
+        const badge = document.getElementById('statusBadge');
+        const details = document.getElementById('statusDetails');
+
+        if (status && status.status === 'Checked In') {
+            badge.className = 'status-badge checked-in';
+            badge.textContent = '✅ Checked In';
+            
+            const checkInTime = formatKenyaTime(status.checkIn);
+            
+            details.innerHTML = `
+                <div style="font-size:13px;color:#666;">
+                    <strong>✅ Checked In:</strong> ${checkInTime}
+                </div>
+                <div style="font-size:12px;color:#888;margin-top:4px;">
+                    ${status.isLate ? '⚠️ You checked in late' : '✅ On time'}
+                </div>
+            `;
+            
+            document.getElementById('checkinBtn').classList.add('hidden');
+            document.getElementById('checkoutBtn').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            
+        } else if (status && status.status === 'Checked Out') {
+            badge.className = 'status-badge checked-out';
+            badge.textContent = '✅ Checked Out';
+            
+            const checkInTime = formatKenyaTime(status.checkIn);
+            const checkOutTime = formatKenyaTime(status.checkOut);
+            const hoursWorked = status.hoursWorked || '0';
+            
+            details.innerHTML = `
+                <div style="font-size:13px;color:#666;">
+                    <strong>✅ Checked In:</strong> ${checkInTime}
+                </div>
+                <div style="font-size:13px;color:#666;">
+                    <strong>✅ Checked Out:</strong> ${checkOutTime}
+                </div>
+                <div style="font-size:13px;color:#28a745;font-weight:700;margin-top:4px;">
+                    ⏱️ Hours Worked: ${hoursWorked} hrs
+                </div>
+            `;
+            
+            document.getElementById('checkinBtn').classList.add('hidden');
+            document.getElementById('checkoutBtn').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            
+        } else {
+            badge.className = 'status-badge absent';
+            badge.textContent = '⚪ Not Checked In';
+            details.innerHTML = `<span style="font-size:14px;color:#888;">Please check in to start your day</span>`;
+            document.getElementById('checkinBtn').classList.remove('hidden');
+            document.getElementById('checkoutBtn').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
         }
 
-        // ============================================
-        // SHOW ALERT
-        // ============================================
-        function showAlert(message, type) {
-            alertDiv.className = 'alert ' + type;
-            alertDiv.textContent = message;
-            alertDiv.style.display = 'block';
-            
-            setTimeout(() => {
-                alertDiv.style.display = 'none';
-            }, 6000);
+        // Show employee info
+        if (teacher) {
+            document.getElementById('employeeInfo').classList.remove('hidden');
+            document.getElementById('displayName').textContent = teacher.name || teacher.firstName + ' ' + teacher.lastName;
+            document.getElementById('displayEmployeeId').textContent = teacher.employeeId;
+        }
+    }
+
+    // ============================================
+    // LOGIN / CHECK IN
+    // ============================================
+    async function handleCheckIn() {
+        const employeeId = document.getElementById('employeeId').value.trim();
+        const pin = document.getElementById('pin').value.trim();
+
+        if (!employeeId || !pin) {
+            showAlert('Please enter both Staff ID and PIN.', 'error');
+            return;
         }
 
-        // ============================================
-        // UPDATE UI BASED ON DAY
-        // ============================================
-        function updateDayUI() {
-            const dayInfo = getDayInfo();
-            document.getElementById('dayInfo').textContent = `${dayInfo.dayName}, ${dayInfo.date}`;
-            
-            if (dayInfo.isWeekend) {
-                weekendMessage.style.display = 'block';
-                checkinBtn.disabled = true;
-                checkoutBtn.disabled = true;
+        if (pin.length < 4 || pin.length > 6) {
+            showAlert('PIN must be 4-6 digits.', 'error');
+            return;
+        }
+
+        try {
+            const loginResponse = await fetch('/api/teacher/checkin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employeeId, pin })
+            });
+
+            const loginData = await loginResponse.json();
+
+            if (loginData.success) {
+                currentTeacher = loginData.teacher;
+                showAlert('✅ ' + loginData.message, 'success');
+                
+                const status = await checkCurrentStatus(employeeId);
+                if (status) {
+                    updateUI(status, currentTeacher);
+                }
+                
+                // Auto-refresh status every 30 seconds
+                if (statusCheckInterval) clearInterval(statusCheckInterval);
+                statusCheckInterval = setInterval(async () => {
+                    const newStatus = await checkCurrentStatus(employeeId);
+                    if (newStatus) {
+                        updateUI(newStatus, currentTeacher);
+                    }
+                }, 30000);
+
             } else {
-                weekendMessage.style.display = 'none';
-                checkinBtn.disabled = false;
-                checkoutBtn.disabled = false;
+                showAlert('❌ ' + loginData.message, 'error');
             }
+        } catch (error) {
+            console.error('Check-in error:', error);
+            showAlert('❌ Error: ' + error.message, 'error');
+        }
+    }
+
+    // ============================================
+    // CHECK OUT
+    // ============================================
+    async function handleCheckOut() {
+        const employeeId = document.getElementById('employeeId').value.trim();
+        const pin = document.getElementById('pin').value.trim();
+
+        if (!employeeId || !pin) {
+            showAlert('Please enter Staff ID and PIN.', 'error');
+            return;
         }
 
-        // ============================================
-        // CLEAR FORM - Reset fields for next user
-        // ============================================
-        function clearForm() {
-            employeeIdInput.value = '';
-            pinInput.value = '';
-            employeeIdInput.focus();
-        }
+        try {
+            const response = await fetch('/api/teacher/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employeeId, pin })
+            });
 
-        // ============================================
-        // GET TODAY'S ATTENDANCE STATUS FOR TEACHER
-        // ============================================
-        async function getTeacherStatus(employeeId) {
-            try {
-                const response = await fetch(`/api/teacher/attendance/today`);
-                const data = await response.json();
-                if (data.success) {
-                    const teacher = data.attendance.find(t => t.employeeId === employeeId);
-                    if (teacher) {
-                        return {
-                            checkedIn: teacher.status === 'Checked In',
-                            checkedOut: teacher.status === 'Checked Out',
-                            isLate: teacher.isLate || false,
-                            checkInTime: teacher.checkIn,
-                            checkOutTime: teacher.checkOut,
-                            hoursWorked: teacher.hoursWorked || 0
-                        };
-                    }
-                }
-                return null;
-            } catch (error) {
-                console.error('Error checking status:', error);
-                return null;
-            }
-        }
+            const data = await response.json();
 
-        // ============================================
-        // HANDLE CHECK IN / CHECK OUT
-        // ============================================
-        async function handleAction(action) {
-            const dayInfo = getDayInfo();
-            if (dayInfo.isWeekend) {
-                showAlert('Check-in/out is only available on weekdays (Monday-Friday)', 'error');
-                return;
-            }
-            
-            const employeeId = employeeIdInput.value.trim();
-            const pin = pinInput.value.trim();
-            
-            if (!employeeId) {
-                showAlert('Please enter your Staff ID', 'error');
-                employeeIdInput.focus();
-                return;
-            }
-            
-            if (!pin) {
-                showAlert('Please enter your PIN', 'error');
-                pinInput.focus();
-                return;
-            }
-            
-            // Check if already checked in/out
-            const status = await getTeacherStatus(employeeId);
-            
-            // If trying to check out but not checked in
-            if (action === 'checkout') {
-                if (!status) {
-                    showAlert('❌ You have not checked in today. Please check in first.', 'error');
-                    return;
-                }
-                if (status.checkedOut) {
-                    showAlert(`⚠️ You already checked out today at ${new Date(status.checkOutTime).toLocaleTimeString()}`, 'error');
-                    return;
-                }
-            }
-            
-            // If trying to check in but already checked in
-            if (action === 'checkin') {
-                if (status && status.checkedIn) {
-                    showAlert(`⚠️ You already checked in today at ${new Date(status.checkInTime).toLocaleTimeString()}`, 'error');
-                    return;
-                }
-                if (status && status.checkedOut) {
-                    showAlert('⚠️ You already checked out today. Cannot check in again.', 'error');
-                    return;
-                }
-            }
-            
-            const endpoint = action === 'checkin' ? '/api/teacher/checkin' : '/api/teacher/checkout';
-            
-            try {
-                // Disable both buttons while processing
-                checkinBtn.disabled = true;
-                checkoutBtn.disabled = true;
-                checkinBtn.textContent = '⏳ ...';
-                checkoutBtn.textContent = '⏳ ...';
+            if (data.success) {
+                showAlert('✅ ' + data.message, 'success');
                 
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        employeeId: employeeId, 
-                        location: 'School',
-                        pin: pin 
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showAlert(result.message, 'success');
-                    
-                    // Update status card
-                    statusCard.style.display = 'block';
-                    
-                    if (action === 'checkin') {
-                        statusText.textContent = result.isLate ? '⚠️ Checked In (LATE)' : '✅ Checked In';
-                        statusText.className = result.isLate ? 'status-text late' : 'status-text checked-in';
-                        statusTime.textContent = `Time: ${new Date(result.checkInTime).toLocaleTimeString()}`;
-                        statusHours.textContent = '';
-                    } else {
-                        statusText.textContent = '🚪 Checked Out';
-                        statusText.className = 'status-text checked-out';
-                        statusTime.textContent = `Time: ${new Date(result.checkOutTime).toLocaleTimeString()}`;
-                        statusHours.textContent = `Hours Worked: ${result.hoursWorked}`;
-                    }
-                    
-                    // ============================================
-                    // CLEAR THE FORM FOR NEXT USER
-                    // ============================================
-                    clearForm();
-                    
-                } else {
-                    showAlert(result.message, 'error');
+                const status = await checkCurrentStatus(employeeId);
+                if (status) {
+                    updateUI(status, currentTeacher);
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('Error: ' + error.message, 'error');
-            } finally {
-                // Re-enable buttons
-                checkinBtn.disabled = false;
-                checkoutBtn.disabled = false;
-                checkinBtn.textContent = '✅ Check In';
-                checkoutBtn.textContent = '🚪 Check Out';
-            }
-        }
+                
+                if (statusCheckInterval) clearInterval(statusCheckInterval);
+                
+                setTimeout(() => {
+                    showAlert('⏱️ Hours Worked: ' + data.hoursWorked + ' hrs', 'info');
+                }, 1000);
 
-        // ============================================
-        // PRESS ENTER TO SUBMIT (Check In by default)
-        // ============================================
-        document.getElementById('checkinForm').addEventListener('keydown', function(e) {
+            } else {
+                showAlert('❌ ' + data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Check-out error:', error);
+            showAlert('❌ Error: ' + error.message, 'error');
+        }
+    }
+
+    // ============================================
+    // LOGOUT
+    // ============================================
+    function logoutUser() {
+        currentTeacher = null;
+        document.getElementById('employeeId').value = '';
+        document.getElementById('pin').value = '';
+        document.getElementById('employeeInfo').classList.add('hidden');
+        document.getElementById('logoutBtn').classList.add('hidden');
+        document.getElementById('checkinBtn').classList.remove('hidden');
+        document.getElementById('checkoutBtn').classList.add('hidden');
+        
+        const badge = document.getElementById('statusBadge');
+        badge.className = 'status-badge absent';
+        badge.textContent = '⚪ Not Checked In';
+        document.getElementById('statusDetails').innerHTML = `<span style="font-size:14px;color:#888;">Please check in to start your day</span>`;
+        
+        if (statusCheckInterval) clearInterval(statusCheckInterval);
+        
+        showAlert('👋 Logged out successfully', 'info');
+    }
+
+    // ============================================
+    // SHOW ALERT
+    // ============================================
+    function showAlert(message, type) {
+        const alertEl = document.getElementById('alert');
+        alertEl.className = 'alert ' + type;
+        alertEl.textContent = message;
+        alertEl.style.display = 'block';
+        setTimeout(() => {
+            alertEl.style.display = 'none';
+        }, 8000);
+    }
+
+    // ============================================
+    // ENTER KEY SUPPORT
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('employeeId').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                e.preventDefault();
-                handleAction('checkin');
+                document.getElementById('pin').focus();
             }
         });
-
-        // ============================================
-        // INIT
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            updateDayUI();
-            updateKenyanTime();
+        document.getElementById('pin').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (document.getElementById('checkinBtn').classList.contains('hidden')) {
+                    handleCheckOut();
+                } else {
+                    handleCheckIn();
+                }
+            }
         });
-    </script>
+    });
+</script>
 </body>
 </html>
