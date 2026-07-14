@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🏫 Changara Star Academy - Excellence in Education</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
-    <meta name="description" content="Changara Star Academy - Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya. Quality education from Playgroup to Grade 6.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>" />
+    <meta name="description" content="Changara Star Academy - Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
     
     <!-- ===== FONTS ===== -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     
-    <!-- ===== CSS LIBRARIES ===== -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- ===== CSS ===== -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    
+
     <style>
         /* ========================================
            ROOT VARIABLES
@@ -47,7 +47,7 @@
             color: #1a1a2e;
             overflow-x: hidden;
             line-height: 1.6;
-            padding-top: 62px;
+            padding-top: 100px; /* Increased to account for larger header */
         }
 
         .container {
@@ -57,36 +57,37 @@
         }
 
         /* ========================================
-           KENYAN FLAG STRIP
+           KENYAN FLAG STRIP - MADE THICKER
            ======================================== */
         .kenya-flag-strip {
-            height: 4px;
+            height: 6px;
             background: linear-gradient(to right, 
-                var(--kenya-black) 0%, var(--kenya-black) 25%,
-                var(--kenya-red) 25%, var(--kenya-red) 50%,
-                var(--kenya-green) 50%, var(--kenya-green) 75%,
-                var(--kenya-black) 75%, var(--kenya-black) 100%
+                var(--kenya-black) 0%, var(--kenya-black) 20%,
+                var(--kenya-red) 20%, var(--kenya-red) 40%,
+                var(--kenya-green) 40%, var(--kenya-green) 60%,
+                var(--kenya-black) 60%, var(--kenya-black) 80%,
+                var(--kenya-red) 80%, var(--kenya-red) 100%
             );
             position: relative;
             z-index: 1001;
         }
 
         /* ========================================
-           HEADER - FIXED AT TOP
+           HEADER - LARGER, FIXED AT TOP
            ======================================== */
         .main-header {
-            background: rgba(10, 22, 40, 0.96);
+            background: rgba(10, 22, 40, 0.97);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             color: white;
-            padding: 8px 0;
+            padding: 15px 0;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            border-bottom: 1px solid rgba(212, 160, 23, 0.15);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            border-bottom: 2px solid rgba(212, 160, 23, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
         }
         .main-header .container {
             display: flex;
@@ -97,48 +98,50 @@
         .main-header .logo-section {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         .main-header .school-icon {
-            font-size: 28px;
+            font-size: 38px;
             animation: float 3s ease-in-out infinite;
         }
-        .main-header .logo-section h1 {
+        .main-header .logo-section .brand-text h1 {
             font-family: var(--font-primary);
-            font-size: 18px;
+            font-size: 26px;
             font-weight: 700;
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1.1;
         }
-        .main-header .logo-section .subtitle {
-            font-size: 8px;
-            color: rgba(255,255,255,0.4);
+        .main-header .logo-section .brand-text .subtitle {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
             display: block;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            -webkit-text-fill-color: rgba(255,255,255,0.4);
+            -webkit-text-fill-color: rgba(255,255,255,0.5);
+            font-weight: 300;
         }
         .main-header .nav-links {
             display: flex;
-            gap: 4px;
+            gap: 8px;
             align-items: center;
         }
         .main-header .nav-links a {
             color: rgba(255,255,255,0.7);
             text-decoration: none;
             font-weight: 500;
-            padding: 5px 14px;
+            padding: 8px 18px;
             border-radius: 50px;
             transition: all 0.3s ease;
-            font-size: 12px;
+            font-size: 14px;
             position: relative;
         }
         .main-header .nav-links a::after {
             content: '';
             position: absolute;
-            bottom: 2px;
+            bottom: 4px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
@@ -148,7 +151,7 @@
         }
         .main-header .nav-links a:hover::after,
         .main-header .nav-links a.active::after {
-            width: 50%;
+            width: 40%;
         }
         .main-header .nav-links a:hover {
             color: white;
@@ -160,15 +163,15 @@
         .main-header .nav-links a.portal-link {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
-            font-weight: 600;
-            padding: 5px 16px;
+            font-weight: 700;
+            padding: 8px 22px;
             border-radius: 50px;
             transition: all 0.3s ease;
-            font-size: 11px;
+            font-size: 13px;
         }
         .main-header .nav-links a.portal-link:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.3);
+            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.4);
         }
         .main-header .nav-links a.portal-link::after { display: none; }
         .main-header .mobile-menu-btn {
@@ -176,7 +179,7 @@
             background: none;
             border: none;
             color: white;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
         }
 
@@ -186,9 +189,9 @@
         .notice-alert-bar {
             background: linear-gradient(135deg, var(--kenya-red), #8B0000);
             color: white;
-            padding: 6px 0;
+            padding: 8px 0;
             position: fixed;
-            top: 62px;
+            top: 82px;
             left: 0;
             right: 0;
             z-index: 1001;
@@ -203,35 +206,35 @@
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 8px;
         }
         .notice-alert-bar .notice-icon {
-            font-size: 18px;
+            font-size: 20px;
             animation: pulseBell 1.5s infinite;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
         .notice-alert-bar .notice-content {
             flex: 1;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
         .notice-alert-bar .notice-content .badge {
             background: var(--school-gold);
             color: var(--kenya-black);
-            padding: 2px 12px;
+            padding: 3px 14px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 9px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
             animation: pulseBadge 1.5s infinite;
         }
         .notice-alert-bar .notice-content .message {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
             flex: 1;
         }
@@ -240,11 +243,11 @@
             background: rgba(255,255,255,0.15);
             border: none;
             color: white;
-            width: 24px;
-            height: 24px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             transition: all 0.3s ease;
         }
         .notice-alert-bar .notice-close:hover {
@@ -253,47 +256,53 @@
         }
 
         /* ========================================
-           NEWS TICKER
+           NEWS TICKER - LARGER, COVERS WHITE SPACE
            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
             color: white;
-            padding: 4px 0;
-            border-bottom: 2px solid var(--school-gold);
+            padding: 10px 0;
+            border-bottom: 3px solid var(--school-gold);
             position: fixed;
-            top: 62px;
+            top: 82px;
             left: 0;
             right: 0;
             z-index: 999;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+            min-height: 48px;
+            display: flex;
+            align-items: center;
         }
         .news-ticker-section.show-notice {
-            top: 98px;
+            top: 118px;
         }
         .news-ticker-section .container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
+            width: 100%;
         }
         .news-ticker-section .ticker-label {
             background: var(--kenya-red);
             color: white;
-            padding: 2px 14px;
+            padding: 4px 20px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 9px;
+            font-size: 12px;
             text-transform: uppercase;
             white-space: nowrap;
             display: flex;
             align-items: center;
-            gap: 4px;
-            letter-spacing: 1px;
+            gap: 8px;
+            letter-spacing: 1.5px;
+            flex-shrink: 0;
+            height: 36px;
         }
-        .news-ticker-section .ticker-label .icon { font-size: 10px; }
+        .news-ticker-section .ticker-label .icon { font-size: 14px; }
         .news-ticker-section .ticker-wrapper {
             flex: 1;
             overflow: hidden;
-            height: 22px;
+            height: 36px;
             position: relative;
         }
         .news-ticker-section .ticker-content {
@@ -302,31 +311,34 @@
             animation: tickerScroll 16s infinite;
         }
         .news-ticker-section .ticker-content .ticker-item {
-            height: 22px;
+            height: 36px;
             display: flex;
             align-items: center;
-            padding: 0 8px;
-            font-size: 12px;
+            padding: 0 12px;
+            font-size: 15px;
+            font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .news-ticker-section .ticker-content .ticker-item .tag {
-            background: rgba(255,255,255,0.12);
-            padding: 1px 8px;
+            background: rgba(255,255,255,0.15);
+            padding: 2px 12px;
             border-radius: 20px;
-            font-size: 8px;
-            margin-right: 6px;
+            font-size: 10px;
+            margin-right: 10px;
             color: var(--school-gold);
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* ========================================
-           HERO SECTION WITH VIDEO BACKGROUND
+           HERO SECTION - Adjusted for larger header
            ======================================== */
         .hero-section {
-            min-height: calc(100vh - 62px);
-            margin-top: 100px;
+            min-height: calc(100vh - 130px);
+            margin-top: 130px;
             display: flex;
             align-items: center;
             text-align: center;
@@ -393,10 +405,10 @@
         .hero-flag-badge {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
-            padding: 4px 16px 4px 4px;
+            padding: 6px 20px 6px 6px;
             border-radius: 50px;
             border: 1px solid rgba(255,255,255,0.15);
             margin-bottom: 20px;
@@ -404,8 +416,8 @@
         }
         .hero-flag-badge .flag-strip {
             display: flex;
-            width: 32px;
-            height: 16px;
+            width: 36px;
+            height: 18px;
             border-radius: 4px;
             overflow: hidden;
         }
@@ -415,9 +427,9 @@
         .hero-flag-badge .flag-strip .g { background: #006600; }
         .hero-flag-badge .flag-strip .w { background: #FFFFFF; }
         .hero-flag-badge .flag-text {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
-            color: rgba(255,255,255,0.7);
+            color: rgba(255,255,255,0.8);
             letter-spacing: 2px;
             text-transform: uppercase;
         }
@@ -985,7 +997,6 @@
             background: var(--school-gold) !important;
         }
 
-        /* Dark background pagination for cards section */
         .cards-swiper .swiper-pagination-bullet {
             background: rgba(0,0,0,0.2) !important;
         }
@@ -1317,9 +1328,9 @@
         }
         @keyframes tickerScroll {
             0%, 20% { transform: translateY(0); }
-            25%, 45% { transform: translateY(-22px); }
-            50%, 70% { transform: translateY(-44px); }
-            75%, 95% { transform: translateY(-66px); }
+            25%, 45% { transform: translateY(-36px); }
+            50%, 70% { transform: translateY(-72px); }
+            75%, 95% { transform: translateY(-108px); }
             100% { transform: translateY(0); }
         }
 
@@ -1336,16 +1347,23 @@
             }
             .main-header .nav-links.show { display: flex; }
             .main-header .mobile-menu-btn { display: block; }
+            
+            .main-header .logo-section .brand-text h1 {
+                font-size: 20px;
+            }
+            .main-header .school-icon {
+                font-size: 30px;
+            }
+            
+            body { padding-top: 120px; }
+            .notice-alert-bar { top: 100px; }
+            .news-ticker-section { top: 100px; }
+            .hero-section { margin-top: 150px; }
 
-            .hero-section { padding: 40px 0; margin-top: 70px; }
             .hero-section h1 { font-size: 32px; }
             .hero-section p { font-size: 16px; }
             .hero-section .btn-group { flex-direction: column; align-items: center; }
             .btn-scroll-down, .btn-outline { width: 100%; justify-content: center; }
-
-            body { padding-top: 100px; }
-            .notice-alert-bar { top: 100px; }
-            .news-ticker-section { top: 100px; }
 
             .gallery-section .section-title { font-size: 26px; }
             .content-cards-section .section-title { font-size: 26px; }
@@ -1354,12 +1372,9 @@
             .notice-alert-bar .container { flex-direction: column; text-align: center; }
             .gallery-card .image-wrapper { height: 180px; }
             
-            .main-header .logo-section h1 { font-size: 16px; }
-            .main-header .school-icon { font-size: 24px; }
-            .main-header .nav-links a { font-size: 11px; padding: 4px 10px; }
-            
-            .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
-            .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
+            .news-ticker-section .ticker-label { font-size: 10px; padding: 4px 14px; height: 32px; }
+            .news-ticker-section .ticker-wrapper { height: 32px; }
+            .news-ticker-section .ticker-content .ticker-item { height: 32px; font-size: 13px; }
             
             .video-modal { padding: 20px; }
             .video-modal .close-modal { top: -40px; font-size: 20px; width: 36px; height: 36px; }
@@ -1376,6 +1391,9 @@
             .features-grid { grid-template-columns: 1fr 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .news-grid { grid-template-columns: 1fr; }
+            
+            .main-header .nav-links a { font-size: 13px; padding: 6px 14px; }
+            .main-header .nav-links a.portal-link { font-size: 12px; padding: 6px 18px; }
         }
 
         @media (max-width: 480px) {
@@ -1384,14 +1402,22 @@
             .hero-section h1 { font-size: 26px; }
             .gallery-section .section-title { font-size: 22px; }
             .content-cards-section .section-title { font-size: 22px; }
-            .main-header .logo-section h1 { font-size: 14px; }
-            .main-header .school-icon { font-size: 20px; }
-            body { padding-top: 90px; }
+            
+            .main-header .logo-section .brand-text h1 { font-size: 17px; }
+            .main-header .school-icon { font-size: 24px; }
+            .main-header .logo-section .brand-text .subtitle { font-size: 9px; }
+            
+            body { padding-top: 105px; }
             .notice-alert-bar { top: 90px; }
             .news-ticker-section { top: 90px; }
-            .hero-section { margin-top: 60px; }
+            .hero-section { margin-top: 130px; }
+            
             .hero-video-play { bottom: 60px; }
             .gallery-card .image-wrapper { height: 200px; }
+            
+            .news-ticker-section .ticker-label { font-size: 8px; padding: 3px 10px; height: 28px; }
+            .news-ticker-section .ticker-wrapper { height: 28px; }
+            .news-ticker-section .ticker-content .ticker-item { height: 28px; font-size: 11px; }
         }
     </style>
 </head>
@@ -1414,11 +1440,11 @@
         </div>
     </div>
 
-    <!-- ===== NEWS TICKER ===== -->
+    <!-- ===== NEWS TICKER - LARGER ===== -->
     <div class="news-ticker-section" id="newsTicker">
         <div class="container">
             <div class="ticker-label">
-                <span class="icon">📰</span> News
+                <span class="icon">📰</span> NEWS
             </div>
             <div class="ticker-wrapper">
                 <div class="ticker-content" id="tickerContent">
@@ -1444,14 +1470,14 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HEADER -->
+    <!-- HEADER - LARGER -->
     <!-- ======================================== -->
     <header class="main-header">
         <div class="kenya-flag-strip"></div>
         <div class="container">
             <div class="logo-section">
                 <span class="school-icon">🏫</span>
-                <div>
+                <div class="brand-text">
                     <h1>Changara Star Academy</h1>
                     <span class="subtitle">Assurance to Excellence</span>
                 </div>
@@ -1459,7 +1485,7 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <a href="portal.html">🔐 Portal</a>
+                <a href="portal.html" class="portal-link">🔐 Portal</a>
                 <a href="contact.html">Contact</a>
             </nav>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
@@ -1467,7 +1493,7 @@
     </header>
 
     <!-- ======================================== -->
-    <!-- HERO SECTION WITH VIDEO BACKGROUND -->
+    <!-- HERO SECTION -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-video-bg">
@@ -1542,7 +1568,6 @@
 
             <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
                 <div class="swiper-wrapper" id="gallerySwiperWrapper">
-                    <!-- Gallery items loaded from CMS -->
                     <div class="swiper-slide">
                         <div class="gallery-card">
                             <div class="image-wrapper">
@@ -1652,7 +1677,6 @@
 
             <div class="swiper cards-swiper" data-aos="fade-up" data-aos-delay="200">
                 <div class="swiper-wrapper" id="cardsSwiperWrapper">
-                    <!-- Card 1: Academics -->
                     <div class="swiper-slide">
                         <div class="content-card card-academics" onclick="window.location.href='academics.html'">
                             <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
@@ -1669,7 +1693,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 2: Admissions -->
                     <div class="swiper-slide">
                         <div class="content-card card-admissions" onclick="window.location.href='admissions.html'">
                             <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
@@ -1686,7 +1709,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 3: Facilities -->
                     <div class="swiper-slide">
                         <div class="content-card card-facilities" onclick="window.location.href='facilities.html'">
                             <div style="position: absolute; top: -8px; right: -8px; background: #17a2b8; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeBlue 2s infinite; box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4);">
@@ -1703,7 +1725,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 4: Performance -->
                     <div class="swiper-slide">
                         <div class="content-card card-performance" onclick="window.location.href='performance.html'">
                             <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);">
@@ -1720,7 +1741,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 5: Parents Corner -->
                     <div class="swiper-slide">
                         <div class="content-card card-parents" onclick="window.location.href='parents-corner.html'">
                             <div style="position: absolute; top: -8px; right: -8px; background: #fd7e14; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(253, 126, 20, 0.4);">
@@ -1737,7 +1757,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 6: Downloads -->
                     <div class="swiper-slide">
                         <div class="content-card card-downloads" onclick="window.location.href='downloads.html'">
                             <div style="position: absolute; top: -8px; right: -8px; background: #20c997; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(32, 201, 151, 0.4);">
@@ -1754,7 +1773,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 7: Fees Structure -->
                     <div class="swiper-slide">
                         <div class="content-card card-fees" onclick="window.location.href='fees.html'">
                             <div style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 2.2s infinite; box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);">
@@ -1961,7 +1979,7 @@
             localStorage.setItem('noticeClosed', 'true');
             const ticker = document.getElementById('newsTicker');
             if (ticker) {
-                ticker.style.top = '100px';
+                ticker.style.top = '82px';
             }
         }
 
@@ -1975,7 +1993,7 @@
             localStorage.removeItem('noticeClosed');
             const ticker = document.getElementById('newsTicker');
             if (ticker) {
-                ticker.style.top = '136px';
+                ticker.style.top = '118px';
             }
         }
 
@@ -1986,7 +2004,7 @@
             if (!closed) {
                 bar.classList.add('show');
                 if (ticker) {
-                    ticker.style.top = '136px';
+                    ticker.style.top = '118px';
                 }
             }
         }
@@ -2027,7 +2045,6 @@
         let gallerySwiper, cardsSwiper;
 
         function initSwipers() {
-            // Gallery Swiper
             gallerySwiper = new Swiper('.gallery-swiper', {
                 slidesPerView: 1,
                 spaceBetween: 20,
@@ -2051,7 +2068,6 @@
                 },
             });
 
-            // Cards Swiper
             cardsSwiper = new Swiper('.cards-swiper', {
                 slidesPerView: 1,
                 spaceBetween: 20,
@@ -2115,7 +2131,6 @@
                         }
                     });
 
-                    // Load gallery from CMS
                     if (c.gallery && c.gallery.length > 0) {
                         const wrapper = document.getElementById('gallerySwiperWrapper');
                         wrapper.innerHTML = '';
@@ -2146,7 +2161,6 @@
                             `;
                             wrapper.appendChild(slide);
                         });
-                        // Re-init swiper after adding items
                         if (gallerySwiper) {
                             gallerySwiper.destroy();
                             gallerySwiper = null;
@@ -2161,7 +2175,6 @@
                 console.log('CMS not available - using default content');
             }
             
-            // Initialize swipers after content is loaded
             setTimeout(initSwipers, 300);
         }
 
