@@ -45,7 +45,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB'
   .catch(err => console.error('❌ MongoDB Error:', err.message));
 
 // ============================================
-// FILE UPLOAD SETUP (Images, Videos, Audio)
+// FILE UPLOAD SETUP
 // ============================================
 const uploadDirs = ['./uploads', './uploads/images', './uploads/videos', './uploads/audio'];
 uploadDirs.forEach(dir => {
@@ -140,7 +140,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 app.use('/uploads', express.static('uploads'));
 
 // ============================================
-// COMPLETE WEBSITE CONTENT SCHEMA (CMS)
+// CONTENT SCHEMA (CMS)
 // ============================================
 const contentSchema = new mongoose.Schema({
   heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
@@ -607,7 +607,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
     if (existingAttendance) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked in today at ' + new Date(existingAttendance.checkIn).toLocaleTimeString(),
+        message: '⚠️ You already checked in today at ' + existingAttendance.checkIn.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' }),
         checkInTime: existingAttendance.checkIn
       });
     }
@@ -631,7 +631,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       status: status,
       location: 'School',
       isLate: isLate,
-      notes: isLate ? 'Late check-in at ' + kenyaNow.toLocaleTimeString() : 'On-time check-in at ' + kenyaNow.toLocaleTimeString()
+      notes: isLate ? 'Late check-in at ' + kenyaNow.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' }) : 'On-time check-in at ' + kenyaNow.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' })
     });
     
     await teacher.save();
@@ -710,7 +710,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     if (todayAttendance.checkOut) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked out today at ' + new Date(todayAttendance.checkOut).toLocaleTimeString(),
+        message: '⚠️ You already checked out today at ' + todayAttendance.checkOut.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' }),
         checkOutTime: todayAttendance.checkOut
       });
     }
@@ -725,7 +725,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     
     // Store check-out time in Kenya time
     todayAttendance.checkOut = kenyaNow;
-    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + kenyaNow.toLocaleTimeString();
+    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + kenyaNow.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' });
     
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
@@ -769,6 +769,18 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
         return aDate.getTime() === kenyaToday.getTime();
       });
       
+      let checkInTime = null;
+      let checkOutTime = null;
+      
+      if (todayRecord) {
+        if (todayRecord.checkIn) {
+          checkInTime = todayRecord.checkIn.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' });
+        }
+        if (todayRecord.checkOut) {
+          checkOutTime = todayRecord.checkOut.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' });
+        }
+      }
+      
       return {
         name: `${teacher.firstName} ${teacher.lastName}`,
         employeeId: teacher.employeeId,
@@ -777,7 +789,9 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
         checkIn: todayRecord ? todayRecord.checkIn : null,
         checkOut: todayRecord ? todayRecord.checkOut : null,
         isLate: todayRecord ? todayRecord.isLate : false,
-        hoursWorked: todayRecord ? todayRecord.hoursWorked : 0
+        hoursWorked: todayRecord ? todayRecord.hoursWorked : 0,
+        checkInTime: checkInTime,
+        checkOutTime: checkOutTime
       };
     });
     
@@ -1145,7 +1159,7 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
     if (visitor.status === 'Checked Out') {
       return res.status(400).json({
         success: false,
-        message: 'Visitor already checked out at ' + new Date(visitor.checkOut).toLocaleTimeString()
+        message: 'Visitor already checked out at ' + visitor.checkOut.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' })
       });
     }
     
