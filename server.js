@@ -22,19 +22,43 @@ app.use(express.urlencoded({ extended: true }));
 // ============================================
 function getKenyaTime() {
     const now = new Date();
+    // Use Nairobi timezone
     const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
     return new Date(kenyaTimeString);
 }
 
 function getKenyaDate() {
-    const now = getKenyaTime();
-    const date = new Date(now);
+    const kenyaTime = getKenyaTime();
+    const date = new Date(kenyaTime);
     date.setHours(0, 0, 0, 0);
     return date;
 }
 
 function getKenyaHour() {
     return getKenyaTime().getHours();
+}
+
+function formatKenyaTime(date) {
+    if (!date) return '-';
+    const d = new Date(date);
+    return d.toLocaleTimeString('en-KE', {
+        timeZone: 'Africa/Nairobi',
+        hour12: true,
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function formatKenyaFullTime(date) {
+    if (!date) return '-';
+    const d = new Date(date);
+    return d.toLocaleTimeString('en-KE', {
+        timeZone: 'Africa/Nairobi',
+        hour12: true,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
 }
 
 // ============================================
@@ -557,7 +581,7 @@ app.post('/api/teacher/register', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-IN - FIXED WITH KENYA TIME
+// TEACHER CHECK-IN - FIXED
 // ============================================
 app.post('/api/teacher/checkin', async (req, res) => {
   try {
@@ -579,14 +603,14 @@ app.post('/api/teacher/checkin', async (req, res) => {
     }
     
     // ============================================
-    // USE KENYA TIME FOR ALL CHECKS
+    // USE KENYA TIME
     // ============================================
     const kenyaNow = getKenyaTime();
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
     const dayOfWeek = kenyaNow.getDay();
     
-    console.log('📍 Check-in at (Kenya time):', kenyaNow.toLocaleString());
+    console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
     console.log('🕐 Hour (Kenya time):', kenyaHour);
     
     // Weekend check
@@ -607,8 +631,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
     if (existingAttendance) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked in today at ' + existingAttendance.checkIn.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' }),
-        checkInTime: existingAttendance.checkIn
+        message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn)
       });
     }
     
@@ -625,15 +648,16 @@ app.post('/api/teacher/checkin', async (req, res) => {
     const status = isLate ? 'Late' : 'Present';
     
     // Store check-in time in Kenya time
-    teacher.attendance.push({
+    const newAttendance = {
       date: kenyaToday,
       checkIn: kenyaNow,
       status: status,
       location: 'School',
       isLate: isLate,
-      notes: isLate ? 'Late check-in at ' + kenyaNow.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' }) : 'On-time check-in at ' + kenyaNow.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' })
-    });
+      notes: isLate ? 'Late check-in at ' + formatKenyaFullTime(kenyaNow) : 'On-time check-in at ' + formatKenyaFullTime(kenyaNow)
+    };
     
+    teacher.attendance.push(newAttendance);
     await teacher.save();
     
     const message = isLate 
@@ -644,6 +668,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       success: true,
       message: message,
       checkInTime: kenyaNow,
+      checkInTimeFormatted: formatKenyaTime(kenyaNow),
       isLate: isLate,
       status: status,
       teacher: {
@@ -662,7 +687,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-OUT - FIXED WITH KENYA TIME
+// TEACHER CHECK-OUT - FIXED
 // ============================================
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
@@ -690,7 +715,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
     
-    console.log('📍 Check-out at (Kenya time):', kenyaNow.toLocaleString());
+    console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
     console.log('🕐 Hour (Kenya time):', kenyaHour);
     
     // Find today's attendance
@@ -710,8 +735,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     if (todayAttendance.checkOut) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked out today at ' + todayAttendance.checkOut.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' }),
-        checkOutTime: todayAttendance.checkOut
+        message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut)
       });
     }
     
@@ -725,7 +749,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     
     // Store check-out time in Kenya time
     todayAttendance.checkOut = kenyaNow;
-    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + kenyaNow.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' });
+    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + formatKenyaFullTime(kenyaNow);
     
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
@@ -737,6 +761,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
       success: true,
       message: '✅ Check-out successful!',
       checkOutTime: kenyaNow,
+      checkOutTimeFormatted: formatKenyaTime(kenyaNow),
       hoursWorked: hoursWorked,
       teacher: {
         name: `${teacher.firstName} ${teacher.lastName}`,
@@ -769,15 +794,19 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
         return aDate.getTime() === kenyaToday.getTime();
       });
       
-      let checkInTime = null;
-      let checkOutTime = null;
+      let status = 'Absent';
+      let checkInFormatted = null;
+      let checkOutFormatted = null;
       
       if (todayRecord) {
-        if (todayRecord.checkIn) {
-          checkInTime = todayRecord.checkIn.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' });
-        }
         if (todayRecord.checkOut) {
-          checkOutTime = todayRecord.checkOut.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' });
+          status = 'Checked Out';
+          checkOutFormatted = formatKenyaTime(todayRecord.checkOut);
+        } else {
+          status = 'Checked In';
+        }
+        if (todayRecord.checkIn) {
+          checkInFormatted = formatKenyaTime(todayRecord.checkIn);
         }
       }
       
@@ -785,13 +814,13 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
         name: `${teacher.firstName} ${teacher.lastName}`,
         employeeId: teacher.employeeId,
         department: teacher.department,
-        status: todayRecord ? (todayRecord.checkOut ? 'Checked Out' : 'Checked In') : 'Absent',
+        status: status,
         checkIn: todayRecord ? todayRecord.checkIn : null,
         checkOut: todayRecord ? todayRecord.checkOut : null,
+        checkInTime: checkInFormatted,
+        checkOutTime: checkOutFormatted,
         isLate: todayRecord ? todayRecord.isLate : false,
-        hoursWorked: todayRecord ? todayRecord.hoursWorked : 0,
-        checkInTime: checkInTime,
-        checkOutTime: checkOutTime
+        hoursWorked: todayRecord ? todayRecord.hoursWorked : 0
       };
     });
     
@@ -803,6 +832,7 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
     });
     
   } catch (error) {
+    console.error('Error loading attendance:', error);
     res.status(500).json({ 
       success: false, 
       message: error.message 
@@ -1133,6 +1163,7 @@ app.post('/api/visitor/checkin', async (req, res) => {
         fullName: visitor.fullName,
         badgeNumber: visitor.badgeNumber,
         checkIn: visitor.checkIn,
+        checkInTime: formatKenyaTime(visitor.checkIn),
         purpose: visitor.purpose,
         personToVisit: visitor.personToVisit,
         hostName: visitor.hostName
@@ -1159,7 +1190,7 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
     if (visitor.status === 'Checked Out') {
       return res.status(400).json({
         success: false,
-        message: 'Visitor already checked out at ' + visitor.checkOut.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour12: true, hour: '2-digit', minute: '2-digit' })
+        message: 'Visitor already checked out at ' + formatKenyaTime(visitor.checkOut)
       });
     }
     
@@ -1178,7 +1209,9 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
         fullName: visitor.fullName,
         badgeNumber: visitor.badgeNumber,
         checkIn: visitor.checkIn,
+        checkInTime: formatKenyaTime(visitor.checkIn),
         checkOut: visitor.checkOut,
+        checkOutTime: formatKenyaTime(visitor.checkOut),
         duration: duration + ' minutes'
       }
     });
@@ -1233,6 +1266,12 @@ app.get('/api/visitors/today', async (req, res) => {
       purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
     });
     
+    const formattedVisitors = visitors.map(v => ({
+      ...v.toObject(),
+      checkInTime: formatKenyaTime(v.checkIn),
+      checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
+    }));
+    
     res.json({
       success: true,
       date: kenyaToday,
@@ -1240,7 +1279,7 @@ app.get('/api/visitors/today', async (req, res) => {
       active: active.length,
       completed: completed.length,
       byPurpose: purposeStats,
-      visitors: visitors
+      visitors: formattedVisitors
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -1365,7 +1404,8 @@ app.get('/api/test', (req, res) => {
     message: '🎉 Changara Star Academy is running!',
     data: {
       server: 'Online',
-      kenyaTime: kenyaNow.toLocaleString(),
+      kenyaTime: kenyaNow.toString(),
+      kenyaTimeFormatted: formatKenyaFullTime(kenyaNow),
       timestamp: new Date().toISOString(),
       endpoints: {
         test: '/api/test',
@@ -1423,7 +1463,7 @@ app.listen(PORT, () => {
   console.log('🏫 CHANGARA STAR ACADEMY');
   console.log('='.repeat(50));
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`🕐 Kenya Time: ${kenyaNow.toLocaleString()}`);
+  console.log(`🕐 Kenya Time: ${formatKenyaFullTime(kenyaNow)}`);
   console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
   console.log(`🌐 Website: http://localhost:${PORT}/`);
   console.log(`📊 Admin: http://localhost:${PORT}/admin-login.html`);
