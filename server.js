@@ -22,7 +22,6 @@ app.use(express.urlencoded({ extended: true }));
 // ============================================
 function getKenyaTime() {
     const now = new Date();
-    // Use Nairobi timezone
     const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
     return new Date(kenyaTimeString);
 }
@@ -73,13 +72,17 @@ function formatKenyaDate(date) {
     });
 }
 
+function getKenyaDayOfWeek(date) {
+    const d = new Date(date);
+    return d.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+}
+
 // ============================================
 // CONNECT TO MONGODB
 // ============================================
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB')
   .then(() => {
     console.log('✅ MongoDB Connected');
-    // Fix existing data on startup
     fixExistingAttendanceData();
   })
   .catch(err => console.error('❌ MongoDB Error:', err.message));
@@ -97,31 +100,20 @@ async function fixExistingAttendanceData() {
             let needsSave = false;
             
             for (const record of teacher.attendance) {
-                // Fix checkIn time if it exists
                 if (record.checkIn) {
                     const originalTime = new Date(record.checkIn);
-                    // Check if time is in UTC (off by 3 hours)
-                    const hours = originalTime.getUTCHours();
-                    if (hours < 6 || hours > 20) {
-                        // Convert to Kenya time
-                        const kenyaTime = getKenyaTimeFromUTC(originalTime);
-                        record.checkIn = kenyaTime;
-                        needsSave = true;
-                    }
+                    const kenyaTime = getKenyaTimeFromUTC(originalTime);
+                    record.checkIn = kenyaTime;
+                    needsSave = true;
                 }
                 
-                // Fix checkOut time if it exists
                 if (record.checkOut) {
                     const originalTime = new Date(record.checkOut);
-                    const hours = originalTime.getUTCHours();
-                    if (hours < 6 || hours > 20) {
-                        const kenyaTime = getKenyaTimeFromUTC(originalTime);
-                        record.checkOut = kenyaTime;
-                        needsSave = true;
-                    }
+                    const kenyaTime = getKenyaTimeFromUTC(originalTime);
+                    record.checkOut = kenyaTime;
+                    needsSave = true;
                 }
                 
-                // Fix date
                 if (record.date) {
                     const originalDate = new Date(record.date);
                     const kenyaDate = getKenyaDateFromUTC(originalDate);
@@ -143,7 +135,6 @@ async function fixExistingAttendanceData() {
 }
 
 function getKenyaTimeFromUTC(utcDate) {
-    // Add 3 hours to convert UTC to EAT
     const kenyaTime = new Date(utcDate);
     kenyaTime.setHours(kenyaTime.getHours() + 3);
     return kenyaTime;
@@ -534,61 +525,6 @@ app.put('/api/content', async (req, res) => {
 });
 
 // ============================================
-// HERO VIDEO UPLOAD ROUTE
-// ============================================
-app.post('/api/upload/hero-video', upload.single('file'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
-    }
-    
-    const content = await Content.getContent();
-    content.heroVideo = `/${req.file.path.replace(/\\/g, '/')}`;
-    await content.save();
-    
-    res.json({
-      success: true,
-      message: 'Hero video uploaded successfully!',
-      file: {
-        path: `/${req.file.path.replace(/\\/g, '/')}`,
-        filename: req.file.filename
-      }
-    });
-  } catch (error) {
-    console.error('Error uploading hero video:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ============================================
-// NOTICE ALERT ROUTES
-// ============================================
-app.put('/api/content/notice', async (req, res) => {
-  try {
-    const content = await Content.getContent();
-    content.noticeAlert = req.body.noticeAlert;
-    content.noticeType = req.body.noticeType || 'staff';
-    content.noticeDate = req.body.noticeDate || new Date();
-    await content.save();
-    res.json({ success: true, message: 'Notice updated successfully!' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.delete('/api/content/notice', async (req, res) => {
-  try {
-    const content = await Content.getContent();
-    content.noticeAlert = '';
-    content.noticeType = '';
-    await content.save();
-    res.json({ success: true, message: 'Notice cleared successfully!' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ============================================
 // API ROUTES - ADMIN
 // ============================================
 
@@ -765,7 +701,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
     console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
     console.log('🕐 Hour (Kenya time):', kenyaHour);
     
-    // Weekend check
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       return res.status(400).json({
         success: false,
@@ -773,7 +708,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // Check if already checked in today
     const existingAttendance = teacher.attendance.find(a => {
       const aDate = new Date(a.date);
       aDate.setHours(0, 0, 0, 0);
@@ -787,7 +721,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // Check if after 5:00 PM
     if (kenyaHour >= 17) {
       return res.status(400).json({
         success: false,
@@ -795,11 +728,9 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // Determine if late (after 7:00 AM)
     const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
     const status = isLate ? 'Late' : 'Present';
     
-    // Store check-in time in Kenya time
     teacher.attendance.push({
       date: kenyaToday,
       checkIn: kenyaNow,
@@ -859,7 +790,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // USE KENYA TIME
     const kenyaNow = getKenyaTime();
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
@@ -867,7 +797,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
     console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
     console.log('🕐 Hour (Kenya time):', kenyaHour);
     
-    // Find today's attendance
     const todayAttendance = teacher.attendance.find(a => {
       const aDate = new Date(a.date);
       aDate.setHours(0, 0, 0, 0);
@@ -888,7 +817,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // Allow check-out after 3:00 PM (15:00) Kenya time
     if (kenyaHour < 15) {
       return res.status(400).json({
         success: false,
@@ -896,7 +824,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // Store check-out time in Kenya time
     todayAttendance.checkOut = kenyaNow;
     todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + formatKenyaFullTime(kenyaNow);
     
@@ -990,33 +917,42 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
 });
 
 // ============================================
-// STAFF ATTENDANCE REPORTS - WITH ANALYTICS
+// STAFF ATTENDANCE REPORTS - WITH PROPER DATE RANGES
 // ============================================
 app.get('/api/reports/staff/attendance', async (req, res) => {
   try {
     const { period, date } = req.query;
-    const kenyaNow = getKenyaTime();
     let startDate, endDate;
     
-    // Set date range based on period
+    // Parse the date or use today
+    const selectedDate = date ? new Date(date) : getKenyaTime();
+    
     if (period === 'daily') {
-      const selectedDate = date ? new Date(date) : kenyaNow;
+      // Daily: Exact day selected
       startDate = new Date(selectedDate);
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 1);
+      
     } else if (period === 'weekly') {
-      const selectedDate = date ? new Date(date) : kenyaNow;
+      // Weekly: Monday to Friday only
       startDate = new Date(selectedDate);
-      startDate.setDate(startDate.getDate() - startDate.getDay() + 1);
+      // Go back to Monday
+      const dayOfWeek = startDate.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      startDate.setDate(startDate.getDate() - daysToMonday);
       startDate.setHours(0, 0, 0, 0);
+      
+      // End date: Friday (5 days later) - include only weekdays
       endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 7);
+      endDate.setDate(endDate.getDate() + 5); // Monday to Friday
+      
     } else if (period === 'monthly') {
-      const selectedDate = date ? new Date(date) : kenyaNow;
+      // Monthly: First day of month to last day
       startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
+      
     } else {
       startDate = getKenyaDate();
       endDate = new Date(startDate);
@@ -1033,18 +969,29 @@ app.get('/api/reports/staff/attendance', async (req, res) => {
     let totalOnTime = 0;
     let totalStaff = teachers.length;
     
-    // Daily breakdown for the period
+    // Daily breakdown for the period (weekdays only for weekly)
     const dailyBreakdown = {};
     let currentDate = new Date(startDate);
     while (currentDate < endDate) {
+      const dayOfWeek = currentDate.getDay();
+      // For weekly reports, only include weekdays (Monday-Friday)
+      if (period === 'weekly' && (dayOfWeek === 0 || dayOfWeek === 6)) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        continue;
+      }
       const dateStr = formatKenyaDate(currentDate);
-      dailyBreakdown[dateStr] = { present: 0, late: 0, absent: 0, onTime: 0 };
+      dailyBreakdown[dateStr] = { present: 0, late: 0, absent: 0, onTime: 0, total: 0 };
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
     teachers.forEach(teacher => {
       const attendanceRecords = teacher.attendance.filter(a => {
         const aDate = new Date(a.date);
+        // For weekly reports, only include weekdays
+        if (period === 'weekly') {
+          const dayOfWeek = aDate.getDay();
+          if (dayOfWeek === 0 || dayOfWeek === 6) return false;
+        }
         return aDate >= startDate && aDate < endDate;
       });
       
@@ -1062,6 +1009,7 @@ app.get('/api/reports/staff/attendance', async (req, res) => {
       attendanceRecords.forEach(record => {
         const dateStr = formatKenyaDate(record.date);
         if (dailyBreakdown[dateStr]) {
+          dailyBreakdown[dateStr].total++;
           if (record.status === 'Absent') {
             dailyBreakdown[dateStr].absent++;
           } else if (record.isLate) {
@@ -1075,17 +1023,34 @@ app.get('/api/reports/staff/attendance', async (req, res) => {
         }
       });
       
+      // Calculate total working days (excluding weekends for weekly)
+      let totalWorkingDays = attendanceRecords.length;
+      if (period === 'weekly') {
+        // Count only weekdays in the range
+        let weekdays = 0;
+        let d = new Date(startDate);
+        while (d < endDate) {
+          const dow = d.getDay();
+          if (dow !== 0 && dow !== 6) weekdays++;
+          d.setDate(d.getDate() + 1);
+        }
+        totalWorkingDays = weekdays;
+      } else if (period === 'monthly') {
+        // Count all days in month
+        totalWorkingDays = attendanceRecords.length || 0;
+      }
+      
       reportData.push({
         name: `${teacher.firstName} ${teacher.lastName}`,
         employeeId: teacher.employeeId,
         department: teacher.department,
-        totalDays: attendanceRecords.length,
+        totalDays: totalWorkingDays,
         present: daysPresent,
         late: daysLate,
         onTime: daysOnTime,
         absent: daysAbsent,
-        attendanceRate: attendanceRecords.length > 0 ? ((daysPresent / attendanceRecords.length) * 100).toFixed(1) : 0,
-        punctualityRate: attendanceRecords.length > 0 ? ((daysOnTime / attendanceRecords.length) * 100).toFixed(1) : 0,
+        attendanceRate: totalWorkingDays > 0 ? ((daysPresent / totalWorkingDays) * 100).toFixed(1) : 0,
+        punctualityRate: totalWorkingDays > 0 ? ((daysOnTime / totalWorkingDays) * 100).toFixed(1) : 0,
         records: attendanceRecords.map(a => ({
           date: formatKenyaDate(a.date),
           checkIn: formatKenyaTime(a.checkIn),
@@ -1128,33 +1093,35 @@ app.get('/api/reports/staff/attendance', async (req, res) => {
 });
 
 // ============================================
-// VISITOR REPORTS
+// VISITOR REPORTS - WITH PROPER DATE RANGES
 // ============================================
 app.get('/api/reports/visitors', async (req, res) => {
   try {
     const { period, date } = req.query;
-    const kenyaNow = getKenyaTime();
+    const selectedDate = date ? new Date(date) : getKenyaTime();
     let startDate, endDate;
     
-    // Set date range based on period
     if (period === 'daily') {
-      const selectedDate = date ? new Date(date) : kenyaNow;
       startDate = new Date(selectedDate);
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 1);
+      
     } else if (period === 'weekly') {
-      const selectedDate = date ? new Date(date) : kenyaNow;
+      // Weekly: Monday to Friday only
       startDate = new Date(selectedDate);
-      startDate.setDate(startDate.getDate() - startDate.getDay() + 1);
+      const dayOfWeek = startDate.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      startDate.setDate(startDate.getDate() - daysToMonday);
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 7);
+      endDate.setDate(endDate.getDate() + 5);
+      
     } else if (period === 'monthly') {
-      const selectedDate = date ? new Date(date) : kenyaNow;
       startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
+      
     } else {
       startDate = getKenyaDate();
       endDate = new Date(startDate);
@@ -1166,7 +1133,6 @@ app.get('/api/reports/visitors', async (req, res) => {
       checkIn: { $gte: startDate, $lt: endDate }
     }).sort({ checkIn: -1 });
     
-    // Calculate statistics
     const totalVisitors = visitors.length;
     const active = visitors.filter(v => v.status === 'Checked In').length;
     const completed = visitors.filter(v => v.status === 'Checked Out').length;
@@ -1177,10 +1143,17 @@ app.get('/api/reports/visitors', async (req, res) => {
       purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
     });
     
-    // Daily breakdown
+    // Daily breakdown (weekdays only for weekly)
     const dailyBreakdown = {};
     let currentDate = new Date(startDate);
     while (currentDate < endDate) {
+      if (period === 'weekly') {
+        const dow = currentDate.getDay();
+        if (dow === 0 || dow === 6) {
+          currentDate.setDate(currentDate.getDate() + 1);
+          continue;
+        }
+      }
       const dateStr = formatKenyaDate(currentDate);
       dailyBreakdown[dateStr] = 0;
       currentDate.setDate(currentDate.getDate() + 1);
@@ -1193,7 +1166,6 @@ app.get('/api/reports/visitors', async (req, res) => {
       }
     });
     
-    // Format visitor data
     const formattedVisitors = visitors.map(v => ({
       fullName: v.fullName,
       badgeNumber: v.badgeNumber,
@@ -1663,13 +1635,11 @@ app.get('/api/test', (req, res) => {
         visitor: {
           checkin: '/api/visitor/checkin',
           checkout: '/api/visitor/checkout/:badgeNumber',
-          today: '/api/visitors/today',
-          weekly: '/api/visitors/weekly',
-          monthly: '/api/visitors/monthly'
+          today: '/api/visitors/today'
         },
         reports: {
-          staff: '/api/reports/staff/attendance?period=daily&date=2024-01-01',
-          visitor: '/api/reports/visitors?period=daily&date=2024-01-01'
+          staff: '/api/reports/staff/attendance?period=daily&date=2024-01-15',
+          visitor: '/api/reports/visitors?period=daily&date=2024-01-15'
         }
       }
     }
@@ -1677,7 +1647,7 @@ app.get('/api/test', (req, res) => {
 });
 
 // ============================================
-// FIX DATA ENDPOINT - Run this once to fix all past data
+// FIX DATA ENDPOINT
 // ============================================
 app.post('/api/fix-attendance-times', async (req, res) => {
   try {
@@ -1689,7 +1659,6 @@ app.post('/api/fix-attendance-times', async (req, res) => {
       let needsSave = false;
       
       for (const record of teacher.attendance) {
-        // Fix checkIn time
         if (record.checkIn) {
           const originalTime = new Date(record.checkIn);
           const kenyaTime = getKenyaTimeFromUTC(originalTime);
@@ -1697,7 +1666,6 @@ app.post('/api/fix-attendance-times', async (req, res) => {
           needsSave = true;
         }
         
-        // Fix checkOut time
         if (record.checkOut) {
           const originalTime = new Date(record.checkOut);
           const kenyaTime = getKenyaTimeFromUTC(originalTime);
@@ -1705,7 +1673,6 @@ app.post('/api/fix-attendance-times', async (req, res) => {
           needsSave = true;
         }
         
-        // Fix date
         if (record.date) {
           const originalDate = new Date(record.date);
           const kenyaDate = getKenyaDateFromUTC(originalDate);
