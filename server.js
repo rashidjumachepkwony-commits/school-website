@@ -22,14 +22,13 @@ app.use(express.urlencoded({ extended: true }));
 // ============================================
 function getKenyaTime() {
     const now = new Date();
-    // Use Nairobi timezone
     const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
     return new Date(kenyaTimeString);
 }
 
 function getKenyaDate() {
-    const kenyaTime = getKenyaTime();
-    const date = new Date(kenyaTime);
+    const now = getKenyaTime();
+    const date = new Date(now);
     date.setHours(0, 0, 0, 0);
     return date;
 }
@@ -167,28 +166,31 @@ app.use('/uploads', express.static('uploads'));
 // CONTENT SCHEMA (CMS)
 // ============================================
 const contentSchema = new mongoose.Schema({
+  // Hero Section
   heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
   heroSubtitle: { type: String, default: 'Your trusted partner in quality education and school management' },
   heroButtonText: { type: String, default: 'Learn More' },
   heroButtonLink: { type: String, default: '/about.html' },
+  heroVideo: { type: String, default: '' },
+  applyButtonText: { type: String, default: 'Apply Now' },
   
+  // Home Page
   homeFeatures: [{
     icon: { type: String, default: '📚' },
     title: { type: String, default: 'Quality Education' },
     description: { type: String, default: 'Holistic education that nurtures talent.' }
   }],
-  
   homeStats: [{
     number: { type: String, default: '500+' },
     label: { type: String, default: 'Students' }
   }],
-  
   homeNews: [{
     title: { type: String, default: 'Latest News' },
     content: { type: String, default: 'Stay updated with our latest announcements.' },
     date: { type: Date, default: Date.now }
   }],
 
+  // About Page
   aboutMission: { type: String, default: 'To provide quality education that nurtures talent, builds character, and prepares students for a successful future.' },
   aboutVision: { type: String, default: 'To be a center of excellence in education, producing well-rounded individuals who contribute positively to society.' },
   aboutValues: { type: String, default: 'Excellence, Integrity, Respect, Innovation, Community Engagement' },
@@ -196,6 +198,8 @@ const contentSchema = new mongoose.Schema({
   aboutMotto: { type: String, default: 'Excellence in Education' },
   aboutWhy: { type: String, default: 'Holistic education, qualified teachers, modern facilities.' },
 
+  // Academics Page
+  academicsIntro: { type: String, default: '' },
   academics: [{
     grade: { type: String, default: 'Grade 1' },
     subjects: { type: String, default: 'Math, English, Science' },
@@ -204,18 +208,23 @@ const contentSchema = new mongoose.Schema({
     teacherSupport: { type: String, default: 'Individual attention' }
   }],
 
+  // Admissions Page
+  admissionsIntro: { type: String, default: '' },
   admissionsRequirements: { type: String, default: 'Admission is open to all students who meet the age requirements.' },
   admissionsAge: { type: String, default: 'Playgroup: 2-3 years, PP1: 4 years, PP2: 5 years, Grade 1: 6 years, Grade 2-6: 7-12 years' },
   admissionsDocuments: { type: String, default: 'Birth certificate, Previous school records, Passport photo, Parent ID, Medical records' },
   admissionsProcess: { type: String, default: '1. Visit the school for a tour. 2. Fill the admission form. 3. Submit required documents. 4. Pay registration fee.' },
   admissionsFees: { type: String, default: 'Please contact the school administration for the current fee structure.' },
 
+  // Facilities Page
+  facilitiesIntro: { type: String, default: '' },
   facilities: [{
     name: { type: String, default: 'Modern Classrooms' },
     description: { type: String, default: 'Well-equipped classrooms with modern learning resources.' },
     image: { type: String, default: '' }
   }],
 
+  // Gallery
   gallery: [{
     title: { type: String, default: 'School Activity' },
     description: { type: String, default: '' },
@@ -224,6 +233,7 @@ const contentSchema = new mongoose.Schema({
     category: { type: String, default: 'General' }
   }],
 
+  // Events
   events: [{
     title: { type: String, default: 'Event Title' },
     content: { type: String, default: 'Event description' },
@@ -232,6 +242,7 @@ const contentSchema = new mongoose.Schema({
     image: { type: String, default: '' }
   }],
 
+  // Co-Curricular
   coCurricular: [{
     name: { type: String, default: 'Football' },
     description: { type: String, default: 'School football team.' },
@@ -239,9 +250,13 @@ const contentSchema = new mongoose.Schema({
     image: { type: String, default: '' }
   }],
 
+  // Performance Page
+  performanceIntro: { type: String, default: '' },
   performanceKcpe: { type: String, default: 'Our students consistently perform well in national examinations.' },
   performanceInternal: { type: String, default: 'Regular internal assessments track student progress.' },
 
+  // Parents Corner
+  parentsIntro: { type: String, default: '' },
   parentsCalendar: { type: String, default: 'School calendar for 2026 with all important dates.' },
   parentsHomework: { type: String, default: 'Homework is given regularly to reinforce learning.' },
   parentsAttendance: { type: String, default: 'Attendance is mandatory and monitored daily.' },
@@ -249,6 +264,8 @@ const contentSchema = new mongoose.Schema({
   parentsUniform: { type: String, default: 'All students must wear the official school uniform.' },
   parentsFees: { type: String, default: 'Fees must be paid at the beginning of each term.' },
 
+  // Downloads
+  downloadsIntro: { type: String, default: '' },
   downloads: [{
     name: { type: String, default: 'Admission Form' },
     file: { type: String, default: '/downloads/admission-form.pdf' },
@@ -256,18 +273,33 @@ const contentSchema = new mongoose.Schema({
     icon: { type: String, default: '📄' }
   }],
 
+  // Fees Page
+  feesIntro: { type: String, default: '' },
+  feesPaybill: { type: String, default: '474752' },
+  feesInstructions: { type: String, default: '' },
+
+  // Contact Page
+  contactIntro: { type: String, default: '' },
   contactAddress: { type: String, default: 'Nairobi, Kenya' },
   contactPhone: { type: String, default: '+254 721 556 252' },
   contactEmail: { type: String, default: 'starchangara@gmail.com' },
   contactHours: { type: String, default: 'Monday - Friday: 7:00 AM - 6:00 PM' },
   contactMap: { type: String, default: '' },
 
+  // Footer
   footerText: { type: String, default: 'Committed to providing quality education and fostering excellence.' },
 
+  // SEO
   seoTitle: { type: String, default: 'Changara Star Academy - Excellence in Education' },
   seoDescription: { type: String, default: 'Changara Star Academy - Excellence in Education. School management system for students, staff, and parents.' },
   seoKeywords: { type: String, default: 'school, education, academy, Nairobi, Kenya' },
 
+  // Notice Alert
+  noticeAlert: { type: String, default: '' },
+  noticeType: { type: String, default: '' },
+  noticeDate: { type: Date },
+
+  // Meta
   lastUpdated: { type: Date, default: Date.now },
   updatedBy: { type: String, default: 'Admin' }
 });
@@ -431,6 +463,61 @@ app.put('/api/content', async (req, res) => {
 });
 
 // ============================================
+// HERO VIDEO UPLOAD ROUTE
+// ============================================
+app.post('/api/upload/hero-video', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    
+    const content = await Content.getContent();
+    content.heroVideo = `/${req.file.path.replace(/\\/g, '/')}`;
+    await content.save();
+    
+    res.json({
+      success: true,
+      message: 'Hero video uploaded successfully!',
+      file: {
+        path: `/${req.file.path.replace(/\\/g, '/')}`,
+        filename: req.file.filename
+      }
+    });
+  } catch (error) {
+    console.error('Error uploading hero video:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// NOTICE ALERT ROUTES
+// ============================================
+app.put('/api/content/notice', async (req, res) => {
+  try {
+    const content = await Content.getContent();
+    content.noticeAlert = req.body.noticeAlert;
+    content.noticeType = req.body.noticeType || 'staff';
+    content.noticeDate = req.body.noticeDate || new Date();
+    await content.save();
+    res.json({ success: true, message: 'Notice updated successfully!' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.delete('/api/content/notice', async (req, res) => {
+  try {
+    const content = await Content.getContent();
+    content.noticeAlert = '';
+    content.noticeType = '';
+    await content.save();
+    res.json({ success: true, message: 'Notice cleared successfully!' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
 // API ROUTES - ADMIN
 // ============================================
 
@@ -581,7 +668,7 @@ app.post('/api/teacher/register', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-IN - FIXED
+// TEACHER CHECK-IN
 // ============================================
 app.post('/api/teacher/checkin', async (req, res) => {
   try {
@@ -602,9 +689,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // ============================================
-    // USE KENYA TIME
-    // ============================================
     const kenyaNow = getKenyaTime();
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
@@ -613,7 +697,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
     console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
     console.log('🕐 Hour (Kenya time):', kenyaHour);
     
-    // Weekend check
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       return res.status(400).json({
         success: false,
@@ -621,7 +704,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // Check if already checked in today
     const existingAttendance = teacher.attendance.find(a => {
       const aDate = new Date(a.date);
       aDate.setHours(0, 0, 0, 0);
@@ -635,7 +717,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // Check if after 5:00 PM
     if (kenyaHour >= 17) {
       return res.status(400).json({
         success: false,
@@ -643,21 +724,18 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // Determine if late (after 7:00 AM)
     const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
     const status = isLate ? 'Late' : 'Present';
     
-    // Store check-in time in Kenya time
-    const newAttendance = {
+    teacher.attendance.push({
       date: kenyaToday,
       checkIn: kenyaNow,
       status: status,
       location: 'School',
       isLate: isLate,
       notes: isLate ? 'Late check-in at ' + formatKenyaFullTime(kenyaNow) : 'On-time check-in at ' + formatKenyaFullTime(kenyaNow)
-    };
+    });
     
-    teacher.attendance.push(newAttendance);
     await teacher.save();
     
     const message = isLate 
@@ -687,7 +765,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-OUT - FIXED
+// TEACHER CHECK-OUT
 // ============================================
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
@@ -708,9 +786,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // ============================================
-    // USE KENYA TIME
-    // ============================================
     const kenyaNow = getKenyaTime();
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
@@ -718,7 +793,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
     console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
     console.log('🕐 Hour (Kenya time):', kenyaHour);
     
-    // Find today's attendance
     const todayAttendance = teacher.attendance.find(a => {
       const aDate = new Date(a.date);
       aDate.setHours(0, 0, 0, 0);
@@ -739,7 +813,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // Allow check-out after 3:00 PM (15:00) Kenya time
     if (kenyaHour < 15) {
       return res.status(400).json({
         success: false,
@@ -747,7 +820,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // Store check-out time in Kenya time
     todayAttendance.checkOut = kenyaNow;
     todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + formatKenyaFullTime(kenyaNow);
     
@@ -779,7 +851,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
 });
 
 // ============================================
-// GET TODAY'S ATTENDANCE - FIXED
+// GET TODAY'S ATTENDANCE
 // ============================================
 app.get('/api/teacher/attendance/today', async (req, res) => {
   try {
