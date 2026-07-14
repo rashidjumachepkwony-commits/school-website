@@ -336,7 +336,6 @@
             padding: 60px 0;
         }
         
-        /* ===== VIDEO BACKGROUND ===== */
         .hero-video-bg {
             position: absolute;
             top: 0;
@@ -375,7 +374,6 @@
             z-index: 2;
         }
         
-        /* ===== HERO CONTENT ===== */
         .hero-section .hero-bg-pattern {
             position: absolute;
             inset: 0;
@@ -507,7 +505,6 @@
             transform: translateY(-3px);
         }
 
-        /* ===== VIDEO PLAY BUTTON ===== */
         .hero-video-play {
             position: absolute;
             bottom: 100px;
@@ -653,20 +650,20 @@
         }
 
         /* ========================================
-           GALLERY SECTION - DISPLAYED BELOW HERO
+           GALLERY SWIPER SECTION
            ======================================== */
         .gallery-section {
-            padding: 60px 0;
-            background: #ffffff;
+            padding: 50px 0;
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
             scroll-margin-top: 50px;
         }
         .gallery-section .section-title {
             font-family: var(--font-primary);
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
             text-align: center;
             margin-bottom: 5px;
-            color: var(--school-blue-dark);
+            color: white;
         }
         .gallery-section .section-title .highlight {
             color: var(--school-gold);
@@ -674,60 +671,56 @@
         .gallery-section .section-subtitle {
             text-align: center;
             font-size: 16px;
-            color: #666;
+            color: rgba(255,255,255,0.6);
             margin-bottom: 30px;
             font-weight: 300;
         }
 
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+        .gallery-swiper {
+            padding: 10px 0 30px;
         }
-        .gallery-item {
+        .gallery-card {
             background: white;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.4s ease;
-            cursor: pointer;
-            border: 2px solid #f0f2f5;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            height: 100%;
         }
-        .gallery-item:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.15);
-            border-color: var(--school-gold);
+        .gallery-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
-        .gallery-item .image-wrapper {
+        .gallery-card .image-wrapper {
             position: relative;
             overflow: hidden;
             height: 220px;
         }
-        .gallery-item .image-wrapper img,
-        .gallery-item .image-wrapper video {
+        .gallery-card .image-wrapper img,
+        .gallery-card .image-wrapper video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s ease;
         }
-        .gallery-item:hover .image-wrapper img,
-        .gallery-item:hover .image-wrapper video {
+        .gallery-card:hover .image-wrapper img,
+        .gallery-card:hover .image-wrapper video {
             transform: scale(1.05);
         }
-        .gallery-item .image-wrapper .overlay {
+        .gallery-card .image-wrapper .overlay {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 20px;
+            padding: 30px 15px 15px;
             background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        .gallery-item:hover .image-wrapper .overlay {
+        .gallery-card:hover .image-wrapper .overlay {
             opacity: 1;
         }
-        .gallery-item .image-wrapper .overlay .tag {
+        .gallery-card .image-wrapper .overlay .tag {
             display: inline-block;
             padding: 3px 14px;
             border-radius: 50px;
@@ -738,25 +731,30 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .gallery-item .gallery-info {
+        .gallery-card .gallery-content {
             padding: 18px 20px;
         }
-        .gallery-item .gallery-info h4 {
+        .gallery-card .gallery-content h4 {
             color: var(--school-blue-dark);
             font-size: 16px;
+            margin-bottom: 5px;
             font-weight: 700;
-            margin-bottom: 4px;
         }
-        .gallery-item .gallery-info p {
+        .gallery-card .gallery-content p {
             color: #666;
             font-size: 13px;
             line-height: 1.5;
         }
 
         /* ========================================
-           SECTION TITLES
+           CONTENT CARDS SWIPER SECTION
            ======================================== */
-        .section-title {
+        .content-cards-section {
+            padding: 60px 0;
+            background: #f0f2f5;
+            scroll-margin-top: 50px;
+        }
+        .content-cards-section .section-title {
             font-family: var(--font-primary);
             font-size: 32px;
             font-weight: 700;
@@ -764,29 +762,19 @@
             margin-bottom: 5px;
             color: var(--school-blue-dark);
         }
-        .section-title .highlight { color: var(--school-gold); }
-        .section-title.light { color: white; }
-        .section-subtitle {
+        .content-cards-section .section-title .highlight {
+            color: var(--school-gold);
+        }
+        .content-cards-section .section-subtitle {
             text-align: center;
             font-size: 16px;
             color: #666;
             margin-bottom: 30px;
             font-weight: 300;
         }
-        .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
-        /* ========================================
-           CONTENT CARDS
-           ======================================== */
-        .content-cards-section {
-            padding: 60px 0;
-            background: #f0f2f5;
-            scroll-margin-top: 50px;
-        }
-        .content-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
+        .cards-swiper {
+            padding: 10px 0 30px;
         }
         .content-card {
             background: white;
@@ -802,6 +790,7 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            height: 100%;
         }
         .content-card::before {
             content: '';
@@ -962,6 +951,57 @@
         .card-fees .card-cta {
             background: linear-gradient(135deg, #dc3545, #a71d2a);
             color: white;
+        }
+
+        /* ========================================
+           SWIPER CUSTOM STYLES
+           ======================================== */
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: var(--school-gold) !important;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 50% !important;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .swiper-button-next:hover,
+        .swiper-button-prev:hover {
+            background: rgba(212, 160, 23, 0.2);
+            border-color: var(--school-gold);
+        }
+        .swiper-button-next::after,
+        .swiper-button-prev::after {
+            font-size: 14px !important;
+        }
+        .swiper-pagination-bullet {
+            background: rgba(255,255,255,0.2) !important;
+            width: 10px !important;
+            height: 10px !important;
+        }
+        .swiper-pagination-bullet-active {
+            background: var(--school-gold) !important;
+        }
+
+        /* Dark background pagination for cards section */
+        .cards-swiper .swiper-pagination-bullet {
+            background: rgba(0,0,0,0.2) !important;
+        }
+        .cards-swiper .swiper-pagination-bullet-active {
+            background: var(--school-gold) !important;
+        }
+        .cards-swiper .swiper-button-next,
+        .cards-swiper .swiper-button-prev {
+            color: var(--school-gold) !important;
+            background: rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .cards-swiper .swiper-button-next:hover,
+        .cards-swiper .swiper-button-prev:hover {
+            background: rgba(212, 160, 23, 0.15);
+            border-color: var(--school-gold);
         }
 
         /* ========================================
@@ -1307,16 +1347,12 @@
             .notice-alert-bar { top: 100px; }
             .news-ticker-section { top: 100px; }
 
-            .section-title { font-size: 26px; }
-            .gallery-grid { grid-template-columns: 1fr 1fr; }
-            .content-grid { grid-template-columns: 1fr 1fr; }
-            .features-grid { grid-template-columns: 1fr 1fr; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .news-grid { grid-template-columns: 1fr; }
-
+            .gallery-section .section-title { font-size: 26px; }
+            .content-cards-section .section-title { font-size: 26px; }
+            
             .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
             .notice-alert-bar .container { flex-direction: column; text-align: center; }
-            .gallery-item .image-wrapper { height: 160px; }
+            .gallery-card .image-wrapper { height: 180px; }
             
             .main-header .logo-section h1 { font-size: 16px; }
             .main-header .school-icon { font-size: 24px; }
@@ -1331,18 +1367,23 @@
             .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
             .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
             .hero-video-play .play-text { font-size: 10px; }
+
+            .swiper-button-next,
+            .swiper-button-prev {
+                display: none !important;
+            }
             
-            .gallery-section .section-title { font-size: 28px; }
+            .features-grid { grid-template-columns: 1fr 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .news-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 480px) {
-            .gallery-grid { grid-template-columns: 1fr; }
-            .content-grid { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .hero-section h1 { font-size: 26px; }
-            .section-title { font-size: 22px; }
             .gallery-section .section-title { font-size: 22px; }
+            .content-cards-section .section-title { font-size: 22px; }
             .main-header .logo-section h1 { font-size: 14px; }
             .main-header .school-icon { font-size: 20px; }
             body { padding-top: 90px; }
@@ -1350,7 +1391,7 @@
             .news-ticker-section { top: 90px; }
             .hero-section { margin-top: 60px; }
             .hero-video-play { bottom: 60px; }
-            .gallery-item .image-wrapper { height: 200px; }
+            .gallery-card .image-wrapper { height: 200px; }
         }
     </style>
 </head>
@@ -1429,7 +1470,6 @@
     <!-- HERO SECTION WITH VIDEO BACKGROUND -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
-        <!-- Video Background -->
         <div class="hero-video-bg">
             <video id="heroVideo" autoplay muted loop playsinline poster="/images/school-compound.jpg">
                 <source src="/videos/school-hero.mp4" type="video/mp4">
@@ -1440,7 +1480,6 @@
 
         <div class="hero-bg-pattern"></div>
 
-        <!-- Video Play Button -->
         <div class="hero-video-play" onclick="openVideoModal()">
             <div class="play-icon"><i class="fas fa-play"></i></div>
             <span class="play-text">▶ Watch Our Story</span>
@@ -1494,96 +1533,108 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- GALLERY SECTION - BELOW HERO -->
+    <!-- GALLERY SWIPER SECTION -->
     <!-- ======================================== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">🖼️ Our <span class="highlight">Gallery</span></h2>
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Explore our school facilities, activities, and events</p>
 
-            <div class="gallery-grid" id="galleryGrid">
-                <!-- Gallery items will be loaded dynamically from CMS -->
-                <div class="gallery-item" data-aos="fade-up" data-aos-delay="100">
-                    <div class="image-wrapper">
-                        <img src="/images/school-compound.jpg" alt="School Compound">
-                        <div class="overlay">
-                            <span class="tag">🏫 Facilities</span>
+            <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
+                <div class="swiper-wrapper" id="gallerySwiperWrapper">
+                    <!-- Gallery items loaded from CMS -->
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/school-compound.jpg" alt="School Compound">
+                                <div class="overlay">
+                                    <span class="tag">🏫 Facilities</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>School Compound</h4>
+                                <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="gallery-info">
-                        <h4>School Compound</h4>
-                        <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
-                    </div>
-                </div>
-
-                <div class="gallery-item" data-aos="fade-up" data-aos-delay="150">
-                    <div class="image-wrapper">
-                        <img src="/images/ecde-section.jpg" alt="ECDE Section">
-                        <div class="overlay">
-                            <span class="tag">🧸 ECDE</span>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/ecde-section.jpg" alt="ECDE Section">
+                                <div class="overlay">
+                                    <span class="tag">🧸 ECDE</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>E.C.D.E Section</h4>
+                                <p>Our Early Childhood Development Education section where young learners begin their journey.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="gallery-info">
-                        <h4>E.C.D.E Section</h4>
-                        <p>Our Early Childhood Development Education section where young learners begin their journey.</p>
-                    </div>
-                </div>
-
-                <div class="gallery-item" data-aos="fade-up" data-aos-delay="200">
-                    <div class="image-wrapper">
-                        <img src="/images/classroom-learning.jpg" alt="Classroom Learning">
-                        <div class="overlay">
-                            <span class="tag">📚 Academics</span>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/classroom-learning.jpg" alt="Classroom Learning">
+                                <div class="overlay">
+                                    <span class="tag">📚 Academics</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>Classroom Learning</h4>
+                                <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="gallery-info">
-                        <h4>Classroom Learning</h4>
-                        <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
-                    </div>
-                </div>
-
-                <div class="gallery-item" data-aos="fade-up" data-aos-delay="250">
-                    <div class="image-wrapper">
-                        <img src="/images/computer-lab.jpg" alt="Computer Lab">
-                        <div class="overlay">
-                            <span class="tag">💻 Technology</span>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/computer-lab.jpg" alt="Computer Lab">
+                                <div class="overlay">
+                                    <span class="tag">💻 Technology</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>Computer Lab</h4>
+                                <p>Students learning essential computer skills in our modern computer laboratory.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="gallery-info">
-                        <h4>Computer Lab</h4>
-                        <p>Students learning essential computer skills in our modern computer laboratory.</p>
-                    </div>
-                </div>
-
-                <div class="gallery-item" data-aos="fade-up" data-aos-delay="300">
-                    <div class="image-wrapper">
-                        <img src="/images/sports-day.jpg" alt="Sports Day">
-                        <div class="overlay">
-                            <span class="tag">🏆 Sports</span>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/sports-day.jpg" alt="Sports Day">
+                                <div class="overlay">
+                                    <span class="tag">🏆 Sports</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>Sports Day</h4>
+                                <p>Students participating in various sports activities during our annual sports day.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="gallery-info">
-                        <h4>Sports Day</h4>
-                        <p>Students participating in various sports activities during our annual sports day.</p>
-                    </div>
-                </div>
-
-                <div class="gallery-item" data-aos="fade-up" data-aos-delay="350">
-                    <div class="image-wrapper">
-                        <img src="/images/graduation.jpg" alt="Graduation Ceremony">
-                        <div class="overlay">
-                            <span class="tag">🎓 Events</span>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/graduation.jpg" alt="Graduation Ceremony">
+                                <div class="overlay">
+                                    <span class="tag">🎓 Events</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>Graduation Ceremony</h4>
+                                <p>Celebrating the achievements of our graduating students in a colorful ceremony.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="gallery-info">
-                        <h4>Graduation Ceremony</h4>
-                        <p>Celebrating the achievements of our graduating students in a colorful ceremony.</p>
-                    </div>
                 </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-pagination"></div>
             </div>
 
-            <div style="text-align:center;margin-top:30px;" data-aos="fade-up">
-                <a href="gallery.html" class="btn btn-primary" style="padding:12px 35px;border-radius:50px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:10px;">
+            <div style="text-align:center;margin-top:10px;" data-aos="fade-up">
+                <a href="gallery.html" class="btn" style="padding:12px 35px;border-radius:50px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--school-gold),var(--school-gold-dark));color:var(--kenya-black);transition:all 0.3s ease;box-shadow:0 4px 20px rgba(212,160,23,0.3);">
                     <i class="fas fa-images"></i> View Full Gallery
                     <i class="fas fa-arrow-right"></i>
                 </a>
@@ -1592,120 +1643,137 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- CONTENT CARDS SECTION -->
+    <!-- CONTENT CARDS SWIPER SECTION -->
     <!-- ======================================== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
 
-            <div class="content-grid">
+            <div class="swiper cards-swiper" data-aos="fade-up" data-aos-delay="200">
+                <div class="swiper-wrapper" id="cardsSwiperWrapper">
+                    <!-- Card 1: Academics -->
+                    <div class="swiper-slide">
+                        <div class="content-card card-academics" onclick="window.location.href='academics.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
+                                🔥 NEW
+                            </div>
+                            <span class="icon">📚</span>
+                            <h3>Academics</h3>
+                            <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📖 Playgroup to Grade 6 • CBC Curriculum</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Qualified Teachers</span> • <span>✅ Modern Facilities</span> • <span>✅ CBC</span>
+                            </div>
+                            <span class="badge">📢 Explore</span>
+                            <div class="card-cta">👆 Click to Explore</div>
+                        </div>
+                    </div>
 
-                <!-- CARD 1: ACADEMICS -->
-                <div class="content-card card-academics" id="slide-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
-                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
-                        🔥 NEW
+                    <!-- Card 2: Admissions -->
+                    <div class="swiper-slide">
+                        <div class="content-card card-admissions" onclick="window.location.href='admissions.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
+                                📢 ENROLLING
+                            </div>
+                            <span class="icon">📝</span>
+                            <h3>Admissions</h3>
+                            <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 Open • Playgroup to Grade 6</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Simple Process</span> • <span>✅ Affordable Fees</span> • <span>✅ Quality</span>
+                            </div>
+                            <span class="badge">📢 Apply Now</span>
+                            <div class="card-cta">👆 Apply Now</div>
+                        </div>
                     </div>
-                    <span class="icon">📚</span>
-                    <h3>Academics</h3>
-                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📖 Playgroup to Grade 6 • CBC Curriculum</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Qualified Teachers</span> • <span>✅ Modern Facilities</span> • <span>✅ CBC</span>
+
+                    <!-- Card 3: Facilities -->
+                    <div class="swiper-slide">
+                        <div class="content-card card-facilities" onclick="window.location.href='facilities.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: #17a2b8; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeBlue 2s infinite; box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4);">
+                                🏫 MODERN
+                            </div>
+                            <span class="icon">🏫</span>
+                            <h3>School Facilities</h3>
+                            <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">🏗️ Modern Classrooms • Computer Lab • Library</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Safe Environment</span> • <span>✅ Sports Facilities</span> • <span>✅ Meals</span>
+                            </div>
+                            <span class="badge">🏗️ Explore</span>
+                            <div class="card-cta">👆 View Facilities</div>
+                        </div>
                     </div>
-                    <span class="badge">📢 Explore</span>
-                    <div class="card-cta">👆 Click to Explore</div>
+
+                    <!-- Card 4: Performance -->
+                    <div class="swiper-slide">
+                        <div class="content-card card-performance" onclick="window.location.href='performance.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);">
+                                🏆 EXCELLENCE
+                            </div>
+                            <span class="icon">🏆</span>
+                            <h3>Performance</h3>
+                            <p id="displayPerformance" style="font-weight: 500;">Excellent academic performance in national examinations with top-performing students.</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Top Grades</span> • <span>✅ National Exams</span> • <span>✅ Track Record</span>
+                            </div>
+                            <span class="badge">🏆 Results</span>
+                            <div class="card-cta">👆 See Results</div>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Parents Corner -->
+                    <div class="swiper-slide">
+                        <div class="content-card card-parents" onclick="window.location.href='parents-corner.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: #fd7e14; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(253, 126, 20, 0.4);">
+                                👨‍👩‍👧‍👦 FAMILY
+                            </div>
+                            <span class="icon">👨‍👩‍👧‍👦</span>
+                            <h3>Parents Corner</h3>
+                            <p id="displayParents" style="font-weight: 500;">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Calendar</span> • <span>✅ Policies</span> • <span>✅ Communication</span>
+                            </div>
+                            <span class="badge">📋 Info</span>
+                            <div class="card-cta">👆 View Info</div>
+                        </div>
+                    </div>
+
+                    <!-- Card 6: Downloads -->
+                    <div class="swiper-slide">
+                        <div class="content-card card-downloads" onclick="window.location.href='downloads.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: #20c997; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(32, 201, 151, 0.4);">
+                                📥 DOWNLOAD
+                            </div>
+                            <span class="icon">📄</span>
+                            <h3>Downloads</h3>
+                            <p id="displayDownloads" style="font-weight: 500;">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Forms</span> • <span>✅ Calendar</span> • <span>✅ Documents</span>
+                            </div>
+                            <span class="badge">📥 Get</span>
+                            <div class="card-cta">👆 Download</div>
+                        </div>
+                    </div>
+
+                    <!-- Card 7: Fees Structure -->
+                    <div class="swiper-slide">
+                        <div class="content-card card-fees" onclick="window.location.href='fees.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 2.2s infinite; box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);">
+                                💰 AFFORDABLE
+                            </div>
+                            <span class="icon">💰</span>
+                            <h3>Fees Structure</h3>
+                            <p id="displayFees" style="font-weight: 500;">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Affordable</span> • <span>✅ Day Scholars</span> • <span>✅ Boarding</span>
+                            </div>
+                            <span class="badge">💰 View</span>
+                            <div class="card-cta">👆 View Fees</div>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- CARD 2: ADMISSIONS -->
-                <div class="content-card card-admissions" id="slide-admissions" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130">
-                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
-                        📢 ENROLLING
-                    </div>
-                    <span class="icon">📝</span>
-                    <h3>Admissions</h3>
-                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 Open • Playgroup to Grade 6</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Simple Process</span> • <span>✅ Affordable Fees</span> • <span>✅ Quality</span>
-                    </div>
-                    <span class="badge">📢 Apply Now</span>
-                    <div class="card-cta">👆 Apply Now</div>
-                </div>
-
-                <!-- CARD 3: FACILITIES -->
-                <div class="content-card card-facilities" id="slide-facilities" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #17a2b8; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeBlue 2s infinite; box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4);">
-                        🏫 MODERN
-                    </div>
-                    <span class="icon">🏫</span>
-                    <h3>School Facilities</h3>
-                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">🏗️ Modern Classrooms • Computer Lab • Library</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Safe Environment</span> • <span>✅ Sports Facilities</span> • <span>✅ Meals</span>
-                    </div>
-                    <span class="badge">🏗️ Explore</span>
-                    <div class="card-cta">👆 View Facilities</div>
-                </div>
-
-                <!-- CARD 4: PERFORMANCE -->
-                <div class="content-card card-performance" id="slide-performance" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);">
-                        🏆 EXCELLENCE
-                    </div>
-                    <span class="icon">🏆</span>
-                    <h3>Performance</h3>
-                    <p id="displayPerformance" style="font-weight: 500;">Excellent academic performance in national examinations with top-performing students.</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Top Grades</span> • <span>✅ National Exams</span> • <span>✅ Track Record</span>
-                    </div>
-                    <span class="badge">🏆 Results</span>
-                    <div class="card-cta">👆 See Results</div>
-                </div>
-
-                <!-- CARD 5: PARENTS CORNER -->
-                <div class="content-card card-parents" id="slide-parents" onclick="window.location.href='parents-corner.html'" data-aos="fade-up" data-aos-delay="220">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #fd7e14; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(253, 126, 20, 0.4);">
-                        👨‍👩‍👧‍👦 FAMILY
-                    </div>
-                    <span class="icon">👨‍👩‍👧‍👦</span>
-                    <h3>Parents Corner</h3>
-                    <p id="displayParents" style="font-weight: 500;">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Calendar</span> • <span>✅ Policies</span> • <span>✅ Communication</span>
-                    </div>
-                    <span class="badge">📋 Info</span>
-                    <div class="card-cta">👆 View Info</div>
-                </div>
-
-                <!-- CARD 6: DOWNLOADS -->
-                <div class="content-card card-downloads" id="slide-downloads" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #20c997; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(32, 201, 151, 0.4);">
-                        📥 DOWNLOAD
-                    </div>
-                    <span class="icon">📄</span>
-                    <h3>Downloads</h3>
-                    <p id="displayDownloads" style="font-weight: 500;">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Forms</span> • <span>✅ Calendar</span> • <span>✅ Documents</span>
-                    </div>
-                    <span class="badge">📥 Get</span>
-                    <div class="card-cta">👆 Download</div>
-                </div>
-
-                <!-- CARD 7: FEES STRUCTURE -->
-                <div class="content-card card-fees" id="slide-fees" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 2.2s infinite; box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);">
-                        💰 AFFORDABLE
-                    </div>
-                    <span class="icon">💰</span>
-                    <h3>Fees Structure</h3>
-                    <p id="displayFees" style="font-weight: 500;">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Affordable</span> • <span>✅ Day Scholars</span> • <span>✅ Boarding</span>
-                    </div>
-                    <span class="badge">💰 View</span>
-                    <div class="card-cta">👆 View Fees</div>
-                </div>
-
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-pagination"></div>
             </div>
         </div>
     </section>
@@ -1851,6 +1919,7 @@
     <!-- ======================================== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
         // ============================================
@@ -1953,6 +2022,61 @@
         });
 
         // ============================================
+        // SWIPER INITIALIZATION
+        // ============================================
+        let gallerySwiper, cardsSwiper;
+
+        function initSwipers() {
+            // Gallery Swiper
+            gallerySwiper = new Swiper('.gallery-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 4000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: '.gallery-swiper .swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.gallery-swiper .swiper-button-next',
+                    prevEl: '.gallery-swiper .swiper-button-prev',
+                },
+                breakpoints: {
+                    640: { slidesPerView: 1 },
+                    768: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 },
+                },
+            });
+
+            // Cards Swiper
+            cardsSwiper = new Swiper('.cards-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: '.cards-swiper .swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.cards-swiper .swiper-button-next',
+                    prevEl: '.cards-swiper .swiper-button-prev',
+                },
+                breakpoints: {
+                    640: { slidesPerView: 1 },
+                    768: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 },
+                },
+            });
+        }
+
+        // ============================================
         // LOAD CMS CONTENT
         // ============================================
         function stripHtml(html) {
@@ -1991,61 +2115,13 @@
                         }
                     });
 
-                    if (c.homeFeatures && c.homeFeatures.length > 0) {
-                        const featuresGrid = document.getElementById('featuresGrid');
-                        featuresGrid.innerHTML = '';
-                        c.homeFeatures.forEach((feature, i) => {
-                            const div = document.createElement('div');
-                            div.className = 'feature-item';
-                            div.setAttribute('data-aos', 'zoom-in');
-                            div.setAttribute('data-aos-delay', (i + 1) * 100);
-                            div.innerHTML = `
-                                <span class="icon">${feature.icon || '📚'}</span>
-                                <h4>${feature.title || 'Feature'}</h4>
-                                <p>${feature.description || ''}</p>
-                                <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                            `;
-                            featuresGrid.appendChild(div);
-                        });
-                    }
-
-                    if (c.homeStats && c.homeStats.length > 0) {
-                        const stats = c.homeStats;
-                        const statIds = ['stat1Number', 'stat2Number', 'stat3Number', 'stat4Number'];
-                        statIds.forEach((id, index) => {
-                            if (stats[index]) {
-                                document.getElementById(id).textContent = stats[index].number || '0';
-                            }
-                        });
-                    }
-
-                    if (c.homeNews && c.homeNews.length > 0) {
-                        const newsGrid = document.getElementById('newsGrid');
-                        newsGrid.innerHTML = '';
-                        c.homeNews.forEach((news, i) => {
-                            const div = document.createElement('div');
-                            div.className = 'news-item';
-                            div.setAttribute('data-aos', 'fade-up');
-                            div.setAttribute('data-aos-delay', (i + 1) * 100);
-                            div.innerHTML = `
-                                <h4>${news.title || 'News'}</h4>
-                                <p>${news.content || ''}</p>
-                                <span class="date">Posted: ${new Date().toLocaleDateString()}</span>
-                                <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                            `;
-                            newsGrid.appendChild(div);
-                        });
-                    }
-
                     // Load gallery from CMS
                     if (c.gallery && c.gallery.length > 0) {
-                        const galleryGrid = document.getElementById('galleryGrid');
-                        galleryGrid.innerHTML = '';
-                        c.gallery.forEach((item, index) => {
-                            const div = document.createElement('div');
-                            div.className = 'gallery-item';
-                            div.setAttribute('data-aos', 'fade-up');
-                            div.setAttribute('data-aos-delay', (index + 1) * 50);
+                        const wrapper = document.getElementById('gallerySwiperWrapper');
+                        wrapper.innerHTML = '';
+                        c.gallery.forEach((item) => {
+                            const slide = document.createElement('div');
+                            slide.className = 'swiper-slide';
                             
                             let mediaHtml = '';
                             if (item.type === 'video') {
@@ -2054,20 +2130,27 @@
                                 mediaHtml = `<img src="${item.file}" alt="${item.title || 'Gallery Image'}">`;
                             }
                             
-                            div.innerHTML = `
-                                <div class="image-wrapper">
-                                    ${mediaHtml}
-                                    <div class="overlay">
-                                        <span class="tag">${item.category || 'Gallery'}</span>
+                            slide.innerHTML = `
+                                <div class="gallery-card">
+                                    <div class="image-wrapper">
+                                        ${mediaHtml}
+                                        <div class="overlay">
+                                            <span class="tag">${item.category || 'Gallery'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="gallery-content">
+                                        <h4>${item.title || 'Gallery Item'}</h4>
+                                        <p>${item.description || ''}</p>
                                     </div>
                                 </div>
-                                <div class="gallery-info">
-                                    <h4>${item.title || 'Gallery Item'}</h4>
-                                    <p>${item.description || ''}</p>
-                                </div>
                             `;
-                            galleryGrid.appendChild(div);
+                            wrapper.appendChild(slide);
                         });
+                        // Re-init swiper after adding items
+                        if (gallerySwiper) {
+                            gallerySwiper.destroy();
+                            gallerySwiper = null;
+                        }
                     }
 
                     if (c.noticeAlert) {
@@ -2077,8 +2160,14 @@
             } catch (error) {
                 console.log('CMS not available - using default content');
             }
+            
+            // Initialize swipers after content is loaded
+            setTimeout(initSwipers, 300);
         }
 
+        // ============================================
+        // INIT
+        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadWebsiteContent();
         });
