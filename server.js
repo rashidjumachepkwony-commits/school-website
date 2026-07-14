@@ -18,17 +18,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================
-// HELPER: GET KENYA TIME (UTC+3)
+// HELPER: GET KENYA TIME (UTC+3) - FIXED
 // ============================================
 function getKenyaTime() {
     const now = new Date();
+    // Use Nairobi timezone
     const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
     return new Date(kenyaTimeString);
 }
 
 function getKenyaDate() {
-    const now = getKenyaTime();
-    const date = new Date(now);
+    const kenyaTime = getKenyaTime();
+    const date = new Date(kenyaTime);
     date.setHours(0, 0, 0, 0);
     return date;
 }
@@ -57,6 +58,17 @@ function formatKenyaFullTime(date) {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
+    });
+}
+
+function formatKenyaDate(date) {
+    if (!date) return '-';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-KE', {
+        timeZone: 'Africa/Nairobi',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
     });
 }
 
@@ -166,7 +178,6 @@ app.use('/uploads', express.static('uploads'));
 // CONTENT SCHEMA (CMS)
 // ============================================
 const contentSchema = new mongoose.Schema({
-  // Hero Section
   heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
   heroSubtitle: { type: String, default: 'Your trusted partner in quality education and school management' },
   heroButtonText: { type: String, default: 'Learn More' },
@@ -174,7 +185,6 @@ const contentSchema = new mongoose.Schema({
   heroVideo: { type: String, default: '' },
   applyButtonText: { type: String, default: 'Apply Now' },
   
-  // Home Page
   homeFeatures: [{
     icon: { type: String, default: '📚' },
     title: { type: String, default: 'Quality Education' },
@@ -190,7 +200,6 @@ const contentSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
   }],
 
-  // About Page
   aboutMission: { type: String, default: 'To provide quality education that nurtures talent, builds character, and prepares students for a successful future.' },
   aboutVision: { type: String, default: 'To be a center of excellence in education, producing well-rounded individuals who contribute positively to society.' },
   aboutValues: { type: String, default: 'Excellence, Integrity, Respect, Innovation, Community Engagement' },
@@ -198,7 +207,6 @@ const contentSchema = new mongoose.Schema({
   aboutMotto: { type: String, default: 'Excellence in Education' },
   aboutWhy: { type: String, default: 'Holistic education, qualified teachers, modern facilities.' },
 
-  // Academics Page
   academicsIntro: { type: String, default: '' },
   academics: [{
     grade: { type: String, default: 'Grade 1' },
@@ -208,7 +216,6 @@ const contentSchema = new mongoose.Schema({
     teacherSupport: { type: String, default: 'Individual attention' }
   }],
 
-  // Admissions Page
   admissionsIntro: { type: String, default: '' },
   admissionsRequirements: { type: String, default: 'Admission is open to all students who meet the age requirements.' },
   admissionsAge: { type: String, default: 'Playgroup: 2-3 years, PP1: 4 years, PP2: 5 years, Grade 1: 6 years, Grade 2-6: 7-12 years' },
@@ -216,7 +223,6 @@ const contentSchema = new mongoose.Schema({
   admissionsProcess: { type: String, default: '1. Visit the school for a tour. 2. Fill the admission form. 3. Submit required documents. 4. Pay registration fee.' },
   admissionsFees: { type: String, default: 'Please contact the school administration for the current fee structure.' },
 
-  // Facilities Page
   facilitiesIntro: { type: String, default: '' },
   facilities: [{
     name: { type: String, default: 'Modern Classrooms' },
@@ -224,7 +230,6 @@ const contentSchema = new mongoose.Schema({
     image: { type: String, default: '' }
   }],
 
-  // Gallery
   gallery: [{
     title: { type: String, default: 'School Activity' },
     description: { type: String, default: '' },
@@ -233,7 +238,6 @@ const contentSchema = new mongoose.Schema({
     category: { type: String, default: 'General' }
   }],
 
-  // Events
   events: [{
     title: { type: String, default: 'Event Title' },
     content: { type: String, default: 'Event description' },
@@ -242,7 +246,6 @@ const contentSchema = new mongoose.Schema({
     image: { type: String, default: '' }
   }],
 
-  // Co-Curricular
   coCurricular: [{
     name: { type: String, default: 'Football' },
     description: { type: String, default: 'School football team.' },
@@ -250,12 +253,10 @@ const contentSchema = new mongoose.Schema({
     image: { type: String, default: '' }
   }],
 
-  // Performance Page
   performanceIntro: { type: String, default: '' },
   performanceKcpe: { type: String, default: 'Our students consistently perform well in national examinations.' },
   performanceInternal: { type: String, default: 'Regular internal assessments track student progress.' },
 
-  // Parents Corner
   parentsIntro: { type: String, default: '' },
   parentsCalendar: { type: String, default: 'School calendar for 2026 with all important dates.' },
   parentsHomework: { type: String, default: 'Homework is given regularly to reinforce learning.' },
@@ -264,7 +265,6 @@ const contentSchema = new mongoose.Schema({
   parentsUniform: { type: String, default: 'All students must wear the official school uniform.' },
   parentsFees: { type: String, default: 'Fees must be paid at the beginning of each term.' },
 
-  // Downloads
   downloadsIntro: { type: String, default: '' },
   downloads: [{
     name: { type: String, default: 'Admission Form' },
@@ -273,12 +273,10 @@ const contentSchema = new mongoose.Schema({
     icon: { type: String, default: '📄' }
   }],
 
-  // Fees Page
   feesIntro: { type: String, default: '' },
   feesPaybill: { type: String, default: '474752' },
   feesInstructions: { type: String, default: '' },
 
-  // Contact Page
   contactIntro: { type: String, default: '' },
   contactAddress: { type: String, default: 'Nairobi, Kenya' },
   contactPhone: { type: String, default: '+254 721 556 252' },
@@ -286,20 +284,16 @@ const contentSchema = new mongoose.Schema({
   contactHours: { type: String, default: 'Monday - Friday: 7:00 AM - 6:00 PM' },
   contactMap: { type: String, default: '' },
 
-  // Footer
   footerText: { type: String, default: 'Committed to providing quality education and fostering excellence.' },
 
-  // SEO
   seoTitle: { type: String, default: 'Changara Star Academy - Excellence in Education' },
   seoDescription: { type: String, default: 'Changara Star Academy - Excellence in Education. School management system for students, staff, and parents.' },
   seoKeywords: { type: String, default: 'school, education, academy, Nairobi, Kenya' },
 
-  // Notice Alert
   noticeAlert: { type: String, default: '' },
   noticeType: { type: String, default: '' },
   noticeDate: { type: Date },
 
-  // Meta
   lastUpdated: { type: Date, default: Date.now },
   updatedBy: { type: String, default: 'Admin' }
 });
@@ -605,14 +599,12 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ============================================
-// API ROUTES - TEACHER (ALL USING KENYA TIME)
+// API ROUTES - TEACHER (USING KENYA TIME)
 // ============================================
 
 app.post('/api/teacher/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, employeeId, phoneNumber, department } = req.body;
-    
-    console.log('📝 Registering teacher:', { firstName, lastName, email, employeeId });
     
     const existing = await Teacher.findOne({ 
       $or: [{ email }, { employeeId }] 
@@ -644,8 +636,6 @@ app.post('/api/teacher/register', async (req, res) => {
     
     await teacher.save();
     
-    console.log('✅ Teacher registered successfully:', teacher.employeeId);
-    
     res.json({ 
       success: true, 
       message: 'Staff registered successfully!',
@@ -659,7 +649,7 @@ app.post('/api/teacher/register', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ Registration error:', error);
+    console.error('Registration error:', error);
     res.status(500).json({ 
       success: false, 
       message: error.message 
@@ -668,7 +658,7 @@ app.post('/api/teacher/register', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-IN
+// TEACHER CHECK-IN - FIXED WITH KENYA TIME
 // ============================================
 app.post('/api/teacher/checkin', async (req, res) => {
   try {
@@ -689,6 +679,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
+    // USE KENYA TIME
     const kenyaNow = getKenyaTime();
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
@@ -697,6 +688,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
     console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
     console.log('🕐 Hour (Kenya time):', kenyaHour);
     
+    // Weekend check
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       return res.status(400).json({
         success: false,
@@ -704,6 +696,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
+    // Check if already checked in today
     const existingAttendance = teacher.attendance.find(a => {
       const aDate = new Date(a.date);
       aDate.setHours(0, 0, 0, 0);
@@ -717,6 +710,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
+    // Check if after 5:00 PM
     if (kenyaHour >= 17) {
       return res.status(400).json({
         success: false,
@@ -724,9 +718,11 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
+    // Determine if late (after 7:00 AM)
     const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
     const status = isLate ? 'Late' : 'Present';
     
+    // Store check-in time in Kenya time
     teacher.attendance.push({
       date: kenyaToday,
       checkIn: kenyaNow,
@@ -765,7 +761,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-OUT
+// TEACHER CHECK-OUT - FIXED WITH KENYA TIME
 // ============================================
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
@@ -786,6 +782,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
+    // USE KENYA TIME
     const kenyaNow = getKenyaTime();
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
@@ -793,6 +790,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
     console.log('🕐 Hour (Kenya time):', kenyaHour);
     
+    // Find today's attendance
     const todayAttendance = teacher.attendance.find(a => {
       const aDate = new Date(a.date);
       aDate.setHours(0, 0, 0, 0);
@@ -813,6 +811,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
+    // Allow check-out after 3:00 PM (15:00) Kenya time
     if (kenyaHour < 15) {
       return res.status(400).json({
         success: false,
@@ -820,6 +819,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
+    // Store check-out time in Kenya time
     todayAttendance.checkOut = kenyaNow;
     todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + formatKenyaFullTime(kenyaNow);
     
@@ -912,47 +912,210 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
   }
 });
 
-// GET TEACHER ATTENDANCE HISTORY
-app.get('/api/teacher/attendance/:employeeId', async (req, res) => {
+// ============================================
+// STAFF ATTENDANCE REPORTS - DAILY, WEEKLY, MONTHLY
+// ============================================
+
+// Staff Attendance Report
+app.get('/api/reports/staff/attendance', async (req, res) => {
   try {
-    const teacher = await Teacher.findOne({ 
-      employeeId: req.params.employeeId 
-    });
+    const { period, date } = req.query;
+    const kenyaNow = getKenyaTime();
+    let startDate, endDate;
     
-    if (!teacher) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Teacher not found' 
-      });
+    // Set date range based on period
+    if (period === 'daily') {
+      const selectedDate = date ? new Date(date) : kenyaNow;
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    } else if (period === 'weekly') {
+      const selectedDate = date ? new Date(date) : kenyaNow;
+      startDate = new Date(selectedDate);
+      startDate.setDate(startDate.getDate() - startDate.getDay() + 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+    } else if (period === 'monthly') {
+      const selectedDate = date ? new Date(date) : kenyaNow;
+      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
+    } else {
+      // Default: today
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
     }
     
-    const totalDays = teacher.attendance.length;
-    const presentDays = teacher.attendance.filter(a => a.status === 'Present' || a.status === 'Late').length;
-    const lateDays = teacher.attendance.filter(a => a.isLate === true).length;
-    const absentDays = teacher.attendance.filter(a => a.status === 'Absent').length;
+    // Get all teachers with attendance in date range
+    const teachers = await Teacher.find({ isActive: true });
+    
+    let reportData = [];
+    let totalPresent = 0;
+    let totalLate = 0;
+    let totalAbsent = 0;
+    let totalStaff = teachers.length;
+    
+    teachers.forEach(teacher => {
+      const attendanceRecords = teacher.attendance.filter(a => {
+        const aDate = new Date(a.date);
+        return aDate >= startDate && aDate < endDate;
+      });
+      
+      const daysPresent = attendanceRecords.filter(a => a.status === 'Present' || a.status === 'Late').length;
+      const daysLate = attendanceRecords.filter(a => a.isLate === true).length;
+      const daysAbsent = attendanceRecords.filter(a => a.status === 'Absent').length;
+      
+      totalPresent += daysPresent;
+      totalLate += daysLate;
+      totalAbsent += daysAbsent;
+      
+      reportData.push({
+        name: `${teacher.firstName} ${teacher.lastName}`,
+        employeeId: teacher.employeeId,
+        department: teacher.department,
+        totalDays: attendanceRecords.length,
+        present: daysPresent,
+        late: daysLate,
+        absent: daysAbsent,
+        attendanceRate: attendanceRecords.length > 0 ? ((daysPresent / attendanceRecords.length) * 100).toFixed(1) : 0,
+        records: attendanceRecords.map(a => ({
+          date: formatKenyaDate(a.date),
+          checkIn: formatKenyaTime(a.checkIn),
+          checkOut: a.checkOut ? formatKenyaTime(a.checkOut) : '-',
+          status: a.status,
+          isLate: a.isLate,
+          hoursWorked: a.hoursWorked || 0
+        }))
+      });
+    });
+    
+    // Calculate summary
+    const summary = {
+      totalStaff,
+      totalPresent,
+      totalLate,
+      totalAbsent,
+      overallAttendanceRate: totalStaff > 0 ? ((totalPresent / (totalStaff * 7)) * 100).toFixed(1) : 0,
+      period: period,
+      startDate: startDate,
+      endDate: endDate
+    };
     
     res.json({
       success: true,
-      teacher: {
-        name: `${teacher.firstName} ${teacher.lastName}`,
-        employeeId: teacher.employeeId,
-        department: teacher.department
-      },
-      stats: {
-        totalDays,
-        presentDays,
-        lateDays,
-        absentDays,
-        attendanceRate: totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : 0
-      },
-      attendance: teacher.attendance.sort((a, b) => b.date - a.date)
+      summary,
+      teachers: reportData
     });
     
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    console.error('Error generating staff report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// VISITOR REPORTS - DAILY, WEEKLY, MONTHLY
+// ============================================
+
+// Visitor Report
+app.get('/api/reports/visitors', async (req, res) => {
+  try {
+    const { period, date } = req.query;
+    const kenyaNow = getKenyaTime();
+    let startDate, endDate;
+    
+    // Set date range based on period
+    if (period === 'daily') {
+      const selectedDate = date ? new Date(date) : kenyaNow;
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    } else if (period === 'weekly') {
+      const selectedDate = date ? new Date(date) : kenyaNow;
+      startDate = new Date(selectedDate);
+      startDate.setDate(startDate.getDate() - startDate.getDay() + 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+    } else if (period === 'monthly') {
+      const selectedDate = date ? new Date(date) : kenyaNow;
+      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
+    } else {
+      // Default: today
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    // Get all visitors in date range
+    const visitors = await Visitor.find({
+      checkIn: { $gte: startDate, $lt: endDate }
+    }).sort({ checkIn: -1 });
+    
+    // Calculate statistics
+    const totalVisitors = visitors.length;
+    const active = visitors.filter(v => v.status === 'Checked In').length;
+    const completed = visitors.filter(v => v.status === 'Checked Out').length;
+    
+    // Purpose breakdown
+    const purposeStats = {};
+    visitors.forEach(v => {
+      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
     });
+    
+    // Daily breakdown
+    const dailyStats = {};
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(startDate);
+      day.setDate(day.getDate() + d);
+      if (day < endDate) {
+        const dayStr = formatKenyaDate(day);
+        dailyStats[dayStr] = visitors.filter(v => {
+          const vDate = new Date(v.checkIn);
+          return vDate >= day && vDate < new Date(day.getTime() + 24 * 60 * 60 * 1000);
+        }).length;
+      }
+    }
+    
+    // Format visitor data
+    const formattedVisitors = visitors.map(v => ({
+      fullName: v.fullName,
+      badgeNumber: v.badgeNumber,
+      purpose: v.purpose,
+      personToVisit: v.personToVisit,
+      hostName: v.hostName,
+      checkIn: v.checkIn,
+      checkOut: v.checkOut,
+      checkInTime: formatKenyaTime(v.checkIn),
+      checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : '-',
+      status: v.status,
+      duration: v.checkOut ? ((v.checkOut - v.checkIn) / 1000 / 60).toFixed(0) + ' mins' : 'In progress'
+    }));
+    
+    res.json({
+      success: true,
+      summary: {
+        period: period,
+        startDate: startDate,
+        endDate: endDate,
+        totalVisitors,
+        active,
+        completed,
+        purposeStats,
+        dailyStats
+      },
+      visitors: formattedVisitors
+    });
+    
+  } catch (error) {
+    console.error('Error generating visitor report:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -1358,114 +1521,6 @@ app.get('/api/visitors/today', async (req, res) => {
   }
 });
 
-app.get('/api/visitors/weekly', async (req, res) => {
-  try {
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
-    weekStart.setHours(0, 0, 0, 0);
-    
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-
-    const visitors = await Visitor.find({
-      checkIn: { $gte: weekStart, $lt: weekEnd }
-    }).sort({ checkIn: -1 });
-
-    const active = visitors.filter(v => v.status === 'Checked In');
-    const completed = visitors.filter(v => v.status === 'Checked Out');
-
-    const purposeStats = {};
-    visitors.forEach(v => {
-      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
-    });
-
-    const dailyStats = {};
-    for (let d = 0; d < 7; d++) {
-      const day = new Date(weekStart);
-      day.setDate(day.getDate() + d);
-      const dayStr = day.toDateString();
-      dailyStats[dayStr] = visitors.filter(v => new Date(v.checkIn).toDateString() === dayStr).length;
-    }
-
-    res.json({
-      success: true,
-      weekStart: weekStart,
-      weekEnd: weekEnd,
-      total: visitors.length,
-      active: active.length,
-      completed: completed.length,
-      byPurpose: purposeStats,
-      daily: dailyStats,
-      visitors: visitors
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.get('/api/visitors/monthly', async (req, res) => {
-  try {
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
-    
-    const monthEnd = new Date(monthStart);
-    monthEnd.setMonth(monthEnd.getMonth() + 1);
-
-    const visitors = await Visitor.find({
-      checkIn: { $gte: monthStart, $lt: monthEnd }
-    }).sort({ checkIn: -1 });
-
-    const active = visitors.filter(v => v.status === 'Checked In');
-    const completed = visitors.filter(v => v.status === 'Checked Out');
-
-    const purposeStats = {};
-    visitors.forEach(v => {
-      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
-    });
-
-    const dailyStats = {};
-    for (let d = 1; d <= monthEnd.getDate(); d++) {
-      const day = new Date(monthStart);
-      day.setDate(d);
-      const dayStr = day.toDateString();
-      dailyStats[dayStr] = visitors.filter(v => new Date(v.checkIn).toDateString() === dayStr).length;
-    }
-
-    res.json({
-      success: true,
-      monthStart: monthStart,
-      monthEnd: monthEnd,
-      total: visitors.length,
-      active: active.length,
-      completed: completed.length,
-      byPurpose: purposeStats,
-      daily: dailyStats,
-      visitors: visitors
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.delete('/api/visitors/:id', async (req, res) => {
-  try {
-    const visitor = await Visitor.findByIdAndDelete(req.params.id);
-    if (!visitor) {
-      return res.status(404).json({
-        success: false,
-        message: 'Visitor not found'
-      });
-    }
-    res.json({
-      success: true,
-      message: 'Visitor record deleted successfully!'
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
 // ============================================
 // TEST ROUTE
 // ============================================
@@ -1497,6 +1552,10 @@ app.get('/api/test', (req, res) => {
           today: '/api/visitors/today',
           weekly: '/api/visitors/weekly',
           monthly: '/api/visitors/monthly'
+        },
+        reports: {
+          staff: '/api/reports/staff/attendance?period=daily&date=2024-01-01',
+          visitor: '/api/reports/visitors?period=daily&date=2024-01-01'
         }
       }
     }
