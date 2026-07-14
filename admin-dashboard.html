@@ -8,8 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
+        /* ===== BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; min-height: 100vh; }
         
@@ -195,129 +197,8 @@
         .btn-warning:hover { background: #e0a800; }
         .btn-block { width: 100%; padding: 14px; font-size: 16px; justify-content: center; margin-top: 20px; }
         .btn-sm { padding: 5px 12px; font-size: 12px; }
-        
-        /* ===== UPLOAD AREA ===== */
-        .upload-area {
-            background: #f8f9fc;
-            border: 2px dashed #d4a017;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 15px;
-            transition: 0.3s;
-        }
-        .upload-area:hover { border-color: #0b5394; background: #f0f4ff; }
-        .upload-area .icon { font-size: 40px; display: block; margin-bottom: 5px; }
-        .upload-area h3 { color: #001f5c; font-size: 18px; margin-bottom: 3px; }
-        .upload-area p { color: #666; font-size: 13px; margin-bottom: 10px; }
-        .upload-area .file-types {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-        .upload-area .file-types span {
-            background: white;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            border: 1px solid #ddd;
-        }
-        .upload-progress { display: none; margin-top: 10px; }
-        .progress-bar {
-            background: #e8ecf1;
-            border-radius: 10px;
-            height: 20px;
-            overflow: hidden;
-        }
-        .progress-bar .progress-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #d4a017, #f5c842);
-            transition: width 0.3s;
-        }
-        .upload-status { margin-top: 5px; color: #666; font-size: 13px; }
-        .uploaded-preview { margin-top: 10px; display: none; }
-        .uploaded-preview .preview-box {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border: 2px solid #d4a017;
-            display: inline-block;
-        }
-        .uploaded-preview img,
-        .uploaded-preview video { max-width: 200px; max-height: 150px; border-radius: 6px; }
-        .uploaded-preview audio { width: 250px; }
-        .uploaded-preview .file-info { margin-top: 8px; font-size: 13px; color: #28a745; font-weight: bold; }
-        .uploaded-preview .file-path { font-size: 12px; color: #666; }
-        
-        /* ===== ITEM BOXES ===== */
-        .item-box {
-            background: #f8f9fc;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #e8ecf1;
-            margin-bottom: 10px;
-            position: relative;
-        }
-        .item-box .remove-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .item-box .remove-btn:hover { background: #c82333; transform: scale(1.1); }
-        .item-box .file-preview {
-            margin-top: 8px;
-            padding: 8px;
-            background: #e8ecf1;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .item-box .file-preview img,
-        .item-box .file-preview video { max-width: 100px; max-height: 80px; border-radius: 4px; }
-        .item-box .file-preview audio { width: 150px; }
-        
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            color: #999;
-        }
-        .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; color: #ddd; }
-        
-        /* ===== DASHBOARD CARDS ===== */
-        .dashboard-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .dashboard-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            text-align: center;
-            transition: transform 0.2s;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-        .dashboard-card:hover { transform: translateY(-5px); }
-        .dashboard-card .icon { font-size: 32px; display: block; margin-bottom: 8px; }
-        .dashboard-card h3 { color: #1a2a4a; font-size: 16px; }
-        .dashboard-card p { color: #666; font-size: 12px; }
+        .btn-download { background: linear-gradient(135deg, #6f42c1, #4a2a8a); color: white; }
+        .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(111,66,193,0.35); }
         
         /* ===== ALERT ===== */
         .alert {
@@ -360,6 +241,82 @@
         .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
         .action-buttons .btn { font-size: 11px; padding: 4px 10px; }
         
+        /* ===== REPORT FILTERS ===== */
+        .report-filters {
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e8ecf1;
+            margin-bottom: 20px;
+        }
+        .report-filters .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .report-filters .filter-row .form-group {
+            margin-bottom: 0;
+            flex: 1;
+            min-width: 150px;
+        }
+        .report-filters .filter-row .form-group label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        
+        /* ===== STATS CARDS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e8ecf1;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a2a4a;
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: #666;
+        }
+        .stat-card .number.gold { color: #d4a017; }
+        .stat-card .number.green { color: #28a745; }
+        .stat-card .number.red { color: #dc3545; }
+        .stat-card .number.blue { color: #17a2b8; }
+        .stat-card .number.purple { color: #6f42c1; }
+        
+        /* ===== DASHBOARD CARDS ===== */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .dashboard-card:hover { transform: translateY(-5px); }
+        .dashboard-card .icon { font-size: 32px; display: block; margin-bottom: 8px; }
+        .dashboard-card h3 { color: #1a2a4a; font-size: 16px; }
+        .dashboard-card p { color: #666; font-size: 12px; }
+        
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .sidebar {
@@ -375,9 +332,12 @@
             .data-table { font-size: 12px; }
             .data-table th,
             .data-table td { padding: 6px 8px; }
+            .report-filters .filter-row { flex-direction: column; }
+            .report-filters .filter-row .form-group { min-width: 100%; }
         }
         @media (max-width: 480px) {
             .dashboard-cards { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -416,6 +376,10 @@
 
         <div class="menu-label" style="margin-top:10px;">Visitor Management</div>
         <a onclick="showSection('visitors')"><i class="fas fa-user-friends"></i> Visitors</a>
+
+        <div class="menu-label" style="margin-top:10px;">📊 Reports</div>
+        <a onclick="showSection('staff-reports')"><i class="fas fa-chart-bar"></i> Staff Reports</a>
+        <a onclick="showSection('visitor-reports')"><i class="fas fa-chart-pie"></i> Visitor Reports</a>
 
         <div class="logout">
             <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -473,6 +437,16 @@
                 <h3>Visitors</h3>
                 <p>Visitor logs</p>
             </div>
+            <div class="dashboard-card" onclick="showSection('staff-reports')" style="border-color:#6f42c1;">
+                <span class="icon">📊</span>
+                <h3>Staff Reports</h3>
+                <p>Daily/Weekly/Monthly</p>
+            </div>
+            <div class="dashboard-card" onclick="showSection('visitor-reports')" style="border-color:#d4a017;">
+                <span class="icon">📈</span>
+                <h3>Visitor Reports</h3>
+                <p>Daily/Weekly/Monthly</p>
+            </div>
         </div>
 
         <div style="background:white;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);">
@@ -482,7 +456,7 @@
                 <button class="btn btn-info" onclick="showSection('gallery')"><i class="fas fa-images"></i> Upload Media</button>
                 <button class="btn btn-primary" onclick="showSection('staff')"><i class="fas fa-user-plus"></i> Add Staff</button>
                 <button class="btn btn-warning" onclick="showSection('notice')"><i class="fas fa-bell"></i> Post Notice</button>
-                <button class="btn btn-danger" onclick="clearAllCache()"><i class="fas fa-trash"></i> Clear Cache</button>
+                <button class="btn btn-secondary" onclick="showSection('staff-reports')"><i class="fas fa-chart-bar"></i> View Reports</button>
             </div>
         </div>
     </div>
@@ -493,25 +467,6 @@
     <div id="section-hero" class="editor-container">
         <h2>🎬 Hero Section</h2>
         <p class="desc">Edit the hero section content and upload a background video.</p>
-
-        <div class="upload-area">
-            <span class="icon">🎥</span>
-            <h3>Upload Hero Video</h3>
-            <p>Upload a video to display as the hero background.</p>
-            <div class="file-types">
-                <span>🎬 MP4</span>
-                <span>🎬 WebM</span>
-                <span>🎬 OGG</span>
-            </div>
-            <input type="file" id="heroVideoUpload" accept="video/*" style="display:none;" onchange="uploadHeroVideo()">
-            <button class="btn btn-primary" onclick="document.getElementById('heroVideoUpload').click()">
-                <i class="fas fa-upload"></i> Choose Video
-            </button>
-            <div id="heroVideoPreview" style="margin-top:10px;display:none;">
-                <video id="heroVideoPlayer" controls style="max-width:100%;border-radius:8px;max-height:300px;"></video>
-                <p style="color:#28a745;margin-top:5px;font-weight:600;">✅ Video uploaded!</p>
-            </div>
-        </div>
 
         <div class="form-group">
             <label>Hero Title</label>
@@ -654,31 +609,12 @@
         <h2>🖼️ Gallery</h2>
         <p class="desc">Upload and manage all media files.</p>
 
-        <div class="upload-area">
-            <span class="icon">📤</span>
-            <h3>Upload Media</h3>
-            <p>Upload images, videos, or audio files.</p>
-            <div class="file-types">
-                <span>🖼️ Images (JPG, PNG, GIF, WebP)</span>
-                <span>🎬 Videos (MP4, WebM, OGG)</span>
-                <span>🎵 Audio (MP3, WAV, OGG, WebM)</span>
-            </div>
-            <input type="file" id="fileUpload" accept="image/*,video/*,audio/*" style="display:none;" onchange="uploadFile()">
-            <button class="btn btn-primary" onclick="document.getElementById('fileUpload').click()">
-                <i class="fas fa-upload"></i> Choose File
-            </button>
-            <div class="upload-progress" id="uploadProgress">
+        <div class="form-group">
+            <label>Upload Image/Video/Audio</label>
+            <input type="file" id="fileUpload" accept="image/*,video/*,audio/*" onchange="uploadFile()" style="padding:10px;border:2px dashed #d4a017;border-radius:8px;width:100%;">
+            <div id="uploadProgress" style="display:none;margin-top:10px;">
                 <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-                <p class="upload-status" id="uploadStatus">Uploading... 0%</p>
-            </div>
-            <div class="uploaded-preview" id="uploadedPreview">
-                <div class="preview-box">
-                    <div id="mediaPreview"></div>
-                    <div class="file-info" id="fileInfo">✅ Uploaded Successfully!</div>
-                    <div class="file-path" id="filePath"></div>
-                    <button class="btn btn-success" onclick="addUploadedToGallery()"><i class="fas fa-plus"></i> Add to Gallery</button>
-                    <button class="btn btn-danger" onclick="cancelUpload()" style="margin-left:5px;"><i class="fas fa-times"></i> Cancel</button>
-                </div>
+                <p class="upload-status" id="uploadStatus">Uploading...</p>
             </div>
         </div>
 
@@ -996,6 +932,156 @@
         </div>
     </div>
 
+    <!-- ======================================== -->
+    <!-- STAFF REPORTS SECTION -->
+    <!-- ======================================== -->
+    <div id="section-staff-reports" class="editor-container">
+        <h2>📊 Staff Attendance Reports</h2>
+        <p class="desc">Generate and download staff attendance reports for daily, weekly, and monthly periods.</p>
+
+        <div class="report-filters">
+            <div class="filter-row">
+                <div class="form-group">
+                    <label>Report Period</label>
+                    <select id="staffReportPeriod" onchange="generateStaffReport()">
+                        <option value="daily">📅 Daily</option>
+                        <option value="weekly">📆 Weekly</option>
+                        <option value="monthly">📊 Monthly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Date</label>
+                    <input type="date" id="staffReportDate" onchange="generateStaffReport()">
+                </div>
+                <div class="form-group" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <button class="btn btn-success" onclick="generateStaffReport()"><i class="fas fa-sync"></i> Generate</button>
+                    <button class="btn btn-download" onclick="downloadStaffReportCSV()"><i class="fas fa-file-csv"></i> Download CSV</button>
+                    <button class="btn btn-danger" onclick="downloadStaffReportPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Report Stats -->
+        <div class="stats-grid" id="staffReportStats">
+            <div class="stat-card">
+                <div class="number gold" id="staffReportTotal">0</div>
+                <div class="label">Total Staff</div>
+            </div>
+            <div class="stat-card">
+                <div class="number green" id="staffReportPresent">0</div>
+                <div class="label">Present</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" style="color:#d4a017;" id="staffReportLate">0</div>
+                <div class="label">Late</div>
+            </div>
+            <div class="stat-card">
+                <div class="number red" id="staffReportAbsent">0</div>
+                <div class="label">Absent</div>
+            </div>
+            <div class="stat-card">
+                <div class="number blue" id="staffReportRate">0%</div>
+                <div class="label">Attendance Rate</div>
+            </div>
+        </div>
+
+        <!-- Staff Report Table -->
+        <div style="overflow-x:auto;">
+            <table class="data-table" id="staffReportTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Staff Name</th>
+                        <th>Employee ID</th>
+                        <th>Department</th>
+                        <th>Total Days</th>
+                        <th>Present</th>
+                        <th>Late</th>
+                        <th>Absent</th>
+                        <th>Attendance Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="staffReportBody">
+                    <tr><td colspan="9" style="text-align:center;color:#999;">Select period and click Generate</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- VISITOR REPORTS SECTION -->
+    <!-- ======================================== -->
+    <div id="section-visitor-reports" class="editor-container">
+        <h2>📈 Visitor Reports</h2>
+        <p class="desc">Generate and download visitor reports for daily, weekly, and monthly periods.</p>
+
+        <div class="report-filters">
+            <div class="filter-row">
+                <div class="form-group">
+                    <label>Report Period</label>
+                    <select id="visitorReportPeriod" onchange="generateVisitorReport()">
+                        <option value="daily">📅 Daily</option>
+                        <option value="weekly">📆 Weekly</option>
+                        <option value="monthly">📊 Monthly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Date</label>
+                    <input type="date" id="visitorReportDate" onchange="generateVisitorReport()">
+                </div>
+                <div class="form-group" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <button class="btn btn-success" onclick="generateVisitorReport()"><i class="fas fa-sync"></i> Generate</button>
+                    <button class="btn btn-download" onclick="downloadVisitorReportCSV()"><i class="fas fa-file-csv"></i> Download CSV</button>
+                    <button class="btn btn-danger" onclick="downloadVisitorReportPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visitor Report Stats -->
+        <div class="stats-grid" id="visitorReportStats">
+            <div class="stat-card">
+                <div class="number blue" id="visitorReportTotal">0</div>
+                <div class="label">Total Visitors</div>
+            </div>
+            <div class="stat-card">
+                <div class="number green" id="visitorReportActive">0</div>
+                <div class="label">Active (Checked In)</div>
+            </div>
+            <div class="stat-card">
+                <div class="number gold" id="visitorReportCompleted">0</div>
+                <div class="label">Completed (Checked Out)</div>
+            </div>
+        </div>
+
+        <!-- Purpose Breakdown -->
+        <div style="margin-bottom:15px;" id="visitorPurposeBreakdown">
+            <h4 style="color:#1a2a4a;margin-bottom:10px;">📊 Purpose Breakdown</h4>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;" id="purposeStatsContainer"></div>
+        </div>
+
+        <!-- Visitor Report Table -->
+        <div style="overflow-x:auto;">
+            <table class="data-table" id="visitorReportTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Visitor Name</th>
+                        <th>Badge #</th>
+                        <th>Purpose</th>
+                        <th>Person to Visit</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Status</th>
+                        <th>Duration</th>
+                    </tr>
+                </thead>
+                <tbody id="visitorReportBody">
+                    <tr><td colspan="9" style="text-align:center;color:#999;">Select period and click Generate</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- ===== SAVE BUTTON ===== -->
     <button class="btn btn-success btn-block" onclick="saveAllContent()">
         <i class="fas fa-save"></i> Save All Content
@@ -1026,6 +1112,8 @@
     let quillEditors = {};
     let websiteContent = {};
     let uploadedFileData = null;
+    let staffReportData = null;
+    let visitorReportData = null;
 
     function initQuillEditors() {
         const editorIds = [
@@ -1101,6 +1189,17 @@
         if (section === 'staff') loadStaffList();
         if (section === 'attendance') loadAttendance();
         if (section === 'visitors') loadVisitors();
+        if (section === 'staff-reports') {
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('staffReportDate').value = today;
+            generateStaffReport();
+        }
+        if (section === 'visitor-reports') {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('visitorReportDate').value = today;
+            generateVisitorReport();
+        }
     }
 
     // ============================================
@@ -1553,123 +1652,41 @@
         const fileInput = document.getElementById('fileUpload');
         const file = fileInput.files[0];
         if (!file) return;
-        if (file.size > 100 * 1024 * 1024) {
-            showAlert('File is too large. Maximum size is 100MB.', 'error');
-            return;
-        }
+
+        const formData = new FormData();
+        formData.append('file', file);
 
         document.getElementById('uploadProgress').style.display = 'block';
         document.getElementById('progressFill').style.width = '0%';
-        document.getElementById('uploadStatus').textContent = 'Uploading... 0%';
-
-        const formData = new FormData();
-        formData.append('file', file);
+        document.getElementById('uploadStatus').textContent = 'Uploading...';
 
         try {
-            const xhr = new XMLHttpRequest();
-            xhr.upload.addEventListener('progress', (e) => {
-                if (e.lengthComputable) {
-                    const percentComplete = (e.loaded / e.total) * 100;
-                    document.getElementById('progressFill').style.width = percentComplete + '%';
-                    document.getElementById('uploadStatus').textContent = `Uploading... ${Math.round(percentComplete)}%`;
-                }
-            });
-
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    const result = JSON.parse(xhr.responseText);
-                    if (result.success) {
-                        uploadedFileData = result.file;
-                        document.getElementById('uploadStatus').textContent = '✅ Upload complete!';
-                        document.getElementById('progressFill').style.width = '100%';
-
-                        document.getElementById('uploadedPreview').style.display = 'block';
-                        const previewDiv = document.getElementById('mediaPreview');
-                        const fileType = result.file.type;
-                        if (fileType === 'image') previewDiv.innerHTML = `<img src="${result.file.path}" alt="Preview" style="max-width:100%;">`;
-                        else if (fileType === 'video') previewDiv.innerHTML = `<video src="${result.file.path}" controls style="max-width:100%;"></video>`;
-                        else if (fileType === 'audio') previewDiv.innerHTML = `<audio src="${result.file.path}" controls style="width:100%;"></audio>`;
-                        document.getElementById('fileInfo').textContent = `✅ ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} uploaded!`;
-                        document.getElementById('filePath').textContent = `Path: ${result.file.path}`;
-                        showAlert('✅ File uploaded successfully!', 'success');
-                    } else {
-                        showAlert('❌ Upload failed: ' + result.message, 'error');
-                    }
-                } else {
-                    showAlert('❌ Upload failed. Please try again.', 'error');
-                }
-            };
-            xhr.onerror = function() { showAlert('❌ Network error.', 'error'); };
-            xhr.open('POST', '/api/upload');
-            xhr.send(formData);
-        } catch (error) {
-            console.error('Upload error:', error);
-            showAlert('❌ Error uploading file: ' + error.message, 'error');
-            document.getElementById('uploadProgress').style.display = 'none';
-        }
-    }
-
-    function addUploadedToGallery() {
-        if (!uploadedFileData) {
-            showAlert('No file uploaded yet.', 'error');
-            return;
-        }
-        const gallery = websiteContent.gallery || [];
-        gallery.push({
-            title: uploadedFileData.originalname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
-            category: 'General',
-            file: uploadedFileData.path,
-            type: uploadedFileData.type || 'image'
-        });
-        websiteContent.gallery = gallery;
-        document.getElementById('uploadedPreview').style.display = 'none';
-        document.getElementById('uploadProgress').style.display = 'none';
-        document.getElementById('fileUpload').value = '';
-        uploadedFileData = null;
-        renderGallery();
-        showAlert('✅ File added to gallery!', 'success');
-    }
-
-    function cancelUpload() {
-        document.getElementById('uploadedPreview').style.display = 'none';
-        document.getElementById('uploadProgress').style.display = 'none';
-        document.getElementById('fileUpload').value = '';
-        uploadedFileData = null;
-        showAlert('Upload cancelled', 'success');
-    }
-
-    // ============================================
-    // HERO VIDEO UPLOAD
-    // ============================================
-    async function uploadHeroVideo() {
-        const input = document.getElementById('heroVideoUpload');
-        const file = input.files[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const response = await fetch('/api/upload/hero-video', {
+            const response = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData
             });
-            const data = await response.json();
-            if (data.success) {
-                const videoPlayer = document.getElementById('heroVideoPlayer');
-                const preview = document.getElementById('heroVideoPreview');
-                videoPlayer.src = data.file.path;
-                videoPlayer.load();
-                preview.style.display = 'block';
-                showAlert('✅ Hero video updated successfully!', 'success');
+            const result = await response.json();
+            if (result.success) {
+                showAlert('✅ File uploaded successfully!', 'success');
+                // Add to gallery
+                const gallery = websiteContent.gallery || [];
+                gallery.push({
+                    title: result.file.originalname || 'Uploaded File',
+                    category: 'General',
+                    file: result.file.path,
+                    type: result.file.type || 'image'
+                });
+                websiteContent.gallery = gallery;
+                renderGallery();
+                document.getElementById('uploadProgress').style.display = 'none';
+                fileInput.value = '';
             } else {
-                showAlert('❌ Error: ' + data.message, 'error');
+                showAlert('❌ Upload failed: ' + result.message, 'error');
             }
         } catch (error) {
-            console.error('Error:', error);
-            showAlert('❌ Error uploading video', 'error');
+            console.error('Upload error:', error);
+            showAlert('❌ Error uploading file', 'error');
         }
-        input.value = '';
     }
 
     // ============================================
@@ -1777,7 +1794,7 @@
         const pin = document.getElementById('staffPin').value.trim();
 
         if (!firstName || !lastName || !email || !employeeId || !pin) {
-            showAlert('Please fill in all required fields (First Name, Last Name, Email, Employee ID, PIN)', 'error');
+            showAlert('Please fill in all required fields', 'error');
             return;
         }
 
@@ -1963,6 +1980,357 @@
     }
 
     // ============================================
+    // STAFF REPORTS
+    // ============================================
+    async function generateStaffReport() {
+        const period = document.getElementById('staffReportPeriod').value;
+        const date = document.getElementById('staffReportDate').value;
+
+        try {
+            const response = await fetch(`/api/reports/staff/attendance?period=${period}&date=${date}`);
+            const data = await response.json();
+
+            if (data.success) {
+                staffReportData = data;
+
+                // Update stats
+                document.getElementById('staffReportTotal').textContent = data.summary.totalStaff;
+                document.getElementById('staffReportPresent').textContent = data.summary.totalPresent;
+                document.getElementById('staffReportLate').textContent = data.summary.totalLate;
+                document.getElementById('staffReportAbsent').textContent = data.summary.totalAbsent;
+                document.getElementById('staffReportRate').textContent = data.summary.overallAttendanceRate + '%';
+
+                // Update table
+                const tbody = document.getElementById('staffReportBody');
+                if (data.teachers.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#999;">No data found for this period.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                data.teachers.forEach((teacher, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td><strong>${teacher.name}</strong></td>
+                        <td>${teacher.employeeId}</td>
+                        <td>${teacher.department}</td>
+                        <td>${teacher.totalDays}</td>
+                        <td><span class="status-present">${teacher.present}</span></td>
+                        <td><span style="color:#d4a017;">${teacher.late}</span></td>
+                        <td><span class="status-absent">${teacher.absent}</span></td>
+                        <td><strong>${teacher.attendanceRate}%</strong></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                showAlert('✅ Staff report generated successfully!', 'success');
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error generating staff report:', error);
+            showAlert('❌ Error generating staff report', 'error');
+        }
+    }
+
+    function downloadStaffReportCSV() {
+        if (!staffReportData) {
+            showAlert('Please generate a report first.', 'error');
+            return;
+        }
+
+        let csv = '\uFEFF'; // BOM for Excel
+        csv += 'Staff Attendance Report\n';
+        csv += `Period: ${staffReportData.summary.period}, Date: ${new Date(staffReportData.summary.startDate).toLocaleDateString()} - ${new Date(staffReportData.summary.endDate).toLocaleDateString()}\n\n`;
+        csv += 'Staff Name,Employee ID,Department,Total Days,Present,Late,Absent,Attendance Rate\n';
+
+        staffReportData.teachers.forEach(teacher => {
+            csv += `"${teacher.name}","${teacher.employeeId}","${teacher.department}",${teacher.totalDays},${teacher.present},${teacher.late},${teacher.absent},${teacher.attendanceRate}%\n`;
+        });
+
+        csv += '\nSummary\n';
+        csv += `Total Staff,${staffReportData.summary.totalStaff}\n`;
+        csv += `Total Present,${staffReportData.summary.totalPresent}\n`;
+        csv += `Total Late,${staffReportData.summary.totalLate}\n`;
+        csv += `Total Absent,${staffReportData.summary.totalAbsent}\n`;
+        csv += `Overall Attendance Rate,${staffReportData.summary.overallAttendanceRate}%\n`;
+
+        downloadFile(csv, `staff_attendance_report_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+    }
+
+    function downloadStaffReportPDF() {
+        if (!staffReportData) {
+            showAlert('Please generate a report first.', 'error');
+            return;
+        }
+
+        // Simple HTML-based PDF (opens in new window for printing)
+        const html = `
+            <html>
+            <head><title>Staff Attendance Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 40px; }
+                h1 { color: #1a2a4a; border-bottom: 3px solid #d4a017; padding-bottom: 10px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+                th { background: #f0f2f5; }
+                .summary { margin-top: 30px; padding: 15px; background: #f8f9fc; border-radius: 8px; }
+                .summary-item { display: inline-block; margin-right: 30px; }
+                .summary-item strong { font-size: 20px; color: #d4a017; }
+                .footer { margin-top: 40px; color: #999; font-size: 12px; text-align: center; }
+            </style>
+            </head>
+            <body>
+                <h1>📊 Staff Attendance Report</h1>
+                <p><strong>Period:</strong> ${staffReportData.summary.period} | 
+                   <strong>Date:</strong> ${new Date(staffReportData.summary.startDate).toLocaleDateString()} - ${new Date(staffReportData.summary.endDate).toLocaleDateString()}</p>
+                
+                <div class="summary">
+                    <div class="summary-item"><strong>${staffReportData.summary.totalStaff}</strong> Total Staff</div>
+                    <div class="summary-item"><strong style="color:#28a745;">${staffReportData.summary.totalPresent}</strong> Present</div>
+                    <div class="summary-item"><strong style="color:#d4a017;">${staffReportData.summary.totalLate}</strong> Late</div>
+                    <div class="summary-item"><strong style="color:#dc3545;">${staffReportData.summary.totalAbsent}</strong> Absent</div>
+                    <div class="summary-item"><strong style="color:#17a2b8;">${staffReportData.summary.overallAttendanceRate}%</strong> Attendance Rate</div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Staff Name</th>
+                            <th>Employee ID</th>
+                            <th>Department</th>
+                            <th>Total Days</th>
+                            <th>Present</th>
+                            <th>Late</th>
+                            <th>Absent</th>
+                            <th>Attendance Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${staffReportData.teachers.map((t, i) => `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td>${t.name}</td>
+                                <td>${t.employeeId}</td>
+                                <td>${t.department}</td>
+                                <td>${t.totalDays}</td>
+                                <td>${t.present}</td>
+                                <td>${t.late}</td>
+                                <td>${t.absent}</td>
+                                <td>${t.attendanceRate}%</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="footer">Generated on ${new Date().toLocaleString()} | Changara Star Academy</div>
+            </body>
+            </html>
+        `;
+
+        const win = window.open('', '_blank');
+        win.document.write(html);
+        win.document.close();
+        win.print();
+    }
+
+    // ============================================
+    // VISITOR REPORTS
+    // ============================================
+    async function generateVisitorReport() {
+        const period = document.getElementById('visitorReportPeriod').value;
+        const date = document.getElementById('visitorReportDate').value;
+
+        try {
+            const response = await fetch(`/api/reports/visitors?period=${period}&date=${date}`);
+            const data = await response.json();
+
+            if (data.success) {
+                visitorReportData = data;
+
+                // Update stats
+                document.getElementById('visitorReportTotal').textContent = data.summary.totalVisitors;
+                document.getElementById('visitorReportActive').textContent = data.summary.active;
+                document.getElementById('visitorReportCompleted').textContent = data.summary.completed;
+
+                // Update purpose breakdown
+                const purposeContainer = document.getElementById('purposeStatsContainer');
+                purposeContainer.innerHTML = '';
+                Object.keys(data.summary.purposeStats).forEach(purpose => {
+                    const count = data.summary.purposeStats[purpose];
+                    const colors = ['#d4a017', '#28a745', '#dc3545', '#17a2b8', '#6f42c1', '#fd7e14'];
+                    const color = colors[Object.keys(data.summary.purposeStats).indexOf(purpose) % colors.length];
+                    const badge = document.createElement('span');
+                    badge.style.cssText = `
+                        background: ${color}20;
+                        color: ${color};
+                        padding: 4px 12px;
+                        border-radius: 50px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        border: 1px solid ${color}40;
+                    `;
+                    badge.textContent = `${purpose}: ${count}`;
+                    purposeContainer.appendChild(badge);
+                });
+
+                // Update table
+                const tbody = document.getElementById('visitorReportBody');
+                if (data.visitors.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#999;">No visitors found for this period.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                data.visitors.forEach((visitor, index) => {
+                    const tr = document.createElement('tr');
+                    const isCheckedIn = visitor.status === 'Checked In';
+                    tr.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td><strong>${visitor.fullName}</strong></td>
+                        <td>${visitor.badgeNumber}</td>
+                        <td>${visitor.purpose}</td>
+                        <td>${visitor.personToVisit}</td>
+                        <td>${visitor.checkInTime}</td>
+                        <td>${visitor.checkOutTime}</td>
+                        <td><span class="${isCheckedIn ? 'status-checked-in' : 'status-checked-out'}">${isCheckedIn ? '✅ Checked In' : '✅ Checked Out'}</span></td>
+                        <td>${visitor.duration}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                showAlert('✅ Visitor report generated successfully!', 'success');
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error generating visitor report:', error);
+            showAlert('❌ Error generating visitor report', 'error');
+        }
+    }
+
+    function downloadVisitorReportCSV() {
+        if (!visitorReportData) {
+            showAlert('Please generate a report first.', 'error');
+            return;
+        }
+
+        let csv = '\uFEFF';
+        csv += 'Visitor Report\n';
+        csv += `Period: ${visitorReportData.summary.period}, Date: ${new Date(visitorReportData.summary.startDate).toLocaleDateString()} - ${new Date(visitorReportData.summary.endDate).toLocaleDateString()}\n\n`;
+        csv += 'Visitor Name,Badge #,Purpose,Person to Visit,Check In,Check Out,Status,Duration\n';
+
+        visitorReportData.visitors.forEach(visitor => {
+            csv += `"${visitor.fullName}","${visitor.badgeNumber}","${visitor.purpose}","${visitor.personToVisit}","${visitor.checkInTime}","${visitor.checkOutTime}","${visitor.status}","${visitor.duration}"\n`;
+        });
+
+        csv += '\nSummary\n';
+        csv += `Total Visitors,${visitorReportData.summary.totalVisitors}\n`;
+        csv += `Active (Checked In),${visitorReportData.summary.active}\n`;
+        csv += `Completed (Checked Out),${visitorReportData.summary.completed}\n`;
+
+        downloadFile(csv, `visitor_report_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+    }
+
+    function downloadVisitorReportPDF() {
+        if (!visitorReportData) {
+            showAlert('Please generate a report first.', 'error');
+            return;
+        }
+
+        const html = `
+            <html>
+            <head><title>Visitor Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 40px; }
+                h1 { color: #1a2a4a; border-bottom: 3px solid #d4a017; padding-bottom: 10px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+                th { background: #f0f2f5; }
+                .summary { margin-top: 30px; padding: 15px; background: #f8f9fc; border-radius: 8px; }
+                .summary-item { display: inline-block; margin-right: 30px; }
+                .summary-item strong { font-size: 20px; color: #d4a017; }
+                .footer { margin-top: 40px; color: #999; font-size: 12px; text-align: center; }
+                .purpose-badges { margin-top: 15px; }
+                .badge { display: inline-block; padding: 4px 12px; border-radius: 50px; margin-right: 8px; margin-bottom: 5px; font-size: 12px; }
+            </style>
+            </head>
+            <body>
+                <h1>📈 Visitor Report</h1>
+                <p><strong>Period:</strong> ${visitorReportData.summary.period} | 
+                   <strong>Date:</strong> ${new Date(visitorReportData.summary.startDate).toLocaleDateString()} - ${new Date(visitorReportData.summary.endDate).toLocaleDateString()}</p>
+                
+                <div class="summary">
+                    <div class="summary-item"><strong style="color:#17a2b8;">${visitorReportData.summary.totalVisitors}</strong> Total Visitors</div>
+                    <div class="summary-item"><strong style="color:#28a745;">${visitorReportData.summary.active}</strong> Active</div>
+                    <div class="summary-item"><strong style="color:#6c757d;">${visitorReportData.summary.completed}</strong> Completed</div>
+                </div>
+
+                <div class="purpose-badges">
+                    <strong>Purpose Breakdown:</strong><br>
+                    ${Object.keys(visitorReportData.summary.purposeStats).map(p => 
+                        `<span class="badge" style="background:#d4a01720;color:#d4a017;border:1px solid #d4a01740;">${p}: ${visitorReportData.summary.purposeStats[p]}</span>`
+                    ).join('')}
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Visitor Name</th>
+                            <th>Badge #</th>
+                            <th>Purpose</th>
+                            <th>Person to Visit</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Status</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${visitorReportData.visitors.map((v, i) => `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td>${v.fullName}</td>
+                                <td>${v.badgeNumber}</td>
+                                <td>${v.purpose}</td>
+                                <td>${v.personToVisit}</td>
+                                <td>${v.checkInTime}</td>
+                                <td>${v.checkOutTime}</td>
+                                <td>${v.status}</td>
+                                <td>${v.duration}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="footer">Generated on ${new Date().toLocaleString()} | Changara Star Academy</div>
+            </body>
+            </html>
+        `;
+
+        const win = window.open('', '_blank');
+        win.document.write(html);
+        win.document.close();
+        win.print();
+    }
+
+    // ============================================
+    // DOWNLOAD HELPER
+    // ============================================
+    function downloadFile(content, filename, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    // ============================================
     // SAVE ALL CONTENT
     // ============================================
     async function saveAllContent() {
@@ -2064,18 +2432,6 @@
     }
 
     // ============================================
-    // CLEAR CACHE
-    // ============================================
-    function clearAllCache() {
-        if (confirm('Are you sure you want to clear all cached content? This will reload the page.')) {
-            localStorage.clear();
-            sessionStorage.clear();
-            showAlert('✅ Cache cleared! Refreshing...', 'success');
-            setTimeout(() => window.location.reload(), 1500);
-        }
-    }
-
-    // ============================================
     // LOGOUT
     // ============================================
     function logout() {
@@ -2093,6 +2449,11 @@
         loadStaffList();
         loadAttendance();
         loadVisitors();
+
+        // Set default dates for reports
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('staffReportDate').value = today;
+        document.getElementById('visitorReportDate').value = today;
     });
 </script>
 </body>
