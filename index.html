@@ -7,18 +7,6 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
     <meta name="description" content="Changara Star Academy - Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya. Quality education from Playgroup to Grade 6.">
     
-    <!-- ===== GOOGLE ANALYTICS ===== -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FTGXL40KB0"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-FTGXL40KB0');
-    </script>
-    
-    <!-- ===== GOOGLE SEARCH CONSOLE VERIFICATION ===== -->
-    <meta name="google-site-verification" content="google120463af0d0325f6" />
-    
     <!-- ===== FONTS ===== -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,6 +16,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
+    <!-- ===== GOOGLE ANALYTICS ===== -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FTGXL40KB0"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-FTGXL40KB0');
+    </script>
+    
+    <!-- ===== GOOGLE SEARCH CONSOLE ===== -->
+    <meta name="google-site-verification" content="google120463af0d0325f6" />
 
     <style>
         /* ========================================
@@ -59,7 +59,7 @@
             color: #1a1a2e;
             overflow-x: hidden;
             line-height: 1.6;
-            padding-top: 112px;
+            padding-top: 62px;
         }
 
         .container {
@@ -69,7 +69,7 @@
         }
 
         /* ========================================
-           KENYAN FLAG STRIP - INSIDE HEADER
+           KENYAN FLAG STRIP
            ======================================== */
         .kenya-flag-strip {
             height: 4px;
@@ -84,7 +84,7 @@
         }
 
         /* ========================================
-           HEADER - PERMANENTLY FIXED AT TOP
+           HEADER - FIXED AT TOP
            ======================================== */
         .main-header {
             background: rgba(10, 22, 40, 0.96);
@@ -193,7 +193,148 @@
         }
 
         /* ========================================
-           SECTION NAVIGATION TABS - 7 CARDS
+           NOTICE ALERT BAR
+           ======================================== */
+        .notice-alert-bar {
+            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
+            color: white;
+            padding: 6px 0;
+            position: fixed;
+            top: 62px;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            border-bottom: 3px solid var(--school-gold);
+            display: none;
+            animation: slideDownNotice 0.6s ease forwards;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .notice-alert-bar.show { display: block; }
+        .notice-alert-bar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .notice-alert-bar .notice-icon {
+            font-size: 18px;
+            animation: pulseBell 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .notice-alert-bar .notice-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .notice-alert-bar .notice-content .badge {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulseBadge 1.5s infinite;
+        }
+        .notice-alert-bar .notice-content .message {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+        }
+        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
+        .notice-alert-bar .notice-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .notice-alert-bar .notice-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        /* ========================================
+           NEWS TICKER
+           ======================================== */
+        .news-ticker-section {
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            color: white;
+            padding: 4px 0;
+            border-bottom: 2px solid var(--school-gold);
+            position: fixed;
+            top: 62px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+        }
+        .news-ticker-section.show-notice {
+            top: 98px;
+        }
+        .news-ticker-section .container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .news-ticker-section .ticker-label {
+            background: var(--kenya-red);
+            color: white;
+            padding: 2px 14px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 9px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            letter-spacing: 1px;
+        }
+        .news-ticker-section .ticker-label .icon { font-size: 10px; }
+        .news-ticker-section .ticker-wrapper {
+            flex: 1;
+            overflow: hidden;
+            height: 22px;
+            position: relative;
+        }
+        .news-ticker-section .ticker-content {
+            position: absolute;
+            width: 100%;
+            animation: tickerScroll 16s infinite;
+        }
+        .news-ticker-section .ticker-content .ticker-item {
+            height: 22px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .news-ticker-section .ticker-content .ticker-item .tag {
+            background: rgba(255,255,255,0.12);
+            padding: 1px 8px;
+            border-radius: 20px;
+            font-size: 8px;
+            margin-right: 6px;
+            color: var(--school-gold);
+            font-weight: 600;
+        }
+
+        /* ========================================
+           SECTION NAVIGATION TABS
            ======================================== */
         .section-tabs {
             background: white;
@@ -261,167 +402,115 @@
         }
 
         /* ========================================
-           NOTICE ALERT BAR
-           ======================================== */
-        .notice-alert-bar {
-            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
-            color: white;
-            padding: 6px 0;
-            position: fixed;
-            top: 112px;
-            left: 0;
-            right: 0;
-            z-index: 99;
-            border-bottom: 3px solid var(--school-gold);
-            display: none;
-            animation: slideDownNotice 0.6s ease forwards;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        .notice-alert-bar.show { display: block; }
-        .notice-alert-bar .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .notice-alert-bar .notice-icon {
-            font-size: 18px;
-            animation: pulseBell 1.5s infinite;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .notice-alert-bar .notice-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .notice-alert-bar .notice-content .badge {
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            padding: 2px 12px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            animation: pulseBadge 1.5s infinite;
-        }
-        .notice-alert-bar .notice-content .message {
-            font-size: 13px;
-            font-weight: 500;
-            flex: 1;
-        }
-        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
-        .notice-alert-bar .notice-close {
-            background: rgba(255,255,255,0.15);
-            border: none;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        .notice-alert-bar .notice-close:hover {
-            background: rgba(255,255,255,0.3);
-            transform: rotate(90deg);
-        }
-
-        /* ========================================
-           NEWS TICKER - DIRECTLY BELOW TABS
-           ======================================== */
-        .news-ticker-section {
-            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
-            color: white;
-            padding: 4px 0;
-            border-bottom: 2px solid var(--school-gold);
-            position: fixed;
-            top: 112px;
-            left: 0;
-            right: 0;
-            z-index: 98;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
-        }
-        .news-ticker-section .container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .news-ticker-section .ticker-label {
-            background: var(--kenya-red);
-            color: white;
-            padding: 2px 14px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 9px;
-            text-transform: uppercase;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            letter-spacing: 1px;
-        }
-        .news-ticker-section .ticker-label .icon { font-size: 10px; }
-        .news-ticker-section .ticker-wrapper {
-            flex: 1;
-            overflow: hidden;
-            height: 22px;
-            position: relative;
-        }
-        .news-ticker-section .ticker-content {
-            position: absolute;
-            width: 100%;
-            animation: tickerScroll 16s infinite;
-        }
-        .news-ticker-section .ticker-content .ticker-item {
-            height: 22px;
-            display: flex;
-            align-items: center;
-            padding: 0 8px;
-            font-size: 12px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .news-ticker-section .ticker-content .ticker-item .tag {
-            background: rgba(255,255,255,0.12);
-            padding: 1px 8px;
-            border-radius: 20px;
-            font-size: 8px;
-            margin-right: 6px;
-            color: var(--school-gold);
-            font-weight: 600;
-        }
-
-        /* ========================================
-           HERO SECTION
+           HERO SECTION WITH VIDEO BACKGROUND
            ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
-            margin-top: 50px;
+            margin-top: 100px;
             display: flex;
             align-items: center;
             text-align: center;
             color: white;
             position: relative;
-            background: linear-gradient(135deg, #000000 0%, #1a0000 30%, #003300 70%, #0a1628 100%);
+            overflow: hidden;
             padding: 60px 0;
         }
+        
+        /* ===== VIDEO BACKGROUND ===== */
+        .hero-video-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .hero-video-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .hero-video-bg .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(10, 22, 40, 0.6) 50%, rgba(187, 0, 0, 0.3) 100%);
+            z-index: 1;
+        }
+        .hero-video-bg .video-overlay-kenya {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(187, 0, 0, 0.2) 50%, rgba(0, 102, 0, 0.2) 100%);
+            z-index: 2;
+        }
+        
+        /* ===== VIDEO UPLOAD ZONE ===== */
+        .video-upload-zone {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: none;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .video-upload-zone:hover {
+            background: rgba(212, 160, 23, 0.8);
+            border-color: var(--school-gold);
+        }
+        .video-upload-zone .icon {
+            font-size: 16px;
+        }
+        .video-upload-zone .text {
+            font-size: 11px;
+            color: white;
+            font-weight: 500;
+        }
+        .video-upload-zone .upload-btn {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            border: none;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .video-upload-zone .upload-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        /* ===== HERO CONTENT ===== */
         .hero-section .hero-bg-pattern {
             position: absolute;
             inset: 0;
+            z-index: 1;
             background-image: 
-                radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.05) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%);
         }
         .hero-section .hero-content {
             position: relative;
-            z-index: 1;
+            z-index: 3;
             max-width: 800px;
             margin: 0 auto;
             padding: 0 20px;
@@ -431,11 +520,11 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
             padding: 4px 16px 4px 4px;
             border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
             margin-bottom: 20px;
         }
         .hero-flag-badge .flag-strip {
@@ -453,17 +542,18 @@
         .hero-flag-badge .flag-text {
             font-size: 10px;
             font-weight: 600;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.7);
             letter-spacing: 2px;
             text-transform: uppercase;
         }
 
         .hero-section h1 {
             font-family: var(--font-primary);
-            font-size: 48px;
+            font-size: 52px;
             margin-bottom: 15px;
             font-weight: 900;
             line-height: 1.1;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
         .hero-section h1 .highlight {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
@@ -473,12 +563,13 @@
         }
         .hero-section p {
             font-size: 18px;
-            opacity: 0.85;
+            opacity: 0.9;
             line-height: 1.7;
             margin-bottom: 25px;
             max-width: 650px;
             margin-left: auto;
             margin-right: auto;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
         }
         .hero-section .btn-group {
             display: flex;
@@ -509,7 +600,8 @@
             align-items: center;
             gap: 8px;
             padding: 12px 32px;
-            background: transparent;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
             color: white;
             text-decoration: none;
             border-radius: 50px;
@@ -519,9 +611,55 @@
             transition: all 0.3s ease;
         }
         .hero-section .btn-outline:hover {
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.15);
             border-color: var(--school-gold);
             transform: translateY(-3px);
+        }
+
+        /* ===== VIDEO PLAY BUTTON ===== */
+        .hero-video-play {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px 8px 8px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeInUp 2s ease forwards;
+        }
+        .hero-video-play:hover {
+            background: rgba(212, 160, 23, 0.2);
+            border-color: var(--school-gold);
+            transform: translateX(-50%) scale(1.05);
+        }
+        .hero-video-play .play-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--school-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--kenya-black);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .hero-video-play:hover .play-icon {
+            transform: scale(1.1);
+        }
+        .hero-video-play .play-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            font-weight: 500;
+            letter-spacing: 1px;
         }
 
         .scroll-indicator {
@@ -529,12 +667,12 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 2;
+            z-index: 3;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.4);
             font-size: 10px;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -556,9 +694,80 @@
             margin-top: 4px;
             animation: scrollDot 2s ease-in-out infinite;
         }
+
+        /* ========================================
+           VIDEO MODAL
+           ======================================== */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .video-modal.show {
+            display: flex;
+        }
+        .video-modal .modal-content {
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+        }
+        .video-modal .modal-content video {
+            width: 100%;
+            display: block;
+            border-radius: 16px;
+        }
+        .video-modal .close-modal {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .video-modal .close-modal:hover {
+            background: var(--kenya-red);
+            transform: rotate(90deg);
+        }
+        .video-modal .modal-title {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 16px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+
         @keyframes scrollDot {
             0%, 100% { transform: translateY(0); opacity: 1; }
             50% { transform: translateY(12px); opacity: 0.3; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
         /* ========================================
@@ -584,7 +793,7 @@
         .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
         /* ========================================
-           CONTENT CARDS - 7 CARDS
+           CONTENT CARDS
            ======================================== */
         .content-cards-section {
             padding: 50px 0;
@@ -1019,6 +1228,38 @@
         }
 
         /* ========================================
+           READ MORE BUTTON
+           ======================================== */
+        .read-more-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 4px 16px;
+            background: transparent;
+            color: var(--school-gold);
+            border: 2px solid var(--school-gold);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 11px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .read-more-btn:hover {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            transform: translateX(4px);
+        }
+        .read-more-btn i {
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+        .read-more-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* ========================================
            FOOTER
            ======================================== */
         .main-footer {
@@ -1175,6 +1416,13 @@
             
             .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
             .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
+            
+            .video-modal { padding: 20px; }
+            .video-modal .close-modal { top: -40px; font-size: 20px; width: 36px; height: 36px; }
+            
+            .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
+            .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
+            .hero-video-play .play-text { font-size: 10px; }
         }
 
         @media (max-width: 480px) {
@@ -1192,6 +1440,7 @@
             .notice-alert-bar { top: 90px; }
             .news-ticker-section { top: 90px; }
             .hero-section { margin-top: 60px; }
+            .hero-video-play { bottom: 60px; }
         }
 
         /* ========================================
@@ -1220,6 +1469,10 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-6px); }
         }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -1238,34 +1491,6 @@
                 </span>
             </div>
             <button class="notice-close" onclick="closeNotice()">✕</button>
-        </div>
-    </div>
-
-    <!-- ===== SECTION NAVIGATION TABS ===== -->
-    <div class="section-tabs" id="sectionTabs">
-        <div class="container">
-            <button class="tab-btn active" onclick="scrollToSection('slide-academics')">
-                <span class="tab-icon">📚</span> Academics
-                <span class="tab-badge">🔥</span>
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-admissions')">
-                <span class="tab-icon">📝</span> Admissions
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-facilities')">
-                <span class="tab-icon">🏫</span> Facilities
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-performance')">
-                <span class="tab-icon">🏆</span> Performance
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-parents')">
-                <span class="tab-icon">👨‍👩‍👧‍👦</span> Parents
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-downloads')">
-                <span class="tab-icon">📥</span> Downloads
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-fees')">
-                <span class="tab-icon">💰</span> Fees
-            </button>
         </div>
     </div>
 
@@ -1298,7 +1523,37 @@
         </div>
     </div>
 
-    <!-- ===== HEADER ===== -->
+    <!-- ===== SECTION NAVIGATION TABS ===== -->
+    <div class="section-tabs" id="sectionTabs">
+        <div class="container">
+            <button class="tab-btn active" onclick="scrollToSection('slide-academics')">
+                <span class="tab-icon">📚</span> Academics
+                <span class="tab-badge">🔥</span>
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-admissions')">
+                <span class="tab-icon">📝</span> Admissions
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-facilities')">
+                <span class="tab-icon">🏫</span> Facilities
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-performance')">
+                <span class="tab-icon">🏆</span> Performance
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-parents')">
+                <span class="tab-icon">👨‍👩‍👧‍👦</span> Parents
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-downloads')">
+                <span class="tab-icon">📥</span> Downloads
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-fees')">
+                <span class="tab-icon">💰</span> Fees
+            </button>
+        </div>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- HEADER -->
+    <!-- ======================================== -->
     <header class="main-header">
         <div class="kenya-flag-strip"></div>
         <div class="container">
@@ -1319,9 +1574,38 @@
         </div>
     </header>
 
-    <!-- ===== HERO SECTION ===== -->
+    <!-- ======================================== -->
+    <!-- HERO SECTION WITH VIDEO BACKGROUND -->
+    <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
+        <!-- Video Background -->
+        <div class="hero-video-bg">
+            <video id="heroVideo" autoplay muted loop playsinline poster="/images/school-compound.jpg">
+                <source src="/videos/school-hero.mp4" type="video/mp4">
+                <!-- Fallback image if video doesn't load -->
+            </video>
+            <div class="video-overlay"></div>
+            <div class="video-overlay-kenya"></div>
+        </div>
+        
         <div class="hero-bg-pattern"></div>
+        
+        <!-- Video Upload Zone (Admin Only) -->
+        <div class="video-upload-zone" id="videoUploadZone">
+            <span class="icon">🎬</span>
+            <span class="text">Update Hero Video</span>
+            <button class="upload-btn" onclick="document.getElementById('heroVideoInput').click()">
+                <i class="fas fa-upload"></i> Upload
+            </button>
+            <input type="file" id="heroVideoInput" accept="video/*" style="display:none;" onchange="uploadHeroVideo()">
+        </div>
+        
+        <!-- Video Play Button -->
+        <div class="hero-video-play" onclick="openVideoModal()">
+            <div class="play-icon"><i class="fas fa-play"></i></div>
+            <span class="play-text">▶ Watch Our Story</span>
+        </div>
+
         <div class="hero-content">
             <div class="hero-flag-badge">
                 <div class="flag-strip">
@@ -1348,13 +1632,30 @@
                 </a>
             </div>
         </div>
+        
         <div class="scroll-indicator">
             <div class="mouse"><div class="dot"></div></div>
             <span>Scroll</span>
         </div>
     </section>
 
-    <!-- ===== CONTENT CARDS SECTION ===== -->
+    <!-- ======================================== -->
+    <!-- VIDEO MODAL -->
+    <!-- ======================================== -->
+    <div class="video-modal" id="videoModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeVideoModal()">✕</button>
+            <video id="modalVideo" controls autoplay>
+                <source src="/videos/school-hero.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="modal-title">🏫 Changara Star Academy - Our Story</div>
+        </div>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- CONTENT CARDS SECTION -->
+    <!-- ======================================== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
@@ -1471,7 +1772,9 @@
         </div>
     </section>
 
-    <!-- ===== FEATURES SECTION ===== -->
+    <!-- ======================================== -->
+    <!-- FEATURES SECTION -->
+    <!-- ======================================== -->
     <section class="features-section" id="slide-features">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🌟 Why <span style="color:var(--school-gold);">Choose Us</span></h2>
@@ -1483,27 +1786,33 @@
                     <span class="icon">👨‍🏫</span>
                     <h4>Qualified Teachers</h4>
                     <p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p>
+                    <a href="about.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-item" data-aos="zoom-in" data-aos-delay="200">
                     <span class="icon">🏆</span>
                     <h4>Excellence in Performance</h4>
                     <p>We consistently produce top-performing students in national examinations and co-curricular activities.</p>
+                    <a href="performance.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-item" data-aos="zoom-in" data-aos-delay="300">
                     <span class="icon">🏫</span>
                     <h4>Modern Facilities</h4>
                     <p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p>
+                    <a href="facilities.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="feature-item" data-aos="zoom-in" data-aos-delay="400">
                     <span class="icon">💡</span>
                     <h4>Innovative Learning</h4>
                     <p>We use modern teaching methods including technology integration and hands-on learning experiences.</p>
+                    <a href="academics.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ===== STATS SECTION ===== -->
+    <!-- ======================================== -->
+    <!-- STATS SECTION -->
+    <!-- ======================================== -->
     <section class="stats-section" id="slide-stats">
         <div class="container">
             <div class="stats-grid" id="statsGrid">
@@ -1527,7 +1836,9 @@
         </div>
     </section>
 
-    <!-- ===== GALLERY SECTION ===== -->
+    <!-- ======================================== -->
+    <!-- GALLERY SECTION -->
+    <!-- ======================================== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
@@ -1542,6 +1853,7 @@
                                 <h4>🏫 School Compound</h4>
                                 <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
                                 <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1552,6 +1864,7 @@
                                 <h4>🧸 E.C.D.E Section</h4>
                                 <p>Our Early Childhood Development Education section where young learners begin.</p>
                                 <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1562,6 +1875,7 @@
                                 <h4>📚 Classroom Learning</h4>
                                 <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
                                 <span class="tag">Academics</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1572,6 +1886,7 @@
                                 <h4>💻 Computer Lab</h4>
                                 <p>Students learning essential computer skills in our modern computer laboratory.</p>
                                 <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1583,7 +1898,9 @@
         </div>
     </section>
 
-    <!-- ===== NEWS SECTION ===== -->
+    <!-- ======================================== -->
+    <!-- NEWS SECTION -->
+    <!-- ======================================== -->
     <section class="news-section" id="slide-news">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
@@ -1593,22 +1910,27 @@
                     <h4>📅 Term 3 Opening</h4>
                     <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.</p>
                     <span class="date">Posted: Recently</span>
+                    <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="200">
                     <h4>🏆 Sports Day</h4>
                     <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.</p>
                     <span class="date">Posted: Recently</span>
+                    <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="300">
                     <h4>📚 Parents' Meeting</h4>
                     <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall.</p>
                     <span class="date">Posted: Recently</span>
+                    <a href="parents-corner.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ===== FOOTER ===== -->
+    <!-- ======================================== -->
+    <!-- FOOTER -->
+    <!-- ======================================== -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
@@ -1648,7 +1970,9 @@
         </div>
     </footer>
 
-    <!-- ===== SCRIPTS ===== -->
+    <!-- ======================================== -->
+    <!-- SCRIPTS -->
+    <!-- ======================================== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -1673,7 +1997,7 @@
         }
 
         // ============================================
-        // SECTION TABS - SCROLL TO SECTION
+        // SECTION TABS
         // ============================================
         function scrollToSection(sectionId) {
             const section = document.getElementById(sectionId);
@@ -1724,6 +2048,10 @@
             const bar = document.getElementById('noticeAlertBar');
             bar.classList.remove('show');
             localStorage.setItem('noticeClosed', 'true');
+            const ticker = document.getElementById('newsTicker');
+            if (ticker) {
+                ticker.style.top = '100px';
+            }
         }
 
         function showNotice(message) {
@@ -1734,16 +2062,121 @@
             }
             bar.classList.add('show');
             localStorage.removeItem('noticeClosed');
+            const ticker = document.getElementById('newsTicker');
+            if (ticker) {
+                ticker.style.top = '136px';
+            }
         }
 
         function checkNoticeStatus() {
             const closed = localStorage.getItem('noticeClosed');
             const bar = document.getElementById('noticeAlertBar');
+            const ticker = document.getElementById('newsTicker');
             if (!closed) {
                 bar.classList.add('show');
+                if (ticker) {
+                    ticker.style.top = '136px';
+                }
             }
         }
         checkNoticeStatus();
+
+        // ============================================
+        // VIDEO MODAL
+        // ============================================
+        function openVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('modalVideo');
+            modal.classList.add('show');
+            video.play();
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('modalVideo');
+            modal.classList.remove('show');
+            video.pause();
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeVideoModal();
+            }
+        });
+
+        // Click outside to close
+        document.getElementById('videoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVideoModal();
+            }
+        });
+
+        // ============================================
+        // HERO VIDEO UPLOAD (Admin)
+        // ============================================
+        function uploadHeroVideo() {
+            const input = document.getElementById('heroVideoInput');
+            const file = input.files[0];
+            
+            if (!file) return;
+            
+            // Show upload progress
+            const uploadZone = document.getElementById('videoUploadZone');
+            const originalText = uploadZone.querySelector('.text').textContent;
+            uploadZone.querySelector('.text').textContent = '⏳ Uploading...';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('/api/upload/hero-video', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update video source
+                    const video = document.getElementById('heroVideo');
+                    const modalVideo = document.getElementById('modalVideo');
+                    const videoPath = data.file.path;
+                    
+                    video.src = videoPath;
+                    video.load();
+                    video.play();
+                    
+                    modalVideo.src = videoPath;
+                    modalVideo.load();
+                    
+                    uploadZone.querySelector('.text').textContent = '✅ Video Updated!';
+                    setTimeout(() => {
+                        uploadZone.querySelector('.text').textContent = 'Update Hero Video';
+                    }, 3000);
+                    
+                    showAlert('✅ Hero video updated successfully!', 'success');
+                } else {
+                    uploadZone.querySelector('.text').textContent = '❌ Upload Failed';
+                    setTimeout(() => {
+                        uploadZone.querySelector('.text').textContent = 'Update Hero Video';
+                    }, 3000);
+                    showAlert('❌ Error uploading video: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Upload error:', error);
+                uploadZone.querySelector('.text').textContent = '❌ Error';
+                setTimeout(() => {
+                    uploadZone.querySelector('.text').textContent = 'Update Hero Video';
+                }, 3000);
+                showAlert('❌ Error uploading video', 'error');
+            });
+            
+            input.value = '';
+        }
+
+        // Show video upload zone for admin (you can add a check for admin role)
+        // For now, we show it - you can add admin check later
+        // document.getElementById('videoUploadZone').style.display = 'flex';
 
         // ============================================
         // SWIPER GALLERY
@@ -1822,6 +2255,7 @@
                                 <span class="icon">${feature.icon || '📚'}</span>
                                 <h4>${feature.title || 'Feature'}</h4>
                                 <p>${feature.description || ''}</p>
+                                <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                             `;
                             featuresGrid.appendChild(div);
                         });
@@ -1849,6 +2283,7 @@
                                 <h4>${news.title || 'News'}</h4>
                                 <p>${news.content || ''}</p>
                                 <span class="date">Posted: ${new Date().toLocaleDateString()}</span>
+                                <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                             `;
                             newsGrid.appendChild(div);
                         });
@@ -1870,6 +2305,13 @@
             if (heroBtn) {
                 heroBtn.innerHTML = '<span>Explore More</span> <i class="fas fa-arrow-right"></i>';
             }
+            
+            // Show video upload zone for admin (check if admin is logged in)
+            // You can uncomment this after adding proper admin check
+            // const token = localStorage.getItem('adminToken');
+            // if (token) {
+            //     document.getElementById('videoUploadZone').style.display = 'flex';
+            // }
         });
     </script>
 </body>
