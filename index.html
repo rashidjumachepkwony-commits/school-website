@@ -1,33 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏫 Changara Star Academy - Excellence in Education</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
-    <meta name="description" content="Changara Star Academy - Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya. Quality education from Playgroup to Grade 6.">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🏫 Changara Star Academy – Excellence in Education</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>" />
+    <meta name="description" content="Changara Star Academy – Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
     
-    <!-- ===== FONTS ===== -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- ===== CSS LIBRARIES ===== -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Fonts & CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    
-    <!-- ===== GOOGLE ANALYTICS ===== -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FTGXL40KB0"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-FTGXL40KB0');
-    </script>
-    
-    <!-- ===== GOOGLE SEARCH CONSOLE ===== -->
-    <meta name="google-site-verification" content="google120463af0d0325f6" />
 
     <style>
         /* ========================================
@@ -37,11 +23,9 @@
             --kenya-black: #000000;
             --kenya-red: #BB0000;
             --kenya-green: #006600;
-            --kenya-white: #FFFFFF;
             --school-gold: #D4A017;
             --school-gold-light: #F5C842;
             --school-gold-dark: #B8890A;
-            --school-blue: #001F5C;
             --school-blue-dark: #0A1628;
             --font-primary: 'Playfair Display', serif;
             --font-secondary: 'Poppins', sans-serif;
@@ -52,7 +36,6 @@
            ======================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-        
         body {
             font-family: var(--font-secondary);
             background: #f0f2f5;
@@ -61,7 +44,6 @@
             line-height: 1.6;
             padding-top: 62px;
         }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -69,11 +51,11 @@
         }
 
         /* ========================================
-           KENYAN FLAG STRIP
+           KENYA FLAG STRIP
            ======================================== */
         .kenya-flag-strip {
             height: 4px;
-            background: linear-gradient(to right, 
+            background: linear-gradient(to right,
                 var(--kenya-black) 0%, var(--kenya-black) 25%,
                 var(--kenya-red) 25%, var(--kenya-red) 50%,
                 var(--kenya-green) 50%, var(--kenya-green) 75%,
@@ -268,7 +250,7 @@
            NEWS TICKER
            ======================================== */
         .news-ticker-section {
-            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            background: linear-gradient(135deg, var(--school-blue-dark), #001F5C);
             color: white;
             padding: 4px 0;
             border-bottom: 2px solid var(--school-gold);
@@ -415,7 +397,7 @@
             overflow: hidden;
             padding: 60px 0;
         }
-        
+
         /* ===== VIDEO BACKGROUND ===== */
         .hero-video-bg {
             position: absolute;
@@ -441,7 +423,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(10, 22, 40, 0.6) 50%, rgba(187, 0, 0, 0.3) 100%);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(10, 22, 40, 0.6) 50%, rgba(187, 0, 0, 0.25) 100%);
             z-index: 1;
         }
         .hero-video-bg .video-overlay-kenya {
@@ -450,61 +432,16 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(187, 0, 0, 0.2) 50%, rgba(0, 102, 0, 0.2) 100%);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(187, 0, 0, 0.12) 50%, rgba(0, 102, 0, 0.12) 100%);
             z-index: 2;
         }
-        
-        /* ===== VIDEO UPLOAD ZONE ===== */
-        .video-upload-zone {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.1);
-            display: none;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .video-upload-zone:hover {
-            background: rgba(212, 160, 23, 0.8);
-            border-color: var(--school-gold);
-        }
-        .video-upload-zone .icon {
-            font-size: 16px;
-        }
-        .video-upload-zone .text {
-            font-size: 11px;
-            color: white;
-            font-weight: 500;
-        }
-        .video-upload-zone .upload-btn {
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            border: none;
-            padding: 4px 12px;
-            border-radius: 50px;
-            font-size: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .video-upload-zone .upload-btn:hover {
-            transform: scale(1.05);
-        }
-        
+
         /* ===== HERO CONTENT ===== */
         .hero-section .hero-bg-pattern {
             position: absolute;
             inset: 0;
             z-index: 1;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%),
                 radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%);
         }
@@ -515,7 +452,7 @@
             margin: 0 auto;
             padding: 0 20px;
         }
-        
+
         .hero-flag-badge {
             display: inline-flex;
             align-items: center;
@@ -526,6 +463,7 @@
             border-radius: 50px;
             border: 1px solid rgba(255,255,255,0.15);
             margin-bottom: 20px;
+            animation: fadeInUp 1s ease forwards;
         }
         .hero-flag-badge .flag-strip {
             display: flex;
@@ -554,6 +492,7 @@
             font-weight: 900;
             line-height: 1.1;
             text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1.2s ease forwards;
         }
         .hero-section h1 .highlight {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
@@ -570,36 +509,50 @@
             margin-left: auto;
             margin-right: auto;
             text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1.4s ease forwards;
         }
         .hero-section .btn-group {
             display: flex;
             gap: 12px;
             justify-content: center;
             flex-wrap: wrap;
+            animation: fadeInUp 1.6s ease forwards;
         }
-        .hero-section .btn-hero {
+
+        /* ===== SCROLL DOWN BUTTON ===== */
+        .btn-scroll-down {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 32px;
-            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
-            color: var(--kenya-black);
+            gap: 10px;
+            padding: 14px 35px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
             text-decoration: none;
             border-radius: 50px;
-            font-weight: 700;
-            font-size: 14px;
+            font-weight: 600;
+            font-size: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
             transition: all 0.3s ease;
+            cursor: pointer;
+            animation: bounceArrow 2s infinite;
+        }
+        .btn-scroll-down:hover {
+            background: rgba(212, 160, 23, 0.25);
+            border-color: var(--school-gold);
+            transform: translateY(-3px);
             box-shadow: 0 8px 30px rgba(212, 160, 23, 0.3);
         }
-        .hero-section .btn-hero:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 40px rgba(212, 160, 23, 0.5);
+        .btn-scroll-down .arrow {
+            display: inline-block;
+            animation: arrowDown 1.5s infinite;
         }
-        .hero-section .btn-outline {
+
+        .btn-outline {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 32px;
+            padding: 14px 32px;
             background: rgba(255,255,255,0.08);
             backdrop-filter: blur(10px);
             color: white;
@@ -610,7 +563,7 @@
             border: 2px solid rgba(255,255,255,0.2);
             transition: all 0.3s ease;
         }
-        .hero-section .btn-outline:hover {
+        .btn-outline:hover {
             background: rgba(255,255,255,0.15);
             border-color: var(--school-gold);
             transform: translateY(-3px);
@@ -672,7 +625,7 @@
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255,255,255,0.3);
             font-size: 10px;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -695,9 +648,7 @@
             animation: scrollDot 2s ease-in-out infinite;
         }
 
-        /* ========================================
-           VIDEO MODAL
-           ======================================== */
+        /* ===== VIDEO MODAL ===== */
         .video-modal {
             display: none;
             position: fixed;
@@ -761,13 +712,49 @@
             backdrop-filter: blur(10px);
         }
 
+        /* ===== KEYFRAMES ===== */
         @keyframes scrollDot {
             0%, 100% { transform: translateY(0); opacity: 1; }
             50% { transform: translateY(12px); opacity: 0.3; }
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounceArrow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+        @keyframes arrowDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(5px); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes slideDownNotice {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulseBell {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes pulseBadgeRed {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(187, 0, 0, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(187, 0, 0, 0.7); }
+        }
+        @keyframes tickerScroll {
+            0%, 20% { transform: translateY(0); }
+            25%, 45% { transform: translateY(-22px); }
+            50%, 70% { transform: translateY(-44px); }
+            75%, 95% { transform: translateY(-66px); }
+            100% { transform: translateY(0); }
         }
 
         /* ========================================
@@ -877,9 +864,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .content-card .badge.live { background: var(--kenya-green); color: white; }
-        .content-card .badge.new { background: var(--school-gold); color: var(--kenya-black); }
-        
         .card-cta {
             margin-top: 10px;
             padding: 6px 18px;
@@ -894,9 +878,7 @@
             transform: scale(1.05);
         }
 
-        /* ========================================
-           INDIVIDUAL CARD STYLES
-           ======================================== */
+        /* Card variants */
         .card-academics {
             border-color: var(--school-gold) !important;
             background: linear-gradient(135deg, #ffffff, #fff8e7) !important;
@@ -910,7 +892,6 @@
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
         }
-
         .card-admissions {
             border-color: var(--kenya-green) !important;
             background: linear-gradient(135deg, #ffffff, #f0fff4) !important;
@@ -924,7 +905,6 @@
             background: linear-gradient(135deg, var(--kenya-green), #004d00);
             color: white;
         }
-
         .card-facilities {
             border-color: #17a2b8 !important;
             background: linear-gradient(135deg, #ffffff, #f0faff) !important;
@@ -938,7 +918,6 @@
             background: linear-gradient(135deg, #17a2b8, #0d6e7a);
             color: white;
         }
-
         .card-performance {
             border-color: #6f42c1 !important;
             background: linear-gradient(135deg, #ffffff, #f8f0ff) !important;
@@ -951,7 +930,6 @@
             background: linear-gradient(135deg, #6f42c1, #4a2a8a);
             color: white;
         }
-
         .card-parents {
             border-color: #fd7e14 !important;
             background: linear-gradient(135deg, #ffffff, #fff5eb) !important;
@@ -964,7 +942,6 @@
             background: linear-gradient(135deg, #fd7e14, #c96a0a);
             color: white;
         }
-
         .card-downloads {
             border-color: #20c997 !important;
             background: linear-gradient(135deg, #ffffff, #f0fff8) !important;
@@ -977,7 +954,6 @@
             background: linear-gradient(135deg, #20c997, #128f6e);
             color: white;
         }
-
         .card-fees {
             border-color: #dc3545 !important;
             background: linear-gradient(135deg, #ffffff, #fff0f0) !important;
@@ -992,13 +968,6 @@
             color: white;
         }
 
-        /* ========================================
-           BADGE ANIMATIONS
-           ======================================== */
-        @keyframes pulseBadgeRed {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(187, 0, 0, 0.4); }
-            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(187, 0, 0, 0.7); }
-        }
         @keyframes pulseBadgeGreen {
             0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4); }
             50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(0, 102, 0, 0.7); }
@@ -1051,6 +1020,34 @@
             font-size: 13px;
             line-height: 1.5;
         }
+        .read-more-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 4px 16px;
+            background: transparent;
+            color: var(--school-gold);
+            border: 2px solid var(--school-gold);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 11px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .read-more-btn:hover {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            transform: translateX(4px);
+        }
+        .read-more-btn i {
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+        .read-more-btn:hover i {
+            transform: translateX(3px);
+        }
 
         /* ========================================
            STATS
@@ -1101,7 +1098,7 @@
            ======================================== */
         .gallery-section {
             padding: 50px 0;
-            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            background: linear-gradient(135deg, var(--school-blue-dark), #001F5C);
             scroll-margin-top: 50px;
         }
         .gallery-swiper {
@@ -1228,38 +1225,6 @@
         }
 
         /* ========================================
-           READ MORE BUTTON
-           ======================================== */
-        .read-more-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 8px;
-            padding: 4px 16px;
-            background: transparent;
-            color: var(--school-gold);
-            border: 2px solid var(--school-gold);
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 11px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .read-more-btn:hover {
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            transform: translateX(4px);
-        }
-        .read-more-btn i {
-            font-size: 10px;
-            transition: transform 0.3s ease;
-        }
-        .read-more-btn:hover i {
-            transform: translateX(3px);
-        }
-
-        /* ========================================
            FOOTER
            ======================================== */
         .main-footer {
@@ -1373,7 +1338,7 @@
             }
             .main-header .nav-links.show { display: flex; }
             .main-header .mobile-menu-btn { display: block; }
-            
+
             .section-tabs .container {
                 justify-content: flex-start;
                 padding: 0 10px;
@@ -1385,41 +1350,36 @@
             .section-tabs .tab-btn .tab-icon {
                 font-size: 11px;
             }
-            
+
             .hero-section { padding: 40px 0; margin-top: 70px; }
             .hero-section h1 { font-size: 32px; }
             .hero-section p { font-size: 16px; }
             .hero-section .btn-group { flex-direction: column; align-items: center; }
-            .hero-section .btn-hero, .hero-section .btn-outline { width: 100%; justify-content: center; }
-            
+            .btn-scroll-down, .btn-outline { width: 100%; justify-content: center; }
+
             body { padding-top: 100px; }
             .section-tabs { top: 55px; padding: 6px 0; }
             .notice-alert-bar { top: 100px; }
             .news-ticker-section { top: 100px; }
-            
+
             .section-title { font-size: 26px; }
-            
             .content-grid { grid-template-columns: 1fr 1fr; }
             .features-grid { grid-template-columns: 1fr 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .news-grid { grid-template-columns: 1fr; }
-            
+
             .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
-            
             .notice-alert-bar .container { flex-direction: column; text-align: center; }
-            
             .gallery-card img { height: 160px; }
-            
             .main-header .logo-section h1 { font-size: 16px; }
             .main-header .school-icon { font-size: 24px; }
-            .main-header .nav-links a { font-size: 11px; padding: 4px 10px; }
-            
+
             .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
             .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
-            
+
             .video-modal { padding: 20px; }
             .video-modal .close-modal { top: -40px; font-size: 20px; width: 36px; height: 36px; }
-            
+
             .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
             .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
             .hero-video-play .play-text { font-size: 10px; }
@@ -1441,37 +1401,6 @@
             .news-ticker-section { top: 90px; }
             .hero-section { margin-top: 60px; }
             .hero-video-play { bottom: 60px; }
-        }
-
-        /* ========================================
-           ANIMATIONS
-           ======================================== */
-        @keyframes slideDownNotice {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes pulseBell {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-        }
-        @keyframes pulseBadge {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        @keyframes tickerScroll {
-            0%, 20% { transform: translateY(0); }
-            25%, 45% { transform: translateY(-22px); }
-            50%, 70% { transform: translateY(-44px); }
-            75%, 95% { transform: translateY(-66px); }
-            100% { transform: translateY(0); }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -1587,19 +1516,9 @@
             <div class="video-overlay"></div>
             <div class="video-overlay-kenya"></div>
         </div>
-        
+
         <div class="hero-bg-pattern"></div>
-        
-        <!-- Video Upload Zone (Admin Only) -->
-        <div class="video-upload-zone" id="videoUploadZone">
-            <span class="icon">🎬</span>
-            <span class="text">Update Hero Video</span>
-            <button class="upload-btn" onclick="document.getElementById('heroVideoInput').click()">
-                <i class="fas fa-upload"></i> Upload
-            </button>
-            <input type="file" id="heroVideoInput" accept="video/*" style="display:none;" onchange="uploadHeroVideo()">
-        </div>
-        
+
         <!-- Video Play Button -->
         <div class="hero-video-play" onclick="openVideoModal()">
             <div class="play-icon"><i class="fas fa-play"></i></div>
@@ -1618,21 +1537,22 @@
                 Welcome to <br><span class="highlight">Changara Star Academy</span>
             </h1>
             <p id="heroSubtitle">
-                Nurturing young minds through quality education, discipline, innovation, and strong moral values. 
-                We provide a safe and supportive learning environment where every child is encouraged to discover 
+                Nurturing young minds through quality education, discipline, innovation, and strong moral values.
+                We provide a safe and supportive learning environment where every child is encouraged to discover
                 their potential and achieve academic excellence.
             </p>
             <div class="btn-group">
-                <a href="about.html" class="btn-hero" id="heroButton">
-                    <span>Explore More</span>
-                    <i class="fas fa-arrow-right"></i>
-                </a>
+                <!-- SCROLL DOWN BUTTON (replaces Explore More) -->
+                <button class="btn-scroll-down" onclick="scrollToContent()">
+                    <span>Scroll Down</span>
+                    <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+                </button>
                 <a href="admissions.html" class="btn-outline">
                     <i class="fas fa-pen-fancy"></i> Apply Now
                 </a>
             </div>
         </div>
-        
+
         <div class="scroll-indicator">
             <div class="mouse"><div class="dot"></div></div>
             <span>Scroll</span>
@@ -1989,6 +1909,18 @@
         });
 
         // ============================================
+        // SCROLL TO CONTENT (for Scroll Down button)
+        // ============================================
+        function scrollToContent() {
+            const contentSection = document.getElementById('slide-content');
+            if (contentSection) {
+                const offset = 150;
+                const top = contentSection.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({ top: top, behavior: 'smooth' });
+            }
+        }
+
+        // ============================================
         // MOBILE MENU
         // ============================================
         function toggleMobileMenu() {
@@ -2005,7 +1937,7 @@
                 const offset = 160;
                 const top = section.getBoundingClientRect().top + window.pageYOffset - offset;
                 window.scrollTo({ top: top, behavior: 'smooth' });
-                
+
                 document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
                 const tabs = document.querySelectorAll('.tab-btn');
                 const index = Array.from(tabs).findIndex(btn => {
@@ -2023,11 +1955,11 @@
             const sections = document.querySelectorAll('.content-card');
             const tabs = document.querySelectorAll('.tab-btn');
             const scrollPosition = window.scrollY + 170;
-            
+
             sections.forEach((section) => {
                 const sectionTop = section.offsetTop;
                 const sectionBottom = sectionTop + section.offsetHeight;
-                
+
                 if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
                     tabs.forEach(btn => btn.classList.remove('active'));
                     const sectionId = section.id;
@@ -2113,72 +2045,6 @@
         });
 
         // ============================================
-        // HERO VIDEO UPLOAD (Admin)
-        // ============================================
-        function uploadHeroVideo() {
-            const input = document.getElementById('heroVideoInput');
-            const file = input.files[0];
-            
-            if (!file) return;
-            
-            // Show upload progress
-            const uploadZone = document.getElementById('videoUploadZone');
-            const originalText = uploadZone.querySelector('.text').textContent;
-            uploadZone.querySelector('.text').textContent = '⏳ Uploading...';
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            fetch('/api/upload/hero-video', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update video source
-                    const video = document.getElementById('heroVideo');
-                    const modalVideo = document.getElementById('modalVideo');
-                    const videoPath = data.file.path;
-                    
-                    video.src = videoPath;
-                    video.load();
-                    video.play();
-                    
-                    modalVideo.src = videoPath;
-                    modalVideo.load();
-                    
-                    uploadZone.querySelector('.text').textContent = '✅ Video Updated!';
-                    setTimeout(() => {
-                        uploadZone.querySelector('.text').textContent = 'Update Hero Video';
-                    }, 3000);
-                    
-                    showAlert('✅ Hero video updated successfully!', 'success');
-                } else {
-                    uploadZone.querySelector('.text').textContent = '❌ Upload Failed';
-                    setTimeout(() => {
-                        uploadZone.querySelector('.text').textContent = 'Update Hero Video';
-                    }, 3000);
-                    showAlert('❌ Error uploading video: ' + data.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Upload error:', error);
-                uploadZone.querySelector('.text').textContent = '❌ Error';
-                setTimeout(() => {
-                    uploadZone.querySelector('.text').textContent = 'Update Hero Video';
-                }, 3000);
-                showAlert('❌ Error uploading video', 'error');
-            });
-            
-            input.value = '';
-        }
-
-        // Show video upload zone for admin (you can add a check for admin role)
-        // For now, we show it - you can add admin check later
-        // document.getElementById('videoUploadZone').style.display = 'flex';
-
-        // ============================================
         // SWIPER GALLERY
         // ============================================
         const swiper = new Swiper('.gallery-swiper', {
@@ -2231,7 +2097,7 @@
                     const cardIds = [
                         'displayPerformance', 'displayParents', 'displayDownloads', 'displayFees'
                     ];
-                    
+
                     const cmsData = [
                         c.performanceKcpe, c.parentsCalendar, c.downloads, c.feesContent
                     ];
@@ -2300,18 +2166,6 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             loadWebsiteContent();
-            
-            const heroBtn = document.getElementById('heroButton');
-            if (heroBtn) {
-                heroBtn.innerHTML = '<span>Explore More</span> <i class="fas fa-arrow-right"></i>';
-            }
-            
-            // Show video upload zone for admin (check if admin is logged in)
-            // You can uncomment this after adding proper admin check
-            // const token = localStorage.getItem('adminToken');
-            // if (token) {
-            //     document.getElementById('videoUploadZone').style.display = 'flex';
-            // }
         });
     </script>
 </body>
