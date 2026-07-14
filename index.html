@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🏫 Changara Star Academy – Excellence in Education</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>" />
-    <meta name="description" content="Changara Star Academy – Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏫 Changara Star Academy - Excellence in Education</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+    <meta name="description" content="Changara Star Academy - Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya. Quality education from Playgroup to Grade 6.">
     
-    <!-- Fonts & CSS -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+    <!-- ===== FONTS ===== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- ===== CSS LIBRARIES ===== -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-
+    
     <style>
         /* ========================================
            ROOT VARIABLES
@@ -23,9 +25,11 @@
             --kenya-black: #000000;
             --kenya-red: #BB0000;
             --kenya-green: #006600;
+            --kenya-white: #FFFFFF;
             --school-gold: #D4A017;
             --school-gold-light: #F5C842;
             --school-gold-dark: #B8890A;
+            --school-blue: #001F5C;
             --school-blue-dark: #0A1628;
             --font-primary: 'Playfair Display', serif;
             --font-secondary: 'Poppins', sans-serif;
@@ -36,6 +40,7 @@
            ======================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
+        
         body {
             font-family: var(--font-secondary);
             background: #f0f2f5;
@@ -44,6 +49,7 @@
             line-height: 1.6;
             padding-top: 62px;
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -51,11 +57,11 @@
         }
 
         /* ========================================
-           KENYA FLAG STRIP
+           KENYAN FLAG STRIP
            ======================================== */
         .kenya-flag-strip {
             height: 4px;
-            background: linear-gradient(to right,
+            background: linear-gradient(to right, 
                 var(--kenya-black) 0%, var(--kenya-black) 25%,
                 var(--kenya-red) 25%, var(--kenya-red) 50%,
                 var(--kenya-green) 50%, var(--kenya-green) 75%,
@@ -250,7 +256,7 @@
            NEWS TICKER
            ======================================== */
         .news-ticker-section {
-            background: linear-gradient(135deg, var(--school-blue-dark), #001F5C);
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
             color: white;
             padding: 4px 0;
             border-bottom: 2px solid var(--school-gold);
@@ -316,74 +322,6 @@
         }
 
         /* ========================================
-           SECTION NAVIGATION TABS
-           ======================================== */
-        .section-tabs {
-            background: white;
-            padding: 8px 0;
-            position: fixed;
-            top: 62px;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            border-bottom: 2px solid var(--school-gold);
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-        }
-        .section-tabs::-webkit-scrollbar {
-            display: none;
-        }
-        .section-tabs .container {
-            display: flex;
-            gap: 4px;
-            flex-wrap: nowrap;
-            justify-content: center;
-            align-items: center;
-        }
-        .section-tabs .tab-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 5px 14px;
-            border: 2px solid transparent;
-            border-radius: 50px;
-            background: transparent;
-            color: #555;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            font-family: var(--font-secondary);
-            position: relative;
-        }
-        .section-tabs .tab-btn:hover {
-            background: rgba(212, 160, 23, 0.08);
-            color: var(--school-gold);
-            transform: translateY(-2px);
-        }
-        .section-tabs .tab-btn.active {
-            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
-            color: var(--kenya-black);
-            border-color: var(--school-gold);
-            box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3);
-        }
-        .section-tabs .tab-btn .tab-icon {
-            font-size: 13px;
-        }
-        .section-tabs .tab-btn .tab-badge {
-            background: var(--kenya-red);
-            color: white;
-            font-size: 7px;
-            padding: 1px 7px;
-            border-radius: 50px;
-            font-weight: 700;
-            animation: pulseBadgeRed 1.5s infinite;
-        }
-
-        /* ========================================
            HERO SECTION WITH VIDEO BACKGROUND
            ======================================== */
         .hero-section {
@@ -397,7 +335,7 @@
             overflow: hidden;
             padding: 60px 0;
         }
-
+        
         /* ===== VIDEO BACKGROUND ===== */
         .hero-video-bg {
             position: absolute;
@@ -423,7 +361,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(10, 22, 40, 0.6) 50%, rgba(187, 0, 0, 0.25) 100%);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(10, 22, 40, 0.6) 50%, rgba(187, 0, 0, 0.3) 100%);
             z-index: 1;
         }
         .hero-video-bg .video-overlay-kenya {
@@ -432,16 +370,17 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(187, 0, 0, 0.12) 50%, rgba(0, 102, 0, 0.12) 100%);
+            background: 
+                linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(187, 0, 0, 0.15) 50%, rgba(0, 102, 0, 0.15) 100%);
             z-index: 2;
         }
-
+        
         /* ===== HERO CONTENT ===== */
         .hero-section .hero-bg-pattern {
             position: absolute;
             inset: 0;
             z-index: 1;
-            background-image:
+            background-image: 
                 radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%),
                 radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%);
         }
@@ -452,7 +391,7 @@
             margin: 0 auto;
             padding: 0 20px;
         }
-
+        
         .hero-flag-badge {
             display: inline-flex;
             align-items: center;
@@ -519,7 +458,6 @@
             animation: fadeInUp 1.6s ease forwards;
         }
 
-        /* ===== SCROLL DOWN BUTTON ===== */
         .btn-scroll-down {
             display: inline-flex;
             align-items: center;
@@ -648,7 +586,9 @@
             animation: scrollDot 2s ease-in-out infinite;
         }
 
-        /* ===== VIDEO MODAL ===== */
+        /* ========================================
+           VIDEO MODAL
+           ======================================== */
         .video-modal {
             display: none;
             position: fixed;
@@ -712,49 +652,105 @@
             backdrop-filter: blur(10px);
         }
 
-        /* ===== KEYFRAMES ===== */
-        @keyframes scrollDot {
-            0%, 100% { transform: translateY(0); opacity: 1; }
-            50% { transform: translateY(12px); opacity: 0.3; }
+        /* ========================================
+           GALLERY SECTION - DISPLAYED BELOW HERO
+           ======================================== */
+        .gallery-section {
+            padding: 60px 0;
+            background: #ffffff;
+            scroll-margin-top: 50px;
         }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        .gallery-section .section-title {
+            font-family: var(--font-primary);
+            font-size: 36px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+            color: var(--school-blue-dark);
         }
-        @keyframes bounceArrow {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(8px); }
+        .gallery-section .section-title .highlight {
+            color: var(--school-gold);
         }
-        @keyframes arrowDown {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(5px); }
+        .gallery-section .section-subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: 300;
         }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
         }
-        @keyframes slideDownNotice {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .gallery-item {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            border: 2px solid #f0f2f5;
         }
-        @keyframes pulseBell {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
+        .gallery-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.15);
+            border-color: var(--school-gold);
         }
-        @keyframes pulseBadge {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        .gallery-item .image-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 220px;
         }
-        @keyframes pulseBadgeRed {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(187, 0, 0, 0.4); }
-            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(187, 0, 0, 0.7); }
+        .gallery-item .image-wrapper img,
+        .gallery-item .image-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
         }
-        @keyframes tickerScroll {
-            0%, 20% { transform: translateY(0); }
-            25%, 45% { transform: translateY(-22px); }
-            50%, 70% { transform: translateY(-44px); }
-            75%, 95% { transform: translateY(-66px); }
-            100% { transform: translateY(0); }
+        .gallery-item:hover .image-wrapper img,
+        .gallery-item:hover .image-wrapper video {
+            transform: scale(1.05);
+        }
+        .gallery-item .image-wrapper .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .gallery-item:hover .image-wrapper .overlay {
+            opacity: 1;
+        }
+        .gallery-item .image-wrapper .overlay .tag {
+            display: inline-block;
+            padding: 3px 14px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .gallery-item .gallery-info {
+            padding: 18px 20px;
+        }
+        .gallery-item .gallery-info h4 {
+            color: var(--school-blue-dark);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .gallery-item .gallery-info p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
         }
 
         /* ========================================
@@ -783,7 +779,7 @@
            CONTENT CARDS
            ======================================== */
         .content-cards-section {
-            padding: 50px 0;
+            padding: 60px 0;
             background: #f0f2f5;
             scroll-margin-top: 50px;
         }
@@ -968,6 +964,13 @@
             color: white;
         }
 
+        /* ========================================
+           BADGE ANIMATIONS
+           ======================================== */
+        @keyframes pulseBadgeRed {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(187, 0, 0, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(187, 0, 0, 0.7); }
+        }
         @keyframes pulseBadgeGreen {
             0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4); }
             50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(0, 102, 0, 0.7); }
@@ -981,7 +984,7 @@
            FEATURES
            ======================================== */
         .features-section {
-            padding: 50px 0;
+            padding: 60px 0;
             background: linear-gradient(135deg, #000000, #1a0000, #0a1628);
             position: relative;
             overflow: hidden;
@@ -1053,7 +1056,7 @@
            STATS
            ======================================== */
         .stats-section {
-            padding: 50px 0;
+            padding: 60px 0;
             background: linear-gradient(135deg, var(--kenya-black), var(--school-blue-dark));
             position: relative;
             overflow: hidden;
@@ -1094,98 +1097,10 @@
         }
 
         /* ========================================
-           GALLERY
-           ======================================== */
-        .gallery-section {
-            padding: 50px 0;
-            background: linear-gradient(135deg, var(--school-blue-dark), #001F5C);
-            scroll-margin-top: 50px;
-        }
-        .gallery-swiper {
-            padding: 15px 0;
-        }
-        .gallery-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-        .gallery-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
-        .gallery-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        .gallery-card:hover img {
-            transform: scale(1.05);
-        }
-        .gallery-card .gallery-content {
-            padding: 18px;
-        }
-        .gallery-card .gallery-content h4 {
-            color: var(--school-blue-dark);
-            font-size: 16px;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        .gallery-card .gallery-content p {
-            color: #666;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-        .gallery-card .gallery-content .tag {
-            display: inline-block;
-            padding: 2px 12px;
-            border-radius: 50px;
-            font-size: 9px;
-            font-weight: 700;
-            margin-top: 8px;
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .swiper-button-next,
-        .swiper-button-prev {
-            color: var(--school-gold) !important;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            width: 40px !important;
-            height: 40px !important;
-            border-radius: 50% !important;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-        .swiper-button-next:hover,
-        .swiper-button-prev:hover {
-            background: rgba(212, 160, 23, 0.2);
-            border-color: var(--school-gold);
-        }
-        .swiper-button-next::after,
-        .swiper-button-prev::after {
-            font-size: 14px !important;
-        }
-        .swiper-pagination-bullet {
-            background: rgba(255,255,255,0.2) !important;
-            width: 8px !important;
-            height: 8px !important;
-        }
-        .swiper-pagination-bullet-active {
-            background: var(--school-gold) !important;
-        }
-
-        /* ========================================
            NEWS
            ======================================== */
         .news-section {
-            padding: 50px 0;
+            padding: 60px 0;
             background: #f0f2f5;
             scroll-margin-top: 50px;
         }
@@ -1326,6 +1241,49 @@
         }
 
         /* ========================================
+           ANIMATIONS
+           ======================================== */
+        @keyframes scrollDot {
+            0%, 100% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(12px); opacity: 0.3; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounceArrow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+        @keyframes arrowDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(5px); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes slideDownNotice {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulseBell {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes tickerScroll {
+            0%, 20% { transform: translateY(0); }
+            25%, 45% { transform: translateY(-22px); }
+            50%, 70% { transform: translateY(-44px); }
+            75%, 95% { transform: translateY(-66px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* ========================================
            RESPONSIVE
            ======================================== */
         @media (max-width: 768px) {
@@ -1339,18 +1297,6 @@
             .main-header .nav-links.show { display: flex; }
             .main-header .mobile-menu-btn { display: block; }
 
-            .section-tabs .container {
-                justify-content: flex-start;
-                padding: 0 10px;
-            }
-            .section-tabs .tab-btn {
-                font-size: 9px;
-                padding: 4px 10px;
-            }
-            .section-tabs .tab-btn .tab-icon {
-                font-size: 11px;
-            }
-
             .hero-section { padding: 40px 0; margin-top: 70px; }
             .hero-section h1 { font-size: 32px; }
             .hero-section p { font-size: 16px; }
@@ -1358,11 +1304,11 @@
             .btn-scroll-down, .btn-outline { width: 100%; justify-content: center; }
 
             body { padding-top: 100px; }
-            .section-tabs { top: 55px; padding: 6px 0; }
             .notice-alert-bar { top: 100px; }
             .news-ticker-section { top: 100px; }
 
             .section-title { font-size: 26px; }
+            .gallery-grid { grid-template-columns: 1fr 1fr; }
             .content-grid { grid-template-columns: 1fr 1fr; }
             .features-grid { grid-template-columns: 1fr 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
@@ -1370,37 +1316,41 @@
 
             .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
             .notice-alert-bar .container { flex-direction: column; text-align: center; }
-            .gallery-card img { height: 160px; }
+            .gallery-item .image-wrapper { height: 160px; }
+            
             .main-header .logo-section h1 { font-size: 16px; }
             .main-header .school-icon { font-size: 24px; }
-
+            .main-header .nav-links a { font-size: 11px; padding: 4px 10px; }
+            
             .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
             .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
-
+            
             .video-modal { padding: 20px; }
             .video-modal .close-modal { top: -40px; font-size: 20px; width: 36px; height: 36px; }
-
+            
             .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
             .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
             .hero-video-play .play-text { font-size: 10px; }
+            
+            .gallery-section .section-title { font-size: 28px; }
         }
 
         @media (max-width: 480px) {
+            .gallery-grid { grid-template-columns: 1fr; }
             .content-grid { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .hero-section h1 { font-size: 26px; }
             .section-title { font-size: 22px; }
-            .section-tabs .tab-btn { font-size: 8px; padding: 3px 8px; }
-            .section-tabs .tab-btn .tab-icon { font-size: 10px; }
+            .gallery-section .section-title { font-size: 22px; }
             .main-header .logo-section h1 { font-size: 14px; }
             .main-header .school-icon { font-size: 20px; }
             body { padding-top: 90px; }
-            .section-tabs { top: 48px; padding: 4px 0; }
             .notice-alert-bar { top: 90px; }
             .news-ticker-section { top: 90px; }
             .hero-section { margin-top: 60px; }
             .hero-video-play { bottom: 60px; }
+            .gallery-item .image-wrapper { height: 200px; }
         }
     </style>
 </head>
@@ -1452,34 +1402,6 @@
         </div>
     </div>
 
-    <!-- ===== SECTION NAVIGATION TABS ===== -->
-    <div class="section-tabs" id="sectionTabs">
-        <div class="container">
-            <button class="tab-btn active" onclick="scrollToSection('slide-academics')">
-                <span class="tab-icon">📚</span> Academics
-                <span class="tab-badge">🔥</span>
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-admissions')">
-                <span class="tab-icon">📝</span> Admissions
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-facilities')">
-                <span class="tab-icon">🏫</span> Facilities
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-performance')">
-                <span class="tab-icon">🏆</span> Performance
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-parents')">
-                <span class="tab-icon">👨‍👩‍👧‍👦</span> Parents
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-downloads')">
-                <span class="tab-icon">📥</span> Downloads
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-fees')">
-                <span class="tab-icon">💰</span> Fees
-            </button>
-        </div>
-    </div>
-
     <!-- ======================================== -->
     <!-- HEADER -->
     <!-- ======================================== -->
@@ -1511,7 +1433,6 @@
         <div class="hero-video-bg">
             <video id="heroVideo" autoplay muted loop playsinline poster="/images/school-compound.jpg">
                 <source src="/videos/school-hero.mp4" type="video/mp4">
-                <!-- Fallback image if video doesn't load -->
             </video>
             <div class="video-overlay"></div>
             <div class="video-overlay-kenya"></div>
@@ -1542,7 +1463,6 @@
                 their potential and achieve academic excellence.
             </p>
             <div class="btn-group">
-                <!-- SCROLL DOWN BUTTON (replaces Explore More) -->
                 <button class="btn-scroll-down" onclick="scrollToContent()">
                     <span>Scroll Down</span>
                     <span class="arrow"><i class="fas fa-chevron-down"></i></span>
@@ -1572,6 +1492,104 @@
             <div class="modal-title">🏫 Changara Star Academy - Our Story</div>
         </div>
     </div>
+
+    <!-- ======================================== -->
+    <!-- GALLERY SECTION - BELOW HERO -->
+    <!-- ======================================== -->
+    <section class="gallery-section" id="slide-gallery">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">🖼️ Our <span class="highlight">Gallery</span></h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Explore our school facilities, activities, and events</p>
+
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- Gallery items will be loaded dynamically from CMS -->
+                <div class="gallery-item" data-aos="fade-up" data-aos-delay="100">
+                    <div class="image-wrapper">
+                        <img src="/images/school-compound.jpg" alt="School Compound">
+                        <div class="overlay">
+                            <span class="tag">🏫 Facilities</span>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h4>School Compound</h4>
+                        <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-aos="fade-up" data-aos-delay="150">
+                    <div class="image-wrapper">
+                        <img src="/images/ecde-section.jpg" alt="ECDE Section">
+                        <div class="overlay">
+                            <span class="tag">🧸 ECDE</span>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h4>E.C.D.E Section</h4>
+                        <p>Our Early Childhood Development Education section where young learners begin their journey.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-aos="fade-up" data-aos-delay="200">
+                    <div class="image-wrapper">
+                        <img src="/images/classroom-learning.jpg" alt="Classroom Learning">
+                        <div class="overlay">
+                            <span class="tag">📚 Academics</span>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h4>Classroom Learning</h4>
+                        <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-aos="fade-up" data-aos-delay="250">
+                    <div class="image-wrapper">
+                        <img src="/images/computer-lab.jpg" alt="Computer Lab">
+                        <div class="overlay">
+                            <span class="tag">💻 Technology</span>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h4>Computer Lab</h4>
+                        <p>Students learning essential computer skills in our modern computer laboratory.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-aos="fade-up" data-aos-delay="300">
+                    <div class="image-wrapper">
+                        <img src="/images/sports-day.jpg" alt="Sports Day">
+                        <div class="overlay">
+                            <span class="tag">🏆 Sports</span>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h4>Sports Day</h4>
+                        <p>Students participating in various sports activities during our annual sports day.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-aos="fade-up" data-aos-delay="350">
+                    <div class="image-wrapper">
+                        <img src="/images/graduation.jpg" alt="Graduation Ceremony">
+                        <div class="overlay">
+                            <span class="tag">🎓 Events</span>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h4>Graduation Ceremony</h4>
+                        <p>Celebrating the achievements of our graduating students in a colorful ceremony.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:30px;" data-aos="fade-up">
+                <a href="gallery.html" class="btn btn-primary" style="padding:12px 35px;border-radius:50px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:10px;">
+                    <i class="fas fa-images"></i> View Full Gallery
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
 
     <!-- ======================================== -->
     <!-- CONTENT CARDS SECTION -->
@@ -1757,68 +1775,6 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- GALLERY SECTION -->
-    <!-- ======================================== -->
-    <section class="gallery-section" id="slide-gallery">
-        <div class="container">
-            <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
-            <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">Explore our school facilities and activities</p>
-
-            <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
-                <div class="swiper-wrapper">
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/school-compound.jpg" alt="School Compound">
-                            <div class="gallery-content">
-                                <h4>🏫 School Compound</h4>
-                                <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/ecde-section.jpg" alt="ECDE Section">
-                            <div class="gallery-content">
-                                <h4>🧸 E.C.D.E Section</h4>
-                                <p>Our Early Childhood Development Education section where young learners begin.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/classroom-learning.jpg" alt="Classroom">
-                            <div class="gallery-content">
-                                <h4>📚 Classroom Learning</h4>
-                                <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
-                                <span class="tag">Academics</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/computer-lab.jpg" alt="Computer Lab">
-                            <div class="gallery-content">
-                                <h4>💻 Computer Lab</h4>
-                                <p>Students learning essential computer skills in our modern computer laboratory.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-pagination"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ======================================== -->
     <!-- NEWS SECTION -->
     <!-- ======================================== -->
     <section class="news-section" id="slide-news">
@@ -1895,7 +1851,6 @@
     <!-- ======================================== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
         // ============================================
@@ -1909,7 +1864,15 @@
         });
 
         // ============================================
-        // SCROLL TO CONTENT (for Scroll Down button)
+        // MOBILE MENU
+        // ============================================
+        function toggleMobileMenu() {
+            const nav = document.getElementById('navLinks');
+            if (nav) nav.classList.toggle('show');
+        }
+
+        // ============================================
+        // SCROLL TO CONTENT
         // ============================================
         function scrollToContent() {
             const contentSection = document.getElementById('slide-content');
@@ -1919,59 +1882,6 @@
                 window.scrollTo({ top: top, behavior: 'smooth' });
             }
         }
-
-        // ============================================
-        // MOBILE MENU
-        // ============================================
-        function toggleMobileMenu() {
-            const nav = document.getElementById('navLinks');
-            if (nav) nav.classList.toggle('show');
-        }
-
-        // ============================================
-        // SECTION TABS
-        // ============================================
-        function scrollToSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                const offset = 160;
-                const top = section.getBoundingClientRect().top + window.pageYOffset - offset;
-                window.scrollTo({ top: top, behavior: 'smooth' });
-
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                const tabs = document.querySelectorAll('.tab-btn');
-                const index = Array.from(tabs).findIndex(btn => {
-                    const onclick = btn.getAttribute('onclick');
-                    return onclick && onclick.includes(sectionId);
-                });
-                if (index !== -1) {
-                    tabs[index].classList.add('active');
-                }
-            }
-        }
-
-        // Update active tab on scroll
-        document.addEventListener('scroll', function() {
-            const sections = document.querySelectorAll('.content-card');
-            const tabs = document.querySelectorAll('.tab-btn');
-            const scrollPosition = window.scrollY + 170;
-
-            sections.forEach((section) => {
-                const sectionTop = section.offsetTop;
-                const sectionBottom = sectionTop + section.offsetHeight;
-
-                if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
-                    tabs.forEach(btn => btn.classList.remove('active'));
-                    const sectionId = section.id;
-                    tabs.forEach(btn => {
-                        const onclick = btn.getAttribute('onclick');
-                        if (onclick && onclick.includes(sectionId)) {
-                            btn.classList.add('active');
-                        }
-                    });
-                }
-            });
-        });
 
         // ============================================
         // NOTICE ALERT
@@ -2030,44 +1940,16 @@
             video.pause();
         }
 
-        // Close modal with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeVideoModal();
             }
         });
 
-        // Click outside to close
         document.getElementById('videoModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeVideoModal();
             }
-        });
-
-        // ============================================
-        // SWIPER GALLERY
-        // ============================================
-        const swiper = new Swiper('.gallery-swiper', {
-            slidesPerView: 1,
-            spaceBetween: 16,
-            loop: true,
-            autoplay: {
-                delay: 4000,
-                disableOnInteraction: false,
-            },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-            },
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            breakpoints: {
-                640: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
-            },
         });
 
         // ============================================
@@ -2152,6 +2034,39 @@
                                 <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                             `;
                             newsGrid.appendChild(div);
+                        });
+                    }
+
+                    // Load gallery from CMS
+                    if (c.gallery && c.gallery.length > 0) {
+                        const galleryGrid = document.getElementById('galleryGrid');
+                        galleryGrid.innerHTML = '';
+                        c.gallery.forEach((item, index) => {
+                            const div = document.createElement('div');
+                            div.className = 'gallery-item';
+                            div.setAttribute('data-aos', 'fade-up');
+                            div.setAttribute('data-aos-delay', (index + 1) * 50);
+                            
+                            let mediaHtml = '';
+                            if (item.type === 'video') {
+                                mediaHtml = `<video src="${item.file}" muted loop playsinline></video>`;
+                            } else {
+                                mediaHtml = `<img src="${item.file}" alt="${item.title || 'Gallery Image'}">`;
+                            }
+                            
+                            div.innerHTML = `
+                                <div class="image-wrapper">
+                                    ${mediaHtml}
+                                    <div class="overlay">
+                                        <span class="tag">${item.category || 'Gallery'}</span>
+                                    </div>
+                                </div>
+                                <div class="gallery-info">
+                                    <h4>${item.title || 'Gallery Item'}</h4>
+                                    <p>${item.description || ''}</p>
+                                </div>
+                            `;
+                            galleryGrid.appendChild(div);
                         });
                     }
 
