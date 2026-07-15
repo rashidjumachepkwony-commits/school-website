@@ -12,7 +12,7 @@
             background: #f0f2f5;
             padding: 20px;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
+        .container { max-width: 1600px; margin: 0 auto; }
         
         .header {
             display: flex;
@@ -98,6 +98,8 @@
         .btn-secondary:hover { background: #5a6268; }
         .btn-info { background: #17a2b8; color: white; }
         .btn-info:hover { background: #138496; }
+        .btn-warning { background: #ffc107; color: #0A1628; }
+        .btn-warning:hover { background: #e0a800; }
         .btn-sm { padding: 5px 12px; font-size: 12px; }
         .btn-block { width: 100%; padding: 14px; font-size: 16px; justify-content: center; }
 
@@ -150,52 +152,61 @@
             gap: 15px;
         }
 
-        .subject-entry {
-            background: #f8f9fc;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e8ecf1;
-            margin-bottom: 10px;
-            position: relative;
-        }
-        .subject-entry .remove-subject {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .subject-entry .remove-subject:hover { background: #c82333; transform: scale(1.1); }
-
         .table-wrapper { overflow-x: auto; }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
+            font-size: 13px;
         }
         table th, table td {
             border: 1px solid #e8ecf1;
-            padding: 10px 12px;
-            text-align: left;
-            font-size: 13px;
+            padding: 8px 10px;
+            text-align: center;
         }
         table th {
             background: #0A1628;
             color: white;
             font-weight: 600;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         table tr:nth-child(even) { background: #fafbfc; }
+        table tr:hover { background: #f0f4ff; }
         table .status-exceeding { color: #28a745; font-weight: 600; }
         table .status-meeting { color: #17a2b8; font-weight: 600; }
         table .status-approaching { color: #d4a017; font-weight: 600; }
         table .status-below { color: #dc3545; font-weight: 600; }
+
+        table input[type="number"] {
+            width: 60px;
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        table input[type="number"]:focus {
+            border-color: #D4A017;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(212,160,23,0.1);
+        }
+        table input[type="text"] {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            min-width: 120px;
+        }
+        table input[type="text"]:focus {
+            border-color: #D4A017;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(212,160,23,0.1);
+        }
 
         .stats-grid {
             display: grid;
@@ -231,6 +242,42 @@
         .filters .form-group { margin-bottom: 0; flex: 1; min-width: 150px; }
         .filters .form-group label { font-size: 12px; color: #666; }
 
+        /* Grade Selector Tabs */
+        .grade-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .grade-tabs .tab {
+            padding: 8px 18px;
+            border: 2px solid #e8ecf1;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #666;
+        }
+        .grade-tabs .tab:hover {
+            border-color: #D4A017;
+            color: #0A1628;
+        }
+        .grade-tabs .tab.active {
+            background: linear-gradient(135deg, #D4A017, #F5C842);
+            border-color: #D4A017;
+            color: #0A1628;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+            align-items: center;
+        }
+
         .empty-state {
             text-align: center;
             padding: 40px;
@@ -238,6 +285,24 @@
         }
         .empty-state i { font-size: 48px; display: block; margin-bottom: 10px; color: #ddd; }
 
+        /* Subject header with max score */
+        .subject-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.7);
+        }
+        .subject-header .subj-name {
+            font-weight: 700;
+            color: white;
+            font-size: 12px;
+        }
+        .subject-header .subj-max {
+            font-size: 10px;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .form-row { grid-template-columns: 1fr; }
             .form-row-3 { grid-template-columns: 1fr; }
@@ -245,11 +310,42 @@
             .filters .form-group { min-width: 100%; }
             .header h1 { font-size: 22px; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
+            table { font-size: 11px; }
+            table input[type="number"] { width: 45px; font-size: 11px; }
+            table th, table td { padding: 4px 6px; }
+            .grade-tabs .tab { font-size: 11px; padding: 5px 12px; }
         }
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr; }
             .card { padding: 15px; }
         }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #D4A017;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .save-status {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            display: none;
+        }
+        .save-status.show { display: inline-block; }
+        .save-status.saving { background: #cce5ff; color: #004085; }
+        .save-status.saved { background: #d4edda; color: #155724; }
+        .save-status.error { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
@@ -257,7 +353,7 @@
 <div class="container">
     <!-- Header -->
     <div class="header">
-        <h1><i class="fas fa-chart-bar"></i> Academic Assessments</h1>
+        <h1><i class="fas fa-edit"></i> Academic Assessments</h1>
         <div class="admin-info">
             <div class="avatar" id="adminAvatar">A</div>
             <span id="adminName">Admin</span>
@@ -265,6 +361,55 @@
     </div>
 
     <div id="alert" class="alert"></div>
+
+    <!-- ===== GRADE SELECTOR ===== -->
+    <div class="card">
+        <h2><i class="fas fa-chalkboard" style="color:#D4A017;"></i> Online Marks Entry</h2>
+        <p class="desc">Select a grade below to start entering marks online. All data is saved automatically.</p>
+
+        <div class="grade-tabs" id="gradeTabs">
+            <div class="tab" onclick="selectGrade('Play Group')">🧸 Play Group</div>
+            <div class="tab" onclick="selectGrade('PP1')">🎨 PP1</div>
+            <div class="tab" onclick="selectGrade('PP2')">✏️ PP2</div>
+            <div class="tab active" onclick="selectGrade('Grade 1')">📖 Grade 1</div>
+            <div class="tab" onclick="selectGrade('Grade 2')">📗 Grade 2</div>
+            <div class="tab" onclick="selectGrade('Grade 3')">📘 Grade 3</div>
+            <div class="tab" onclick="selectGrade('Grade 4')">📙 Grade 4</div>
+            <div class="tab" onclick="selectGrade('Grade 5')">📚 Grade 5</div>
+            <div class="tab" onclick="selectGrade('Grade 6')">🎓 Grade 6</div>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn btn-success" onclick="addStudentRow()">
+                <i class="fas fa-user-plus"></i> Add Student
+            </button>
+            <button class="btn btn-primary" onclick="saveAllMarks()">
+                <i class="fas fa-save"></i> Save All Marks
+            </button>
+            <button class="btn btn-info" onclick="loadGradeData()">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+            <button class="btn btn-danger" onclick="confirmDeleteGrade()">
+                <i class="fas fa-trash"></i> Clear Grade
+            </button>
+            <span class="save-status" id="saveStatus"></span>
+        </div>
+
+        <div id="marksTableContainer">
+            <div class="table-wrapper">
+                <table id="marksTable">
+                    <thead id="marksTableHead">
+                        <!-- Generated by JavaScript -->
+                    </thead>
+                    <tbody id="marksTableBody">
+                        <tr><td colspan="20" style="text-align:center;padding:40px;color:#999;">
+                            <i class="fas fa-spinner spinner"></i> Loading marks...
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <!-- ===== STATS ===== -->
     <div class="stats-grid" id="statsGrid">
@@ -290,75 +435,15 @@
         </div>
     </div>
 
-    <!-- ===== ADD STUDENT FORM ===== -->
-    <div class="card">
-        <h2><i class="fas fa-user-plus" style="color:#28a745;"></i> Add/Edit Student Assessment</h2>
-        <p class="desc">Add a new student or edit existing assessment records</p>
-
-        <form id="assessmentForm">
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Student Name *</label>
-                    <input type="text" id="studentName" placeholder="Enter full name" required>
-                </div>
-                <div class="form-group">
-                    <label>Grade *</label>
-                    <select id="grade" required>
-                        <option value="">Select Grade</option>
-                        <option value="Play Group">Play Group</option>
-                        <option value="PP1">PP1</option>
-                        <option value="PP2">PP2</option>
-                        <option value="Grade 1">Grade 1</option>
-                        <option value="Grade 2">Grade 2</option>
-                        <option value="Grade 3">Grade 3</option>
-                        <option value="Grade 4">Grade 4</option>
-                        <option value="Grade 5">Grade 5</option>
-                        <option value="Grade 6">Grade 6</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="subjectsContainer">
-                <div class="subject-entry">
-                    <button type="button" class="remove-subject" onclick="removeSubject(this)">✕</button>
-                    <div class="form-row-3">
-                        <div class="form-group">
-                            <label>Subject</label>
-                            <input type="text" class="subject-name" placeholder="e.g., Mathematics" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Max Score</label>
-                            <input type="number" class="subject-max" placeholder="e.g., 30" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Score</label>
-                            <input type="number" class="subject-score" placeholder="e.g., 25" required>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <button type="button" class="btn btn-info" onclick="addSubject()">
-                <i class="fas fa-plus"></i> Add Subject
-            </button>
-            <button type="submit" class="btn btn-success" style="margin-top:15px;">
-                <i class="fas fa-save"></i> Save Assessment
-            </button>
-            <button type="button" class="btn btn-secondary" onclick="resetForm()" style="margin-top:15px;">
-                <i class="fas fa-undo"></i> Reset
-            </button>
-        </form>
-    </div>
-
-    <!-- ===== STUDENT LIST ===== -->
+    <!-- ===== STUDENT LIST (Existing) ===== -->
     <div class="card">
         <h2><i class="fas fa-list" style="color:#D4A017;"></i> All Students</h2>
-        <p class="desc">View, edit, or delete student assessment records</p>
+        <p class="desc">View all students and their assessment records</p>
 
         <div class="filters">
             <div class="form-group">
                 <label>Filter by Grade</label>
-                <select id="filterGrade" onchange="loadStudents()">
+                <select id="filterGrade" onchange="loadStudentList()">
                     <option value="">All Grades</option>
                     <option value="Play Group">Play Group</option>
                     <option value="PP1">PP1</option>
@@ -373,10 +458,9 @@
             </div>
             <div class="form-group">
                 <label>Search Student</label>
-                <input type="text" id="searchStudent" placeholder="Search by name..." onkeyup="loadStudents()">
+                <input type="text" id="searchStudent" placeholder="Search by name..." onkeyup="loadStudentList()">
             </div>
-            <button class="btn btn-success" onclick="loadStudents()"><i class="fas fa-sync"></i> Refresh</button>
-            <button class="btn btn-danger" onclick="confirmDeleteAll()"><i class="fas fa-trash"></i> Delete All</button>
+            <button class="btn btn-success" onclick="loadStudentList()"><i class="fas fa-sync"></i> Refresh</button>
         </div>
 
         <div class="table-wrapper">
@@ -402,7 +486,127 @@
 </div>
 
 <script>
+    let currentGrade = 'Grade 1';
+    let studentsData = [];
     let editingStudentId = null;
+
+    // ============================================
+    // GRADE SUBJECT CONFIGURATIONS
+    // ============================================
+    const GRADE_CONFIGS = {
+        'Play Group': {
+            subjects: [
+                { name: 'MATH', max: 10 },
+                { name: 'LANG', max: 10 },
+                { name: 'LIT', max: 10 },
+                { name: 'KUS', max: 10 },
+                { name: 'ENVI/CRE', max: 10 },
+                { name: 'C/A', max: 10 }
+            ]
+        },
+        'PP1': {
+            subjects: [
+                { name: 'MATH', max: 10 },
+                { name: 'LANG', max: 10 },
+                { name: 'LIT', max: 10 },
+                { name: 'KIS', max: 10 },
+                { name: 'KUS', max: 10 },
+                { name: 'ENV', max: 10 },
+                { name: 'CRE/I.R.E', max: 10 },
+                { name: 'C/A', max: 10 }
+            ]
+        },
+        'PP2': {
+            subjects: [
+                { name: 'MATH', max: 10 },
+                { name: 'LANG', max: 10 },
+                { name: 'LIT', max: 10 },
+                { name: 'KIS', max: 10 },
+                { name: 'KUS', max: 10 },
+                { name: 'ENV', max: 10 },
+                { name: 'CRE/I.R.E', max: 10 },
+                { name: 'C/A', max: 10 }
+            ]
+        },
+        'Grade 1': {
+            subjects: [
+                { name: 'MATH', max: 30 },
+                { name: 'LIST/SPEAKING', max: 20 },
+                { name: 'READING', max: 20 },
+                { name: 'GRAMMAR', max: 20 },
+                { name: 'KUSOMA', max: 20 },
+                { name: 'SARUFI', max: 20 },
+                { name: 'ENV', max: 30 },
+                { name: 'C.R.E', max: 20 },
+                { name: 'CREATIVE ARTS', max: 20 }
+            ]
+        },
+        'Grade 2': {
+            subjects: [
+                { name: 'LIST & SPEAKING', max: 20 },
+                { name: 'READING ALOUD', max: 20 },
+                { name: 'GRAMMAR', max: 20 },
+                { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 20 },
+                { name: 'KUSOMA KWA SAUTI', max: 20 },
+                { name: 'LUGHA', max: 20 },
+                { name: 'MATH', max: 30 },
+                { name: 'ENVIRONMENTAL', max: 30 },
+                { name: 'C/A', max: 20 },
+                { name: 'RE', max: 20 }
+            ]
+        },
+        'Grade 3': {
+            subjects: [
+                { name: 'LIST & SPEAKING', max: 20 },
+                { name: 'READING ALOUD', max: 20 },
+                { name: 'GRAMMAR', max: 20 },
+                { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 20 },
+                { name: 'KUSOMA KWA SAUTI', max: 20 },
+                { name: 'SARUFI', max: 20 },
+                { name: 'MATHS', max: 30 },
+                { name: 'ENVIRONMENTAL', max: 30 },
+                { name: 'C.R.E', max: 20 },
+                { name: 'I.R.E', max: 20 },
+                { name: 'C/A', max: 20 }
+            ]
+        },
+        'Grade 4': {
+            subjects: [
+                { name: 'MATHS ACTIVITIES', max: 30 },
+                { name: 'ENGLISH ACTIVITIES', max: 50 },
+                { name: 'SCI & TECH', max: 30 },
+                { name: 'KISW LUGHA', max: 50 },
+                { name: 'SST', max: 30 },
+                { name: 'RELIGIOUS EDUCATION', max: 20 },
+                { name: 'AGRICULTURE', max: 20 },
+                { name: 'CREATIVE ART', max: 35 }
+            ]
+        },
+        'Grade 5': {
+            subjects: [
+                { name: 'MATHS ACTIVITIES', max: 30 },
+                { name: 'ENGLISH ACTIVITIES', max: 50 },
+                { name: 'SCI & TECH', max: 30 },
+                { name: 'KISW LUGHA', max: 50 },
+                { name: 'SST', max: 30 },
+                { name: 'RELIGIOUS EDUCATION', max: 20 },
+                { name: 'AGRICULTURE', max: 20 },
+                { name: 'CREATIVE ART', max: 35 }
+            ]
+        },
+        'Grade 6': {
+            subjects: [
+                { name: 'MATHS ACTIVITIES', max: 30 },
+                { name: 'ENGLISH ACTIVITIES', max: 50 },
+                { name: 'SCI & TECH', max: 30 },
+                { name: 'KISW LUGHA', max: 50 },
+                { name: 'SST', max: 30 },
+                { name: 'RELIGIOUS EDUCATION', max: 20 },
+                { name: 'AGRICULTURE', max: 20 },
+                { name: 'CREATIVE ART', max: 35 }
+            ]
+        }
+    };
 
     // ============================================
     // CHECK AUTH
@@ -419,90 +623,421 @@
     })();
 
     // ============================================
-    // ADD SUBJECT ROW
+    // SELECT GRADE
     // ============================================
-    function addSubject() {
-        const container = document.getElementById('subjectsContainer');
-        const div = document.createElement('div');
-        div.className = 'subject-entry';
-        div.innerHTML = `
-            <button type="button" class="remove-subject" onclick="removeSubject(this)">✕</button>
-            <div class="form-row-3">
-                <div class="form-group">
-                    <label>Subject</label>
-                    <input type="text" class="subject-name" placeholder="e.g., Mathematics" required>
-                </div>
-                <div class="form-group">
-                    <label>Max Score</label>
-                    <input type="number" class="subject-max" placeholder="e.g., 30" required>
-                </div>
-                <div class="form-group">
-                    <label>Score</label>
-                    <input type="number" class="subject-score" placeholder="e.g., 25" required>
-                </div>
-            </div>
-        `;
-        container.appendChild(div);
+    function selectGrade(grade) {
+        currentGrade = grade;
+        document.querySelectorAll('.grade-tabs .tab').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.grade-tabs .tab').forEach(el => {
+            if (el.textContent.trim().includes(grade) || el.textContent.trim() === grade) {
+                el.classList.add('active');
+            }
+        });
+        loadGradeData();
     }
 
-    function removeSubject(btn) {
-        const container = document.getElementById('subjectsContainer');
-        if (container.children.length > 1) {
-            btn.closest('.subject-entry').remove();
-        } else {
-            showAlert('You need at least one subject', 'error');
+    // ============================================
+    // LOAD GRADE DATA
+    // ============================================
+    async function loadGradeData() {
+        showSaveStatus('Loading...', 'saving');
+        
+        try {
+            const response = await fetch(`/api/assessments/grade/${encodeURIComponent(currentGrade)}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                studentsData = data.students || [];
+                renderMarksTable();
+                updateStats();
+                showSaveStatus('Loaded', 'saved');
+                setTimeout(() => hideSaveStatus(), 1500);
+            } else {
+                studentsData = [];
+                renderMarksTable();
+                updateStats();
+                showSaveStatus('No data', 'saved');
+                setTimeout(() => hideSaveStatus(), 1500);
+            }
+        } catch (error) {
+            console.error('Error loading grade data:', error);
+            studentsData = [];
+            renderMarksTable();
+            updateStats();
+            showSaveStatus('Error loading', 'error');
+            setTimeout(() => hideSaveStatus(), 2000);
         }
     }
 
     // ============================================
-    // GET SUBJECTS DATA
+    // RENDER MARKS TABLE
     // ============================================
-    function getSubjectsData() {
-        const entries = document.querySelectorAll('.subject-entry');
-        const subjects = [];
-        entries.forEach(entry => {
-            const name = entry.querySelector('.subject-name').value.trim();
-            const maxScore = parseInt(entry.querySelector('.subject-max').value);
-            const score = parseInt(entry.querySelector('.subject-score').value);
-            if (name && !isNaN(maxScore) && !isNaN(score)) {
-                subjects.push({ subject: name, maxScore, score });
-            }
+    function renderMarksTable() {
+        const config = GRADE_CONFIGS[currentGrade];
+        if (!config) return;
+
+        const thead = document.getElementById('marksTableHead');
+        const tbody = document.getElementById('marksTableBody');
+
+        // Build header
+        let headerHtml = `<tr><th style="min-width:50px;">#</th><th style="min-width:150px;">Student Name</th>`;
+        config.subjects.forEach(s => {
+            headerHtml += `<th><div class="subject-header"><span class="subj-name">${s.name}</span><span class="subj-max">Max: ${s.max}</span></div></th>`;
         });
-        return subjects;
+        headerHtml += `<th style="min-width:80px;">Total</th><th style="min-width:80px;">Average</th><th style="min-width:120px;">Performance</th><th style="min-width:60px;">Action</th></tr>`;
+        thead.innerHTML = headerHtml;
+
+        // Build body
+        if (studentsData.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="${config.subjects.length + 5}" style="text-align:center;padding:40px;color:#999;">
+                        <i class="fas fa-user-plus" style="font-size:36px;display:block;margin-bottom:10px;color:#ddd;"></i>
+                        No students in ${currentGrade}. Click "Add Student" to start entering marks.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let bodyHtml = '';
+        studentsData.forEach((student, index) => {
+            const performanceClass = {
+                'Exceeding Expectation': 'status-exceeding',
+                'Meeting Expectation': 'status-meeting',
+                'Approaching Expectation': 'status-approaching',
+                'Below Expectation': 'status-below'
+            }[student.performanceLevel] || '';
+
+            bodyHtml += `<tr>`;
+            bodyHtml += `<td>${index + 1}</td>`;
+            bodyHtml += `<td><input type="text" class="student-name-input" value="${student.studentName}" data-id="${student._id || 'new'}" placeholder="Student name"></td>`;
+            
+            // Subject scores
+            config.subjects.forEach(subj => {
+                const existing = student.assessments?.find(a => a.subject === subj.name);
+                const score = existing?.score || '';
+                const maxScore = subj.max;
+                bodyHtml += `<td>
+                    <input type="number" class="score-input" value="${score}" 
+                           min="0" max="${maxScore}" 
+                           data-student-id="${student._id || 'new'}" 
+                           data-subject="${subj.name}" 
+                           data-max="${maxScore}"
+                           onchange="onScoreChange(this)"
+                           placeholder="0">
+                </td>`;
+            });
+
+            // Total, Average, Performance
+            const totalScore = student.totalScore || 0;
+            const avgScore = student.averageScore || 0;
+            bodyHtml += `<td><strong>${totalScore}</strong></td>`;
+            bodyHtml += `<td>${avgScore.toFixed(1)}</td>`;
+            bodyHtml += `<td><span class="${performanceClass}">${student.performanceLevel || 'N/A'}</span></td>`;
+            bodyHtml += `<td>
+                <button class="btn btn-danger btn-sm" onclick="deleteStudentRow('${student._id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>`;
+            bodyHtml += `</tr>`;
+        });
+
+        tbody.innerHTML = bodyHtml;
     }
 
-    function setSubjectsData(subjects) {
-        const container = document.getElementById('subjectsContainer');
-        container.innerHTML = '';
-        subjects.forEach((s, index) => {
-            if (index > 0) {
-                const div = document.createElement('div');
-                div.className = 'subject-entry';
-                div.innerHTML = `
-                    <button type="button" class="remove-subject" onclick="removeSubject(this)">✕</button>
-                    <div class="form-row-3">
-                        <div class="form-group">
-                            <label>Subject</label>
-                            <input type="text" class="subject-name" value="${s.subject}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Max Score</label>
-                            <input type="number" class="subject-max" value="${s.maxScore}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Score</label>
-                            <input type="number" class="subject-score" value="${s.score}" required>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(div);
-            } else {
-                const entry = container.querySelector('.subject-entry');
-                entry.querySelector('.subject-name').value = s.subject;
-                entry.querySelector('.subject-max').value = s.maxScore;
-                entry.querySelector('.subject-score').value = s.score;
+    // ============================================
+    // ON SCORE CHANGE - Auto calculate
+    // ============================================
+    function onScoreChange(input) {
+        const row = input.closest('tr');
+        const inputs = row.querySelectorAll('.score-input');
+        let total = 0;
+        let count = 0;
+        
+        inputs.forEach(inp => {
+            const val = parseFloat(inp.value);
+            if (!isNaN(val)) {
+                total += val;
+                count++;
             }
         });
+
+        const totalCell = row.querySelector('td:nth-last-child(4)');
+        const avgCell = row.querySelector('td:nth-last-child(3)');
+        const perfCell = row.querySelector('td:nth-last-child(2)');
+
+        if (totalCell) totalCell.innerHTML = `<strong>${total}</strong>`;
+        if (avgCell) {
+            const avg = count > 0 ? total / count : 0;
+            avgCell.textContent = avg.toFixed(1);
+        }
+        if (perfCell) {
+            const avg = count > 0 ? total / count : 0;
+            const config = GRADE_CONFIGS[currentGrade];
+            const maxTotal = config.subjects.reduce((sum, s) => sum + s.max, 0);
+            const percentage = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
+            
+            let level = 'Approaching Expectation';
+            let className = 'status-approaching';
+            if (percentage >= 80) {
+                level = 'Exceeding Expectation';
+                className = 'status-exceeding';
+            } else if (percentage >= 60) {
+                level = 'Meeting Expectation';
+                className = 'status-meeting';
+            } else if (percentage >= 40) {
+                level = 'Approaching Expectation';
+                className = 'status-approaching';
+            } else {
+                level = 'Below Expectation';
+                className = 'status-below';
+            }
+            perfCell.innerHTML = `<span class="${className}">${level}</span>`;
+        }
+
+        // Auto-save after 1 second of inactivity
+        clearTimeout(window.saveTimeout);
+        window.saveTimeout = setTimeout(() => {
+            saveAllMarks();
+        }, 1000);
+    }
+
+    // ============================================
+    // ADD STUDENT ROW
+    // ============================================
+    function addStudentRow() {
+        const newStudent = {
+            _id: 'new_' + Date.now(),
+            studentName: '',
+            grade: currentGrade,
+            assessments: GRADE_CONFIGS[currentGrade].subjects.map(s => ({
+                subject: s.name,
+                maxScore: s.max,
+                score: 0
+            })),
+            totalScore: 0,
+            averageScore: 0,
+            performanceLevel: 'Approaching Expectation'
+        };
+        studentsData.push(newStudent);
+        renderMarksTable();
+        // Focus on the new student name input
+        const inputs = document.querySelectorAll('.student-name-input');
+        const lastInput = inputs[inputs.length - 1];
+        if (lastInput) {
+            setTimeout(() => lastInput.focus(), 100);
+        }
+        showSaveStatus('New student added', 'saved');
+        setTimeout(() => hideSaveStatus(), 1500);
+    }
+
+    // ============================================
+    // DELETE STUDENT ROW
+    // ============================================
+    async function deleteStudentRow(studentId) {
+        if (!confirm('Are you sure you want to delete this student?')) return;
+        
+        if (studentId.startsWith('new_')) {
+            // Remove unsaved student
+            studentsData = studentsData.filter(s => s._id !== studentId);
+            renderMarksTable();
+            updateStats();
+            showSaveStatus('Student removed', 'saved');
+            setTimeout(() => hideSaveStatus(), 1500);
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/assessments/${studentId}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                studentsData = studentsData.filter(s => s._id !== studentId);
+                renderMarksTable();
+                updateStats();
+                showSaveStatus('Student deleted', 'saved');
+                setTimeout(() => hideSaveStatus(), 1500);
+            } else {
+                showAlert('Error deleting student', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('Error deleting student', 'error');
+        }
+    }
+
+    // ============================================
+    // SAVE ALL MARKS
+    // ============================================
+    async function saveAllMarks() {
+        showSaveStatus('Saving...', 'saving');
+        
+        const config = GRADE_CONFIGS[currentGrade];
+        const rows = document.querySelectorAll('#marksTableBody tr');
+        const studentsToSave = [];
+
+        rows.forEach((row, index) => {
+            const nameInput = row.querySelector('.student-name-input');
+            const scoreInputs = row.querySelectorAll('.score-input');
+            
+            if (!nameInput) return;
+            
+            const studentName = nameInput.value.trim();
+            if (!studentName) return;
+
+            const assessments = [];
+            let totalScore = 0;
+            let hasValidScore = false;
+
+            scoreInputs.forEach(inp => {
+                const subject = inp.dataset.subject;
+                const maxScore = parseInt(inp.dataset.max);
+                const score = parseFloat(inp.value);
+                if (!isNaN(score) && score >= 0 && score <= maxScore) {
+                    assessments.push({ subject, maxScore, score });
+                    totalScore += score;
+                    hasValidScore = true;
+                } else if (inp.value !== '') {
+                    // Invalid score
+                    assessments.push({ subject, maxScore, score: 0 });
+                }
+            });
+
+            if (!hasValidScore) return;
+
+            const avgScore = assessments.length > 0 ? totalScore / assessments.length : 0;
+            const maxTotal = config.subjects.reduce((sum, s) => sum + s.max, 0);
+            const percentage = maxTotal > 0 ? (totalScore / maxTotal) * 100 : 0;
+            
+            let performanceLevel = 'Approaching Expectation';
+            if (percentage >= 80) performanceLevel = 'Exceeding Expectation';
+            else if (percentage >= 60) performanceLevel = 'Meeting Expectation';
+            else if (percentage >= 40) performanceLevel = 'Approaching Expectation';
+            else performanceLevel = 'Below Expectation';
+
+            const studentId = nameInput.dataset.id;
+            studentsToSave.push({
+                _id: studentId && !studentId.startsWith('new_') ? studentId : null,
+                studentName,
+                grade: currentGrade,
+                assessments,
+                totalScore,
+                averageScore: avgScore,
+                performanceLevel
+            });
+        });
+
+        if (studentsToSave.length === 0) {
+            showSaveStatus('No data to save', 'error');
+            setTimeout(() => hideSaveStatus(), 2000);
+            return;
+        }
+
+        let savedCount = 0;
+        let errorCount = 0;
+
+        for (const student of studentsToSave) {
+            try {
+                const url = student._id ? `/api/assessments/${student._id}` : '/api/assessments';
+                const method = student._id ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        studentName: student.studentName,
+                        grade: student.grade,
+                        assessments: student.assessments
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    savedCount++;
+                    // Update ID if it was a new student
+                    if (!student._id && result.student) {
+                        const nameInput = document.querySelector(`.student-name-input[data-id="${student._id || 'new'}"]`);
+                        if (nameInput) {
+                            nameInput.dataset.id = result.student._id;
+                        }
+                    }
+                } else {
+                    errorCount++;
+                }
+            } catch (error) {
+                errorCount++;
+                console.error('Error saving student:', error);
+            }
+        }
+
+        // Refresh data from server
+        await loadGradeData();
+        
+        if (errorCount > 0) {
+            showSaveStatus(`Saved ${savedCount}/${savedCount + errorCount} students`, 'error');
+            setTimeout(() => hideSaveStatus(), 3000);
+        } else {
+            showSaveStatus(`✅ ${savedCount} students saved!`, 'saved');
+            setTimeout(() => hideSaveStatus(), 2000);
+        }
+    }
+
+    // ============================================
+    // CONFIRM DELETE GRADE
+    // ============================================
+    function confirmDeleteGrade() {
+        if (!confirm(`⚠️ Are you sure you want to delete ALL students in ${currentGrade}? This cannot be undone!`)) return;
+        if (!confirm(`⚠️ REALLY? All ${studentsData.length} students in ${currentGrade} will be permanently deleted!`)) return;
+        
+        // Delete all students in this grade
+        let deletedCount = 0;
+        studentsData.forEach(async (student) => {
+            if (student._id && !student._id.startsWith('new_')) {
+                try {
+                    await fetch(`/api/assessments/${student._id}`, { method: 'DELETE' });
+                    deletedCount++;
+                } catch (error) {
+                    console.error('Error deleting student:', error);
+                }
+            }
+        });
+        
+        studentsData = [];
+        renderMarksTable();
+        updateStats();
+        showSaveStatus(`Cleared ${currentGrade}`, 'saved');
+        setTimeout(() => hideSaveStatus(), 2000);
+    }
+
+    // ============================================
+    // UPDATE STATS
+    // ============================================
+    function updateStats() {
+        const total = studentsData.length;
+        const exceeding = studentsData.filter(s => s.performanceLevel === 'Exceeding Expectation').length;
+        const meeting = studentsData.filter(s => s.performanceLevel === 'Meeting Expectation').length;
+        const approaching = studentsData.filter(s => s.performanceLevel === 'Approaching Expectation').length;
+        const below = studentsData.filter(s => s.performanceLevel === 'Below Expectation').length;
+
+        document.getElementById('totalStudents').textContent = total;
+        document.getElementById('exceedingCount').textContent = exceeding;
+        document.getElementById('meetingCount').textContent = meeting;
+        document.getElementById('approachingCount').textContent = approaching;
+        document.getElementById('belowCount').textContent = below;
+    }
+
+    // ============================================
+    // SHOW/HIDE SAVE STATUS
+    // ============================================
+    function showSaveStatus(message, type) {
+        const el = document.getElementById('saveStatus');
+        el.textContent = message;
+        el.className = 'save-status show ' + type;
+    }
+
+    function hideSaveStatus() {
+        const el = document.getElementById('saveStatus');
+        el.className = 'save-status';
+        setTimeout(() => { el.style.display = 'none'; }, 300);
     }
 
     // ============================================
@@ -517,92 +1052,9 @@
     }
 
     // ============================================
-    // RESET FORM
+    // LOAD STUDENT LIST
     // ============================================
-    function resetForm() {
-        document.getElementById('studentName').value = '';
-        document.getElementById('grade').value = '';
-        document.getElementById('subjectsContainer').innerHTML = `
-            <div class="subject-entry">
-                <button type="button" class="remove-subject" onclick="removeSubject(this)">✕</button>
-                <div class="form-row-3">
-                    <div class="form-group">
-                        <label>Subject</label>
-                        <input type="text" class="subject-name" placeholder="e.g., Mathematics" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Max Score</label>
-                        <input type="number" class="subject-max" placeholder="e.g., 30" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Score</label>
-                        <input type="number" class="subject-score" placeholder="e.g., 25" required>
-                    </div>
-                </div>
-            </div>
-        `;
-        editingStudentId = null;
-        document.querySelector('#assessmentForm .btn-success').innerHTML = '<i class="fas fa-save"></i> Save Assessment';
-    }
-
-    // ============================================
-    // SAVE ASSESSMENT
-    // ============================================
-    document.getElementById('assessmentForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const studentName = document.getElementById('studentName').value.trim();
-        const grade = document.getElementById('grade').value;
-        const subjects = getSubjectsData();
-
-        if (!studentName) {
-            showAlert('Please enter student name', 'error');
-            return;
-        }
-        if (!grade) {
-            showAlert('Please select grade', 'error');
-            return;
-        }
-        if (subjects.length === 0) {
-            showAlert('Please add at least one subject', 'error');
-            return;
-        }
-
-        const data = {
-            studentName,
-            grade,
-            assessments: subjects
-        };
-
-        try {
-            const url = editingStudentId ? `/api/assessments/${editingStudentId}` : '/api/assessments';
-            const method = editingStudentId ? 'PUT' : 'POST';
-            
-            const response = await fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                showAlert(`✅ ${editingStudentId ? 'Updated' : 'Added'} successfully!`, 'success');
-                resetForm();
-                loadStudents();
-                loadStats();
-            } else {
-                showAlert('❌ Error: ' + result.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showAlert('❌ Error saving assessment', 'error');
-        }
-    });
-
-    // ============================================
-    // LOAD STUDENTS
-    // ============================================
-    async function loadStudents() {
+    async function loadStudentList() {
         const filterGrade = document.getElementById('filterGrade').value;
         const searchTerm = document.getElementById('searchStudent').value.toLowerCase().trim();
         
@@ -644,11 +1096,8 @@
                             <td>${student.averageScore ? student.averageScore.toFixed(1) : 0}</td>
                             <td><span class="${performanceClass}">${student.performanceLevel || 'N/A'}</span></td>
                             <td>
-                                <button class="btn btn-info btn-sm" onclick="editStudent('${student._id}')">
+                                <button class="btn btn-info btn-sm" onclick="editStudentFromList('${student._id}')">
                                     <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteStudent('${student._id}')">
-                                    <i class="fas fa-trash"></i>
                                 </button>
                                 <button class="btn btn-success btn-sm" onclick="downloadReport('${student._id}')">
                                     <i class="fas fa-download"></i>
@@ -665,89 +1114,35 @@
     }
 
     // ============================================
-    // LOAD STATS
+    // EDIT STUDENT FROM LIST - Switch to grade tab
     // ============================================
-    async function loadStats() {
-        try {
-            const response = await fetch('/api/assessments/stats');
-            const data = await response.json();
-            if (data.success) {
-                document.getElementById('totalStudents').textContent = data.stats.total || 0;
-                document.getElementById('exceedingCount').textContent = data.stats.exceeding || 0;
-                document.getElementById('meetingCount').textContent = data.stats.meeting || 0;
-                document.getElementById('approachingCount').textContent = data.stats.approaching || 0;
-                document.getElementById('belowCount').textContent = data.stats.below || 0;
-            }
-        } catch (error) {
-            console.error('Error loading stats:', error);
-        }
-    }
-
-    // ============================================
-    // EDIT STUDENT
-    // ============================================
-    async function editStudent(studentId) {
+    async function editStudentFromList(studentId) {
         try {
             const response = await fetch(`/api/assessments/student/${studentId}`);
             const data = await response.json();
             if (data.success) {
                 const student = data.student;
-                document.getElementById('studentName').value = student.studentName;
-                document.getElementById('grade').value = student.grade;
-                setSubjectsData(student.assessments || []);
-                editingStudentId = studentId;
-                document.querySelector('#assessmentForm .btn-success').innerHTML = '<i class="fas fa-edit"></i> Update Assessment';
-                document.querySelector('#assessmentForm').scrollIntoView({ behavior: 'smooth' });
-                showAlert('Edit mode: Update the student details and save', 'info');
+                selectGrade(student.grade);
+                // Scroll to marks table
+                document.getElementById('marksTableContainer').scrollIntoView({ behavior: 'smooth' });
+                // Highlight the student row
+                setTimeout(() => {
+                    const rows = document.querySelectorAll('#marksTableBody tr');
+                    rows.forEach(row => {
+                        const nameInput = row.querySelector('.student-name-input');
+                        if (nameInput && nameInput.dataset.id === studentId) {
+                            row.style.backgroundColor = '#fff3cd';
+                            row.style.transition = 'background-color 0.5s';
+                            setTimeout(() => {
+                                row.style.backgroundColor = '';
+                            }, 3000);
+                        }
+                    });
+                }, 500);
             }
         } catch (error) {
             console.error('Error:', error);
             showAlert('Error loading student data', 'error');
-        }
-    }
-
-    // ============================================
-    // DELETE STUDENT
-    // ============================================
-    async function deleteStudent(studentId) {
-        if (!confirm('Are you sure you want to delete this student\'s assessment?')) return;
-        try {
-            const response = await fetch(`/api/assessments/${studentId}`, { method: 'DELETE' });
-            const result = await response.json();
-            if (result.success) {
-                showAlert('✅ Student assessment deleted!', 'success');
-                loadStudents();
-                loadStats();
-                if (editingStudentId === studentId) resetForm();
-            } else {
-                showAlert('❌ Error: ' + result.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showAlert('Error deleting student', 'error');
-        }
-    }
-
-    // ============================================
-    // DELETE ALL STUDENTS
-    // ============================================
-    async function confirmDeleteAll() {
-        if (!confirm('⚠️ Are you sure you want to delete ALL student assessments? This cannot be undone!')) return;
-        if (!confirm('⚠️ REALLY? All student assessment data will be permanently deleted!')) return;
-        try {
-            const response = await fetch('/api/assessments/all', { method: 'DELETE' });
-            const result = await response.json();
-            if (result.success) {
-                showAlert('✅ All students deleted!', 'success');
-                loadStudents();
-                loadStats();
-                resetForm();
-            } else {
-                showAlert('❌ Error: ' + result.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showAlert('Error deleting students', 'error');
         }
     }
 
@@ -776,8 +1171,8 @@
     // INIT
     // ============================================
     document.addEventListener('DOMContentLoaded', function() {
-        loadStudents();
-        loadStats();
+        loadGradeData();
+        loadStudentList();
     });
 </script>
 </body>
