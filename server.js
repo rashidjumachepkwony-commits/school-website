@@ -1554,6 +1554,308 @@ app.get('/api/visitors/today', async (req, res) => {
 });
 
 // ============================================
+// ACADEMIC ASSESSMENT ROUTES
+// ============================================
+
+// Student Assessment Schema
+const studentAssessmentSchema = new mongoose.Schema({
+  studentName: { type: String, required: true },
+  grade: { type: String, required: true },
+  assessments: [{
+    subject: { type: String, required: true },
+    maxScore: { type: Number, required: true },
+    score: { type: Number, required: true }
+  }],
+  totalScore: { type: Number, default: 0 },
+  averageScore: { type: Number, default: 0 },
+  performanceLevel: {
+    type: String,
+    enum: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+    default: 'Approaching Expectation'
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const StudentAssessment = mongoose.model('StudentAssessment', studentAssessmentSchema);
+
+// Helper function to calculate performance level
+function calculatePerformanceLevel(assessments) {
+  if (!assessments || assessments.length === 0) return 'Approaching Expectation';
+  
+  let totalPercentage = 0;
+  assessments.forEach(a => {
+    if (a.maxScore > 0) {
+      totalPercentage += (a.score / a.maxScore) * 100;
+    }
+  });
+  const avgPercentage = assessments.length > 0 ? totalPercentage / assessments.length : 0;
+  
+  if (avgPercentage >= 80) return 'Exceeding Expectation';
+  if (avgPercentage >= 60) return 'Meeting Expectation';
+  if (avgPercentage >= 40) return 'Approaching Expectation';
+  return 'Below Expectation';
+}
+
+// GET all assessments
+app.get('/api/assessments/all', async (req, res) => {
+  try {
+    const students = await StudentAssessment.find().sort({ createdAt: -1 });
+    res.json({ success: true, students });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET assessments by grade
+app.get('/api/assessments/grade/:grade', async (req, res) => {
+  try {
+    const { grade } = req.params;
+    const students = await StudentAssessment.find({ grade: decodeURIComponent(grade) }).sort({ studentName: 1 });
+    res.json({ success: true, students });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET search assessments
+app.get('/api/assessments/search', async (req, res) => {
+  try {
+    const { name, grade } = req.query;
+    let query = {};
+    if (name) query.studentName = { $regex: name, $options: 'i' };
+    if (grade) query.grade = grade;
+    
+    const students = await StudentAssessment.find(query).sort({ createdAt: -1 });
+    res.json({ success: true, students });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET single student
+app.get('/api/assessments/student/:id', async (req, res) => {
+  try {
+    const student = await StudentAssessment.findById(req.params.id);
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+    res.json({ success: true, student });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET stats
+app.get('/api/assessments/stats', async (req, res) => {
+  try {
+    const students = await StudentAssessment.find();
+    const stats = {
+      total: students.length,
+      exceeding: students.filter(s => s.performanceLevel === 'Exceeding Expectation').length,
+      meeting: students.filter(s => s.performanceLevel === 'Meeting Expectation').length,
+      approaching: students.filter(s => s.performanceLevel === 'Approaching Expectation').length,
+      below: students.filter(s => s.performanceLevel === 'Below Expectation').length
+    };
+    res.json({ success: true, stats });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// POST create assessment
+app.post('/api/assessments', async (req, res) => {
+  try {
+    const { studentName, grade, assessments } = req.body;
+    
+    const totalScore = assessments.reduce((sum, a) => sum + a.score, 0);
+    const averageScore = assessments.length > 0 ? totalScore / assessments.length : 0;
+    const performanceLevel = calculatePerformanceLevel(assessments);
+    
+    const student = new StudentAssessment({
+      studentName,
+      grade,
+      assessments,
+      totalScore,
+      averageScore,
+      performanceLevel
+    });
+    
+    await student.save();
+    res.json({ success: true, message: 'Assessment saved!', student });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// PUT update assessment
+app.put('/api/assessments/:id', async (req, res) => {
+  try {
+    const { studentName, grade, assessments } = req.body;
+    const student = await StudentAssessment.findById(req.params.id);
+    
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+    
+    const totalScore = assessments.reduce((sum, a) => sum + a.score, 0);
+    const averageScore = assessments.length > 0 ? totalScore / assessments.length : 0;
+    const performanceLevel = calculatePerformanceLevel(assessments);
+    
+    student.studentName = studentName;
+    student.grade = grade;
+    student.assessments = assessments;
+    student.totalScore = totalScore;
+    student.averageScore = averageScore;
+    student.performanceLevel = performanceLevel;
+    student.updatedAt = new Date();
+    
+    await student.save();
+    res.json({ success: true, message: 'Assessment updated!', student });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// DELETE assessment
+app.delete('/api/assessments/:id', async (req, res) => {
+  try {
+    await StudentAssessment.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Assessment deleted!' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// DELETE all assessments
+app.delete('/api/assessments/all', async (req, res) => {
+  try {
+    await StudentAssessment.deleteMany({});
+    res.json({ success: true, message: 'All assessments deleted!' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Generate report
+app.get('/api/assessments/generate-report/:id', async (req, res) => {
+  try {
+    const student = await StudentAssessment.findById(req.params.id);
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+    
+    const performanceColors = {
+      'Exceeding Expectation': '#28a745',
+      'Meeting Expectation': '#17a2b8',
+      'Approaching Expectation': '#ffc107',
+      'Below Expectation': '#dc3545'
+    };
+    
+    const subjectsHtml = student.assessments.map(a => `
+      <tr>
+        <td style="padding:8px;border:1px solid #ddd;">${a.subject}</td>
+        <td style="padding:8px;border:1px solid #ddd;text-align:center;">${a.maxScore}</td>
+        <td style="padding:8px;border:1px solid #ddd;text-align:center;">${a.score}</td>
+        <td style="padding:8px;border:1px solid #ddd;text-align:center;">${a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0}%</td>
+      </tr>
+    `).join('');
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Assessment Report - ${student.studentName}</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+          .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
+          .header h1 { color: #0A1628; margin: 0; font-size: 28px; }
+          .header .subtitle { color: #D4A017; font-size: 14px; }
+          .student-info { background: #f8f9fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+          .student-info table { width: 100%; }
+          .student-info td { padding: 5px; }
+          table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+          th { background: #0A1628; color: white; padding: 10px; text-align: left; }
+          td { padding: 8px; border: 1px solid #ddd; }
+          .summary { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+          .summary-item { background: #f8f9fc; padding: 15px; border-radius: 8px; flex: 1; min-width: 120px; text-align: center; }
+          .summary-item .label { color: #666; font-size: 12px; }
+          .summary-item .value { font-size: 24px; font-weight: bold; color: #0A1628; }
+          .performance-badge { 
+            display: inline-block; 
+            padding: 8px 20px; 
+            border-radius: 50px; 
+            font-weight: bold;
+            background: ${performanceColors[student.performanceLevel] || '#6c757d'};
+            color: white;
+          }
+          .footer { margin-top: 30px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #ddd; padding-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>🏫 Changara Star Academy</h1>
+          <div class="subtitle">Academic Assessment Report</div>
+        </div>
+        
+        <div class="student-info">
+          <table>
+            <tr><td><strong>Student Name:</strong></td><td>${student.studentName}</td></tr>
+            <tr><td><strong>Grade:</strong></td><td>${student.grade}</td></tr>
+            <tr><td><strong>Report Date:</strong></td><td>${new Date().toLocaleDateString('en-KE', { timeZone: 'Africa/Nairobi' })}</td></tr>
+            <tr><td><strong>Performance Level:</strong></td><td><span class="performance-badge">${student.performanceLevel}</span></td></tr>
+          </table>
+        </div>
+        
+        <div class="summary">
+          <div class="summary-item">
+            <div class="label">Total Score</div>
+            <div class="value">${student.totalScore}</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Average Score</div>
+            <div class="value">${student.averageScore.toFixed(1)}</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Subjects</div>
+            <div class="value">${student.assessments.length}</div>
+          </div>
+        </div>
+        
+        <h3>📊 Subject Performance</h3>
+        <table>
+          <thead>
+            <tr><th>Subject</th><th>Max Score</th><th>Score</th><th>Percentage</th></tr>
+          </thead>
+          <tbody>${subjectsHtml}</tbody>
+        </table>
+        
+        <div style="margin-top:20px;padding:15px;background:#f0f2f5;border-radius:8px;">
+          <h4>📌 Performance Key</h4>
+          <ul style="list-style:none;padding:0;">
+            <li>🎯 <strong>Exceeding Expectation</strong> - 80% and above</li>
+            <li>✅ <strong>Meeting Expectation</strong> - 60% to 79%</li>
+            <li>📈 <strong>Approaching Expectation</strong> - 40% to 59%</li>
+            <li>📚 <strong>Below Expectation</strong> - Below 40%</li>
+          </ul>
+        </div>
+        
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais</p>
+          <p>📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    res.json({ success: true, html, student });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
 // TEST ROUTE
 // ============================================
 app.get('/api/test', (req, res) => {
@@ -1586,6 +1888,14 @@ app.get('/api/test', (req, res) => {
           checkin: '/api/visitor/checkin',
           checkout: '/api/visitor/checkout/:badgeNumber',
           today: '/api/visitors/today'
+        },
+        assessments: {
+          all: '/api/assessments/all',
+          grade: '/api/assessments/grade/:grade',
+          search: '/api/assessments/search?name=John',
+          stats: '/api/assessments/stats',
+          create: '/api/assessments (POST)',
+          generateReport: '/api/assessments/generate-report/:id'
         }
       }
     }
@@ -1684,6 +1994,7 @@ app.listen(PORT, () => {
   console.log(`🕐 Kenya Time: ${formatKenyaFullTime(kenyaNow)}`);
   console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
   console.log(`🔧 Fix Data: http://localhost:${PORT}/api/fix-attendance-times`);
+  console.log(`📊 Assessments API: http://localhost:${PORT}/api/assessments/all`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
 });
