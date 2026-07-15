@@ -18,11 +18,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================
-// HELPER: GET KENYA TIME (UTC+3) - FIXED
+// HELPER: GET KENYA TIME (UTC+3)
 // ============================================
 function getKenyaTime() {
     const now = new Date();
-    // Get Kenya time by adding 3 hours to UTC
     const kenyaTime = new Date(now.getTime() + (3 * 60 * 60 * 1000));
     return kenyaTime;
 }
@@ -41,7 +40,6 @@ function getKenyaHour() {
 function formatKenyaTime(date) {
     if (!date) return '-';
     const d = new Date(date);
-    // Format in Kenya timezone
     return d.toLocaleTimeString('en-KE', {
         hour12: true,
         hour: '2-digit',
@@ -71,69 +69,30 @@ function formatKenyaDate(date) {
     });
 }
 
+function getWeekStart(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    d.setDate(diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+
+function getMonthStart(date) {
+    const d = new Date(date);
+    d.setDate(1);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+
 // ============================================
 // CONNECT TO MONGODB
 // ============================================
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB')
   .then(() => {
     console.log('✅ MongoDB Connected');
-    fixExistingAttendanceData();
   })
   .catch(err => console.error('❌ MongoDB Error:', err.message));
-
-// ============================================
-// FIX EXISTING ATTENDANCE DATA - CONVERT UTC TO KENYA TIME
-// ============================================
-async function fixExistingAttendanceData() {
-    try {
-        console.log('🔧 Fixing existing attendance data (UTC → Kenya Time)...');
-        const teachers = await Teacher.find({});
-        let fixedCount = 0;
-        let recordCount = 0;
-
-        for (const teacher of teachers) {
-            let needsSave = false;
-            
-            for (const record of teacher.attendance) {
-                // Fix checkIn time: add 3 hours to convert UTC to Kenya time
-                if (record.checkIn) {
-                    const originalTime = new Date(record.checkIn);
-                    const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
-                    record.checkIn = kenyaTime;
-                    needsSave = true;
-                    recordCount++;
-                }
-                
-                // Fix checkOut time
-                if (record.checkOut) {
-                    const originalTime = new Date(record.checkOut);
-                    const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
-                    record.checkOut = kenyaTime;
-                    needsSave = true;
-                    recordCount++;
-                }
-                
-                // Fix date
-                if (record.date) {
-                    const originalDate = new Date(record.date);
-                    const kenyaDate = new Date(originalDate.getTime() + (3 * 60 * 60 * 1000));
-                    kenyaDate.setHours(0, 0, 0, 0);
-                    record.date = kenyaDate;
-                    needsSave = true;
-                }
-            }
-            
-            if (needsSave) {
-                await teacher.save();
-                fixedCount++;
-            }
-        }
-        
-        console.log(`✅ Fixed ${fixedCount} teachers, ${recordCount} attendance records with correct Kenya time`);
-    } catch (error) {
-        console.error('❌ Error fixing attendance data:', error);
-    }
-}
 
 // ============================================
 // FILE UPLOAD SETUP
@@ -680,12 +639,9 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // USE KENYA TIME - Add 3 hours to UTC
-    const now = new Date();
-    const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-    const kenyaToday = new Date(kenyaNow);
-    kenyaToday.setHours(0, 0, 0, 0);
-    const kenyaHour = kenyaNow.getHours();
+    const kenyaNow = getKenyaTime();
+    const kenyaToday = getKenyaDate();
+    const kenyaHour = getKenyaHour();
     const dayOfWeek = kenyaNow.getDay();
     
     console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
@@ -780,12 +736,9 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    // USE KENYA TIME - Add 3 hours to UTC
-    const now = new Date();
-    const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-    const kenyaToday = new Date(kenyaNow);
-    kenyaToday.setHours(0, 0, 0, 0);
-    const kenyaHour = kenyaNow.getHours();
+    const kenyaNow = getKenyaTime();
+    const kenyaToday = getKenyaDate();
+    const kenyaHour = getKenyaHour();
     
     console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
     console.log('🕐 Hour (Kenya time):', kenyaHour);
@@ -852,9 +805,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
 // ============================================
 app.get('/api/teacher/attendance/today', async (req, res) => {
   try {
-    const now = new Date();
-    const kenyaToday = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-    kenyaToday.setHours(0, 0, 0, 0);
+    const kenyaToday = getKenyaDate();
     
     const teachers = await Teacher.find({ isActive: true });
     
@@ -912,61 +863,286 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
 });
 
 // ============================================
-// FIX DATA ENDPOINT - Run this to fix all existing data
+// STAFF ATTENDANCE REPORTS - FIXED
 // ============================================
-app.post('/api/fix-attendance-times', async (req, res) => {
+app.get('/api/reports/staff/attendance', async (req, res) => {
   try {
-    console.log('🔧 Manually fixing attendance times...');
-    const teachers = await Teacher.find({});
-    let fixedCount = 0;
-    let recordCount = 0;
-
-    for (const teacher of teachers) {
-      let needsSave = false;
-      
-      for (const record of teacher.attendance) {
-        // Fix checkIn time: add 3 hours to convert UTC to Kenya time
-        if (record.checkIn) {
-          const originalTime = new Date(record.checkIn);
-          const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
-          record.checkIn = kenyaTime;
-          needsSave = true;
-          recordCount++;
-        }
-        
-        // Fix checkOut time
-        if (record.checkOut) {
-          const originalTime = new Date(record.checkOut);
-          const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
-          record.checkOut = kenyaTime;
-          needsSave = true;
-          recordCount++;
-        }
-        
-        // Fix date
-        if (record.date) {
-          const originalDate = new Date(record.date);
-          const kenyaDate = new Date(originalDate.getTime() + (3 * 60 * 60 * 1000));
-          kenyaDate.setHours(0, 0, 0, 0);
-          record.date = kenyaDate;
-          needsSave = true;
-        }
-      }
-      
-      if (needsSave) {
-        await teacher.save();
-        fixedCount++;
-      }
+    const { period, date } = req.query;
+    let startDate, endDate;
+    
+    // Parse the date using Kenya time
+    let selectedDate;
+    if (date) {
+      const dateParts = date.split('-');
+      selectedDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+    } else {
+      selectedDate = getKenyaTime();
     }
+    
+    // Set date range based on period using Kenya time
+    if (period === 'daily') {
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+      
+    } else if (period === 'weekly') {
+      // Weekly: Monday to Friday
+      startDate = getWeekStart(selectedDate);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 5); // Monday to Friday
+      
+    } else if (period === 'monthly') {
+      // Monthly: First day of month
+      startDate = getMonthStart(selectedDate);
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+      
+    } else {
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    // Get all teachers
+    const teachers = await Teacher.find({ isActive: true });
+    
+    let reportData = [];
+    let totalPresent = 0;
+    let totalLate = 0;
+    let totalAbsent = 0;
+    let totalOnTime = 0;
+    let totalStaff = teachers.length;
+    
+    // Daily breakdown for the period
+    const dailyBreakdown = {};
+    let currentDate = new Date(startDate);
+    while (currentDate < endDate) {
+      const dayOfWeek = currentDate.getDay();
+      // For weekly reports, only include weekdays (Monday-Friday)
+      if (period === 'weekly' && (dayOfWeek === 0 || dayOfWeek === 6)) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        continue;
+      }
+      const dateStr = formatKenyaDate(currentDate);
+      dailyBreakdown[dateStr] = { present: 0, late: 0, absent: 0, onTime: 0, total: 0 };
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    teachers.forEach(teacher => {
+      const attendanceRecords = teacher.attendance.filter(a => {
+        const aDate = new Date(a.date);
+        // For weekly reports, only include weekdays
+        if (period === 'weekly') {
+          const dayOfWeek = aDate.getDay();
+          if (dayOfWeek === 0 || dayOfWeek === 6) return false;
+        }
+        return aDate >= startDate && aDate < endDate;
+      });
+      
+      const daysPresent = attendanceRecords.filter(a => a.status === 'Present' || a.status === 'Late').length;
+      const daysLate = attendanceRecords.filter(a => a.isLate === true).length;
+      const daysOnTime = attendanceRecords.filter(a => a.status === 'Present' && !a.isLate).length;
+      const daysAbsent = attendanceRecords.filter(a => a.status === 'Absent').length;
+      
+      totalPresent += daysPresent;
+      totalLate += daysLate;
+      totalOnTime += daysOnTime;
+      totalAbsent += daysAbsent;
+      
+      // Add to daily breakdown
+      attendanceRecords.forEach(record => {
+        const dateStr = formatKenyaDate(record.date);
+        if (dailyBreakdown[dateStr]) {
+          dailyBreakdown[dateStr].total++;
+          if (record.status === 'Absent') {
+            dailyBreakdown[dateStr].absent++;
+          } else if (record.isLate) {
+            dailyBreakdown[dateStr].late++;
+          } else {
+            dailyBreakdown[dateStr].present++;
+            if (!record.isLate) {
+              dailyBreakdown[dateStr].onTime++;
+            }
+          }
+        }
+      });
+      
+      // Calculate total working days (excluding weekends for weekly)
+      let totalWorkingDays = attendanceRecords.length;
+      if (period === 'weekly') {
+        let weekdays = 0;
+        let d = new Date(startDate);
+        while (d < endDate) {
+          const dow = d.getDay();
+          if (dow !== 0 && dow !== 6) weekdays++;
+          d.setDate(d.getDate() + 1);
+        }
+        totalWorkingDays = weekdays;
+      } else if (period === 'monthly') {
+        totalWorkingDays = attendanceRecords.length || 0;
+      }
+      
+      reportData.push({
+        name: `${teacher.firstName} ${teacher.lastName}`,
+        employeeId: teacher.employeeId,
+        department: teacher.department,
+        totalDays: totalWorkingDays,
+        present: daysPresent,
+        late: daysLate,
+        onTime: daysOnTime,
+        absent: daysAbsent,
+        attendanceRate: totalWorkingDays > 0 ? ((daysPresent / totalWorkingDays) * 100).toFixed(1) : 0,
+        punctualityRate: totalWorkingDays > 0 ? ((daysOnTime / totalWorkingDays) * 100).toFixed(1) : 0,
+        records: attendanceRecords.map(a => ({
+          date: formatKenyaDate(a.date),
+          checkIn: formatKenyaTime(a.checkIn),
+          checkOut: a.checkOut ? formatKenyaTime(a.checkOut) : '-',
+          status: a.status,
+          isLate: a.isLate,
+          hoursWorked: a.hoursWorked || 0
+        }))
+      });
+    });
+    
+    // Calculate summary
+    const summary = {
+      totalStaff,
+      totalPresent,
+      totalLate,
+      totalOnTime,
+      totalAbsent,
+      overallAttendanceRate: totalStaff > 0 ? ((totalPresent / (totalStaff * 7)) * 100).toFixed(1) : 0,
+      overallPunctualityRate: totalStaff > 0 ? ((totalOnTime / (totalStaff * 7)) * 100).toFixed(1) : 0,
+      period: period,
+      startDate: startDate,
+      endDate: endDate,
+      dailyBreakdown: dailyBreakdown
+    };
+    
+    // Sort teachers by attendance rate (highest first)
+    reportData.sort((a, b) => parseFloat(b.attendanceRate) - parseFloat(a.attendanceRate));
     
     res.json({
       success: true,
-      message: `✅ Fixed ${fixedCount} teachers, ${recordCount} attendance records with correct Kenya time`,
-      fixedCount,
-      recordCount
+      summary,
+      teachers: reportData
     });
+    
   } catch (error) {
-    console.error('❌ Error fixing attendance data:', error);
+    console.error('Error generating staff report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// VISITOR REPORTS - FIXED
+// ============================================
+app.get('/api/reports/visitors', async (req, res) => {
+  try {
+    const { period, date } = req.query;
+    let startDate, endDate;
+    
+    // Parse the date using Kenya time
+    let selectedDate;
+    if (date) {
+      const dateParts = date.split('-');
+      selectedDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+    } else {
+      selectedDate = getKenyaTime();
+    }
+    
+    if (period === 'daily') {
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+      
+    } else if (period === 'weekly') {
+      startDate = getWeekStart(selectedDate);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 5);
+      
+    } else if (period === 'monthly') {
+      startDate = getMonthStart(selectedDate);
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+      
+    } else {
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    // Get all visitors in date range
+    const visitors = await Visitor.find({
+      checkIn: { $gte: startDate, $lt: endDate }
+    }).sort({ checkIn: -1 });
+    
+    const totalVisitors = visitors.length;
+    const active = visitors.filter(v => v.status === 'Checked In').length;
+    const completed = visitors.filter(v => v.status === 'Checked Out').length;
+    
+    // Purpose breakdown
+    const purposeStats = {};
+    visitors.forEach(v => {
+      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
+    });
+    
+    // Daily breakdown (weekdays only for weekly)
+    const dailyBreakdown = {};
+    let currentDate = new Date(startDate);
+    while (currentDate < endDate) {
+      if (period === 'weekly') {
+        const dow = currentDate.getDay();
+        if (dow === 0 || dow === 6) {
+          currentDate.setDate(currentDate.getDate() + 1);
+          continue;
+        }
+      }
+      const dateStr = formatKenyaDate(currentDate);
+      dailyBreakdown[dateStr] = 0;
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    visitors.forEach(v => {
+      const dateStr = formatKenyaDate(v.checkIn);
+      if (dailyBreakdown[dateStr] !== undefined) {
+        dailyBreakdown[dateStr]++;
+      }
+    });
+    
+    const formattedVisitors = visitors.map(v => ({
+      fullName: v.fullName,
+      badgeNumber: v.badgeNumber,
+      purpose: v.purpose,
+      personToVisit: v.personToVisit,
+      hostName: v.hostName,
+      checkIn: v.checkIn,
+      checkOut: v.checkOut,
+      checkInTime: formatKenyaTime(v.checkIn),
+      checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : '-',
+      status: v.status,
+      duration: v.checkOut ? ((v.checkOut - v.checkIn) / 1000 / 60).toFixed(0) + ' mins' : 'In progress'
+    }));
+    
+    res.json({
+      success: true,
+      summary: {
+        period: period,
+        startDate: startDate,
+        endDate: endDate,
+        totalVisitors,
+        active,
+        completed,
+        purposeStats,
+        dailyBreakdown
+      },
+      visitors: formattedVisitors
+    });
+    
+  } catch (error) {
+    console.error('Error generating visitor report:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -1158,9 +1334,7 @@ app.get('/api/admin/attendance/all', async (req, res) => {
 app.get('/api/admin/attendance/summary', async (req, res) => {
   try {
     const teachers = await Teacher.find({ isActive: true });
-    const now = new Date();
-    const kenyaToday = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-    kenyaToday.setHours(0, 0, 0, 0);
+    const kenyaToday = getKenyaDate();
     
     let totalTeachers = teachers.length;
     let totalPresent = 0;
@@ -1227,8 +1401,7 @@ app.post('/api/visitor/checkin', async (req, res) => {
     }
 
     const badgeNumber = 'V' + Date.now().toString().slice(-6);
-    const now = new Date();
-    const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+    const kenyaNow = getKenyaTime();
 
     const visitor = new Visitor({
       firstName,
@@ -1288,8 +1461,7 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
       });
     }
     
-    const now = new Date();
-    const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+    const kenyaNow = getKenyaTime();
     visitor.checkOut = kenyaNow;
     visitor.status = 'Checked Out';
     await visitor.save();
@@ -1345,9 +1517,7 @@ app.get('/api/visitors/active', async (req, res) => {
 
 app.get('/api/visitors/today', async (req, res) => {
   try {
-    const now = new Date();
-    const kenyaToday = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-    kenyaToday.setHours(0, 0, 0, 0);
+    const kenyaToday = getKenyaDate();
     const tomorrow = new Date(kenyaToday);
     tomorrow.setDate(tomorrow.getDate() + 1);
     
@@ -1387,8 +1557,7 @@ app.get('/api/visitors/today', async (req, res) => {
 // TEST ROUTE
 // ============================================
 app.get('/api/test', (req, res) => {
-  const now = new Date();
-  const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+  const kenyaNow = getKenyaTime();
   res.json({
     success: true,
     message: '🎉 Changara Star Academy is running!',
@@ -1428,15 +1597,13 @@ app.use((req, res) => {
 // ============================================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  const now = new Date();
-  const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+  const kenyaNow = getKenyaTime();
   console.log('='.repeat(50));
   console.log('🏫 CHANGARA STAR ACADEMY');
   console.log('='.repeat(50));
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`🕐 Kenya Time: ${formatKenyaFullTime(kenyaNow)}`);
   console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
-  console.log(`🔧 Fix Data: http://localhost:${PORT}/api/fix-attendance-times`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
 });
