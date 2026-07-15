@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Academic Assessments</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header h1 { color: #0A1628; font-size: 28px; }
+        .header h1 i { color: #D4A017; margin-right: 10px; }
+        .header .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 5px 16px 5px 5px;
+            border-radius: 50px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .header .admin-info .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #D4A017, #F5C842);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0A1628;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 14px;
+        }
+        .alert.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert.info {
+            display: block;
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #D4A017, #F5C842);
+            color: #0A1628;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,160,23,0.35); }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; transform: translateY(-2px); }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+        .btn-block { width: 100%; padding: 14px; font-size: 16px; justify-content: center; }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+        .card h2 { color: #0A1628; font-size: 20px; margin-bottom: 5px; }
+        .card .desc { color: #888; font-size: 13px; margin-bottom: 20px; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e8ecf1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+            font-family: inherit;
+            background: #fafbfc;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #D4A017;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(212,160,23,0.1);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .subject-entry {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e8ecf1;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .subject-entry .remove-subject {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .subject-entry .remove-subject:hover { background: #c82333; transform: scale(1.1); }
+
+        .table-wrapper { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table th, table td {
+            border: 1px solid #e8ecf1;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+        table th {
+            background: #0A1628;
+            color: white;
+            font-weight: 600;
+        }
+        table tr:nth-child(even) { background: #fafbfc; }
+        table .status-exceeding { color: #28a745; font-weight: 600; }
+        table .status-meeting { color: #17a2b8; font-weight: 600; }
+        table .status-approaching { color: #d4a017; font-weight: 600; }
+        table .status-below { color: #dc3545; font-weight: 600; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e8ecf1;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0A1628;
+        }
+        .stat-card .label { font-size: 12px; color: #666; }
+        .stat-card .number.gold { color: #D4A017; }
+        .stat-card .number.green { color: #28a745; }
+        .stat-card .number.red { color: #dc3545; }
+        .stat-card .number.blue { color: #17a2b8; }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .filters .form-group { margin-bottom: 0; flex: 1; min-width: 150px; }
+        .filters .form-group label { font-size: 12px; color: #666; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .empty-state i { font-size: 48px; display: block; margin-bottom: 10px; color: #ddd; }
+
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .form-row-3 { grid-template-columns: 1fr; }
+            .filters { flex-direction: column; }
+            .filters .form-group { min-width: 100%; }
+            .header h1 { font-size: 22px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .card { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-chart-bar"></i> Academic Assessments</h1>
+        <div class="admin-info">
+            <div class="avatar" id="adminAvatar">A</div>
+            <span id="adminName">Admin</span>
+        </div>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <!-- ===== STATS ===== -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <div class="number gold" id="totalStudents">0</div>
+            <div class="label">Total Students</div>
+        </div>
+        <div class="stat-card">
+            <div class="number green" id="exceedingCount">0</div>
+            <div class="label">Exceeding Expectation</div>
+        </div>
+        <div class="stat-card">
+            <div class="number blue" id="meetingCount">0</div>
+            <div class="label">Meeting Expectation</div>
+        </div>
+        <div class="stat-card">
+            <div class="number" style="color:#d4a017;" id="approachingCount">0</div>
+            <div class="label">Approaching Expectation</div>
+        </div>
+        <div class="stat-card">
+            <div class="number red" id="belowCount">0</div>
+            <div class="label">Below Expectation</div>
+        </div>
+    </div>
+
+    <!-- ===== ADD STUDENT FORM ===== -->
+    <div class="card">
+        <h2><i class="fas fa-user-plus" style="color:#28a745;"></i> Add/Edit Student Assessment</h2>
+        <p class="desc">Add a new student or edit existing assessment records</p>
+
+        <form id="assessmentForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Student Name *</label>
+                    <input type="text" id="studentName" placeholder="Enter full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Grade *</label>
+                    <select id="grade" required>
+                        <option value="">Select Grade</option>
+                        <option value="Play Group">Play Group</option>
+                        <option value="PP1">PP1</option>
+                        <option value="PP2">PP2</option>
+                        <option value="Grade 1">Grade 1</option>
+                        <option value="Grade 2">Grade 2</option>
+                        <option value="Grade 3">Grade 3</option>
+                        <option value="Grade 4">Grade 4</option>
+                        <option value="Grade 5">Grade 5</option>
+                        <option value="Grade 6">Grade 6</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="subjectsContainer">
+                <div class="subject-entry">
+                    <button type="button" class="remove-subject" onclick="removeSubject(this)">✕</button>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <input type="text" class="subject-name" placeholder="e.g., Mathematics" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Max Score</label>
+                            <input type="number" class="subject-max" placeholder="e.g., 30" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Score</label>
+                            <input type="number" class="subject-score" placeholder="e.g., 25" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-info" onclick="addSubject()">
+                <i class="fas fa-plus"></i> Add Subject
+            </button>
+            <button type="submit" class="btn btn-success" style="margin-top:15px;">
+                <i class="fas fa-save"></i> Save Assessment
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="resetForm()" style="margin-top:15px;">
+                <i class="fas fa-undo"></i> Reset
+            </button>
+        </form>
+    </div>
+
+    <!-- ===== STUDENT LIST ===== -->
+    <div class="card">
+        <h2><i class="fas fa-list" style="color:#D4A017;"></i> All Students</h2>
+        <p class="desc">View, edit, or delete student assessment records</p>
+
+        <div class="filters">
+            <div class="form-group">
+                <label>Filter by Grade</label>
+                <select id="filterGrade" onchange="loadStudents()">
+                    <option value="">All Grades</option>
+                    <option value="Play Group">Play Group</option>
+                    <option value="PP1">PP1</option>
+                    <option value="PP2">PP2</option>
+                    <option value="Grade 1">Grade 1</option>
+                    <option value="Grade 2">Grade 2</option>
+                    <option value="Grade 3">Grade 3</option>
+                    <option value="Grade 4">Grade 4</option>
+                    <option value="Grade 5">Grade 5</option>
+                    <option value="Grade 6">Grade 6</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Search Student</label>
+                <input type="text" id="searchStudent" placeholder="Search by name..." onkeyup="loadStudents()">
+            </div>
+            <button class="btn btn-success" onclick="loadStudents()"><i class="fas fa-sync"></i> Refresh</button>
+            <button class="btn btn-danger" onclick="confirmDeleteAll()"><i class="fas fa-trash"></i> Delete All</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student Name</th>
+                        <th>Grade</th>
+                        <th>Subjects</th>
+                        <th>Total Score</th>
+                        <th>Average</th>
+                        <th>Performance Level</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <tr><td colspan="8" style="text-align:center;color:#999;">Loading students...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let editingStudentId = null;
+
+    // ============================================
+    // CHECK AUTH
+    // ============================================
+    (function() {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            window.location.href = 'admin-login.html';
+            return;
+        }
+        const admin = JSON.parse(localStorage.getItem('admin') || '{}');
+        document.getElementById('adminName').textContent = admin.fullName || 'Admin';
+        document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
+    })();
+
+    // ============================================
+    // ADD SUBJECT ROW
+    // ============================================
+    function addSubject() {
+        const container = document.getElementById('subjectsContainer');
+        const div = document.createElement('div');
+        div.className = 'subject-entry';
+        div.innerHTML = `
+            <button type="button" class="remove-subject" onclick="removeSubject(this)">✕</button>
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" class="subject-name" placeholder="e.g., Mathematics" required>
+                </div>
+                <div class="form-group">
+                    <label>Max Score</label>
+                    <input type="number" class="subject-max" placeholder="e.g., 30" required>
+                </div>
+                <div class="form-group">
+                    <label>Score</label>
+                    <input type="number" class="subject-score" placeholder="e.g., 25" required>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    function removeSubject(btn) {
+        const container = document.getElementById('subjectsContainer');
+        if (container.children.length > 1) {
+            btn.closest('.subject-entry').remove();
+        } else {
+            showAlert('You need at least one subject', 'error');
+        }
+    }
+
+    // ============================================
+    // GET SUBJECTS DATA
+    // ============================================
+    function getSubjectsData() {
+        const entries = document.querySelectorAll('.subject-entry');
+        const subjects = [];
+        entries.forEach(entry => {
+            const name = entry.querySelector('.subject-name').value.trim();
+            const maxScore = parseInt(entry.querySelector('.subject-max').value);
+            const score = parseInt(entry.querySelector('.subject-score').value);
+            if (name && !isNaN(maxScore) && !isNaN(score)) {
+                subjects.push({ subject: name, maxScore, score });
+            }
+        });
+        return subjects;
+    }
+
+    function setSubjectsData(subjects) {
+        const container = document.getElementById('subjectsContainer');
+        container.innerHTML = '';
+        subjects.forEach((s, index) => {
+            if (index > 0) {
+                const div = document.createElement('div');
+                div.className = 'subject-entry';
+                div.innerHTML = `
+                    <button type="button" class="remove-subject" onclick="removeSubject(this)">✕</button>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <input type="text" class="subject-name" value="${s.subject}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Max Score</label>
+                            <input type="number" class="subject-max" value="${s.maxScore}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Score</label>
+                            <input type="number" class="subject-score" value="${s.score}" required>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            } else {
+                const entry = container.querySelector('.subject-entry');
+                entry.querySelector('.subject-name').value = s.subject;
+                entry.querySelector('.subject-max').value = s.maxScore;
+                entry.querySelector('.subject-score').value = s.score;
+            }
+        });
+    }
+
+    // ============================================
+    // SHOW ALERT
+    // ============================================
+    function showAlert(message, type) {
+        const alertEl = document.getElementById('alert');
+        alertEl.className = 'alert ' + type;
+        alertEl.textContent = message;
+        alertEl.style.display = 'block';
+        setTimeout(() => { alertEl.style.display = 'none'; }, 5000);
+    }
+
+    // ============================================
+    // RESET FORM
+    // ============================================
+    function resetForm() {
+        document.getElementById('studentName').value = '';
+        document.getElementById('grade').value = '';
+        document.getElementById('subjectsContainer').innerHTML = `
+            <div class="subject-entry">
+                <button type="button" class="remove-subject" onclick="removeSubject(this)">✕</button>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" class="subject-name" placeholder="e.g., Mathematics" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Max Score</label>
+                        <input type="number" class="subject-max" placeholder="e.g., 30" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Score</label>
+                        <input type="number" class="subject-score" placeholder="e.g., 25" required>
+                    </div>
+                </div>
+            </div>
+        `;
+        editingStudentId = null;
+        document.querySelector('#assessmentForm .btn-success').innerHTML = '<i class="fas fa-save"></i> Save Assessment';
+    }
+
+    // ============================================
+    // SAVE ASSESSMENT
+    // ============================================
+    document.getElementById('assessmentForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const studentName = document.getElementById('studentName').value.trim();
+        const grade = document.getElementById('grade').value;
+        const subjects = getSubjectsData();
+
+        if (!studentName) {
+            showAlert('Please enter student name', 'error');
+            return;
+        }
+        if (!grade) {
+            showAlert('Please select grade', 'error');
+            return;
+        }
+        if (subjects.length === 0) {
+            showAlert('Please add at least one subject', 'error');
+            return;
+        }
+
+        const data = {
+            studentName,
+            grade,
+            assessments: subjects
+        };
+
+        try {
+            const url = editingStudentId ? `/api/assessments/${editingStudentId}` : '/api/assessments';
+            const method = editingStudentId ? 'PUT' : 'POST';
+            
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                showAlert(`✅ ${editingStudentId ? 'Updated' : 'Added'} successfully!`, 'success');
+                resetForm();
+                loadStudents();
+                loadStats();
+            } else {
+                showAlert('❌ Error: ' + result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('❌ Error saving assessment', 'error');
+        }
+    });
+
+    // ============================================
+    // LOAD STUDENTS
+    // ============================================
+    async function loadStudents() {
+        const filterGrade = document.getElementById('filterGrade').value;
+        const searchTerm = document.getElementById('searchStudent').value.toLowerCase().trim();
+        
+        try {
+            const response = await fetch('/api/assessments/all');
+            const data = await response.json();
+
+            if (data.success) {
+                let students = data.students || [];
+                
+                if (filterGrade) {
+                    students = students.filter(s => s.grade === filterGrade);
+                }
+                if (searchTerm) {
+                    students = students.filter(s => s.studentName.toLowerCase().includes(searchTerm));
+                }
+
+                const tbody = document.getElementById('studentsTableBody');
+                if (students.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#999;">No students found</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = students.map((student, index) => {
+                    const performanceClass = {
+                        'Exceeding Expectation': 'status-exceeding',
+                        'Meeting Expectation': 'status-meeting',
+                        'Approaching Expectation': 'status-approaching',
+                        'Below Expectation': 'status-below'
+                    }[student.performanceLevel] || '';
+
+                    return `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${student.studentName}</strong></td>
+                            <td>${student.grade}</td>
+                            <td>${student.assessments ? student.assessments.length : 0}</td>
+                            <td>${student.totalScore || 0}</td>
+                            <td>${student.averageScore ? student.averageScore.toFixed(1) : 0}</td>
+                            <td><span class="${performanceClass}">${student.performanceLevel || 'N/A'}</span></td>
+                            <td>
+                                <button class="btn btn-info btn-sm" onclick="editStudent('${student._id}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteStudent('${student._id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button class="btn btn-success btn-sm" onclick="downloadReport('${student._id}')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('studentsTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc3545;">Error loading students</td></tr>`;
+        }
+    }
+
+    // ============================================
+    // LOAD STATS
+    // ============================================
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/assessments/stats');
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('totalStudents').textContent = data.stats.total || 0;
+                document.getElementById('exceedingCount').textContent = data.stats.exceeding || 0;
+                document.getElementById('meetingCount').textContent = data.stats.meeting || 0;
+                document.getElementById('approachingCount').textContent = data.stats.approaching || 0;
+                document.getElementById('belowCount').textContent = data.stats.below || 0;
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    // ============================================
+    // EDIT STUDENT
+    // ============================================
+    async function editStudent(studentId) {
+        try {
+            const response = await fetch(`/api/assessments/student/${studentId}`);
+            const data = await response.json();
+            if (data.success) {
+                const student = data.student;
+                document.getElementById('studentName').value = student.studentName;
+                document.getElementById('grade').value = student.grade;
+                setSubjectsData(student.assessments || []);
+                editingStudentId = studentId;
+                document.querySelector('#assessmentForm .btn-success').innerHTML = '<i class="fas fa-edit"></i> Update Assessment';
+                document.querySelector('#assessmentForm').scrollIntoView({ behavior: 'smooth' });
+                showAlert('Edit mode: Update the student details and save', 'info');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('Error loading student data', 'error');
+        }
+    }
+
+    // ============================================
+    // DELETE STUDENT
+    // ============================================
+    async function deleteStudent(studentId) {
+        if (!confirm('Are you sure you want to delete this student\'s assessment?')) return;
+        try {
+            const response = await fetch(`/api/assessments/${studentId}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                showAlert('✅ Student assessment deleted!', 'success');
+                loadStudents();
+                loadStats();
+                if (editingStudentId === studentId) resetForm();
+            } else {
+                showAlert('❌ Error: ' + result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('Error deleting student', 'error');
+        }
+    }
+
+    // ============================================
+    // DELETE ALL STUDENTS
+    // ============================================
+    async function confirmDeleteAll() {
+        if (!confirm('⚠️ Are you sure you want to delete ALL student assessments? This cannot be undone!')) return;
+        if (!confirm('⚠️ REALLY? All student assessment data will be permanently deleted!')) return;
+        try {
+            const response = await fetch('/api/assessments/all', { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                showAlert('✅ All students deleted!', 'success');
+                loadStudents();
+                loadStats();
+                resetForm();
+            } else {
+                showAlert('❌ Error: ' + result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('Error deleting students', 'error');
+        }
+    }
+
+    // ============================================
+    // DOWNLOAD REPORT
+    // ============================================
+    async function downloadReport(studentId) {
+        try {
+            const response = await fetch(`/api/assessments/generate-report/${studentId}`);
+            const data = await response.json();
+            if (data.success) {
+                const win = window.open('', '_blank');
+                win.document.write(data.html);
+                win.document.close();
+                setTimeout(() => win.print(), 500);
+            } else {
+                showAlert('Error generating report', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('Error downloading report', 'error');
+        }
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStudents();
+        loadStats();
+    });
+</script>
+</body>
+</html>
