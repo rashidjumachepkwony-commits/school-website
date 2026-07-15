@@ -22,8 +22,9 @@ app.use(express.urlencoded({ extended: true }));
 // ============================================
 function getKenyaTime() {
     const now = new Date();
-    const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
-    return new Date(kenyaTimeString);
+    // Get Kenya time by adding 3 hours to UTC
+    const kenyaTime = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+    return kenyaTime;
 }
 
 function getKenyaDate() {
@@ -40,8 +41,8 @@ function getKenyaHour() {
 function formatKenyaTime(date) {
     if (!date) return '-';
     const d = new Date(date);
+    // Format in Kenya timezone
     return d.toLocaleTimeString('en-KE', {
-        timeZone: 'Africa/Nairobi',
         hour12: true,
         hour: '2-digit',
         minute: '2-digit'
@@ -52,11 +53,21 @@ function formatKenyaFullTime(date) {
     if (!date) return '-';
     const d = new Date(date);
     return d.toLocaleTimeString('en-KE', {
-        timeZone: 'Africa/Nairobi',
         hour12: true,
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
+    });
+}
+
+function formatKenyaDate(date) {
+    if (!date) return '-';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-KE', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        weekday: 'short'
     });
 }
 
@@ -84,45 +95,31 @@ async function fixExistingAttendanceData() {
             let needsSave = false;
             
             for (const record of teacher.attendance) {
-                // Fix checkIn time: subtract 3 hours if it's in UTC
+                // Fix checkIn time: add 3 hours to convert UTC to Kenya time
                 if (record.checkIn) {
                     const originalTime = new Date(record.checkIn);
-                    const hours = originalTime.getUTCHours();
-                    // If time is in UTC (showing as 12:49 pm instead of 3:49 pm)
-                    // We need to subtract 3 hours to get correct Kenya time
-                    if (hours >= 10 && hours <= 23) {
-                        const kenyaTime = new Date(originalTime);
-                        kenyaTime.setHours(kenyaTime.getHours() - 3);
-                        record.checkIn = kenyaTime;
-                        needsSave = true;
-                        recordCount++;
-                    }
+                    const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+                    record.checkIn = kenyaTime;
+                    needsSave = true;
+                    recordCount++;
                 }
                 
                 // Fix checkOut time
                 if (record.checkOut) {
                     const originalTime = new Date(record.checkOut);
-                    const hours = originalTime.getUTCHours();
-                    if (hours >= 10 && hours <= 23) {
-                        const kenyaTime = new Date(originalTime);
-                        kenyaTime.setHours(kenyaTime.getHours() - 3);
-                        record.checkOut = kenyaTime;
-                        needsSave = true;
-                        recordCount++;
-                    }
+                    const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+                    record.checkOut = kenyaTime;
+                    needsSave = true;
+                    recordCount++;
                 }
                 
                 // Fix date
                 if (record.date) {
                     const originalDate = new Date(record.date);
-                    const hours = originalDate.getUTCHours();
-                    if (hours >= 10 && hours <= 23) {
-                        const kenyaDate = new Date(originalDate);
-                        kenyaDate.setHours(kenyaDate.getHours() - 3);
-                        kenyaDate.setHours(0, 0, 0, 0);
-                        record.date = kenyaDate;
-                        needsSave = true;
-                    }
+                    const kenyaDate = new Date(originalDate.getTime() + (3 * 60 * 60 * 1000));
+                    kenyaDate.setHours(0, 0, 0, 0);
+                    record.date = kenyaDate;
+                    needsSave = true;
                 }
             }
             
@@ -683,10 +680,12 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    // USE KENYA TIME
-    const kenyaNow = getKenyaTime();
-    const kenyaToday = getKenyaDate();
-    const kenyaHour = getKenyaHour();
+    // USE KENYA TIME - Add 3 hours to UTC
+    const now = new Date();
+    const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+    const kenyaToday = new Date(kenyaNow);
+    kenyaToday.setHours(0, 0, 0, 0);
+    const kenyaHour = kenyaNow.getHours();
     const dayOfWeek = kenyaNow.getDay();
     
     console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
@@ -781,9 +780,12 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    const kenyaNow = getKenyaTime();
-    const kenyaToday = getKenyaDate();
-    const kenyaHour = getKenyaHour();
+    // USE KENYA TIME - Add 3 hours to UTC
+    const now = new Date();
+    const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+    const kenyaToday = new Date(kenyaNow);
+    kenyaToday.setHours(0, 0, 0, 0);
+    const kenyaHour = kenyaNow.getHours();
     
     console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
     console.log('🕐 Hour (Kenya time):', kenyaHour);
@@ -850,7 +852,9 @@ app.post('/api/teacher/checkout', async (req, res) => {
 // ============================================
 app.get('/api/teacher/attendance/today', async (req, res) => {
   try {
-    const kenyaToday = getKenyaDate();
+    const now = new Date();
+    const kenyaToday = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+    kenyaToday.setHours(0, 0, 0, 0);
     
     const teachers = await Teacher.find({ isActive: true });
     
@@ -921,43 +925,31 @@ app.post('/api/fix-attendance-times', async (req, res) => {
       let needsSave = false;
       
       for (const record of teacher.attendance) {
-        // Fix checkIn time: subtract 3 hours if in UTC
+        // Fix checkIn time: add 3 hours to convert UTC to Kenya time
         if (record.checkIn) {
           const originalTime = new Date(record.checkIn);
-          const hours = originalTime.getUTCHours();
-          if (hours >= 10 && hours <= 23) {
-            const kenyaTime = new Date(originalTime);
-            kenyaTime.setHours(kenyaTime.getHours() - 3);
-            record.checkIn = kenyaTime;
-            needsSave = true;
-            recordCount++;
-          }
+          const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+          record.checkIn = kenyaTime;
+          needsSave = true;
+          recordCount++;
         }
         
         // Fix checkOut time
         if (record.checkOut) {
           const originalTime = new Date(record.checkOut);
-          const hours = originalTime.getUTCHours();
-          if (hours >= 10 && hours <= 23) {
-            const kenyaTime = new Date(originalTime);
-            kenyaTime.setHours(kenyaTime.getHours() - 3);
-            record.checkOut = kenyaTime;
-            needsSave = true;
-            recordCount++;
-          }
+          const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+          record.checkOut = kenyaTime;
+          needsSave = true;
+          recordCount++;
         }
         
         // Fix date
         if (record.date) {
           const originalDate = new Date(record.date);
-          const hours = originalDate.getUTCHours();
-          if (hours >= 10 && hours <= 23) {
-            const kenyaDate = new Date(originalDate);
-            kenyaDate.setHours(kenyaDate.getHours() - 3);
-            kenyaDate.setHours(0, 0, 0, 0);
-            record.date = kenyaDate;
-            needsSave = true;
-          }
+          const kenyaDate = new Date(originalDate.getTime() + (3 * 60 * 60 * 1000));
+          kenyaDate.setHours(0, 0, 0, 0);
+          record.date = kenyaDate;
+          needsSave = true;
         }
       }
       
@@ -1166,7 +1158,9 @@ app.get('/api/admin/attendance/all', async (req, res) => {
 app.get('/api/admin/attendance/summary', async (req, res) => {
   try {
     const teachers = await Teacher.find({ isActive: true });
-    const kenyaToday = getKenyaDate();
+    const now = new Date();
+    const kenyaToday = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+    kenyaToday.setHours(0, 0, 0, 0);
     
     let totalTeachers = teachers.length;
     let totalPresent = 0;
@@ -1233,7 +1227,8 @@ app.post('/api/visitor/checkin', async (req, res) => {
     }
 
     const badgeNumber = 'V' + Date.now().toString().slice(-6);
-    const kenyaNow = getKenyaTime();
+    const now = new Date();
+    const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
 
     const visitor = new Visitor({
       firstName,
@@ -1293,7 +1288,8 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
       });
     }
     
-    const kenyaNow = getKenyaTime();
+    const now = new Date();
+    const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
     visitor.checkOut = kenyaNow;
     visitor.status = 'Checked Out';
     await visitor.save();
@@ -1349,7 +1345,9 @@ app.get('/api/visitors/active', async (req, res) => {
 
 app.get('/api/visitors/today', async (req, res) => {
   try {
-    const kenyaToday = getKenyaDate();
+    const now = new Date();
+    const kenyaToday = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+    kenyaToday.setHours(0, 0, 0, 0);
     const tomorrow = new Date(kenyaToday);
     tomorrow.setDate(tomorrow.getDate() + 1);
     
@@ -1389,7 +1387,8 @@ app.get('/api/visitors/today', async (req, res) => {
 // TEST ROUTE
 // ============================================
 app.get('/api/test', (req, res) => {
-  const kenyaNow = getKenyaTime();
+  const now = new Date();
+  const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
   res.json({
     success: true,
     message: '🎉 Changara Star Academy is running!',
@@ -1429,7 +1428,8 @@ app.use((req, res) => {
 // ============================================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  const kenyaNow = getKenyaTime();
+  const now = new Date();
+  const kenyaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
   console.log('='.repeat(50));
   console.log('🏫 CHANGARA STAR ACADEMY');
   console.log('='.repeat(50));
