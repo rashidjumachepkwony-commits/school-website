@@ -863,7 +863,7 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
 });
 
 // ============================================
-// STAFF ATTENDANCE REPORTS - FIXED
+// STAFF ATTENDANCE REPORTS - DAILY, WEEKLY, MONTHLY
 // ============================================
 app.get('/api/reports/staff/attendance', async (req, res) => {
   try {
@@ -1036,7 +1036,7 @@ app.get('/api/reports/staff/attendance', async (req, res) => {
 });
 
 // ============================================
-// VISITOR REPORTS - FIXED
+// VISITOR REPORTS - DAILY, WEEKLY, MONTHLY
 // ============================================
 app.get('/api/reports/visitors', async (req, res) => {
   try {
@@ -1565,9 +1565,88 @@ app.get('/api/test', (req, res) => {
       server: 'Online',
       kenyaTime: kenyaNow.toString(),
       kenyaTimeFormatted: formatKenyaFullTime(kenyaNow),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      endpoints: {
+        test: '/api/test',
+        content: '/api/content',
+        admin: '/api/admin/login',
+        setup: '/api/setup-admin',
+        teacher: {
+          register: '/api/teacher/register',
+          checkin: '/api/teacher/checkin',
+          checkout: '/api/teacher/checkout',
+          attendance: '/api/teacher/attendance/today'
+        },
+        reports: {
+          staff: '/api/reports/staff/attendance?period=daily&date=2024-01-15',
+          visitor: '/api/reports/visitors?period=daily&date=2024-01-15'
+        },
+        adminAttendance: '/api/admin/attendance/all',
+        visitor: {
+          checkin: '/api/visitor/checkin',
+          checkout: '/api/visitor/checkout/:badgeNumber',
+          today: '/api/visitors/today'
+        }
+      }
     }
   });
+});
+
+// ============================================
+// FIX DATA ENDPOINT
+// ============================================
+app.post('/api/fix-attendance-times', async (req, res) => {
+  try {
+    console.log('🔧 Manually fixing attendance times...');
+    const teachers = await Teacher.find({});
+    let fixedCount = 0;
+    let recordCount = 0;
+
+    for (const teacher of teachers) {
+      let needsSave = false;
+      
+      for (const record of teacher.attendance) {
+        if (record.checkIn) {
+          const originalTime = new Date(record.checkIn);
+          const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+          record.checkIn = kenyaTime;
+          needsSave = true;
+          recordCount++;
+        }
+        
+        if (record.checkOut) {
+          const originalTime = new Date(record.checkOut);
+          const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+          record.checkOut = kenyaTime;
+          needsSave = true;
+          recordCount++;
+        }
+        
+        if (record.date) {
+          const originalDate = new Date(record.date);
+          const kenyaDate = new Date(originalDate.getTime() + (3 * 60 * 60 * 1000));
+          kenyaDate.setHours(0, 0, 0, 0);
+          record.date = kenyaDate;
+          needsSave = true;
+        }
+      }
+      
+      if (needsSave) {
+        await teacher.save();
+        fixedCount++;
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: `✅ Fixed ${fixedCount} teachers, ${recordCount} attendance records with correct Kenya time`,
+      fixedCount,
+      recordCount
+    });
+  } catch (error) {
+    console.error('❌ Error fixing attendance data:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // ============================================
@@ -1604,6 +1683,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`🕐 Kenya Time: ${formatKenyaFullTime(kenyaNow)}`);
   console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
+  console.log(`🔧 Fix Data: http://localhost:${PORT}/api/fix-attendance-times`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
 });
