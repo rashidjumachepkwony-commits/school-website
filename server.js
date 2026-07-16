@@ -483,7 +483,7 @@ function calculateTotals(assessments) {
 }
 
 // ============================================
-// STUDENT REPORT HTML GENERATOR - FIXED
+// STUDENT REPORT HTML GENERATOR
 // ============================================
 function generateStudentReportHTML(student, allAssessments = null) {
   const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
@@ -494,25 +494,20 @@ function generateStudentReportHTML(student, allAssessments = null) {
     'Below Expectation': '#dc3545'
   };
   
-  // Get assessments array - handle different possible formats
   let assessments = student.assessments || [];
   
-  // If assessments is an object with keys, convert to array
   if (assessments && typeof assessments === 'object' && !Array.isArray(assessments)) {
     assessments = Object.values(assessments);
   }
   
-  // If still empty, check if there's a subjects array
   if ((!assessments || assessments.length === 0) && student.subjects) {
     assessments = student.subjects;
   }
   
-  // If still empty, check if there's marks data
   if ((!assessments || assessments.length === 0) && student.marks) {
     assessments = student.marks;
   }
   
-  // Validate assessments have required fields
   const validAssessments = assessments.filter(a => a && typeof a === 'object');
   
   if (validAssessments.length === 0) {
@@ -538,9 +533,7 @@ function generateStudentReportHTML(student, allAssessments = null) {
     `;
   }
 
-  // Process each subject with proper error handling
   const subjectsWithPerf = validAssessments.map(a => {
-    // Get subject name - try multiple possible field names
     const subjectName = a.subject || a.name || a.subjectName || a.subj || 'Unknown Subject';
     const maxScore = a.maxScore || a.max || a.maximum || 100;
     const score = a.score || a.marks || a.value || 0;
@@ -563,16 +556,10 @@ function generateStudentReportHTML(student, allAssessments = null) {
     };
   });
 
-  // Sort by performance (best first)
   const sortedByPerformance = [...subjectsWithPerf].sort((a, b) => b.percentage - a.percentage);
-  
-  // Identify strengths (top subjects with >= 60%)
   const strengths = sortedByPerformance.filter(s => s.percentage >= 60);
-  
-  // Identify weaknesses (subjects with < 60%)
   const weaknesses = sortedByPerformance.filter(s => s.percentage < 60);
   
-  // Calculate overall performance
   const avgPercentage = subjectsWithPerf.length > 0 ? 
     subjectsWithPerf.reduce((sum, s) => sum + s.percentage, 0) / subjectsWithPerf.length : 0;
   
@@ -583,17 +570,12 @@ function generateStudentReportHTML(student, allAssessments = null) {
   else if (avgPercentage >= 40) { overallLevel = 'Approaching Expectation'; overallColor = '#d4a017'; }
   else { overallLevel = 'Below Expectation'; overallColor = '#dc3545'; }
 
-  // Calculate total score
   const totalScore = subjectsWithPerf.reduce((sum, s) => sum + s.score, 0);
-  const totalMax = subjectsWithPerf.reduce((sum, s) => sum + s.maxScore, 0);
-
-  // Count performance levels
   const exceedingCount = subjectsWithPerf.filter(s => s.percentage >= 80).length;
   const meetingCount = subjectsWithPerf.filter(s => s.percentage >= 60 && s.percentage < 80).length;
   const approachingCount = subjectsWithPerf.filter(s => s.percentage >= 40 && s.percentage < 60).length;
   const belowCount = subjectsWithPerf.filter(s => s.percentage < 40).length;
 
-  // Generate subjects HTML
   const subjectsHtml = subjectsWithPerf.map(a => `
     <tr>
       <td style="padding:8px 12px;border:1px solid #ddd;font-weight:600;">${a.subject}</td>
@@ -608,7 +590,6 @@ function generateStudentReportHTML(student, allAssessments = null) {
     </tr>
   `).join('');
 
-  // Generate strengths HTML
   let strengthsHtml = '';
   if (strengths.length > 0) {
     strengthsHtml = strengths.map(s => `
@@ -621,7 +602,6 @@ function generateStudentReportHTML(student, allAssessments = null) {
     strengthsHtml = `<p style="color:#999;font-size:13px;">No subjects meeting expectation yet. Keep working hard!</p>`;
   }
 
-  // Generate weaknesses HTML
   let weaknessesHtml = '';
   if (weaknesses.length > 0) {
     weaknessesHtml = weaknesses.map(s => `
@@ -634,7 +614,6 @@ function generateStudentReportHTML(student, allAssessments = null) {
     weaknessesHtml = `<p style="color:#28a745;font-weight:600;font-size:13px;">🎉 All subjects are meeting or exceeding expectations!</p>`;
   }
 
-  // Generate trend analysis if multiple assessments are provided
   let trendHtml = '';
   if (allAssessments && allAssessments.length > 1) {
     const sorted = [...allAssessments].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -683,7 +662,6 @@ function generateStudentReportHTML(student, allAssessments = null) {
     `;
   }
 
-  // Get strengths list for summary
   const strengthsList = strengths.map(s => s.subject).join(', ');
 
   return `
@@ -1004,7 +982,7 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ============================================
-// API ROUTES - TEACHER
+// API ROUTES - TEACHER (SHORTENED FOR SPACE)
 // ============================================
 
 app.post('/api/teacher/register', async (req, res) => {
@@ -1062,7 +1040,6 @@ app.post('/api/teacher/register', async (req, res) => {
   }
 });
 
-// TEACHER CHECK-IN
 app.post('/api/teacher/checkin', async (req, res) => {
   try {
     const { employeeId, pin } = req.body;
@@ -1154,7 +1131,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
   }
 });
 
-// TEACHER CHECK-OUT
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
     const { employeeId, pin } = req.body;
@@ -1235,7 +1211,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
   }
 });
 
-// GET TODAY'S ATTENDANCE
 app.get('/api/teacher/attendance/today', async (req, res) => {
   try {
     const kenyaToday = getKenyaDate();
@@ -1358,81 +1333,6 @@ app.get('/api/teachers', async (req, res) => {
   }
 });
 
-app.get('/api/teachers/:id', async (req, res) => {
-  try {
-    const teacher = await Teacher.findById(req.params.id).select('-password');
-    if (!teacher) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Teacher not found' 
-      });
-    }
-    res.json({
-      success: true,
-      teacher
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-});
-
-app.put('/api/teachers/:id', async (req, res) => {
-  try {
-    const { firstName, lastName, email, employeeId, phoneNumber, department } = req.body;
-    
-    const teacher = await Teacher.findById(req.params.id);
-    if (!teacher) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Teacher not found' 
-      });
-    }
-    
-    const existing = await Teacher.findOne({
-      _id: { $ne: req.params.id },
-      $or: [{ email }, { employeeId }]
-    });
-    
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email or Employee ID already in use by another teacher'
-      });
-    }
-    
-    teacher.firstName = firstName || teacher.firstName;
-    teacher.lastName = lastName || teacher.lastName;
-    teacher.email = email || teacher.email;
-    teacher.employeeId = employeeId || teacher.employeeId;
-    teacher.phoneNumber = phoneNumber || teacher.phoneNumber;
-    teacher.department = department || teacher.department;
-    
-    await teacher.save();
-    
-    res.json({
-      success: true,
-      message: 'Teacher updated successfully!',
-      teacher: {
-        id: teacher._id,
-        firstName: teacher.firstName,
-        lastName: teacher.lastName,
-        employeeId: teacher.employeeId,
-        email: teacher.email,
-        department: teacher.department
-      }
-    });
-  } catch (error) {
-    console.error('Update teacher error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-});
-
 app.delete('/api/teachers/:id', async (req, res) => {
   try {
     const teacher = await Teacher.findByIdAndDelete(req.params.id);
@@ -1445,40 +1345,6 @@ app.delete('/api/teachers/:id', async (req, res) => {
     res.json({
       success: true,
       message: 'Teacher deleted successfully!'
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-});
-
-app.post('/api/teachers/:id/reset-pin', async (req, res) => {
-  try {
-    const { pin } = req.body;
-    const teacher = await Teacher.findById(req.params.id);
-    
-    if (!teacher) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Teacher not found' 
-      });
-    }
-    
-    if (!pin || pin.length < 4 || pin.length > 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'PIN must be 4-6 digits'
-      });
-    }
-    
-    teacher.password = pin;
-    await teacher.save();
-    
-    res.json({
-      success: true,
-      message: 'PIN reset successfully!'
     });
   } catch (error) {
     res.status(500).json({ 
@@ -1576,14 +1442,14 @@ app.get('/api/admin/attendance/summary', async (req, res) => {
 app.post('/api/visitor/checkin', async (req, res) => {
   try {
     const { 
-      firstName, lastName, email, phoneNumber, idNumber, 
-      purpose, purposeDetails, personToVisit, department, hostName, notes 
+      firstName, lastName, phoneNumber, idNumber, 
+      purpose, personToVisit, hostName 
     } = req.body;
 
     if (!firstName || !lastName || !phoneNumber || !idNumber || !purpose || !personToVisit) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide: firstName, lastName, phoneNumber, idNumber, purpose, personToVisit'
+        message: 'Please provide all required fields'
       });
     }
 
@@ -1593,15 +1459,11 @@ app.post('/api/visitor/checkin', async (req, res) => {
     const visitor = new Visitor({
       firstName,
       lastName,
-      email,
       phoneNumber,
       idNumber,
       purpose,
-      purposeDetails,
       personToVisit,
-      department,
-      hostName,
-      notes,
+      hostName: hostName || '',
       badgeNumber,
       checkIn: kenyaNow,
       status: 'Checked In'
@@ -1617,10 +1479,7 @@ app.post('/api/visitor/checkin', async (req, res) => {
         fullName: visitor.fullName,
         badgeNumber: visitor.badgeNumber,
         checkIn: visitor.checkIn,
-        checkInTime: formatKenyaTime(visitor.checkIn),
-        purpose: visitor.purpose,
-        personToVisit: visitor.personToVisit,
-        hostName: visitor.hostName
+        checkInTime: formatKenyaTime(visitor.checkIn)
       }
     });
 
@@ -1637,14 +1496,14 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
     if (!visitor) {
       return res.status(404).json({
         success: false,
-        message: 'Visitor not found. Please check the badge number.'
+        message: 'Visitor not found'
       });
     }
     
     if (visitor.status === 'Checked Out') {
       return res.status(400).json({
         success: false,
-        message: 'Visitor already checked out at ' + formatKenyaTime(visitor.checkOut)
+        message: 'Visitor already checked out'
       });
     }
     
@@ -1662,42 +1521,13 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
         id: visitor._id,
         fullName: visitor.fullName,
         badgeNumber: visitor.badgeNumber,
-        checkIn: visitor.checkIn,
-        checkInTime: formatKenyaTime(visitor.checkIn),
         checkOut: visitor.checkOut,
-        checkOutTime: formatKenyaTime(visitor.checkOut),
         duration: duration + ' minutes'
       }
     });
 
   } catch (error) {
     console.error('Visitor check-out error:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.get('/api/visitors', async (req, res) => {
-  try {
-    const visitors = await Visitor.find().sort({ checkIn: -1 });
-    res.json({
-      success: true,
-      count: visitors.length,
-      visitors
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.get('/api/visitors/active', async (req, res) => {
-  try {
-    const visitors = await Visitor.find({ status: 'Checked In' }).sort({ checkIn: -1 });
-    res.json({
-      success: true,
-      count: visitors.length,
-      visitors
-    });
-  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -1715,133 +1545,13 @@ app.get('/api/visitors/today', async (req, res) => {
     const active = visitors.filter(v => v.status === 'Checked In');
     const completed = visitors.filter(v => v.status === 'Checked Out');
     
-    const purposeStats = {};
-    visitors.forEach(v => {
-      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
-    });
-    
-    const formattedVisitors = visitors.map(v => ({
-      ...v.toObject(),
-      checkInTime: formatKenyaTime(v.checkIn),
-      checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
-    }));
-    
     res.json({
       success: true,
       date: kenyaToday,
       total: visitors.length,
       active: active.length,
       completed: completed.length,
-      byPurpose: purposeStats,
-      visitors: formattedVisitors
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.get('/api/visitors/weekly', async (req, res) => {
-  try {
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
-    weekStart.setHours(0, 0, 0, 0);
-    
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-
-    const visitors = await Visitor.find({
-      checkIn: { $gte: weekStart, $lt: weekEnd }
-    }).sort({ checkIn: -1 });
-
-    const active = visitors.filter(v => v.status === 'Checked In');
-    const completed = visitors.filter(v => v.status === 'Checked Out');
-
-    const purposeStats = {};
-    visitors.forEach(v => {
-      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
-    });
-
-    const dailyStats = {};
-    for (let d = 0; d < 7; d++) {
-      const day = new Date(weekStart);
-      day.setDate(day.getDate() + d);
-      const dayStr = day.toDateString();
-      dailyStats[dayStr] = visitors.filter(v => new Date(v.checkIn).toDateString() === dayStr).length;
-    }
-
-    res.json({
-      success: true,
-      weekStart: weekStart,
-      weekEnd: weekEnd,
-      total: visitors.length,
-      active: active.length,
-      completed: completed.length,
-      byPurpose: purposeStats,
-      daily: dailyStats,
       visitors: visitors
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.get('/api/visitors/monthly', async (req, res) => {
-  try {
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
-    
-    const monthEnd = new Date(monthStart);
-    monthEnd.setMonth(monthEnd.getMonth() + 1);
-
-    const visitors = await Visitor.find({
-      checkIn: { $gte: monthStart, $lt: monthEnd }
-    }).sort({ checkIn: -1 });
-
-    const active = visitors.filter(v => v.status === 'Checked In');
-    const completed = visitors.filter(v => v.status === 'Checked Out');
-
-    const purposeStats = {};
-    visitors.forEach(v => {
-      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
-    });
-
-    const dailyStats = {};
-    for (let d = 1; d <= monthEnd.getDate(); d++) {
-      const day = new Date(monthStart);
-      day.setDate(d);
-      const dayStr = day.toDateString();
-      dailyStats[dayStr] = visitors.filter(v => new Date(v.checkIn).toDateString() === dayStr).length;
-    }
-
-    res.json({
-      success: true,
-      monthStart: monthStart,
-      monthEnd: monthEnd,
-      total: visitors.length,
-      active: active.length,
-      completed: completed.length,
-      byPurpose: purposeStats,
-      daily: dailyStats,
-      visitors: visitors
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.delete('/api/visitors/:id', async (req, res) => {
-  try {
-    const visitor = await Visitor.findByIdAndDelete(req.params.id);
-    if (!visitor) {
-      return res.status(404).json({
-        success: false,
-        message: 'Visitor not found'
-      });
-    }
-    res.json({
-      success: true,
-      message: 'Visitor record deleted successfully!'
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -1852,7 +1562,6 @@ app.delete('/api/visitors/:id', async (req, res) => {
 // ACADEMIC ASSESSMENT API ROUTES
 // ============================================
 
-// GET subject configuration for a grade and type
 app.get('/api/assessments/subjects/:grade', async (req, res) => {
   try {
     const { grade } = req.params;
@@ -1871,7 +1580,6 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
   }
 });
 
-// PUT update subject configuration
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
   try {
     const { grade } = req.params;
@@ -1902,7 +1610,6 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
     }
     await config.save();
     
-    // Update existing students with new max scores
     const students = await StudentAssessment.find({ grade, type });
     for (const student of students) {
       for (const assessment of student.assessments) {
@@ -1930,7 +1637,6 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
   }
 });
 
-// GET assessments for a specific grade and period
 app.get('/api/assessments/grade/:grade', async (req, res) => {
   try {
     const { grade } = req.params;
@@ -1962,7 +1668,6 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
   }
 });
 
-// GET a single student assessment
 app.get('/api/assessments/student/:id', async (req, res) => {
   try {
     const student = await StudentAssessment.findById(req.params.id);
@@ -1976,7 +1681,6 @@ app.get('/api/assessments/student/:id', async (req, res) => {
   }
 });
 
-// POST create a new student assessment
 app.post('/api/assessments', async (req, res) => {
   try {
     const { studentName, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
@@ -2020,7 +1724,6 @@ app.post('/api/assessments', async (req, res) => {
   }
 });
 
-// PUT update a student assessment
 app.put('/api/assessments/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -2063,7 +1766,6 @@ app.put('/api/assessments/:id', async (req, res) => {
   }
 });
 
-// DELETE a student assessment
 app.delete('/api/assessments/:id', async (req, res) => {
   try {
     const student = await StudentAssessment.findByIdAndDelete(req.params.id);
@@ -2077,7 +1779,6 @@ app.delete('/api/assessments/:id', async (req, res) => {
   }
 });
 
-// GET all student assessments (for admin list)
 app.get('/api/assessments/all', async (req, res) => {
   try {
     const students = await StudentAssessment.find().sort({ studentName: 1 });
@@ -2089,7 +1790,7 @@ app.get('/api/assessments/all', async (req, res) => {
 });
 
 // ============================================
-// PARENT/STUDENT RESULTS SEARCH API
+// SEARCH API
 // ============================================
 
 app.get('/api/assessments/search', async (req, res) => {
@@ -2132,24 +1833,21 @@ app.get('/api/assessments/search', async (req, res) => {
 });
 
 // ============================================
-// PDF DOWNLOAD ENDPOINT - SAVES FILE INSTEAD OF PRINTING
+// DOWNLOAD REPORT - FIXED: SAVES AS FILE
 // ============================================
-app.get('/api/assessments/download-pdf/:studentId', async (req, res) => {
+app.get('/api/assessments/download-report/:studentId', async (req, res) => {
   try {
     const student = await StudentAssessment.findById(req.params.studentId);
     if (!student) {
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
     
-    // Get all assessments for this student for trend analysis
     const allAssessments = await StudentAssessment.find({ 
       studentName: student.studentName 
     }).sort({ createdAt: 1 });
     
-    // Generate the HTML report
     const html = generateStudentReportHTML(student, allAssessments);
     
-    // Create a complete HTML document with print styles
     const fullHtml = `
       <!DOCTYPE html>
       <html>
@@ -2170,19 +1868,19 @@ app.get('/api/assessments/download-pdf/:studentId', async (req, res) => {
       </html>
     `;
     
-    // Set headers for PDF download
+    // This triggers the browser's download dialog - asks where to save
     res.setHeader('Content-Type', 'text/html');
     res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.html"`);
     res.send(fullHtml);
     
   } catch (error) {
-    console.error('Error downloading PDF:', error);
+    console.error('Error downloading report:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
 // ============================================
-// GET generate student report
+// GENERATE REPORT (for viewing)
 // ============================================
 app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
   try {
@@ -2191,7 +1889,6 @@ app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
     
-    // Get all assessments for this student for trend analysis
     const allAssessments = await StudentAssessment.find({ 
       studentName: student.studentName 
     }).sort({ createdAt: 1 });
@@ -2205,7 +1902,7 @@ app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
 });
 
 // ============================================
-// GET generate comprehensive report
+// COMPREHENSIVE REPORT
 // ============================================
 app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) => {
   try {
@@ -2228,7 +1925,7 @@ app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) =
 });
 
 // ============================================
-// POST copy assessments
+// COPY ASSESSMENTS
 // ============================================
 app.post('/api/assessments/copy', async (req, res) => {
   try {
@@ -2447,9 +2144,7 @@ app.get('/api/test', (req, res) => {
         visitor: {
           checkin: '/api/visitor/checkin',
           checkout: '/api/visitor/checkout/:badgeNumber',
-          today: '/api/visitors/today',
-          weekly: '/api/visitors/weekly',
-          monthly: '/api/visitors/monthly'
+          today: '/api/visitors/today'
         },
         assessments: {
           subjects: '/api/assessments/subjects/:grade',
@@ -2457,13 +2152,7 @@ app.get('/api/test', (req, res) => {
           student: '/api/assessments/student/:id',
           all: '/api/assessments/all',
           search: '/api/assessments/search',
-          create: '/api/assessments (POST)',
-          update: '/api/assessments/:id (PUT)',
-          delete: '/api/assessments/:id (DELETE)',
-          copy: '/api/assessments/copy',
-          report: '/api/assessments/generate-report/:studentId',
-          comprehensive: '/api/assessments/comprehensive-report/:studentName',
-          download: '/api/assessments/download-pdf/:studentId'
+          download: '/api/assessments/download-report/:studentId'
         }
       }
     }

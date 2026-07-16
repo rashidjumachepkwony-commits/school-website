@@ -702,23 +702,6 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(111, 66, 193, 0.35);
         }
-        .btn-comprehensive {
-            background: linear-gradient(135deg, #0A1628, #1a2a4a);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-family: inherit;
-        }
-        .btn-comprehensive:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(10, 22, 40, 0.35);
-        }
         .btn-print {
             background: #6c757d;
             color: white;
@@ -1539,10 +1522,7 @@
 
                     <div class="action-buttons">
                         <button onclick="downloadAssessmentPDF('${student._id}')" class="btn-download">
-                            <i class="fas fa-file-pdf"></i> Download PDF
-                        </button>
-                        <button onclick="downloadComprehensiveReport('${student.studentName}')" class="btn-comprehensive">
-                            <i class="fas fa-chart-line"></i> Comprehensive Report
+                            <i class="fas fa-file-pdf"></i> Download Report
                         </button>
                         <button onclick="printResult('${student._id}')" class="btn-print">
                             <i class="fas fa-print"></i> Print
@@ -1607,62 +1587,21 @@
         }
 
         // ============================================
-        // DOWNLOAD ASSESSMENT PDF
+        // DOWNLOAD ASSESSMENT PDF - FIXED: SAVES AS FILE
         // ============================================
         async function downloadAssessmentPDF(studentId) {
             try {
                 showAlert('Generating report...', 'info');
-
-                const response = await fetch(`/api/assessments/generate-report/${studentId}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    const win = window.open('', '_blank');
-                    if (!win) {
-                        showAlert('Please allow popups for downloading reports', 'error');
-                        return;
-                    }
-                    win.document.write(data.html);
-                    win.document.close();
-                    setTimeout(() => {
-                        win.print();
-                    }, 800);
-                } else {
-                    showAlert('Error generating report: ' + (data.message || 'Unknown error'), 'error');
-                }
+                
+                // This triggers the browser's download dialog - asks where to save
+                window.location.href = `/api/assessments/download-report/${studentId}`;
+                
+                setTimeout(() => {
+                    showAlert('✅ Report downloaded successfully!', 'success');
+                }, 3000);
             } catch (error) {
                 console.error('Error:', error);
                 showAlert('Error downloading report: ' + error.message, 'error');
-            }
-        }
-
-        // ============================================
-        // DOWNLOAD COMPREHENSIVE REPORT (All Assessments)
-        // ============================================
-        async function downloadComprehensiveReport(studentName) {
-            try {
-                showAlert('Generating comprehensive report with trend analysis...', 'info');
-
-                const response = await fetch(`/api/assessments/comprehensive-report/${encodeURIComponent(studentName)}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    const win = window.open('', '_blank');
-                    if (!win) {
-                        showAlert('Please allow popups for downloading reports', 'error');
-                        return;
-                    }
-                    win.document.write(data.html);
-                    win.document.close();
-                    setTimeout(() => {
-                        win.print();
-                    }, 800);
-                } else {
-                    showAlert('Error generating comprehensive report: ' + (data.message || 'Unknown error'), 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('Error downloading comprehensive report: ' + error.message, 'error');
             }
         }
 
