@@ -379,246 +379,7 @@
         }
 
         /* ========================================
-           SECTION STYLES
-           ======================================== */
-        .section {
-            padding: 40px 0;
-        }
-        .section-alt {
-            background: white;
-        }
-        .section-gray {
-            background: #f8f9fa;
-        }
-        .section-dark {
-            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
-            color: white;
-        }
-        .section-dark .section-title { color: white; }
-        .section-dark .section-subtitle { color: rgba(255,255,255,0.6); }
-
-        .section-title {
-            font-family: var(--font-primary);
-            font-size: 30px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 5px;
-            color: var(--school-blue-dark);
-        }
-        .section-title .highlight { color: var(--school-gold); }
-        .section-title.light { color: white; }
-        .section-subtitle {
-            text-align: center;
-            font-size: 15px;
-            color: #666;
-            margin-bottom: 25px;
-            font-weight: 300;
-        }
-        .section-subtitle.light { color: rgba(255,255,255,0.6); }
-
-        /* ========================================
-           CONTENT CARDS
-           ======================================== */
-        .content-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-        }
-        .content-card {
-            background: white;
-            padding: 22px 18px;
-            border-radius: 14px;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid #e8ecf1;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.04);
-        }
-        .content-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--school-gold);
-            box-shadow: 0 10px 35px rgba(212, 160, 23, 0.12);
-        }
-        .content-card .icon {
-            font-size: 32px;
-            display: block;
-            margin-bottom: 8px;
-        }
-        .content-card h4 {
-            color: var(--school-blue-dark);
-            font-size: 15px;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        .content-card p {
-            color: #666;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
-        /* ========================================
-           CLASSES GRID
-           ======================================== */
-        .classes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 12px;
-        }
-        .class-item {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 15px 10px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: default;
-        }
-        .class-item:hover {
-            background: rgba(255,255,255,0.12);
-            transform: translateY(-3px);
-            border-color: var(--school-gold);
-        }
-        .class-item .class-icon {
-            font-size: 28px;
-            display: block;
-            margin-bottom: 4px;
-        }
-        .class-item .class-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: white;
-        }
-        .class-item .class-desc {
-            font-size: 11px;
-            color: rgba(255,255,255,0.5);
-        }
-
-        /* ========================================
-           SUBJECTS LIST
-           ======================================== */
-        .subjects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-        }
-        .subject-item {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 10px;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
-        .subject-item:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: var(--school-gold);
-        }
-        .subject-item .subject-icon {
-            font-size: 18px;
-            color: var(--school-gold);
-        }
-        .subject-item .subject-name {
-            font-size: 13px;
-            color: white;
-            font-weight: 500;
-        }
-
-        /* ========================================
-           APPROACH LIST
-           ======================================== */
-        .approach-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        .approach-item {
-            background: white;
-            padding: 18px 16px;
-            border-radius: 12px;
-            border-left: 4px solid var(--school-gold);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-            transition: all 0.3s ease;
-        }
-        .approach-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-        }
-        .approach-item .approach-icon {
-            font-size: 20px;
-            margin-bottom: 4px;
-            display: block;
-        }
-        .approach-item h4 {
-            font-size: 14px;
-            color: var(--school-blue-dark);
-            font-weight: 600;
-        }
-        .approach-item p {
-            font-size: 12px;
-            color: #666;
-        }
-
-        /* ========================================
-           ASSESSMENT GRID
-           ======================================== */
-        .assessment-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-        }
-        .assessment-item {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 12px;
-            padding: 18px 14px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .assessment-item:hover {
-            background: rgba(255,255,255,0.1);
-            transform: scale(1.02);
-        }
-        .assessment-item .assessment-icon {
-            font-size: 28px;
-            display: block;
-            margin-bottom: 4px;
-        }
-        .assessment-item .assessment-name {
-            font-size: 14px;
-            color: white;
-            font-weight: 600;
-        }
-        .assessment-item .assessment-desc {
-            font-size: 11px;
-            color: rgba(255,255,255,0.5);
-            margin-top: 4px;
-        }
-        .assessment-item .view-results {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 3px 14px;
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            border-radius: 50px;
-            font-size: 10px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        .assessment-item .view-results:hover {
-            transform: scale(1.05);
-        }
-        .assessment-item.highlight {
-            border: 2px solid var(--school-gold);
-            background: rgba(212, 160, 23, 0.15);
-        }
-        .assessment-item.highlight .assessment-name {
-            color: var(--school-gold);
-        }
-
-        /* ========================================
-           ASSESSMENT SEARCH
+           ASSESSMENT SEARCH SECTION
            ======================================== */
         .assessments-section {
             padding: 60px 0;
@@ -801,11 +562,6 @@
             font-size: 11px;
             color: #666;
         }
-        .result-card .summary-stats .stat .rank-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--school-gold);
-        }
 
         .result-card .subjects-table {
             width: 100%;
@@ -840,52 +596,6 @@
         .subject-rank-badge.meeting { background: #17a2b8; color: white; }
         .subject-rank-badge.approaching { background: #ffc107; color: #0A1628; }
         .subject-rank-badge.below { background: #dc3545; color: white; }
-
-        /* ========================================
-           ANALYSIS SECTION
-           ======================================== */
-        .analysis-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px solid #e8ecf1;
-        }
-        .analysis-section h4 {
-            color: var(--school-blue-dark);
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        .analysis-section .analysis-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
-        }
-        .analysis-section .analysis-box {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #e8ecf1;
-            background: #f8f9fc;
-        }
-        .analysis-section .analysis-box h5 {
-            font-size: 12px;
-            margin-bottom: 6px;
-            color: var(--school-blue-dark);
-        }
-        .analysis-section .analysis-box .subject-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 3px 0;
-            font-size: 12px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .analysis-section .analysis-box .subject-item:last-child {
-            border-bottom: none;
-        }
-        .analysis-section .analysis-box .subject-item .perf-up { color: #28a745; }
-        .analysis-section .analysis-box .subject-item .perf-down { color: #dc3545; }
-        .analysis-section .analysis-box .subject-item .perf-best { color: var(--school-gold); font-weight: 700; }
-        .analysis-box.improved { border-left: 4px solid #28a745; }
-        .analysis-box.dropped { border-left: 4px solid #dc3545; }
-        .analysis-box.best { border-left: 4px solid var(--school-gold); }
 
         .result-card .action-buttons {
             display: flex;
@@ -1097,13 +807,6 @@
             
             .page-hero h1 { font-size: 30px; }
             .page-hero p { font-size: 15px; }
-            .section-title { font-size: 24px; }
-            
-            .content-grid { grid-template-columns: 1fr 1fr; }
-            .classes-grid { grid-template-columns: 1fr 1fr 1fr; }
-            .subjects-grid { grid-template-columns: 1fr 1fr; }
-            .approach-grid { grid-template-columns: 1fr; }
-            .assessment-grid { grid-template-columns: 1fr 1fr; }
             
             .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
             
@@ -1129,9 +832,6 @@
             .result-card .action-buttons .btn {
                 min-width: 100%;
             }
-            .analysis-section .analysis-grid {
-                grid-template-columns: 1fr;
-            }
             .result-card .subjects-table {
                 font-size: 10px;
             }
@@ -1142,14 +842,9 @@
         }
 
         @media (max-width: 480px) {
-            .content-grid { grid-template-columns: 1fr; }
-            .classes-grid { grid-template-columns: 1fr 1fr; }
-            .subjects-grid { grid-template-columns: 1fr; }
-            .assessment-grid { grid-template-columns: 1fr; }
             .page-hero h1 { font-size: 24px; }
-            .section-title { font-size: 20px; }
-            .analysis-section .analysis-grid {
-                grid-template-columns: 1fr;
+            .result-card .summary-stats {
+                grid-template-columns: 1fr 1fr;
             }
         }
 
@@ -1271,262 +966,6 @@
                     At Changara Star Academy, we are committed to providing quality education that prepares every learner 
                     for academic success and responsible citizenship.
                 </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ========================================
-    ACADEMIC OVERVIEW
-    ======================================== -->
-    <section class="section section-alt" data-aos="fade-up">
-        <div class="container">
-            <h2 class="section-title">🎯 Our <span class="highlight">Academic Vision</span></h2>
-            <p class="section-subtitle">
-                We follow the Competency-Based Curriculum (CBC) as prescribed by the Ministry of Education, ensuring that 
-                every learner develops the knowledge, skills, values, and attitudes needed for lifelong learning.
-            </p>
-            <div class="content-grid">
-                <div class="content-card" data-aos="fade-up" data-aos-delay="100">
-                    <span class="icon">👨‍🏫</span>
-                    <h4>Qualified Teachers</h4>
-                    <p>Our experienced teachers use learner-centred teaching methods that encourage creativity, critical thinking, and confidence.</p>
-                </div>
-                <div class="content-card" data-aos="fade-up" data-aos-delay="150">
-                    <span class="icon">📖</span>
-                    <h4>Competency-Based Curriculum</h4>
-                    <p>We follow the CBC framework as prescribed by the Ministry of Education, focusing on skills, values, and attitudes.</p>
-                </div>
-                <div class="content-card" data-aos="fade-up" data-aos-delay="200">
-                    <span class="icon">🏆</span>
-                    <h4>Academic Excellence</h4>
-                    <p>We are committed to producing academically successful learners who are prepared for higher levels of education.</p>
-                </div>
-                <div class="content-card" data-aos="fade-up" data-aos-delay="250">
-                    <span class="icon">💡</span>
-                    <h4>Holistic Development</h4>
-                    <p>We nurture confident, disciplined, and academically successful learners who contribute positively to society.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ========================================
-    CLASSES OFFERED
-    ======================================== -->
-    <section class="section section-dark" data-aos="fade-up">
-        <div class="container">
-            <h2 class="section-title light">📋 Classes <span style="color:var(--school-gold);">Offered</span></h2>
-            <p class="section-subtitle light">
-                We offer quality education in the following levels, with age-appropriate learning materials and qualified teachers.
-            </p>
-            <div class="classes-grid">
-                <div class="class-item" data-aos="zoom-in" data-aos-delay="100">
-                    <span class="class-icon">🧸</span>
-                    <div class="class-name">Playgroup</div>
-                    <div class="class-desc">Early Years</div>
-                </div>
-                <div class="class-item" data-aos="zoom-in" data-aos-delay="130">
-                    <span class="class-icon">🎨</span>
-                    <div class="class-name">PP1</div>
-                    <div class="class-desc">Pre-Primary 1</div>
-                </div>
-                <div class="class-item" data-aos="zoom-in" data-aos-delay="160">
-                    <span class="class-icon">📚</span>
-                    <div class="class-name">PP2</div>
-                    <div class="class-desc">Pre-Primary 2</div>
-                </div>
-                <div class="class-item" data-aos="zoom-in" data-aos-delay="190">
-                    <span class="class-icon">📖</span>
-                    <div class="class-name">Grade 1</div>
-                    <div class="class-desc">Lower Primary</div>
-                </div>
-                <div class="class-item" data-aos="zoom-in" data-aos-delay="220">
-                    <span class="class-icon">✏️</span>
-                    <div class="class-name">Grade 2</div>
-                    <div class="class-desc">Lower Primary</div>
-                </div>
-                <div class="class-item" data-aos="zoom-in" data-aos-delay="250">
-                    <span class="class-icon">📝</span>
-                    <div class="class-name">Grade 3</div>
-                    <div class="class-desc">Lower Primary</div>
-                </div>
-                <div class="class-item" data-aos="zoom-in" data-aos-delay="280">
-                    <span class="class-icon">📐</span>
-                    <div class="class-name">Grade 4</div>
-                    <div class="class-desc">Upper Primary</div>
-                </div>
-                <div class="class-item" data-aos="zoom-in" data-aos-delay="310">
-                    <span class="class-icon">🔬</span>
-                    <div class="class-name">Grade 5</div>
-                    <div class="class-desc">Upper Primary</div>
-                </div>
-                <div class="class-item" data-aos="zoom-in" data-aos-delay="340">
-                    <span class="class-icon">💻</span>
-                    <div class="class-name">Grade 6</div>
-                    <div class="class-desc">Upper Primary</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ========================================
-    LEARNING AREAS
-    ======================================== -->
-    <section class="section" data-aos="fade-up">
-        <div class="container">
-            <h2 class="section-title">📚 Our <span class="highlight">Learning Areas</span></h2>
-            <p class="section-subtitle">
-                Learners study a wide range of subjects designed to develop both academic knowledge and practical skills.
-            </p>
-            <div class="subjects-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="100">
-                    <span class="subject-icon" style="color:var(--school-gold);">➕</span>
-                    <span class="subject-name" style="color:#333;">Mathematics</span>
-                </div>
-                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="130">
-                    <span class="subject-icon" style="color:var(--school-gold);">📖</span>
-                    <span class="subject-name" style="color:#333;">English Language</span>
-                </div>
-                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="160">
-                    <span class="subject-icon" style="color:var(--school-gold);">🗣️</span>
-                    <span class="subject-name" style="color:#333;">Kiswahili</span>
-                </div>
-                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="190">
-                    <span class="subject-icon" style="color:var(--school-gold);">🔬</span>
-                    <span class="subject-name" style="color:#333;">Integrated Science</span>
-                </div>
-                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="220">
-                    <span class="subject-icon" style="color:var(--school-gold);">🌍</span>
-                    <span class="subject-name" style="color:#333;">Social Studies</span>
-                </div>
-                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="250">
-                    <span class="subject-icon" style="color:var(--school-gold);">🎨</span>
-                    <span class="subject-name" style="color:#333;">Creative Arts</span>
-                </div>
-                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="280">
-                    <span class="subject-icon" style="color:var(--school-gold);">🌱</span>
-                    <span class="subject-name" style="color:#333;">Agriculture</span>
-                </div>
-                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="310">
-                    <span class="subject-icon" style="color:var(--school-gold);">⛪</span>
-                    <span class="subject-name" style="color:#333;">Christian Religious Education</span>
-                </div>
-                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="340">
-                    <span class="subject-icon" style="color:var(--school-gold);">⚽</span>
-                    <span class="subject-name" style="color:#333;">Physical & Health Education</span>
-                </div>
-                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="370">
-                    <span class="subject-icon" style="color:var(--school-gold);">💻</span>
-                    <span class="subject-name" style="color:#333;">Computer Studies</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ========================================
-    TEACHING APPROACH
-    ======================================== -->
-    <section class="section section-gray" data-aos="fade-up">
-        <div class="container">
-            <h2 class="section-title">🎯 Our <span class="highlight">Teaching Approach</span></h2>
-            <p class="section-subtitle">
-                Our teaching focuses on active participation and practical learning experiences.
-            </p>
-            <div class="approach-grid">
-                <div class="approach-item" data-aos="fade-up" data-aos-delay="100">
-                    <span class="approach-icon">🤝</span>
-                    <h4>Active Participation</h4>
-                    <p>Learners are encouraged to actively participate in class discussions and activities.</p>
-                </div>
-                <div class="approach-item" data-aos="fade-up" data-aos-delay="150">
-                    <span class="approach-icon">🔬</span>
-                    <h4>Practical Learning</h4>
-                    <p>Hands-on experiences that make learning more engaging and memorable.</p>
-                </div>
-                <div class="approach-item" data-aos="fade-up" data-aos-delay="200">
-                    <span class="approach-icon">👩‍🏫</span>
-                    <h4>Individual Support</h4>
-                    <p>Every learner receives individual attention and support from teachers.</p>
-                </div>
-                <div class="approach-item" data-aos="fade-up" data-aos-delay="250">
-                    <span class="approach-icon">📊</span>
-                    <h4>Continuous Assessment</h4>
-                    <p>Regular assessments to track progress and identify areas for improvement.</p>
-                </div>
-                <div class="approach-item" data-aos="fade-up" data-aos-delay="300">
-                    <span class="approach-icon">💬</span>
-                    <h4>Group Discussions</h4>
-                    <p>Teamwork and collaboration through group discussions and projects.</p>
-                </div>
-                <div class="approach-item" data-aos="fade-up" data-aos-delay="350">
-                    <span class="approach-icon">💻</span>
-                    <h4>Digital Learning</h4>
-                    <p>Integration of technology where resources are available to enhance learning.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ========================================
-    CONTINUOUS ASSESSMENT
-    ======================================== -->
-    <section class="section section-dark" data-aos="fade-up">
-        <div class="container">
-            <h2 class="section-title light">📊 Continuous <span style="color:var(--school-gold);">Assessment</span></h2>
-            <p class="section-subtitle light">
-                Learners are regularly assessed to identify strengths and areas for improvement.
-            </p>
-            <div class="assessment-grid" id="assessmentGrid">
-                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="100">
-                    <span class="assessment-icon">📝</span>
-                    <div class="assessment-name">Weekly Assessments</div>
-                    <div class="assessment-desc">Ongoing weekly evaluations</div>
-                    <a href="#assessments" onclick="selectAssessmentType('weekly')" class="view-results">
-                        <i class="fas fa-download"></i> View Results
-                    </a>
-                </div>
-                
-                <div class="assessment-item highlight" data-aos="zoom-in" data-aos-delay="130">
-                    <span class="assessment-icon">📋</span>
-                    <div class="assessment-name">Monthly Examinations</div>
-                    <div class="assessment-desc">Comprehensive monthly tests</div>
-                    <a href="#assessments" onclick="selectAssessmentType('monthly')" class="view-results">
-                        <i class="fas fa-download"></i> View Results
-                    </a>
-                </div>
-                
-                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="160">
-                    <span class="assessment-icon">📄</span>
-                    <div class="assessment-name">End-of-Term Exams</div>
-                    <div class="assessment-desc">Termly final examinations</div>
-                    <a href="#assessments" onclick="selectAssessmentType('term')" class="view-results">
-                        <i class="fas fa-download"></i> View Results
-                    </a>
-                </div>
-                
-                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="190">
-                    <span class="assessment-icon">📚</span>
-                    <div class="assessment-name">Class Assignments</div>
-                    <div class="assessment-desc">Regular class work</div>
-                </div>
-                
-                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="220">
-                    <span class="assessment-icon">🎯</span>
-                    <div class="assessment-name">Projects</div>
-                    <div class="assessment-desc">Hands-on project work</div>
-                </div>
-                
-                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="250">
-                    <span class="assessment-icon">🎤</span>
-                    <div class="assessment-name">Oral Presentations</div>
-                    <div class="assessment-desc">Speaking & presentation skills</div>
-                </div>
-                
-                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="280">
-                    <span class="assessment-icon">🔬</span>
-                    <div class="assessment-name">Practical Activities</div>
-                    <div class="assessment-desc">Hands-on practical learning</div>
-                </div>
             </div>
         </div>
     </section>
@@ -1712,15 +1151,6 @@
         }
 
         // ============================================
-        // SELECT ASSESSMENT TYPE
-        // ============================================
-        function selectAssessmentType(type) {
-            document.getElementById('assessmentTypeFilter').value = type;
-            document.getElementById('assessments').scrollIntoView({ behavior: 'smooth' });
-            setTimeout(searchStudentAssessment, 500);
-        }
-
-        // ============================================
         // SHOW ALERT
         // ============================================
         function showAlert(message, type) {
@@ -1747,100 +1177,69 @@
         }
 
         // ============================================
-        // ANALYZE STUDENT RESULTS
-        // ============================================
-        function analyzeResults(assessments) {
-            const analysis = {
-                improved: [],
-                dropped: [],
-                best: []
-            };
-
-            const subjectMap = {};
-            assessments.forEach(a => {
-                if (!subjectMap[a.subject]) {
-                    subjectMap[a.subject] = [];
-                }
-                subjectMap[a.subject].push(a);
-            });
-
-            Object.keys(subjectMap).forEach(subject => {
-                const records = subjectMap[subject].sort((a, b) => {
-                    return new Date(a.date) - new Date(b.date);
-                });
-
-                if (records.length >= 2) {
-                    const firstPerf = getSubjectPerformance(records[0].score, records[0].maxScore);
-                    const lastPerf = getSubjectPerformance(records[records.length - 1].score, records[records.length - 1].maxScore);
-                    
-                    const levelOrder = ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'];
-                    const firstIndex = levelOrder.indexOf(firstPerf.level);
-                    const lastIndex = levelOrder.indexOf(lastPerf.level);
-                    
-                    if (lastIndex > firstIndex) {
-                        analysis.improved.push({ subject, from: firstPerf.level, to: lastPerf.level });
-                    } else if (lastIndex < firstIndex) {
-                        analysis.dropped.push({ subject, from: firstPerf.level, to: lastPerf.level });
-                    }
-                }
-                
-                const bestRecord = records.reduce((a, b) => {
-                    const aPct = (a.score / a.maxScore) * 100;
-                    const bPct = (b.score / b.maxScore) * 100;
-                    return aPct > bPct ? a : b;
-                }, records[0]);
-                
-                analysis.best.push({
-                    subject,
-                    score: bestRecord.score,
-                    maxScore: bestRecord.maxScore,
-                    percentage: ((bestRecord.score / bestRecord.maxScore) * 100).toFixed(1)
-                });
-            });
-
-            analysis.best.sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage));
-            analysis.best = analysis.best.slice(0, 3);
-
-            return analysis;
-        }
-
-        // ============================================
-        // CALCULATE RANK
-        // ============================================
-        function calculateRank(students, studentId) {
-            // Sort students by total score descending
-            const sorted = [...students].sort((a, b) => b.totalScore - a.totalScore);
-            const rank = sorted.findIndex(s => s._id === studentId) + 1;
-            const total = sorted.length;
-            return { rank, total };
-        }
-
-        // ============================================
-        // SEARCH ASSESSMENT
+        // SEARCH STUDENT ASSESSMENT - FIXED
         // ============================================
         async function searchStudentAssessment() {
             const studentName = document.getElementById('studentSearch').value.trim();
             const grade = document.getElementById('gradeFilter').value;
             const type = document.getElementById('assessmentTypeFilter').value;
             const resultsDiv = document.getElementById('assessmentResults');
-            
+
+            // Validate input
             if (!studentName && !grade) {
                 showAlert('Please enter a student name or select a grade', 'error');
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-info-circle"></i>
+                        <h3>Enter a student name or select a grade</h3>
+                        <p>Please enter a student name or choose a grade to view results</p>
+                    </div>
+                `;
                 return;
             }
 
+            // Show loading
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <div style="text-align:center;padding:40px;">
+                    <div style="display:inline-block;width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #D4A017;border-radius:50%;animation:spin 1s linear infinite;"></div>
+                    <p style="margin-top:10px;color:#666;">Searching for results...</p>
+                </div>
+            `;
+
+            // Add spinner keyframes if not exists
+            if (!document.querySelector('#spinner-style')) {
+                const style = document.createElement('style');
+                style.id = 'spinner-style';
+                style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+                document.head.appendChild(style);
+            }
+
             try {
+                // Build URL with query parameters
                 let url = '/api/assessments/search?';
-                if (studentName) url += `name=${encodeURIComponent(studentName)}`;
-                if (grade) url += `${studentName ? '&' : ''}grade=${encodeURIComponent(grade)}`;
-                if (type) url += `${(studentName || grade) ? '&' : ''}type=${encodeURIComponent(type)}`;
+                const params = [];
+                if (studentName) params.push(`name=${encodeURIComponent(studentName)}`);
+                if (grade) params.push(`grade=${encodeURIComponent(grade)}`);
+                if (type) params.push(`type=${encodeURIComponent(type)}`);
+                url += params.join('&');
+
+                console.log('🔍 Searching:', url);
 
                 const response = await fetch(url);
                 const data = await response.json();
 
+                console.log('📊 Response:', data);
+
                 if (data.success && data.students && data.students.length > 0) {
                     resultsDiv.style.display = 'block';
-                    resultsDiv.innerHTML = data.students.map(student => renderStudentResult(student, data.students)).join('');
+                    resultsDiv.innerHTML = `
+                        <div style="background:#f8f9fc;padding:10px 16px;border-radius:8px;margin-bottom:15px;color:#666;font-size:13px;border:1px solid #e8ecf1;">
+                            <i class="fas fa-search" style="color:#D4A017;"></i> Found <strong>${data.students.length}</strong> result(s)
+                        </div>
+                        ${data.students.map(student => renderStudentResult(student)).join('')}
+                    `;
                 } else {
                     resultsDiv.style.display = 'block';
                     resultsDiv.innerHTML = `
@@ -1848,19 +1247,36 @@
                             <i class="fas fa-user-graduate"></i>
                             <h3>No results found</h3>
                             <p>Try searching with a different name, grade, or assessment type</p>
+                            <p style="font-size:12px;color:#aaa;margin-top:8px;">
+                                💡 Tip: Make sure the student has been added in the admin panel
+                            </p>
+                            <button onclick="searchStudentAssessment()" style="margin-top:10px;padding:8px 20px;background:#D4A017;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                                <i class="fas fa-sync"></i> Try Again
+                            </button>
                         </div>
                     `;
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showAlert('Error searching assessments', 'error');
+                console.error('❌ Error searching:', error);
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = `
+                    <div class="no-results" style="border:2px solid #dc3545;">
+                        <i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i>
+                        <h3 style="color:#dc3545;">Error loading results</h3>
+                        <p>${error.message || 'Please try again later'}</p>
+                        <button onclick="searchStudentAssessment()" style="margin-top:10px;padding:8px 20px;background:#D4A017;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                            <i class="fas fa-sync"></i> Retry
+                        </button>
+                    </div>
+                `;
+                showAlert('Error loading results. Please try again.', 'error');
             }
         }
 
         // ============================================
-        // RENDER STUDENT RESULT WITH RANK
+        // RENDER STUDENT RESULT
         // ============================================
-        function renderStudentResult(student, allStudents) {
+        function renderStudentResult(student) {
             const performanceColors = {
                 'Exceeding Expectation': 'exceeding',
                 'Meeting Expectation': 'meeting',
@@ -1879,56 +1295,15 @@
                 return { ...a, performance: perf };
             });
 
-            const analysis = analyzeResults(student.assessments);
-            const rankInfo = calculateRank(allStudents, student._id);
-
             const subjectsHtml = subjectsWithPerf.map(a => `
                 <tr>
                     <td><strong>${a.subject}</strong></td>
-                    <td>${a.maxScore}</td>
-                    <td>${a.score}</td>
-                    <td>${a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0}%</td>
-                    <td><span class="subject-rank-badge ${a.performance.class}">${a.performance.level}</span></td>
+                    <td style="text-align:center;">${a.maxScore}</td>
+                    <td style="text-align:center;font-weight:bold;">${a.score}</td>
+                    <td style="text-align:center;">${a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0}%</td>
+                    <td style="text-align:center;"><span class="subject-rank-badge ${a.performance.class}">${a.performance.level}</span></td>
                 </tr>
             `).join('');
-
-            let analysisHtml = '';
-            if (analysis.improved.length > 0 || analysis.dropped.length > 0 || analysis.best.length > 0) {
-                analysisHtml = `
-                    <div class="analysis-section">
-                        <h4>📊 Performance Analysis</h4>
-                        <div class="analysis-grid">
-                            <div class="analysis-box improved">
-                                <h5>📈 Improved Subjects</h5>
-                                ${analysis.improved.length > 0 ? analysis.improved.map(s => `
-                                    <div class="subject-item">
-                                        <span>${s.subject}</span>
-                                        <span><span class="perf-down">${s.from}</span> → <span class="perf-up">${s.to}</span></span>
-                                    </div>
-                                `).join('') : '<p style="color:#999;font-size:11px;">No improvements detected</p>'}
-                            </div>
-                            <div class="analysis-box dropped">
-                                <h5>📉 Dropped Subjects</h5>
-                                ${analysis.dropped.length > 0 ? analysis.dropped.map(s => `
-                                    <div class="subject-item">
-                                        <span>${s.subject}</span>
-                                        <span><span class="perf-up">${s.from}</span> → <span class="perf-down">${s.to}</span></span>
-                                    </div>
-                                `).join('') : '<p style="color:#999;font-size:11px;">No drops detected</p>'}
-                            </div>
-                            <div class="analysis-box best">
-                                <h5>🏆 Best Performing Subjects</h5>
-                                ${analysis.best.length > 0 ? analysis.best.map(s => `
-                                    <div class="subject-item">
-                                        <span>${s.subject}</span>
-                                        <span class="perf-best">${s.percentage}% (${s.score}/${s.maxScore})</span>
-                                    </div>
-                                `).join('') : '<p style="color:#999;font-size:11px;">No data available</p>'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
 
             return `
                 <div class="result-card" id="result-${student._id}">
@@ -1941,31 +1316,24 @@
                             ${student.month ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.month}</span>` : ''}
                             ${student.term ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.term}</span>` : ''}
                         </div>
-                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                            <span style="font-weight:700;color:var(--school-gold);font-size:16px;">
-                                🏆 Rank: ${rankInfo.rank}/${rankInfo.total}
-                            </span>
+                        <div>
                             <span class="performance-badge ${performanceColors[student.performanceLevel] || 'meeting'}">
-                                ${student.performanceLevel}
+                                ${student.performanceLevel || 'Meeting Expectation'}
                             </span>
                         </div>
                     </div>
 
                     <div class="summary-stats">
                         <div class="stat">
-                            <div class="rank-number">#${rankInfo.rank}</div>
-                            <div class="label">Rank</div>
-                        </div>
-                        <div class="stat">
-                            <div class="number">${student.totalScore}</div>
+                            <div class="number" style="color:#D4A017;">${student.totalScore || 0}</div>
                             <div class="label">Total Score</div>
                         </div>
                         <div class="stat">
-                            <div class="number">${student.averageScore.toFixed(1)}</div>
+                            <div class="number" style="color:#17a2b8;">${(student.averageScore || 0).toFixed(1)}</div>
                             <div class="label">Average Score</div>
                         </div>
                         <div class="stat">
-                            <div class="number">${student.assessments.length}</div>
+                            <div class="number" style="color:#28a745;">${student.assessments ? student.assessments.length : 0}</div>
                             <div class="label">Subjects</div>
                         </div>
                     </div>
@@ -1974,24 +1342,22 @@
                         <thead>
                             <tr>
                                 <th>Subject</th>
-                                <th>Max Score</th>
-                                <th>Score</th>
-                                <th>Percentage</th>
-                                <th>Performance Level</th>
+                                <th style="text-align:center;">Max Score</th>
+                                <th style="text-align:center;">Score</th>
+                                <th style="text-align:center;">Percentage</th>
+                                <th style="text-align:center;">Performance Level</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${subjectsHtml}
+                            ${subjectsHtml || '<tr><td colspan="5" style="text-align:center;color:#999;">No subjects found</td></tr>'}
                         </tbody>
                     </table>
-
-                    ${analysisHtml}
 
                     <div class="action-buttons">
                         <button onclick="downloadAssessmentPDF('${student._id}')" class="btn-download">
                             <i class="fas fa-file-pdf"></i> Download PDF
                         </button>
-                        <button onclick="window.print()" class="btn-print">
+                        <button onclick="printResult('${student._id}')" class="btn-print">
                             <i class="fas fa-print"></i> Print
                         </button>
                     </div>
@@ -2000,29 +1366,86 @@
         }
 
         // ============================================
+        // PRINT RESULT
+        // ============================================
+        function printResult(studentId) {
+            const resultCard = document.getElementById(`result-${studentId}`);
+            if (!resultCard) {
+                showAlert('Result not found', 'error');
+                return;
+            }
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html><head>
+                    <title>Student Results</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
+                        .result-card { max-width: 900px; margin: 0 auto; }
+                        .student-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #D4A017; padding-bottom: 10px; }
+                        .grade-badge { background: #D4A017; padding: 3px 14px; border-radius: 50px; font-weight: 700; font-size: 13px; }
+                        .type-badge { background: #0A1628; color: white; padding: 3px 14px; border-radius: 50px; font-weight: 700; font-size: 11px; }
+                        .performance-badge { display: inline-block; padding: 5px 16px; border-radius: 50px; font-weight: 700; font-size: 13px; }
+                        .performance-badge.exceeding { background: #28a745; color: white; }
+                        .performance-badge.meeting { background: #17a2b8; color: white; }
+                        .performance-badge.approaching { background: #ffc107; color: #0A1628; }
+                        .performance-badge.below { background: #dc3545; color: white; }
+                        .summary-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+                        .stat { background: #f8f9fc; padding: 10px; border-radius: 8px; text-align: center; }
+                        .stat .number { font-size: 20px; font-weight: 700; color: #0A1628; }
+                        .stat .label { font-size: 11px; color: #666; }
+                        .subjects-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+                        .subjects-table th { background: #0A1628; color: white; padding: 6px 10px; text-align: left; }
+                        .subjects-table td { padding: 6px 10px; border-bottom: 1px solid #e8ecf1; }
+                        .subject-rank-badge { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 9px; font-weight: 700; }
+                        .subject-rank-badge.exceeding { background: #28a745; color: white; }
+                        .subject-rank-badge.meeting { background: #17a2b8; color: white; }
+                        .subject-rank-badge.approaching { background: #ffc107; color: #0A1628; }
+                        .subject-rank-badge.below { background: #dc3545; color: white; }
+                        .action-buttons { display: none; }
+                        .footer { margin-top: 30px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #ddd; padding-top: 15px; }
+                        @media print { body { padding: 10px; } }
+                    </style>
+                </head><body>
+                    ${resultCard.outerHTML}
+                    <div class="footer">
+                        <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); }
+                    <\/script>
+                </body></html>
+            `);
+            printWindow.document.close();
+        }
+
+        // ============================================
         // DOWNLOAD ASSESSMENT PDF
         // ============================================
         async function downloadAssessmentPDF(studentId) {
             try {
+                showAlert('Generating PDF...', 'info');
+
                 const response = await fetch(`/api/assessments/generate-report/${studentId}`);
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    // Create a new window with the HTML content
                     const win = window.open('', '_blank');
+                    if (!win) {
+                        showAlert('Please allow popups for downloading reports', 'error');
+                        return;
+                    }
                     win.document.write(data.html);
                     win.document.close();
-                    
-                    // Wait for content to load then trigger download
                     setTimeout(() => {
                         win.print();
-                    }, 500);
+                    }, 800);
                 } else {
-                    showAlert('Error generating report', 'error');
+                    showAlert('Error generating report: ' + (data.message || 'Unknown error'), 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showAlert('Error downloading report', 'error');
+                showAlert('Error downloading report: ' + error.message, 'error');
             }
         }
 
@@ -2031,20 +1454,37 @@
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadNewsTicker();
-            
+
+            // Check URL parameters for auto-search
             const urlParams = new URLSearchParams(window.location.search);
             const type = urlParams.get('type');
             if (type) {
                 document.getElementById('assessmentTypeFilter').value = type;
             }
-            
+
             const grade = urlParams.get('grade');
             if (grade) {
                 document.getElementById('gradeFilter').value = grade;
             }
-            
-            if (type || grade) {
-                setTimeout(searchStudentAssessment, 500);
+
+            const name = urlParams.get('name');
+            if (name) {
+                document.getElementById('studentSearch').value = name;
+            }
+
+            // Auto-search if parameters are present
+            if (type || grade || name) {
+                setTimeout(searchStudentAssessment, 800);
+            }
+
+            // Handle hash for assessments anchor
+            if (window.location.hash === '#assessments') {
+                setTimeout(() => {
+                    const section = document.getElementById('assessments');
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 500);
             }
         });
     </script>
