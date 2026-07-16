@@ -1004,7 +1004,7 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ============================================
-// API ROUTES - TEACHER (SHORTENED FOR SPACE)
+// API ROUTES - TEACHER
 // ============================================
 
 app.post('/api/teacher/register', async (req, res) => {
@@ -1339,7 +1339,7 @@ app.get('/api/teacher/attendance/:employeeId', async (req, res) => {
 });
 
 // ============================================
-// ADMIN TEACHER MANAGEMENT ROUTES (SHORTENED)
+// ADMIN TEACHER MANAGEMENT ROUTES
 // ============================================
 
 app.get('/api/teachers', async (req, res) => {
@@ -1351,6 +1351,81 @@ app.get('/api/teachers', async (req, res) => {
       teachers
     });
   } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+app.get('/api/teachers/:id', async (req, res) => {
+  try {
+    const teacher = await Teacher.findById(req.params.id).select('-password');
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+    res.json({
+      success: true,
+      teacher
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+app.put('/api/teachers/:id', async (req, res) => {
+  try {
+    const { firstName, lastName, email, employeeId, phoneNumber, department } = req.body;
+    
+    const teacher = await Teacher.findById(req.params.id);
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+    
+    const existing = await Teacher.findOne({
+      _id: { $ne: req.params.id },
+      $or: [{ email }, { employeeId }]
+    });
+    
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email or Employee ID already in use by another teacher'
+      });
+    }
+    
+    teacher.firstName = firstName || teacher.firstName;
+    teacher.lastName = lastName || teacher.lastName;
+    teacher.email = email || teacher.email;
+    teacher.employeeId = employeeId || teacher.employeeId;
+    teacher.phoneNumber = phoneNumber || teacher.phoneNumber;
+    teacher.department = department || teacher.department;
+    
+    await teacher.save();
+    
+    res.json({
+      success: true,
+      message: 'Teacher updated successfully!',
+      teacher: {
+        id: teacher._id,
+        firstName: teacher.firstName,
+        lastName: teacher.lastName,
+        employeeId: teacher.employeeId,
+        email: teacher.email,
+        department: teacher.department
+      }
+    });
+  } catch (error) {
+    console.error('Update teacher error:', error);
     res.status(500).json({ 
       success: false, 
       message: error.message 
@@ -1370,6 +1445,40 @@ app.delete('/api/teachers/:id', async (req, res) => {
     res.json({
       success: true,
       message: 'Teacher deleted successfully!'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+app.post('/api/teachers/:id/reset-pin', async (req, res) => {
+  try {
+    const { pin } = req.body;
+    const teacher = await Teacher.findById(req.params.id);
+    
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+    
+    if (!pin || pin.length < 4 || pin.length > 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'PIN must be 4-6 digits'
+      });
+    }
+    
+    teacher.password = pin;
+    await teacher.save();
+    
+    res.json({
+      success: true,
+      message: 'PIN reset successfully!'
     });
   } catch (error) {
     res.status(500).json({ 
@@ -1461,20 +1570,20 @@ app.get('/api/admin/attendance/summary', async (req, res) => {
 });
 
 // ============================================
-// VISITOR API ROUTES (SHORTENED)
+// VISITOR API ROUTES
 // ============================================
 
 app.post('/api/visitor/checkin', async (req, res) => {
   try {
     const { 
-      firstName, lastName, phoneNumber, idNumber, 
-      purpose, personToVisit, hostName 
+      firstName, lastName, email, phoneNumber, idNumber, 
+      purpose, purposeDetails, personToVisit, department, hostName, notes 
     } = req.body;
 
     if (!firstName || !lastName || !phoneNumber || !idNumber || !purpose || !personToVisit) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields'
+        message: 'Please provide: firstName, lastName, phoneNumber, idNumber, purpose, personToVisit'
       });
     }
 
@@ -1484,11 +1593,15 @@ app.post('/api/visitor/checkin', async (req, res) => {
     const visitor = new Visitor({
       firstName,
       lastName,
+      email,
       phoneNumber,
       idNumber,
       purpose,
+      purposeDetails,
       personToVisit,
-      hostName: hostName || '',
+      department,
+      hostName,
+      notes,
       badgeNumber,
       checkIn: kenyaNow,
       status: 'Checked In'
@@ -1504,7 +1617,10 @@ app.post('/api/visitor/checkin', async (req, res) => {
         fullName: visitor.fullName,
         badgeNumber: visitor.badgeNumber,
         checkIn: visitor.checkIn,
-        checkInTime: formatKenyaTime(visitor.checkIn)
+        checkInTime: formatKenyaTime(visitor.checkIn),
+        purpose: visitor.purpose,
+        personToVisit: visitor.personToVisit,
+        hostName: visitor.hostName
       }
     });
 
@@ -1521,14 +1637,14 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
     if (!visitor) {
       return res.status(404).json({
         success: false,
-        message: 'Visitor not found'
+        message: 'Visitor not found. Please check the badge number.'
       });
     }
     
     if (visitor.status === 'Checked Out') {
       return res.status(400).json({
         success: false,
-        message: 'Visitor already checked out'
+        message: 'Visitor already checked out at ' + formatKenyaTime(visitor.checkOut)
       });
     }
     
@@ -1546,13 +1662,42 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
         id: visitor._id,
         fullName: visitor.fullName,
         badgeNumber: visitor.badgeNumber,
+        checkIn: visitor.checkIn,
+        checkInTime: formatKenyaTime(visitor.checkIn),
         checkOut: visitor.checkOut,
+        checkOutTime: formatKenyaTime(visitor.checkOut),
         duration: duration + ' minutes'
       }
     });
 
   } catch (error) {
     console.error('Visitor check-out error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.get('/api/visitors', async (req, res) => {
+  try {
+    const visitors = await Visitor.find().sort({ checkIn: -1 });
+    res.json({
+      success: true,
+      count: visitors.length,
+      visitors
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.get('/api/visitors/active', async (req, res) => {
+  try {
+    const visitors = await Visitor.find({ status: 'Checked In' }).sort({ checkIn: -1 });
+    res.json({
+      success: true,
+      count: visitors.length,
+      visitors
+    });
+  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -1570,13 +1715,133 @@ app.get('/api/visitors/today', async (req, res) => {
     const active = visitors.filter(v => v.status === 'Checked In');
     const completed = visitors.filter(v => v.status === 'Checked Out');
     
+    const purposeStats = {};
+    visitors.forEach(v => {
+      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
+    });
+    
+    const formattedVisitors = visitors.map(v => ({
+      ...v.toObject(),
+      checkInTime: formatKenyaTime(v.checkIn),
+      checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
+    }));
+    
     res.json({
       success: true,
       date: kenyaToday,
       total: visitors.length,
       active: active.length,
       completed: completed.length,
+      byPurpose: purposeStats,
+      visitors: formattedVisitors
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.get('/api/visitors/weekly', async (req, res) => {
+  try {
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+    weekStart.setHours(0, 0, 0, 0);
+    
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    const visitors = await Visitor.find({
+      checkIn: { $gte: weekStart, $lt: weekEnd }
+    }).sort({ checkIn: -1 });
+
+    const active = visitors.filter(v => v.status === 'Checked In');
+    const completed = visitors.filter(v => v.status === 'Checked Out');
+
+    const purposeStats = {};
+    visitors.forEach(v => {
+      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
+    });
+
+    const dailyStats = {};
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(weekStart);
+      day.setDate(day.getDate() + d);
+      const dayStr = day.toDateString();
+      dailyStats[dayStr] = visitors.filter(v => new Date(v.checkIn).toDateString() === dayStr).length;
+    }
+
+    res.json({
+      success: true,
+      weekStart: weekStart,
+      weekEnd: weekEnd,
+      total: visitors.length,
+      active: active.length,
+      completed: completed.length,
+      byPurpose: purposeStats,
+      daily: dailyStats,
       visitors: visitors
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.get('/api/visitors/monthly', async (req, res) => {
+  try {
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    
+    const monthEnd = new Date(monthStart);
+    monthEnd.setMonth(monthEnd.getMonth() + 1);
+
+    const visitors = await Visitor.find({
+      checkIn: { $gte: monthStart, $lt: monthEnd }
+    }).sort({ checkIn: -1 });
+
+    const active = visitors.filter(v => v.status === 'Checked In');
+    const completed = visitors.filter(v => v.status === 'Checked Out');
+
+    const purposeStats = {};
+    visitors.forEach(v => {
+      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
+    });
+
+    const dailyStats = {};
+    for (let d = 1; d <= monthEnd.getDate(); d++) {
+      const day = new Date(monthStart);
+      day.setDate(d);
+      const dayStr = day.toDateString();
+      dailyStats[dayStr] = visitors.filter(v => new Date(v.checkIn).toDateString() === dayStr).length;
+    }
+
+    res.json({
+      success: true,
+      monthStart: monthStart,
+      monthEnd: monthEnd,
+      total: visitors.length,
+      active: active.length,
+      completed: completed.length,
+      byPurpose: purposeStats,
+      daily: dailyStats,
+      visitors: visitors
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.delete('/api/visitors/:id', async (req, res) => {
+  try {
+    const visitor = await Visitor.findByIdAndDelete(req.params.id);
+    if (!visitor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Visitor not found'
+      });
+    }
+    res.json({
+      success: true,
+      message: 'Visitor record deleted successfully!'
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -1866,7 +2131,59 @@ app.get('/api/assessments/search', async (req, res) => {
   }
 });
 
-// GET generate student report - FIXED
+// ============================================
+// PDF DOWNLOAD ENDPOINT - SAVES FILE INSTEAD OF PRINTING
+// ============================================
+app.get('/api/assessments/download-pdf/:studentId', async (req, res) => {
+  try {
+    const student = await StudentAssessment.findById(req.params.studentId);
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+    
+    // Get all assessments for this student for trend analysis
+    const allAssessments = await StudentAssessment.find({ 
+      studentName: student.studentName 
+    }).sort({ createdAt: 1 });
+    
+    // Generate the HTML report
+    const html = generateStudentReportHTML(student, allAssessments);
+    
+    // Create a complete HTML document with print styles
+    const fullHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Student Report - ${student.studentName}</title>
+        <style>
+          @media print {
+            body { padding: 10px; background: white; }
+            .report-container { box-shadow: none; padding: 15px; }
+            .no-print { display: none !important; }
+          }
+        </style>
+      </head>
+      <body>
+        ${html}
+      </body>
+      </html>
+    `;
+    
+    // Set headers for PDF download
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.html"`);
+    res.send(fullHtml);
+    
+  } catch (error) {
+    console.error('Error downloading PDF:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// GET generate student report
+// ============================================
 app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
   try {
     const student = await StudentAssessment.findById(req.params.studentId);
@@ -1887,7 +2204,9 @@ app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
   }
 });
 
+// ============================================
 // GET generate comprehensive report
+// ============================================
 app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) => {
   try {
     const studentName = decodeURIComponent(req.params.studentName);
@@ -1908,7 +2227,9 @@ app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) =
   }
 });
 
+// ============================================
 // POST copy assessments
+// ============================================
 app.post('/api/assessments/copy', async (req, res) => {
   try {
     const { 
@@ -2110,7 +2431,41 @@ app.get('/api/test', (req, res) => {
       server: 'Online',
       kenyaTime: kenyaNow.toLocaleString(),
       kenyaTimeFormatted: formatKenyaFullTime(kenyaNow),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      endpoints: {
+        test: '/api/test',
+        content: '/api/content',
+        admin: '/api/admin/login',
+        setup: '/api/setup-admin',
+        teacher: {
+          register: '/api/teacher/register',
+          checkin: '/api/teacher/checkin',
+          checkout: '/api/teacher/checkout',
+          attendance: '/api/teacher/attendance/today'
+        },
+        adminAttendance: '/api/admin/attendance/all',
+        visitor: {
+          checkin: '/api/visitor/checkin',
+          checkout: '/api/visitor/checkout/:badgeNumber',
+          today: '/api/visitors/today',
+          weekly: '/api/visitors/weekly',
+          monthly: '/api/visitors/monthly'
+        },
+        assessments: {
+          subjects: '/api/assessments/subjects/:grade',
+          grade: '/api/assessments/grade/:grade',
+          student: '/api/assessments/student/:id',
+          all: '/api/assessments/all',
+          search: '/api/assessments/search',
+          create: '/api/assessments (POST)',
+          update: '/api/assessments/:id (PUT)',
+          delete: '/api/assessments/:id (DELETE)',
+          copy: '/api/assessments/copy',
+          report: '/api/assessments/generate-report/:studentId',
+          comprehensive: '/api/assessments/comprehensive-report/:studentName',
+          download: '/api/assessments/download-pdf/:studentId'
+        }
+      }
     }
   });
 });
@@ -2148,6 +2503,16 @@ app.listen(PORT, () => {
   console.log('='.repeat(50));
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`🕐 Kenya Time: ${kenyaNow.toLocaleString()}`);
+  console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
+  console.log(`🌐 Website: http://localhost:${PORT}/`);
+  console.log(`📊 Admin: http://localhost:${PORT}/admin-login.html`);
+  console.log(`👨‍🏫 Staff Check-in: http://localhost:${PORT}/teacher-checkin.html`);
+  console.log(`📋 Admin Attendance: http://localhost:${PORT}/admin-attendance.html`);
+  console.log(`👨‍🏫 Manage Teachers: http://localhost:${PORT}/admin-teachers.html`);
+  console.log(`🚪 Visitor Check-in: http://localhost:${PORT}/visitor-checkin.html`);
+  console.log(`📋 Admin Visitors: http://localhost:${PORT}/admin-visitors.html`);
+  console.log(`📝 Academic Assessments: http://localhost:${PORT}/admin-academics.html`);
+  console.log(`📚 Parent Results: http://localhost:${PORT}/academics.html#assessments`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
 });
