@@ -161,31 +161,45 @@
         .status-below { color: #dc3545; font-weight: 600; }
 
         table input[type="number"] {
-            width: 45px;
-            padding: 2px 3px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
+            width: 50px;
+            padding: 3px 4px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
             text-align: center;
-            font-size: 11px;
+            font-size: 12px;
             transition: 0.3s;
+            background: white;
         }
         table input[type="number"]:focus {
             border-color: #D4A017;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(212,160,23,0.1);
+            box-shadow: 0 0 0 3px rgba(212,160,23,0.15);
+        }
+        table input[type="number"]:invalid {
+            border-color: #dc3545;
+            background: #fff0f0;
+        }
+        table input[type="number"].error {
+            border-color: #dc3545;
+            background: #fff0f0;
+        }
+        table input[type="number"].valid {
+            border-color: #28a745;
+            background: #f0fff4;
         }
         table input[type="text"] {
             width: 100%;
             padding: 3px 5px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            font-size: 11px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
             min-width: 80px;
+            background: white;
         }
         table input[type="text"]:focus {
             border-color: #D4A017;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(212,160,23,0.1);
+            box-shadow: 0 0 0 3px rgba(212,160,23,0.15);
         }
 
         .stats-grid {
@@ -494,6 +508,13 @@
         }
         .close-report-btn:hover { transform: scale(1.1); }
 
+        .max-score-hint {
+            font-size: 9px;
+            color: #999;
+            display: block;
+            margin-top: 1px;
+        }
+
         @media (max-width: 768px) {
             .form-row, .form-row-3 { grid-template-columns: 1fr; }
             .filters { flex-direction: column; }
@@ -501,7 +522,7 @@
             .header h1 { font-size: 22px; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             table { font-size: 10px; }
-            table input[type="number"] { width: 35px; font-size: 9px; }
+            table input[type="number"] { width: 38px; font-size: 10px; }
             table th, table td { padding: 3px 3px; }
             .grade-tabs .tab { font-size: 11px; padding: 5px 12px; }
             .assessment-type-tabs .type-tab { font-size: 11px; padding: 4px 12px; }
@@ -528,7 +549,7 @@
 
     <div class="card">
         <h2><i class="fas fa-chalkboard" style="color:#D4A017;"></i> Online Marks Entry</h2>
-        <p class="desc">Select a grade, enter scores, then click "Save Row" or "Save All" to save.</p>
+        <p class="desc">Select a grade, enter scores (cannot exceed maximum score), then click "Save" to save.</p>
 
         <div class="grade-tabs" id="gradeTabs">
             <div class="tab" onclick="selectGrade('Play Group')">🧸 Play Group</div>
@@ -683,6 +704,7 @@
         </div>
     </div>
 
+    <!-- Report Modal -->
     <div class="report-modal" id="reportModal">
         <div class="report-content" id="reportContent">
             <button class="close-report-btn" onclick="closeReport()">✕</button>
@@ -700,6 +722,7 @@
         </div>
     </div>
 
+    <!-- Copy Modal -->
     <div class="edit-subject-modal" id="copyModal">
         <div class="modal-content">
             <h3><i class="fas fa-copy" style="color:#D4A017;"></i> Copy Assessments</h3>
@@ -782,6 +805,7 @@
         </div>
     </div>
 
+    <!-- Edit Subject Modal -->
     <div class="edit-subject-modal" id="editSubjectModal">
         <div class="modal-content">
             <h3><i class="fas fa-edit" style="color:#D4A017;"></i> Edit Subjects & Max Scores</h3>
@@ -972,6 +996,144 @@
     }
 
     // ============================================
+    // VALIDATE SCORE - Ensures score doesn't exceed max
+    // ============================================
+    function validateScore(input) {
+        const max = parseInt(input.dataset.max);
+        const value = parseFloat(input.value);
+        const studentId = input.dataset.studentId;
+        const subjectName = input.dataset.subject;
+        
+        // Find the student in memory
+        const student = studentsData.find(s => s._id === studentId || s._id === 'new_' + studentId);
+        
+        if (isNaN(value) || value === '') {
+            input.classList.remove('valid', 'error');
+            return true;
+        }
+        
+        if (value < 0) {
+            input.value = 0;
+            input.classList.add('error');
+            input.classList.remove('valid');
+            showAlert('Score cannot be negative', 'error');
+            return false;
+        }
+        
+        if (value > max) {
+            input.value = max;
+            input.classList.add('error');
+            input.classList.remove('valid');
+            showAlert(`Score cannot exceed ${max} for ${subjectName}`, 'error');
+            // Update the student's assessment in memory
+            if (student) {
+                const assessment = student.assessments.find(a => a.subject === subjectName);
+                if (assessment) {
+                    assessment.score = max;
+                }
+            }
+            // Recalculate
+            recalculateStudentTotals(studentId);
+            return false;
+        }
+        
+        // Valid score
+        input.classList.remove('error');
+        input.classList.add('valid');
+        
+        // Update the student's assessment in memory
+        if (student) {
+            const assessment = student.assessments.find(a => a.subject === subjectName);
+            if (assessment) {
+                assessment.score = value;
+            }
+        }
+        
+        // Recalculate totals and performance
+        recalculateStudentTotals(studentId);
+        return true;
+    }
+
+    // ============================================
+    // RECALCULATE STUDENT TOTALS
+    // ============================================
+    function recalculateStudentTotals(studentId) {
+        const student = studentsData.find(s => s._id === studentId || s._id === 'new_' + studentId);
+        if (!student) return;
+        
+        let total = 0;
+        let count = 0;
+        
+        student.assessments.forEach(a => {
+            const score = a.score || 0;
+            total += score;
+            if (score > 0 || score === 0) count++;
+        });
+        
+        student.totalScore = total;
+        student.averageScore = count > 0 ? total / count : 0;
+        student.performanceLevel = calculatePerformanceLevel(student.assessments);
+        
+        // Update the row display
+        updateRowDisplay(studentId);
+    }
+
+    // ============================================
+    // CALCULATE PERFORMANCE LEVEL
+    // ============================================
+    function calculatePerformanceLevel(assessments) {
+        if (!assessments || assessments.length === 0) return 'Approaching Expectation';
+        
+        let totalPercentage = 0;
+        let validCount = 0;
+        assessments.forEach(a => {
+            if (a.maxScore > 0) {
+                totalPercentage += (a.score / a.maxScore) * 100;
+                validCount++;
+            }
+        });
+        const avgPercentage = validCount > 0 ? totalPercentage / validCount : 0;
+        
+        if (avgPercentage >= 80) return 'Exceeding Expectation';
+        if (avgPercentage >= 60) return 'Meeting Expectation';
+        if (avgPercentage >= 40) return 'Approaching Expectation';
+        return 'Below Expectation';
+    }
+
+    // ============================================
+    // UPDATE ROW DISPLAY
+    // ============================================
+    function updateRowDisplay(studentId) {
+        const student = studentsData.find(s => s._id === studentId || s._id === 'new_' + studentId);
+        if (!student) return;
+        
+        const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
+        if (!row) return;
+        
+        // Update total and average cells
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 3) {
+            const totalIndex = cells.length - 4;
+            const avgIndex = cells.length - 3;
+            const perfIndex = cells.length - 2;
+            
+            if (cells[totalIndex]) cells[totalIndex].innerHTML = `<strong>${student.totalScore}</strong>`;
+            if (cells[avgIndex]) cells[avgIndex].textContent = student.averageScore.toFixed(1);
+            if (cells[perfIndex]) {
+                const perfClass = {
+                    'Exceeding Expectation': 'status-exceeding',
+                    'Meeting Expectation': 'status-meeting',
+                    'Approaching Expectation': 'status-approaching',
+                    'Below Expectation': 'status-below'
+                }[student.performanceLevel] || '';
+                cells[perfIndex].innerHTML = `<span class="${perfClass}">${student.performanceLevel}</span>`;
+            }
+        }
+        
+        updateStats();
+    }
+
+    // ============================================
     // RENDER MARKS TABLE
     // ============================================
     function renderMarksTable() {
@@ -1023,11 +1185,11 @@
 
             bodyHtml += `<tr class="${isNew ? 'unsaved-row' : ''} ${isEditing ? 'row-editing' : ''}" data-student-id="${student._id}">`;
             bodyHtml += `<td>${index + 1}</td>`;
-            bodyHtml += `<td><input type="text" class="student-name-input" value="${student.studentName}" data-id="${student._id || 'new'}" placeholder="Student name" style="width:100%;min-width:80px;"></td>`;
+            bodyHtml += `<td><input type="text" class="student-name-input" value="${student.studentName}" data-id="${student._id || 'new'}" placeholder="Student name" style="width:100%;min-width:80px;" onchange="updateStudentName(this)"></td>`;
             
             config.subjects.forEach(subj => {
                 const existing = student.assessments?.find(a => a.subject === subj.name);
-                const score = existing?.score || '';
+                const score = existing?.score !== undefined ? existing.score : '';
                 const perf = getSubjectPerformance(score, subj.max);
                 bodyHtml += `<td>
                     <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
@@ -1036,8 +1198,10 @@
                                data-student-id="${student._id || 'new'}" 
                                data-subject="${subj.name}" 
                                data-max="${subj.max}"
-                               onchange="onScoreChange(this)"
-                               placeholder="0" style="width:40px;">
+                               onchange="validateScore(this)"
+                               oninput="validateScore(this)"
+                               placeholder="0" style="width:50px;">
+                        <span class="max-score-hint">max: ${subj.max}</span>
                         <span class="subject-rank-badge ${perf.class}" style="font-size:7px;">${perf.level}</span>
                     </div>
                 </td>`;
@@ -1070,75 +1234,13 @@
     }
 
     // ============================================
-    // ON SCORE CHANGE
+    // UPDATE STUDENT NAME
     // ============================================
-    function onScoreChange(input) {
-        const row = input.closest('tr');
-        const inputs = row.querySelectorAll('.score-input');
-        let total = 0;
-        let count = 0;
-        
-        inputs.forEach(inp => {
-            const val = parseFloat(inp.value);
-            if (!isNaN(val)) {
-                total += val;
-                count++;
-            }
-            const max = parseInt(inp.dataset.max);
-            const perf = getSubjectPerformance(val, max);
-            const badge = inp.closest('td').querySelector('.subject-rank-badge');
-            if (badge) {
-                badge.className = `subject-rank-badge ${perf.class}`;
-                badge.textContent = perf.level;
-            }
-        });
-
-        const totalCell = row.querySelector('td:nth-last-child(4)');
-        const avgCell = row.querySelector('td:nth-last-child(3)');
-        const perfCell = row.querySelector('td:nth-last-child(2)');
-
-        if (totalCell) totalCell.innerHTML = `<strong>${total}</strong>`;
-        if (avgCell) {
-            const avg = count > 0 ? total / count : 0;
-            avgCell.textContent = avg.toFixed(1);
-        }
-        if (perfCell) {
-            const avg = count > 0 ? total / count : 0;
-            const config = subjectConfig;
-            const maxTotal = config.subjects.reduce((sum, s) => sum + s.max, 0);
-            const percentage = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
-            
-            let level = 'Approaching Expectation';
-            let className = 'status-approaching';
-            if (percentage >= 80) {
-                level = 'Exceeding Expectation';
-                className = 'status-exceeding';
-            } else if (percentage >= 60) {
-                level = 'Meeting Expectation';
-                className = 'status-meeting';
-            } else if (percentage >= 40) {
-                level = 'Approaching Expectation';
-                className = 'status-approaching';
-            } else {
-                level = 'Below Expectation';
-                className = 'status-below';
-            }
-            perfCell.innerHTML = `<span class="${className}">${level}</span>`;
-        }
-
-        // Update student data in memory
-        const studentId = input.dataset.studentId;
+    function updateStudentName(input) {
+        const studentId = input.dataset.id;
         const student = studentsData.find(s => s._id === studentId || s._id === 'new_' + studentId);
         if (student) {
-            student.totalScore = total;
-            student.averageScore = count > 0 ? total / count : 0;
-            const config = subjectConfig;
-            const maxTotal = config.subjects.reduce((sum, s) => sum + s.max, 0);
-            const percentage = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
-            if (percentage >= 80) student.performanceLevel = 'Exceeding Expectation';
-            else if (percentage >= 60) student.performanceLevel = 'Meeting Expectation';
-            else if (percentage >= 40) student.performanceLevel = 'Approaching Expectation';
-            else student.performanceLevel = 'Below Expectation';
+            student.studentName = input.value.trim();
         }
     }
 
@@ -1170,15 +1272,23 @@
             return;
         }
 
-        // Check if student has any scores
+        // Check if all scores are entered (no empty fields)
+        let allScoresEntered = true;
         let hasValidScore = false;
         student.assessments.forEach(a => {
+            if (a.score === '' || a.score === undefined || a.score === null) {
+                allScoresEntered = false;
+            }
             if (a.score > 0 || a.score === 0) hasValidScore = true;
         });
 
         if (!hasValidScore) {
             showAlert('Please enter at least one score for this student', 'error');
             return;
+        }
+
+        if (!allScoresEntered) {
+            showAlert('Please enter all scores before saving. Empty scores will be saved as 0.', 'info');
         }
 
         // Prepare data for API
@@ -1204,8 +1314,6 @@
             const url = isNew ? '/api/assessments' : `/api/assessments/${studentId}`;
             const method = isNew ? 'POST' : 'PUT';
             
-            console.log('Saving student:', { url, method, data });
-            
             const response = await fetch(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
@@ -1213,7 +1321,6 @@
             });
             
             const result = await response.json();
-            console.log('Save response:', result);
             
             if (result.success) {
                 if (isNew && result.student) {
@@ -1370,8 +1477,6 @@
                         score: a.score || 0
                     }))
                 };
-                
-                console.log('Saving all - student:', { url, method, data });
                 
                 const response = await fetch(url, {
                     method: method,
