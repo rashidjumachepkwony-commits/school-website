@@ -560,7 +560,7 @@
         }
 
         /* ========================================
-           ASSESSMENT GRID - UPDATED
+           ASSESSMENT GRID
            ======================================== */
         .assessment-grid {
             display: grid;
@@ -618,7 +618,7 @@
         }
 
         /* ========================================
-           ASSESSMENT SEARCH - UPDATED
+           ASSESSMENT SEARCH
            ======================================== */
         .assessments-section {
             padding: 60px 0;
@@ -710,12 +710,15 @@
             border: 1px solid #b8daff;
         }
 
+        /* ========================================
+           RESULT CARD - UPDATED WITH ANALYSIS
+           ======================================== */
         .result-card {
             background: white;
             border-radius: 16px;
             padding: 30px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto 20px;
         }
         .result-card .student-header {
@@ -803,22 +806,81 @@
             width: 100%;
             border-collapse: collapse;
             margin: 15px 0;
+            font-size: 13px;
         }
         .result-card .subjects-table th {
             background: var(--school-blue-dark);
             color: white;
             padding: 10px 12px;
             text-align: left;
-            font-size: 13px;
+            font-size: 12px;
         }
         .result-card .subjects-table td {
-            padding: 10px 12px;
+            padding: 8px 12px;
             border-bottom: 1px solid #e8ecf1;
-            font-size: 14px;
+            font-size: 13px;
         }
         .result-card .subjects-table tr:hover td {
             background: #f8f9fc;
         }
+
+        .subject-rank-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .subject-rank-badge.exceeding { background: #28a745; color: white; }
+        .subject-rank-badge.meeting { background: #17a2b8; color: white; }
+        .subject-rank-badge.approaching { background: #ffc107; color: #0A1628; }
+        .subject-rank-badge.below { background: #dc3545; color: white; }
+
+        /* ========================================
+           ANALYSIS SECTION
+           ======================================== */
+        .analysis-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e8ecf1;
+        }
+        .analysis-section h4 {
+            color: var(--school-blue-dark);
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        .analysis-section .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+        .analysis-section .analysis-box {
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+            background: #f8f9fc;
+        }
+        .analysis-section .analysis-box h5 {
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: var(--school-blue-dark);
+        }
+        .analysis-section .analysis-box .subject-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .analysis-section .analysis-box .subject-item:last-child {
+            border-bottom: none;
+        }
+        .analysis-section .analysis-box .subject-item .perf-up { color: #28a745; }
+        .analysis-section .analysis-box .subject-item .perf-down { color: #dc3545; }
+        .analysis-section .analysis-box .subject-item .perf-best { color: var(--school-gold); font-weight: 700; }
+        .analysis-box.improved { border-left: 4px solid #28a745; }
+        .analysis-box.dropped { border-left: 4px solid #dc3545; }
+        .analysis-box.best { border-left: 4px solid var(--school-gold); }
 
         .result-card .action-buttons {
             display: flex;
@@ -1064,6 +1126,16 @@
             .result-card .action-buttons .btn {
                 min-width: 100%;
             }
+            .analysis-section .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+            .result-card .subjects-table {
+                font-size: 11px;
+            }
+            .result-card .subjects-table th,
+            .result-card .subjects-table td {
+                padding: 4px 6px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1073,6 +1145,9 @@
             .assessment-grid { grid-template-columns: 1fr; }
             .page-hero h1 { font-size: 24px; }
             .section-title { font-size: 20px; }
+            .analysis-section .analysis-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* ========================================
@@ -1390,7 +1465,7 @@
     </section>
 
     <!-- ========================================
-    CONTINUOUS ASSESSMENT - UPDATED
+    CONTINUOUS ASSESSMENT
     ======================================== -->
     <section class="section section-dark" data-aos="fade-up">
         <div class="container">
@@ -1657,6 +1732,84 @@
         }
 
         // ============================================
+        // GET SUBJECT PERFORMANCE
+        // ============================================
+        function getSubjectPerformance(score, maxScore) {
+            if (maxScore <= 0) return { level: 'Approaching Expectation', class: 'approaching' };
+            const percentage = (score / maxScore) * 100;
+            if (percentage >= 80) return { level: 'Exceeding Expectation', class: 'exceeding' };
+            if (percentage >= 60) return { level: 'Meeting Expectation', class: 'meeting' };
+            if (percentage >= 40) return { level: 'Approaching Expectation', class: 'approaching' };
+            return { level: 'Below Expectation', class: 'below' };
+        }
+
+        // ============================================
+        // ANALYZE STUDENT RESULTS
+        // ============================================
+        function analyzeResults(assessments) {
+            const analysis = {
+                improved: [],
+                dropped: [],
+                best: []
+            };
+
+            // Group by subject
+            const subjectMap = {};
+            assessments.forEach(a => {
+                if (!subjectMap[a.subject]) {
+                    subjectMap[a.subject] = [];
+                }
+                subjectMap[a.subject].push(a);
+            });
+
+            // Analyze each subject
+            Object.keys(subjectMap).forEach(subject => {
+                const records = subjectMap[subject].sort((a, b) => {
+                    // Sort by date (assuming newer records have later dates)
+                    return new Date(a.date) - new Date(b.date);
+                });
+
+                if (records.length >= 2) {
+                    const firstPerf = getSubjectPerformance(records[0].score, records[0].maxScore);
+                    const lastPerf = getSubjectPerformance(records[records.length - 1].score, records[records.length - 1].maxScore);
+                    
+                    // Check if improved
+                    const levelOrder = ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'];
+                    const firstIndex = levelOrder.indexOf(firstPerf.level);
+                    const lastIndex = levelOrder.indexOf(lastPerf.level);
+                    
+                    if (lastIndex > firstIndex) {
+                        analysis.improved.push({ subject, from: firstPerf.level, to: lastPerf.level });
+                    } else if (lastIndex < firstIndex) {
+                        analysis.dropped.push({ subject, from: firstPerf.level, to: lastPerf.level });
+                    }
+                }
+                
+                // Get best performing subject (highest percentage)
+                const bestRecord = records.reduce((a, b) => {
+                    const aPct = (a.score / a.maxScore) * 100;
+                    const bPct = (b.score / b.maxScore) * 100;
+                    return aPct > bPct ? a : b;
+                }, records[0]);
+                
+                analysis.best.push({
+                    subject,
+                    score: bestRecord.score,
+                    maxScore: bestRecord.maxScore,
+                    percentage: ((bestRecord.score / bestRecord.maxScore) * 100).toFixed(1)
+                });
+            });
+
+            // Sort best by percentage descending
+            analysis.best.sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage));
+            
+            // Only keep top 3 best
+            analysis.best = analysis.best.slice(0, 3);
+
+            return analysis;
+        }
+
+        // ============================================
         // SEARCH ASSESSMENT
         // ============================================
         async function searchStudentAssessment() {
@@ -1699,7 +1852,7 @@
         }
 
         // ============================================
-        // RENDER STUDENT RESULT
+        // RENDER STUDENT RESULT WITH ANALYSIS
         // ============================================
         function renderStudentResult(student) {
             const performanceColors = {
@@ -1715,17 +1868,66 @@
                 'term': 'End-of-Term Exams'
             };
 
-            const subjectsHtml = student.assessments.map(a => `
+            // Get subject performance for each subject
+            const subjectsWithPerf = student.assessments.map(a => {
+                const perf = getSubjectPerformance(a.score, a.maxScore);
+                return { ...a, performance: perf };
+            });
+
+            // Analyze results
+            const analysis = analyzeResults(student.assessments);
+
+            const subjectsHtml = subjectsWithPerf.map(a => `
                 <tr>
                     <td><strong>${a.subject}</strong></td>
                     <td>${a.maxScore}</td>
                     <td>${a.score}</td>
                     <td>${a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0}%</td>
+                    <td><span class="subject-rank-badge ${a.performance.class}">${a.performance.level}</span></td>
                 </tr>
             `).join('');
 
+            // Analysis HTML
+            let analysisHtml = '';
+            if (analysis.improved.length > 0 || analysis.dropped.length > 0 || analysis.best.length > 0) {
+                analysisHtml = `
+                    <div class="analysis-section">
+                        <h4>📊 Performance Analysis</h4>
+                        <div class="analysis-grid">
+                            <div class="analysis-box improved">
+                                <h5>📈 Improved Subjects</h5>
+                                ${analysis.improved.length > 0 ? analysis.improved.map(s => `
+                                    <div class="subject-item">
+                                        <span>${s.subject}</span>
+                                        <span><span class="perf-down">${s.from}</span> → <span class="perf-up">${s.to}</span></span>
+                                    </div>
+                                `).join('') : '<p style="color:#999;font-size:12px;">No improvements detected</p>'}
+                            </div>
+                            <div class="analysis-box dropped">
+                                <h5>📉 Dropped Subjects</h5>
+                                ${analysis.dropped.length > 0 ? analysis.dropped.map(s => `
+                                    <div class="subject-item">
+                                        <span>${s.subject}</span>
+                                        <span><span class="perf-up">${s.from}</span> → <span class="perf-down">${s.to}</span></span>
+                                    </div>
+                                `).join('') : '<p style="color:#999;font-size:12px;">No drops detected</p>'}
+                            </div>
+                            <div class="analysis-box best">
+                                <h5>🏆 Best Performing Subjects</h5>
+                                ${analysis.best.length > 0 ? analysis.best.map(s => `
+                                    <div class="subject-item">
+                                        <span>${s.subject}</span>
+                                        <span class="perf-best">${s.percentage}% (${s.score}/${s.maxScore})</span>
+                                    </div>
+                                `).join('') : '<p style="color:#999;font-size:12px;">No data available</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
             return `
-                <div class="result-card">
+                <div class="result-card" id="result-${student._id}">
                     <div class="student-header">
                         <div>
                             <h3><i class="fas fa-user-graduate"></i> ${student.studentName}</h3>
@@ -1764,12 +1966,15 @@
                                 <th>Max Score</th>
                                 <th>Score</th>
                                 <th>Percentage</th>
+                                <th>Performance Level</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${subjectsHtml}
                         </tbody>
                     </table>
+
+                    ${analysisHtml}
 
                     <div class="action-buttons">
                         <button onclick="downloadAssessmentPDF('${student._id}')" class="btn-download">
@@ -1831,5 +2036,4 @@
         });
     </script>
 </body>
-</html> 
- 
+</html>
