@@ -560,18 +560,18 @@
         }
 
         /* ========================================
-           ASSESSMENT GRID
+           ASSESSMENT GRID - UPDATED
            ======================================== */
         .assessment-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
         }
         .assessment-item {
             background: rgba(255,255,255,0.06);
             border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 10px;
-            padding: 14px;
+            border-radius: 12px;
+            padding: 18px 14px;
             text-align: center;
             transition: all 0.3s ease;
         }
@@ -580,25 +580,52 @@
             transform: scale(1.02);
         }
         .assessment-item .assessment-icon {
-            font-size: 24px;
+            font-size: 28px;
             display: block;
             margin-bottom: 4px;
         }
         .assessment-item .assessment-name {
-            font-size: 13px;
+            font-size: 14px;
             color: white;
-            font-weight: 500;
+            font-weight: 600;
+        }
+        .assessment-item .assessment-desc {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 4px;
+        }
+        .assessment-item .view-results {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 3px 14px;
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .assessment-item .view-results:hover {
+            transform: scale(1.05);
+        }
+        .assessment-item.highlight {
+            border: 2px solid var(--school-gold);
+            background: rgba(212, 160, 23, 0.15);
+        }
+        .assessment-item.highlight .assessment-name {
+            color: var(--school-gold);
         }
 
         /* ========================================
-           ASSESSMENT SECTION - NEW
+           ASSESSMENT SEARCH - UPDATED
            ======================================== */
         .assessments-section {
             padding: 60px 0;
             background: #f0f2f5;
         }
         .assessment-search {
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto 30px;
         }
         .assessment-search .form-group label {
@@ -613,33 +640,28 @@
             gap: 10px;
             flex-wrap: wrap;
         }
-        .search-box input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e8ecf1;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: 0.3s;
-            min-width: 200px;
-            font-family: inherit;
-        }
-        .search-box input:focus {
-            border-color: var(--school-gold);
-            outline: none;
-        }
+        .search-box input,
         .search-box select {
             padding: 12px 16px;
             border: 2px solid #e8ecf1;
             border-radius: 8px;
             font-size: 14px;
-            background: white;
-            min-width: 150px;
+            transition: 0.3s;
             font-family: inherit;
-            cursor: pointer;
+            background: white;
         }
+        .search-box input:focus,
         .search-box select:focus {
             border-color: var(--school-gold);
             outline: none;
+        }
+        .search-box input {
+            flex: 1;
+            min-width: 180px;
+        }
+        .search-box select {
+            min-width: 140px;
+            cursor: pointer;
         }
         .search-box .btn {
             padding: 12px 25px;
@@ -693,7 +715,7 @@
             border-radius: 16px;
             padding: 30px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto 20px;
         }
         .result-card .student-header {
@@ -722,6 +744,14 @@
             border-radius: 50px;
             font-weight: 700;
             font-size: 14px;
+        }
+        .result-card .student-header .type-badge {
+            background: var(--school-blue);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 12px;
         }
         .result-card .performance-badge {
             display: inline-block;
@@ -1360,7 +1390,7 @@
     </section>
 
     <!-- ========================================
-    CONTINUOUS ASSESSMENT - UPDATED WITH MONTHLY ASSESSMENT CARD
+    CONTINUOUS ASSESSMENT - UPDATED
     ======================================== -->
     <section class="section section-dark" data-aos="fade-up">
         <div class="container">
@@ -1368,63 +1398,77 @@
             <p class="section-subtitle light">
                 Learners are regularly assessed to identify strengths and areas for improvement.
             </p>
-            <div class="assessment-grid">
+            <div class="assessment-grid" id="assessmentGrid">
                 <div class="assessment-item" data-aos="zoom-in" data-aos-delay="100">
                     <span class="assessment-icon">📝</span>
                     <div class="assessment-name">Weekly Assessments</div>
+                    <div class="assessment-desc">Ongoing weekly evaluations</div>
+                    <a href="#assessments" onclick="selectAssessmentType('weekly')" class="view-results">
+                        <i class="fas fa-download"></i> View Results
+                    </a>
                 </div>
-                <!-- ===== MONTHLY ASSESSMENT CARD - HIGHLIGHTED ===== -->
-                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="130" style="border: 2px solid var(--school-gold); background: rgba(212, 160, 23, 0.15);">
+                
+                <div class="assessment-item highlight" data-aos="zoom-in" data-aos-delay="130">
                     <span class="assessment-icon">📋</span>
-                    <div class="assessment-name" style="color: var(--school-gold); font-weight: 700;">Monthly Examinations</div>
-                    <div style="margin-top: 8px;">
-                        <a href="#assessments" onclick="document.getElementById('gradeFilter').value=''; document.getElementById('studentSearch').value=''; searchStudentAssessment();" 
-                           style="display: inline-block; padding: 4px 14px; background: var(--school-gold); color: var(--kenya-black); border-radius: 50px; font-size: 10px; font-weight: 700; text-decoration: none; transition: all 0.3s ease;">
-                            <i class="fas fa-download"></i> View Results
-                        </a>
-                    </div>
+                    <div class="assessment-name">Monthly Examinations</div>
+                    <div class="assessment-desc">Comprehensive monthly tests</div>
+                    <a href="#assessments" onclick="selectAssessmentType('monthly')" class="view-results">
+                        <i class="fas fa-download"></i> View Results
+                    </a>
                 </div>
-                <!-- ===== END MONTHLY ASSESSMENT CARD ===== -->
+                
                 <div class="assessment-item" data-aos="zoom-in" data-aos-delay="160">
                     <span class="assessment-icon">📄</span>
                     <div class="assessment-name">End-of-Term Exams</div>
+                    <div class="assessment-desc">Termly final examinations</div>
+                    <a href="#assessments" onclick="selectAssessmentType('term')" class="view-results">
+                        <i class="fas fa-download"></i> View Results
+                    </a>
                 </div>
+                
                 <div class="assessment-item" data-aos="zoom-in" data-aos-delay="190">
                     <span class="assessment-icon">📚</span>
                     <div class="assessment-name">Class Assignments</div>
+                    <div class="assessment-desc">Regular class work</div>
                 </div>
+                
                 <div class="assessment-item" data-aos="zoom-in" data-aos-delay="220">
                     <span class="assessment-icon">🎯</span>
                     <div class="assessment-name">Projects</div>
+                    <div class="assessment-desc">Hands-on project work</div>
                 </div>
+                
                 <div class="assessment-item" data-aos="zoom-in" data-aos-delay="250">
                     <span class="assessment-icon">🎤</span>
                     <div class="assessment-name">Oral Presentations</div>
+                    <div class="assessment-desc">Speaking & presentation skills</div>
                 </div>
+                
                 <div class="assessment-item" data-aos="zoom-in" data-aos-delay="280">
                     <span class="assessment-icon">🔬</span>
                     <div class="assessment-name">Practical Activities</div>
+                    <div class="assessment-desc">Hands-on practical learning</div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ========================================
-    ASSESSMENT RESULTS SECTION - PARENT VIEW
+    ASSESSMENT RESULTS SECTION
     ======================================== -->
     <section class="assessments-section" id="assessments">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📊 <span class="highlight">Assessment Results</span></h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Enter your child's name or select a grade to view and download their assessment results</p>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Search by student name, grade, or assessment type</p>
 
             <div id="alert" class="alert"></div>
 
             <div class="assessment-search" data-aos="fade-up" data-aos-delay="150">
                 <div class="form-group">
-                    <label><i class="fas fa-user-graduate"></i> Search by Student Name or Grade</label>
+                    <label><i class="fas fa-user-graduate"></i> Search Options</label>
                     <div class="search-box">
                         <input type="text" id="studentSearch" placeholder="Enter student name..." onkeypress="if(event.key==='Enter') searchStudentAssessment()">
-                        <select id="gradeFilter" onchange="searchStudentAssessment()">
+                        <select id="gradeFilter">
                             <option value="">All Grades</option>
                             <option value="Play Group">Play Group</option>
                             <option value="PP1">PP1</option>
@@ -1435,6 +1479,12 @@
                             <option value="Grade 4">Grade 4</option>
                             <option value="Grade 5">Grade 5</option>
                             <option value="Grade 6">Grade 6</option>
+                        </select>
+                        <select id="assessmentTypeFilter">
+                            <option value="">All Types</option>
+                            <option value="weekly">Weekly Assessments</option>
+                            <option value="monthly">Monthly Examinations</option>
+                            <option value="term">End-of-Term Exams</option>
                         </select>
                         <button class="btn" onclick="searchStudentAssessment()">
                             <i class="fas fa-search"></i> Search
@@ -1584,7 +1634,16 @@
         }
 
         // ============================================
-        // ASSESSMENT RESULTS - SEARCH & DOWNLOAD
+        // SELECT ASSESSMENT TYPE
+        // ============================================
+        function selectAssessmentType(type) {
+            document.getElementById('assessmentTypeFilter').value = type;
+            document.getElementById('assessments').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(searchStudentAssessment, 500);
+        }
+
+        // ============================================
+        // SHOW ALERT
         // ============================================
         function showAlert(message, type) {
             const alertEl = document.getElementById('alert');
@@ -1597,9 +1656,13 @@
             }, 5000);
         }
 
+        // ============================================
+        // SEARCH ASSESSMENT
+        // ============================================
         async function searchStudentAssessment() {
             const studentName = document.getElementById('studentSearch').value.trim();
             const grade = document.getElementById('gradeFilter').value;
+            const type = document.getElementById('assessmentTypeFilter').value;
             const resultsDiv = document.getElementById('assessmentResults');
             
             if (!studentName && !grade) {
@@ -1611,6 +1674,7 @@
                 let url = '/api/assessments/search?';
                 if (studentName) url += `name=${encodeURIComponent(studentName)}`;
                 if (grade) url += `${studentName ? '&' : ''}grade=${encodeURIComponent(grade)}`;
+                if (type) url += `${(studentName || grade) ? '&' : ''}type=${encodeURIComponent(type)}`;
 
                 const response = await fetch(url);
                 const data = await response.json();
@@ -1624,7 +1688,7 @@
                         <div class="no-results">
                             <i class="fas fa-user-graduate"></i>
                             <h3>No results found</h3>
-                            <p>Try searching with a different name or grade</p>
+                            <p>Try searching with a different name, grade, or assessment type</p>
                         </div>
                     `;
                 }
@@ -1634,12 +1698,21 @@
             }
         }
 
+        // ============================================
+        // RENDER STUDENT RESULT
+        // ============================================
         function renderStudentResult(student) {
             const performanceColors = {
                 'Exceeding Expectation': 'exceeding',
                 'Meeting Expectation': 'meeting',
                 'Approaching Expectation': 'approaching',
                 'Below Expectation': 'below'
+            };
+
+            const typeNames = {
+                'weekly': 'Weekly Assessments',
+                'monthly': 'Monthly Examinations',
+                'term': 'End-of-Term Exams'
             };
 
             const subjectsHtml = student.assessments.map(a => `
@@ -1657,6 +1730,10 @@
                         <div>
                             <h3><i class="fas fa-user-graduate"></i> ${student.studentName}</h3>
                             <span class="grade-badge">${student.grade}</span>
+                            <span class="type-badge">${typeNames[student.type] || student.type || 'Monthly'}</span>
+                            ${student.period ? `<span style="margin-left:5px;font-size:12px;color:#666;">${student.period}</span>` : ''}
+                            ${student.month ? `<span style="margin-left:5px;font-size:12px;color:#666;">${student.month}</span>` : ''}
+                            ${student.term ? `<span style="margin-left:5px;font-size:12px;color:#666;">${student.term}</span>` : ''}
                         </div>
                         <div>
                             <span class="performance-badge ${performanceColors[student.performanceLevel] || 'meeting'}">
@@ -1706,6 +1783,9 @@
             `;
         }
 
+        // ============================================
+        // DOWNLOAD ASSESSMENT PDF
+        // ============================================
         async function downloadAssessmentPDF(studentId) {
             try {
                 const response = await fetch(`/api/assessments/generate-report/${studentId}`);
@@ -1727,15 +1807,26 @@
             }
         }
 
+        // ============================================
+        // INIT
+        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadNewsTicker();
             
-            // Check if grade parameter is in URL
+            // Check if assessment type is in URL
             const urlParams = new URLSearchParams(window.location.search);
+            const type = urlParams.get('type');
+            if (type) {
+                document.getElementById('assessmentTypeFilter').value = type;
+            }
+            
             const grade = urlParams.get('grade');
             if (grade) {
                 document.getElementById('gradeFilter').value = grade;
-                searchStudentAssessment();
+            }
+            
+            if (type || grade) {
+                setTimeout(searchStudentAssessment, 500);
             }
         });
     </script>
