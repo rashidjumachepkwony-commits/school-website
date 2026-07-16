@@ -1771,23 +1771,25 @@ app.get('/api/assessments/search', async (req, res) => {
   try {
     const { name, grade, type, admission } = req.query;
     
+    console.log('🔍 Search request:', { name, grade, type, admission });
+    
     // Build search filter
     let filter = {};
     
-    if (name) {
-      filter.studentName = { $regex: name, $options: 'i' };
+    if (name && name.trim() !== '') {
+      filter.studentName = { $regex: name.trim(), $options: 'i' };
     }
     
-    if (admission) {
-      filter.admissionNumber = { $regex: admission, $options: 'i' };
+    if (admission && admission.trim() !== '') {
+      filter.admissionNumber = { $regex: admission.trim(), $options: 'i' };
     }
     
-    if (grade) {
-      filter.grade = grade;
+    if (grade && grade.trim() !== '') {
+      filter.grade = grade.trim();
     }
     
-    if (type) {
-      filter.type = type;
+    if (type && type.trim() !== '') {
+      filter.type = type.trim();
     }
     
     // If no search criteria, return error
@@ -1798,7 +1800,7 @@ app.get('/api/assessments/search', async (req, res) => {
       });
     }
     
-    console.log('🔍 Searching with filter:', filter);
+    console.log('📊 Filter:', JSON.stringify(filter));
     
     // Find students matching the criteria
     const students = await StudentAssessment.find(filter).sort({ studentName: 1 });

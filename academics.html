@@ -379,6 +379,80 @@
         }
 
         /* ========================================
+           ACADEMIC OVERVIEW CARDS
+           ======================================== */
+        .section {
+            padding: 40px 0;
+        }
+        .section-alt {
+            background: white;
+        }
+        .section-gray {
+            background: #f8f9fa;
+        }
+        .section-dark {
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            color: white;
+        }
+        .section-dark .section-title { color: white; }
+        .section-dark .section-subtitle { color: rgba(255,255,255,0.6); }
+
+        .section-title {
+            font-family: var(--font-primary);
+            font-size: 30px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+            color: var(--school-blue-dark);
+        }
+        .section-title .highlight { color: var(--school-gold); }
+        .section-title.light { color: white; }
+        .section-subtitle {
+            text-align: center;
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+        .section-subtitle.light { color: rgba(255,255,255,0.6); }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        .content-card {
+            background: white;
+            padding: 22px 18px;
+            border-radius: 14px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #e8ecf1;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--school-gold);
+            box-shadow: 0 10px 35px rgba(212, 160, 23, 0.12);
+        }
+        .content-card .icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .content-card h4 {
+            color: var(--school-blue-dark);
+            font-size: 15px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .content-card p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* ========================================
            ASSESSMENT SEARCH SECTION
            ======================================== */
         .assessments-section {
@@ -839,12 +913,18 @@
             .result-card .subjects-table td {
                 padding: 4px 6px;
             }
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
         @media (max-width: 480px) {
             .page-hero h1 { font-size: 24px; }
             .result-card .summary-stats {
                 grid-template-columns: 1fr 1fr;
+            }
+            .content-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -966,6 +1046,41 @@
                     At Changara Star Academy, we are committed to providing quality education that prepares every learner 
                     for academic success and responsible citizenship.
                 </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    ACADEMIC OVERVIEW
+    ======================================== -->
+    <section class="section section-alt" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title">🎯 Our <span class="highlight">Academic Vision</span></h2>
+            <p class="section-subtitle">
+                We follow the Competency-Based Curriculum (CBC) as prescribed by the Ministry of Education, ensuring that 
+                every learner develops the knowledge, skills, values, and attitudes needed for lifelong learning.
+            </p>
+            <div class="content-grid">
+                <div class="content-card" data-aos="fade-up" data-aos-delay="100">
+                    <span class="icon">👨‍🏫</span>
+                    <h4>Qualified Teachers</h4>
+                    <p>Our experienced teachers use learner-centred teaching methods that encourage creativity, critical thinking, and confidence.</p>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="150">
+                    <span class="icon">📖</span>
+                    <h4>Competency-Based Curriculum</h4>
+                    <p>We follow the CBC framework as prescribed by the Ministry of Education, focusing on skills, values, and attitudes.</p>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="200">
+                    <span class="icon">🏆</span>
+                    <h4>Academic Excellence</h4>
+                    <p>We are committed to producing academically successful learners who are prepared for higher levels of education.</p>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="250">
+                    <span class="icon">💡</span>
+                    <h4>Holistic Development</h4>
+                    <p>We nurture confident, disciplined, and academically successful learners who contribute positively to society.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -1250,9 +1365,14 @@
                             <p style="font-size:12px;color:#aaa;margin-top:8px;">
                                 💡 Tip: Make sure the student has been added in the admin panel
                             </p>
-                            <button onclick="searchStudentAssessment()" style="margin-top:10px;padding:8px 20px;background:#D4A017;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
-                                <i class="fas fa-sync"></i> Try Again
-                            </button>
+                            <div style="margin-top:15px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                                <button onclick="searchStudentAssessment()" style="padding:8px 20px;background:#D4A017;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                                    <i class="fas fa-sync"></i> Try Again
+                                </button>
+                                <button onclick="loadAllStudents()" style="padding:8px 20px;background:#17a2b8;border:none;border-radius:8px;font-weight:600;cursor:pointer;color:white;">
+                                    <i class="fas fa-list"></i> Show All Students
+                                </button>
+                            </div>
                         </div>
                     `;
                 }
@@ -1270,6 +1390,57 @@
                     </div>
                 `;
                 showAlert('Error loading results. Please try again.', 'error');
+            }
+        }
+
+        // ============================================
+        // LOAD ALL STUDENTS (for debugging)
+        // ============================================
+        async function loadAllStudents() {
+            const resultsDiv = document.getElementById('assessmentResults');
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <div style="text-align:center;padding:40px;">
+                    <div style="display:inline-block;width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #D4A017;border-radius:50%;animation:spin 1s linear infinite;"></div>
+                    <p style="margin-top:10px;color:#666;">Loading all students...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/assessments/all');
+                const data = await response.json();
+
+                console.log('📊 All students:', data);
+
+                if (data.success && data.students && data.students.length > 0) {
+                    resultsDiv.style.display = 'block';
+                    resultsDiv.innerHTML = `
+                        <div style="background:#f8f9fc;padding:10px 16px;border-radius:8px;margin-bottom:15px;color:#666;font-size:13px;border:1px solid #e8ecf1;">
+                            <i class="fas fa-list" style="color:#D4A017;"></i> Showing all <strong>${data.students.length}</strong> students
+                        </div>
+                        ${data.students.map(student => renderStudentResult(student)).join('')}
+                    `;
+                } else {
+                    resultsDiv.style.display = 'block';
+                    resultsDiv.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-database"></i>
+                            <h3>No students in the system</h3>
+                            <p>Please add students through the admin panel first</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Error loading all students:', error);
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = `
+                    <div class="no-results" style="border:2px solid #dc3545;">
+                        <i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i>
+                        <h3 style="color:#dc3545;">Error loading students</h3>
+                        <p>${error.message || 'Please try again later'}</p>
+                    </div>
+                `;
             }
         }
 
