@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academics - Changara Star Academy</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+    <meta name="description" content="Changara Star Academy Academics - Quality education from Playgroup to Grade 6 following the Competency-Based Curriculum (CBC).">
+    
+    <!-- ===== FONTS ===== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- ===== CSS LIBRARIES ===== -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        /* ========================================
+           ROOT VARIABLES
+           ======================================== */
+        :root {
+            --kenya-black: #000000;
+            --kenya-red: #BB0000;
+            --kenya-green: #006600;
+            --kenya-white: #FFFFFF;
+            --school-gold: #D4A017;
+            --school-gold-light: #F5C842;
+            --school-gold-dark: #B8890A;
+            --school-blue: #001F5C;
+            --school-blue-dark: #0A1628;
+            --font-primary: 'Playfair Display', serif;
+            --font-secondary: 'Poppins', sans-serif;
+        }
+
+        /* ========================================
+           RESET & BASE
+           ======================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: var(--font-secondary);
+            background: #f0f2f5;
+            color: #1a1a2e;
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ========================================
+           KENYAN FLAG STRIP
+           ======================================== */
+        .kenya-flag-strip {
+            height: 5px;
+            background: linear-gradient(to right, 
+                var(--kenya-black) 0%, var(--kenya-black) 25%,
+                var(--kenya-red) 25%, var(--kenya-red) 50%,
+                var(--kenya-green) 50%, var(--kenya-green) 75%,
+                var(--kenya-black) 75%, var(--kenya-black) 100%
+            );
+            position: sticky;
+            top: 0;
+            z-index: 1001;
+        }
+
+        /* ========================================
+           NOTICE ALERT BAR
+           ======================================== */
+        .notice-alert-bar {
+            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
+            color: white;
+            padding: 10px 0;
+            position: sticky;
+            top: 5px;
+            z-index: 1000;
+            border-bottom: 3px solid var(--school-gold);
+            display: none;
+            animation: slideDownNotice 0.6s ease forwards;
+        }
+        .notice-alert-bar.show { display: block; }
+        .notice-alert-bar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .notice-alert-bar .notice-icon {
+            font-size: 22px;
+            animation: pulseBell 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .notice-alert-bar .notice-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .notice-alert-bar .notice-content .badge {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            padding: 3px 14px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulseBadge 1.5s infinite;
+        }
+        .notice-alert-bar .notice-content .message {
+            font-size: 14px;
+            font-weight: 500;
+            flex: 1;
+        }
+        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
+        .notice-alert-bar .notice-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .notice-alert-bar .notice-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        /* ========================================
+           NEWS TICKER
+           ======================================== */
+        .news-ticker-section {
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            color: white;
+            padding: 6px 0;
+            border-bottom: 2px solid var(--school-gold);
+            position: sticky;
+            top: 52px;
+            z-index: 100;
+        }
+        .news-ticker-section .container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .news-ticker-section .ticker-label {
+            background: var(--kenya-red);
+            color: white;
+            padding: 3px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 1px;
+        }
+        .news-ticker-section .ticker-label .icon { font-size: 12px; }
+        .news-ticker-section .ticker-wrapper {
+            flex: 1;
+            overflow: hidden;
+            height: 24px;
+            position: relative;
+        }
+        .news-ticker-section .ticker-content {
+            position: absolute;
+            width: 100%;
+            animation: tickerScroll 16s infinite;
+        }
+        .news-ticker-section .ticker-content .ticker-item {
+            height: 24px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .news-ticker-section .ticker-content .ticker-item .tag {
+            background: rgba(255,255,255,0.12);
+            padding: 1px 10px;
+            border-radius: 20px;
+            font-size: 9px;
+            margin-right: 8px;
+            color: var(--school-gold);
+            font-weight: 600;
+        }
+
+        /* ========================================
+           HEADER
+           ======================================== */
+        .main-header {
+            background: rgba(10, 22, 40, 0.92);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 8px 0;
+            position: sticky;
+            top: 100px;
+            z-index: 90;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.15);
+        }
+        .main-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .main-header .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .main-header .school-icon {
+            font-size: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+        .main-header .logo-section h1 {
+            font-family: var(--font-primary);
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .main-header .logo-section .subtitle {
+            font-size: 9px;
+            color: rgba(255,255,255,0.5);
+            display: block;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .main-header .nav-links {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .main-header .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            position: relative;
+        }
+        .main-header .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--school-gold);
+            transition: width 0.3s ease;
+        }
+        .main-header .nav-links a:hover::after,
+        .main-header .nav-links a.active::after {
+            width: 50%;
+        }
+        .main-header .nav-links a:hover {
+            color: white;
+        }
+        .main-header .nav-links a.active {
+            background: rgba(212, 160, 23, 0.12);
+            color: var(--school-gold);
+        }
+        .main-header .nav-links a.portal-link {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            font-weight: 600;
+            padding: 6px 18px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+        .main-header .nav-links a.portal-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.3);
+        }
+        .main-header .nav-links a.portal-link::after { display: none; }
+        .main-header .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* ========================================
+           PAGE HERO
+           ======================================== */
+        .page-hero {
+            background: linear-gradient(135deg, #000000 0%, #1a0000 30%, #003300 70%, #0a1628 100%);
+            color: white;
+            padding: 50px 0 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.05) 0%, transparent 50%);
+        }
+        .page-hero .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        .page-hero .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(10px);
+            padding: 4px 16px 4px 4px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 15px;
+        }
+        .page-hero .hero-badge .flag-strip {
+            display: flex;
+            width: 32px;
+            height: 16px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .page-hero .hero-badge .flag-strip span { flex: 1; height: 100%; }
+        .page-hero .hero-badge .flag-strip .b { background: #000000; }
+        .page-hero .hero-badge .flag-strip .r { background: #BB0000; }
+        .page-hero .hero-badge .flag-strip .g { background: #006600; }
+        .page-hero .hero-badge .flag-strip .w { background: #FFFFFF; }
+        .page-hero .hero-badge .flag-text {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .page-hero h1 {
+            font-family: var(--font-primary);
+            font-size: 40px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+        .page-hero h1 .highlight {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .page-hero p {
+            font-size: 17px;
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* ========================================
+           SECTION STYLES
+           ======================================== */
+        .section {
+            padding: 40px 0;
+        }
+        .section-alt {
+            background: white;
+        }
+        .section-gray {
+            background: #f8f9fa;
+        }
+        .section-dark {
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            color: white;
+        }
+        .section-dark .section-title { color: white; }
+        .section-dark .section-subtitle { color: rgba(255,255,255,0.6); }
+
+        .section-title {
+            font-family: var(--font-primary);
+            font-size: 30px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+            color: var(--school-blue-dark);
+        }
+        .section-title .highlight { color: var(--school-gold); }
+        .section-title.light { color: white; }
+        .section-subtitle {
+            text-align: center;
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+        .section-subtitle.light { color: rgba(255,255,255,0.6); }
+
+        /* ========================================
+           CONTENT CARDS
+           ======================================== */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        .content-card {
+            background: white;
+            padding: 22px 18px;
+            border-radius: 14px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #e8ecf1;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--school-gold);
+            box-shadow: 0 10px 35px rgba(212, 160, 23, 0.12);
+        }
+        .content-card .icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .content-card h4 {
+            color: var(--school-blue-dark);
+            font-size: 15px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .content-card p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* ========================================
+           CLASSES GRID
+           ======================================== */
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+        }
+        .class-item {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        .class-item:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-3px);
+            border-color: var(--school-gold);
+        }
+        .class-item .class-icon {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .class-item .class-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+        .class-item .class-desc {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* ========================================
+           SUBJECTS LIST
+           ======================================== */
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+        .subject-item {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        .subject-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--school-gold);
+        }
+        .subject-item .subject-icon {
+            font-size: 18px;
+            color: var(--school-gold);
+        }
+        .subject-item .subject-name {
+            font-size: 13px;
+            color: white;
+            font-weight: 500;
+        }
+
+        /* ========================================
+           APPROACH LIST
+           ======================================== */
+        .approach-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .approach-item {
+            background: white;
+            padding: 18px 16px;
+            border-radius: 12px;
+            border-left: 4px solid var(--school-gold);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+        }
+        .approach-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        .approach-item .approach-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .approach-item h4 {
+            font-size: 14px;
+            color: var(--school-blue-dark);
+            font-weight: 600;
+        }
+        .approach-item p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* ========================================
+           ASSESSMENT GRID
+           ======================================== */
+        .assessment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .assessment-item {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .assessment-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.02);
+        }
+        .assessment-item .assessment-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .assessment-item .assessment-name {
+            font-size: 13px;
+            color: white;
+            font-weight: 500;
+        }
+
+        /* ========================================
+           ASSESSMENT SECTION - NEW
+           ======================================== */
+        .assessments-section {
+            padding: 60px 0;
+            background: #f0f2f5;
+        }
+        .assessment-search {
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+        .assessment-search .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e8ecf1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+            min-width: 200px;
+            font-family: inherit;
+        }
+        .search-box input:focus {
+            border-color: var(--school-gold);
+            outline: none;
+        }
+        .search-box select {
+            padding: 12px 16px;
+            border: 2px solid #e8ecf1;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            min-width: 150px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .search-box select:focus {
+            border-color: var(--school-gold);
+            outline: none;
+        }
+        .search-box .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            white-space: nowrap;
+        }
+        .search-box .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 160, 23, 0.35);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 14px;
+        }
+        .alert.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert.info {
+            display: block;
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 800px;
+            margin: 0 auto 20px;
+        }
+        .result-card .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e8ecf1;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .result-card .student-header h3 {
+            color: var(--school-blue-dark);
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .result-card .student-header h3 i {
+            color: var(--school-gold);
+            margin-right: 8px;
+        }
+        .result-card .student-header .grade-badge {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            padding: 4px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .result-card .performance-badge {
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .result-card .performance-badge.exceeding {
+            background: #28a745;
+            color: white;
+        }
+        .result-card .performance-badge.meeting {
+            background: #17a2b8;
+            color: white;
+        }
+        .result-card .performance-badge.approaching {
+            background: #ffc107;
+            color: #0A1628;
+        }
+        .result-card .performance-badge.below {
+            background: #dc3545;
+            color: white;
+        }
+
+        .result-card .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .result-card .summary-stats .stat {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .result-card .summary-stats .stat .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--school-blue-dark);
+        }
+        .result-card .summary-stats .stat .label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .result-card .subjects-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .result-card .subjects-table th {
+            background: var(--school-blue-dark);
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+        .result-card .subjects-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e8ecf1;
+            font-size: 14px;
+        }
+        .result-card .subjects-table tr:hover td {
+            background: #f8f9fc;
+        }
+
+        .result-card .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .result-card .action-buttons .btn {
+            flex: 1;
+            min-width: 150px;
+            justify-content: center;
+        }
+        .btn-download {
+            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.35);
+        }
+        .btn-print {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+        .btn-print:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 16px;
+        }
+        .no-results i {
+            font-size: 48px;
+            color: #ddd;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .no-results h3 {
+            color: #666;
+            font-size: 18px;
+        }
+        .no-results p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* ========================================
+           BACK TO HOME
+           ======================================== */
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 28px;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(212, 160, 23, 0.3);
+            margin-top: 10px;
+        }
+        .back-home:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(212, 160, 23, 0.4);
+        }
+
+        /* ========================================
+           FOOTER
+           ======================================== */
+        .main-footer {
+            background: var(--kenya-black);
+            color: white;
+            padding: 25px 0 12px;
+            position: relative;
+        }
+        .main-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--kenya-black), var(--kenya-red), var(--kenya-green), var(--kenya-black));
+        }
+        .main-footer .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .main-footer .footer-info h3 {
+            font-family: var(--font-primary);
+            font-size: 18px;
+            margin-bottom: 6px;
+            color: var(--school-gold);
+        }
+        .main-footer .footer-info p {
+            color: rgba(255,255,255,0.4);
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .main-footer .footer-info .ministry-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.04);
+            padding: 4px 14px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.35);
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .main-footer .footer-info .ministry-badge i {
+            color: var(--school-gold);
+            margin-right: 6px;
+        }
+        .main-footer .footer-links h4 {
+            color: white;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .main-footer .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .main-footer .footer-links a {
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        .main-footer .footer-links a:hover {
+            color: var(--school-gold);
+            padding-left: 4px;
+        }
+        .main-footer .footer-bottom {
+            text-align: center;
+            padding-top: 12px;
+            color: rgba(255,255,255,0.2);
+            font-size: 11px;
+        }
+        .main-footer .footer-social {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .main-footer .footer-social a {
+            color: rgba(255,255,255,0.25);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        .main-footer .footer-social a:hover {
+            color: var(--school-gold);
+            border-color: var(--school-gold);
+            transform: translateY(-2px);
+        }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 768px) {
+            .main-header .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                padding: 15px 0;
+                gap: 5px;
+            }
+            .main-header .nav-links.show { display: flex; }
+            .main-header .mobile-menu-btn { display: block; }
+            
+            .page-hero h1 { font-size: 30px; }
+            .page-hero p { font-size: 15px; }
+            .section-title { font-size: 24px; }
+            
+            .content-grid { grid-template-columns: 1fr 1fr; }
+            .classes-grid { grid-template-columns: 1fr 1fr 1fr; }
+            .subjects-grid { grid-template-columns: 1fr 1fr; }
+            .approach-grid { grid-template-columns: 1fr; }
+            .assessment-grid { grid-template-columns: 1fr 1fr; }
+            
+            .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
+            
+            .notice-alert-bar .container { flex-direction: column; text-align: center; }
+            .news-ticker-section .container { flex-direction: column; gap: 4px; }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            .search-box input,
+            .search-box select,
+            .search-box .btn {
+                width: 100%;
+                min-width: auto;
+            }
+            .result-card {
+                padding: 20px;
+            }
+            .result-card .student-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .result-card .action-buttons .btn {
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .classes-grid { grid-template-columns: 1fr 1fr; }
+            .subjects-grid { grid-template-columns: 1fr; }
+            .assessment-grid { grid-template-columns: 1fr; }
+            .page-hero h1 { font-size: 24px; }
+            .section-title { font-size: 20px; }
+        }
+
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
+        @keyframes slideDownNotice {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulseBell {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes tickerScroll {
+            0%, 20% { transform: translateY(0); }
+            25%, 45% { transform: translateY(-24px); }
+            50%, 70% { transform: translateY(-48px); }
+            75%, 95% { transform: translateY(-72px); }
+            100% { transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== KENYA FLAG STRIP ===== -->
+    <div class="kenya-flag-strip"></div>
+
+    <!-- ===== NOTICE ALERT BAR ===== -->
+    <div class="notice-alert-bar" id="noticeAlertBar">
+        <div class="container">
+            <div class="notice-icon">
+                <span class="bell">🔔</span>
+                <span style="font-weight:700;font-size:12px;">ALERT</span>
+            </div>
+            <div class="notice-content">
+                <span class="badge">⚠️ STAFF NOTICE</span>
+                <span class="message" id="noticeMessage">
+                    <strong>📢 Important:</strong> Staff meeting on Friday at 4:00 PM in the staff room.
+                </span>
+            </div>
+            <button class="notice-close" onclick="closeNotice()">✕</button>
+        </div>
+    </div>
+
+    <!-- ===== NEWS TICKER ===== -->
+    <div class="news-ticker-section">
+        <div class="container">
+            <div class="ticker-label">
+                <span class="icon">📰</span> News
+            </div>
+            <div class="ticker-wrapper">
+                <div class="ticker-content" id="tickerContent">
+                    <div class="ticker-item">
+                        <span class="tag">🎉 NEW</span>
+                        School opens Term 3 on 1st September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">🏆 EVENT</span>
+                        Sports Day on 15th September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">📚 MEETING</span>
+                        Parents' Meeting on 20th September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">📢 ANNOUNCEMENT</span>
+                        New computer lab now open!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo-section">
+                <span class="school-icon">🏫</span>
+                <div>
+                    <h1>Changara Star Academy</h1>
+                    <span class="subtitle">Assurance to Excellence</span>
+                </div>
+            </div>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="academics.html" class="active">Academics</a>
+                <a href="portal.html">🔐 Portal</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </header>
+
+    <!-- ========================================
+    PAGE HERO
+    ======================================== -->
+    <section class="page-hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <div class="flag-strip">
+                        <span class="b"></span><span class="r"></span>
+                        <span class="g"></span><span class="w"></span>
+                    </div>
+                    <span class="flag-text">🇰🇪 Proudly Kenyan</span>
+                </div>
+                <h1>📚 Academic <span class="highlight">Excellence</span></h1>
+                <p>
+                    At Changara Star Academy, we are committed to providing quality education that prepares every learner 
+                    for academic success and responsible citizenship.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    ACADEMIC OVERVIEW
+    ======================================== -->
+    <section class="section section-alt" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title">🎯 Our <span class="highlight">Academic Vision</span></h2>
+            <p class="section-subtitle">
+                We follow the Competency-Based Curriculum (CBC) as prescribed by the Ministry of Education, ensuring that 
+                every learner develops the knowledge, skills, values, and attitudes needed for lifelong learning.
+            </p>
+            <div class="content-grid">
+                <div class="content-card" data-aos="fade-up" data-aos-delay="100">
+                    <span class="icon">👨‍🏫</span>
+                    <h4>Qualified Teachers</h4>
+                    <p>Our experienced teachers use learner-centred teaching methods that encourage creativity, critical thinking, and confidence.</p>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="150">
+                    <span class="icon">📖</span>
+                    <h4>Competency-Based Curriculum</h4>
+                    <p>We follow the CBC framework as prescribed by the Ministry of Education, focusing on skills, values, and attitudes.</p>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="200">
+                    <span class="icon">🏆</span>
+                    <h4>Academic Excellence</h4>
+                    <p>We are committed to producing academically successful learners who are prepared for higher levels of education.</p>
+                </div>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="250">
+                    <span class="icon">💡</span>
+                    <h4>Holistic Development</h4>
+                    <p>We nurture confident, disciplined, and academically successful learners who contribute positively to society.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    CLASSES OFFERED
+    ======================================== -->
+    <section class="section section-dark" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title light">📋 Classes <span style="color:var(--school-gold);">Offered</span></h2>
+            <p class="section-subtitle light">
+                We offer quality education in the following levels, with age-appropriate learning materials and qualified teachers.
+            </p>
+            <div class="classes-grid">
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="100">
+                    <span class="class-icon">🧸</span>
+                    <div class="class-name">Playgroup</div>
+                    <div class="class-desc">Early Years</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="130">
+                    <span class="class-icon">🎨</span>
+                    <div class="class-name">PP1</div>
+                    <div class="class-desc">Pre-Primary 1</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="160">
+                    <span class="class-icon">📚</span>
+                    <div class="class-name">PP2</div>
+                    <div class="class-desc">Pre-Primary 2</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="190">
+                    <span class="class-icon">📖</span>
+                    <div class="class-name">Grade 1</div>
+                    <div class="class-desc">Lower Primary</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="220">
+                    <span class="class-icon">✏️</span>
+                    <div class="class-name">Grade 2</div>
+                    <div class="class-desc">Lower Primary</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="250">
+                    <span class="class-icon">📝</span>
+                    <div class="class-name">Grade 3</div>
+                    <div class="class-desc">Lower Primary</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="280">
+                    <span class="class-icon">📐</span>
+                    <div class="class-name">Grade 4</div>
+                    <div class="class-desc">Upper Primary</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="310">
+                    <span class="class-icon">🔬</span>
+                    <div class="class-name">Grade 5</div>
+                    <div class="class-desc">Upper Primary</div>
+                </div>
+                <div class="class-item" data-aos="zoom-in" data-aos-delay="340">
+                    <span class="class-icon">💻</span>
+                    <div class="class-name">Grade 6</div>
+                    <div class="class-desc">Upper Primary</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    LEARNING AREAS
+    ======================================== -->
+    <section class="section" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title">📚 Our <span class="highlight">Learning Areas</span></h2>
+            <p class="section-subtitle">
+                Learners study a wide range of subjects designed to develop both academic knowledge and practical skills.
+            </p>
+            <div class="subjects-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="100">
+                    <span class="subject-icon" style="color:var(--school-gold);">➕</span>
+                    <span class="subject-name" style="color:#333;">Mathematics</span>
+                </div>
+                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="130">
+                    <span class="subject-icon" style="color:var(--school-gold);">📖</span>
+                    <span class="subject-name" style="color:#333;">English Language</span>
+                </div>
+                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="160">
+                    <span class="subject-icon" style="color:var(--school-gold);">🗣️</span>
+                    <span class="subject-name" style="color:#333;">Kiswahili</span>
+                </div>
+                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="190">
+                    <span class="subject-icon" style="color:var(--school-gold);">🔬</span>
+                    <span class="subject-name" style="color:#333;">Integrated Science</span>
+                </div>
+                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="220">
+                    <span class="subject-icon" style="color:var(--school-gold);">🌍</span>
+                    <span class="subject-name" style="color:#333;">Social Studies</span>
+                </div>
+                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="250">
+                    <span class="subject-icon" style="color:var(--school-gold);">🎨</span>
+                    <span class="subject-name" style="color:#333;">Creative Arts</span>
+                </div>
+                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="280">
+                    <span class="subject-icon" style="color:var(--school-gold);">🌱</span>
+                    <span class="subject-name" style="color:#333;">Agriculture</span>
+                </div>
+                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="310">
+                    <span class="subject-icon" style="color:var(--school-gold);">⛪</span>
+                    <span class="subject-name" style="color:#333;">Christian Religious Education</span>
+                </div>
+                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="340">
+                    <span class="subject-icon" style="color:var(--school-gold);">⚽</span>
+                    <span class="subject-name" style="color:#333;">Physical & Health Education</span>
+                </div>
+                <div class="subject-item" style="background:white;border:1px solid #e8ecf1;color:#333;" data-aos="fade-up" data-aos-delay="370">
+                    <span class="subject-icon" style="color:var(--school-gold);">💻</span>
+                    <span class="subject-name" style="color:#333;">Computer Studies</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    TEACHING APPROACH
+    ======================================== -->
+    <section class="section section-gray" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title">🎯 Our <span class="highlight">Teaching Approach</span></h2>
+            <p class="section-subtitle">
+                Our teaching focuses on active participation and practical learning experiences.
+            </p>
+            <div class="approach-grid">
+                <div class="approach-item" data-aos="fade-up" data-aos-delay="100">
+                    <span class="approach-icon">🤝</span>
+                    <h4>Active Participation</h4>
+                    <p>Learners are encouraged to actively participate in class discussions and activities.</p>
+                </div>
+                <div class="approach-item" data-aos="fade-up" data-aos-delay="150">
+                    <span class="approach-icon">🔬</span>
+                    <h4>Practical Learning</h4>
+                    <p>Hands-on experiences that make learning more engaging and memorable.</p>
+                </div>
+                <div class="approach-item" data-aos="fade-up" data-aos-delay="200">
+                    <span class="approach-icon">👩‍🏫</span>
+                    <h4>Individual Support</h4>
+                    <p>Every learner receives individual attention and support from teachers.</p>
+                </div>
+                <div class="approach-item" data-aos="fade-up" data-aos-delay="250">
+                    <span class="approach-icon">📊</span>
+                    <h4>Continuous Assessment</h4>
+                    <p>Regular assessments to track progress and identify areas for improvement.</p>
+                </div>
+                <div class="approach-item" data-aos="fade-up" data-aos-delay="300">
+                    <span class="approach-icon">💬</span>
+                    <h4>Group Discussions</h4>
+                    <p>Teamwork and collaboration through group discussions and projects.</p>
+                </div>
+                <div class="approach-item" data-aos="fade-up" data-aos-delay="350">
+                    <span class="approach-icon">💻</span>
+                    <h4>Digital Learning</h4>
+                    <p>Integration of technology where resources are available to enhance learning.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    CONTINUOUS ASSESSMENT - UPDATED WITH MONTHLY ASSESSMENT CARD
+    ======================================== -->
+    <section class="section section-dark" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title light">📊 Continuous <span style="color:var(--school-gold);">Assessment</span></h2>
+            <p class="section-subtitle light">
+                Learners are regularly assessed to identify strengths and areas for improvement.
+            </p>
+            <div class="assessment-grid">
+                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="100">
+                    <span class="assessment-icon">📝</span>
+                    <div class="assessment-name">Weekly Assessments</div>
+                </div>
+                <!-- ===== MONTHLY ASSESSMENT CARD - HIGHLIGHTED ===== -->
+                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="130" style="border: 2px solid var(--school-gold); background: rgba(212, 160, 23, 0.15);">
+                    <span class="assessment-icon">📋</span>
+                    <div class="assessment-name" style="color: var(--school-gold); font-weight: 700;">Monthly Examinations</div>
+                    <div style="margin-top: 8px;">
+                        <a href="#assessments" onclick="document.getElementById('gradeFilter').value=''; document.getElementById('studentSearch').value=''; searchStudentAssessment();" 
+                           style="display: inline-block; padding: 4px 14px; background: var(--school-gold); color: var(--kenya-black); border-radius: 50px; font-size: 10px; font-weight: 700; text-decoration: none; transition: all 0.3s ease;">
+                            <i class="fas fa-download"></i> View Results
+                        </a>
+                    </div>
+                </div>
+                <!-- ===== END MONTHLY ASSESSMENT CARD ===== -->
+                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="160">
+                    <span class="assessment-icon">📄</span>
+                    <div class="assessment-name">End-of-Term Exams</div>
+                </div>
+                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="190">
+                    <span class="assessment-icon">📚</span>
+                    <div class="assessment-name">Class Assignments</div>
+                </div>
+                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="220">
+                    <span class="assessment-icon">🎯</span>
+                    <div class="assessment-name">Projects</div>
+                </div>
+                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="250">
+                    <span class="assessment-icon">🎤</span>
+                    <div class="assessment-name">Oral Presentations</div>
+                </div>
+                <div class="assessment-item" data-aos="zoom-in" data-aos-delay="280">
+                    <span class="assessment-icon">🔬</span>
+                    <div class="assessment-name">Practical Activities</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    ASSESSMENT RESULTS SECTION - PARENT VIEW
+    ======================================== -->
+    <section class="assessments-section" id="assessments">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">📊 <span class="highlight">Assessment Results</span></h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Enter your child's name or select a grade to view and download their assessment results</p>
+
+            <div id="alert" class="alert"></div>
+
+            <div class="assessment-search" data-aos="fade-up" data-aos-delay="150">
+                <div class="form-group">
+                    <label><i class="fas fa-user-graduate"></i> Search by Student Name or Grade</label>
+                    <div class="search-box">
+                        <input type="text" id="studentSearch" placeholder="Enter student name..." onkeypress="if(event.key==='Enter') searchStudentAssessment()">
+                        <select id="gradeFilter" onchange="searchStudentAssessment()">
+                            <option value="">All Grades</option>
+                            <option value="Play Group">Play Group</option>
+                            <option value="PP1">PP1</option>
+                            <option value="PP2">PP2</option>
+                            <option value="Grade 1">Grade 1</option>
+                            <option value="Grade 2">Grade 2</option>
+                            <option value="Grade 3">Grade 3</option>
+                            <option value="Grade 4">Grade 4</option>
+                            <option value="Grade 5">Grade 5</option>
+                            <option value="Grade 6">Grade 6</option>
+                        </select>
+                        <button class="btn" onclick="searchStudentAssessment()">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="assessmentResults" style="display:none;" data-aos="fade-up">
+                <!-- Results will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    BACK TO HOME
+    ======================================== -->
+    <section class="section section-gray" style="text-align:center;padding:30px 0;">
+        <div class="container">
+            <a href="index.html" class="back-home">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </section>
+
+    <!-- ========================================
+    FOOTER
+    ======================================== -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>🏫 Changara Star Academy</h3>
+                    <p>Changara Market, Teso North Sub-County, Busia County, Kenya</p>
+                    <p>📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                    <div class="footer-social">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="ministry-badge">
+                        <i class="fas fa-certificate"></i> Registered under Ministry of Education, Kenya
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">🏠 Home</a>
+                    <a href="about.html">📖 About Us</a>
+                    <a href="academics.html">📚 Academics</a>
+                    <a href="portal.html">🔐 Portal</a>
+                    <a href="contact.html">📞 Contact</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <a href="gallery.html">🖼️ Gallery</a>
+                    <a href="events.html">📰 Events</a>
+                    <a href="downloads.html">📄 Downloads</a>
+                    <a href="fees.html">💰 Fees</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Changara Star Academy. All rights reserved. | <span style="color:var(--school-gold);">🇰🇪 Proudly Kenyan</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================
+    SCRIPTS
+    ======================================== -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        // ============================================
+        // INITIALIZE AOS
+        // ============================================
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 60,
+            easing: 'ease-in-out'
+        });
+
+        // ============================================
+        // MOBILE MENU
+        // ============================================
+        function toggleMobileMenu() {
+            const nav = document.getElementById('navLinks');
+            if (nav) nav.classList.toggle('show');
+        }
+
+        // ============================================
+        // NOTICE ALERT
+        // ============================================
+        function closeNotice() {
+            const bar = document.getElementById('noticeAlertBar');
+            bar.classList.remove('show');
+            localStorage.setItem('noticeClosed', 'true');
+        }
+
+        function showNotice(message) {
+            const bar = document.getElementById('noticeAlertBar');
+            const msgEl = document.getElementById('noticeMessage');
+            if (message) {
+                msgEl.innerHTML = message;
+            }
+            bar.classList.add('show');
+            localStorage.removeItem('noticeClosed');
+        }
+
+        function checkNoticeStatus() {
+            const closed = localStorage.getItem('noticeClosed');
+            const bar = document.getElementById('noticeAlertBar');
+            if (!closed) {
+                bar.classList.add('show');
+            }
+        }
+        checkNoticeStatus();
+
+        // ============================================
+        // LOAD NEWS TICKER
+        // ============================================
+        async function loadNewsTicker() {
+            try {
+                const response = await fetch('/api/content');
+                const data = await response.json();
+                if (data.success && data.content.homeNews) {
+                    const tickerContent = document.getElementById('tickerContent');
+                    let tickerHtml = '';
+                    const tags = ['🎉 NEW', '🏆 EVENT', '📚 MEETING', '📢 ANNOUNCEMENT'];
+                    data.content.homeNews.forEach((news, index) => {
+                        const tag = tags[index % tags.length];
+                        tickerHtml += `
+                            <div class="ticker-item">
+                                <span class="tag">${tag}</span>
+                                ${news.title || 'News'} - ${news.content || ''}
+                            </div>
+                        `;
+                    });
+                    if (tickerHtml) {
+                        tickerContent.innerHTML = tickerHtml;
+                    }
+                }
+            } catch (error) {
+                console.log('News ticker not available');
+            }
+        }
+
+        // ============================================
+        // ASSESSMENT RESULTS - SEARCH & DOWNLOAD
+        // ============================================
+        function showAlert(message, type) {
+            const alertEl = document.getElementById('alert');
+            if (!alertEl) return;
+            alertEl.className = 'alert ' + type;
+            alertEl.textContent = message;
+            alertEl.style.display = 'block';
+            setTimeout(() => {
+                alertEl.style.display = 'none';
+            }, 5000);
+        }
+
+        async function searchStudentAssessment() {
+            const studentName = document.getElementById('studentSearch').value.trim();
+            const grade = document.getElementById('gradeFilter').value;
+            const resultsDiv = document.getElementById('assessmentResults');
+            
+            if (!studentName && !grade) {
+                showAlert('Please enter a student name or select a grade', 'error');
+                return;
+            }
+
+            try {
+                let url = '/api/assessments/search?';
+                if (studentName) url += `name=${encodeURIComponent(studentName)}`;
+                if (grade) url += `${studentName ? '&' : ''}grade=${encodeURIComponent(grade)}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success && data.students && data.students.length > 0) {
+                    resultsDiv.style.display = 'block';
+                    resultsDiv.innerHTML = data.students.map(student => renderStudentResult(student)).join('');
+                } else {
+                    resultsDiv.style.display = 'block';
+                    resultsDiv.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-user-graduate"></i>
+                            <h3>No results found</h3>
+                            <p>Try searching with a different name or grade</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error searching assessments', 'error');
+            }
+        }
+
+        function renderStudentResult(student) {
+            const performanceColors = {
+                'Exceeding Expectation': 'exceeding',
+                'Meeting Expectation': 'meeting',
+                'Approaching Expectation': 'approaching',
+                'Below Expectation': 'below'
+            };
+
+            const subjectsHtml = student.assessments.map(a => `
+                <tr>
+                    <td><strong>${a.subject}</strong></td>
+                    <td>${a.maxScore}</td>
+                    <td>${a.score}</td>
+                    <td>${a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0}%</td>
+                </tr>
+            `).join('');
+
+            return `
+                <div class="result-card">
+                    <div class="student-header">
+                        <div>
+                            <h3><i class="fas fa-user-graduate"></i> ${student.studentName}</h3>
+                            <span class="grade-badge">${student.grade}</span>
+                        </div>
+                        <div>
+                            <span class="performance-badge ${performanceColors[student.performanceLevel] || 'meeting'}">
+                                ${student.performanceLevel}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="summary-stats">
+                        <div class="stat">
+                            <div class="number">${student.totalScore}</div>
+                            <div class="label">Total Score</div>
+                        </div>
+                        <div class="stat">
+                            <div class="number">${student.averageScore.toFixed(1)}</div>
+                            <div class="label">Average Score</div>
+                        </div>
+                        <div class="stat">
+                            <div class="number">${student.assessments.length}</div>
+                            <div class="label">Subjects</div>
+                        </div>
+                    </div>
+
+                    <table class="subjects-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Max Score</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${subjectsHtml}
+                        </tbody>
+                    </table>
+
+                    <div class="action-buttons">
+                        <button onclick="downloadAssessmentPDF('${student._id}')" class="btn-download">
+                            <i class="fas fa-file-pdf"></i> Download PDF
+                        </button>
+                        <button onclick="window.print()" class="btn-print">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function downloadAssessmentPDF(studentId) {
+            try {
+                const response = await fetch(`/api/assessments/generate-report/${studentId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const win = window.open('', '_blank');
+                    win.document.write(data.html);
+                    win.document.close();
+                    setTimeout(() => {
+                        win.print();
+                    }, 500);
+                } else {
+                    showAlert('Error generating report', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error downloading report', 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNewsTicker();
+            
+            // Check if grade parameter is in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const grade = urlParams.get('grade');
+            if (grade) {
+                document.getElementById('gradeFilter').value = grade;
+                searchStudentAssessment();
+            }
+        });
+    </script>
+</body>
+</html>

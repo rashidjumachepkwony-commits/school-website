@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Attendance - Changara Star Academy</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #001f5c, #0b5394);
+            color: white;
+            padding: 20px 0;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+        }
+        .sidebar-brand { padding: 0 20px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-brand h2 { color: #ffeb99; font-size: 22px; }
+        .sidebar-brand p { color: #d4a017; font-size: 13px; }
+        .sidebar-menu { padding: 20px; }
+        .sidebar-menu a {
+            display: block;
+            color: #ccc;
+            text-decoration: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(212, 160, 23, 0.2);
+            color: #d4a017;
+        }
+        .sidebar-menu .logout { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+        .sidebar-menu .logout a { color: #ff6b6b; cursor: pointer; }
+        .main-content { margin-left: 250px; padding: 30px; width: 100%; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .header h1 { color: #001f5c; }
+        .header .admin-info { display: flex; align-items: center; gap: 15px; }
+        .header .admin-info .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #d4a017;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #001f5c;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .stat-card .number { font-size: 24px; font-weight: bold; display: block; }
+        .stat-card .label { color: #666; font-size: 12px; }
+        .stat-card .number.green { color: #28a745; }
+        .stat-card .number.red { color: #dc3545; }
+        .stat-card .number.orange { color: #ffc107; }
+        .stat-card .number.blue { color: #0b5394; }
+        .stat-card .number.purple { color: #6f42c1; }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            background: white;
+            padding: 5px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
+        }
+        .tabs button {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #666;
+            min-width: 80px;
+        }
+        .tabs button:hover { background: #f0f2f5; }
+        .tabs button.active { background: #0b5394; color: white; }
+
+        .filter-section {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-section input, .filter-section select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 120px;
+        }
+        .filter-section input[type="date"] {
+            min-width: 160px;
+            cursor: pointer;
+        }
+        .filter-section .date-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .filter-section button {
+            padding: 8px 18px;
+            background: #0b5394;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .filter-section button:hover { background: #001f5c; }
+        .filter-section .export-btn { background: #28a745; }
+        .filter-section .export-btn:hover { background: #1e7e34; }
+        .filter-section .pdf-btn { background: #dc3545; }
+        .filter-section .pdf-btn:hover { background: #c82333; }
+
+        .summary-box {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #0b5394;
+        }
+        .summary-box .title { font-weight: bold; color: #001f5c; font-size: 16px; }
+        .summary-box .stats { display: flex; gap: 25px; flex-wrap: wrap; margin-top: 5px; }
+        .summary-box .stats span { font-size: 13px; }
+        .summary-box .stats .count { font-weight: bold; font-size: 16px; }
+
+        .table-container {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: #001f5c;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 12px;
+        }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+        tr:hover td { background: #f8f9fa; }
+
+        .badge {
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge.green { background: #d4edda; color: #155724; }
+        .badge.red { background: #f8d7da; color: #721c24; }
+        .badge.orange { background: #fff3cd; color: #856404; }
+        .badge.blue { background: #d1ecf1; color: #0c5460; }
+        .badge.gray { background: #e2e3e5; color: #383d41; }
+
+        .loading { text-align: center; padding: 30px; color: #666; }
+
+        .ranking-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        .ranking-section h3 { color: #001f5c; margin-bottom: 15px; }
+        .ranking-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #0b5394;
+        }
+        .ranking-item .rank { font-weight: bold; color: #0b5394; font-size: 14px; min-width: 30px; }
+        .ranking-item .name { flex: 1; font-weight: 600; font-size: 14px; }
+        .ranking-item .score { font-weight: bold; font-size: 14px; }
+        .ranking-item .score.green { color: #28a745; }
+        .ranking-item .score.orange { color: #ffc107; }
+        .ranking-item .score.red { color: #dc3545; }
+
+        .selected-date-display {
+            background: #e8f0fe;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #0b5394;
+            display: inline-block;
+            border: 1px solid #0b5394;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; position: relative; min-height: auto; }
+            .main-content { margin-left: 0; padding: 15px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .ranking-list { grid-template-columns: 1fr; }
+            .tabs button { font-size: 12px; padding: 8px; min-width: 60px; }
+            .filter-section { flex-direction: column; }
+            .filter-section input, .filter-section select { width: 100%; }
+            .filter-section .date-label { width: 100%; }
+        }
+
+        @media print {
+            .sidebar { display: none !important; }
+            .main-content { margin-left: 0 !important; padding: 10px !important; }
+            .filter-section { display: none !important; }
+            .no-print { display: none !important; }
+            .table-container { box-shadow: none !important; border: 1px solid #ddd !important; }
+            .stats-grid { page-break-after: avoid; }
+            .ranking-section { page-break-after: avoid; }
+            .summary-box { page-break-after: avoid; }
+            .tabs { display: none !important; }
+            body { background: white !important; }
+        }
+
+        .pdf-content {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: white;
+        }
+        .pdf-content h1 { color: #001f5c; text-align: center; margin-bottom: 20px; }
+        .pdf-content .pdf-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .pdf-content .pdf-stat {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        .pdf-content .pdf-stat .num { font-size: 20px; font-weight: bold; display: block; }
+        .pdf-content .pdf-stat .lbl { font-size: 11px; color: #666; }
+        .pdf-content table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .pdf-content th {
+            background: #001f5c;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-size: 11px;
+        }
+        .pdf-content td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 11px;
+        }
+        .pdf-content .pdf-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .pdf-content .pdf-badge.green { background: #d4edda; color: #155724; }
+        .pdf-content .pdf-badge.red { background: #f8d7da; color: #721c24; }
+        .pdf-content .pdf-badge.orange { background: #fff3cd; color: #856404; }
+        .pdf-content .pdf-badge.blue { background: #d1ecf1; color: #0c5460; }
+        .pdf-content .pdf-badge.gray { background: #e2e3e5; color: #383d41; }
+        .pdf-content .pdf-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-size: 11px;
+            color: #999;
+        }
+        .pdf-content .pdf-ranking {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .pdf-content .pdf-ranking h3 { color: #001f5c; margin-bottom: 10px; }
+        .pdf-content .pdf-ranking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .pdf-content .pdf-ranking-item .rank { font-weight: bold; color: #0b5394; }
+        .pdf-content .pdf-ranking-item .score { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="sidebar no-print">
+        <div class="sidebar-brand">
+            <h2>🏫 Admin</h2>
+            <p>Changara Star Academy</p>
+        </div>
+        <div class="sidebar-menu">
+            <a href="admin-dashboard.html">📊 Dashboard</a>
+            <a href="admin-attendance.html" class="active">📋 Attendance</a>
+            <a href="admin-teachers.html">👨‍🏫 Teachers</a>
+            <div class="logout">
+                <a onclick="logout()">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content" id="reportContent">
+        <div class="header no-print">
+            <h1>📋 Staff Attendance Reports</h1>
+            <div class="admin-info">
+                <span id="adminName">Admin</span>
+                <div class="avatar" id="adminAvatar">A</div>
+            </div>
+        </div>
+
+        <div id="statsContainer" class="stats-grid">
+            <div class="stat-card"><span class="number blue" id="totalStaff">0</span><span class="label">Total Staff</span></div>
+            <div class="stat-card"><span class="number green" id="todayPresent">0</span><span class="label">Present</span></div>
+            <div class="stat-card"><span class="number orange" id="todayLate">0</span><span class="label">Late</span></div>
+            <div class="stat-card"><span class="number red" id="todayAbsent">0</span><span class="label">Absent</span></div>
+            <div class="stat-card"><span class="number purple" id="attendanceRate">0%</span><span class="label">Attendance Rate</span></div>
+        </div>
+
+        <div class="tabs no-print">
+            <button class="active" onclick="switchTab('daily')">📅 Daily</button>
+            <button onclick="switchTab('weekly')">📆 Weekly</button>
+            <button onclick="switchTab('monthly')">📊 Monthly</button>
+            <button onclick="switchTab('datepicker')">📅 Select Date</button>
+        </div>
+
+        <div class="filter-section no-print">
+            <input type="text" id="searchInput" placeholder="Search by name or ID..." onkeyup="filterTable()">
+            <select id="departmentFilter" onchange="filterTable()">
+                <option value="">All Departments</option>
+                <option value="Teaching">Teaching</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Science">Science</option>
+                <option value="Languages">Languages</option>
+                <option value="Social Studies">Social Studies</option>
+                <option value="Arts">Arts</option>
+                <option value="Physical Education">Physical Education</option>
+                <option value="Administration">Administration</option>
+                <option value="Support Staff">Support Staff</option>
+            </select>
+            <div class="date-label">📅 
+                <input type="date" id="datePicker" onchange="loadDatePickerReport()">
+            </div>
+            <button onclick="loadAttendance()">🔄 Refresh</button>
+            <button class="export-btn" onclick="exportCSV()">📥 CSV</button>
+            <button class="pdf-btn" onclick="exportPDF()">📄 PDF</button>
+            <button onclick="printReport()" style="background:#6c757d;">🖨️ Print</button>
+        </div>
+
+        <div id="summaryBox" class="summary-box">
+            <div class="title" id="reportTitle">📅 Daily Attendance Report</div>
+            <div class="stats" id="reportStats">
+                <span>Total: <span class="count" id="reportTotal">0</span></span>
+                <span>Present: <span class="count" id="reportPresent">0</span></span>
+                <span>Late: <span class="count" id="reportLate">0</span></span>
+                <span>Absent: <span class="count" id="reportAbsent">0</span></span>
+                <span>Rate: <span class="count" id="reportRate">0%</span></span>
+            </div>
+        </div>
+
+        <div id="rankingSection" class="ranking-section">
+            <h3>🏆 Staff Attendance Ranking</h3>
+            <div id="rankingList" class="ranking-list">
+                <p style="color:#999; grid-column: span 2;">Loading ranking...</p>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loading" class="loading">⏳ Loading attendance data...</div>
+            <div id="tableWrapper" style="display:none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Staff ID</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Hours</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let attendanceData = [];
+        let currentTab = 'daily';
+        let filteredData = [];
+        let selectedDate = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) { window.location.href = 'admin-login.html'; return; }
+            const admin = JSON.parse(localStorage.getItem('admin') || '{}');
+            document.getElementById('adminName').textContent = admin.fullName || 'Admin';
+            document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('datePicker').value = today;
+            selectedDate = new Date();
+            
+            loadAttendance();
+        });
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tabs button').forEach(b => {
+                if (b.textContent.toLowerCase().includes(tab)) b.classList.add('active');
+            });
+            // Show/hide date picker label
+            const datePickerContainer = document.querySelector('.date-label');
+            if (tab === 'datepicker') {
+                datePickerContainer.style.display = 'flex';
+                document.getElementById('reportTitle').textContent = '📅 Attendance Report - Selected Date';
+            } else {
+                datePickerContainer.style.display = 'none';
+            }
+            loadAttendance();
+        }
+
+        function loadDatePickerReport() {
+            if (currentTab === 'datepicker') {
+                const dateVal = document.getElementById('datePicker').value;
+                if (dateVal) {
+                    selectedDate = new Date(dateVal + 'T00:00:00');
+                    document.getElementById('reportTitle').textContent = '📅 Attendance Report - ' + selectedDate.toLocaleDateString();
+                    loadAttendance();
+                }
+            }
+        }
+
+        function loadCustomReport() {
+            if (currentTab === 'datepicker') loadDatePickerReport();
+        }
+
+        async function loadAttendance() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('tableWrapper').style.display = 'none';
+
+            try {
+                const summaryRes = await fetch('/api/admin/attendance/summary');
+                const summaryData = await summaryRes.json();
+                if (summaryData.success) {
+                    document.getElementById('totalStaff').textContent = summaryData.today.total || 0;
+                    document.getElementById('todayPresent').textContent = summaryData.today.present || 0;
+                    document.getElementById('todayLate').textContent = summaryData.today.late || 0;
+                    document.getElementById('todayAbsent').textContent = summaryData.today.absent || 0;
+                    document.getElementById('attendanceRate').textContent = (summaryData.today.attendanceRate || 0) + '%';
+                }
+
+                const res = await fetch('/api/admin/attendance/all');
+                const data = await res.json();
+
+                if (data.success) {
+                    attendanceData = data.teachers;
+                    filterByTab();
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('tableWrapper').style.display = 'block';
+                } else {
+                    showError('Failed to load attendance data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error loading data: ' + error.message);
+            }
+        }
+
+        function filterByTab() {
+            let data = [];
+
+            if (currentTab === 'daily') {
+                const today = new Date();
+                data = getDailyReport(today);
+                document.getElementById('reportTitle').textContent = '📅 Daily Attendance Report - ' + today.toLocaleDateString();
+            } else if (currentTab === 'weekly') {
+                const today = new Date();
+                data = getWeeklyReport(today);
+                document.getElementById('reportTitle').textContent = '📆 Weekly Attendance Report - Week of ' + getWeekStart(today).toLocaleDateString();
+            } else if (currentTab === 'monthly') {
+                const today = new Date();
+                data = getMonthlyReport(today);
+                document.getElementById('reportTitle').textContent = '📊 Monthly Attendance Report - ' + today.toLocaleString('default', { month: 'long', year: 'numeric' });
+            } else if (currentTab === 'datepicker') {
+                const datePicker = document.getElementById('datePicker');
+                if (datePicker.value) {
+                    const selectedDate = new Date(datePicker.value + 'T00:00:00');
+                    data = getDailyReport(selectedDate);
+                    document.getElementById('reportTitle').textContent = '📅 Attendance Report - ' + selectedDate.toLocaleDateString();
+                } else {
+                    const today = new Date();
+                    data = getDailyReport(today);
+                    document.getElementById('reportTitle').textContent = '📅 Daily Attendance Report - ' + today.toLocaleDateString();
+                }
+            }
+
+            filteredData = data;
+            renderTable(data);
+            updateSummary(data);
+            renderRanking(data);
+        }
+
+        function getTeacherName(teacher) {
+            let firstName = teacher.firstName || '';
+            let lastName = teacher.lastName || '';
+            
+            if (!firstName) firstName = teacher.name || '';
+            if (!firstName && !lastName) {
+                if (teacher.fullName) return teacher.fullName;
+                return teacher.employeeId || 'Unknown Staff';
+            }
+            const fullName = `${firstName} ${lastName}`.trim();
+            return fullName || teacher.employeeId || 'Unknown Staff';
+        }
+
+        function getDailyReport(date) {
+            const dateStr = date.toDateString();
+            const result = [];
+
+            attendanceData.forEach(teacher => {
+                const todayRecord = teacher.attendance.find(a => new Date(a.date).toDateString() === dateStr);
+                let status = 'Not Checked In', statusClass = 'gray', checkIn = '-', checkOut = '-', hours = '-';
+
+                if (todayRecord) {
+                    status = todayRecord.checkOut ? 'Checked Out' : (todayRecord.isLate ? 'Late' : 'Checked In');
+                    statusClass = todayRecord.checkOut ? 'blue' : (todayRecord.isLate ? 'orange' : 'green');
+                    checkIn = formatDate(todayRecord.checkIn);
+                    checkOut = todayRecord.checkOut ? formatDate(todayRecord.checkOut) : '-';
+                    hours = todayRecord.hoursWorked ? todayRecord.hoursWorked + 'h' : '-';
+                }
+
+                result.push({
+                    name: getTeacherName(teacher),
+                    employeeId: teacher.employeeId || 'N/A',
+                    department: teacher.department || 'N/A',
+                    status: status,
+                    statusClass: statusClass,
+                    checkIn: checkIn,
+                    checkOut: checkOut,
+                    hours: hours,
+                    date: dateStr,
+                    rawDate: date,
+                    attendanceRate: status === 'Checked In' || status === 'Checked Out' || status === 'Late' ? 100 : 0
+                });
+            });
+
+            return result;
+        }
+
+        function getWeeklyReport(date) {
+            const weekStart = getWeekStart(date);
+            const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+            const result = [];
+
+            attendanceData.forEach(teacher => {
+                const weekRecords = teacher.attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= weekStart && aDate <= weekEnd;
+                });
+
+                let present = 0, late = 0;
+                const dayStatus = {};
+                for (let d = 0; d < 5; d++) {
+                    const day = new Date(weekStart);
+                    day.setDate(day.getDate() + d);
+                    if (day.getDay() !== 0 && day.getDay() !== 6) {
+                        dayStatus[day.toDateString()] = 'Absent';
+                    }
+                }
+
+                weekRecords.forEach(record => {
+                    const dayStr = new Date(record.date).toDateString();
+                    if (dayStatus.hasOwnProperty(dayStr)) {
+                        dayStatus[dayStr] = record.isLate ? 'Late' : 'Present';
+                    }
+                });
+
+                let total = Object.keys(dayStatus).length;
+                Object.values(dayStatus).forEach(s => {
+                    if (s === 'Present') present++;
+                    else if (s === 'Late') late++;
+                });
+
+                const rate = total > 0 ? ((present / total) * 100).toFixed(0) : 0;
+                let overallStatus = 'Absent', statusClass = 'red';
+                if (present > 0) { overallStatus = 'Present'; statusClass = 'green'; }
+                if (late > 0 && present === 0) { overallStatus = 'Late'; statusClass = 'orange'; }
+
+                result.push({
+                    name: getTeacherName(teacher),
+                    employeeId: teacher.employeeId || 'N/A',
+                    department: teacher.department || 'N/A',
+                    status: `${overallStatus} (${present}/${total})`,
+                    statusClass: statusClass,
+                    checkIn: `${present} Present`,
+                    checkOut: `${late} Late`,
+                    hours: `${total - present - late} Absent`,
+                    date: `${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`,
+                    rawDate: weekStart,
+                    attendanceRate: parseFloat(rate)
+                });
+            });
+
+            return result;
+        }
+
+        function getMonthlyReport(date) {
+            const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+            const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            const result = [];
+
+            attendanceData.forEach(teacher => {
+                const monthRecords = teacher.attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= monthStart && aDate <= monthEnd;
+                });
+
+                let present = 0, late = 0, totalDays = 0;
+                const currentDate = new Date(monthStart);
+                while (currentDate <= monthEnd) {
+                    if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) totalDays++;
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                monthRecords.forEach(record => {
+                    if (record.isLate) late++;
+                    else if (record.status === 'Present') present++;
+                });
+
+                const rate = totalDays > 0 ? ((present / totalDays) * 100).toFixed(0) : 0;
+                let overallStatus = 'Absent', statusClass = 'red';
+                if (present > 0) { overallStatus = 'Present'; statusClass = 'green'; }
+                if (late > 0 && present === 0) { overallStatus = 'Late'; statusClass = 'orange'; }
+
+                result.push({
+                    name: getTeacherName(teacher),
+                    employeeId: teacher.employeeId || 'N/A',
+                    department: teacher.department || 'N/A',
+                    status: `${overallStatus} (${present}/${totalDays})`,
+                    statusClass: statusClass,
+                    checkIn: `${present} Present`,
+                    checkOut: `${late} Late`,
+                    hours: `${totalDays - present - late} Absent`,
+                    date: monthStart.toLocaleString('default', { month: 'long', year: 'numeric' }),
+                    rawDate: monthStart,
+                    attendanceRate: parseFloat(rate)
+                });
+            });
+
+            return result;
+        }
+
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            d.setDate(diff); d.setHours(0,0,0,0);
+            return d;
+        }
+
+        function formatDate(date) {
+            if (!date) return '-';
+            return new Date(date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function updateSummary(data) {
+            let total = data.length, present = 0, late = 0, absent = 0;
+            data.forEach(item => {
+                if (item.status.includes('Present')) present++;
+                else if (item.status.includes('Late')) late++;
+                else absent++;
+            });
+            document.getElementById('reportTotal').textContent = total;
+            document.getElementById('reportPresent').textContent = present;
+            document.getElementById('reportLate').textContent = late;
+            document.getElementById('reportAbsent').textContent = absent;
+            document.getElementById('reportRate').textContent = total > 0 ? ((present / total) * 100).toFixed(1) + '%' : '0%';
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('attendanceBody');
+            tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:30px;">No records found for selected date</td></tr>';
+                return;
+            }
+            data.forEach((item, i) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${i+1}</td>
+                    <td><strong>${item.name}</strong></td>
+                    <td>${item.employeeId}</td>
+                    <td>${item.department}</td>
+                    <td><span class="badge ${item.statusClass}">${item.status}</span></td>
+                    <td>${item.checkIn}</td>
+                    <td>${item.checkOut}</td>
+                    <td>${item.hours}</td>
+                    <td>${item.date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderRanking(data) {
+            const container = document.getElementById('rankingList');
+            const sorted = [...data].sort((a, b) => b.attendanceRate - a.attendanceRate);
+            const top = sorted.slice(0, 10);
+
+            if (!top || top.length === 0) {
+                container.innerHTML = '<p style="color:#999;grid-column:span 2;">No data available for ranking</p>';
+                return;
+            }
+
+            const medals = ['🥇', '🥈', '🥉'];
+            container.innerHTML = top.map((item, i) => {
+                const medal = i < 3 ? medals[i] : `${i+1}.`;
+                const scoreColor = item.attendanceRate >= 80 ? 'green' : item.attendanceRate >= 50 ? 'orange' : 'red';
+                return `
+                    <div class="ranking-item">
+                        <span class="rank">${medal}</span>
+                        <span class="name">${item.name}</span>
+                        <span class="score ${scoreColor}">${item.attendanceRate}%</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const dept = document.getElementById('departmentFilter').value;
+            const filtered = filteredData.filter(item => {
+                const nameMatch = item.name.toLowerCase().includes(search);
+                const idMatch = item.employeeId.toLowerCase().includes(search);
+                const deptMatch = dept === '' || item.department === dept;
+                return (nameMatch || idMatch) && deptMatch;
+            });
+            renderTable(filtered);
+            updateSummary(filtered);
+            renderRanking(filtered);
+        }
+
+        function exportCSV() {
+            if (!filteredData || filteredData.length === 0) { alert('No data to export'); return; }
+            let csv = 'Name,Staff ID,Department,Status,Check In,Check Out,Hours,Date,Attendance Rate\n';
+            filteredData.forEach(item => {
+                csv += `${item.name},${item.employeeId},${item.department},${item.status},${item.checkIn},${item.checkOut},${item.hours},${item.date},${item.attendanceRate || 0}%\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `attendance_${currentTab}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        function exportPDF() {
+            const data = filteredData;
+            if (!data || data.length === 0) { alert('No data to export'); return; }
+
+            let total = data.length, present = 0, late = 0, absent = 0;
+            data.forEach(item => {
+                if (item.status.includes('Present')) present++;
+                else if (item.status.includes('Late')) late++;
+                else absent++;
+            });
+            const rate = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+
+            const sorted = [...data].sort((a, b) => b.attendanceRate - a.attendanceRate);
+            const top = sorted.slice(0, 10);
+            const medals = ['🥇', '🥈', '🥉'];
+
+            let rankingHTML = '';
+            top.forEach((item, i) => {
+                const medal = i < 3 ? medals[i] : `${i+1}.`;
+                const scoreColor = item.attendanceRate >= 80 ? 'green' : item.attendanceRate >= 50 ? 'orange' : 'red';
+                rankingHTML += `
+                    <div class="pdf-ranking-item">
+                        <span class="rank">${medal} ${item.name}</span>
+                        <span class="score" style="color:${scoreColor === 'green' ? '#28a745' : scoreColor === 'orange' ? '#ffc107' : '#dc3545'}">${item.attendanceRate}%</span>
+                    </div>
+                `;
+            });
+
+            let tableRows = '';
+            data.forEach((item, i) => {
+                const badgeClass = item.statusClass === 'green' ? 'green' : item.statusClass === 'orange' ? 'orange' : item.statusClass === 'blue' ? 'blue' : 'gray';
+                tableRows += `
+                    <tr>
+                        <td>${i+1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.employeeId}</td>
+                        <td>${item.department}</td>
+                        <td><span class="pdf-badge ${badgeClass}">${item.status}</span></td>
+                        <td>${item.checkIn}</td>
+                        <td>${item.checkOut}</td>
+                        <td>${item.hours}</td>
+                        <td>${item.date}</td>
+                    </tr>
+                `;
+            });
+
+            const pdfHTML = `
+                <div class="pdf-content">
+                    <h1>🏫 CHANGARA STAR ACADEMY</h1>
+                    <h2 style="text-align:center;color:#0b5394;font-size:18px;margin-bottom:15px;">Staff Attendance Report</h2>
+                    <p style="text-align:center;color:#666;margin-bottom:20px;">Generated: ${new Date().toLocaleString()}</p>
+
+                    <div class="pdf-stats">
+                        <div class="pdf-stat"><span class="num" style="color:#0b5394;">${total}</span><span class="lbl">Total Staff</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#28a745;">${present}</span><span class="lbl">Present</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#ffc107;">${late}</span><span class="lbl">Late</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#dc3545;">${absent}</span><span class="lbl">Absent</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#6f42c1;">${rate}%</span><span class="lbl">Attendance Rate</span></div>
+                    </div>
+
+                    <div class="pdf-ranking">
+                        <h3>🏆 Top Staff by Attendance</h3>
+                        ${rankingHTML || '<p>No data available</p>'}
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Staff ID</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Hours</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+
+                    <div class="pdf-footer">
+                        <p>© ${new Date().getFullYear()} Changara Star Academy. All rights reserved.</p>
+                        <p>Report Type: ${currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}</p>
+                    </div>
+                </div>
+            `;
+
+            const container = document.createElement('div');
+            container.innerHTML = pdfHTML;
+            container.style.position = 'absolute';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            document.body.appendChild(container);
+
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: `attendance_report_${currentTab}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, width: 1100 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            html2pdf().set(opt).from(container).save().then(function() {
+                document.body.removeChild(container);
+            });
+        }
+
+        function printReport() { window.print(); }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('admin');
+            window.location.href = 'admin-login.html';
+        }
+
+        function showError(msg) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('tableWrapper').style.display = 'block';
+            document.getElementById('attendanceBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc3545;padding:30px;">❌ ${msg}</td></tr>`;
+        }
+
+        setInterval(loadAttendance, 60000);
+    </script>
+</body>
+</html>

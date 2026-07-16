@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Changara Star Academy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #001f5c 0%, #0b5394 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-container h1 {
+            text-align: center;
+            color: #001f5c;
+            margin-bottom: 5px;
+        }
+        .login-container .subtitle {
+            text-align: center;
+            color: #d4a017;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .login-container .school-icon {
+            text-align: center;
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input:focus {
+            border-color: #0b5394;
+            outline: none;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #0b5394;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-login:hover {
+            background: #001f5c;
+            transform: scale(1.02);
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .alert.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .back-link a {
+            color: #0b5394;
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <span class="school-icon">🏫</span>
+        <h1>Admin Login</h1>
+        <p class="subtitle">Changara Star Academy</p>
+        
+        <div id="alert" class="alert"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Username or Email</label>
+                <input type="text" id="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn-login">🔐 Login</button>
+        </form>
+        
+        <div class="back-link">
+            <a href="index.html">← Back to Website</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // If already logged in, go to dashboard
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                console.log('🔄 Token found, redirecting to dashboard...');
+                window.location.href = 'admin-dashboard.html';
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const alertEl = document.getElementById('alert');
+            
+            alertEl.className = 'alert';
+            alertEl.style.display = 'none';
+            
+            try {
+                console.log('📤 Sending login request...');
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                console.log('📥 Login response:', result);
+                
+                if (result.success) {
+                    // Save to localStorage
+                    localStorage.setItem('adminToken', 'demo-token');
+                    localStorage.setItem('admin', JSON.stringify(result.admin));
+                    
+                    console.log('✅ Token saved:', localStorage.getItem('adminToken'));
+                    
+                    alertEl.className = 'alert success';
+                    alertEl.style.display = 'block';
+                    alertEl.textContent = '✅ Login successful! Redirecting...';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'admin-dashboard.html';
+                    }, 1000);
+                } else {
+                    alertEl.className = 'alert error';
+                    alertEl.style.display = 'block';
+                    alertEl.textContent = '❌ ' + (result.message || 'Login failed');
+                }
+            } catch (error) {
+                console.error('❌ Login error:', error);
+                alertEl.className = 'alert error';
+                alertEl.style.display = 'block';
+                alertEl.textContent = '❌ Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
