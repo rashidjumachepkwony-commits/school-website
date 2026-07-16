@@ -484,7 +484,7 @@ function calculateTotals(assessments) {
 }
 
 // ============================================
-// STUDENT REPORT HTML GENERATOR
+// STUDENT REPORT HTML GENERATOR - SINGLE PAGE OPTIMIZED
 // ============================================
 function generateStudentReportHTML(student, allAssessments = null) {
   const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
@@ -577,44 +577,56 @@ function generateStudentReportHTML(student, allAssessments = null) {
   const approachingCount = subjectsWithPerf.filter(s => s.percentage >= 40 && s.percentage < 60).length;
   const belowCount = subjectsWithPerf.filter(s => s.percentage < 40).length;
 
-  const subjectsHtml = subjectsWithPerf.map(a => `
+  // Determine if we need a compact layout (more than 8 subjects)
+  const isCompact = subjectsWithPerf.length > 8;
+
+  // Build subjects table HTML with compact styling
+  const subjectsHtml = subjectsWithPerf.map((a, index) => `
     <tr>
-      <td style="padding:8px 12px;border:1px solid #ddd;font-weight:600;">${a.subject}</td>
-      <td style="padding:8px 12px;border:1px solid #ddd;text-align:center;">${a.maxScore}</td>
-      <td style="padding:8px 12px;border:1px solid #ddd;text-align:center;font-weight:bold;font-size:16px;">${a.score}</td>
-      <td style="padding:8px 12px;border:1px solid #ddd;text-align:center;font-weight:bold;">
-        ${a.percentage.toFixed(1)}%
-      </td>
-      <td style="padding:8px 12px;border:1px solid #ddd;text-align:center;">
-        <span style="background:${a.color};color:white;padding:4px 14px;border-radius:50px;font-size:12px;font-weight:700;">${a.level}</span>
+      <td style="padding:${isCompact ? '2px 4px' : '4px 8px'};border:1px solid #ddd;font-weight:600;font-size:${isCompact ? '8px' : '10px'};">${a.subject}</td>
+      <td style="padding:${isCompact ? '2px 4px' : '4px 8px'};border:1px solid #ddd;text-align:center;font-size:${isCompact ? '8px' : '10px'};">${a.maxScore}</td>
+      <td style="padding:${isCompact ? '2px 4px' : '4px 8px'};border:1px solid #ddd;text-align:center;font-weight:bold;font-size:${isCompact ? '9px' : '12px'};color:#0A1628;">${a.score}</td>
+      <td style="padding:${isCompact ? '2px 4px' : '4px 8px'};border:1px solid #ddd;text-align:center;font-weight:bold;font-size:${isCompact ? '8px' : '10px'};">${a.percentage.toFixed(1)}%</td>
+      <td style="padding:${isCompact ? '2px 4px' : '4px 8px'};border:1px solid #ddd;text-align:center;">
+        <span style="background:${a.color};color:white;padding:${isCompact ? '1px 6px' : '2px 10px'};border-radius:50px;font-size:${isCompact ? '7px' : '9px'};font-weight:700;display:inline-block;white-space:nowrap;">${a.level}</span>
       </td>
     </tr>
   `).join('');
 
+  // Build strengths and weaknesses HTML (compact)
   let strengthsHtml = '';
   if (strengths.length > 0) {
-    strengthsHtml = strengths.map(s => `
-      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;">
+    const displayStrengths = isCompact ? strengths.slice(0, 4) : strengths;
+    strengthsHtml = displayStrengths.map(s => `
+      <div style="display:flex;justify-content:space-between;padding:${isCompact ? '2px 0' : '3px 0'};border-bottom:1px solid #f0f0f0;font-size:${isCompact ? '8px' : '10px'};">
         <span style="font-weight:600;">${s.subject}</span>
         <span style="color:#28a745;font-weight:700;">${s.percentage.toFixed(1)}%</span>
       </div>
     `).join('');
+    if (isCompact && strengths.length > 4) {
+      strengthsHtml += `<div style="font-size:7px;color:#999;text-align:center;padding-top:2px;">+${strengths.length - 4} more</div>`;
+    }
   } else {
-    strengthsHtml = `<p style="color:#999;font-size:13px;">No subjects meeting expectation yet. Keep working hard!</p>`;
+    strengthsHtml = `<p style="color:#999;font-size:${isCompact ? '7px' : '10px'};">No subjects meeting expectation yet.</p>`;
   }
 
   let weaknessesHtml = '';
   if (weaknesses.length > 0) {
-    weaknessesHtml = weaknesses.map(s => `
-      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;">
+    const displayWeaknesses = isCompact ? weaknesses.slice(0, 4) : weaknesses;
+    weaknessesHtml = displayWeaknesses.map(s => `
+      <div style="display:flex;justify-content:space-between;padding:${isCompact ? '2px 0' : '3px 0'};border-bottom:1px solid #f0f0f0;font-size:${isCompact ? '8px' : '10px'};">
         <span style="font-weight:600;">${s.subject}</span>
         <span style="color:#dc3545;font-weight:700;">${s.percentage.toFixed(1)}%</span>
       </div>
     `).join('');
+    if (isCompact && weaknesses.length > 4) {
+      weaknessesHtml += `<div style="font-size:7px;color:#999;text-align:center;padding-top:2px;">+${weaknesses.length - 4} more</div>`;
+    }
   } else {
-    weaknessesHtml = `<p style="color:#28a745;font-weight:600;font-size:13px;">🎉 All subjects are meeting or exceeding expectations!</p>`;
+    weaknessesHtml = `<p style="color:#28a745;font-weight:600;font-size:${isCompact ? '7px' : '10px'};">🎉 All subjects are meeting expectations!</p>`;
   }
 
+  // Trend analysis (compact)
   let trendHtml = '';
   if (allAssessments && allAssessments.length > 1) {
     const sorted = [...allAssessments].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -635,7 +647,8 @@ function generateStudentReportHTML(student, allAssessments = null) {
     });
 
     let trendItemsHtml = '';
-    Object.keys(subjectTrends).forEach(subject => {
+    const trendSubjects = isCompact ? Object.keys(subjectTrends).slice(0, 5) : Object.keys(subjectTrends);
+    trendSubjects.forEach(subject => {
       const scores = subjectTrends[subject];
       if (scores.length >= 2) {
         const first = scores[0];
@@ -644,26 +657,31 @@ function generateStudentReportHTML(student, allAssessments = null) {
         const trendIcon = diff > 5 ? '📈' : diff < -5 ? '📉' : '➡️';
         const trendColor = diff > 5 ? '#28a745' : diff < -5 ? '#dc3545' : '#d4a017';
         trendItemsHtml += `
-          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;">
+          <div style="display:flex;justify-content:space-between;padding:${isCompact ? '1px 0' : '3px 0'};border-bottom:1px solid #f0f0f0;font-size:${isCompact ? '7px' : '9px'};">
             <span style="font-weight:600;">${subject}</span>
-            <span style="color:${trendColor};font-weight:700;">
-              ${trendIcon} ${diff > 0 ? '+' : ''}${diff.toFixed(1)}%
-            </span>
-            <span style="color:#999;font-size:12px;">${scores[0].toFixed(1)}% → ${scores[scores.length-1].toFixed(1)}%</span>
+            <span style="color:${trendColor};font-weight:700;">${trendIcon} ${diff > 0 ? '+' : ''}${diff.toFixed(1)}%</span>
+            <span style="color:#999;">${scores[0].toFixed(0)}% → ${scores[scores.length-1].toFixed(0)}%</span>
           </div>
         `;
       }
     });
 
     trendHtml = `
-      <div style="margin-top:20px;padding:18px;background:white;border-radius:10px;border:1px solid #e8ecf1;">
-        <h4 style="color:#0A1628;font-size:15px;margin-bottom:10px;">📈 Progress Trend (All Assessments)</h4>
-        ${trendItemsHtml || '<p style="color:#999;font-size:13px;">Not enough data for trend analysis</p>'}
+      <div style="margin-top:6px;padding:${isCompact ? '6px 8px' : '10px 14px'};background:white;border-radius:6px;border:1px solid #e8ecf1;">
+        <h4 style="color:#0A1628;font-size:${isCompact ? '9px' : '12px'};margin-bottom:4px;">📈 Progress Trend</h4>
+        ${trendItemsHtml || '<p style="color:#999;font-size:8px;">Not enough data</p>'}
       </div>
     `;
   }
 
+  // Summary (compact)
   const strengthsList = strengths.map(s => s.subject).join(', ');
+
+  // Determine font sizes based on number of subjects
+  const titleSize = isCompact ? '14px' : '18px';
+  const subTitleSize = isCompact ? '10px' : '13px';
+  const bodySize = isCompact ? '8px' : '11px';
+  const smallSize = isCompact ? '7px' : '9px';
 
   return `
     <!DOCTYPE html>
@@ -672,45 +690,195 @@ function generateStudentReportHTML(student, allAssessments = null) {
       <meta charset="UTF-8">
       <title>Student Report - ${student.studentName}</title>
       <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; max-width: 1100px; margin: 0 auto; background: #f8f9fa; }
-        .report-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
-        .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { color: #0A1628; font-size: 26px; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+          font-family: 'Segoe UI', Arial, sans-serif; 
+          padding: ${isCompact ? '8px' : '15px'}; 
+          max-width: 100%; 
+          margin: 0; 
+          background: white;
+          font-size: ${bodySize};
+          line-height: 1.3;
+        }
+        .report-container { 
+          max-width: 100%; 
+          margin: 0 auto; 
+        }
+        .header { 
+          text-align: center; 
+          border-bottom: 2px solid #D4A017; 
+          padding-bottom: ${isCompact ? '4px' : '8px'}; 
+          margin-bottom: ${isCompact ? '6px' : '10px'}; 
+        }
+        .header h1 { 
+          color: #0A1628; 
+          font-size: ${titleSize}; 
+          margin: 0; 
+        }
         .header h1 .school-name { color: #D4A017; }
-        .header p { color: #666; margin: 5px 0; font-size: 14px; }
-        .student-info { background: #f8f9fc; padding: 18px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #e8ecf1; }
-        .student-info table { width: 100%; font-size: 14px; }
-        .student-info td { padding: 5px 10px; }
-        .student-info .label { font-weight: 600; color: #555; width: 140px; }
-        .student-info .value { font-weight: 600; color: #0A1628; }
-        .performance-box { text-align: center; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        .performance-box .level { font-size: 30px; font-weight: 700; }
-        .performance-box .score { font-size: 16px; color: #555; margin-top: 5px; }
-        .performance-box .badges { margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        .badge { display: inline-block; padding: 4px 16px; border-radius: 50px; font-size: 12px; font-weight: 700; color: white; }
+        .header p { 
+          color: #666; 
+          margin: ${isCompact ? '1px 0' : '3px 0'}; 
+          font-size: ${subTitleSize}; 
+        }
+        .student-info { 
+          background: #f8f9fc; 
+          padding: ${isCompact ? '4px 8px' : '8px 14px'}; 
+          border-radius: 6px; 
+          margin-bottom: ${isCompact ? '6px' : '10px'}; 
+          border: 1px solid #e8ecf1; 
+        }
+        .student-info table { 
+          width: 100%; 
+          font-size: ${bodySize}; 
+        }
+        .student-info td { 
+          padding: ${isCompact ? '1px 4px' : '3px 8px'}; 
+        }
+        .student-info .label { 
+          font-weight: 600; 
+          color: #555; 
+          width: ${isCompact ? '80px' : '120px'}; 
+        }
+        .student-info .value { 
+          font-weight: 600; 
+          color: #0A1628; 
+        }
+        .performance-box { 
+          text-align: center; 
+          padding: ${isCompact ? '4px 8px' : '8px 16px'}; 
+          border-radius: 6px; 
+          margin-bottom: ${isCompact ? '6px' : '10px'}; 
+        }
+        .performance-box .level { 
+          font-size: ${isCompact ? '16px' : '22px'}; 
+          font-weight: 700; 
+        }
+        .performance-box .score { 
+          font-size: ${subTitleSize}; 
+          color: #555; 
+          margin-top: 2px; 
+        }
+        .performance-box .badges { 
+          margin-top: 4px; 
+          display: flex; 
+          justify-content: center; 
+          gap: 4px; 
+          flex-wrap: wrap; 
+        }
+        .badge { 
+          display: inline-block; 
+          padding: ${isCompact ? '1px 6px' : '2px 12px'}; 
+          border-radius: 50px; 
+          font-size: ${smallSize}; 
+          font-weight: 700; 
+          color: white; 
+        }
         .badge-exceeding { background: #28a745; }
         .badge-meeting { background: #17a2b8; }
         .badge-approaching { background: #d4a017; }
         .badge-below { background: #dc3545; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 13px; }
-        table th { background: #0A1628; color: white; padding: 10px 12px; text-align: left; }
-        table td { padding: 8px 12px; border-bottom: 1px solid #e8ecf1; }
-        table tr:hover td { background: #f8f9fc; }
-        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
-        .analysis-box { background: #f8f9fc; padding: 18px; border-radius: 10px; border-left: 4px solid #28a745; }
+        
+        .table-wrap { overflow-x: auto; margin: ${isCompact ? '4px 0' : '8px 0'}; }
+        table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          font-size: ${bodySize}; 
+        }
+        table th { 
+          background: #0A1628; 
+          color: white; 
+          padding: ${isCompact ? '3px 4px' : '6px 10px'}; 
+          text-align: left; 
+          font-size: ${smallSize}; 
+        }
+        table td { 
+          padding: ${isCompact ? '2px 4px' : '4px 10px'}; 
+          border-bottom: 1px solid #e8ecf1; 
+        }
+        table tr:nth-child(even) { background: #fafbfc; }
+        
+        .analysis-grid { 
+          display: grid; 
+          grid-template-columns: 1fr 1fr; 
+          gap: ${isCompact ? '6px' : '12px'}; 
+          margin: ${isCompact ? '4px 0' : '8px 0'}; 
+        }
+        .analysis-box { 
+          background: #f8f9fc; 
+          padding: ${isCompact ? '4px 8px' : '8px 14px'}; 
+          border-radius: 6px; 
+          border-left: 3px solid #28a745; 
+        }
         .analysis-box.weakness { border-left-color: #dc3545; }
-        .analysis-box h4 { font-size: 15px; margin-bottom: 10px; }
-        .analysis-box .item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+        .analysis-box h4 { 
+          font-size: ${subTitleSize}; 
+          margin-bottom: 2px; 
+        }
+        .analysis-box .item { 
+          display: flex; 
+          justify-content: space-between; 
+          padding: ${isCompact ? '1px 0' : '3px 0'}; 
+          border-bottom: 1px solid #f0f0f0; 
+          font-size: ${bodySize}; 
+        }
         .analysis-box .item:last-child { border-bottom: none; }
         .analysis-box .item .score-high { color: #28a745; font-weight: 700; }
         .analysis-box .item .score-low { color: #dc3545; font-weight: 700; }
-        .trend-box { margin-top: 20px; padding: 18px; background: white; border-radius: 10px; border: 1px solid #e8ecf1; }
-        .summary-box { margin-top: 20px; padding: 18px; background: #f8f9fc; border-radius: 10px; border: 1px solid #e8ecf1; }
-        .summary-box p { font-size: 13px; color: #555; line-height: 1.8; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
+        .analysis-box .more-text { 
+          font-size: ${smallSize}; 
+          color: #999; 
+          text-align: center; 
+          padding-top: 2px; 
+        }
+        
+        .trend-box { 
+          margin-top: ${isCompact ? '4px' : '8px'}; 
+          padding: ${isCompact ? '6px 8px' : '10px 14px'}; 
+          background: white; 
+          border-radius: 6px; 
+          border: 1px solid #e8ecf1; 
+        }
+        .trend-box h4 { 
+          color: #0A1628; 
+          font-size: ${subTitleSize}; 
+          margin-bottom: 2px; 
+        }
+        
+        .summary-box { 
+          margin-top: ${isCompact ? '4px' : '8px'}; 
+          padding: ${isCompact ? '4px 8px' : '8px 14px'}; 
+          background: #f8f9fc; 
+          border-radius: 6px; 
+          border: 1px solid #e8ecf1; 
+        }
+        .summary-box p { 
+          font-size: ${bodySize}; 
+          color: #555; 
+          line-height: ${isCompact ? '1.3' : '1.6'}; 
+          margin: 0;
+        }
+        .summary-box p strong { color: #0A1628; }
+        
+        .footer { 
+          text-align: center; 
+          margin-top: ${isCompact ? '6px' : '12px'}; 
+          padding-top: ${isCompact ? '4px' : '8px'}; 
+          border-top: 1px solid #ddd; 
+          color: #999; 
+          font-size: ${smallSize}; 
+        }
         .no-print { display: none; }
-        @media print { body { padding: 10px; background: white; } .report-container { box-shadow: none; padding: 15px; } .no-print { display: none; } }
-        @media (max-width: 700px) { .analysis-grid { grid-template-columns: 1fr; } table { font-size: 11px; } table th, table td { padding: 5px 8px; } }
+        @media print { 
+          body { padding: 8px; background: white; } 
+          .report-container { box-shadow: none; padding: 0; } 
+          .no-print { display: none !important; } 
+        }
+        @media (max-width: 600px) { 
+          .analysis-grid { grid-template-columns: 1fr; } 
+          table { font-size: 8px; } 
+          table th, table td { padding: 2px 4px; } 
+        }
       </style>
     </head>
     <body>
@@ -744,60 +912,52 @@ function generateStudentReportHTML(student, allAssessments = null) {
           </div>
         </div>
         
-        <h3 style="margin:20px 0 10px;">📊 Subject Scores</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Subject</th>
-              <th style="text-align:center;">Max Score</th>
-              <th style="text-align:center;">Score</th>
-              <th style="text-align:center;">Percentage</th>
-              <th style="text-align:center;">Performance Level</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${subjectsHtml}
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th style="text-align:center;">Max</th>
+                <th style="text-align:center;">Score</th>
+                <th style="text-align:center;">%</th>
+                <th style="text-align:center;">Performance</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${subjectsHtml}
+            </tbody>
+          </table>
+        </div>
         
         <div class="analysis-grid">
           <div class="analysis-box">
-            <h4 style="color:#28a745;">🏆 Strengths (Best Performing Subjects)</h4>
+            <h4 style="color:#28a745;">🏆 Strengths</h4>
             ${strengthsHtml}
-            <div style="margin-top:10px;font-size:12px;color:#666;">
-              ${strengths.length > 0 ? `✅ ${strengths.length} subject(s) meeting or exceeding expectations` : 'Keep working hard!'}
-            </div>
           </div>
           <div class="analysis-box weakness">
-            <h4 style="color:#dc3545;">📚 Needs Improvement (Subjects to Focus On)</h4>
+            <h4 style="color:#dc3545;">📚 Needs Improvement</h4>
             ${weaknessesHtml}
-            <div style="margin-top:10px;font-size:12px;color:#666;">
-              ${weaknesses.length > 0 ? `⚠️ ${weaknesses.length} subject(s) need improvement` : '🎉 All subjects are doing well!'}
-            </div>
           </div>
         </div>
         
         ${trendHtml}
         
         <div class="summary-box">
-          <h4 style="color:#0A1628;font-size:15px;margin-bottom:8px;">📝 Teacher's Summary</h4>
           <p>
-            <strong>Overall Performance:</strong> ${student.studentName || 'The student'} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()}</strong> 
-            with an average score of <strong>${avgPercentage.toFixed(1)}%</strong>.
-            ${strengths.length > 0 ? `<br><br><strong>Strengths:</strong> ${strengthsList} show strong performance.` : ''}
-            ${weaknesses.length > 0 ? `<br><br><strong>Areas for Improvement:</strong> Focus on ${weaknesses.map(s => s.subject).join(', ')} to improve overall performance.` : ''}
-            ${weaknesses.length === 0 ? '<br><br>🎉 Excellent work! Continue maintaining this high standard.' : '<br><br>Keep up the good work and focus on improving in the areas identified above.'}
+            <strong>Overall:</strong> ${student.studentName || 'The student'} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()}</strong> 
+            with an average of <strong>${avgPercentage.toFixed(1)}%</strong>.
+            ${strengths.length > 0 ? ` <strong>Strengths:</strong> ${strengthsList}.` : ''}
+            ${weaknesses.length > 0 ? ` <strong>Focus:</strong> ${weaknesses.map(s => s.subject).join(', ')}.` : ' 🎉 Excellent work!'}
           </p>
         </div>
         
         <div class="footer">
           <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-          <p>This report is a true reflection of the student's performance in the ${typeNames[student.type] || 'monthly'} assessment.</p>
         </div>
       </div>
       
-      <div class="no-print" style="text-align:center;margin-top:15px;">
-        <button onclick="window.print()" style="padding:10px 30px;background:#D4A017;color:#0A1628;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">
+      <div class="no-print" style="text-align:center;margin-top:10px;">
+        <button onclick="window.print()" style="padding:8px 20px;background:#D4A017;color:#0A1628;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:12px;">
           🖨️ Print / Save as PDF
         </button>
       </div>
@@ -983,7 +1143,7 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ============================================
-// API ROUTES - TEACHER (SHORTENED)
+// API ROUTES - TEACHER
 // ============================================
 
 app.post('/api/teacher/register', async (req, res) => {
@@ -1849,26 +2009,35 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
     
     const html = generateStudentReportHTML(student, allAssessments);
     
-    // Create PDF options
+    // PDF options for single page
     const options = {
       format: 'A4',
       border: {
-        top: '1cm',
-        right: '1cm',
-        bottom: '1cm',
-        left: '1cm'
+        top: '0.5cm',
+        right: '0.5cm',
+        bottom: '0.5cm',
+        left: '0.5cm'
       },
       printBackground: true,
       landscape: false,
       type: 'pdf',
-      timeout: 30000
+      timeout: 30000,
+      quality: '100',
+      zoomFactor: '0.8',
+      paginationOffset: 0,
+      header: {
+        height: '0mm'
+      },
+      footer: {
+        height: '0mm'
+      }
     };
     
     // Generate PDF from HTML
     pdf.create(html, options).toBuffer((err, buffer) => {
       if (err) {
         console.error('PDF generation error:', err);
-        return res.status(500).json({ success: false, message: 'Error generating PDF' });
+        return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
       }
       
       // Send PDF as download
