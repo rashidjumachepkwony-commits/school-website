@@ -484,16 +484,10 @@ function calculateTotals(assessments) {
 }
 
 // ============================================
-// STUDENT REPORT HTML GENERATOR - SINGLE PAGE OPTIMIZED
+// STUDENT REPORT HTML GENERATOR
 // ============================================
 function generateStudentReportHTML(student, allAssessments = null) {
   const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
-  const performanceColors = {
-    'Exceeding Expectation': '#28a745',
-    'Meeting Expectation': '#17a2b8',
-    'Approaching Expectation': '#d4a017',
-    'Below Expectation': '#dc3545'
-  };
   
   let assessments = student.assessments || [];
   
@@ -577,10 +571,8 @@ function generateStudentReportHTML(student, allAssessments = null) {
   const approachingCount = subjectsWithPerf.filter(s => s.percentage >= 40 && s.percentage < 60).length;
   const belowCount = subjectsWithPerf.filter(s => s.percentage < 40).length;
 
-  // Determine if we need a compact layout (more than 8 subjects)
   const isCompact = subjectsWithPerf.length > 8;
 
-  // Build subjects table HTML with compact styling
   const subjectsHtml = subjectsWithPerf.map((a, index) => `
     <tr>
       <td style="padding:${isCompact ? '2px 4px' : '4px 8px'};border:1px solid #ddd;font-weight:600;font-size:${isCompact ? '8px' : '10px'};">${a.subject}</td>
@@ -593,7 +585,6 @@ function generateStudentReportHTML(student, allAssessments = null) {
     </tr>
   `).join('');
 
-  // Build strengths and weaknesses HTML (compact)
   let strengthsHtml = '';
   if (strengths.length > 0) {
     const displayStrengths = isCompact ? strengths.slice(0, 4) : strengths;
@@ -626,7 +617,7 @@ function generateStudentReportHTML(student, allAssessments = null) {
     weaknessesHtml = `<p style="color:#28a745;font-weight:600;font-size:${isCompact ? '7px' : '10px'};">🎉 All subjects are meeting expectations!</p>`;
   }
 
-  // Trend analysis (compact)
+  // Trend analysis
   let trendHtml = '';
   if (allAssessments && allAssessments.length > 1) {
     const sorted = [...allAssessments].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -674,10 +665,7 @@ function generateStudentReportHTML(student, allAssessments = null) {
     `;
   }
 
-  // Summary (compact)
   const strengthsList = strengths.map(s => s.subject).join(', ');
-
-  // Determine font sizes based on number of subjects
   const titleSize = isCompact ? '14px' : '18px';
   const subTitleSize = isCompact ? '10px' : '13px';
   const bodySize = isCompact ? '8px' : '11px';
@@ -700,185 +688,48 @@ function generateStudentReportHTML(student, allAssessments = null) {
           font-size: ${bodySize};
           line-height: 1.3;
         }
-        .report-container { 
-          max-width: 100%; 
-          margin: 0 auto; 
-        }
-        .header { 
-          text-align: center; 
-          border-bottom: 2px solid #D4A017; 
-          padding-bottom: ${isCompact ? '4px' : '8px'}; 
-          margin-bottom: ${isCompact ? '6px' : '10px'}; 
-        }
-        .header h1 { 
-          color: #0A1628; 
-          font-size: ${titleSize}; 
-          margin: 0; 
-        }
+        .report-container { max-width: 100%; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: ${isCompact ? '4px' : '8px'}; margin-bottom: ${isCompact ? '6px' : '10px'}; }
+        .header h1 { color: #0A1628; font-size: ${titleSize}; margin: 0; }
         .header h1 .school-name { color: #D4A017; }
-        .header p { 
-          color: #666; 
-          margin: ${isCompact ? '1px 0' : '3px 0'}; 
-          font-size: ${subTitleSize}; 
-        }
-        .student-info { 
-          background: #f8f9fc; 
-          padding: ${isCompact ? '4px 8px' : '8px 14px'}; 
-          border-radius: 6px; 
-          margin-bottom: ${isCompact ? '6px' : '10px'}; 
-          border: 1px solid #e8ecf1; 
-        }
-        .student-info table { 
-          width: 100%; 
-          font-size: ${bodySize}; 
-        }
-        .student-info td { 
-          padding: ${isCompact ? '1px 4px' : '3px 8px'}; 
-        }
-        .student-info .label { 
-          font-weight: 600; 
-          color: #555; 
-          width: ${isCompact ? '80px' : '120px'}; 
-        }
-        .student-info .value { 
-          font-weight: 600; 
-          color: #0A1628; 
-        }
-        .performance-box { 
-          text-align: center; 
-          padding: ${isCompact ? '4px 8px' : '8px 16px'}; 
-          border-radius: 6px; 
-          margin-bottom: ${isCompact ? '6px' : '10px'}; 
-        }
-        .performance-box .level { 
-          font-size: ${isCompact ? '16px' : '22px'}; 
-          font-weight: 700; 
-        }
-        .performance-box .score { 
-          font-size: ${subTitleSize}; 
-          color: #555; 
-          margin-top: 2px; 
-        }
-        .performance-box .badges { 
-          margin-top: 4px; 
-          display: flex; 
-          justify-content: center; 
-          gap: 4px; 
-          flex-wrap: wrap; 
-        }
-        .badge { 
-          display: inline-block; 
-          padding: ${isCompact ? '1px 6px' : '2px 12px'}; 
-          border-radius: 50px; 
-          font-size: ${smallSize}; 
-          font-weight: 700; 
-          color: white; 
-        }
+        .header p { color: #666; margin: ${isCompact ? '1px 0' : '3px 0'}; font-size: ${subTitleSize}; }
+        .student-info { background: #f8f9fc; padding: ${isCompact ? '4px 8px' : '8px 14px'}; border-radius: 6px; margin-bottom: ${isCompact ? '6px' : '10px'}; border: 1px solid #e8ecf1; }
+        .student-info table { width: 100%; font-size: ${bodySize}; }
+        .student-info td { padding: ${isCompact ? '1px 4px' : '3px 8px'}; }
+        .student-info .label { font-weight: 600; color: #555; width: ${isCompact ? '80px' : '120px'}; }
+        .student-info .value { font-weight: 600; color: #0A1628; }
+        .performance-box { text-align: center; padding: ${isCompact ? '4px 8px' : '8px 16px'}; border-radius: 6px; margin-bottom: ${isCompact ? '6px' : '10px'}; }
+        .performance-box .level { font-size: ${isCompact ? '16px' : '22px'}; font-weight: 700; }
+        .performance-box .score { font-size: ${subTitleSize}; color: #555; margin-top: 2px; }
+        .performance-box .badges { margin-top: 4px; display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
+        .badge { display: inline-block; padding: ${isCompact ? '1px 6px' : '2px 12px'}; border-radius: 50px; font-size: ${smallSize}; font-weight: 700; color: white; }
         .badge-exceeding { background: #28a745; }
         .badge-meeting { background: #17a2b8; }
         .badge-approaching { background: #d4a017; }
         .badge-below { background: #dc3545; }
-        
         .table-wrap { overflow-x: auto; margin: ${isCompact ? '4px 0' : '8px 0'}; }
-        table { 
-          width: 100%; 
-          border-collapse: collapse; 
-          font-size: ${bodySize}; 
-        }
-        table th { 
-          background: #0A1628; 
-          color: white; 
-          padding: ${isCompact ? '3px 4px' : '6px 10px'}; 
-          text-align: left; 
-          font-size: ${smallSize}; 
-        }
-        table td { 
-          padding: ${isCompact ? '2px 4px' : '4px 10px'}; 
-          border-bottom: 1px solid #e8ecf1; 
-        }
+        table { width: 100%; border-collapse: collapse; font-size: ${bodySize}; }
+        table th { background: #0A1628; color: white; padding: ${isCompact ? '3px 4px' : '6px 10px'}; text-align: left; font-size: ${smallSize}; }
+        table td { padding: ${isCompact ? '2px 4px' : '4px 10px'}; border-bottom: 1px solid #e8ecf1; }
         table tr:nth-child(even) { background: #fafbfc; }
-        
-        .analysis-grid { 
-          display: grid; 
-          grid-template-columns: 1fr 1fr; 
-          gap: ${isCompact ? '6px' : '12px'}; 
-          margin: ${isCompact ? '4px 0' : '8px 0'}; 
-        }
-        .analysis-box { 
-          background: #f8f9fc; 
-          padding: ${isCompact ? '4px 8px' : '8px 14px'}; 
-          border-radius: 6px; 
-          border-left: 3px solid #28a745; 
-        }
+        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: ${isCompact ? '6px' : '12px'}; margin: ${isCompact ? '4px 0' : '8px 0'}; }
+        .analysis-box { background: #f8f9fc; padding: ${isCompact ? '4px 8px' : '8px 14px'}; border-radius: 6px; border-left: 3px solid #28a745; }
         .analysis-box.weakness { border-left-color: #dc3545; }
-        .analysis-box h4 { 
-          font-size: ${subTitleSize}; 
-          margin-bottom: 2px; 
-        }
-        .analysis-box .item { 
-          display: flex; 
-          justify-content: space-between; 
-          padding: ${isCompact ? '1px 0' : '3px 0'}; 
-          border-bottom: 1px solid #f0f0f0; 
-          font-size: ${bodySize}; 
-        }
+        .analysis-box h4 { font-size: ${subTitleSize}; margin-bottom: 2px; }
+        .analysis-box .item { display: flex; justify-content: space-between; padding: ${isCompact ? '1px 0' : '3px 0'}; border-bottom: 1px solid #f0f0f0; font-size: ${bodySize}; }
         .analysis-box .item:last-child { border-bottom: none; }
         .analysis-box .item .score-high { color: #28a745; font-weight: 700; }
         .analysis-box .item .score-low { color: #dc3545; font-weight: 700; }
-        .analysis-box .more-text { 
-          font-size: ${smallSize}; 
-          color: #999; 
-          text-align: center; 
-          padding-top: 2px; 
-        }
-        
-        .trend-box { 
-          margin-top: ${isCompact ? '4px' : '8px'}; 
-          padding: ${isCompact ? '6px 8px' : '10px 14px'}; 
-          background: white; 
-          border-radius: 6px; 
-          border: 1px solid #e8ecf1; 
-        }
-        .trend-box h4 { 
-          color: #0A1628; 
-          font-size: ${subTitleSize}; 
-          margin-bottom: 2px; 
-        }
-        
-        .summary-box { 
-          margin-top: ${isCompact ? '4px' : '8px'}; 
-          padding: ${isCompact ? '4px 8px' : '8px 14px'}; 
-          background: #f8f9fc; 
-          border-radius: 6px; 
-          border: 1px solid #e8ecf1; 
-        }
-        .summary-box p { 
-          font-size: ${bodySize}; 
-          color: #555; 
-          line-height: ${isCompact ? '1.3' : '1.6'}; 
-          margin: 0;
-        }
+        .analysis-box .more-text { font-size: ${smallSize}; color: #999; text-align: center; padding-top: 2px; }
+        .trend-box { margin-top: ${isCompact ? '4px' : '8px'}; padding: ${isCompact ? '6px 8px' : '10px 14px'}; background: white; border-radius: 6px; border: 1px solid #e8ecf1; }
+        .trend-box h4 { color: #0A1628; font-size: ${subTitleSize}; margin-bottom: 2px; }
+        .summary-box { margin-top: ${isCompact ? '4px' : '8px'}; padding: ${isCompact ? '4px 8px' : '8px 14px'}; background: #f8f9fc; border-radius: 6px; border: 1px solid #e8ecf1; }
+        .summary-box p { font-size: ${bodySize}; color: #555; line-height: ${isCompact ? '1.3' : '1.6'}; margin: 0; }
         .summary-box p strong { color: #0A1628; }
-        
-        .footer { 
-          text-align: center; 
-          margin-top: ${isCompact ? '6px' : '12px'}; 
-          padding-top: ${isCompact ? '4px' : '8px'}; 
-          border-top: 1px solid #ddd; 
-          color: #999; 
-          font-size: ${smallSize}; 
-        }
+        .footer { text-align: center; margin-top: ${isCompact ? '6px' : '12px'}; padding-top: ${isCompact ? '4px' : '8px'}; border-top: 1px solid #ddd; color: #999; font-size: ${smallSize}; }
         .no-print { display: none; }
-        @media print { 
-          body { padding: 8px; background: white; } 
-          .report-container { box-shadow: none; padding: 0; } 
-          .no-print { display: none !important; } 
-        }
-        @media (max-width: 600px) { 
-          .analysis-grid { grid-template-columns: 1fr; } 
-          table { font-size: 8px; } 
-          table th, table td { padding: 2px 4px; } 
-        }
+        @media print { body { padding: 8px; background: white; } .report-container { box-shadow: none; padding: 0; } .no-print { display: none !important; } }
+        @media (max-width: 600px) { .analysis-grid { grid-template-columns: 1fr; } table { font-size: 8px; } table th, table td { padding: 2px 4px; } }
       </style>
     </head>
     <body>
@@ -1201,6 +1052,9 @@ app.post('/api/teacher/register', async (req, res) => {
   }
 });
 
+// ============================================
+// TEACHER CHECK-IN - FIXED WITH KENYA TIME
+// ============================================
 app.post('/api/teacher/checkin', async (req, res) => {
   try {
     const { employeeId, pin } = req.body;
@@ -1220,11 +1074,13 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
+    // USE KENYA TIME
     const kenyaNow = getKenyaTime();
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
     const dayOfWeek = kenyaNow.getDay();
     
+    // Weekend check
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       return res.status(400).json({
         success: false,
@@ -1232,6 +1088,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
+    // Check if already checked in today
     const existingAttendance = teacher.attendance.find(a => {
       const aDate = new Date(a.date);
       aDate.setHours(0, 0, 0, 0);
@@ -1241,10 +1098,11 @@ app.post('/api/teacher/checkin', async (req, res) => {
     if (existingAttendance) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn)
+        message: '⚠️ You already checked in today'
       });
     }
     
+    // Check if after 5:00 PM (17:00) Kenya time
     if (kenyaHour >= 17) {
       return res.status(400).json({
         success: false,
@@ -1252,16 +1110,18 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
+    // Determine if late (after 7:00 AM Kenya time)
     const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
     const status = isLate ? 'Late' : 'Present';
     
+    // Store check-in time in Kenya time
     teacher.attendance.push({
       date: kenyaToday,
       checkIn: kenyaNow,
       status: status,
       location: 'School',
       isLate: isLate,
-      notes: isLate ? 'Late check-in at ' + formatKenyaFullTime(kenyaNow) : 'On-time check-in at ' + formatKenyaFullTime(kenyaNow)
+      notes: isLate ? 'Late check-in' : 'On-time check-in'
     });
     
     await teacher.save();
@@ -1292,6 +1152,9 @@ app.post('/api/teacher/checkin', async (req, res) => {
   }
 });
 
+// ============================================
+// TEACHER CHECK-OUT - FIXED WITH KENYA TIME
+// ============================================
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
     const { employeeId, pin } = req.body;
@@ -1311,10 +1174,12 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
+    // USE KENYA TIME
     const kenyaNow = getKenyaTime();
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
     
+    // Find today's attendance
     const todayAttendance = teacher.attendance.find(a => {
       const aDate = new Date(a.date);
       aDate.setHours(0, 0, 0, 0);
@@ -1331,10 +1196,11 @@ app.post('/api/teacher/checkout', async (req, res) => {
     if (todayAttendance.checkOut) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut)
+        message: '⚠️ You already checked out today'
       });
     }
     
+    // Allow check-out after 3:00 PM (15:00) Kenya time
     if (kenyaHour < 15) {
       return res.status(400).json({
         success: false,
@@ -1342,8 +1208,9 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
+    // Store check-out time in Kenya time
     todayAttendance.checkOut = kenyaNow;
-    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + formatKenyaFullTime(kenyaNow);
+    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
     
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
@@ -1372,6 +1239,9 @@ app.post('/api/teacher/checkout', async (req, res) => {
   }
 });
 
+// ============================================
+// GET TODAY'S ATTENDANCE - FIXED WITH KENYA TIME
+// ============================================
 app.get('/api/teacher/attendance/today', async (req, res) => {
   try {
     const kenyaToday = getKenyaDate();
@@ -1494,6 +1364,81 @@ app.get('/api/teachers', async (req, res) => {
   }
 });
 
+app.get('/api/teachers/:id', async (req, res) => {
+  try {
+    const teacher = await Teacher.findById(req.params.id).select('-password');
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+    res.json({
+      success: true,
+      teacher
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+app.put('/api/teachers/:id', async (req, res) => {
+  try {
+    const { firstName, lastName, email, employeeId, phoneNumber, department } = req.body;
+    
+    const teacher = await Teacher.findById(req.params.id);
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+    
+    const existing = await Teacher.findOne({
+      _id: { $ne: req.params.id },
+      $or: [{ email }, { employeeId }]
+    });
+    
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email or Employee ID already in use by another teacher'
+      });
+    }
+    
+    teacher.firstName = firstName || teacher.firstName;
+    teacher.lastName = lastName || teacher.lastName;
+    teacher.email = email || teacher.email;
+    teacher.employeeId = employeeId || teacher.employeeId;
+    teacher.phoneNumber = phoneNumber || teacher.phoneNumber;
+    teacher.department = department || teacher.department;
+    
+    await teacher.save();
+    
+    res.json({
+      success: true,
+      message: 'Teacher updated successfully!',
+      teacher: {
+        id: teacher._id,
+        firstName: teacher.firstName,
+        lastName: teacher.lastName,
+        employeeId: teacher.employeeId,
+        email: teacher.email,
+        department: teacher.department
+      }
+    });
+  } catch (error) {
+    console.error('Update teacher error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
 app.delete('/api/teachers/:id', async (req, res) => {
   try {
     const teacher = await Teacher.findByIdAndDelete(req.params.id);
@@ -1506,6 +1451,40 @@ app.delete('/api/teachers/:id', async (req, res) => {
     res.json({
       success: true,
       message: 'Teacher deleted successfully!'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+app.post('/api/teachers/:id/reset-pin', async (req, res) => {
+  try {
+    const { pin } = req.body;
+    const teacher = await Teacher.findById(req.params.id);
+    
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+    
+    if (!pin || pin.length < 4 || pin.length > 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'PIN must be 4-6 digits'
+      });
+    }
+    
+    teacher.password = pin;
+    await teacher.save();
+    
+    res.json({
+      success: true,
+      message: 'PIN reset successfully!'
     });
   } catch (error) {
     res.status(500).json({ 
@@ -1683,6 +1662,7 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
         fullName: visitor.fullName,
         badgeNumber: visitor.badgeNumber,
         checkOut: visitor.checkOut,
+        checkOutTime: formatKenyaTime(visitor.checkOut),
         duration: duration + ' minutes'
       }
     });
@@ -1712,7 +1692,11 @@ app.get('/api/visitors/today', async (req, res) => {
       total: visitors.length,
       active: active.length,
       completed: completed.length,
-      visitors: visitors
+      visitors: visitors.map(v => ({
+        ...v.toObject(),
+        checkInTime: formatKenyaTime(v.checkIn),
+        checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
+      }))
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -2009,7 +1993,6 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
     
     const html = generateStudentReportHTML(student, allAssessments);
     
-    // PDF options for single page
     const options = {
       format: 'A4',
       border: {
@@ -2025,22 +2008,16 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
       quality: '100',
       zoomFactor: '0.8',
       paginationOffset: 0,
-      header: {
-        height: '0mm'
-      },
-      footer: {
-        height: '0mm'
-      }
+      header: { height: '0mm' },
+      footer: { height: '0mm' }
     };
     
-    // Generate PDF from HTML
     pdf.create(html, options).toBuffer((err, buffer) => {
       if (err) {
         console.error('PDF generation error:', err);
         return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
       }
       
-      // Send PDF as download
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
       res.setHeader('Content-Length', buffer.length);
@@ -2054,7 +2031,7 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
 });
 
 // ============================================
-// GENERATE REPORT (for viewing)
+// GENERATE REPORT
 // ============================================
 app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
   try {
@@ -2182,6 +2159,159 @@ app.post('/api/assessments/copy', async (req, res) => {
     });
   } catch (error) {
     console.error('Error copying assessments:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// STAFF AND VISITOR REPORTS
+// ============================================
+
+// Staff Attendance Reports
+app.get('/api/reports/staff/attendance', async (req, res) => {
+  try {
+    const { period, date, department } = req.query;
+    
+    // Build date range
+    let startDate, endDate;
+    const selectedDate = date ? new Date(date) : getKenyaDate();
+    
+    if (period === 'daily') {
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    } else if (period === 'weekly') {
+      const day = selectedDate.getDay();
+      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(selectedDate);
+      startDate.setDate(diff);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+    } else if (period === 'monthly') {
+      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else {
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    // Build filter
+    let filter = {};
+    if (department) {
+      filter.department = department;
+    }
+    
+    const teachers = await Teacher.find(filter);
+    
+    const report = teachers.map(teacher => {
+      let totalDays = 0;
+      let onTime = 0;
+      let late = 0;
+      let absent = 0;
+      
+      teacher.attendance.forEach(record => {
+        const recordDate = new Date(record.date);
+        if (recordDate >= startDate && recordDate < endDate) {
+          totalDays++;
+          if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
+            if (record.isLate) {
+              late++;
+            } else {
+              onTime++;
+            }
+          } else {
+            absent++;
+          }
+        }
+      });
+      
+      return {
+        name: `${teacher.firstName} ${teacher.lastName}`,
+        employeeId: teacher.employeeId || 'N/A',
+        department: teacher.department || 'N/A',
+        totalDays,
+        onTime,
+        late,
+        absent
+      };
+    });
+    
+    res.json({ success: true, report });
+  } catch (error) {
+    console.error('Error generating staff report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Visitor Reports
+app.get('/api/reports/visitors', async (req, res) => {
+  try {
+    const { period, date, purpose } = req.query;
+    
+    let startDate, endDate;
+    const selectedDate = date ? new Date(date) : getKenyaDate();
+    
+    if (period === 'daily') {
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    } else if (period === 'weekly') {
+      const day = selectedDate.getDay();
+      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(selectedDate);
+      startDate.setDate(diff);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+    } else if (period === 'monthly') {
+      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else {
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    let filter = {
+      checkIn: { $gte: startDate, $lt: endDate }
+    };
+    if (purpose) {
+      filter.purpose = purpose;
+    }
+    
+    const visitors = await Visitor.find(filter);
+    
+    const report = visitors.map(visitor => {
+      const duration = visitor.checkOut ? 
+        Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
+      
+      return {
+        fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`,
+        firstName: visitor.firstName,
+        lastName: visitor.lastName,
+        badgeNumber: visitor.badgeNumber || 'N/A',
+        purpose: visitor.purpose || 'N/A',
+        personToVisit: visitor.personToVisit || 'N/A',
+        checkIn: visitor.checkIn,
+        checkOut: visitor.checkOut || null,
+        checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-',
+        checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-',
+        status: visitor.status || 'Checked In',
+        duration: duration
+      };
+    });
+    
+    res.json({ success: true, report });
+  } catch (error) {
+    console.error('Error generating visitor report:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -2327,6 +2457,10 @@ app.get('/api/test', (req, res) => {
           all: '/api/assessments/all',
           search: '/api/assessments/search',
           download: '/api/assessments/download-report/:studentId'
+        },
+        reports: {
+          staff: '/api/reports/staff/attendance',
+          visitors: '/api/reports/visitors'
         }
       }
     }
