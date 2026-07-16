@@ -158,6 +158,8 @@
         .btn-info:hover { background: #138496; }
         .btn-warning { background: #ffc107; color: #001f5c; }
         .btn-warning:hover { background: #e0a800; }
+        .btn-purple { background: linear-gradient(135deg, #6f42c1, #4a2a8a); color: white; }
+        .btn-purple:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(111,66,193,0.35); }
         .btn-sm { padding: 5px 12px; font-size: 12px; }
 
         .dashboard-cards { 
@@ -210,6 +212,10 @@
         .status-late { color: #d4a017; font-weight: 600; }
         .status-checked-in { color: #17a2b8; font-weight: 600; }
         .status-checked-out { color: #6c757d; font-weight: 600; }
+        .status-exceeding { color: #28a745; font-weight: 600; }
+        .status-meeting { color: #17a2b8; font-weight: 600; }
+        .status-approaching { color: #d4a017; font-weight: 600; }
+        .status-below { color: #dc3545; font-weight: 600; }
 
         .stats-grid {
             display: grid;
@@ -230,6 +236,7 @@
         .stat-card .number.green { color: #28a745; }
         .stat-card .number.red { color: #dc3545; }
         .stat-card .number.blue { color: #17a2b8; }
+        .stat-card .number.purple { color: #6f42c1; }
 
         .filter-bar {
             display: flex;
@@ -287,6 +294,77 @@
         }
         .chart-box canvas { max-height: 200px; max-width: 100%; }
 
+        .grade-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .grade-tabs .tab {
+            padding: 6px 14px;
+            border: 2px solid #e8ecf1;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #666;
+        }
+        .grade-tabs .tab:hover { border-color: #D4A017; color: #0A1628; }
+        .grade-tabs .tab.active {
+            background: linear-gradient(135deg, #D4A017, #F5C842);
+            border-color: #D4A017;
+            color: #0A1628;
+        }
+
+        .assessment-type-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .assessment-type-tabs .type-tab {
+            padding: 5px 16px;
+            border: 2px solid #e8ecf1;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #666;
+        }
+        .assessment-type-tabs .type-tab:hover { border-color: #D4A017; color: #0A1628; }
+        .assessment-type-tabs .type-tab.active {
+            background: linear-gradient(135deg, #D4A017, #F5C842);
+            border-color: #D4A017;
+            color: #0A1628;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .rank-badge.top { background: #28a745; color: white; }
+        .rank-badge.mid { background: #ffc107; color: #0A1628; }
+        .rank-badge.bottom { background: #dc3545; color: white; }
+
+        .subject-rank-badge {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 50px;
+            font-size: 8px;
+            font-weight: 700;
+        }
+        .subject-rank-badge.exceeding { background: #28a745; color: white; }
+        .subject-rank-badge.meeting { background: #17a2b8; color: white; }
+        .subject-rank-badge.approaching { background: #ffc107; color: #0A1628; }
+        .subject-rank-badge.below { background: #dc3545; color: white; }
+
         @media (max-width: 768px) {
             .sidebar { width: 100%; position: relative; min-height: auto; padding: 10px 0; }
             .main-content { margin-left: 0; padding: 15px; }
@@ -319,6 +397,9 @@
             <div class="menu-label" style="margin-top:10px;">Visitor Management</div>
             <a onclick="showSection('visitor-management')"><i class="fas fa-user-friends"></i> Visitor Management</a>
             
+            <div class="menu-label" style="margin-top:10px;">Academic Assessments</div>
+            <a onclick="showSection('academic-assessments')"><i class="fas fa-edit"></i> Assessments</a>
+            
             <div class="menu-label" style="margin-top:10px;">Reports</div>
             <a onclick="showSection('staff-reports')"><i class="fas fa-chart-bar"></i> Staff Reports</a>
             <a onclick="showSection('visitor-reports')"><i class="fas fa-chart-pie"></i> Visitor Reports</a>
@@ -346,7 +427,7 @@
         <!-- ======================================== -->
         <div id="section-dashboard" class="editor-container active">
             <h2>📊 Dashboard Overview</h2>
-            <p class="desc">Welcome to the Admin Dashboard. Manage staff, visitors, and view reports.</p>
+            <p class="desc">Welcome to the Admin Dashboard. Manage staff, visitors, assessments, and view reports.</p>
 
             <div class="dashboard-cards">
                 <div class="dashboard-card" onclick="showSection('staff-management')">
@@ -363,6 +444,11 @@
                     <span class="icon">🚪</span>
                     <h3>Visitor Management</h3>
                     <p>Check-in/out</p>
+                </div>
+                <div class="dashboard-card" onclick="showSection('academic-assessments')" style="border:2px solid #D4A017;">
+                    <span class="icon">📝</span>
+                    <h3>Assessments</h3>
+                    <p>Manage student results</p>
                 </div>
                 <div class="dashboard-card" onclick="showSection('staff-reports')">
                     <span class="icon">📊</span>
@@ -382,6 +468,7 @@
                     <button class="btn btn-success" onclick="showSection('staff-management')"><i class="fas fa-user-plus"></i> Add Staff</button>
                     <button class="btn btn-info" onclick="showSection('staff-attendance')"><i class="fas fa-user-check"></i> Staff Attendance</button>
                     <button class="btn btn-primary" onclick="showSection('visitor-management')"><i class="fas fa-user-friends"></i> Visitors</button>
+                    <button class="btn btn-purple" onclick="showSection('academic-assessments')"><i class="fas fa-edit"></i> Assessments</button>
                     <button class="btn btn-warning" onclick="showSection('staff-reports')"><i class="fas fa-chart-bar"></i> Staff Reports</button>
                     <button class="btn btn-secondary" onclick="showSection('visitor-reports')"><i class="fas fa-chart-pie"></i> Visitor Reports</button>
                 </div>
@@ -547,6 +634,72 @@
         </div>
 
         <!-- ======================================== -->
+        <!-- ACADEMIC ASSESSMENTS SECTION -->
+        <!-- ======================================== -->
+        <div id="section-academic-assessments" class="editor-container">
+            <h2>📝 Academic Assessments</h2>
+            <p class="desc">Manage student academic assessments and results.</p>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:15px;">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-primary btn-sm" onclick="window.open('admin-academics.html','_blank')"><i class="fas fa-external-link-alt"></i> Open Full Assessment Manager</button>
+                    <button class="btn btn-success btn-sm" onclick="loadAcademicAssessments()"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-info btn-sm" onclick="exportAcademicAssessments()"><i class="fas fa-download"></i> Export CSV</button>
+                </div>
+                <span style="color:#666;font-size:13px;" id="academicDate">Loading...</span>
+            </div>
+
+            <div class="grade-tabs" id="gradeTabs">
+                <div class="tab" onclick="selectAcademicGrade('Play Group')">🧸 Play Group</div>
+                <div class="tab" onclick="selectAcademicGrade('PP1')">🎨 PP1</div>
+                <div class="tab" onclick="selectAcademicGrade('PP2')">✏️ PP2</div>
+                <div class="tab active" onclick="selectAcademicGrade('Grade 1')">📖 Grade 1</div>
+                <div class="tab" onclick="selectAcademicGrade('Grade 2')">📗 Grade 2</div>
+                <div class="tab" onclick="selectAcademicGrade('Grade 3')">📘 Grade 3</div>
+                <div class="tab" onclick="selectAcademicGrade('Grade 4')">📙 Grade 4</div>
+                <div class="tab" onclick="selectAcademicGrade('Grade 5')">📚 Grade 5</div>
+                <div class="tab" onclick="selectAcademicGrade('Grade 6')">🎓 Grade 6</div>
+            </div>
+
+            <div class="assessment-type-tabs">
+                <div class="type-tab active" onclick="selectAcademicType('weekly')">📅 Weekly</div>
+                <div class="type-tab" onclick="selectAcademicType('monthly')">📊 Monthly</div>
+                <div class="type-tab" onclick="selectAcademicType('term')">📄 End of Term</div>
+            </div>
+
+            <div class="stats-grid" id="academicStats">
+                <div class="stat-card"><div class="number gold" id="academicTotal">0</div><div class="label">Total Students</div></div>
+                <div class="stat-card"><div class="number green" id="academicExceeding">0</div><div class="label">Exceeding Expectation</div></div>
+                <div class="stat-card"><div class="number blue" id="academicMeeting">0</div><div class="label">Meeting Expectation</div></div>
+                <div class="stat-card"><div class="number" style="color:#d4a017;" id="academicApproaching">0</div><div class="label">Approaching Expectation</div></div>
+                <div class="stat-card"><div class="number red" id="academicBelow">0</div><div class="label">Below Expectation</div></div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="academicTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Rank</th>
+                            <th>Student Name</th>
+                            <th>Grade</th>
+                            <th>Type</th>
+                            <th>Period</th>
+                            <th>Month</th>
+                            <th>Term</th>
+                            <th>Total</th>
+                            <th>Performance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="academicBody">
+                        <tr><td colspan="11" style="text-align:center;color:#999;">Loading academic data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ======================================== -->
         <!-- STAFF REPORTS SECTION -->
         <!-- ======================================== -->
         <div id="section-staff-reports" class="editor-container">
@@ -701,6 +854,13 @@
         })();
 
         // ============================================
+        // GLOBAL VARIABLES
+        // ============================================
+        let currentAcademicGrade = 'Grade 1';
+        let currentAcademicType = 'weekly';
+        let academicData = [];
+
+        // ============================================
         // SHOW SECTION
         // ============================================
         function showSection(section) {
@@ -721,6 +881,7 @@
             if (section === 'staff-management') loadStaffList();
             if (section === 'staff-attendance') loadStaffAttendance();
             if (section === 'visitor-management') loadVisitors();
+            if (section === 'academic-assessments') loadAcademicAssessments();
             if (section === 'staff-reports') setTimeout(generateStaffReport, 300);
             if (section === 'visitor-reports') setTimeout(generateVisitorReport, 300);
 
@@ -1036,6 +1197,141 @@
         }
 
         // ============================================
+        // ACADEMIC ASSESSMENTS
+        // ============================================
+        function selectAcademicGrade(grade) {
+            currentAcademicGrade = grade;
+            document.querySelectorAll('#gradeTabs .tab').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#gradeTabs .tab').forEach(el => {
+                if (el.textContent.trim().includes(grade) || el.textContent.trim() === grade) {
+                    el.classList.add('active');
+                }
+            });
+            loadAcademicAssessments();
+        }
+
+        function selectAcademicType(type) {
+            currentAcademicType = type;
+            document.querySelectorAll('.type-tab').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.type-tab').forEach(el => {
+                if (el.textContent.trim().toLowerCase().includes(type)) {
+                    el.classList.add('active');
+                }
+            });
+            loadAcademicAssessments();
+        }
+
+        async function loadAcademicAssessments() {
+            document.getElementById('academicDate').textContent = '📅 ' + new Date().toLocaleDateString('en-KE', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+
+            try {
+                const response = await fetch(`/api/assessments/grade/${encodeURIComponent(currentAcademicGrade)}?type=${currentAcademicType}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    academicData = data.students || [];
+                    const students = academicData;
+
+                    const total = students.length;
+                    const exceeding = students.filter(s => s.performanceLevel === 'Exceeding Expectation').length;
+                    const meeting = students.filter(s => s.performanceLevel === 'Meeting Expectation').length;
+                    const approaching = students.filter(s => s.performanceLevel === 'Approaching Expectation').length;
+                    const below = students.filter(s => s.performanceLevel === 'Below Expectation').length;
+
+                    document.getElementById('academicTotal').textContent = total;
+                    document.getElementById('academicExceeding').textContent = exceeding;
+                    document.getElementById('academicMeeting').textContent = meeting;
+                    document.getElementById('academicApproaching').textContent = approaching;
+                    document.getElementById('academicBelow').textContent = below;
+
+                    const tbody = document.getElementById('academicBody');
+                    if (students.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#999;">No students found for ${currentAcademicGrade} - ${currentAcademicType}</td></tr>`;
+                        return;
+                    }
+
+                    // Sort by total score descending for ranking
+                    students.sort((a, b) => b.totalScore - a.totalScore);
+
+                    const typeNames = {
+                        'weekly': 'Weekly',
+                        'monthly': 'Monthly',
+                        'term': 'End of Term'
+                    };
+
+                    tbody.innerHTML = '';
+                    students.forEach((student, index) => {
+                        const rank = index + 1;
+                        const totalStudents = students.length;
+                        let rankColor = 'mid';
+                        if (rank <= Math.ceil(totalStudents * 0.2)) rankColor = 'top';
+                        else if (rank > Math.ceil(totalStudents * 0.7)) rankColor = 'bottom';
+
+                        const performanceClass = {
+                            'Exceeding Expectation': 'status-exceeding',
+                            'Meeting Expectation': 'status-meeting',
+                            'Approaching Expectation': 'status-approaching',
+                            'Below Expectation': 'status-below'
+                        }[student.performanceLevel] || '';
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td><span class="rank-badge ${rankColor}">#${rank}</span></td>
+                            <td><strong>${student.studentName}</strong></td>
+                            <td>${student.grade}</td>
+                            <td>${typeNames[student.type] || student.type || '-'}</td>
+                            <td>${student.period || '-'}</td>
+                            <td>${student.month || '-'}</td>
+                            <td>${student.term || '-'}</td>
+                            <td>${student.totalScore || 0}</td>
+                            <td><span class="${performanceClass}">${student.performanceLevel || 'N/A'}</span></td>
+                            <td>
+                                <button class="btn btn-info btn-sm" onclick="viewAcademicStudent('${student._id}')" title="View"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-primary btn-sm" onclick="editAcademicStudent('${student._id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-success btn-sm" onclick="downloadAcademicReport('${student._id}')" title="Download"><i class="fas fa-download"></i></button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading academic assessments:', error);
+                document.getElementById('academicBody').innerHTML = `<tr><td colspan="11" style="text-align:center;color:#dc3545;">Error loading academic data</td></tr>`;
+            }
+        }
+
+        function viewAcademicStudent(studentId) {
+            window.open(`admin-academics.html?view=${studentId}`, '_blank');
+        }
+
+        function editAcademicStudent(studentId) {
+            window.open(`admin-academics.html?edit=${studentId}`, '_blank');
+        }
+
+        function downloadAcademicReport(studentId) {
+            window.open(`/api/assessments/download-report/${studentId}`, '_blank');
+        }
+
+        function exportAcademicAssessments() {
+            if (academicData.length === 0) {
+                showAlert('No data to export', 'error');
+                return;
+            }
+
+            let csv = '\uFEFF';
+            csv += 'Student Name,Grade,Type,Period,Month,Term,Total Score,Average,Performance Level\n';
+
+            academicData.forEach(student => {
+                csv += `"${student.studentName}","${student.grade}","${student.type || ''}","${student.period || ''}","${student.month || ''}","${student.term || ''}","${student.totalScore || 0}","${(student.averageScore || 0).toFixed(1)}","${student.performanceLevel || ''}"\n`;
+            });
+
+            downloadCSV(csv, `academic_assessments_${currentAcademicGrade}_${currentAcademicType}_${new Date().toISOString().split('T')[0]}.csv`);
+        }
+
+        // ============================================
         // STAFF REPORTS
         // ============================================
         async function generateStaffReport() {
@@ -1264,6 +1560,7 @@
             loadStaffList();
             loadStaffAttendance();
             loadVisitors();
+            loadAcademicAssessments();
             setTimeout(generateStaffReport, 500);
             setTimeout(generateVisitorReport, 500);
         });
