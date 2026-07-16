@@ -1,581 +1,258 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Check-in/out - Changara Star Academy</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #e8f0fe 0%, #f5f5f5 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            width: 100%;
-            max-width: 500px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .header .icon {
-            font-size: 64px;
-            display: block;
-        }
-        .header h1 {
-            color: #001f5c;
-            font-size: 28px;
-            margin-top: 10px;
-        }
-        .header p {
-            color: #666;
-            margin-top: 5px;
-        }
-        .day-info {
-            text-align: center;
-            color: #666;
-            margin: 5px 0 15px;
-            font-size: 14px;
-        }
-        .kenyan-time {
-            text-align: center;
-            color: #0b5394;
-            font-size: 20px;
-            font-weight: bold;
-            margin: 10px 0;
-            padding: 10px;
-            background: #f0f4ff;
-            border-radius: 8px;
-        }
-        .weekend-message {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #ffeaa7;
-            margin: 10px 0;
-            display: none;
-        }
-        .weekend-message .icon {
-            font-size: 48px;
-            display: block;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-        .form-group input:focus {
-            border-color: #0b5394;
-            outline: none;
-        }
-        .btn-row {
-            display: flex;
-            gap: 15px;
-            margin-top: 5px;
-        }
-        .btn-row button {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .btn-row button:hover {
-            transform: scale(1.02);
-        }
-        .btn-row button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-checkin {
-            background: #28a745;
-            color: white;
-        }
-        .btn-checkin:hover:not(:disabled) {
-            background: #1e7e34;
-        }
-        .btn-checkout {
-            background: #dc3545;
-            color: white;
-        }
-        .btn-checkout:hover:not(:disabled) {
-            background: #c82333;
-        }
-        .btn-checkin:disabled, .btn-checkout:disabled {
-            background: #ccc;
-            color: #666;
-        }
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-            font-size: 14px;
-        }
-        .alert.success {
-            display: block;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert.error {
-            display: block;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .alert.info {
-            display: block;
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        .status-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            text-align: center;
-            border: 2px solid #e0e0e0;
-            display: none;
-        }
-        .status-card .status-text {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .status-card .status-text.checked-in {
-            color: #28a745;
-        }
-        .status-card .status-text.checked-out {
-            color: #dc3545;
-        }
-        .status-card .status-text.late {
-            color: #ffc107;
-        }
-        .buttons-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        .buttons-row button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            min-width: 100px;
-        }
-        .btn-home {
-            background: #6c757d;
-            color: white;
-        }
-        .btn-home:hover {
-            background: #5a6268;
-        }
-        .btn-admin {
-            background: #0b5394;
-            color: white;
-        }
-        .btn-admin:hover {
-            background: #001f5c;
-        }
-        .btn-back {
-            background: #6c757d;
-            color: white;
-        }
-        .btn-back:hover {
-            background: #5a6268;
-        }
-        .btn-row-bottom {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .btn-row-bottom button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
-            .btn-row {
-                flex-direction: column;
-            }
-            .btn-row-bottom {
-                flex-direction: column;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <span class="icon">👨‍🏫</span>
-            <h1>Staff Check-in / Check-out</h1>
-            <p>Changara Star Academy</p>
-        </div>
+// ============================================
+// TEACHER CHECK-IN - FIXED WITH KENYA TIME
+// ============================================
+app.post('/api/teacher/checkin', async (req, res) => {
+  try {
+    const { employeeId, pin } = req.body;
+    
+    const teacher = await Teacher.findOne({ employeeId });
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: '❌ Staff not found. Please contact admin.' 
+      });
+    }
+    
+    if (teacher.password !== pin) {
+      return res.status(401).json({
+        success: false,
+        message: '❌ Invalid PIN. Please try again.'
+      });
+    }
+    
+    // ============================================
+    // USE KENYA TIME - FIXED
+    // ============================================
+    const kenyaNow = getKenyaTime();
+    const kenyaToday = getKenyaDate();
+    const kenyaHour = getKenyaHour();
+    const dayOfWeek = kenyaNow.getDay();
+    
+    console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
+    console.log('🕐 Hour (Kenya time):', kenyaHour);
+    
+    // Weekend check
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      return res.status(400).json({
+        success: false,
+        message: '📅 Weekend! Check-in is only available on weekdays (Monday-Friday).'
+      });
+    }
+    
+    // Check if already checked in today
+    const existingAttendance = teacher.attendance.find(a => {
+      const aDate = new Date(a.date);
+      aDate.setHours(0, 0, 0, 0);
+      return aDate.getTime() === kenyaToday.getTime();
+    });
+    
+    if (existingAttendance) {
+      return res.status(400).json({
+        success: false,
+        message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn)
+      });
+    }
+    
+    // Check if after 5:00 PM (17:00) Kenya time
+    if (kenyaHour >= 17) {
+      return res.status(400).json({
+        success: false,
+        message: '⏰ Check-in is not allowed after 5:00 PM. Please try again tomorrow.'
+      });
+    }
+    
+    // Determine if late (after 7:00 AM Kenya time)
+    const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
+    const status = isLate ? 'Late' : 'Present';
+    
+    // Store check-in time in Kenya time
+    teacher.attendance.push({
+      date: kenyaToday,
+      checkIn: kenyaNow,
+      status: status,
+      location: 'School',
+      isLate: isLate,
+      notes: isLate ? 'Late check-in at ' + formatKenyaFullTime(kenyaNow) : 'On-time check-in at ' + formatKenyaFullTime(kenyaNow)
+    });
+    
+    await teacher.save();
+    
+    const message = isLate 
+      ? '⚠️ Check-in successful! (You are LATE - after 7:00 AM)' 
+      : '✅ Check-in successful! (On time)';
+    
+    res.json({
+      success: true,
+      message: message,
+      checkInTime: kenyaNow,
+      checkInTimeFormatted: formatKenyaTime(kenyaNow),
+      isLate: isLate,
+      status: status,
+      teacher: {
+        name: `${teacher.firstName} ${teacher.lastName}`,
+        employeeId: teacher.employeeId
+      }
+    });
+    
+  } catch (error) {
+    console.error('Check-in error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
 
-        <div id="kenyanTime" class="kenyan-time">🕐 Kenya Time: Loading...</div>
-        <div id="dayInfo" class="day-info"></div>
-        <div id="weekendMessage" class="weekend-message">
-            <span class="icon">📅</span>
-            <h3>Weekend</h3>
-            <p>Check-in/out is only available on weekdays<br>(Monday - Friday)</p>
-        </div>
+// ============================================
+// TEACHER CHECK-OUT - FIXED WITH KENYA TIME
+// ============================================
+app.post('/api/teacher/checkout', async (req, res) => {
+  try {
+    const { employeeId, pin } = req.body;
+    
+    const teacher = await Teacher.findOne({ employeeId });
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: '❌ Staff not found. Please contact admin.' 
+      });
+    }
+    
+    if (teacher.password !== pin) {
+      return res.status(401).json({
+        success: false,
+        message: '❌ Invalid PIN. Please try again.'
+      });
+    }
+    
+    // ============================================
+    // USE KENYA TIME - FIXED
+    // ============================================
+    const kenyaNow = getKenyaTime();
+    const kenyaToday = getKenyaDate();
+    const kenyaHour = getKenyaHour();
+    
+    console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
+    console.log('🕐 Hour (Kenya time):', kenyaHour);
+    
+    // Find today's attendance
+    const todayAttendance = teacher.attendance.find(a => {
+      const aDate = new Date(a.date);
+      aDate.setHours(0, 0, 0, 0);
+      return aDate.getTime() === kenyaToday.getTime();
+    });
+    
+    if (!todayAttendance) {
+      return res.status(400).json({
+        success: false,
+        message: '❌ No check-in found for today. Please check in first.'
+      });
+    }
+    
+    if (todayAttendance.checkOut) {
+      return res.status(400).json({
+        success: false,
+        message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut)
+      });
+    }
+    
+    // Allow check-out after 3:00 PM (15:00) Kenya time
+    if (kenyaHour < 15) {
+      return res.status(400).json({
+        success: false,
+        message: '⏰ Check-out is only allowed after 3:00 PM. Please continue working.'
+      });
+    }
+    
+    // Store check-out time in Kenya time
+    todayAttendance.checkOut = kenyaNow;
+    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + formatKenyaFullTime(kenyaNow);
+    
+    const checkInTime = new Date(todayAttendance.checkIn);
+    const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
+    todayAttendance.hoursWorked = parseFloat(hoursWorked);
+    
+    await teacher.save();
+    
+    res.json({
+      success: true,
+      message: '✅ Check-out successful!',
+      checkOutTime: kenyaNow,
+      checkOutTimeFormatted: formatKenyaTime(kenyaNow),
+      hoursWorked: hoursWorked,
+      teacher: {
+        name: `${teacher.firstName} ${teacher.lastName}`,
+        employeeId: teacher.employeeId
+      }
+    });
+    
+  } catch (error) {
+    console.error('Check-out error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
 
-        <div id="alert" class="alert"></div>
-
-        <div id="statusCard" class="status-card">
-            <div id="statusText" class="status-text"></div>
-            <div id="statusTime" style="margin-top:5px;color:#666;"></div>
-            <div id="statusHours" style="color:#666;"></div>
-        </div>
-
-        <form id="checkinForm">
-            <div class="form-group">
-                <label>Staff ID</label>
-                <input type="text" id="employeeId" placeholder="Enter your Staff ID" required autofocus>
-            </div>
-            <div class="form-group">
-                <label>PIN</label>
-                <input type="password" id="pin" placeholder="Enter your PIN" required>
-            </div>
-            
-            <div class="btn-row">
-                <button type="button" id="checkinBtn" class="btn-checkin" onclick="handleAction('checkin')">✅ Check In</button>
-                <button type="button" id="checkoutBtn" class="btn-checkout" onclick="handleAction('checkout')">🚪 Check Out</button>
-            </div>
-        </form>
-
-        <div class="btn-row-bottom">
-            <button onclick="window.location.href='index.html'" class="btn-back">🏠 Home</button>
-            <button onclick="window.location.href='admin-login.html'" class="btn-admin">🔐 Admin</button>
-        </div>
-    </div>
-
-    <script>
-        // ============================================
-        // DOM ELEMENTS
-        // ============================================
-        const employeeIdInput = document.getElementById('employeeId');
-        const pinInput = document.getElementById('pin');
-        const checkinBtn = document.getElementById('checkinBtn');
-        const checkoutBtn = document.getElementById('checkoutBtn');
-        const alertDiv = document.getElementById('alert');
-        const statusCard = document.getElementById('statusCard');
-        const statusText = document.getElementById('statusText');
-        const statusTime = document.getElementById('statusTime');
-        const statusHours = document.getElementById('statusHours');
-        const dayInfo = document.getElementById('dayInfo');
-        const weekendMessage = document.getElementById('weekendMessage');
-        const kenyanTimeEl = document.getElementById('kenyanTime');
-
-        // ============================================
-        // KENYAN TIME HELPERS (EAT - UTC+3)
-        // ============================================
-        function getKenyanTime() {
-            const now = new Date();
-            const nairobiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
-            return nairobiTime;
+// ============================================
+// GET TODAY'S ATTENDANCE - FIXED WITH KENYA TIME
+// ============================================
+app.get('/api/teacher/attendance/today', async (req, res) => {
+  try {
+    const kenyaToday = getKenyaDate();
+    
+    const teachers = await Teacher.find({ isActive: true });
+    
+    const todayAttendance = teachers.map(teacher => {
+      const todayRecord = teacher.attendance.find(a => {
+        const aDate = new Date(a.date);
+        aDate.setHours(0, 0, 0, 0);
+        return aDate.getTime() === kenyaToday.getTime();
+      });
+      
+      let status = 'Absent';
+      let checkInFormatted = null;
+      let checkOutFormatted = null;
+      
+      if (todayRecord) {
+        if (todayRecord.checkOut) {
+          status = 'Checked Out';
+          checkOutFormatted = formatKenyaTime(todayRecord.checkOut);
+        } else {
+          status = 'Checked In';
         }
-
-        function formatKenyanTime(date) {
-            if (!date) return '--:--:--';
-            const d = new Date(date);
-            return d.toLocaleTimeString('en-KE', {
-                timeZone: 'Africa/Nairobi',
-                hour12: true,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
+        if (todayRecord.checkIn) {
+          checkInFormatted = formatKenyaTime(todayRecord.checkIn);
         }
-
-        function formatKenyanTimeShort(date) {
-            if (!date) return '--:--';
-            const d = new Date(date);
-            return d.toLocaleTimeString('en-KE', {
-                timeZone: 'Africa/Nairobi',
-                hour12: true,
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function getKenyanDate() {
-            const kenyanTime = getKenyanTime();
-            return kenyanTime.toLocaleDateString('en-KE', {
-                timeZone: 'Africa/Nairobi',
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        }
-
-        function getKenyanDayOfWeek() {
-            const kenyanTime = getKenyanTime();
-            return kenyanTime.getDay();
-        }
-
-        function updateKenyanTime() {
-            const kenyanTime = getKenyanTime();
-            const options = { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit',
-                hour12: true
-            };
-            kenyanTimeEl.textContent = '🕐 Kenya Time: ' + kenyanTime.toLocaleTimeString('en-KE', options);
-        }
-
-        // Update time every second
-        setInterval(updateKenyanTime, 1000);
-
-        // ============================================
-        // CHECK DAY (Kenyan Time)
-        // ============================================
-        function updateDayUI() {
-            const kenyanTime = getKenyanTime();
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const dayOfWeek = kenyanTime.getDay();
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-            
-            dayInfo.textContent = `${days[dayOfWeek]}, ${kenyanTime.toLocaleDateString('en-KE', { timeZone: 'Africa/Nairobi', year: 'numeric', month: 'long', day: 'numeric' })}`;
-            
-            if (isWeekend) {
-                weekendMessage.style.display = 'block';
-                checkinBtn.disabled = true;
-                checkoutBtn.disabled = true;
-            } else {
-                weekendMessage.style.display = 'none';
-                checkinBtn.disabled = false;
-                checkoutBtn.disabled = false;
-            }
-        }
-
-        // ============================================
-        // SHOW ALERT
-        // ============================================
-        function showAlert(message, type) {
-            alertDiv.className = 'alert ' + type;
-            alertDiv.textContent = message;
-            alertDiv.style.display = 'block';
-            
-            setTimeout(() => {
-                alertDiv.style.display = 'none';
-            }, 6000);
-        }
-
-        // ============================================
-        // CLEAR FORM
-        // ============================================
-        function clearForm() {
-            employeeIdInput.value = '';
-            pinInput.value = '';
-            employeeIdInput.focus();
-        }
-
-        // ============================================
-        // GET TODAY'S ATTENDANCE STATUS FOR TEACHER
-        // ============================================
-        async function getTeacherStatus(employeeId) {
-            try {
-                const response = await fetch(`/api/teacher/attendance/today`);
-                const data = await response.json();
-                if (data.success) {
-                    const teacher = data.attendance.find(t => t.employeeId === employeeId);
-                    if (teacher) {
-                        return {
-                            checkedIn: teacher.status === 'Checked In',
-                            checkedOut: teacher.status === 'Checked Out',
-                            isLate: teacher.isLate || false,
-                            checkInTime: teacher.checkIn,
-                            checkOutTime: teacher.checkOut,
-                            hoursWorked: teacher.hoursWorked || 0,
-                            checkInTimeFormatted: teacher.checkInTime,
-                            checkOutTimeFormatted: teacher.checkOutTime
-                        };
-                    }
-                }
-                return null;
-            } catch (error) {
-                console.error('Error checking status:', error);
-                return null;
-            }
-        }
-
-        // ============================================
-        // HANDLE CHECK IN / CHECK OUT
-        // ============================================
-        async function handleAction(action) {
-            const dayOfWeek = getKenyanDayOfWeek();
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                showAlert('📅 Check-in/out is only available on weekdays (Monday-Friday)', 'error');
-                return;
-            }
-            
-            const employeeId = employeeIdInput.value.trim();
-            const pin = pinInput.value.trim();
-            
-            if (!employeeId) {
-                showAlert('Please enter your Staff ID', 'error');
-                employeeIdInput.focus();
-                return;
-            }
-            
-            if (!pin) {
-                showAlert('Please enter your PIN', 'error');
-                pinInput.focus();
-                return;
-            }
-            
-            // Check if already checked in/out
-            const status = await getTeacherStatus(employeeId);
-            
-            // If trying to check out but not checked in
-            if (action === 'checkout') {
-                if (!status) {
-                    showAlert('❌ You have not checked in today. Please check in first.', 'error');
-                    return;
-                }
-                if (status.checkedOut) {
-                    showAlert(`⚠️ You already checked out today at ${status.checkOutTimeFormatted || formatKenyanTime(status.checkOutTime)}`, 'error');
-                    return;
-                }
-            }
-            
-            // If trying to check in but already checked in
-            if (action === 'checkin') {
-                if (status && status.checkedIn) {
-                    showAlert(`⚠️ You already checked in today at ${status.checkInTimeFormatted || formatKenyanTime(status.checkInTime)}`, 'error');
-                    return;
-                }
-                if (status && status.checkedOut) {
-                    showAlert('⚠️ You already checked out today. Cannot check in again.', 'error');
-                    return;
-                }
-            }
-            
-            const endpoint = action === 'checkin' ? '/api/teacher/checkin' : '/api/teacher/checkout';
-            
-            try {
-                // Disable both buttons while processing
-                checkinBtn.disabled = true;
-                checkoutBtn.disabled = true;
-                checkinBtn.textContent = '⏳ ...';
-                checkoutBtn.textContent = '⏳ ...';
-                
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        employeeId: employeeId, 
-                        location: 'School',
-                        pin: pin 
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showAlert(result.message, 'success');
-                    
-                    // Update status card with Kenya time
-                    statusCard.style.display = 'block';
-                    
-                    if (action === 'checkin') {
-                        const checkInTime = result.checkInTimeFormatted || formatKenyanTime(result.checkInTime);
-                        statusText.textContent = result.isLate ? '⚠️ Checked In (LATE)' : '✅ Checked In';
-                        statusText.className = result.isLate ? 'status-text late' : 'status-text checked-in';
-                        statusTime.textContent = `Time: ${checkInTime}`;
-                        statusHours.textContent = '';
-                    } else {
-                        const checkOutTime = result.checkOutTimeFormatted || formatKenyanTime(result.checkOutTime);
-                        statusText.textContent = '🚪 Checked Out';
-                        statusText.className = 'status-text checked-out';
-                        statusTime.textContent = `Time: ${checkOutTime}`;
-                        statusHours.textContent = `Hours Worked: ${result.hoursWorked}`;
-                    }
-                    
-                    // Clear the form for next user
-                    clearForm();
-                    
-                } else {
-                    showAlert(result.message, 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('Error: ' + error.message, 'error');
-            } finally {
-                // Re-enable buttons
-                checkinBtn.disabled = false;
-                checkoutBtn.disabled = false;
-                checkinBtn.textContent = '✅ Check In';
-                checkoutBtn.textContent = '🚪 Check Out';
-            }
-        }
-
-        // ============================================
-        // PRESS ENTER TO SUBMIT (Check In by default)
-        // ============================================
-        document.getElementById('checkinForm').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                handleAction('checkin');
-            }
-        });
-
-        // ============================================
-        // INIT
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            updateDayUI();
-            updateKenyanTime();
-            
-            // Update time every second
-            setInterval(updateKenyanTime, 1000);
-        });
-    </script>
-</body>
-</html>
+      }
+      
+      return {
+        name: `${teacher.firstName} ${teacher.lastName}`,
+        employeeId: teacher.employeeId,
+        department: teacher.department,
+        status: status,
+        checkIn: todayRecord ? todayRecord.checkIn : null,
+        checkOut: todayRecord ? todayRecord.checkOut : null,
+        checkInTime: checkInFormatted,
+        checkOutTime: checkOutFormatted,
+        isLate: todayRecord ? todayRecord.isLate : false,
+        hoursWorked: todayRecord ? todayRecord.hoursWorked : 0
+      };
+    });
+    
+    res.json({
+      success: true,
+      date: kenyaToday,
+      total: todayAttendance.length,
+      attendance: todayAttendance
+    });
+    
+  } catch (error) {
+    console.error('Error loading attendance:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
