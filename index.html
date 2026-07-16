@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏫 Changara Star Academy – Excellence in Education</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>" />
     <meta name="description" content="Changara Star Academy – Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
@@ -118,6 +118,7 @@
             display: flex;
             gap: 4px;
             align-items: center;
+            flex-wrap: wrap;
         }
         .main-header .nav-links a {
             color: rgba(255,255,255,0.7);
@@ -165,6 +166,32 @@
             box-shadow: 0 8px 25px rgba(212, 160, 23, 0.3);
         }
         .main-header .nav-links a.portal-link::after { display: none; }
+        
+        /* ===== NEW: Continuous Assessment Link ===== */
+        .main-header .nav-links a.assessment-link {
+            background: linear-gradient(135deg, var(--kenya-green), #004d00);
+            color: white;
+            font-weight: 600;
+            padding: 5px 16px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 11px;
+            animation: pulseAssessment 2s infinite;
+        }
+        .main-header .nav-links a.assessment-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 102, 0, 0.4);
+        }
+        .main-header .nav-links a.assessment-link::after { display: none; }
+        .main-header .nav-links a.assessment-link i {
+            margin-right: 4px;
+        }
+
+        @keyframes pulseAssessment {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 102, 0, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(0, 102, 0, 0); }
+        }
+
         .main-header .mobile-menu-btn {
             display: none;
             background: none;
@@ -172,154 +199,6 @@
             color: white;
             font-size: 24px;
             cursor: pointer;
-        }
-
-        /* ========================================
-           NAVIGATION BAR ABOVE HERO
-           ======================================== */
-        .top-nav-bar {
-            background: linear-gradient(135deg, #0A1628, #1a2a4a);
-            padding: 8px 0;
-            border-bottom: 2px solid var(--school-gold);
-            position: relative;
-            z-index: 100;
-            margin-top: 62px;
-        }
-        .top-nav-bar .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .top-nav-bar .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .top-nav-bar .nav-left .welcome-text {
-            color: rgba(255,255,255,0.5);
-            font-size: 11px;
-            font-weight: 300;
-        }
-        .top-nav-bar .nav-left .welcome-text i {
-            color: var(--school-gold);
-            margin-right: 4px;
-        }
-        .top-nav-bar .nav-links {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .top-nav-bar .nav-links a {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 16px;
-            border-radius: 50px;
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-        .top-nav-bar .nav-links a:hover {
-            background: rgba(212, 160, 23, 0.12);
-            color: var(--school-gold);
-            border-color: rgba(212, 160, 23, 0.15);
-            transform: translateY(-2px);
-        }
-        .top-nav-bar .nav-links a.active {
-            background: rgba(212, 160, 23, 0.18);
-            color: var(--school-gold);
-            border-color: var(--school-gold);
-        }
-        .top-nav-bar .nav-links a i {
-            font-size: 13px;
-        }
-        .top-nav-bar .nav-links a .badge {
-            background: var(--kenya-red);
-            color: white;
-            font-size: 7px;
-            padding: 1px 7px;
-            border-radius: 50px;
-            font-weight: 700;
-            animation: pulseBadge 1.5s infinite;
-        }
-        .top-nav-bar .nav-links a .badge-green {
-            background: var(--kenya-green);
-            color: white;
-            font-size: 7px;
-            padding: 1px 7px;
-            border-radius: 50px;
-            font-weight: 700;
-            animation: pulseBadgeGreen 1.8s infinite;
-        }
-        .top-nav-bar .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .top-nav-bar .nav-right .quick-link {
-            color: rgba(255,255,255,0.4);
-            font-size: 11px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        .top-nav-bar .nav-right .quick-link:hover {
-            color: var(--school-gold);
-        }
-        .top-nav-bar .nav-right .quick-link i {
-            margin-right: 4px;
-        }
-
-        @keyframes pulseBadge {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        @keyframes pulseBadgeGreen {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* ========================================
-           RESPONSIVE - TOP NAV BAR
-           ======================================== */
-        @media (max-width: 768px) {
-            .top-nav-bar .container {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-            .top-nav-bar .nav-left {
-                justify-content: center;
-            }
-            .top-nav-bar .nav-links {
-                justify-content: center;
-            }
-            .top-nav-bar .nav-right {
-                justify-content: center;
-            }
-            .top-nav-bar .nav-links a {
-                font-size: 11px;
-                padding: 4px 12px;
-            }
-            .top-nav-bar .nav-left .welcome-text {
-                font-size: 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .top-nav-bar .nav-links a {
-                font-size: 10px;
-                padding: 3px 10px;
-            }
-            .top-nav-bar .nav-links a i {
-                font-size: 11px;
-            }
         }
 
         /* ========================================
@@ -464,11 +343,181 @@
         }
 
         /* ========================================
+           TOP NAVIGATION BAR (ABOVE HERO)
+           ======================================== */
+        .top-nav-bar {
+            background: linear-gradient(135deg, #0A1628, #1a2a4a);
+            padding: 8px 0;
+            border-bottom: 2px solid var(--school-gold);
+            position: relative;
+            z-index: 100;
+            margin-top: 62px;
+        }
+        .top-nav-bar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .top-nav-bar .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .top-nav-bar .nav-left .welcome-text {
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+            font-weight: 300;
+        }
+        .top-nav-bar .nav-left .welcome-text i {
+            color: var(--school-gold);
+            margin-right: 4px;
+        }
+        .top-nav-bar .nav-links {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .top-nav-bar .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .top-nav-bar .nav-links a:hover {
+            background: rgba(212, 160, 23, 0.12);
+            color: var(--school-gold);
+            border-color: rgba(212, 160, 23, 0.15);
+            transform: translateY(-2px);
+        }
+        .top-nav-bar .nav-links a.active {
+            background: rgba(212, 160, 23, 0.18);
+            color: var(--school-gold);
+            border-color: var(--school-gold);
+        }
+        .top-nav-bar .nav-links a i {
+            font-size: 13px;
+        }
+        .top-nav-bar .nav-links a .badge {
+            background: var(--kenya-red);
+            color: white;
+            font-size: 7px;
+            padding: 1px 7px;
+            border-radius: 50px;
+            font-weight: 700;
+            animation: pulseBadge 1.5s infinite;
+        }
+        .top-nav-bar .nav-links a .badge-green {
+            background: var(--kenya-green);
+            color: white;
+            font-size: 7px;
+            padding: 1px 7px;
+            border-radius: 50px;
+            font-weight: 700;
+            animation: pulseBadgeGreen 1.8s infinite;
+        }
+        .top-nav-bar .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .top-nav-bar .nav-right .quick-link {
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .top-nav-bar .nav-right .quick-link:hover {
+            color: var(--school-gold);
+        }
+        .top-nav-bar .nav-right .quick-link i {
+            margin-right: 4px;
+        }
+
+        /* ========================================
+           SECTION TABS
+           ======================================== */
+        .section-tabs {
+            background: white;
+            padding: 8px 0;
+            position: fixed;
+            top: 62px;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border-bottom: 2px solid var(--school-gold);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .section-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .section-tabs .container {
+            display: flex;
+            gap: 4px;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .section-tabs .tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 14px;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            background: transparent;
+            color: #555;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-family: var(--font-secondary);
+            position: relative;
+        }
+        .section-tabs .tab-btn:hover {
+            background: rgba(212, 160, 23, 0.08);
+            color: var(--school-gold);
+            transform: translateY(-2px);
+        }
+        .section-tabs .tab-btn.active {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            border-color: var(--school-gold);
+            box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3);
+        }
+        .section-tabs .tab-btn .tab-icon {
+            font-size: 13px;
+        }
+        .section-tabs .tab-btn .tab-badge {
+            background: var(--kenya-red);
+            color: white;
+            font-size: 7px;
+            padding: 1px 7px;
+            border-radius: 50px;
+            font-weight: 700;
+            animation: pulseBadgeRed 1.5s infinite;
+        }
+
+        /* ========================================
            HERO SECTION WITH VIDEO BACKGROUND
            ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
-            margin-top: 0;
+            margin-top: 100px;
             display: flex;
             align-items: center;
             text-align: center;
@@ -821,6 +870,18 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.15); }
         }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes pulseBadgeRed {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(187, 0, 0, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(187, 0, 0, 0.7); }
+        }
+        @keyframes pulseBadgeGreen {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(0, 102, 0, 0.7); }
+        }
         @keyframes tickerScroll {
             0%, 20% { transform: translateY(0); }
             25%, 45% { transform: translateY(-22px); }
@@ -1040,17 +1101,19 @@
             color: white;
         }
 
-        @keyframes pulseBadgeRed {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(187, 0, 0, 0.4); }
-            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(187, 0, 0, 0.7); }
+        /* ===== NEW: Continuous Assessment Card ===== */
+        .card-assessment {
+            border-color: var(--kenya-green) !important;
+            background: linear-gradient(135deg, #ffffff, #f0fff4) !important;
         }
-        @keyframes pulseBadgeGreen {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4); }
-            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(0, 102, 0, 0.7); }
+        .card-assessment .badge {
+            background: var(--kenya-green);
+            color: white;
+            animation: pulseBadgeGreen 1.8s infinite;
         }
-        @keyframes pulseBadgeBlue {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4); }
-            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(23, 162, 184, 0.7); }
+        .card-assessment .card-cta {
+            background: linear-gradient(135deg, var(--kenya-green), #004d00);
+            color: white;
         }
 
         /* ========================================
@@ -1415,16 +1478,35 @@
             .main-header .nav-links.show { display: flex; }
             .main-header .mobile-menu-btn { display: block; }
 
-            .hero-section { padding: 40px 0; }
+            .top-nav-bar .container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .top-nav-bar .nav-left {
+                justify-content: center;
+            }
+            .top-nav-bar .nav-links {
+                justify-content: center;
+            }
+            .top-nav-bar .nav-right {
+                justify-content: center;
+            }
+            .top-nav-bar .nav-links a {
+                font-size: 11px;
+                padding: 4px 12px;
+            }
+
+            .hero-section { padding: 40px 0; margin-top: 70px; }
             .hero-section h1 { font-size: 32px; }
             .hero-section p { font-size: 16px; }
             .hero-section .btn-group { flex-direction: column; align-items: center; }
             .btn-scroll-down, .btn-outline { width: 100%; justify-content: center; }
 
             body { padding-top: 100px; }
+            .section-tabs { top: 55px; padding: 6px 0; }
             .notice-alert-bar { top: 100px; }
             .news-ticker-section { top: 100px; }
-            .top-nav-bar { margin-top: 100px; }
 
             .section-title { font-size: 26px; }
             .content-grid { grid-template-columns: 1fr 1fr; }
@@ -1455,58 +1537,54 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .hero-section h1 { font-size: 26px; }
             .section-title { font-size: 22px; }
+            .section-tabs .tab-btn { font-size: 8px; padding: 3px 8px; }
+            .section-tabs .tab-btn .tab-icon { font-size: 10px; }
             .main-header .logo-section h1 { font-size: 14px; }
             .main-header .school-icon { font-size: 20px; }
             body { padding-top: 90px; }
+            .section-tabs { top: 48px; padding: 4px 0; }
             .notice-alert-bar { top: 90px; }
             .news-ticker-section { top: 90px; }
-            .top-nav-bar { margin-top: 90px; }
-            .hero-section { padding: 30px 0; }
+            .hero-section { margin-top: 60px; }
             .hero-video-play { bottom: 60px; }
+            .top-nav-bar .nav-links a {
+                font-size: 10px;
+                padding: 3px 10px;
+            }
+            .top-nav-bar .nav-links a i {
+                font-size: 11px;
+            }
         }
     </style>
 </head>
 <body>
 
     <!-- ======================================== -->
-    <!-- TOP NAVIGATION BAR (ABOVE HERO) -->
+    <!-- HEADER - FIXED AT TOP -->
     <!-- ======================================== -->
-    <div class="top-nav-bar">
+    <header class="main-header">
+        <div class="kenya-flag-strip"></div>
         <div class="container">
-            <div class="nav-left">
-                <span class="welcome-text">
-                    <i class="fas fa-graduation-cap"></i> Welcome to Changara Star Academy
-                </span>
+            <div class="logo-section">
+                <span class="school-icon">🏫</span>
+                <div>
+                    <h1>Changara Star Academy</h1>
+                    <span class="subtitle">Assurance to Excellence</span>
+                </div>
             </div>
-            <div class="nav-links">
-                <a href="index.html" class="active">
-                    <i class="fas fa-home"></i> Home
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html" class="active">Home</a>
+                <a href="about.html">About</a>
+                <!-- NEW: Continuous Assessment Link -->
+                <a href="academics.html#assessments" class="assessment-link">
+                    <i class="fas fa-clipboard-check"></i> Continuous Assessment
                 </a>
-                <a href="admin-academics.html">
-                    <i class="fas fa-edit"></i> Assessment
-                    <span class="badge">NEW</span>
-                </a>
-                <a href="fees.html">
-                    <i class="fas fa-coins"></i> Fees
-                    <span class="badge-green">VIEW</span>
-                </a>
-                <a href="about.html">
-                    <i class="fas fa-info-circle"></i> About
-                </a>
-                <a href="contact.html">
-                    <i class="fas fa-phone"></i> Contact
-                </a>
-                <a href="portal.html" class="portal-link" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;">
-                    <i class="fas fa-user-lock"></i> Portal
-                </a>
-            </div>
-            <div class="nav-right">
-                <a href="admin-login.html" class="quick-link">
-                    <i class="fas fa-user-shield"></i> Admin
-                </a>
-            </div>
+                <a href="portal.html" class="portal-link">🔐 Portal</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         </div>
-    </div>
+    </header>
 
     <!-- ======================================== -->
     <!-- NOTICE ALERT BAR -->
@@ -1559,27 +1637,79 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HEADER -->
+    <!-- TOP NAVIGATION BAR (ABOVE HERO) -->
     <!-- ======================================== -->
-    <header class="main-header">
-        <div class="kenya-flag-strip"></div>
+    <div class="top-nav-bar">
         <div class="container">
-            <div class="logo-section">
-                <span class="school-icon">🏫</span>
-                <div>
-                    <h1>Changara Star Academy</h1>
-                    <span class="subtitle">Assurance to Excellence</span>
-                </div>
+            <div class="nav-left">
+                <span class="welcome-text">
+                    <i class="fas fa-graduation-cap"></i> Welcome to Changara Star Academy
+                </span>
             </div>
-            <nav class="nav-links" id="navLinks">
-                <a href="index.html" class="active">Home</a>
-                <a href="about.html">About</a>
-                <a href="portal.html">🔐 Portal</a>
-                <a href="contact.html">Contact</a>
-            </nav>
-            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+            <div class="nav-links">
+                <a href="index.html" class="active">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="academics.html#assessments">
+                    <i class="fas fa-clipboard-check"></i> Assessment
+                    <span class="badge-green">NEW</span>
+                </a>
+                <a href="fees.html">
+                    <i class="fas fa-coins"></i> Fees
+                    <span class="badge">VIEW</span>
+                </a>
+                <a href="about.html">
+                    <i class="fas fa-info-circle"></i> About
+                </a>
+                <a href="contact.html">
+                    <i class="fas fa-phone"></i> Contact
+                </a>
+                <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;">
+                    <i class="fas fa-user-lock"></i> Portal
+                </a>
+            </div>
+            <div class="nav-right">
+                <a href="#" class="quick-link" style="display:none;">
+                    <i class="fas fa-user-shield"></i> Admin
+                </a>
+            </div>
         </div>
-    </header>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- SECTION NAVIGATION TABS -->
+    <!-- ======================================== -->
+    <div class="section-tabs" id="sectionTabs">
+        <div class="container">
+            <button class="tab-btn active" onclick="scrollToSection('slide-academics')">
+                <span class="tab-icon">📚</span> Academics
+                <span class="tab-badge">🔥</span>
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-admissions')">
+                <span class="tab-icon">📝</span> Admissions
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-facilities')">
+                <span class="tab-icon">🏫</span> Facilities
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-performance')">
+                <span class="tab-icon">🏆</span> Performance
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-parents')">
+                <span class="tab-icon">👨‍👩‍👧‍👦</span> Parents
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-downloads')">
+                <span class="tab-icon">📥</span> Downloads
+            </button>
+            <button class="tab-btn" onclick="scrollToSection('slide-fees')">
+                <span class="tab-icon">💰</span> Fees
+            </button>
+            <!-- NEW: Assessment Tab -->
+            <button class="tab-btn" onclick="window.location.href='academics.html#assessments'">
+                <span class="tab-icon">📊</span> Assessment
+                <span class="tab-badge">NEW</span>
+            </button>
+        </div>
+    </div>
 
     <!-- ======================================== -->
     <!-- HERO SECTION WITH VIDEO BACKGROUND -->
@@ -1619,7 +1749,6 @@
                 their potential and achieve academic excellence.
             </p>
             <div class="btn-group">
-                <!-- SCROLL DOWN BUTTON -->
                 <button class="btn-scroll-down" onclick="scrollToContent()">
                     <span>Scroll Down</span>
                     <span class="arrow"><i class="fas fa-chevron-down"></i></span>
@@ -1763,6 +1892,21 @@
                     </div>
                     <span class="badge">💰 View</span>
                     <div class="card-cta">👆 View Fees</div>
+                </div>
+
+                <!-- CARD 8: CONTINUOUS ASSESSMENT - NEW -->
+                <div class="content-card card-assessment" onclick="window.location.href='academics.html#assessments'" data-aos="fade-up" data-aos-delay="310">
+                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.5);">
+                        📊 NEW
+                    </div>
+                    <span class="icon">📊</span>
+                    <h3>Continuous Assessment</h3>
+                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 Weekly • Monthly • End-of-Term</p>
+                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                        <span>✅ Track Progress</span> • <span>✅ View Results</span> • <span>✅ Download Reports</span>
+                    </div>
+                    <span class="badge">📊 View Results</span>
+                    <div class="card-cta">👆 View Assessments</div>
                 </div>
 
             </div>
@@ -1959,6 +2103,7 @@
                     <a href="events.html">📰 Events</a>
                     <a href="downloads.html">📄 Downloads</a>
                     <a href="fees.html">💰 Fees</a>
+                    <a href="academics.html#assessments">📊 Assessment</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -2004,6 +2149,51 @@
             const nav = document.getElementById('navLinks');
             if (nav) nav.classList.toggle('show');
         }
+
+        // ============================================
+        // SECTION TABS
+        // ============================================
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const offset = 160;
+                const top = section.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({ top: top, behavior: 'smooth' });
+
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                const tabs = document.querySelectorAll('.tab-btn');
+                const index = Array.from(tabs).findIndex(btn => {
+                    const onclick = btn.getAttribute('onclick');
+                    return onclick && onclick.includes(sectionId);
+                });
+                if (index !== -1) {
+                    tabs[index].classList.add('active');
+                }
+            }
+        }
+
+        // Update active tab on scroll
+        document.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('.content-card');
+            const tabs = document.querySelectorAll('.tab-btn');
+            const scrollPosition = window.scrollY + 170;
+
+            sections.forEach((section) => {
+                const sectionTop = section.offsetTop;
+                const sectionBottom = sectionTop + section.offsetHeight;
+
+                if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                    tabs.forEach(btn => btn.classList.remove('active'));
+                    const sectionId = section.id;
+                    tabs.forEach(btn => {
+                        const onclick = btn.getAttribute('onclick');
+                        if (onclick && onclick.includes(sectionId)) {
+                            btn.classList.add('active');
+                        }
+                    });
+                }
+            });
+        });
 
         // ============================================
         // NOTICE ALERT
