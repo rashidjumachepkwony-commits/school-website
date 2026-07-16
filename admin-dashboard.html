@@ -176,6 +176,7 @@
             text-align: center; 
             transition: transform 0.2s; 
             cursor: pointer; 
+            border: 2px solid transparent;
         }
         .dashboard-card:hover { transform: translateY(-5px); }
         .dashboard-card .icon { font-size: 32px; display: block; margin-bottom: 8px; }
@@ -210,12 +211,9 @@
         .status-present { color: #28a745; font-weight: 600; }
         .status-absent { color: #dc3545; font-weight: 600; }
         .status-late { color: #d4a017; font-weight: 600; }
+        .status-ontime { color: #28a745; font-weight: 600; }
         .status-checked-in { color: #17a2b8; font-weight: 600; }
         .status-checked-out { color: #6c757d; font-weight: 600; }
-        .status-exceeding { color: #28a745; font-weight: 600; }
-        .status-meeting { color: #17a2b8; font-weight: 600; }
-        .status-approaching { color: #d4a017; font-weight: 600; }
-        .status-below { color: #dc3545; font-weight: 600; }
 
         .stats-grid {
             display: grid;
@@ -237,6 +235,7 @@
         .stat-card .number.red { color: #dc3545; }
         .stat-card .number.blue { color: #17a2b8; }
         .stat-card .number.purple { color: #6f42c1; }
+        .stat-card .number.orange { color: #d4a017; }
 
         .filter-bar {
             display: flex;
@@ -294,54 +293,6 @@
         }
         .chart-box canvas { max-height: 200px; max-width: 100%; }
 
-        .grade-tabs {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-        .grade-tabs .tab {
-            padding: 6px 14px;
-            border: 2px solid #e8ecf1;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            background: white;
-            color: #666;
-        }
-        .grade-tabs .tab:hover { border-color: #D4A017; color: #0A1628; }
-        .grade-tabs .tab.active {
-            background: linear-gradient(135deg, #D4A017, #F5C842);
-            border-color: #D4A017;
-            color: #0A1628;
-        }
-
-        .assessment-type-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        .assessment-type-tabs .type-tab {
-            padding: 5px 16px;
-            border: 2px solid #e8ecf1;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            background: white;
-            color: #666;
-        }
-        .assessment-type-tabs .type-tab:hover { border-color: #D4A017; color: #0A1628; }
-        .assessment-type-tabs .type-tab.active {
-            background: linear-gradient(135deg, #D4A017, #F5C842);
-            border-color: #D4A017;
-            color: #0A1628;
-        }
-
         .rank-badge {
             display: inline-block;
             padding: 2px 10px;
@@ -353,17 +304,29 @@
         .rank-badge.mid { background: #ffc107; color: #0A1628; }
         .rank-badge.bottom { background: #dc3545; color: white; }
 
-        .subject-rank-badge {
-            display: inline-block;
-            padding: 1px 8px;
-            border-radius: 50px;
-            font-size: 8px;
-            font-weight: 700;
+        .analysis-summary {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+            margin: 15px 0;
         }
-        .subject-rank-badge.exceeding { background: #28a745; color: white; }
-        .subject-rank-badge.meeting { background: #17a2b8; color: white; }
-        .subject-rank-badge.approaching { background: #ffc107; color: #0A1628; }
-        .subject-rank-badge.below { background: #dc3545; color: white; }
+        .analysis-summary .row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .analysis-summary .item {
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e8ecf1;
+        }
+        .analysis-summary .item .label { font-size: 12px; color: #666; }
+        .analysis-summary .item .value { font-size: 22px; font-weight: 700; }
 
         @media (max-width: 768px) {
             .sidebar { width: 100%; position: relative; min-height: auto; padding: 10px 0; }
@@ -374,6 +337,7 @@
         }
         @media (max-width: 480px) {
             .dashboard-cards { grid-template-columns: 1fr; }
+            .analysis-summary .row { flex-direction: column; }
         }
     </style>
 </head>
@@ -398,7 +362,7 @@
             <a onclick="showSection('visitor-management')"><i class="fas fa-user-friends"></i> Visitor Management</a>
             
             <div class="menu-label" style="margin-top:10px;">Academic Assessments</div>
-            <a onclick="showSection('academic-assessments')"><i class="fas fa-edit"></i> Assessments</a>
+            <a onclick="window.location.href='admin-academics.html'"><i class="fas fa-edit"></i> Assessments</a>
             
             <div class="menu-label" style="margin-top:10px;">Reports</div>
             <a onclick="showSection('staff-reports')"><i class="fas fa-chart-bar"></i> Staff Reports</a>
@@ -445,7 +409,7 @@
                     <h3>Visitor Management</h3>
                     <p>Check-in/out</p>
                 </div>
-                <div class="dashboard-card" onclick="showSection('academic-assessments')" style="border:2px solid #D4A017;">
+                <div class="dashboard-card" onclick="window.location.href='admin-academics.html'" style="border-color:#D4A017;">
                     <span class="icon">📝</span>
                     <h3>Assessments</h3>
                     <p>Manage student results</p>
@@ -468,7 +432,7 @@
                     <button class="btn btn-success" onclick="showSection('staff-management')"><i class="fas fa-user-plus"></i> Add Staff</button>
                     <button class="btn btn-info" onclick="showSection('staff-attendance')"><i class="fas fa-user-check"></i> Staff Attendance</button>
                     <button class="btn btn-primary" onclick="showSection('visitor-management')"><i class="fas fa-user-friends"></i> Visitors</button>
-                    <button class="btn btn-purple" onclick="showSection('academic-assessments')"><i class="fas fa-edit"></i> Assessments</button>
+                    <button class="btn btn-purple" onclick="window.location.href='admin-academics.html'"><i class="fas fa-edit"></i> Assessments</button>
                     <button class="btn btn-warning" onclick="showSection('staff-reports')"><i class="fas fa-chart-bar"></i> Staff Reports</button>
                     <button class="btn btn-secondary" onclick="showSection('visitor-reports')"><i class="fas fa-chart-pie"></i> Visitor Reports</button>
                 </div>
@@ -564,7 +528,8 @@
             <div class="stats-grid" id="staffAttendanceStats">
                 <div class="stat-card"><div class="number" id="staffTotal">0</div><div class="label">Total Staff</div></div>
                 <div class="stat-card"><div class="number green" id="staffPresent">0</div><div class="label">Present</div></div>
-                <div class="stat-card"><div class="number" style="color:#d4a017;" id="staffLate">0</div><div class="label">Late</div></div>
+                <div class="stat-card"><div class="number orange" id="staffLate">0</div><div class="label">Late</div></div>
+                <div class="stat-card"><div class="number green" id="staffOnTime">0</div><div class="label">On Time</div></div>
                 <div class="stat-card"><div class="number red" id="staffAbsent">0</div><div class="label">Absent</div></div>
             </div>
 
@@ -634,77 +599,11 @@
         </div>
 
         <!-- ======================================== -->
-        <!-- ACADEMIC ASSESSMENTS SECTION -->
-        <!-- ======================================== -->
-        <div id="section-academic-assessments" class="editor-container">
-            <h2>📝 Academic Assessments</h2>
-            <p class="desc">Manage student academic assessments and results.</p>
-
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:15px;">
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button class="btn btn-primary btn-sm" onclick="window.open('admin-academics.html','_blank')"><i class="fas fa-external-link-alt"></i> Open Full Assessment Manager</button>
-                    <button class="btn btn-success btn-sm" onclick="loadAcademicAssessments()"><i class="fas fa-sync"></i> Refresh</button>
-                    <button class="btn btn-info btn-sm" onclick="exportAcademicAssessments()"><i class="fas fa-download"></i> Export CSV</button>
-                </div>
-                <span style="color:#666;font-size:13px;" id="academicDate">Loading...</span>
-            </div>
-
-            <div class="grade-tabs" id="gradeTabs">
-                <div class="tab" onclick="selectAcademicGrade('Play Group')">🧸 Play Group</div>
-                <div class="tab" onclick="selectAcademicGrade('PP1')">🎨 PP1</div>
-                <div class="tab" onclick="selectAcademicGrade('PP2')">✏️ PP2</div>
-                <div class="tab active" onclick="selectAcademicGrade('Grade 1')">📖 Grade 1</div>
-                <div class="tab" onclick="selectAcademicGrade('Grade 2')">📗 Grade 2</div>
-                <div class="tab" onclick="selectAcademicGrade('Grade 3')">📘 Grade 3</div>
-                <div class="tab" onclick="selectAcademicGrade('Grade 4')">📙 Grade 4</div>
-                <div class="tab" onclick="selectAcademicGrade('Grade 5')">📚 Grade 5</div>
-                <div class="tab" onclick="selectAcademicGrade('Grade 6')">🎓 Grade 6</div>
-            </div>
-
-            <div class="assessment-type-tabs">
-                <div class="type-tab active" onclick="selectAcademicType('weekly')">📅 Weekly</div>
-                <div class="type-tab" onclick="selectAcademicType('monthly')">📊 Monthly</div>
-                <div class="type-tab" onclick="selectAcademicType('term')">📄 End of Term</div>
-            </div>
-
-            <div class="stats-grid" id="academicStats">
-                <div class="stat-card"><div class="number gold" id="academicTotal">0</div><div class="label">Total Students</div></div>
-                <div class="stat-card"><div class="number green" id="academicExceeding">0</div><div class="label">Exceeding Expectation</div></div>
-                <div class="stat-card"><div class="number blue" id="academicMeeting">0</div><div class="label">Meeting Expectation</div></div>
-                <div class="stat-card"><div class="number" style="color:#d4a017;" id="academicApproaching">0</div><div class="label">Approaching Expectation</div></div>
-                <div class="stat-card"><div class="number red" id="academicBelow">0</div><div class="label">Below Expectation</div></div>
-            </div>
-
-            <div class="table-wrapper">
-                <table id="academicTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Rank</th>
-                            <th>Student Name</th>
-                            <th>Grade</th>
-                            <th>Type</th>
-                            <th>Period</th>
-                            <th>Month</th>
-                            <th>Term</th>
-                            <th>Total</th>
-                            <th>Performance</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="academicBody">
-                        <tr><td colspan="11" style="text-align:center;color:#999;">Loading academic data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ======================================== -->
         <!-- STAFF REPORTS SECTION -->
         <!-- ======================================== -->
         <div id="section-staff-reports" class="editor-container">
             <h2>📊 Staff Attendance Reports</h2>
-            <p class="desc">Generate and view staff attendance reports.</p>
+            <p class="desc">Generate and view staff attendance reports with analysis.</p>
 
             <div class="filter-bar">
                 <div class="form-group">
@@ -735,6 +634,18 @@
                 <button class="btn btn-success" onclick="exportStaffReport()"><i class="fas fa-download"></i> Export CSV</button>
             </div>
 
+            <!-- Analysis Summary -->
+            <div class="analysis-summary" id="staffAnalysisSummary">
+                <h4 style="color:#0A1628;margin-bottom:10px;">📊 Attendance Analysis</h4>
+                <div class="row" id="staffAnalysisRow">
+                    <div class="item"><div class="label">Total Staff</div><div class="value" id="staffReportTotal" style="color:#0A1628;">0</div></div>
+                    <div class="item"><div class="label">✅ On Time</div><div class="value" id="staffReportOnTime" style="color:#28a745;">0</div></div>
+                    <div class="item"><div class="label">⚠️ Late</div><div class="value" id="staffReportLate" style="color:#d4a017;">0</div></div>
+                    <div class="item"><div class="label">❌ Absent</div><div class="value" id="staffReportAbsent" style="color:#dc3545;">0</div></div>
+                    <div class="item"><div class="label">📈 Attendance Rate</div><div class="value" id="staffReportRate" style="color:#17a2b8;">0%</div></div>
+                </div>
+            </div>
+
             <div class="chart-container">
                 <div class="chart-box">
                     <h4>Attendance Status</h4>
@@ -755,7 +666,7 @@
                             <th>Employee ID</th>
                             <th>Department</th>
                             <th>Total Days</th>
-                            <th>Present</th>
+                            <th>On Time</th>
                             <th>Late</th>
                             <th>Absent</th>
                             <th>Attendance Rate</th>
@@ -773,7 +684,7 @@
         <!-- ======================================== -->
         <div id="section-visitor-reports" class="editor-container">
             <h2>📈 Visitor Reports</h2>
-            <p class="desc">Generate and view visitor reports.</p>
+            <p class="desc">Generate and view visitor reports with analysis.</p>
 
             <div class="filter-bar">
                 <div class="form-group">
@@ -802,6 +713,17 @@
                 </div>
                 <button class="btn btn-primary" onclick="generateVisitorReport()"><i class="fas fa-sync"></i> Generate</button>
                 <button class="btn btn-success" onclick="exportVisitorReport()"><i class="fas fa-download"></i> Export CSV</button>
+            </div>
+
+            <!-- Analysis Summary -->
+            <div class="analysis-summary" id="visitorAnalysisSummary">
+                <h4 style="color:#0A1628;margin-bottom:10px;">📊 Visitor Analysis</h4>
+                <div class="row" id="visitorAnalysisRow">
+                    <div class="item"><div class="label">Total Visitors</div><div class="value" id="visitorReportTotal" style="color:#0A1628;">0</div></div>
+                    <div class="item"><div class="label">✅ Checked In</div><div class="value" id="visitorReportActive" style="color:#17a2b8;">0</div></div>
+                    <div class="item"><div class="label">✅ Checked Out</div><div class="value" id="visitorReportCompleted" style="color:#6c757d;">0</div></div>
+                    <div class="item"><div class="label">⏱️ Avg Duration</div><div class="value" id="visitorReportAvgDuration" style="color:#D4A017;">0 min</div></div>
+                </div>
             </div>
 
             <div class="chart-container">
@@ -854,13 +776,6 @@
         })();
 
         // ============================================
-        // GLOBAL VARIABLES
-        // ============================================
-        let currentAcademicGrade = 'Grade 1';
-        let currentAcademicType = 'weekly';
-        let academicData = [];
-
-        // ============================================
         // SHOW SECTION
         // ============================================
         function showSection(section) {
@@ -881,7 +796,6 @@
             if (section === 'staff-management') loadStaffList();
             if (section === 'staff-attendance') loadStaffAttendance();
             if (section === 'visitor-management') loadVisitors();
-            if (section === 'academic-assessments') loadAcademicAssessments();
             if (section === 'staff-reports') setTimeout(generateStaffReport, 300);
             if (section === 'visitor-reports') setTimeout(generateVisitorReport, 300);
 
@@ -1049,11 +963,13 @@
                     const total = attendance.length;
                     const present = attendance.filter(a => a.status === 'Checked In' || a.status === 'Checked Out').length;
                     const late = attendance.filter(a => a.isLate === true).length;
+                    const onTime = attendance.filter(a => a.isLate === false && (a.status === 'Checked In' || a.status === 'Checked Out')).length;
                     const absent = attendance.filter(a => a.status === 'Absent').length;
 
                     document.getElementById('staffTotal').textContent = total;
                     document.getElementById('staffPresent').textContent = present;
                     document.getElementById('staffLate').textContent = late;
+                    document.getElementById('staffOnTime').textContent = onTime;
                     document.getElementById('staffAbsent').textContent = absent;
 
                     const tbody = document.getElementById('staffAttendanceBody');
@@ -1068,11 +984,21 @@
                         let statusClass = 'status-absent';
                         let statusText = 'Absent';
                         if (staff.status === 'Checked In') {
-                            statusClass = 'status-checked-in';
-                            statusText = '✅ Checked In';
+                            if (staff.isLate) {
+                                statusClass = 'status-late';
+                                statusText = '⚠️ Late';
+                            } else {
+                                statusClass = 'status-ontime';
+                                statusText = '✅ On Time';
+                            }
                         } else if (staff.status === 'Checked Out') {
-                            statusClass = 'status-checked-out';
-                            statusText = '✅ Checked Out';
+                            if (staff.isLate) {
+                                statusClass = 'status-late';
+                                statusText = '⚠️ Late';
+                            } else {
+                                statusClass = 'status-ontime';
+                                statusText = '✅ On Time';
+                            }
                         } else if (staff.status === 'Late') {
                             statusClass = 'status-late';
                             statusText = '⚠️ Late';
@@ -1197,141 +1123,6 @@
         }
 
         // ============================================
-        // ACADEMIC ASSESSMENTS
-        // ============================================
-        function selectAcademicGrade(grade) {
-            currentAcademicGrade = grade;
-            document.querySelectorAll('#gradeTabs .tab').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('#gradeTabs .tab').forEach(el => {
-                if (el.textContent.trim().includes(grade) || el.textContent.trim() === grade) {
-                    el.classList.add('active');
-                }
-            });
-            loadAcademicAssessments();
-        }
-
-        function selectAcademicType(type) {
-            currentAcademicType = type;
-            document.querySelectorAll('.type-tab').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.type-tab').forEach(el => {
-                if (el.textContent.trim().toLowerCase().includes(type)) {
-                    el.classList.add('active');
-                }
-            });
-            loadAcademicAssessments();
-        }
-
-        async function loadAcademicAssessments() {
-            document.getElementById('academicDate').textContent = '📅 ' + new Date().toLocaleDateString('en-KE', { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-            });
-
-            try {
-                const response = await fetch(`/api/assessments/grade/${encodeURIComponent(currentAcademicGrade)}?type=${currentAcademicType}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    academicData = data.students || [];
-                    const students = academicData;
-
-                    const total = students.length;
-                    const exceeding = students.filter(s => s.performanceLevel === 'Exceeding Expectation').length;
-                    const meeting = students.filter(s => s.performanceLevel === 'Meeting Expectation').length;
-                    const approaching = students.filter(s => s.performanceLevel === 'Approaching Expectation').length;
-                    const below = students.filter(s => s.performanceLevel === 'Below Expectation').length;
-
-                    document.getElementById('academicTotal').textContent = total;
-                    document.getElementById('academicExceeding').textContent = exceeding;
-                    document.getElementById('academicMeeting').textContent = meeting;
-                    document.getElementById('academicApproaching').textContent = approaching;
-                    document.getElementById('academicBelow').textContent = below;
-
-                    const tbody = document.getElementById('academicBody');
-                    if (students.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#999;">No students found for ${currentAcademicGrade} - ${currentAcademicType}</td></tr>`;
-                        return;
-                    }
-
-                    // Sort by total score descending for ranking
-                    students.sort((a, b) => b.totalScore - a.totalScore);
-
-                    const typeNames = {
-                        'weekly': 'Weekly',
-                        'monthly': 'Monthly',
-                        'term': 'End of Term'
-                    };
-
-                    tbody.innerHTML = '';
-                    students.forEach((student, index) => {
-                        const rank = index + 1;
-                        const totalStudents = students.length;
-                        let rankColor = 'mid';
-                        if (rank <= Math.ceil(totalStudents * 0.2)) rankColor = 'top';
-                        else if (rank > Math.ceil(totalStudents * 0.7)) rankColor = 'bottom';
-
-                        const performanceClass = {
-                            'Exceeding Expectation': 'status-exceeding',
-                            'Meeting Expectation': 'status-meeting',
-                            'Approaching Expectation': 'status-approaching',
-                            'Below Expectation': 'status-below'
-                        }[student.performanceLevel] || '';
-
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td><span class="rank-badge ${rankColor}">#${rank}</span></td>
-                            <td><strong>${student.studentName}</strong></td>
-                            <td>${student.grade}</td>
-                            <td>${typeNames[student.type] || student.type || '-'}</td>
-                            <td>${student.period || '-'}</td>
-                            <td>${student.month || '-'}</td>
-                            <td>${student.term || '-'}</td>
-                            <td>${student.totalScore || 0}</td>
-                            <td><span class="${performanceClass}">${student.performanceLevel || 'N/A'}</span></td>
-                            <td>
-                                <button class="btn btn-info btn-sm" onclick="viewAcademicStudent('${student._id}')" title="View"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-primary btn-sm" onclick="editAcademicStudent('${student._id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-success btn-sm" onclick="downloadAcademicReport('${student._id}')" title="Download"><i class="fas fa-download"></i></button>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading academic assessments:', error);
-                document.getElementById('academicBody').innerHTML = `<tr><td colspan="11" style="text-align:center;color:#dc3545;">Error loading academic data</td></tr>`;
-            }
-        }
-
-        function viewAcademicStudent(studentId) {
-            window.open(`admin-academics.html?view=${studentId}`, '_blank');
-        }
-
-        function editAcademicStudent(studentId) {
-            window.open(`admin-academics.html?edit=${studentId}`, '_blank');
-        }
-
-        function downloadAcademicReport(studentId) {
-            window.open(`/api/assessments/download-report/${studentId}`, '_blank');
-        }
-
-        function exportAcademicAssessments() {
-            if (academicData.length === 0) {
-                showAlert('No data to export', 'error');
-                return;
-            }
-
-            let csv = '\uFEFF';
-            csv += 'Student Name,Grade,Type,Period,Month,Term,Total Score,Average,Performance Level\n';
-
-            academicData.forEach(student => {
-                csv += `"${student.studentName}","${student.grade}","${student.type || ''}","${student.period || ''}","${student.month || ''}","${student.term || ''}","${student.totalScore || 0}","${(student.averageScore || 0).toFixed(1)}","${student.performanceLevel || ''}"\n`;
-            });
-
-            downloadCSV(csv, `academic_assessments_${currentAcademicGrade}_${currentAcademicType}_${new Date().toISOString().split('T')[0]}.csv`);
-        }
-
-        // ============================================
         // STAFF REPORTS
         // ============================================
         async function generateStaffReport() {
@@ -1340,12 +1131,38 @@
             const department = document.getElementById('staffReportDepartment').value;
 
             try {
-                const response = await fetch(`/api/reports/staff/attendance?period=${period}&date=${date}&department=${department}`);
+                // Build URL with query parameters
+                let url = `/api/reports/staff/attendance?period=${period}&date=${date}`;
+                if (department) url += `&department=${department}`;
+
+                const response = await fetch(url);
                 const data = await response.json();
 
                 if (data.success) {
-                    const tbody = document.getElementById('staffReportBody');
                     const report = data.report || [];
+                    const tbody = document.getElementById('staffReportBody');
+
+                    // Calculate summary
+                    let totalStaff = report.length;
+                    let totalOnTime = 0;
+                    let totalLate = 0;
+                    let totalAbsent = 0;
+                    let totalDays = 0;
+
+                    report.forEach(staff => {
+                        totalOnTime += staff.onTime || 0;
+                        totalLate += staff.late || 0;
+                        totalAbsent += staff.absent || 0;
+                        totalDays += staff.totalDays || 0;
+                    });
+
+                    const attendanceRate = totalDays > 0 ? ((totalOnTime / totalDays) * 100).toFixed(1) : 0;
+
+                    document.getElementById('staffReportTotal').textContent = totalStaff;
+                    document.getElementById('staffReportOnTime').textContent = totalOnTime;
+                    document.getElementById('staffReportLate').textContent = totalLate;
+                    document.getElementById('staffReportAbsent').textContent = totalAbsent;
+                    document.getElementById('staffReportRate').textContent = attendanceRate + '%';
 
                     if (report.length === 0) {
                         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#999;">No data available</td></tr>`;
@@ -1355,14 +1172,14 @@
                     tbody.innerHTML = '';
                     report.forEach((staff, index) => {
                         const tr = document.createElement('tr');
-                        const rate = staff.totalDays > 0 ? ((staff.present / staff.totalDays) * 100).toFixed(1) : 0;
+                        const rate = staff.totalDays > 0 ? ((staff.onTime / staff.totalDays) * 100).toFixed(1) : 0;
                         tr.innerHTML = `
                             <td>${index + 1}</td>
                             <td><strong>${staff.name}</strong></td>
                             <td>${staff.employeeId || '-'}</td>
                             <td>${staff.department || '-'}</td>
                             <td>${staff.totalDays || 0}</td>
-                            <td><span class="status-present">${staff.present || 0}</span></td>
+                            <td><span class="status-ontime">${staff.onTime || 0}</span></td>
                             <td><span class="status-late">${staff.late || 0}</span></td>
                             <td><span class="status-absent">${staff.absent || 0}</span></td>
                             <td><strong>${rate}%</strong></td>
@@ -1374,7 +1191,7 @@
                 }
             } catch (error) {
                 console.error('Error generating staff report:', error);
-                document.getElementById('staffReportBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc3545;">Error generating report</td></tr>`;
+                document.getElementById('staffReportBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc3545;">Error generating report: ${error.message}</td></tr>`;
             }
         }
 
@@ -1382,9 +1199,9 @@
             const ctx1 = document.getElementById('staffStatusChart').getContext('2d');
             if (staffStatusChart) staffStatusChart.destroy();
 
-            let present = 0, late = 0, absent = 0;
+            let onTime = 0, late = 0, absent = 0;
             data.forEach(s => {
-                present += s.present || 0;
+                onTime += s.onTime || 0;
                 late += s.late || 0;
                 absent += s.absent || 0;
             });
@@ -1392,8 +1209,8 @@
             staffStatusChart = new Chart(ctx1, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Present', 'Late', 'Absent'],
-                    datasets: [{ data: [present, late, absent], backgroundColor: ['#28a745', '#d4a017', '#dc3545'] }]
+                    labels: ['On Time', 'Late', 'Absent'],
+                    datasets: [{ data: [onTime, late, absent], backgroundColor: ['#28a745', '#d4a017', '#dc3545'] }]
                 },
                 options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
             });
@@ -1440,12 +1257,28 @@
             const purpose = document.getElementById('visitorReportPurpose').value;
 
             try {
-                const response = await fetch(`/api/reports/visitors?period=${period}&date=${date}&purpose=${purpose}`);
+                let url = `/api/reports/visitors?period=${period}&date=${date}`;
+                if (purpose) url += `&purpose=${purpose}`;
+
+                const response = await fetch(url);
                 const data = await response.json();
 
                 if (data.success) {
-                    const tbody = document.getElementById('visitorReportBody');
                     const report = data.report || [];
+                    const tbody = document.getElementById('visitorReportBody');
+
+                    // Calculate summary
+                    let totalVisitors = report.length;
+                    let active = report.filter(v => v.status === 'Checked In').length;
+                    let completed = report.filter(v => v.status === 'Checked Out').length;
+                    let totalDuration = 0;
+                    report.forEach(v => { totalDuration += v.duration || 0; });
+                    const avgDuration = totalVisitors > 0 ? Math.round(totalDuration / totalVisitors) : 0;
+
+                    document.getElementById('visitorReportTotal').textContent = totalVisitors;
+                    document.getElementById('visitorReportActive').textContent = active;
+                    document.getElementById('visitorReportCompleted').textContent = completed;
+                    document.getElementById('visitorReportAvgDuration').textContent = avgDuration + ' min';
 
                     if (report.length === 0) {
                         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#999;">No data available</td></tr>`;
@@ -1474,7 +1307,7 @@
                 }
             } catch (error) {
                 console.error('Error generating visitor report:', error);
-                document.getElementById('visitorReportBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc3545;">Error generating report</td></tr>`;
+                document.getElementById('visitorReportBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc3545;">Error generating report: ${error.message}</td></tr>`;
             }
         }
 
@@ -1560,7 +1393,6 @@
             loadStaffList();
             loadStaffAttendance();
             loadVisitors();
-            loadAcademicAssessments();
             setTimeout(generateStaffReport, 500);
             setTimeout(generateVisitorReport, 500);
         });
