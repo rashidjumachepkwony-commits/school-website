@@ -416,6 +416,17 @@
         .rank-badge.mid { background: #ffc107; color: #0A1628; }
         .rank-badge.bottom { background: #dc3545; color: white; }
 
+        .action-buttons-cell {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .action-buttons-cell .btn-sm {
+            padding: 3px 8px;
+            font-size: 10px;
+        }
+
         @media (max-width: 768px) {
             .form-row, .form-row-3, .form-row-4 { grid-template-columns: 1fr; }
             .filters { flex-direction: column; }
@@ -427,6 +438,7 @@
             table th, table td { padding: 3px 3px; }
             .grade-tabs .tab { font-size: 11px; padding: 5px 12px; }
             .assessment-type-tabs .type-tab { font-size: 11px; padding: 4px 12px; }
+            .action-buttons-cell .btn-sm { padding: 2px 5px; font-size: 9px; }
         }
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr; }
@@ -738,15 +750,12 @@
             'Grade 6': { subjects: [{ name: 'MATHS ACTIVITIES', max: 30 }, { name: 'ENGLISH ACTIVITIES', max: 50 }, { name: 'SCI & TECH', max: 30 }, { name: 'KISW LUGHA', max: 50 }, { name: 'SST', max: 30 }, { name: 'RELIGIOUS EDUCATION', max: 20 }, { name: 'AGRICULTURE', max: 20 }, { name: 'CREATIVE ART', max: 35 }] }
         },
         'monthly': {
-            // ... similar configurations with different max scores
             'Grade 1': { subjects: [{ name: 'MATH', max: 50 }, { name: 'LIST/SPEAKING', max: 30 }, { name: 'READING', max: 30 }, { name: 'GRAMMAR', max: 30 }, { name: 'KUSOMA', max: 30 }, { name: 'SARUFI', max: 30 }, { name: 'ENV', max: 50 }, { name: 'C.R.E', max: 30 }, { name: 'CREATIVE ARTS', max: 30 }] },
             'Grade 4': { subjects: [{ name: 'MATHS ACTIVITIES', max: 60 }, { name: 'ENGLISH ACTIVITIES', max: 80 }, { name: 'SCI & TECH', max: 60 }, { name: 'KISW LUGHA', max: 80 }, { name: 'SST', max: 60 }, { name: 'RELIGIOUS EDUCATION', max: 40 }, { name: 'AGRICULTURE', max: 40 }, { name: 'CREATIVE ART', max: 50 }] },
-            // Add other grades as needed
         },
         'term': {
             'Grade 1': { subjects: [{ name: 'MATH', max: 70 }, { name: 'LIST/SPEAKING', max: 50 }, { name: 'READING', max: 50 }, { name: 'GRAMMAR', max: 50 }, { name: 'KUSOMA', max: 50 }, { name: 'SARUFI', max: 50 }, { name: 'ENV', max: 70 }, { name: 'C.R.E', max: 50 }, { name: 'CREATIVE ARTS', max: 50 }] },
             'Grade 4': { subjects: [{ name: 'MATHS ACTIVITIES', max: 80 }, { name: 'ENGLISH ACTIVITIES', max: 100 }, { name: 'SCI & TECH', max: 80 }, { name: 'KISW LUGHA', max: 100 }, { name: 'SST', max: 80 }, { name: 'RELIGIOUS EDUCATION', max: 60 }, { name: 'AGRICULTURE', max: 60 }, { name: 'CREATIVE ART', max: 70 }] },
-            // Add other grades as needed
         }
     };
 
@@ -757,7 +766,6 @@
         if (!DEFAULT_CONFIGS[type]) DEFAULT_CONFIGS[type] = {};
         grades.forEach(grade => {
             if (!DEFAULT_CONFIGS[type][grade]) {
-                // Copy from Grade 1 as base
                 DEFAULT_CONFIGS[type][grade] = DEFAULT_CONFIGS[type]['Grade 1'] || { subjects: [{ name: 'MATH', max: 30 }, { name: 'ENGLISH', max: 30 }] };
             }
         });
@@ -891,7 +899,6 @@
     // ============================================
     function calculateRankAndColor(students, studentId) {
         const sorted = [...students].sort((a, b) => {
-            // Sort by total score descending, then by average
             if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
             return b.averageScore - a.averageScore;
         });
@@ -919,7 +926,6 @@
         const thead = document.getElementById('marksTableHead');
         const tbody = document.getElementById('marksTableBody');
 
-        // Build header with rank column
         let headerHtml = `<tr>
             <th style="min-width:30px;">#</th>
             <th style="min-width:40px;">🏆</th>
@@ -933,7 +939,6 @@
         headerHtml += `<th style="min-width:60px;">Total</th><th style="min-width:60px;">Avg</th><th style="min-width:90px;">Performance</th><th style="min-width:50px;">Action</th></tr>`;
         thead.innerHTML = headerHtml;
 
-        // Sort students by total score for ranking
         const sortedStudents = [...studentsData].sort((a, b) => b.totalScore - a.totalScore);
 
         if (studentsData.length === 0) {
@@ -1000,13 +1005,11 @@
         });
 
         tbody.innerHTML = bodyHtml;
-
-        // Update stats
         updateStats();
     }
 
     // ============================================
-    // ON SCORE CHANGE - Auto update rank
+    // ON SCORE CHANGE
     // ============================================
     function onScoreChange(input) {
         const row = input.closest('tr');
@@ -1062,13 +1065,11 @@
             perfCell.innerHTML = `<span class="${className}">${level}</span>`;
         }
 
-        // Update the student data in memory
         const studentId = input.dataset.studentId;
         const student = studentsData.find(s => s._id === studentId || s._id === 'new_' + studentId);
         if (student) {
             student.totalScore = total;
             student.averageScore = count > 0 ? total / count : 0;
-            // Recalculate performance level
             const config = subjectConfig;
             const maxTotal = config.subjects.reduce((sum, s) => sum + s.max, 0);
             const percentage = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
@@ -1078,7 +1079,6 @@
             else student.performanceLevel = 'Below Expectation';
         }
 
-        // Re-render table to update ranks
         clearTimeout(window.rankTimeout);
         window.rankTimeout = setTimeout(() => {
             renderMarksTable();
@@ -1535,7 +1535,7 @@
     }
 
     // ============================================
-    // LOAD STUDENT LIST WITH RANK
+    // LOAD STUDENT LIST WITH WORKING ACTIONS
     // ============================================
     async function loadStudentList() {
         const filterGrade = document.getElementById('filterGrade').value;
@@ -1555,7 +1555,6 @@
                     students = students.filter(s => s.studentName.toLowerCase().includes(searchTerm));
                 }
 
-                // Sort by total score for ranking
                 const sortedStudents = [...students].sort((a, b) => b.totalScore - a.totalScore);
 
                 const tbody = document.getElementById('studentsTableBody');
@@ -1597,12 +1596,17 @@
                             <td>${student.totalScore || 0}</td>
                             <td><span class="${performanceClass}">${student.performanceLevel || 'N/A'}</span></td>
                             <td>
-                                <button class="btn btn-info btn-sm" onclick="editStudentFromList('${student._id}')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-success btn-sm" onclick="downloadReport('${student._id}')">
-                                    <i class="fas fa-download"></i>
-                                </button>
+                                <div class="action-buttons-cell">
+                                    <button class="btn btn-info btn-sm" onclick="editStudentFromList('${student._id}')" title="Edit Student">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-success btn-sm" onclick="downloadReport('${student._id}')" title="Download Report">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteStudentFromList('${student._id}')" title="Delete Student">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -1615,6 +1619,29 @@
     }
 
     // ============================================
+    // DELETE STUDENT FROM LIST
+    // ============================================
+    async function deleteStudentFromList(studentId) {
+        if (!confirm('⚠️ Are you sure you want to delete this student\'s assessment record? This cannot be undone!')) return;
+        
+        try {
+            const response = await fetch(`/api/assessments/${studentId}`, { method: 'DELETE' });
+            const result = await response.json();
+            
+            if (result.success) {
+                showAlert('✅ Student assessment deleted successfully!', 'success');
+                loadStudentList();
+                loadGradeData();
+            } else {
+                showAlert('❌ Error: ' + result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('❌ Error deleting student', 'error');
+        }
+    }
+
+    // ============================================
     // EDIT STUDENT FROM LIST
     // ============================================
     async function editStudentFromList(studentId) {
@@ -1623,10 +1650,16 @@
             const data = await response.json();
             if (data.success) {
                 const student = data.student;
+                
+                // Set the grade
                 selectGrade(student.grade);
+                
+                // Set the assessment type
                 if (student.type) {
                     selectAssessmentType(student.type);
                 }
+                
+                // Set period, month, year, term
                 if (student.period) {
                     document.getElementById('assessmentPeriod').value = student.period;
                 }
@@ -1639,8 +1672,14 @@
                 if (student.term) {
                     document.getElementById('assessmentTerm').value = student.term;
                 }
-                loadGradeData();
+                
+                // Load the data and highlight the student
+                await loadGradeData();
+                
+                // Scroll to the marks table
                 document.getElementById('marksTableContainer').scrollIntoView({ behavior: 'smooth' });
+                
+                // Highlight the student row
                 setTimeout(() => {
                     const rows = document.querySelectorAll('#marksTableBody tr');
                     rows.forEach(row => {
@@ -1654,10 +1693,12 @@
                         }
                     });
                 }, 500);
+                
+                showAlert(`✏️ Editing ${student.studentName} - Make changes and click "Save All"`, 'info');
             }
         } catch (error) {
             console.error('Error:', error);
-            showAlert('Error loading student data', 'error');
+            showAlert('❌ Error loading student data', 'error');
         }
     }
 
@@ -1666,19 +1707,36 @@
     // ============================================
     async function downloadReport(studentId) {
         try {
+            showSaveStatus('Generating report...', 'saving');
+            
             const response = await fetch(`/api/assessments/generate-report/${studentId}`);
             const data = await response.json();
+            
             if (data.success) {
+                // Create a new window with the HTML content
                 const win = window.open('', '_blank');
+                if (!win) {
+                    showAlert('Please allow popups for this site to download reports', 'error');
+                    return;
+                }
                 win.document.write(data.html);
                 win.document.close();
-                setTimeout(() => win.print(), 500);
+                
+                // Wait for content to load then trigger print/save
+                setTimeout(() => {
+                    win.print();
+                }, 800);
+                
+                showSaveStatus('Report generated', 'saved');
+                setTimeout(() => hideSaveStatus(), 2000);
             } else {
-                showAlert('Error generating report', 'error');
+                showAlert('❌ Error generating report: ' + (data.message || 'Unknown error'), 'error');
+                hideSaveStatus();
             }
         } catch (error) {
             console.error('Error:', error);
-            showAlert('Error downloading report', 'error');
+            showAlert('❌ Error downloading report: ' + error.message, 'error');
+            hideSaveStatus();
         }
     }
 
