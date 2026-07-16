@@ -440,6 +440,7 @@ const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
 // Student Assessment Schema
 const studentAssessmentSchema = new mongoose.Schema({
   studentName: { type: String, required: true },
+  admissionNumber: { type: String, default: '' },
   grade: { type: String, required: true },
   type: { type: String, default: 'monthly' },
   period: { type: String, default: '' },
@@ -1527,7 +1528,6 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
     
     let config = await SubjectConfig.findOne({ grade, type });
     if (!config) {
-      // Return default config if not found
       const defaultSubjects = getDefaultSubjects(grade, type);
       config = { grade, type, subjects: defaultSubjects };
     }
@@ -1552,7 +1552,6 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
       });
     }
     
-    // Validate subjects
     for (const s of subjects) {
       if (!s.name || typeof s.max !== 'number' || s.max < 1) {
         return res.status(400).json({ 
@@ -1571,7 +1570,6 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
     }
     await config.save();
     
-    // Also update all existing student assessments with new subject max scores
     const students = await StudentAssessment.find({ grade, type });
     let updatedCount = 0;
     for (const student of students) {
@@ -1621,7 +1619,6 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
     
     const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
     
-    // Get subject config
     let config = await SubjectConfig.findOne({ grade, type: type || 'monthly' });
     if (!config) {
       const defaultSubjects = getDefaultSubjects(grade, type || 'monthly');
@@ -1656,7 +1653,7 @@ app.get('/api/assessments/student/:id', async (req, res) => {
 // POST create a new student assessment
 app.post('/api/assessments', async (req, res) => {
   try {
-    const { studentName, grade, type, period, month, year, term, assessments } = req.body;
+    const { studentName, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
     
     if (!studentName || !grade || !assessments || !Array.isArray(assessments) || assessments.length === 0) {
       return res.status(400).json({ 
@@ -1665,13 +1662,13 @@ app.post('/api/assessments', async (req, res) => {
       });
     }
     
-    // Calculate totals
     const { totalScore } = calculateTotals(assessments);
     const avgScore = assessments.length > 0 ? totalScore / assessments.length : 0;
     const performanceLevel = calculatePerformanceLevel(assessments);
     
     const student = new StudentAssessment({
       studentName,
+      admissionNumber: admissionNumber || '',
       grade,
       type: type || 'monthly',
       period: period || '',
@@ -1701,7 +1698,7 @@ app.post('/api/assessments', async (req, res) => {
 app.put('/api/assessments/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { studentName, grade, type, period, month, year, term, assessments } = req.body;
+    const { studentName, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
     
     const student = await StudentAssessment.findById(id);
     if (!student) {
@@ -1709,6 +1706,7 @@ app.put('/api/assessments/:id', async (req, res) => {
     }
     
     if (studentName) student.studentName = studentName;
+    if (admissionNumber) student.admissionNumber = admissionNumber;
     if (grade) student.grade = grade;
     if (type) student.type = type;
     if (period) student.period = period;
@@ -1764,7 +1762,93 @@ app.get('/api/assessments/all', async (req, res) => {
   }
 });
 
+// ============================================
+// PARENT/STUDENT RESULTS SEARCH API - FIXED
+// ============================================
+
+// GET search for student results by name, grade, or type
+app.get('/api/assessments/search', async (req, res) => {
+  try {
+    const { name, grade, type, admission } = req.query;
+    
+    // Build search filter
+    let filter = {};
+    
+    if (name) {
+      filter.studentName = { $regex: name, $options: 'i' };
+    }
+    
+    if (admission) {
+      filter.admissionNumber = { $regex: admission, $options: 'i' };
+    }
+    
+    if (grade) {
+      filter.grade = grade;
+    }
+    
+    if (type) {
+      filter.type = type;
+    }
+    
+    // If no search criteria, return error
+    if (Object.keys(filter).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name, grade, or admission number'
+      });
+    }
+    
+    console.log('🔍 Searching with filter:', filter);
+    
+    // Find students matching the criteria
+    const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
+    
+    console.log('📊 Found students:', students.length);
+    
+    // If no students found
+    if (students.length === 0) {
+      return res.json({
+        success: true,
+        students: [],
+        count: 0,
+        message: 'No students found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      students: students,
+      count: students.length
+    });
+    
+  } catch (error) {
+    console.error('❌ Search error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+// GET generate student report
+app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
+  try {
+    const student = await StudentAssessment.findById(req.params.studentId);
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+    
+    const html = generateStudentReportHTML(student);
+    res.json({ success: true, html });
+  } catch (error) {
+    console.error('Error generating report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
 // POST copy assessments from one period to another
+// ============================================
 app.post('/api/assessments/copy', async (req, res) => {
   try {
     const { 
@@ -1772,7 +1856,6 @@ app.post('/api/assessments/copy', async (req, res) => {
       toGrade, toType, toPeriod, toMonth, toYear, toTerm
     } = req.body;
     
-    // Find source students
     const sourceFilter = { grade: fromGrade };
     if (fromType) sourceFilter.type = fromType;
     if (fromPeriod) sourceFilter.period = fromPeriod;
@@ -1786,7 +1869,6 @@ app.post('/api/assessments/copy', async (req, res) => {
       return res.json({ success: true, message: 'No students found to copy', count: 0 });
     }
     
-    // Get subject config for destination
     let config = await SubjectConfig.findOne({ grade: toGrade, type: toType || 'monthly' });
     if (!config) {
       const defaultSubjects = getDefaultSubjects(toGrade, toType || 'monthly');
@@ -1796,7 +1878,6 @@ app.post('/api/assessments/copy', async (req, res) => {
     let copiedCount = 0;
     
     for (const source of sourceStudents) {
-      // Check if student already exists in destination
       const existingFilter = {
         studentName: source.studentName,
         grade: toGrade,
@@ -1808,9 +1889,8 @@ app.post('/api/assessments/copy', async (req, res) => {
       };
       
       const existing = await StudentAssessment.findOne(existingFilter);
-      if (existing) continue; // Skip if already exists
+      if (existing) continue;
       
-      // Create new assessments with destination subject config
       const newAssessments = config.subjects.map(subj => {
         const sourceAssessment = source.assessments.find(a => a.subject === subj.name);
         return {
@@ -1826,6 +1906,7 @@ app.post('/api/assessments/copy', async (req, res) => {
       
       const newStudent = new StudentAssessment({
         studentName: source.studentName,
+        admissionNumber: source.admissionNumber || '',
         grade: toGrade,
         type: toType || 'monthly',
         period: toPeriod,
@@ -1849,22 +1930,6 @@ app.post('/api/assessments/copy', async (req, res) => {
     });
   } catch (error) {
     console.error('Error copying assessments:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// GET generate student report
-app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
-  try {
-    const student = await StudentAssessment.findById(req.params.studentId);
-    if (!student) {
-      return res.status(404).json({ success: false, message: 'Student not found' });
-    }
-    
-    const html = generateStudentReportHTML(student);
-    res.json({ success: true, html });
-  } catch (error) {
-    console.error('Error generating report:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -1959,7 +2024,6 @@ function getDefaultSubjects(grade, type) {
     }
   };
   
-  // Default fallback
   const fallback = [
     { name: 'MATHEMATICS', max: 50 },
     { name: 'ENGLISH', max: 50 },
@@ -2019,9 +2083,7 @@ function generateStudentReportHTML(student) {
         table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
         table td { padding: 6px 10px; border: 1px solid #ddd; }
         .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
-        .print-btn { display: inline-block; padding: 10px 30px; background: #D4A017; color: #0A1628; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 15px; }
-        .print-btn:hover { background: #F5C842; }
-        @media print { .no-print { display: none; } body { padding: 15px; } }
+        @media print { body { padding: 15px; } }
       </style>
     </head>
     <body>
@@ -2033,6 +2095,7 @@ function generateStudentReportHTML(student) {
       <div class="student-info">
         <table>
           <tr><td class="label">Student Name:</td><td><strong>${student.studentName}</strong></td></tr>
+          ${student.admissionNumber ? `<tr><td class="label">Admission Number:</td><td><strong>${student.admissionNumber}</strong></td></tr>` : ''}
           <tr><td class="label">Grade:</td><td>${student.grade}</td></tr>
           <tr><td class="label">Assessment Type:</td><td>${typeNames[student.type] || student.type || 'Monthly'}</td></tr>
           <tr><td class="label">Period:</td><td>${student.period || 'N/A'}</td></tr>
@@ -2064,10 +2127,6 @@ function generateStudentReportHTML(student) {
       <div class="footer">
         <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
         <p>Generated on ${formatKenyaFullTime(new Date())}</p>
-      </div>
-      
-      <div class="no-print" style="text-align:center;">
-        <button class="print-btn" onclick="window.print()">🖨️ Print / Download PDF</button>
       </div>
     </body>
     </html>
@@ -2111,6 +2170,7 @@ app.get('/api/test', (req, res) => {
           grade: '/api/assessments/grade/:grade',
           student: '/api/assessments/student/:id',
           all: '/api/assessments/all',
+          search: '/api/assessments/search?name=&grade=&type=',
           create: '/api/assessments (POST)',
           update: '/api/assessments/:id (PUT)',
           delete: '/api/assessments/:id (DELETE)',
@@ -2164,6 +2224,7 @@ app.listen(PORT, () => {
   console.log(`🚪 Visitor Check-in: http://localhost:${PORT}/visitor-checkin.html`);
   console.log(`📋 Admin Visitors: http://localhost:${PORT}/admin-visitors.html`);
   console.log(`📝 Academic Assessments: http://localhost:${PORT}/admin-academics.html`);
+  console.log(`📚 Parent Results: http://localhost:${PORT}/academics.html#assessments`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
 });
