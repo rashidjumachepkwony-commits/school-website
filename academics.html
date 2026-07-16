@@ -711,12 +711,12 @@
         }
 
         /* ========================================
-           RESULT CARD - UPDATED WITH ANALYSIS
+           RESULT CARD
            ======================================== */
         .result-card {
             background: white;
             border-radius: 16px;
-            padding: 30px;
+            padding: 25px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             max-width: 1100px;
             margin: 0 auto 20px;
@@ -726,14 +726,14 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid #e8ecf1;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
         .result-card .student-header h3 {
             color: var(--school-blue-dark);
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
         }
         .result-card .student-header h3 i {
@@ -743,25 +743,25 @@
         .result-card .student-header .grade-badge {
             background: var(--school-gold);
             color: var(--kenya-black);
-            padding: 4px 16px;
+            padding: 3px 14px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
         }
         .result-card .student-header .type-badge {
             background: var(--school-blue);
             color: white;
-            padding: 4px 16px;
+            padding: 3px 14px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 11px;
         }
         .result-card .performance-badge {
             display: inline-block;
-            padding: 6px 18px;
+            padding: 5px 16px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
         }
         .result-card .performance-badge.exceeding {
             background: #28a745;
@@ -782,43 +782,48 @@
 
         .result-card .summary-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 12px 0;
         }
         .result-card .summary-stats .stat {
             background: #f8f9fc;
-            padding: 15px;
+            padding: 10px;
             border-radius: 8px;
             text-align: center;
         }
         .result-card .summary-stats .stat .number {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--school-blue-dark);
         }
         .result-card .summary-stats .stat .label {
-            font-size: 12px;
+            font-size: 11px;
             color: #666;
+        }
+        .result-card .summary-stats .stat .rank-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--school-gold);
         }
 
         .result-card .subjects-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 15px 0;
-            font-size: 13px;
+            margin: 10px 0;
+            font-size: 12px;
         }
         .result-card .subjects-table th {
             background: var(--school-blue-dark);
             color: white;
-            padding: 10px 12px;
+            padding: 6px 10px;
             text-align: left;
-            font-size: 12px;
+            font-size: 11px;
         }
         .result-card .subjects-table td {
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-bottom: 1px solid #e8ecf1;
-            font-size: 13px;
+            font-size: 12px;
         }
         .result-card .subjects-table tr:hover td {
             background: #f8f9fc;
@@ -826,9 +831,9 @@
 
         .subject-rank-badge {
             display: inline-block;
-            padding: 2px 12px;
+            padding: 2px 10px;
             border-radius: 50px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
         }
         .subject-rank-badge.exceeding { background: #28a745; color: white; }
@@ -840,36 +845,36 @@
            ANALYSIS SECTION
            ======================================== */
         .analysis-section {
-            margin-top: 25px;
-            padding-top: 20px;
+            margin-top: 15px;
+            padding-top: 15px;
             border-top: 2px solid #e8ecf1;
         }
         .analysis-section h4 {
             color: var(--school-blue-dark);
-            font-size: 16px;
-            margin-bottom: 12px;
+            font-size: 14px;
+            margin-bottom: 10px;
         }
         .analysis-section .analysis-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
+            gap: 12px;
         }
         .analysis-section .analysis-box {
-            padding: 15px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             border: 1px solid #e8ecf1;
             background: #f8f9fc;
         }
         .analysis-section .analysis-box h5 {
-            font-size: 13px;
-            margin-bottom: 8px;
+            font-size: 12px;
+            margin-bottom: 6px;
             color: var(--school-blue-dark);
         }
         .analysis-section .analysis-box .subject-item {
             display: flex;
             justify-content: space-between;
-            padding: 4px 0;
-            font-size: 13px;
+            padding: 3px 0;
+            font-size: 12px;
             border-bottom: 1px solid #f0f0f0;
         }
         .analysis-section .analysis-box .subject-item:last-child {
@@ -885,23 +890,23 @@
         .result-card .action-buttons {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
+            margin-top: 15px;
             flex-wrap: wrap;
             justify-content: center;
         }
         .result-card .action-buttons .btn {
             flex: 1;
-            min-width: 150px;
+            min-width: 130px;
             justify-content: center;
+            padding: 8px 20px;
+            font-size: 13px;
         }
         .btn-download {
             background: linear-gradient(135deg, #6f42c1, #4a2a8a);
             color: white;
             border: none;
-            padding: 10px 25px;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: inline-flex;
@@ -917,10 +922,8 @@
             background: #6c757d;
             color: white;
             border: none;
-            padding: 10px 25px;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: inline-flex;
@@ -1117,7 +1120,7 @@
                 min-width: auto;
             }
             .result-card {
-                padding: 20px;
+                padding: 15px;
             }
             .result-card .student-header {
                 flex-direction: column;
@@ -1130,7 +1133,7 @@
                 grid-template-columns: 1fr;
             }
             .result-card .subjects-table {
-                font-size: 11px;
+                font-size: 10px;
             }
             .result-card .subjects-table th,
             .result-card .subjects-table td {
@@ -1753,7 +1756,6 @@
                 best: []
             };
 
-            // Group by subject
             const subjectMap = {};
             assessments.forEach(a => {
                 if (!subjectMap[a.subject]) {
@@ -1762,10 +1764,8 @@
                 subjectMap[a.subject].push(a);
             });
 
-            // Analyze each subject
             Object.keys(subjectMap).forEach(subject => {
                 const records = subjectMap[subject].sort((a, b) => {
-                    // Sort by date (assuming newer records have later dates)
                     return new Date(a.date) - new Date(b.date);
                 });
 
@@ -1773,7 +1773,6 @@
                     const firstPerf = getSubjectPerformance(records[0].score, records[0].maxScore);
                     const lastPerf = getSubjectPerformance(records[records.length - 1].score, records[records.length - 1].maxScore);
                     
-                    // Check if improved
                     const levelOrder = ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'];
                     const firstIndex = levelOrder.indexOf(firstPerf.level);
                     const lastIndex = levelOrder.indexOf(lastPerf.level);
@@ -1785,7 +1784,6 @@
                     }
                 }
                 
-                // Get best performing subject (highest percentage)
                 const bestRecord = records.reduce((a, b) => {
                     const aPct = (a.score / a.maxScore) * 100;
                     const bPct = (b.score / b.maxScore) * 100;
@@ -1800,13 +1798,21 @@
                 });
             });
 
-            // Sort best by percentage descending
             analysis.best.sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage));
-            
-            // Only keep top 3 best
             analysis.best = analysis.best.slice(0, 3);
 
             return analysis;
+        }
+
+        // ============================================
+        // CALCULATE RANK
+        // ============================================
+        function calculateRank(students, studentId) {
+            // Sort students by total score descending
+            const sorted = [...students].sort((a, b) => b.totalScore - a.totalScore);
+            const rank = sorted.findIndex(s => s._id === studentId) + 1;
+            const total = sorted.length;
+            return { rank, total };
         }
 
         // ============================================
@@ -1834,7 +1840,7 @@
 
                 if (data.success && data.students && data.students.length > 0) {
                     resultsDiv.style.display = 'block';
-                    resultsDiv.innerHTML = data.students.map(student => renderStudentResult(student)).join('');
+                    resultsDiv.innerHTML = data.students.map(student => renderStudentResult(student, data.students)).join('');
                 } else {
                     resultsDiv.style.display = 'block';
                     resultsDiv.innerHTML = `
@@ -1852,9 +1858,9 @@
         }
 
         // ============================================
-        // RENDER STUDENT RESULT WITH ANALYSIS
+        // RENDER STUDENT RESULT WITH RANK
         // ============================================
-        function renderStudentResult(student) {
+        function renderStudentResult(student, allStudents) {
             const performanceColors = {
                 'Exceeding Expectation': 'exceeding',
                 'Meeting Expectation': 'meeting',
@@ -1868,14 +1874,13 @@
                 'term': 'End-of-Term Exams'
             };
 
-            // Get subject performance for each subject
             const subjectsWithPerf = student.assessments.map(a => {
                 const perf = getSubjectPerformance(a.score, a.maxScore);
                 return { ...a, performance: perf };
             });
 
-            // Analyze results
             const analysis = analyzeResults(student.assessments);
+            const rankInfo = calculateRank(allStudents, student._id);
 
             const subjectsHtml = subjectsWithPerf.map(a => `
                 <tr>
@@ -1887,7 +1892,6 @@
                 </tr>
             `).join('');
 
-            // Analysis HTML
             let analysisHtml = '';
             if (analysis.improved.length > 0 || analysis.dropped.length > 0 || analysis.best.length > 0) {
                 analysisHtml = `
@@ -1901,7 +1905,7 @@
                                         <span>${s.subject}</span>
                                         <span><span class="perf-down">${s.from}</span> → <span class="perf-up">${s.to}</span></span>
                                     </div>
-                                `).join('') : '<p style="color:#999;font-size:12px;">No improvements detected</p>'}
+                                `).join('') : '<p style="color:#999;font-size:11px;">No improvements detected</p>'}
                             </div>
                             <div class="analysis-box dropped">
                                 <h5>📉 Dropped Subjects</h5>
@@ -1910,7 +1914,7 @@
                                         <span>${s.subject}</span>
                                         <span><span class="perf-up">${s.from}</span> → <span class="perf-down">${s.to}</span></span>
                                     </div>
-                                `).join('') : '<p style="color:#999;font-size:12px;">No drops detected</p>'}
+                                `).join('') : '<p style="color:#999;font-size:11px;">No drops detected</p>'}
                             </div>
                             <div class="analysis-box best">
                                 <h5>🏆 Best Performing Subjects</h5>
@@ -1919,7 +1923,7 @@
                                         <span>${s.subject}</span>
                                         <span class="perf-best">${s.percentage}% (${s.score}/${s.maxScore})</span>
                                     </div>
-                                `).join('') : '<p style="color:#999;font-size:12px;">No data available</p>'}
+                                `).join('') : '<p style="color:#999;font-size:11px;">No data available</p>'}
                             </div>
                         </div>
                     </div>
@@ -1933,11 +1937,14 @@
                             <h3><i class="fas fa-user-graduate"></i> ${student.studentName}</h3>
                             <span class="grade-badge">${student.grade}</span>
                             <span class="type-badge">${typeNames[student.type] || student.type || 'Monthly'}</span>
-                            ${student.period ? `<span style="margin-left:5px;font-size:12px;color:#666;">${student.period}</span>` : ''}
-                            ${student.month ? `<span style="margin-left:5px;font-size:12px;color:#666;">${student.month}</span>` : ''}
-                            ${student.term ? `<span style="margin-left:5px;font-size:12px;color:#666;">${student.term}</span>` : ''}
+                            ${student.period ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.period}</span>` : ''}
+                            ${student.month ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.month}</span>` : ''}
+                            ${student.term ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.term}</span>` : ''}
                         </div>
-                        <div>
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                            <span style="font-weight:700;color:var(--school-gold);font-size:16px;">
+                                🏆 Rank: ${rankInfo.rank}/${rankInfo.total}
+                            </span>
                             <span class="performance-badge ${performanceColors[student.performanceLevel] || 'meeting'}">
                                 ${student.performanceLevel}
                             </span>
@@ -1945,6 +1952,10 @@
                     </div>
 
                     <div class="summary-stats">
+                        <div class="stat">
+                            <div class="rank-number">#${rankInfo.rank}</div>
+                            <div class="label">Rank</div>
+                        </div>
                         <div class="stat">
                             <div class="number">${student.totalScore}</div>
                             <div class="label">Total Score</div>
@@ -1997,9 +2008,12 @@
                 const data = await response.json();
                 
                 if (data.success) {
+                    // Create a new window with the HTML content
                     const win = window.open('', '_blank');
                     win.document.write(data.html);
                     win.document.close();
+                    
+                    // Wait for content to load then trigger download
                     setTimeout(() => {
                         win.print();
                     }, 500);
@@ -2018,7 +2032,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadNewsTicker();
             
-            // Check if assessment type is in URL
             const urlParams = new URLSearchParams(window.location.search);
             const type = urlParams.get('type');
             if (type) {
