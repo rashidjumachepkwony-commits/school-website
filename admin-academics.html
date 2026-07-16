@@ -85,6 +85,8 @@
         .btn-sm { padding: 5px 12px; font-size: 12px; }
         .btn-purple { background: linear-gradient(135deg, #6f42c1, #4a2a8a); color: white; }
         .btn-purple:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(111,66,193,0.35); }
+        .btn-print { background: #17a2b8; color: white; }
+        .btn-print:hover { background: #138496; transform: translateY(-2px); }
 
         .card {
             background: white;
@@ -128,7 +130,7 @@
         .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
         .form-row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
 
-        .table-wrapper { overflow-x: auto; }
+        .table-wrapper { overflow-x: auto; max-height: 600px; overflow-y: auto; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -336,16 +338,6 @@
             border-bottom: 2px solid #D4A017;
             padding-bottom: 10px;
         }
-        .edit-subject-modal .modal-content .type-label {
-            display: inline-block;
-            padding: 2px 14px;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 700;
-            background: #D4A017;
-            color: #0A1628;
-            margin-bottom: 10px;
-        }
 
         .subject-entry {
             background: #f8f9fc;
@@ -427,6 +419,164 @@
             font-size: 10px;
         }
 
+        /* Report Modal Styles */
+        .report-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 99999;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .report-modal.show { display: block; }
+        .report-modal .report-content {
+            background: white;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 16px;
+            min-height: 500px;
+        }
+        .report-modal .report-content .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #D4A017;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .report-modal .report-content .report-header h2 {
+            color: #0A1628;
+            font-size: 22px;
+        }
+        .report-modal .report-content .report-header h2 i {
+            color: #D4A017;
+        }
+        .report-modal .report-content .report-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .report-modal .report-content .report-body {
+            padding: 10px 0;
+        }
+        .report-modal .report-content .report-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e8ecf1;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+        .report-table th {
+            background: #0A1628;
+            color: white;
+            padding: 6px 8px;
+            text-align: left;
+            font-size: 11px;
+        }
+        .report-table td {
+            padding: 5px 8px;
+            border-bottom: 1px solid #e8ecf1;
+            font-size: 11px;
+        }
+        .report-table tr:nth-child(even) { background: #fafbfc; }
+        .report-table .rank-badge-sm {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 50px;
+            font-size: 9px;
+            font-weight: 700;
+        }
+        .report-table .rank-badge-sm.top { background: #28a745; color: white; }
+        .report-table .rank-badge-sm.mid { background: #ffc107; color: #0A1628; }
+        .report-table .rank-badge-sm.bottom { background: #dc3545; color: white; }
+
+        .report-summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .report-summary-stats .stat-box {
+            background: #f8f9fc;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e8ecf1;
+        }
+        .report-summary-stats .stat-box .num {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0A1628;
+        }
+        .report-summary-stats .stat-box .lbl {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .analysis-grid-report {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .analysis-box-report {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e8ecf1;
+            background: #f8f9fc;
+        }
+        .analysis-box-report h5 {
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: #0A1628;
+        }
+        .analysis-box-report .subj-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 11px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .analysis-box-report .subj-item:last-child { border-bottom: none; }
+        .analysis-box-report .perf-up { color: #28a745; }
+        .analysis-box-report .perf-down { color: #dc3545; }
+        .analysis-box-report .perf-best { color: #D4A017; font-weight: 700; }
+        .analysis-box-report.improved { border-left: 4px solid #28a745; }
+        .analysis-box-report.dropped { border-left: 4px solid #dc3545; }
+        .analysis-box-report.best { border-left: 4px solid #D4A017; }
+
+        .close-report-btn {
+            position: sticky;
+            top: 10px;
+            float: right;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            z-index: 10;
+        }
+        .close-report-btn:hover { transform: scale(1.1); }
+
         @media (max-width: 768px) {
             .form-row, .form-row-3, .form-row-4 { grid-template-columns: 1fr; }
             .filters { flex-direction: column; }
@@ -439,10 +589,13 @@
             .grade-tabs .tab { font-size: 11px; padding: 5px 12px; }
             .assessment-type-tabs .type-tab { font-size: 11px; padding: 4px 12px; }
             .action-buttons-cell .btn-sm { padding: 2px 5px; font-size: 9px; }
+            .analysis-grid-report { grid-template-columns: 1fr; }
+            .report-modal .report-content { padding: 15px; }
         }
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr; }
             .card { padding: 15px; }
+            .report-summary-stats { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -615,6 +768,33 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Report Actions -->
+        <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #e8ecf1;padding-top:15px;">
+            <button class="btn btn-print" onclick="generateClassReport()"><i class="fas fa-print"></i> Print Class Report</button>
+            <button class="btn btn-purple" onclick="generateSchoolReport()"><i class="fas fa-school"></i> Print School Report</button>
+            <button class="btn btn-success" onclick="exportAllData()"><i class="fas fa-file-excel"></i> Export All Data</button>
+        </div>
+    </div>
+
+    <!-- ===== REPORT MODAL ===== -->
+    <div class="report-modal" id="reportModal">
+        <div class="report-content" id="reportContent">
+            <button class="close-report-btn" onclick="closeReport()">✕</button>
+            <div class="report-header">
+                <h2><i class="fas fa-chart-bar"></i> <span id="reportTitle">Assessment Report</span></h2>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="downloadReportPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                    <button class="btn btn-print" onclick="printReport()"><i class="fas fa-print"></i> Print</button>
+                </div>
+            </div>
+            <div class="report-body" id="reportBody">
+                <!-- Report content will be loaded here -->
+            </div>
+            <div class="report-footer">
+                <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+            </div>
+        </div>
     </div>
 
     <!-- ===== COPY ASSESSMENTS MODAL ===== -->
@@ -732,6 +912,7 @@
     let currentTerm = 'Term 2';
     let studentsData = [];
     let subjectConfig = {};
+    let allStudentsData = [];
     let editingStudentId = null;
 
     // ============================================
@@ -897,23 +1078,16 @@
     // ============================================
     // CALCULATE RANK
     // ============================================
-    function calculateRankAndColor(students, studentId) {
+    function calculateRank(students) {
         const sorted = [...students].sort((a, b) => {
             if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
             return b.averageScore - a.averageScore;
         });
-        const rank = sorted.findIndex(s => s._id === studentId) + 1;
-        const total = sorted.length;
-        
-        let rankColor = 'mid';
-        if (rank <= Math.ceil(total * 0.2)) rankColor = 'top';
-        else if (rank > Math.ceil(total * 0.7)) rankColor = 'bottom';
-        
-        return { rank, total, rankColor };
+        return sorted.map((s, i) => ({ ...s, rank: i + 1 }));
     }
 
     // ============================================
-    // RENDER MARKS TABLE WITH RANK
+    // RENDER MARKS TABLE
     // ============================================
     function renderMarksTable() {
         const config = subjectConfig;
@@ -1535,7 +1709,7 @@
     }
 
     // ============================================
-    // LOAD STUDENT LIST WITH WORKING ACTIONS
+    // LOAD STUDENT LIST
     // ============================================
     async function loadStudentList() {
         const filterGrade = document.getElementById('filterGrade').value;
@@ -1546,7 +1720,8 @@
             const data = await response.json();
 
             if (data.success) {
-                let students = data.students || [];
+                allStudentsData = data.students || [];
+                let students = [...allStudentsData];
                 
                 if (filterGrade) {
                     students = students.filter(s => s.grade === filterGrade);
@@ -1650,16 +1825,10 @@
             const data = await response.json();
             if (data.success) {
                 const student = data.student;
-                
-                // Set the grade
                 selectGrade(student.grade);
-                
-                // Set the assessment type
                 if (student.type) {
                     selectAssessmentType(student.type);
                 }
-                
-                // Set period, month, year, term
                 if (student.period) {
                     document.getElementById('assessmentPeriod').value = student.period;
                 }
@@ -1672,14 +1841,8 @@
                 if (student.term) {
                     document.getElementById('assessmentTerm').value = student.term;
                 }
-                
-                // Load the data and highlight the student
                 await loadGradeData();
-                
-                // Scroll to the marks table
                 document.getElementById('marksTableContainer').scrollIntoView({ behavior: 'smooth' });
-                
-                // Highlight the student row
                 setTimeout(() => {
                     const rows = document.querySelectorAll('#marksTableBody tr');
                     rows.forEach(row => {
@@ -1693,7 +1856,6 @@
                         }
                     });
                 }, 500);
-                
                 showAlert(`✏️ Editing ${student.studentName} - Make changes and click "Save All"`, 'info');
             }
         } catch (error) {
@@ -1713,7 +1875,6 @@
             const data = await response.json();
             
             if (data.success) {
-                // Create a new window with the HTML content
                 const win = window.open('', '_blank');
                 if (!win) {
                     showAlert('Please allow popups for this site to download reports', 'error');
@@ -1721,12 +1882,9 @@
                 }
                 win.document.write(data.html);
                 win.document.close();
-                
-                // Wait for content to load then trigger print/save
                 setTimeout(() => {
                     win.print();
                 }, 800);
-                
                 showSaveStatus('Report generated', 'saved');
                 setTimeout(() => hideSaveStatus(), 2000);
             } else {
@@ -1738,6 +1896,309 @@
             showAlert('❌ Error downloading report: ' + error.message, 'error');
             hideSaveStatus();
         }
+    }
+
+    // ============================================
+    // ANALYZE STUDENT RESULTS
+    // ============================================
+    function analyzeResults(assessments) {
+        const analysis = { improved: [], dropped: [], best: [] };
+        const subjectMap = {};
+        assessments.forEach(a => {
+            if (!subjectMap[a.subject]) subjectMap[a.subject] = [];
+            subjectMap[a.subject].push(a);
+        });
+
+        Object.keys(subjectMap).forEach(subject => {
+            const records = subjectMap[subject];
+            if (records.length >= 2) {
+                const firstPerf = getSubjectPerformance(records[0].score, records[0].maxScore);
+                const lastPerf = getSubjectPerformance(records[records.length - 1].score, records[records.length - 1].maxScore);
+                const levelOrder = ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'];
+                const firstIndex = levelOrder.indexOf(firstPerf.level);
+                const lastIndex = levelOrder.indexOf(lastPerf.level);
+                if (lastIndex > firstIndex) {
+                    analysis.improved.push({ subject, from: firstPerf.level, to: lastPerf.level });
+                } else if (lastIndex < firstIndex) {
+                    analysis.dropped.push({ subject, from: firstPerf.level, to: lastPerf.level });
+                }
+            }
+            const bestRecord = records.reduce((a, b) => {
+                const aPct = (a.score / a.maxScore) * 100;
+                const bPct = (b.score / b.maxScore) * 100;
+                return aPct > bPct ? a : b;
+            }, records[0]);
+            analysis.best.push({
+                subject: subject,
+                score: bestRecord.score,
+                maxScore: bestRecord.maxScore,
+                percentage: ((bestRecord.score / bestRecord.maxScore) * 100).toFixed(1)
+            });
+        });
+
+        analysis.best.sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage));
+        analysis.best = analysis.best.slice(0, 3);
+        return analysis;
+    }
+
+    // ============================================
+    // GENERATE CLASS REPORT
+    // ============================================
+    function generateClassReport() {
+        const grade = document.getElementById('filterGrade').value || currentGrade;
+        const students = allStudentsData.filter(s => s.grade === grade);
+        
+        if (students.length === 0) {
+            showAlert('No students found for this grade', 'error');
+            return;
+        }
+
+        const sortedStudents = [...students].sort((a, b) => b.totalScore - a.totalScore);
+        const reportHtml = generateReportHTML(sortedStudents, `Class Report - ${grade}`);
+        showReport('Class Report - ' + grade, reportHtml);
+    }
+
+    // ============================================
+    // GENERATE SCHOOL REPORT
+    // ============================================
+    function generateSchoolReport() {
+        if (allStudentsData.length === 0) {
+            showAlert('No students found', 'error');
+            return;
+        }
+
+        const sortedStudents = [...allStudentsData].sort((a, b) => b.totalScore - a.totalScore);
+        const reportHtml = generateReportHTML(sortedStudents, 'School Report - All Grades');
+        showReport('School Report - All Grades', reportHtml);
+    }
+
+    // ============================================
+    // GENERATE REPORT HTML
+    // ============================================
+    function generateReportHTML(students, title) {
+        const totalStudents = students.length;
+        const exceeding = students.filter(s => s.performanceLevel === 'Exceeding Expectation').length;
+        const meeting = students.filter(s => s.performanceLevel === 'Meeting Expectation').length;
+        const approaching = students.filter(s => s.performanceLevel === 'Approaching Expectation').length;
+        const below = students.filter(s => s.performanceLevel === 'Below Expectation').length;
+
+        const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
+
+        let rowsHtml = students.map((student, index) => {
+            const rank = index + 1;
+            let rankColor = 'mid';
+            if (rank <= Math.ceil(totalStudents * 0.2)) rankColor = 'top';
+            else if (rank > Math.ceil(totalStudents * 0.7)) rankColor = 'bottom';
+
+            const perfClass = {
+                'Exceeding Expectation': 'status-exceeding',
+                'Meeting Expectation': 'status-meeting',
+                'Approaching Expectation': 'status-approaching',
+                'Below Expectation': 'status-below'
+            }[student.performanceLevel] || '';
+
+            const subjectsSummary = student.assessments.map(a => {
+                const p = getSubjectPerformance(a.score, a.maxScore);
+                return `${a.subject}: ${p.level}`;
+            }).join(' | ');
+
+            return `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="rank-badge-sm ${rankColor}">#${rank}</span></td>
+                    <td><strong>${student.studentName}</strong></td>
+                    <td>${student.grade}</td>
+                    <td>${typeNames[student.type] || student.type || '-'}</td>
+                    <td>${student.period || '-'}</td>
+                    <td>${student.month || '-'}</td>
+                    <td>${student.term || '-'}</td>
+                    <td>${student.totalScore}</td>
+                    <td><span class="${perfClass}">${student.performanceLevel}</span></td>
+                    <td style="font-size:9px;text-align:left;">${subjectsSummary}</td>
+                </tr>
+            `;
+        }).join('');
+
+        return `
+            <div style="margin-bottom:15px;">
+                <h3 style="color:#0A1628;font-size:18px;margin-bottom:5px;">📊 ${title}</h3>
+                <p style="color:#666;font-size:13px;">Generated on ${new Date().toLocaleDateString('en-KE', { timeZone: 'Africa/Nairobi' })}</p>
+            </div>
+
+            <div class="report-summary-stats">
+                <div class="stat-box"><div class="num" style="color:#D4A017;">${totalStudents}</div><div class="lbl">Total Students</div></div>
+                <div class="stat-box"><div class="num" style="color:#28a745;">${exceeding}</div><div class="lbl">Exceeding Expectation</div></div>
+                <div class="stat-box"><div class="num" style="color:#17a2b8;">${meeting}</div><div class="lbl">Meeting Expectation</div></div>
+                <div class="stat-box"><div class="num" style="color:#d4a017;">${approaching}</div><div class="lbl">Approaching Expectation</div></div>
+                <div class="stat-box"><div class="num" style="color:#dc3545;">${below}</div><div class="lbl">Below Expectation</div></div>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Rank</th>
+                            <th>Student Name</th>
+                            <th>Grade</th>
+                            <th>Type</th>
+                            <th>Period</th>
+                            <th>Month</th>
+                            <th>Term</th>
+                            <th>Total</th>
+                            <th>Performance</th>
+                            <th>Subject Breakdown</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // ============================================
+    // SHOW REPORT
+    // ============================================
+    function showReport(title, html) {
+        document.getElementById('reportTitle').textContent = title;
+        document.getElementById('reportBody').innerHTML = html;
+        document.getElementById('reportModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // ============================================
+    // CLOSE REPORT
+    // ============================================
+    function closeReport() {
+        document.getElementById('reportModal').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    // ============================================
+    // PRINT REPORT
+    // ============================================
+    function printReport() {
+        const content = document.getElementById('reportContent');
+        const win = window.open('', '_blank');
+        if (!win) {
+            showAlert('Please allow popups for printing', 'error');
+            return;
+        }
+        win.document.write(`
+            <html><head>
+                <title>Assessment Report</title>
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
+                    .report-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 10px 0; }
+                    .report-table th { background: #0A1628; color: white; padding: 6px 8px; text-align: left; }
+                    .report-table td { padding: 5px 8px; border-bottom: 1px solid #ddd; }
+                    .report-table tr:nth-child(even) { background: #fafbfc; }
+                    .rank-badge-sm { display: inline-block; padding: 1px 8px; border-radius: 50px; font-size: 9px; font-weight: 700; }
+                    .rank-badge-sm.top { background: #28a745; color: white; }
+                    .rank-badge-sm.mid { background: #ffc107; color: #0A1628; }
+                    .rank-badge-sm.bottom { background: #dc3545; color: white; }
+                    .status-exceeding { color: #28a745; font-weight: 600; }
+                    .status-meeting { color: #17a2b8; font-weight: 600; }
+                    .status-approaching { color: #d4a017; font-weight: 600; }
+                    .status-below { color: #dc3545; font-weight: 600; }
+                    .report-summary-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin: 15px 0; }
+                    .stat-box { background: #f8f9fc; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #e8ecf1; }
+                    .stat-box .num { font-size: 24px; font-weight: 700; color: #0A1628; }
+                    .stat-box .lbl { font-size: 11px; color: #666; }
+                    .footer { margin-top: 30px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #ddd; padding-top: 15px; }
+                    @media print { body { padding: 10px; } .no-print { display: none; } }
+                </style>
+            </head><body>
+                ${content.innerHTML}
+                <div class="footer">
+                    <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                </div>
+                <script>
+                    window.onload = function() { window.print(); }
+                <\/script>
+            </body></html>
+        `);
+        win.document.close();
+    }
+
+    // ============================================
+    // DOWNLOAD REPORT PDF
+    // ============================================
+    function downloadReportPDF() {
+        const content = document.getElementById('reportContent');
+        const win = window.open('', '_blank');
+        if (!win) {
+            showAlert('Please allow popups for downloading reports', 'error');
+            return;
+        }
+        win.document.write(`
+            <html><head>
+                <title>Assessment Report</title>
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
+                    .report-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 10px 0; }
+                    .report-table th { background: #0A1628; color: white; padding: 6px 8px; text-align: left; }
+                    .report-table td { padding: 5px 8px; border-bottom: 1px solid #ddd; }
+                    .report-table tr:nth-child(even) { background: #fafbfc; }
+                    .rank-badge-sm { display: inline-block; padding: 1px 8px; border-radius: 50px; font-size: 9px; font-weight: 700; }
+                    .rank-badge-sm.top { background: #28a745; color: white; }
+                    .rank-badge-sm.mid { background: #ffc107; color: #0A1628; }
+                    .rank-badge-sm.bottom { background: #dc3545; color: white; }
+                    .status-exceeding { color: #28a745; font-weight: 600; }
+                    .status-meeting { color: #17a2b8; font-weight: 600; }
+                    .status-approaching { color: #d4a017; font-weight: 600; }
+                    .status-below { color: #dc3545; font-weight: 600; }
+                    .report-summary-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin: 15px 0; }
+                    .stat-box { background: #f8f9fc; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #e8ecf1; }
+                    .stat-box .num { font-size: 24px; font-weight: 700; }
+                    .stat-box .lbl { font-size: 11px; color: #666; }
+                    .footer { margin-top: 30px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #ddd; padding-top: 15px; }
+                    .report-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
+                    .report-header h2 { color: #0A1628; font-size: 22px; }
+                    .no-print { display: none; }
+                    @media print { body { padding: 10px; } }
+                </style>
+            </head><body>
+                ${content.innerHTML}
+                <div class="footer">
+                    <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                </div>
+                <script>
+                    window.onload = function() { 
+                        setTimeout(function() { window.print(); }, 500);
+                    }
+                <\/script>
+            </body></html>
+        `);
+        win.document.close();
+    }
+
+    // ============================================
+    // EXPORT ALL DATA
+    // ============================================
+    function exportAllData() {
+        if (allStudentsData.length === 0) {
+            showAlert('No data to export', 'error');
+            return;
+        }
+
+        let csv = '\uFEFF'; // UTF-8 BOM for Excel
+        csv += 'Student Name,Grade,Type,Period,Month,Term,Total Score,Average,Performance Level\n';
+
+        allStudentsData.forEach(student => {
+            csv += `"${student.studentName}","${student.grade}","${student.type || ''}","${student.period || ''}","${student.month || ''}","${student.term || ''}","${student.totalScore || 0}","${(student.averageScore || 0).toFixed(1)}","${student.performanceLevel || ''}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `assessment_report_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showAlert('✅ Data exported successfully!', 'success');
     }
 
     // ============================================
