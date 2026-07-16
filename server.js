@@ -1098,7 +1098,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
     if (existingAttendance) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked in today'
+        message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn)
       });
     }
     
@@ -1121,7 +1121,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       status: status,
       location: 'School',
       isLate: isLate,
-      notes: isLate ? 'Late check-in' : 'On-time check-in'
+      notes: isLate ? 'Late check-in at ' + formatKenyaFullTime(kenyaNow) : 'On-time check-in at ' + formatKenyaFullTime(kenyaNow)
     });
     
     await teacher.save();
@@ -1196,7 +1196,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     if (todayAttendance.checkOut) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked out today'
+        message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut)
       });
     }
     
@@ -1210,7 +1210,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     
     // Store check-out time in Kenya time
     todayAttendance.checkOut = kenyaNow;
-    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
+    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + formatKenyaFullTime(kenyaNow);
     
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
