@@ -72,22 +72,6 @@ function formatKenyaDate(date) {
     });
 }
 
-function getWeekStart(date) {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    d.setDate(diff);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
-
-function getMonthStart(date) {
-    const d = new Date(date);
-    d.setDate(1);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
-
 // ============================================
 // CONNECT TO MONGODB
 // ============================================
@@ -499,7 +483,7 @@ function calculateTotals(assessments) {
 }
 
 // ============================================
-// STUDENT REPORT HTML GENERATOR - WITH CBC ANALYSIS
+// STUDENT REPORT HTML GENERATOR - FIXED
 // ============================================
 function generateStudentReportHTML(student, allAssessments = null) {
   const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
@@ -510,8 +494,33 @@ function generateStudentReportHTML(student, allAssessments = null) {
     'Below Expectation': '#dc3545'
   };
   
-  // Analyze current assessment
-  const subjectsWithPerf = student.assessments.map(a => {
+  // Validate and process assessments
+  const assessments = student.assessments || [];
+  
+  if (assessments.length === 0) {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>No Results Found</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; text-align: center; }
+          .error-box { background: #f8d7da; color: #721c24; padding: 20px; border-radius: 8px; border: 1px solid #f5c6cb; }
+        </style>
+      </head>
+      <body>
+        <div class="error-box">
+          <h2>⚠️ No Subject Data Found</h2>
+          <p>This student has no subject scores recorded yet.</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  // Analyze each subject
+  const subjectsWithPerf = assessments.map(a => {
     const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
     let level = 'Approaching Expectation';
     let color = '#d4a017';
@@ -522,7 +531,7 @@ function generateStudentReportHTML(student, allAssessments = null) {
     return { ...a, percentage, level, color };
   });
 
-  // Sort subjects: best performing first
+  // Sort by performance (best first)
   const sortedByPerformance = [...subjectsWithPerf].sort((a, b) => b.percentage - a.percentage);
   
   // Identify strengths (top subjects with >= 60%)
@@ -531,7 +540,7 @@ function generateStudentReportHTML(student, allAssessments = null) {
   // Identify weaknesses (subjects with < 60%)
   const weaknesses = sortedByPerformance.filter(s => s.percentage < 60);
   
-  // Calculate overall performance level
+  // Calculate overall performance
   const avgPercentage = subjectsWithPerf.length > 0 ? 
     subjectsWithPerf.reduce((sum, s) => sum + s.percentage, 0) / subjectsWithPerf.length : 0;
   
@@ -545,14 +554,14 @@ function generateStudentReportHTML(student, allAssessments = null) {
   // Generate subjects HTML
   const subjectsHtml = subjectsWithPerf.map(a => `
     <tr>
-      <td style="padding:6px 10px;border:1px solid #ddd;">${a.subject}</td>
-      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${a.maxScore}</td>
-      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:bold;">${a.score}</td>
-      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:bold;">
+      <td style="padding:8px 12px;border:1px solid #ddd;font-weight:600;">${a.subject}</td>
+      <td style="padding:8px 12px;border:1px solid #ddd;text-align:center;">${a.maxScore}</td>
+      <td style="padding:8px 12px;border:1px solid #ddd;text-align:center;font-weight:bold;font-size:16px;">${a.score}</td>
+      <td style="padding:8px 12px;border:1px solid #ddd;text-align:center;font-weight:bold;">
         ${a.percentage.toFixed(1)}%
       </td>
-      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">
-        <span style="background:${a.color};color:white;padding:2px 10px;border-radius:50px;font-size:11px;font-weight:700;">${a.level}</span>
+      <td style="padding:8px 12px;border:1px solid #ddd;text-align:center;">
+        <span style="background:${a.color};color:white;padding:4px 14px;border-radius:50px;font-size:12px;font-weight:700;">${a.level}</span>
       </td>
     </tr>
   `).join('');
@@ -561,38 +570,36 @@ function generateStudentReportHTML(student, allAssessments = null) {
   let strengthsHtml = '';
   if (strengths.length > 0) {
     strengthsHtml = strengths.map(s => `
-      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;">
-        <span><strong>${s.subject}</strong></span>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;">
+        <span style="font-weight:600;">${s.subject}</span>
         <span style="color:#28a745;font-weight:700;">${s.percentage.toFixed(1)}%</span>
       </div>
     `).join('');
   } else {
-    strengthsHtml = `<p style="color:#999;font-size:12px;">No subjects meeting expectation yet. Keep working hard!</p>`;
+    strengthsHtml = `<p style="color:#999;font-size:13px;">No subjects meeting expectation yet. Keep working hard!</p>`;
   }
 
   // Generate weaknesses HTML
   let weaknessesHtml = '';
   if (weaknesses.length > 0) {
     weaknessesHtml = weaknesses.map(s => `
-      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;">
-        <span><strong>${s.subject}</strong></span>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;">
+        <span style="font-weight:600;">${s.subject}</span>
         <span style="color:#dc3545;font-weight:700;">${s.percentage.toFixed(1)}%</span>
       </div>
     `).join('');
   } else {
-    weaknessesHtml = `<p style="color:#28a745;font-weight:600;font-size:12px;">🎉 All subjects are meeting or exceeding expectations!</p>`;
+    weaknessesHtml = `<p style="color:#28a745;font-weight:600;font-size:13px;">🎉 All subjects are meeting or exceeding expectations!</p>`;
   }
 
   // Generate trend analysis if multiple assessments are provided
   let trendHtml = '';
   if (allAssessments && allAssessments.length > 1) {
-    // Sort by date
     const sorted = [...allAssessments].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     
-    // Calculate trend for each subject
     const subjectTrends = {};
     sorted.forEach(assessment => {
-      assessment.assessments.forEach(a => {
+      (assessment.assessments || []).forEach(a => {
         if (!subjectTrends[a.subject]) {
           subjectTrends[a.subject] = [];
         }
@@ -611,24 +618,30 @@ function generateStudentReportHTML(student, allAssessments = null) {
         const trendIcon = diff > 5 ? '📈' : diff < -5 ? '📉' : '➡️';
         const trendColor = diff > 5 ? '#28a745' : diff < -5 ? '#dc3545' : '#d4a017';
         trendItemsHtml += `
-          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;">
-            <span><strong>${subject}</strong></span>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;">
+            <span style="font-weight:600;">${subject}</span>
             <span style="color:${trendColor};font-weight:700;">
               ${trendIcon} ${diff > 0 ? '+' : ''}${diff.toFixed(1)}%
             </span>
-            <span style="color:#999;font-size:11px;">${scores[0].toFixed(1)}% → ${scores[scores.length-1].toFixed(1)}%</span>
+            <span style="color:#999;font-size:12px;">${scores[0].toFixed(1)}% → ${scores[scores.length-1].toFixed(1)}%</span>
           </div>
         `;
       }
     });
 
     trendHtml = `
-      <div style="margin-top:15px;padding:15px;background:white;border-radius:8px;border:1px solid #e8ecf1;">
-        <h4 style="color:#0A1628;font-size:14px;margin-bottom:8px;">📈 Progress Trend (All Assessments)</h4>
-        ${trendItemsHtml || '<p style="color:#999;font-size:12px;">Not enough data for trend analysis</p>'}
+      <div style="margin-top:20px;padding:18px;background:white;border-radius:10px;border:1px solid #e8ecf1;">
+        <h4 style="color:#0A1628;font-size:15px;margin-bottom:10px;">📈 Progress Trend (All Assessments)</h4>
+        ${trendItemsHtml || '<p style="color:#999;font-size:13px;">Not enough data for trend analysis</p>'}
       </div>
     `;
   }
+
+  // Count performance levels for badges
+  const exceedingCount = subjectsWithPerf.filter(s => s.percentage >= 80).length;
+  const meetingCount = subjectsWithPerf.filter(s => s.percentage >= 60 && s.percentage < 80).length;
+  const approachingCount = subjectsWithPerf.filter(s => s.percentage >= 40 && s.percentage < 60).length;
+  const belowCount = subjectsWithPerf.filter(s => s.percentage < 40).length;
 
   return `
     <!DOCTYPE html>
@@ -637,115 +650,127 @@ function generateStudentReportHTML(student, allAssessments = null) {
       <meta charset="UTF-8">
       <title>Student Report - ${student.studentName}</title>
       <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; max-width: 1100px; margin: 0 auto; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; max-width: 1100px; margin: 0 auto; background: #f8f9fa; }
+        .report-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
         .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { color: #0A1628; font-size: 24px; margin: 0; }
-        .header p { color: #666; margin: 5px 0; }
-        .student-info { background: #f8f9fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .header h1 { color: #0A1628; font-size: 26px; margin: 0; }
+        .header h1 .school-name { color: #D4A017; }
+        .header p { color: #666; margin: 5px 0; font-size: 14px; }
+        .student-info { background: #f8f9fc; padding: 18px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #e8ecf1; }
         .student-info table { width: 100%; font-size: 14px; }
-        .student-info td { padding: 4px 8px; }
-        .student-info .label { font-weight: 600; color: #555; width: 120px; }
-        .performance-box { text-align: center; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .performance-box .level { font-size: 28px; font-weight: 700; }
-        .performance-box .score { font-size: 16px; color: #555; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
-        table td { padding: 6px 10px; border: 1px solid #ddd; }
-        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
-        .analysis-box { background: #f8f9fc; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745; }
+        .student-info td { padding: 5px 10px; }
+        .student-info .label { font-weight: 600; color: #555; width: 140px; }
+        .student-info .value { font-weight: 600; color: #0A1628; }
+        .performance-box { text-align: center; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .performance-box .level { font-size: 30px; font-weight: 700; }
+        .performance-box .score { font-size: 16px; color: #555; margin-top: 5px; }
+        .performance-box .badges { margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .badge { display: inline-block; padding: 4px 16px; border-radius: 50px; font-size: 12px; font-weight: 700; color: white; }
+        .badge-exceeding { background: #28a745; }
+        .badge-meeting { background: #17a2b8; }
+        .badge-approaching { background: #d4a017; }
+        .badge-below { background: #dc3545; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 13px; }
+        table th { background: #0A1628; color: white; padding: 10px 12px; text-align: left; }
+        table td { padding: 8px 12px; border-bottom: 1px solid #e8ecf1; }
+        table tr:hover td { background: #f8f9fc; }
+        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .analysis-box { background: #f8f9fc; padding: 18px; border-radius: 10px; border-left: 4px solid #28a745; }
         .analysis-box.weakness { border-left-color: #dc3545; }
-        .analysis-box h4 { font-size: 14px; margin-bottom: 8px; }
-        .analysis-box .item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f0f0f0; }
+        .analysis-box h4 { font-size: 15px; margin-bottom: 10px; }
+        .analysis-box .item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
         .analysis-box .item:last-child { border-bottom: none; }
         .analysis-box .item .score-high { color: #28a745; font-weight: 700; }
         .analysis-box .item .score-low { color: #dc3545; font-weight: 700; }
-        .trend-box { margin-top: 15px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e8ecf1; }
+        .trend-box { margin-top: 20px; padding: 18px; background: white; border-radius: 10px; border: 1px solid #e8ecf1; }
+        .summary-box { margin-top: 20px; padding: 18px; background: #f8f9fc; border-radius: 10px; border: 1px solid #e8ecf1; }
+        .summary-box p { font-size: 13px; color: #555; line-height: 1.8; }
         .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
-        .school-name { color: #D4A017; font-weight: 700; }
-        .badge { display: inline-block; padding: 2px 12px; border-radius: 50px; font-size: 11px; font-weight: 700; color: white; }
-        @media print { body { padding: 15px; } .no-print { display: none; } }
-        @media (max-width: 600px) { .analysis-grid { grid-template-columns: 1fr; } }
+        @media print { body { padding: 10px; background: white; } .report-container { box-shadow: none; padding: 15px; } }
+        @media (max-width: 700px) { .analysis-grid { grid-template-columns: 1fr; } table { font-size: 11px; } table th, table td { padding: 5px 8px; } }
       </style>
     </head>
     <body>
-      <div class="header">
-        <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-        <p>Student Assessment Report - CBC Performance Analysis</p>
-      </div>
-      
-      <div class="student-info">
+      <div class="report-container">
+        <div class="header">
+          <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
+          <p>Student Assessment Report - CBC Performance Analysis</p>
+        </div>
+        
+        <div class="student-info">
+          <table>
+            <tr><td class="label">Student Name:</td><td class="value">${student.studentName}</td></tr>
+            ${student.admissionNumber ? `<tr><td class="label">Admission Number:</td><td class="value">${student.admissionNumber}</td></tr>` : ''}
+            <tr><td class="label">Grade:</td><td class="value">${student.grade}</td></tr>
+            <tr><td class="label">Assessment Type:</td><td class="value">${typeNames[student.type] || student.type || 'Monthly'}</td></tr>
+            <tr><td class="label">Period:</td><td>${student.period || 'N/A'}</td></tr>
+            <tr><td class="label">Month:</td><td>${student.month || 'N/A'}</td></tr>
+            <tr><td class="label">Term:</td><td>${student.term || 'N/A'}</td></tr>
+            <tr><td class="label">Report Date:</td><td>${formatKenyaFullTime(new Date())}</td></tr>
+          </table>
+        </div>
+        
+        <div class="performance-box" style="background: ${overallColor}15; border: 2px solid ${overallColor};">
+          <div class="level" style="color: ${overallColor};">${overallLevel}</div>
+          <div class="score">Total Score: ${student.totalScore || 0} | Average: ${student.averageScore ? student.averageScore.toFixed(1) : '0.0'}%</div>
+          <div class="badges">
+            <span class="badge badge-exceeding">✅ Exceeding: ${exceedingCount}</span>
+            <span class="badge badge-meeting">📘 Meeting: ${meetingCount}</span>
+            <span class="badge badge-approaching">📗 Approaching: ${approachingCount}</span>
+            <span class="badge badge-below">📕 Below: ${belowCount}</span>
+          </div>
+        </div>
+        
+        <h3 style="margin:20px 0 10px;">📊 Subject Scores</h3>
         <table>
-          <tr><td class="label">Student Name:</td><td><strong>${student.studentName}</strong></td></tr>
-          ${student.admissionNumber ? `<tr><td class="label">Admission Number:</td><td><strong>${student.admissionNumber}</strong></td></tr>` : ''}
-          <tr><td class="label">Grade:</td><td><strong>${student.grade}</strong></td></tr>
-          <tr><td class="label">Assessment Type:</td><td><strong>${typeNames[student.type] || student.type || 'Monthly'}</strong></td></tr>
-          <tr><td class="label">Period:</td><td>${student.period || 'N/A'}</td></tr>
-          <tr><td class="label">Month:</td><td>${student.month || 'N/A'}</td></tr>
-          <tr><td class="label">Term:</td><td>${student.term || 'N/A'}</td></tr>
-          <tr><td class="label">Report Date:</td><td>${formatKenyaFullTime(new Date())}</td></tr>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th style="text-align:center;">Max Score</th>
+              <th style="text-align:center;">Score</th>
+              <th style="text-align:center;">Percentage</th>
+              <th style="text-align:center;">Performance Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${subjectsHtml}
+          </tbody>
         </table>
-      </div>
-      
-      <div class="performance-box" style="background: ${overallColor}20; border: 2px solid ${overallColor};">
-        <div class="level" style="color: ${overallColor};">${overallLevel}</div>
-        <div class="score">Total Score: ${student.totalScore} | Average: ${student.averageScore.toFixed(1)}%</div>
-        <div style="margin-top:8px;">
-          <span class="badge" style="background:#28a745;">✅ Exceeding: ${subjectsWithPerf.filter(s => s.percentage >= 80).length}</span>
-          <span class="badge" style="background:#17a2b8;">📘 Meeting: ${subjectsWithPerf.filter(s => s.percentage >= 60 && s.percentage < 80).length}</span>
-          <span class="badge" style="background:#d4a017;">📗 Approaching: ${subjectsWithPerf.filter(s => s.percentage >= 40 && s.percentage < 60).length}</span>
-          <span class="badge" style="background:#dc3545;">📕 Below: ${subjectsWithPerf.filter(s => s.percentage < 40).length}</span>
-        </div>
-      </div>
-      
-      <h3 style="margin:15px 0 10px;">📊 Subject Scores</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Subject</th>
-            <th style="text-align:center;">Max Score</th>
-            <th style="text-align:center;">Score</th>
-            <th style="text-align:center;">Percentage</th>
-            <th style="text-align:center;">Performance Level</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${subjectsHtml}
-        </tbody>
-      </table>
-      
-      <div class="analysis-grid">
-        <div class="analysis-box">
-          <h4 style="color:#28a745;">🏆 Strengths (Best Performing Subjects)</h4>
-          ${strengthsHtml}
-          <div style="margin-top:8px;font-size:11px;color:#666;">
-            ${strengths.length > 0 ? `✅ ${strengths.length} subject(s) meeting or exceeding expectations` : 'Keep working hard!'}
+        
+        <div class="analysis-grid">
+          <div class="analysis-box">
+            <h4 style="color:#28a745;">🏆 Strengths (Best Performing Subjects)</h4>
+            ${strengthsHtml}
+            <div style="margin-top:10px;font-size:12px;color:#666;">
+              ${strengths.length > 0 ? `✅ ${strengths.length} subject(s) meeting or exceeding expectations` : 'Keep working hard!'}
+            </div>
+          </div>
+          <div class="analysis-box weakness">
+            <h4 style="color:#dc3545;">📚 Needs Improvement (Subjects to Focus On)</h4>
+            ${weaknessesHtml}
+            <div style="margin-top:10px;font-size:12px;color:#666;">
+              ${weaknesses.length > 0 ? `⚠️ ${weaknesses.length} subject(s) need improvement` : '🎉 All subjects are doing well!'}
+            </div>
           </div>
         </div>
-        <div class="analysis-box weakness">
-          <h4 style="color:#dc3545;">📚 Needs Improvement (Subjects to Focus On)</h4>
-          ${weaknessesHtml}
-          <div style="margin-top:8px;font-size:11px;color:#666;">
-            ${weaknesses.length > 0 ? `⚠️ ${weaknesses.length} subject(s) need improvement` : '🎉 All subjects are doing well!'}
-          </div>
+        
+        ${trendHtml}
+        
+        <div class="summary-box">
+          <h4 style="color:#0A1628;font-size:15px;margin-bottom:8px;">📝 Teacher's Summary</h4>
+          <p>
+            <strong>Overall Performance:</strong> ${student.studentName} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()}</strong> 
+            with an average score of <strong>${student.averageScore ? student.averageScore.toFixed(1) : '0.0'}%</strong>.
+            ${strengths.length > 0 ? `<br><br><strong>Strengths:</strong> ${strengths.map(s => s.subject).join(', ')} show strong performance.` : ''}
+            ${weaknesses.length > 0 ? `<br><br><strong>Areas for Improvement:</strong> Focus on ${weaknesses.map(s => s.subject).join(', ')} to improve overall performance.` : ''}
+            ${weaknesses.length === 0 ? '<br><br>🎉 Excellent work! Continue maintaining this high standard.' : '<br><br>Keep up the good work and focus on improving in the areas identified above.'}
+          </p>
         </div>
-      </div>
-      
-      ${trendHtml}
-      
-      <div style="margin-top:15px;padding:15px;background:#f8f9fc;border-radius:8px;border:1px solid #e8ecf1;">
-        <h4 style="color:#0A1628;font-size:14px;margin-bottom:8px;">📝 Teacher's Summary</h4>
-        <p style="font-size:13px;color:#555;line-height:1.6;">
-          <strong>Overall Performance:</strong> ${student.studentName} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()}</strong> 
-          with an average score of <strong>${student.averageScore.toFixed(1)}%</strong>.
-          ${strengths.length > 0 ? `\n\n<strong>Strengths:</strong> ${strengths.map(s => s.subject).join(', ')} show strong performance.` : ''}
-          ${weaknesses.length > 0 ? `\n\n<strong>Areas for Improvement:</strong> Focus on ${weaknesses.map(s => s.subject).join(', ')} to improve overall performance.` : ''}
-          ${weaknesses.length === 0 ? '\n\n🎉 Excellent work! Continue maintaining this high standard.' : '\n\nKeep up the good work and focus on improving in the areas identified above.'}
-        </p>
-      </div>
-      
-      <div class="footer">
-        <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-        <p>This report is a true reflection of the student's performance in the ${typeNames[student.type] || 'monthly'} assessment.</p>
+        
+        <div class="footer">
+          <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+          <p>This report is a true reflection of the student's performance in the ${typeNames[student.type] || 'monthly'} assessment.</p>
+        </div>
       </div>
     </body>
     </html>
@@ -987,6 +1012,7 @@ app.post('/api/teacher/register', async (req, res) => {
   }
 });
 
+// TEACHER CHECK-IN
 app.post('/api/teacher/checkin', async (req, res) => {
   try {
     const { employeeId, pin } = req.body;
@@ -1078,6 +1104,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
   }
 });
 
+// TEACHER CHECK-OUT
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
     const { employeeId, pin } = req.body;
@@ -1158,6 +1185,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
   }
 });
 
+// GET TODAY'S ATTENDANCE
 app.get('/api/teacher/attendance/today', async (req, res) => {
   try {
     const kenyaToday = getKenyaDate();
@@ -2082,7 +2110,7 @@ app.get('/api/assessments/search', async (req, res) => {
   }
 });
 
-// GET generate student report
+// GET generate student report - FIXED
 app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
   try {
     const student = await StudentAssessment.findById(req.params.studentId);
