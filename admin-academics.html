@@ -1156,7 +1156,7 @@
     }
 
     // ============================================
-    // SAVE ROW
+    // SAVE ROW - FIXED
     // ============================================
     async function saveRow(studentId) {
         const student = studentsData.find(s => s._id === studentId);
@@ -1170,7 +1170,7 @@
             return;
         }
 
-        const config = subjectConfig;
+        // Check if student has any scores
         let hasValidScore = false;
         student.assessments.forEach(a => {
             if (a.score > 0 || a.score === 0) hasValidScore = true;
@@ -1181,6 +1181,7 @@
             return;
         }
 
+        // Prepare data for API
         const data = {
             studentName: student.studentName,
             grade: currentGrade,
@@ -1189,37 +1190,59 @@
             month: currentMonth,
             year: currentYear,
             term: currentTerm,
-            assessments: student.assessments
+            assessments: student.assessments.map(a => ({
+                subject: a.subject,
+                maxScore: a.maxScore,
+                score: a.score || 0
+            }))
         };
 
+        showSaveStatus('Saving...', 'saving');
+
         try {
-            const url = studentId.startsWith('new_') ? '/api/assessments' : `/api/assessments/${studentId}`;
-            const method = studentId.startsWith('new_') ? 'POST' : 'PUT';
+            const isNew = studentId.startsWith('new_');
+            const url = isNew ? '/api/assessments' : `/api/assessments/${studentId}`;
+            const method = isNew ? 'POST' : 'PUT';
+            
+            console.log('Saving student:', { url, method, data });
             
             const response = await fetch(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
+            
             const result = await response.json();
+            console.log('Save response:', result);
             
             if (result.success) {
-                if (studentId.startsWith('new_') && result.student) {
+                if (isNew && result.student) {
                     const oldId = student._id;
                     student._id = result.student._id;
-                    const nameInputs = document.querySelectorAll(`.student-name-input[data-id="${oldId}"]`);
-                    nameInputs.forEach(inp => inp.dataset.id = result.student._id);
+                    // Update all references to the new ID
+                    document.querySelectorAll(`.student-name-input[data-id="${oldId}"]`).forEach(inp => {
+                        inp.dataset.id = result.student._id;
+                    });
+                    document.querySelectorAll(`.score-input[data-student-id="${oldId}"]`).forEach(inp => {
+                        inp.dataset.studentId = result.student._id;
+                    });
                 }
                 editingStudentId = null;
                 showAlert('✅ Student saved successfully!', 'success');
-                loadGradeData();
-                loadStudentList();
+                await loadGradeData();
+                await loadStudentList();
+                showSaveStatus('Saved', 'saved');
+                setTimeout(() => hideSaveStatus(), 1500);
             } else {
-                showAlert('❌ Error: ' + result.message, 'error');
+                showAlert('❌ Error: ' + (result.message || 'Unknown error'), 'error');
+                showSaveStatus('Error saving', 'error');
+                setTimeout(() => hideSaveStatus(), 2000);
             }
         } catch (error) {
             console.error('Error saving student:', error);
-            showAlert('❌ Error saving student', 'error');
+            showAlert('❌ Error saving student: ' + error.message, 'error');
+            showSaveStatus('Error', 'error');
+            setTimeout(() => hideSaveStatus(), 2000);
         }
     }
 
@@ -1292,12 +1315,11 @@
     }
 
     // ============================================
-    // SAVE ALL MARKS
+    // SAVE ALL MARKS - FIXED
     // ============================================
     async function saveAllMarks() {
-        showSaveStatus('Saving...', 'saving');
+        showSaveStatus('Saving all...', 'saving');
         
-        const config = subjectConfig;
         let hasError = false;
         let studentsToSave = [];
 
@@ -1342,8 +1364,14 @@
                     month: currentMonth,
                     year: currentYear,
                     term: currentTerm,
-                    assessments: student.assessments
+                    assessments: student.assessments.map(a => ({
+                        subject: a.subject,
+                        maxScore: a.maxScore,
+                        score: a.score || 0
+                    }))
                 };
+                
+                console.log('Saving all - student:', { url, method, data });
                 
                 const response = await fetch(url, {
                     method: method,
@@ -1358,6 +1386,7 @@
                     }
                 } else {
                     errorCount++;
+                    console.error('Save error for student:', student.studentName, result);
                 }
             } catch (error) {
                 errorCount++;
