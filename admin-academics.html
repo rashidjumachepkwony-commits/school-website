@@ -128,7 +128,6 @@
         }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-        .form-row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
 
         .table-wrapper { overflow-x: auto; max-height: 600px; overflow-y: auto; }
         table {
@@ -400,7 +399,6 @@
             margin: 10px 0;
         }
 
-        /* Edit/Save/Delete row styles */
         .row-actions {
             display: flex;
             gap: 4px;
@@ -497,7 +495,7 @@
         .close-report-btn:hover { transform: scale(1.1); }
 
         @media (max-width: 768px) {
-            .form-row, .form-row-3, .form-row-4 { grid-template-columns: 1fr; }
+            .form-row, .form-row-3 { grid-template-columns: 1fr; }
             .filters { flex-direction: column; }
             .filters .form-group { min-width: 100%; }
             .header h1 { font-size: 22px; }
@@ -518,7 +516,6 @@
 <body>
 
 <div class="container">
-    <!-- Header -->
     <div class="header">
         <h1><i class="fas fa-edit"></i> Academic Assessments</h1>
         <div class="admin-info">
@@ -529,12 +526,10 @@
 
     <div id="alert" class="alert"></div>
 
-    <!-- ===== GRADE SELECTOR ===== -->
     <div class="card">
         <h2><i class="fas fa-chalkboard" style="color:#D4A017;"></i> Online Marks Entry</h2>
-        <p class="desc">Select a grade and assessment type. Enter scores, then click "Save All" to save.</p>
+        <p class="desc">Select a grade, enter scores, then click "Save Row" or "Save All" to save.</p>
 
-        <!-- Grade Tabs -->
         <div class="grade-tabs" id="gradeTabs">
             <div class="tab" onclick="selectGrade('Play Group')">🧸 Play Group</div>
             <div class="tab" onclick="selectGrade('PP1')">🎨 PP1</div>
@@ -547,14 +542,12 @@
             <div class="tab" onclick="selectGrade('Grade 6')">🎓 Grade 6</div>
         </div>
 
-        <!-- Assessment Type Tabs -->
         <div class="assessment-type-tabs">
             <div class="type-tab active" onclick="selectAssessmentType('weekly')">📅 Weekly</div>
             <div class="type-tab" onclick="selectAssessmentType('monthly')">📊 Monthly</div>
             <div class="type-tab" onclick="selectAssessmentType('term')">📄 End of Term</div>
         </div>
 
-        <!-- Period Selector -->
         <div class="form-row" style="margin-bottom:15px;">
             <div class="form-group">
                 <label>Period</label>
@@ -601,7 +594,6 @@
             </div>
         </div>
 
-        <!-- Action Bar -->
         <div class="action-bar">
             <button class="btn btn-success" onclick="addStudentRow()"><i class="fas fa-user-plus"></i> Add Student</button>
             <button class="btn btn-primary" onclick="saveAllMarks()"><i class="fas fa-save"></i> Save All</button>
@@ -626,7 +618,6 @@
         </div>
     </div>
 
-    <!-- ===== STATS ===== -->
     <div class="stats-grid" id="statsGrid">
         <div class="stat-card"><div class="number gold" id="totalStudents">0</div><div class="label">Total Students</div></div>
         <div class="stat-card"><div class="number green" id="exceedingCount">0</div><div class="label">Exceeding Expectation</div></div>
@@ -635,7 +626,6 @@
         <div class="stat-card"><div class="number red" id="belowCount">0</div><div class="label">Below Expectation</div></div>
     </div>
 
-    <!-- ===== STUDENT LIST ===== -->
     <div class="card">
         <h2><i class="fas fa-list" style="color:#D4A017;"></i> All Students</h2>
         <p class="desc">View all students and their assessment records with rankings</p>
@@ -686,7 +676,6 @@
             </table>
         </div>
 
-        <!-- Report Actions -->
         <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #e8ecf1;padding-top:15px;">
             <button class="btn btn-print" onclick="generateClassReport()"><i class="fas fa-print"></i> Print Class Report</button>
             <button class="btn btn-purple" onclick="generateSchoolReport()"><i class="fas fa-school"></i> Print School Report</button>
@@ -694,7 +683,6 @@
         </div>
     </div>
 
-    <!-- ===== REPORT MODAL ===== -->
     <div class="report-modal" id="reportModal">
         <div class="report-content" id="reportContent">
             <button class="close-report-btn" onclick="closeReport()">✕</button>
@@ -712,7 +700,6 @@
         </div>
     </div>
 
-    <!-- ===== COPY ASSESSMENTS MODAL ===== -->
     <div class="edit-subject-modal" id="copyModal">
         <div class="modal-content">
             <h3><i class="fas fa-copy" style="color:#D4A017;"></i> Copy Assessments</h3>
@@ -795,7 +782,6 @@
         </div>
     </div>
 
-    <!-- ===== EDIT SUBJECTS MODAL ===== -->
     <div class="edit-subject-modal" id="editSubjectModal">
         <div class="modal-content">
             <h3><i class="fas fa-edit" style="color:#D4A017;"></i> Edit Subjects & Max Scores</h3>
@@ -851,7 +837,6 @@
         }
     };
 
-    // Fill in missing default configs
     const grades = ['Play Group', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
     const types = ['weekly', 'monthly', 'term'];
     types.forEach(type => {
@@ -987,18 +972,7 @@
     }
 
     // ============================================
-    // CALCULATE RANK
-    // ============================================
-    function calculateRank(students) {
-        const sorted = [...students].sort((a, b) => {
-            if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
-            return b.averageScore - a.averageScore;
-        });
-        return sorted.map((s, i) => ({ ...s, rank: i + 1 }));
-    }
-
-    // ============================================
-    // RENDER MARKS TABLE WITH EDIT/SAVE/DELETE
+    // RENDER MARKS TABLE
     // ============================================
     function renderMarksTable() {
         const config = subjectConfig;
@@ -1013,7 +987,6 @@
 
         let headerHtml = `<tr>
             <th style="min-width:30px;">#</th>
-            <th style="min-width:40px;">🏆</th>
             <th style="min-width:120px;">Student Name</th>`;
         config.subjects.forEach(s => {
             headerHtml += `<th><div class="subject-header">
@@ -1021,17 +994,15 @@
                 <span class="subj-max">/${s.max}</span>
             </div></th>`;
         });
-        headerHtml += `<th style="min-width:60px;">Total</th><th style="min-width:60px;">Avg</th><th style="min-width:90px;">Performance</th><th style="min-width:100px;">Actions</th></tr>`;
+        headerHtml += `<th style="min-width:60px;">Total</th><th style="min-width:60px;">Avg</th><th style="min-width:90px;">Performance</th><th style="min-width:130px;">Actions</th></tr>`;
         thead.innerHTML = headerHtml;
-
-        const sortedStudents = [...studentsData].sort((a, b) => b.totalScore - a.totalScore);
 
         if (studentsData.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="${config.subjects.length + 7}" style="text-align:center;padding:40px;color:#999;">
+                    <td colspan="${config.subjects.length + 6}" style="text-align:center;padding:40px;color:#999;">
                         <i class="fas fa-user-plus" style="font-size:36px;display:block;margin-bottom:10px;color:#ddd;"></i>
-                        No students for ${currentGrade} - ${currentType}. Click "Add Student" to start.
+                        No students. Click "Add Student" to start.
                     </td>
                 </tr>
             `;
@@ -1039,13 +1010,7 @@
         }
 
         let bodyHtml = '';
-        sortedStudents.forEach((student, index) => {
-            const rank = index + 1;
-            const total = sortedStudents.length;
-            let rankColor = 'mid';
-            if (rank <= Math.ceil(total * 0.2)) rankColor = 'top';
-            else if (rank > Math.ceil(total * 0.7)) rankColor = 'bottom';
-
+        studentsData.forEach((student, index) => {
             const performanceClass = {
                 'Exceeding Expectation': 'status-exceeding',
                 'Meeting Expectation': 'status-meeting',
@@ -1058,7 +1023,6 @@
 
             bodyHtml += `<tr class="${isNew ? 'unsaved-row' : ''} ${isEditing ? 'row-editing' : ''}" data-student-id="${student._id}">`;
             bodyHtml += `<td>${index + 1}</td>`;
-            bodyHtml += `<td><span class="rank-badge ${rankColor}">#${rank}</span></td>`;
             bodyHtml += `<td><input type="text" class="student-name-input" value="${student.studentName}" data-id="${student._id || 'new'}" placeholder="Student name" style="width:100%;min-width:80px;"></td>`;
             
             config.subjects.forEach(subj => {
@@ -1085,24 +1049,17 @@
             bodyHtml += `<td>${avgScore.toFixed(1)}</td>`;
             bodyHtml += `<td><span class="${performanceClass}">${student.performanceLevel || 'N/A'}</span></td>`;
             
-            // Actions: Edit, Save, Delete
             bodyHtml += `<td>
                 <div class="row-actions">
-                    ${isNew ? `
-                        <button class="btn btn-success btn-sm" onclick="saveRow('${student._id}')" title="Save this student">
-                            <i class="fas fa-save"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteStudentRow('${student._id}')" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    ` : `
-                        <button class="btn btn-info btn-sm" onclick="editRow('${student._id}')" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteStudentRow('${student._id}')" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    `}
+                    <button class="btn btn-info btn-sm" onclick="editRow('${student._id}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="saveRow('${student._id}')" title="Save">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteStudentRow('${student._id}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </td>`;
             bodyHtml += `</tr>`;
@@ -1113,7 +1070,7 @@
     }
 
     // ============================================
-    // ON SCORE CHANGE - Live update display
+    // ON SCORE CHANGE
     // ============================================
     function onScoreChange(input) {
         const row = input.closest('tr');
@@ -1183,30 +1140,23 @@
             else if (percentage >= 40) student.performanceLevel = 'Approaching Expectation';
             else student.performanceLevel = 'Below Expectation';
         }
-
-        // Re-render to update ranks
-        clearTimeout(window.rankTimeout);
-        window.rankTimeout = setTimeout(() => {
-            renderMarksTable();
-        }, 300);
     }
 
     // ============================================
-    // EDIT ROW - Make row editable
+    // EDIT ROW
     // ============================================
     function editRow(studentId) {
         editingStudentId = studentId;
         renderMarksTable();
-        // Scroll to the row
         const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
         if (row) {
             row.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-        showAlert('✏️ Editing student - Make changes and click "Save All" to save', 'info');
+        showAlert('✏️ Editing student - Make changes and click "Save"', 'info');
     }
 
     // ============================================
-    // SAVE ROW - Save individual student
+    // SAVE ROW
     // ============================================
     async function saveRow(studentId) {
         const student = studentsData.find(s => s._id === studentId);
@@ -1254,11 +1204,9 @@
             const result = await response.json();
             
             if (result.success) {
-                // Update student ID if it was new
                 if (studentId.startsWith('new_') && result.student) {
                     const oldId = student._id;
                     student._id = result.student._id;
-                    // Update any references
                     const nameInputs = document.querySelectorAll(`.student-name-input[data-id="${oldId}"]`);
                     nameInputs.forEach(inp => inp.dataset.id = result.student._id);
                 }
@@ -1300,7 +1248,6 @@
         };
         studentsData.push(newStudent);
         renderMarksTable();
-        // Focus on the new student name input
         const inputs = document.querySelectorAll('.student-name-input');
         const lastInput = inputs[inputs.length - 1];
         if (lastInput) {
@@ -1351,10 +1298,9 @@
         showSaveStatus('Saving...', 'saving');
         
         const config = subjectConfig;
-        const studentsToSave = [];
-
-        // Check each student for valid data
         let hasError = false;
+        let studentsToSave = [];
+
         studentsData.forEach(student => {
             if (!student.studentName.trim()) {
                 showAlert('Please enter a name for all students', 'error');
@@ -1709,17 +1655,15 @@
                     students = students.filter(s => s.studentName.toLowerCase().includes(searchTerm));
                 }
 
-                const sortedStudents = [...students].sort((a, b) => b.totalScore - a.totalScore);
-
                 const tbody = document.getElementById('studentsTableBody');
-                if (sortedStudents.length === 0) {
+                if (students.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#999;">No students found</td></tr>`;
                     return;
                 }
 
-                tbody.innerHTML = sortedStudents.map((student, index) => {
+                tbody.innerHTML = students.map((student, index) => {
                     const rank = index + 1;
-                    const total = sortedStudents.length;
+                    const total = students.length;
                     let rankColor = 'mid';
                     if (rank <= Math.ceil(total * 0.2)) rankColor = 'top';
                     else if (rank > Math.ceil(total * 0.7)) rankColor = 'bottom';
@@ -1751,13 +1695,13 @@
                             <td><span class="${performanceClass}">${student.performanceLevel || 'N/A'}</span></td>
                             <td>
                                 <div class="action-buttons-cell">
-                                    <button class="btn btn-info btn-sm" onclick="editStudentFromList('${student._id}')" title="Edit Student">
+                                    <button class="btn btn-info btn-sm" onclick="editStudentFromList('${student._id}')" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-success btn-sm" onclick="downloadReport('${student._id}')" title="Download Report">
+                                    <button class="btn btn-success btn-sm" onclick="downloadReport('${student._id}')" title="Download">
                                         <i class="fas fa-download"></i>
                                     </button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteStudentFromList('${student._id}')" title="Delete Student">
+                                    <button class="btn btn-danger btn-sm" onclick="deleteStudentFromList('${student._id}')" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -1776,7 +1720,7 @@
     // DELETE STUDENT FROM LIST
     // ============================================
     async function deleteStudentFromList(studentId) {
-        if (!confirm('⚠️ Are you sure you want to delete this student\'s assessment record? This cannot be undone!')) return;
+        if (!confirm('⚠️ Are you sure you want to delete this student\'s assessment record?')) return;
         
         try {
             const response = await fetch(`/api/assessments/${studentId}`, { method: 'DELETE' });
@@ -1836,7 +1780,7 @@
                         }
                     });
                 }, 500);
-                showAlert(`✏️ Editing ${student.studentName} - Make changes and click "Save All"`, 'info');
+                showAlert(`✏️ Editing ${student.studentName} - Make changes and click "Save"`, 'info');
             }
         } catch (error) {
             console.error('Error:', error);
@@ -1868,57 +1812,14 @@
                 showSaveStatus('Report generated', 'saved');
                 setTimeout(() => hideSaveStatus(), 2000);
             } else {
-                showAlert('❌ Error generating report: ' + (data.message || 'Unknown error'), 'error');
+                showAlert('❌ Error generating report', 'error');
                 hideSaveStatus();
             }
         } catch (error) {
             console.error('Error:', error);
-            showAlert('❌ Error downloading report: ' + error.message, 'error');
+            showAlert('❌ Error downloading report', 'error');
             hideSaveStatus();
         }
-    }
-
-    // ============================================
-    // ANALYZE STUDENT RESULTS
-    // ============================================
-    function analyzeResults(assessments) {
-        const analysis = { improved: [], dropped: [], best: [] };
-        const subjectMap = {};
-        assessments.forEach(a => {
-            if (!subjectMap[a.subject]) subjectMap[a.subject] = [];
-            subjectMap[a.subject].push(a);
-        });
-
-        Object.keys(subjectMap).forEach(subject => {
-            const records = subjectMap[subject];
-            if (records.length >= 2) {
-                const firstPerf = getSubjectPerformance(records[0].score, records[0].maxScore);
-                const lastPerf = getSubjectPerformance(records[records.length - 1].score, records[records.length - 1].maxScore);
-                const levelOrder = ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'];
-                const firstIndex = levelOrder.indexOf(firstPerf.level);
-                const lastIndex = levelOrder.indexOf(lastPerf.level);
-                if (lastIndex > firstIndex) {
-                    analysis.improved.push({ subject, from: firstPerf.level, to: lastPerf.level });
-                } else if (lastIndex < firstIndex) {
-                    analysis.dropped.push({ subject, from: firstPerf.level, to: lastPerf.level });
-                }
-            }
-            const bestRecord = records.reduce((a, b) => {
-                const aPct = (a.score / a.maxScore) * 100;
-                const bPct = (b.score / b.maxScore) * 100;
-                return aPct > bPct ? a : b;
-            }, records[0]);
-            analysis.best.push({
-                subject: subject,
-                score: bestRecord.score,
-                maxScore: bestRecord.maxScore,
-                percentage: ((bestRecord.score / bestRecord.maxScore) * 100).toFixed(1)
-            });
-        });
-
-        analysis.best.sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage));
-        analysis.best = analysis.best.slice(0, 3);
-        return analysis;
     }
 
     // ============================================
@@ -1933,8 +1834,7 @@
             return;
         }
 
-        const sortedStudents = [...students].sort((a, b) => b.totalScore - a.totalScore);
-        const reportHtml = generateReportHTML(sortedStudents, `Class Report - ${grade}`);
+        const reportHtml = generateReportHTML(students, `Class Report - ${grade}`);
         showReport('Class Report - ' + grade, reportHtml);
     }
 
@@ -1947,8 +1847,7 @@
             return;
         }
 
-        const sortedStudents = [...allStudentsData].sort((a, b) => b.totalScore - a.totalScore);
-        const reportHtml = generateReportHTML(sortedStudents, 'School Report - All Grades');
+        const reportHtml = generateReportHTML(allStudentsData, 'School Report - All Grades');
         showReport('School Report - All Grades', reportHtml);
     }
 
@@ -2072,7 +1971,6 @@
                     .report-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 10px 0; }
                     .report-table th { background: #0A1628; color: white; padding: 6px 8px; text-align: left; }
                     .report-table td { padding: 5px 8px; border-bottom: 1px solid #ddd; }
-                    .report-table tr:nth-child(even) { background: #fafbfc; }
                     .rank-badge-sm { display: inline-block; padding: 1px 8px; border-radius: 50px; font-size: 9px; font-weight: 700; }
                     .rank-badge-sm.top { background: #28a745; color: white; }
                     .rank-badge-sm.mid { background: #ffc107; color: #0A1628; }
@@ -2119,7 +2017,6 @@
                     .report-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 10px 0; }
                     .report-table th { background: #0A1628; color: white; padding: 6px 8px; text-align: left; }
                     .report-table td { padding: 5px 8px; border-bottom: 1px solid #ddd; }
-                    .report-table tr:nth-child(even) { background: #fafbfc; }
                     .rank-badge-sm { display: inline-block; padding: 1px 8px; border-radius: 50px; font-size: 9px; font-weight: 700; }
                     .rank-badge-sm.top { background: #28a745; color: white; }
                     .rank-badge-sm.mid { background: #ffc107; color: #0A1628; }
