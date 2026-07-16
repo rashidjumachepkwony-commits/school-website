@@ -494,10 +494,28 @@ function generateStudentReportHTML(student, allAssessments = null) {
     'Below Expectation': '#dc3545'
   };
   
-  // Validate and process assessments
-  const assessments = student.assessments || [];
+  // Get assessments array - handle different possible formats
+  let assessments = student.assessments || [];
   
-  if (assessments.length === 0) {
+  // If assessments is an object with keys, convert to array
+  if (assessments && typeof assessments === 'object' && !Array.isArray(assessments)) {
+    assessments = Object.values(assessments);
+  }
+  
+  // If still empty, check if there's a subjects array
+  if ((!assessments || assessments.length === 0) && student.subjects) {
+    assessments = student.subjects;
+  }
+  
+  // If still empty, check if there's marks data
+  if ((!assessments || assessments.length === 0) && student.marks) {
+    assessments = student.marks;
+  }
+  
+  // Validate assessments have required fields
+  const validAssessments = assessments.filter(a => a && typeof a === 'object');
+  
+  if (validAssessments.length === 0) {
     return `
       <!DOCTYPE html>
       <html>
@@ -513,22 +531,36 @@ function generateStudentReportHTML(student, allAssessments = null) {
         <div class="error-box">
           <h2>⚠️ No Subject Data Found</h2>
           <p>This student has no subject scores recorded yet.</p>
+          <p style="font-size:12px;color:#999;">Please ensure subjects have been added and scores entered.</p>
         </div>
       </body>
       </html>
     `;
   }
 
-  // Analyze each subject
-  const subjectsWithPerf = assessments.map(a => {
-    const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+  // Process each subject with proper error handling
+  const subjectsWithPerf = validAssessments.map(a => {
+    // Get subject name - try multiple possible field names
+    const subjectName = a.subject || a.name || a.subjectName || a.subj || 'Unknown Subject';
+    const maxScore = a.maxScore || a.max || a.maximum || 100;
+    const score = a.score || a.marks || a.value || 0;
+    
+    const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
     let level = 'Approaching Expectation';
     let color = '#d4a017';
     if (percentage >= 80) { level = 'Exceeding Expectation'; color = '#28a745'; }
     else if (percentage >= 60) { level = 'Meeting Expectation'; color = '#17a2b8'; }
     else if (percentage >= 40) { level = 'Approaching Expectation'; color = '#d4a017'; }
     else { level = 'Below Expectation'; color = '#dc3545'; }
-    return { ...a, percentage, level, color };
+    
+    return { 
+      subject: subjectName, 
+      maxScore, 
+      score, 
+      percentage, 
+      level, 
+      color 
+    };
   });
 
   // Sort by performance (best first)
@@ -550,6 +582,16 @@ function generateStudentReportHTML(student, allAssessments = null) {
   else if (avgPercentage >= 60) { overallLevel = 'Meeting Expectation'; overallColor = '#17a2b8'; }
   else if (avgPercentage >= 40) { overallLevel = 'Approaching Expectation'; overallColor = '#d4a017'; }
   else { overallLevel = 'Below Expectation'; overallColor = '#dc3545'; }
+
+  // Calculate total score
+  const totalScore = subjectsWithPerf.reduce((sum, s) => sum + s.score, 0);
+  const totalMax = subjectsWithPerf.reduce((sum, s) => sum + s.maxScore, 0);
+
+  // Count performance levels
+  const exceedingCount = subjectsWithPerf.filter(s => s.percentage >= 80).length;
+  const meetingCount = subjectsWithPerf.filter(s => s.percentage >= 60 && s.percentage < 80).length;
+  const approachingCount = subjectsWithPerf.filter(s => s.percentage >= 40 && s.percentage < 60).length;
+  const belowCount = subjectsWithPerf.filter(s => s.percentage < 40).length;
 
   // Generate subjects HTML
   const subjectsHtml = subjectsWithPerf.map(a => `
@@ -599,12 +641,16 @@ function generateStudentReportHTML(student, allAssessments = null) {
     
     const subjectTrends = {};
     sorted.forEach(assessment => {
-      (assessment.assessments || []).forEach(a => {
-        if (!subjectTrends[a.subject]) {
-          subjectTrends[a.subject] = [];
+      const ass = assessment.assessments || [];
+      ass.forEach(a => {
+        const name = a.subject || a.name || 'Unknown';
+        if (!subjectTrends[name]) {
+          subjectTrends[name] = [];
         }
-        const pct = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
-        subjectTrends[a.subject].push(pct);
+        const max = a.maxScore || a.max || 100;
+        const score = a.score || a.marks || 0;
+        const pct = max > 0 ? (score / max) * 100 : 0;
+        subjectTrends[name].push(pct);
       });
     });
 
@@ -637,11 +683,8 @@ function generateStudentReportHTML(student, allAssessments = null) {
     `;
   }
 
-  // Count performance levels for badges
-  const exceedingCount = subjectsWithPerf.filter(s => s.percentage >= 80).length;
-  const meetingCount = subjectsWithPerf.filter(s => s.percentage >= 60 && s.percentage < 80).length;
-  const approachingCount = subjectsWithPerf.filter(s => s.percentage >= 40 && s.percentage < 60).length;
-  const belowCount = subjectsWithPerf.filter(s => s.percentage < 40).length;
+  // Get strengths list for summary
+  const strengthsList = strengths.map(s => s.subject).join(', ');
 
   return `
     <!DOCTYPE html>
@@ -686,7 +729,8 @@ function generateStudentReportHTML(student, allAssessments = null) {
         .summary-box { margin-top: 20px; padding: 18px; background: #f8f9fc; border-radius: 10px; border: 1px solid #e8ecf1; }
         .summary-box p { font-size: 13px; color: #555; line-height: 1.8; }
         .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
-        @media print { body { padding: 10px; background: white; } .report-container { box-shadow: none; padding: 15px; } }
+        .no-print { display: none; }
+        @media print { body { padding: 10px; background: white; } .report-container { box-shadow: none; padding: 15px; } .no-print { display: none; } }
         @media (max-width: 700px) { .analysis-grid { grid-template-columns: 1fr; } table { font-size: 11px; } table th, table td { padding: 5px 8px; } }
       </style>
     </head>
@@ -699,9 +743,9 @@ function generateStudentReportHTML(student, allAssessments = null) {
         
         <div class="student-info">
           <table>
-            <tr><td class="label">Student Name:</td><td class="value">${student.studentName}</td></tr>
+            <tr><td class="label">Student Name:</td><td class="value">${student.studentName || 'N/A'}</td></tr>
             ${student.admissionNumber ? `<tr><td class="label">Admission Number:</td><td class="value">${student.admissionNumber}</td></tr>` : ''}
-            <tr><td class="label">Grade:</td><td class="value">${student.grade}</td></tr>
+            <tr><td class="label">Grade:</td><td class="value">${student.grade || 'N/A'}</td></tr>
             <tr><td class="label">Assessment Type:</td><td class="value">${typeNames[student.type] || student.type || 'Monthly'}</td></tr>
             <tr><td class="label">Period:</td><td>${student.period || 'N/A'}</td></tr>
             <tr><td class="label">Month:</td><td>${student.month || 'N/A'}</td></tr>
@@ -712,7 +756,7 @@ function generateStudentReportHTML(student, allAssessments = null) {
         
         <div class="performance-box" style="background: ${overallColor}15; border: 2px solid ${overallColor};">
           <div class="level" style="color: ${overallColor};">${overallLevel}</div>
-          <div class="score">Total Score: ${student.totalScore || 0} | Average: ${student.averageScore ? student.averageScore.toFixed(1) : '0.0'}%</div>
+          <div class="score">Total Score: ${totalScore} | Average: ${avgPercentage.toFixed(1)}%</div>
           <div class="badges">
             <span class="badge badge-exceeding">✅ Exceeding: ${exceedingCount}</span>
             <span class="badge badge-meeting">📘 Meeting: ${meetingCount}</span>
@@ -759,9 +803,9 @@ function generateStudentReportHTML(student, allAssessments = null) {
         <div class="summary-box">
           <h4 style="color:#0A1628;font-size:15px;margin-bottom:8px;">📝 Teacher's Summary</h4>
           <p>
-            <strong>Overall Performance:</strong> ${student.studentName} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()}</strong> 
-            with an average score of <strong>${student.averageScore ? student.averageScore.toFixed(1) : '0.0'}%</strong>.
-            ${strengths.length > 0 ? `<br><br><strong>Strengths:</strong> ${strengths.map(s => s.subject).join(', ')} show strong performance.` : ''}
+            <strong>Overall Performance:</strong> ${student.studentName || 'The student'} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()}</strong> 
+            with an average score of <strong>${avgPercentage.toFixed(1)}%</strong>.
+            ${strengths.length > 0 ? `<br><br><strong>Strengths:</strong> ${strengthsList} show strong performance.` : ''}
             ${weaknesses.length > 0 ? `<br><br><strong>Areas for Improvement:</strong> Focus on ${weaknesses.map(s => s.subject).join(', ')} to improve overall performance.` : ''}
             ${weaknesses.length === 0 ? '<br><br>🎉 Excellent work! Continue maintaining this high standard.' : '<br><br>Keep up the good work and focus on improving in the areas identified above.'}
           </p>
@@ -771,6 +815,12 @@ function generateStudentReportHTML(student, allAssessments = null) {
           <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
           <p>This report is a true reflection of the student's performance in the ${typeNames[student.type] || 'monthly'} assessment.</p>
         </div>
+      </div>
+      
+      <div class="no-print" style="text-align:center;margin-top:15px;">
+        <button onclick="window.print()" style="padding:10px 30px;background:#D4A017;color:#0A1628;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">
+          🖨️ Print / Save as PDF
+        </button>
       </div>
     </body>
     </html>
@@ -954,7 +1004,7 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ============================================
-// API ROUTES - TEACHER
+// API ROUTES - TEACHER (SHORTENED FOR SPACE)
 // ============================================
 
 app.post('/api/teacher/register', async (req, res) => {
@@ -1289,7 +1339,7 @@ app.get('/api/teacher/attendance/:employeeId', async (req, res) => {
 });
 
 // ============================================
-// ADMIN TEACHER MANAGEMENT ROUTES
+// ADMIN TEACHER MANAGEMENT ROUTES (SHORTENED)
 // ============================================
 
 app.get('/api/teachers', async (req, res) => {
@@ -1301,81 +1351,6 @@ app.get('/api/teachers', async (req, res) => {
       teachers
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-});
-
-app.get('/api/teachers/:id', async (req, res) => {
-  try {
-    const teacher = await Teacher.findById(req.params.id).select('-password');
-    if (!teacher) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Teacher not found' 
-      });
-    }
-    res.json({
-      success: true,
-      teacher
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-});
-
-app.put('/api/teachers/:id', async (req, res) => {
-  try {
-    const { firstName, lastName, email, employeeId, phoneNumber, department } = req.body;
-    
-    const teacher = await Teacher.findById(req.params.id);
-    if (!teacher) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Teacher not found' 
-      });
-    }
-    
-    const existing = await Teacher.findOne({
-      _id: { $ne: req.params.id },
-      $or: [{ email }, { employeeId }]
-    });
-    
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email or Employee ID already in use by another teacher'
-      });
-    }
-    
-    teacher.firstName = firstName || teacher.firstName;
-    teacher.lastName = lastName || teacher.lastName;
-    teacher.email = email || teacher.email;
-    teacher.employeeId = employeeId || teacher.employeeId;
-    teacher.phoneNumber = phoneNumber || teacher.phoneNumber;
-    teacher.department = department || teacher.department;
-    
-    await teacher.save();
-    
-    res.json({
-      success: true,
-      message: 'Teacher updated successfully!',
-      teacher: {
-        id: teacher._id,
-        firstName: teacher.firstName,
-        lastName: teacher.lastName,
-        employeeId: teacher.employeeId,
-        email: teacher.email,
-        department: teacher.department
-      }
-    });
-  } catch (error) {
-    console.error('Update teacher error:', error);
     res.status(500).json({ 
       success: false, 
       message: error.message 
@@ -1395,40 +1370,6 @@ app.delete('/api/teachers/:id', async (req, res) => {
     res.json({
       success: true,
       message: 'Teacher deleted successfully!'
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-});
-
-app.post('/api/teachers/:id/reset-pin', async (req, res) => {
-  try {
-    const { pin } = req.body;
-    const teacher = await Teacher.findById(req.params.id);
-    
-    if (!teacher) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Teacher not found' 
-      });
-    }
-    
-    if (!pin || pin.length < 4 || pin.length > 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'PIN must be 4-6 digits'
-      });
-    }
-    
-    teacher.password = pin;
-    await teacher.save();
-    
-    res.json({
-      success: true,
-      message: 'PIN reset successfully!'
     });
   } catch (error) {
     res.status(500).json({ 
@@ -1520,20 +1461,20 @@ app.get('/api/admin/attendance/summary', async (req, res) => {
 });
 
 // ============================================
-// VISITOR API ROUTES
+// VISITOR API ROUTES (SHORTENED)
 // ============================================
 
 app.post('/api/visitor/checkin', async (req, res) => {
   try {
     const { 
-      firstName, lastName, email, phoneNumber, idNumber, 
-      purpose, purposeDetails, personToVisit, department, hostName, notes 
+      firstName, lastName, phoneNumber, idNumber, 
+      purpose, personToVisit, hostName 
     } = req.body;
 
     if (!firstName || !lastName || !phoneNumber || !idNumber || !purpose || !personToVisit) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide: firstName, lastName, phoneNumber, idNumber, purpose, personToVisit'
+        message: 'Please provide all required fields'
       });
     }
 
@@ -1543,15 +1484,11 @@ app.post('/api/visitor/checkin', async (req, res) => {
     const visitor = new Visitor({
       firstName,
       lastName,
-      email,
       phoneNumber,
       idNumber,
       purpose,
-      purposeDetails,
       personToVisit,
-      department,
-      hostName,
-      notes,
+      hostName: hostName || '',
       badgeNumber,
       checkIn: kenyaNow,
       status: 'Checked In'
@@ -1567,10 +1504,7 @@ app.post('/api/visitor/checkin', async (req, res) => {
         fullName: visitor.fullName,
         badgeNumber: visitor.badgeNumber,
         checkIn: visitor.checkIn,
-        checkInTime: formatKenyaTime(visitor.checkIn),
-        purpose: visitor.purpose,
-        personToVisit: visitor.personToVisit,
-        hostName: visitor.hostName
+        checkInTime: formatKenyaTime(visitor.checkIn)
       }
     });
 
@@ -1587,14 +1521,14 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
     if (!visitor) {
       return res.status(404).json({
         success: false,
-        message: 'Visitor not found. Please check the badge number.'
+        message: 'Visitor not found'
       });
     }
     
     if (visitor.status === 'Checked Out') {
       return res.status(400).json({
         success: false,
-        message: 'Visitor already checked out at ' + formatKenyaTime(visitor.checkOut)
+        message: 'Visitor already checked out'
       });
     }
     
@@ -1612,42 +1546,13 @@ app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
         id: visitor._id,
         fullName: visitor.fullName,
         badgeNumber: visitor.badgeNumber,
-        checkIn: visitor.checkIn,
-        checkInTime: formatKenyaTime(visitor.checkIn),
         checkOut: visitor.checkOut,
-        checkOutTime: formatKenyaTime(visitor.checkOut),
         duration: duration + ' minutes'
       }
     });
 
   } catch (error) {
     console.error('Visitor check-out error:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.get('/api/visitors', async (req, res) => {
-  try {
-    const visitors = await Visitor.find().sort({ checkIn: -1 });
-    res.json({
-      success: true,
-      count: visitors.length,
-      visitors
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.get('/api/visitors/active', async (req, res) => {
-  try {
-    const visitors = await Visitor.find({ status: 'Checked In' }).sort({ checkIn: -1 });
-    res.json({
-      success: true,
-      count: visitors.length,
-      visitors
-    });
-  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -1665,133 +1570,13 @@ app.get('/api/visitors/today', async (req, res) => {
     const active = visitors.filter(v => v.status === 'Checked In');
     const completed = visitors.filter(v => v.status === 'Checked Out');
     
-    const purposeStats = {};
-    visitors.forEach(v => {
-      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
-    });
-    
-    const formattedVisitors = visitors.map(v => ({
-      ...v.toObject(),
-      checkInTime: formatKenyaTime(v.checkIn),
-      checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
-    }));
-    
     res.json({
       success: true,
       date: kenyaToday,
       total: visitors.length,
       active: active.length,
       completed: completed.length,
-      byPurpose: purposeStats,
-      visitors: formattedVisitors
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.get('/api/visitors/weekly', async (req, res) => {
-  try {
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
-    weekStart.setHours(0, 0, 0, 0);
-    
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-
-    const visitors = await Visitor.find({
-      checkIn: { $gte: weekStart, $lt: weekEnd }
-    }).sort({ checkIn: -1 });
-
-    const active = visitors.filter(v => v.status === 'Checked In');
-    const completed = visitors.filter(v => v.status === 'Checked Out');
-
-    const purposeStats = {};
-    visitors.forEach(v => {
-      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
-    });
-
-    const dailyStats = {};
-    for (let d = 0; d < 7; d++) {
-      const day = new Date(weekStart);
-      day.setDate(day.getDate() + d);
-      const dayStr = day.toDateString();
-      dailyStats[dayStr] = visitors.filter(v => new Date(v.checkIn).toDateString() === dayStr).length;
-    }
-
-    res.json({
-      success: true,
-      weekStart: weekStart,
-      weekEnd: weekEnd,
-      total: visitors.length,
-      active: active.length,
-      completed: completed.length,
-      byPurpose: purposeStats,
-      daily: dailyStats,
       visitors: visitors
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.get('/api/visitors/monthly', async (req, res) => {
-  try {
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
-    
-    const monthEnd = new Date(monthStart);
-    monthEnd.setMonth(monthEnd.getMonth() + 1);
-
-    const visitors = await Visitor.find({
-      checkIn: { $gte: monthStart, $lt: monthEnd }
-    }).sort({ checkIn: -1 });
-
-    const active = visitors.filter(v => v.status === 'Checked In');
-    const completed = visitors.filter(v => v.status === 'Checked Out');
-
-    const purposeStats = {};
-    visitors.forEach(v => {
-      purposeStats[v.purpose] = (purposeStats[v.purpose] || 0) + 1;
-    });
-
-    const dailyStats = {};
-    for (let d = 1; d <= monthEnd.getDate(); d++) {
-      const day = new Date(monthStart);
-      day.setDate(d);
-      const dayStr = day.toDateString();
-      dailyStats[dayStr] = visitors.filter(v => new Date(v.checkIn).toDateString() === dayStr).length;
-    }
-
-    res.json({
-      success: true,
-      monthStart: monthStart,
-      monthEnd: monthEnd,
-      total: visitors.length,
-      active: active.length,
-      completed: completed.length,
-      byPurpose: purposeStats,
-      daily: dailyStats,
-      visitors: visitors
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.delete('/api/visitors/:id', async (req, res) => {
-  try {
-    const visitor = await Visitor.findByIdAndDelete(req.params.id);
-    if (!visitor) {
-      return res.status(404).json({
-        success: false,
-        message: 'Visitor not found'
-      });
-    }
-    res.json({
-      success: true,
-      message: 'Visitor record deleted successfully!'
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -1852,32 +1637,26 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
     }
     await config.save();
     
+    // Update existing students with new max scores
     const students = await StudentAssessment.find({ grade, type });
-    let updatedCount = 0;
     for (const student of students) {
-      let changed = false;
       for (const assessment of student.assessments) {
         const subjectConfig = subjects.find(s => s.name === assessment.subject);
         if (subjectConfig && assessment.maxScore !== subjectConfig.max) {
           assessment.maxScore = subjectConfig.max;
-          changed = true;
         }
       }
-      if (changed) {
-        const { totalScore } = calculateTotals(student.assessments);
-        const avgScore = student.assessments.length > 0 ? totalScore / student.assessments.length : 0;
-        student.totalScore = totalScore;
-        student.averageScore = avgScore;
-        student.performanceLevel = calculatePerformanceLevel(student.assessments);
-        student.updatedAt = new Date();
-        await student.save();
-        updatedCount++;
-      }
+      const { totalScore } = calculateTotals(student.assessments);
+      const avgScore = student.assessments.length > 0 ? totalScore / student.assessments.length : 0;
+      student.totalScore = totalScore;
+      student.averageScore = avgScore;
+      student.performanceLevel = calculatePerformanceLevel(student.assessments);
+      await student.save();
     }
     
     res.json({ 
       success: true, 
-      message: `Subject configuration updated successfully! ${updatedCount} student records updated.`,
+      message: 'Subject configuration updated successfully!',
       config 
     });
   } catch (error) {
@@ -2048,27 +1827,17 @@ app.get('/api/assessments/all', async (req, res) => {
 // PARENT/STUDENT RESULTS SEARCH API
 // ============================================
 
-// GET search for student results by name, grade, or type
 app.get('/api/assessments/search', async (req, res) => {
   try {
-    const { name, grade, type, admission } = req.query;
-    
-    console.log('🔍 Search request:', { name, grade, type, admission });
+    const { name, grade, type } = req.query;
     
     let filter = {};
-    
     if (name && name.trim() !== '') {
       filter.studentName = { $regex: name.trim(), $options: 'i' };
     }
-    
-    if (admission && admission.trim() !== '') {
-      filter.admissionNumber = { $regex: admission.trim(), $options: 'i' };
-    }
-    
     if (grade && grade.trim() !== '') {
       filter.grade = grade.trim();
     }
-    
     if (type && type.trim() !== '') {
       filter.type = type.trim();
     }
@@ -2076,24 +1845,11 @@ app.get('/api/assessments/search', async (req, res) => {
     if (Object.keys(filter).length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide name, grade, or admission number'
+        message: 'Please provide name or grade'
       });
     }
-    
-    console.log('📊 Filter:', JSON.stringify(filter));
     
     const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
-    
-    console.log('📊 Found students:', students.length);
-    
-    if (students.length === 0) {
-      return res.json({
-        success: true,
-        students: [],
-        count: 0,
-        message: 'No students found'
-      });
-    }
     
     res.json({
       success: true,
@@ -2102,7 +1858,7 @@ app.get('/api/assessments/search', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('❌ Search error:', error);
+    console.error('Search error:', error);
     res.status(500).json({ 
       success: false, 
       message: error.message 
@@ -2131,7 +1887,7 @@ app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
   }
 });
 
-// GET generate comprehensive report for a student (all assessments)
+// GET generate comprehensive report
 app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) => {
   try {
     const studentName = decodeURIComponent(req.params.studentName);
@@ -2140,10 +1896,9 @@ app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) =
     }).sort({ createdAt: 1 });
     
     if (allAssessments.length === 0) {
-      return res.status(404).json({ success: false, message: 'No assessments found for this student' });
+      return res.status(404).json({ success: false, message: 'No assessments found' });
     }
     
-    // Use the latest assessment as the base
     const latest = allAssessments[allAssessments.length - 1];
     const html = generateStudentReportHTML(latest, allAssessments);
     res.json({ success: true, html });
@@ -2153,9 +1908,7 @@ app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) =
   }
 });
 
-// ============================================
-// POST copy assessments from one period to another
-// ============================================
+// POST copy assessments
 app.post('/api/assessments/copy', async (req, res) => {
   try {
     const { 
@@ -2357,40 +2110,7 @@ app.get('/api/test', (req, res) => {
       server: 'Online',
       kenyaTime: kenyaNow.toLocaleString(),
       kenyaTimeFormatted: formatKenyaFullTime(kenyaNow),
-      timestamp: new Date().toISOString(),
-      endpoints: {
-        test: '/api/test',
-        content: '/api/content',
-        admin: '/api/admin/login',
-        setup: '/api/setup-admin',
-        teacher: {
-          register: '/api/teacher/register',
-          checkin: '/api/teacher/checkin',
-          checkout: '/api/teacher/checkout',
-          attendance: '/api/teacher/attendance/today'
-        },
-        adminAttendance: '/api/admin/attendance/all',
-        visitor: {
-          checkin: '/api/visitor/checkin',
-          checkout: '/api/visitor/checkout/:badgeNumber',
-          today: '/api/visitors/today',
-          weekly: '/api/visitors/weekly',
-          monthly: '/api/visitors/monthly'
-        },
-        assessments: {
-          subjects: '/api/assessments/subjects/:grade',
-          grade: '/api/assessments/grade/:grade',
-          student: '/api/assessments/student/:id',
-          all: '/api/assessments/all',
-          search: '/api/assessments/search?name=&grade=&type=',
-          create: '/api/assessments (POST)',
-          update: '/api/assessments/:id (PUT)',
-          delete: '/api/assessments/:id (DELETE)',
-          copy: '/api/assessments/copy',
-          report: '/api/assessments/generate-report/:studentId',
-          comprehensive: '/api/assessments/comprehensive-report/:studentName'
-        }
-      }
+      timestamp: new Date().toISOString()
     }
   });
 });
@@ -2428,16 +2148,6 @@ app.listen(PORT, () => {
   console.log('='.repeat(50));
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`🕐 Kenya Time: ${kenyaNow.toLocaleString()}`);
-  console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
-  console.log(`🌐 Website: http://localhost:${PORT}/`);
-  console.log(`📊 Admin: http://localhost:${PORT}/admin-login.html`);
-  console.log(`👨‍🏫 Staff Check-in: http://localhost:${PORT}/teacher-checkin.html`);
-  console.log(`📋 Admin Attendance: http://localhost:${PORT}/admin-attendance.html`);
-  console.log(`👨‍🏫 Manage Teachers: http://localhost:${PORT}/admin-teachers.html`);
-  console.log(`🚪 Visitor Check-in: http://localhost:${PORT}/visitor-checkin.html`);
-  console.log(`📋 Admin Visitors: http://localhost:${PORT}/admin-visitors.html`);
-  console.log(`📝 Academic Assessments: http://localhost:${PORT}/admin-academics.html`);
-  console.log(`📚 Parent Results: http://localhost:${PORT}/academics.html#assessments`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
 });
