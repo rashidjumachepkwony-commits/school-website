@@ -5,6 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const fs = require('fs');
+const pdf = require('html-pdf');
 
 // Load environment variables
 dotenv.config();
@@ -982,7 +983,7 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ============================================
-// API ROUTES - TEACHER (SHORTENED FOR SPACE)
+// API ROUTES - TEACHER (SHORTENED)
 // ============================================
 
 app.post('/api/teacher/register', async (req, res) => {
@@ -1833,7 +1834,7 @@ app.get('/api/assessments/search', async (req, res) => {
 });
 
 // ============================================
-// DOWNLOAD REPORT - FIXED: SAVES AS FILE
+// DOWNLOAD REPORT - GENERATES ACTUAL PDF
 // ============================================
 app.get('/api/assessments/download-report/:studentId', async (req, res) => {
   try {
@@ -1848,30 +1849,34 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
     
     const html = generateStudentReportHTML(student, allAssessments);
     
-    const fullHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>Student Report - ${student.studentName}</title>
-        <style>
-          @media print {
-            body { padding: 10px; background: white; }
-            .report-container { box-shadow: none; padding: 15px; }
-            .no-print { display: none !important; }
-          }
-        </style>
-      </head>
-      <body>
-        ${html}
-      </body>
-      </html>
-    `;
+    // Create PDF options
+    const options = {
+      format: 'A4',
+      border: {
+        top: '1cm',
+        right: '1cm',
+        bottom: '1cm',
+        left: '1cm'
+      },
+      printBackground: true,
+      landscape: false,
+      type: 'pdf',
+      timeout: 30000
+    };
     
-    // This triggers the browser's download dialog - asks where to save
-    res.setHeader('Content-Type', 'text/html');
-    res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.html"`);
-    res.send(fullHtml);
+    // Generate PDF from HTML
+    pdf.create(html, options).toBuffer((err, buffer) => {
+      if (err) {
+        console.error('PDF generation error:', err);
+        return res.status(500).json({ success: false, message: 'Error generating PDF' });
+      }
+      
+      // Send PDF as download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
+      res.setHeader('Content-Length', buffer.length);
+      res.send(buffer);
+    });
     
   } catch (error) {
     console.error('Error downloading report:', error);
