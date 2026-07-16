@@ -702,6 +702,23 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(111, 66, 193, 0.35);
         }
+        .btn-comprehensive {
+            background: linear-gradient(135deg, #0A1628, #1a2a4a);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+        .btn-comprehensive:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(10, 22, 40, 0.35);
+        }
         .btn-print {
             background: #6c757d;
             color: white;
@@ -1292,7 +1309,7 @@
         }
 
         // ============================================
-        // SEARCH STUDENT ASSESSMENT - FIXED
+        // SEARCH STUDENT ASSESSMENT
         // ============================================
         async function searchStudentAssessment() {
             const studentName = document.getElementById('studentSearch').value.trim();
@@ -1300,7 +1317,6 @@
             const type = document.getElementById('assessmentTypeFilter').value;
             const resultsDiv = document.getElementById('assessmentResults');
 
-            // Validate input
             if (!studentName && !grade) {
                 showAlert('Please enter a student name or select a grade', 'error');
                 resultsDiv.style.display = 'block';
@@ -1314,7 +1330,6 @@
                 return;
             }
 
-            // Show loading
             resultsDiv.style.display = 'block';
             resultsDiv.innerHTML = `
                 <div style="text-align:center;padding:40px;">
@@ -1323,7 +1338,6 @@
                 </div>
             `;
 
-            // Add spinner keyframes if not exists
             if (!document.querySelector('#spinner-style')) {
                 const style = document.createElement('style');
                 style.id = 'spinner-style';
@@ -1332,7 +1346,6 @@
             }
 
             try {
-                // Build URL with query parameters
                 let url = '/api/assessments/search?';
                 const params = [];
                 if (studentName) params.push(`name=${encodeURIComponent(studentName)}`);
@@ -1394,7 +1407,7 @@
         }
 
         // ============================================
-        // LOAD ALL STUDENTS (for debugging)
+        // LOAD ALL STUDENTS
         // ============================================
         async function loadAllStudents() {
             const resultsDiv = document.getElementById('assessmentResults');
@@ -1528,6 +1541,9 @@
                         <button onclick="downloadAssessmentPDF('${student._id}')" class="btn-download">
                             <i class="fas fa-file-pdf"></i> Download PDF
                         </button>
+                        <button onclick="downloadComprehensiveReport('${student.studentName}')" class="btn-comprehensive">
+                            <i class="fas fa-chart-line"></i> Comprehensive Report
+                        </button>
                         <button onclick="printResult('${student._id}')" class="btn-print">
                             <i class="fas fa-print"></i> Print
                         </button>
@@ -1595,7 +1611,7 @@
         // ============================================
         async function downloadAssessmentPDF(studentId) {
             try {
-                showAlert('Generating PDF...', 'info');
+                showAlert('Generating report...', 'info');
 
                 const response = await fetch(`/api/assessments/generate-report/${studentId}`);
                 const data = await response.json();
@@ -1621,12 +1637,41 @@
         }
 
         // ============================================
+        // DOWNLOAD COMPREHENSIVE REPORT (All Assessments)
+        // ============================================
+        async function downloadComprehensiveReport(studentName) {
+            try {
+                showAlert('Generating comprehensive report with trend analysis...', 'info');
+
+                const response = await fetch(`/api/assessments/comprehensive-report/${encodeURIComponent(studentName)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const win = window.open('', '_blank');
+                    if (!win) {
+                        showAlert('Please allow popups for downloading reports', 'error');
+                        return;
+                    }
+                    win.document.write(data.html);
+                    win.document.close();
+                    setTimeout(() => {
+                        win.print();
+                    }, 800);
+                } else {
+                    showAlert('Error generating comprehensive report: ' + (data.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error downloading comprehensive report: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================
         // INIT
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadNewsTicker();
 
-            // Check URL parameters for auto-search
             const urlParams = new URLSearchParams(window.location.search);
             const type = urlParams.get('type');
             if (type) {
@@ -1643,12 +1688,10 @@
                 document.getElementById('studentSearch').value = name;
             }
 
-            // Auto-search if parameters are present
             if (type || grade || name) {
                 setTimeout(searchStudentAssessment, 800);
             }
 
-            // Handle hash for assessments anchor
             if (window.location.hash === '#assessments') {
                 setTimeout(() => {
                     const section = document.getElementById('assessments');

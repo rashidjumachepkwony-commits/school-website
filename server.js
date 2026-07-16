@@ -499,6 +499,260 @@ function calculateTotals(assessments) {
 }
 
 // ============================================
+// STUDENT REPORT HTML GENERATOR - WITH CBC ANALYSIS
+// ============================================
+function generateStudentReportHTML(student, allAssessments = null) {
+  const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
+  const performanceColors = {
+    'Exceeding Expectation': '#28a745',
+    'Meeting Expectation': '#17a2b8',
+    'Approaching Expectation': '#d4a017',
+    'Below Expectation': '#dc3545'
+  };
+  
+  // Analyze current assessment
+  const subjectsWithPerf = student.assessments.map(a => {
+    const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+    let level = 'Approaching Expectation';
+    let color = '#d4a017';
+    if (percentage >= 80) { level = 'Exceeding Expectation'; color = '#28a745'; }
+    else if (percentage >= 60) { level = 'Meeting Expectation'; color = '#17a2b8'; }
+    else if (percentage >= 40) { level = 'Approaching Expectation'; color = '#d4a017'; }
+    else { level = 'Below Expectation'; color = '#dc3545'; }
+    return { ...a, percentage, level, color };
+  });
+
+  // Sort subjects: best performing first
+  const sortedByPerformance = [...subjectsWithPerf].sort((a, b) => b.percentage - a.percentage);
+  
+  // Identify strengths (top subjects with >= 60%)
+  const strengths = sortedByPerformance.filter(s => s.percentage >= 60);
+  
+  // Identify weaknesses (subjects with < 60%)
+  const weaknesses = sortedByPerformance.filter(s => s.percentage < 60);
+  
+  // Calculate overall performance level
+  const avgPercentage = subjectsWithPerf.length > 0 ? 
+    subjectsWithPerf.reduce((sum, s) => sum + s.percentage, 0) / subjectsWithPerf.length : 0;
+  
+  let overallLevel = 'Approaching Expectation';
+  let overallColor = '#d4a017';
+  if (avgPercentage >= 80) { overallLevel = 'Exceeding Expectation'; overallColor = '#28a745'; }
+  else if (avgPercentage >= 60) { overallLevel = 'Meeting Expectation'; overallColor = '#17a2b8'; }
+  else if (avgPercentage >= 40) { overallLevel = 'Approaching Expectation'; overallColor = '#d4a017'; }
+  else { overallLevel = 'Below Expectation'; overallColor = '#dc3545'; }
+
+  // Generate subjects HTML
+  const subjectsHtml = subjectsWithPerf.map(a => `
+    <tr>
+      <td style="padding:6px 10px;border:1px solid #ddd;">${a.subject}</td>
+      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${a.maxScore}</td>
+      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:bold;">${a.score}</td>
+      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:bold;">
+        ${a.percentage.toFixed(1)}%
+      </td>
+      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">
+        <span style="background:${a.color};color:white;padding:2px 10px;border-radius:50px;font-size:11px;font-weight:700;">${a.level}</span>
+      </td>
+    </tr>
+  `).join('');
+
+  // Generate strengths HTML
+  let strengthsHtml = '';
+  if (strengths.length > 0) {
+    strengthsHtml = strengths.map(s => `
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;">
+        <span><strong>${s.subject}</strong></span>
+        <span style="color:#28a745;font-weight:700;">${s.percentage.toFixed(1)}%</span>
+      </div>
+    `).join('');
+  } else {
+    strengthsHtml = `<p style="color:#999;font-size:12px;">No subjects meeting expectation yet. Keep working hard!</p>`;
+  }
+
+  // Generate weaknesses HTML
+  let weaknessesHtml = '';
+  if (weaknesses.length > 0) {
+    weaknessesHtml = weaknesses.map(s => `
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;">
+        <span><strong>${s.subject}</strong></span>
+        <span style="color:#dc3545;font-weight:700;">${s.percentage.toFixed(1)}%</span>
+      </div>
+    `).join('');
+  } else {
+    weaknessesHtml = `<p style="color:#28a745;font-weight:600;font-size:12px;">🎉 All subjects are meeting or exceeding expectations!</p>`;
+  }
+
+  // Generate trend analysis if multiple assessments are provided
+  let trendHtml = '';
+  if (allAssessments && allAssessments.length > 1) {
+    // Sort by date
+    const sorted = [...allAssessments].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    
+    // Calculate trend for each subject
+    const subjectTrends = {};
+    sorted.forEach(assessment => {
+      assessment.assessments.forEach(a => {
+        if (!subjectTrends[a.subject]) {
+          subjectTrends[a.subject] = [];
+        }
+        const pct = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+        subjectTrends[a.subject].push(pct);
+      });
+    });
+
+    let trendItemsHtml = '';
+    Object.keys(subjectTrends).forEach(subject => {
+      const scores = subjectTrends[subject];
+      if (scores.length >= 2) {
+        const first = scores[0];
+        const last = scores[scores.length - 1];
+        const diff = last - first;
+        const trendIcon = diff > 5 ? '📈' : diff < -5 ? '📉' : '➡️';
+        const trendColor = diff > 5 ? '#28a745' : diff < -5 ? '#dc3545' : '#d4a017';
+        trendItemsHtml += `
+          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;">
+            <span><strong>${subject}</strong></span>
+            <span style="color:${trendColor};font-weight:700;">
+              ${trendIcon} ${diff > 0 ? '+' : ''}${diff.toFixed(1)}%
+            </span>
+            <span style="color:#999;font-size:11px;">${scores[0].toFixed(1)}% → ${scores[scores.length-1].toFixed(1)}%</span>
+          </div>
+        `;
+      }
+    });
+
+    trendHtml = `
+      <div style="margin-top:15px;padding:15px;background:white;border-radius:8px;border:1px solid #e8ecf1;">
+        <h4 style="color:#0A1628;font-size:14px;margin-bottom:8px;">📈 Progress Trend (All Assessments)</h4>
+        ${trendItemsHtml || '<p style="color:#999;font-size:12px;">Not enough data for trend analysis</p>'}
+      </div>
+    `;
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Student Report - ${student.studentName}</title>
+      <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; max-width: 1100px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { color: #0A1628; font-size: 24px; margin: 0; }
+        .header p { color: #666; margin: 5px 0; }
+        .student-info { background: #f8f9fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .student-info table { width: 100%; font-size: 14px; }
+        .student-info td { padding: 4px 8px; }
+        .student-info .label { font-weight: 600; color: #555; width: 120px; }
+        .performance-box { text-align: center; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .performance-box .level { font-size: 28px; font-weight: 700; }
+        .performance-box .score { font-size: 16px; color: #555; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
+        table td { padding: 6px 10px; border: 1px solid #ddd; }
+        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
+        .analysis-box { background: #f8f9fc; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745; }
+        .analysis-box.weakness { border-left-color: #dc3545; }
+        .analysis-box h4 { font-size: 14px; margin-bottom: 8px; }
+        .analysis-box .item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f0f0f0; }
+        .analysis-box .item:last-child { border-bottom: none; }
+        .analysis-box .item .score-high { color: #28a745; font-weight: 700; }
+        .analysis-box .item .score-low { color: #dc3545; font-weight: 700; }
+        .trend-box { margin-top: 15px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e8ecf1; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
+        .school-name { color: #D4A017; font-weight: 700; }
+        .badge { display: inline-block; padding: 2px 12px; border-radius: 50px; font-size: 11px; font-weight: 700; color: white; }
+        @media print { body { padding: 15px; } .no-print { display: none; } }
+        @media (max-width: 600px) { .analysis-grid { grid-template-columns: 1fr; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
+        <p>Student Assessment Report - CBC Performance Analysis</p>
+      </div>
+      
+      <div class="student-info">
+        <table>
+          <tr><td class="label">Student Name:</td><td><strong>${student.studentName}</strong></td></tr>
+          ${student.admissionNumber ? `<tr><td class="label">Admission Number:</td><td><strong>${student.admissionNumber}</strong></td></tr>` : ''}
+          <tr><td class="label">Grade:</td><td><strong>${student.grade}</strong></td></tr>
+          <tr><td class="label">Assessment Type:</td><td><strong>${typeNames[student.type] || student.type || 'Monthly'}</strong></td></tr>
+          <tr><td class="label">Period:</td><td>${student.period || 'N/A'}</td></tr>
+          <tr><td class="label">Month:</td><td>${student.month || 'N/A'}</td></tr>
+          <tr><td class="label">Term:</td><td>${student.term || 'N/A'}</td></tr>
+          <tr><td class="label">Report Date:</td><td>${formatKenyaFullTime(new Date())}</td></tr>
+        </table>
+      </div>
+      
+      <div class="performance-box" style="background: ${overallColor}20; border: 2px solid ${overallColor};">
+        <div class="level" style="color: ${overallColor};">${overallLevel}</div>
+        <div class="score">Total Score: ${student.totalScore} | Average: ${student.averageScore.toFixed(1)}%</div>
+        <div style="margin-top:8px;">
+          <span class="badge" style="background:#28a745;">✅ Exceeding: ${subjectsWithPerf.filter(s => s.percentage >= 80).length}</span>
+          <span class="badge" style="background:#17a2b8;">📘 Meeting: ${subjectsWithPerf.filter(s => s.percentage >= 60 && s.percentage < 80).length}</span>
+          <span class="badge" style="background:#d4a017;">📗 Approaching: ${subjectsWithPerf.filter(s => s.percentage >= 40 && s.percentage < 60).length}</span>
+          <span class="badge" style="background:#dc3545;">📕 Below: ${subjectsWithPerf.filter(s => s.percentage < 40).length}</span>
+        </div>
+      </div>
+      
+      <h3 style="margin:15px 0 10px;">📊 Subject Scores</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th style="text-align:center;">Max Score</th>
+            <th style="text-align:center;">Score</th>
+            <th style="text-align:center;">Percentage</th>
+            <th style="text-align:center;">Performance Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${subjectsHtml}
+        </tbody>
+      </table>
+      
+      <div class="analysis-grid">
+        <div class="analysis-box">
+          <h4 style="color:#28a745;">🏆 Strengths (Best Performing Subjects)</h4>
+          ${strengthsHtml}
+          <div style="margin-top:8px;font-size:11px;color:#666;">
+            ${strengths.length > 0 ? `✅ ${strengths.length} subject(s) meeting or exceeding expectations` : 'Keep working hard!'}
+          </div>
+        </div>
+        <div class="analysis-box weakness">
+          <h4 style="color:#dc3545;">📚 Needs Improvement (Subjects to Focus On)</h4>
+          ${weaknessesHtml}
+          <div style="margin-top:8px;font-size:11px;color:#666;">
+            ${weaknesses.length > 0 ? `⚠️ ${weaknesses.length} subject(s) need improvement` : '🎉 All subjects are doing well!'}
+          </div>
+        </div>
+      </div>
+      
+      ${trendHtml}
+      
+      <div style="margin-top:15px;padding:15px;background:#f8f9fc;border-radius:8px;border:1px solid #e8ecf1;">
+        <h4 style="color:#0A1628;font-size:14px;margin-bottom:8px;">📝 Teacher's Summary</h4>
+        <p style="font-size:13px;color:#555;line-height:1.6;">
+          <strong>Overall Performance:</strong> ${student.studentName} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()}</strong> 
+          with an average score of <strong>${student.averageScore.toFixed(1)}%</strong>.
+          ${strengths.length > 0 ? `\n\n<strong>Strengths:</strong> ${strengths.map(s => s.subject).join(', ')} show strong performance.` : ''}
+          ${weaknesses.length > 0 ? `\n\n<strong>Areas for Improvement:</strong> Focus on ${weaknesses.map(s => s.subject).join(', ')} to improve overall performance.` : ''}
+          ${weaknesses.length === 0 ? '\n\n🎉 Excellent work! Continue maintaining this high standard.' : '\n\nKeep up the good work and focus on improving in the areas identified above.'}
+        </p>
+      </div>
+      
+      <div class="footer">
+        <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+        <p>This report is a true reflection of the student's performance in the ${typeNames[student.type] || 'monthly'} assessment.</p>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+// ============================================
 // API ROUTES - CONTENT (CMS)
 // ============================================
 
@@ -1763,7 +2017,7 @@ app.get('/api/assessments/all', async (req, res) => {
 });
 
 // ============================================
-// PARENT/STUDENT RESULTS SEARCH API - FIXED
+// PARENT/STUDENT RESULTS SEARCH API
 // ============================================
 
 // GET search for student results by name, grade, or type
@@ -1773,7 +2027,6 @@ app.get('/api/assessments/search', async (req, res) => {
     
     console.log('🔍 Search request:', { name, grade, type, admission });
     
-    // Build search filter
     let filter = {};
     
     if (name && name.trim() !== '') {
@@ -1792,7 +2045,6 @@ app.get('/api/assessments/search', async (req, res) => {
       filter.type = type.trim();
     }
     
-    // If no search criteria, return error
     if (Object.keys(filter).length === 0) {
       return res.status(400).json({
         success: false,
@@ -1802,12 +2054,10 @@ app.get('/api/assessments/search', async (req, res) => {
     
     console.log('📊 Filter:', JSON.stringify(filter));
     
-    // Find students matching the criteria
     const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
     
     console.log('📊 Found students:', students.length);
     
-    // If no students found
     if (students.length === 0) {
       return res.json({
         success: true,
@@ -1840,10 +2090,37 @@ app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
     
-    const html = generateStudentReportHTML(student);
+    // Get all assessments for this student for trend analysis
+    const allAssessments = await StudentAssessment.find({ 
+      studentName: student.studentName 
+    }).sort({ createdAt: 1 });
+    
+    const html = generateStudentReportHTML(student, allAssessments);
     res.json({ success: true, html });
   } catch (error) {
     console.error('Error generating report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET generate comprehensive report for a student (all assessments)
+app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) => {
+  try {
+    const studentName = decodeURIComponent(req.params.studentName);
+    const allAssessments = await StudentAssessment.find({ 
+      studentName: studentName 
+    }).sort({ createdAt: 1 });
+    
+    if (allAssessments.length === 0) {
+      return res.status(404).json({ success: false, message: 'No assessments found for this student' });
+    }
+    
+    // Use the latest assessment as the base
+    const latest = allAssessments[allAssessments.length - 1];
+    const html = generateStudentReportHTML(latest, allAssessments);
+    res.json({ success: true, html });
+  } catch (error) {
+    console.error('Error generating comprehensive report:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -2041,101 +2318,6 @@ function getDefaultSubjects(grade, type) {
 }
 
 // ============================================
-// STUDENT REPORT HTML GENERATOR
-// ============================================
-function generateStudentReportHTML(student) {
-  const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
-  const performanceColors = {
-    'Exceeding Expectation': '#28a745',
-    'Meeting Expectation': '#17a2b8',
-    'Approaching Expectation': '#d4a017',
-    'Below Expectation': '#dc3545'
-  };
-  
-  const subjectsHtml = student.assessments.map(a => `
-    <tr>
-      <td style="padding:6px 10px;border:1px solid #ddd;">${a.subject}</td>
-      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${a.maxScore}</td>
-      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:bold;">${a.score}</td>
-      <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:bold;">
-        ${a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) + '%' : '0%'}
-      </td>
-    </tr>
-  `).join('');
-  
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>Student Report - ${student.studentName}</title>
-      <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto; }
-        .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { color: #0A1628; font-size: 24px; margin: 0; }
-        .header p { color: #666; margin: 5px 0; }
-        .student-info { background: #f8f9fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .student-info table { width: 100%; font-size: 14px; }
-        .student-info td { padding: 4px 8px; }
-        .student-info .label { font-weight: 600; color: #555; width: 120px; }
-        .performance-box { text-align: center; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .performance-box .level { font-size: 28px; font-weight: 700; }
-        .performance-box .score { font-size: 16px; color: #555; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
-        table td { padding: 6px 10px; border: 1px solid #ddd; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
-        @media print { body { padding: 15px; } }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>🏫 Changara Star Academy</h1>
-        <p>Student Assessment Report</p>
-      </div>
-      
-      <div class="student-info">
-        <table>
-          <tr><td class="label">Student Name:</td><td><strong>${student.studentName}</strong></td></tr>
-          ${student.admissionNumber ? `<tr><td class="label">Admission Number:</td><td><strong>${student.admissionNumber}</strong></td></tr>` : ''}
-          <tr><td class="label">Grade:</td><td>${student.grade}</td></tr>
-          <tr><td class="label">Assessment Type:</td><td>${typeNames[student.type] || student.type || 'Monthly'}</td></tr>
-          <tr><td class="label">Period:</td><td>${student.period || 'N/A'}</td></tr>
-          <tr><td class="label">Month:</td><td>${student.month || 'N/A'}</td></tr>
-          <tr><td class="label">Term:</td><td>${student.term || 'N/A'}</td></tr>
-        </table>
-      </div>
-      
-      <div class="performance-box" style="background: ${performanceColors[student.performanceLevel] || '#f0f0f0'}20; border: 2px solid ${performanceColors[student.performanceLevel] || '#ccc'};">
-        <div class="level" style="color: ${performanceColors[student.performanceLevel] || '#333'};">${student.performanceLevel}</div>
-        <div class="score">Total Score: ${student.totalScore} | Average: ${student.averageScore.toFixed(1)}</div>
-      </div>
-      
-      <h3 style="margin:15px 0 10px;">📊 Subject Scores</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Subject</th>
-            <th>Max Score</th>
-            <th>Score</th>
-            <th>Percentage</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${subjectsHtml}
-        </tbody>
-      </table>
-      
-      <div class="footer">
-        <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-        <p>Generated on ${formatKenyaFullTime(new Date())}</p>
-      </div>
-    </body>
-    </html>
-  `;
-}
-
-// ============================================
 // TEST ROUTE
 // ============================================
 app.get('/api/test', (req, res) => {
@@ -2177,7 +2359,8 @@ app.get('/api/test', (req, res) => {
           update: '/api/assessments/:id (PUT)',
           delete: '/api/assessments/:id (DELETE)',
           copy: '/api/assessments/copy',
-          report: '/api/assessments/generate-report/:studentId'
+          report: '/api/assessments/generate-report/:studentId',
+          comprehensive: '/api/assessments/comprehensive-report/:studentName'
         }
       }
     }
