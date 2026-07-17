@@ -23,8 +23,9 @@ app.use(express.urlencoded({ extended: true }));
 // ============================================
 function getKenyaTime() {
     const now = new Date();
-    const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
-    return new Date(kenyaTimeString);
+    // Get Kenya time directly using Africa/Nairobi
+    const kenyaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
+    return kenyaTime;
 }
 
 function getKenyaDate() {
@@ -61,16 +62,102 @@ function formatKenyaFullTime(date) {
     });
 }
 
-function formatKenyaDate(date) {
-    if (!date) return '-';
+function convertToKenyaTime(date) {
+    if (!date) return null;
     const d = new Date(date);
-    return d.toLocaleDateString('en-KE', {
-        timeZone: 'Africa/Nairobi',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        weekday: 'short'
-    });
+    return new Date(d.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
+}
+
+// ============================================
+// FIX PAST RECORDS - MIGRATION SCRIPT
+// ============================================
+async function fixPastRecords() {
+    try {
+        console.log('🔄 Checking for past records to fix time...');
+        
+        // Fix Teacher attendance records
+        const teachers = await Teacher.find({});
+        let fixedCount = 0;
+        
+        for (const teacher of teachers) {
+            let changed = false;
+            for (const record of teacher.attendance) {
+                if (record.checkIn) {
+                    const originalTime = new Date(record.checkIn);
+                    // If the time is in UTC (hour is 3 hours ahead), convert to Kenya time
+                    const kenyaTime = convertToKenyaTime(record.checkIn);
+                    if (kenyaTime) {
+                        // Check if it's a UTC time (check if hour difference is 3)
+                        const utcHour = originalTime.getUTCHours();
+                        const kenyaHour = kenyaTime.getHours();
+                        // If the time was stored as UTC (common issue), fix it
+                        if (utcHour !== kenyaHour && (utcHour - kenyaHour === 3 || utcHour - kenyaHour === -21)) {
+                            record.checkIn = kenyaTime;
+                            changed = true;
+                        }
+                    }
+                }
+                if (record.checkOut) {
+                    const kenyaTime = convertToKenyaTime(record.checkOut);
+                    if (kenyaTime) {
+                        const originalTime = new Date(record.checkOut);
+                        const utcHour = originalTime.getUTCHours();
+                        const kenyaHour = kenyaTime.getHours();
+                        if (utcHour !== kenyaHour && (utcHour - kenyaHour === 3 || utcHour - kenyaHour === -21)) {
+                            record.checkOut = kenyaTime;
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            if (changed) {
+                await teacher.save();
+                fixedCount++;
+            }
+        }
+        
+        console.log(`✅ Fixed ${fixedCount} teacher records`);
+        
+        // Fix Visitor records
+        const visitors = await Visitor.find({});
+        let visitorFixed = 0;
+        for (const visitor of visitors) {
+            let changed = false;
+            if (visitor.checkIn) {
+                const kenyaTime = convertToKenyaTime(visitor.checkIn);
+                if (kenyaTime) {
+                    const originalTime = new Date(visitor.checkIn);
+                    const utcHour = originalTime.getUTCHours();
+                    const kenyaHour = kenyaTime.getHours();
+                    if (utcHour !== kenyaHour && (utcHour - kenyaHour === 3 || utcHour - kenyaHour === -21)) {
+                        visitor.checkIn = kenyaTime;
+                        changed = true;
+                    }
+                }
+            }
+            if (visitor.checkOut) {
+                const kenyaTime = convertToKenyaTime(visitor.checkOut);
+                if (kenyaTime) {
+                    const originalTime = new Date(visitor.checkOut);
+                    const utcHour = originalTime.getUTCHours();
+                    const kenyaHour = kenyaTime.getHours();
+                    if (utcHour !== kenyaHour && (utcHour - kenyaHour === 3 || utcHour - kenyaHour === -21)) {
+                        visitor.checkOut = kenyaTime;
+                        changed = true;
+                    }
+                }
+            }
+            if (changed) {
+                await visitor.save();
+                visitorFixed++;
+            }
+        }
+        console.log(`✅ Fixed ${visitorFixed} visitor records`);
+        
+        console.log('✅ Time fix completed!');
+    } catch (error) {
+        console.error('Error fixing records:', error);
+    }
 }
 
 // ============================================
@@ -79,6 +166,8 @@ function formatKenyaDate(date) {
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB')
   .then(() => {
     console.log('✅ MongoDB Connected');
+    // Run the fix after connection
+    setTimeout(fixPastRecords, 1000);
   })
   .catch(err => console.error('❌ MongoDB Error:', err.message));
 
@@ -1214,7 +1303,7 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ============================================
-// API ROUTES - TEACHER (SHORTENED FOR SPACE)
+// API ROUTES - TEACHER
 // ============================================
 
 app.post('/api/teacher/register', async (req, res) => {
@@ -1300,6 +1389,9 @@ app.post('/api/teacher/checkin', async (req, res) => {
     const kenyaHour = getKenyaHour();
     const dayOfWeek = kenyaNow.getDay();
     
+    console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
+    console.log('🕐 Hour (Kenya time):', kenyaHour);
+    
     // Weekend check
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       return res.status(400).json({
@@ -1318,7 +1410,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
     if (existingAttendance) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked in today'
+        message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn)
       });
     }
     
@@ -1341,7 +1433,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       status: status,
       location: 'School',
       isLate: isLate,
-      notes: isLate ? 'Late check-in' : 'On-time check-in'
+      notes: isLate ? 'Late check-in at ' + formatKenyaFullTime(kenyaNow) : 'On-time check-in at ' + formatKenyaFullTime(kenyaNow)
     });
     
     await teacher.save();
@@ -1399,6 +1491,9 @@ app.post('/api/teacher/checkout', async (req, res) => {
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
     
+    console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
+    console.log('🕐 Hour (Kenya time):', kenyaHour);
+    
     // Find today's attendance
     const todayAttendance = teacher.attendance.find(a => {
       const aDate = new Date(a.date);
@@ -1416,7 +1511,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     if (todayAttendance.checkOut) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked out today'
+        message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut)
       });
     }
     
@@ -1430,7 +1525,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     
     // Store check-out time in Kenya time
     todayAttendance.checkOut = kenyaNow;
-    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
+    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + formatKenyaFullTime(kenyaNow);
     
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
@@ -2248,13 +2343,145 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
 });
 
 // ============================================
-// DOWNLOAD STAFF REPORT - PDF
+// GENERATE REPORT (for viewing)
 // ============================================
-app.get('/api/reports/staff/download-pdf', async (req, res) => {
+app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
+  try {
+    const student = await StudentAssessment.findById(req.params.studentId);
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+    
+    const allAssessments = await StudentAssessment.find({ 
+      studentName: student.studentName 
+    }).sort({ createdAt: 1 });
+    
+    const html = generateStudentReportHTML(student, allAssessments);
+    res.json({ success: true, html });
+  } catch (error) {
+    console.error('Error generating report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// COMPREHENSIVE REPORT
+// ============================================
+app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) => {
+  try {
+    const studentName = decodeURIComponent(req.params.studentName);
+    const allAssessments = await StudentAssessment.find({ 
+      studentName: studentName 
+    }).sort({ createdAt: 1 });
+    
+    if (allAssessments.length === 0) {
+      return res.status(404).json({ success: false, message: 'No assessments found' });
+    }
+    
+    const latest = allAssessments[allAssessments.length - 1];
+    const html = generateStudentReportHTML(latest, allAssessments);
+    res.json({ success: true, html });
+  } catch (error) {
+    console.error('Error generating comprehensive report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// COPY ASSESSMENTS
+// ============================================
+app.post('/api/assessments/copy', async (req, res) => {
+  try {
+    const { 
+      fromGrade, fromType, fromPeriod, fromMonth, fromYear, fromTerm,
+      toGrade, toType, toPeriod, toMonth, toYear, toTerm
+    } = req.body;
+    
+    const sourceFilter = { grade: fromGrade };
+    if (fromType) sourceFilter.type = fromType;
+    if (fromPeriod) sourceFilter.period = fromPeriod;
+    if (fromMonth) sourceFilter.month = fromMonth;
+    if (fromYear) sourceFilter.year = fromYear;
+    if (fromTerm) sourceFilter.term = fromTerm;
+    
+    const sourceStudents = await StudentAssessment.find(sourceFilter);
+    
+    if (sourceStudents.length === 0) {
+      return res.json({ success: true, message: 'No students found to copy', count: 0 });
+    }
+    
+    let config = await SubjectConfig.findOne({ grade: toGrade, type: toType || 'monthly' });
+    if (!config) {
+      const defaultSubjects = getDefaultSubjects(toGrade, toType || 'monthly');
+      config = { grade: toGrade, type: toType || 'monthly', subjects: defaultSubjects };
+    }
+    
+    let copiedCount = 0;
+    
+    for (const source of sourceStudents) {
+      const existingFilter = {
+        studentName: source.studentName,
+        grade: toGrade,
+        type: toType || 'monthly',
+        period: toPeriod,
+        month: toMonth,
+        year: toYear,
+        term: toTerm
+      };
+      
+      const existing = await StudentAssessment.findOne(existingFilter);
+      if (existing) continue;
+      
+      const newAssessments = config.subjects.map(subj => {
+        const sourceAssessment = source.assessments.find(a => a.subject === subj.name);
+        return {
+          subject: subj.name,
+          maxScore: subj.max,
+          score: sourceAssessment ? Math.min(sourceAssessment.score, subj.max) : 0
+        };
+      });
+      
+      const { totalScore } = calculateTotals(newAssessments);
+      const avgScore = newAssessments.length > 0 ? totalScore / newAssessments.length : 0;
+      const performanceLevel = calculatePerformanceLevel(newAssessments);
+      
+      const newStudent = new StudentAssessment({
+        studentName: source.studentName,
+        admissionNumber: source.admissionNumber || '',
+        grade: toGrade,
+        type: toType || 'monthly',
+        period: toPeriod,
+        month: toMonth,
+        year: toYear,
+        term: toTerm,
+        assessments: newAssessments,
+        totalScore,
+        averageScore: avgScore,
+        performanceLevel
+      });
+      
+      await newStudent.save();
+      copiedCount++;
+    }
+    
+    res.json({ 
+      success: true, 
+      message: `Copied ${copiedCount} students successfully!`,
+      count: copiedCount
+    });
+  } catch (error) {
+    console.error('Error copying assessments:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// STAFF REPORTS (JSON)
+// ============================================
+app.get('/api/reports/staff/attendance', async (req, res) => {
   try {
     const { period, date, department } = req.query;
     
-    // Build date range
     let startDate, endDate;
     const selectedDate = date ? new Date(date) : getKenyaDate();
     
@@ -2282,7 +2509,157 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
       endDate.setDate(endDate.getDate() + 1);
     }
     
-    // Build filter
+    let filter = {};
+    if (department) {
+      filter.department = department;
+    }
+    
+    const teachers = await Teacher.find(filter);
+    
+    const report = teachers.map(teacher => {
+      let totalDays = 0;
+      let onTime = 0;
+      let late = 0;
+      let absent = 0;
+      
+      teacher.attendance.forEach(record => {
+        const recordDate = new Date(record.date);
+        if (recordDate >= startDate && recordDate < endDate) {
+          totalDays++;
+          if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
+            if (record.isLate) {
+              late++;
+            } else {
+              onTime++;
+            }
+          } else {
+            absent++;
+          }
+        }
+      });
+      
+      return {
+        name: `${teacher.firstName} ${teacher.lastName}`,
+        employeeId: teacher.employeeId || 'N/A',
+        department: teacher.department || 'N/A',
+        totalDays,
+        onTime,
+        late,
+        absent
+      };
+    });
+    
+    res.json({ success: true, report });
+  } catch (error) {
+    console.error('Error generating staff report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// VISITOR REPORTS (JSON)
+// ============================================
+app.get('/api/reports/visitors', async (req, res) => {
+  try {
+    const { period, date, purpose } = req.query;
+    
+    let startDate, endDate;
+    const selectedDate = date ? new Date(date) : getKenyaDate();
+    
+    if (period === 'daily') {
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    } else if (period === 'weekly') {
+      const day = selectedDate.getDay();
+      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(selectedDate);
+      startDate.setDate(diff);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+    } else if (period === 'monthly') {
+      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else {
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    let filter = {
+      checkIn: { $gte: startDate, $lt: endDate }
+    };
+    if (purpose) {
+      filter.purpose = purpose;
+    }
+    
+    const visitors = await Visitor.find(filter);
+    
+    const report = visitors.map(visitor => {
+      const duration = visitor.checkOut ? 
+        Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
+      
+      return {
+        fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`,
+        firstName: visitor.firstName,
+        lastName: visitor.lastName,
+        badgeNumber: visitor.badgeNumber || 'N/A',
+        purpose: visitor.purpose || 'N/A',
+        personToVisit: visitor.personToVisit || 'N/A',
+        checkIn: visitor.checkIn,
+        checkOut: visitor.checkOut || null,
+        checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-',
+        checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-',
+        status: visitor.status || 'Checked In',
+        duration: duration
+      };
+    });
+    
+    res.json({ success: true, report });
+  } catch (error) {
+    console.error('Error generating visitor report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// DOWNLOAD STAFF REPORT - PDF
+// ============================================
+app.get('/api/reports/staff/download-pdf', async (req, res) => {
+  try {
+    const { period, date, department } = req.query;
+    
+    let startDate, endDate;
+    const selectedDate = date ? new Date(date) : getKenyaDate();
+    
+    if (period === 'daily') {
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    } else if (period === 'weekly') {
+      const day = selectedDate.getDay();
+      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(selectedDate);
+      startDate.setDate(diff);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+    } else if (period === 'monthly') {
+      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else {
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
     let filter = {};
     if (department) {
       filter.department = department;
@@ -2456,290 +2833,6 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
     
   } catch (error) {
     console.error('Error downloading visitor report:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ============================================
-// STAFF REPORTS (JSON)
-// ============================================
-app.get('/api/reports/staff/attendance', async (req, res) => {
-  try {
-    const { period, date, department } = req.query;
-    
-    let startDate, endDate;
-    const selectedDate = date ? new Date(date) : getKenyaDate();
-    
-    if (period === 'daily') {
-      startDate = new Date(selectedDate);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 1);
-    } else if (period === 'weekly') {
-      const day = selectedDate.getDay();
-      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-      startDate = new Date(selectedDate);
-      startDate.setDate(diff);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 7);
-    } else if (period === 'monthly') {
-      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + 1);
-    } else {
-      startDate = getKenyaDate();
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 1);
-    }
-    
-    let filter = {};
-    if (department) {
-      filter.department = department;
-    }
-    
-    const teachers = await Teacher.find(filter);
-    
-    const report = teachers.map(teacher => {
-      let totalDays = 0;
-      let onTime = 0;
-      let late = 0;
-      let absent = 0;
-      
-      teacher.attendance.forEach(record => {
-        const recordDate = new Date(record.date);
-        if (recordDate >= startDate && recordDate < endDate) {
-          totalDays++;
-          if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
-            if (record.isLate) {
-              late++;
-            } else {
-              onTime++;
-            }
-          } else {
-            absent++;
-          }
-        }
-      });
-      
-      return {
-        name: `${teacher.firstName} ${teacher.lastName}`,
-        employeeId: teacher.employeeId || 'N/A',
-        department: teacher.department || 'N/A',
-        totalDays,
-        onTime,
-        late,
-        absent
-      };
-    });
-    
-    res.json({ success: true, report });
-  } catch (error) {
-    console.error('Error generating staff report:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ============================================
-// VISITOR REPORTS (JSON)
-// ============================================
-app.get('/api/reports/visitors', async (req, res) => {
-  try {
-    const { period, date, purpose } = req.query;
-    
-    let startDate, endDate;
-    const selectedDate = date ? new Date(date) : getKenyaDate();
-    
-    if (period === 'daily') {
-      startDate = new Date(selectedDate);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 1);
-    } else if (period === 'weekly') {
-      const day = selectedDate.getDay();
-      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-      startDate = new Date(selectedDate);
-      startDate.setDate(diff);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 7);
-    } else if (period === 'monthly') {
-      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + 1);
-    } else {
-      startDate = getKenyaDate();
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 1);
-    }
-    
-    let filter = {
-      checkIn: { $gte: startDate, $lt: endDate }
-    };
-    if (purpose) {
-      filter.purpose = purpose;
-    }
-    
-    const visitors = await Visitor.find(filter);
-    
-    const report = visitors.map(visitor => {
-      const duration = visitor.checkOut ? 
-        Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
-      
-      return {
-        fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`,
-        firstName: visitor.firstName,
-        lastName: visitor.lastName,
-        badgeNumber: visitor.badgeNumber || 'N/A',
-        purpose: visitor.purpose || 'N/A',
-        personToVisit: visitor.personToVisit || 'N/A',
-        checkIn: visitor.checkIn,
-        checkOut: visitor.checkOut || null,
-        checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-',
-        checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-',
-        status: visitor.status || 'Checked In',
-        duration: duration
-      };
-    });
-    
-    res.json({ success: true, report });
-  } catch (error) {
-    console.error('Error generating visitor report:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ============================================
-// GENERATE REPORT (for viewing)
-// ============================================
-app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
-  try {
-    const student = await StudentAssessment.findById(req.params.studentId);
-    if (!student) {
-      return res.status(404).json({ success: false, message: 'Student not found' });
-    }
-    
-    const allAssessments = await StudentAssessment.find({ 
-      studentName: student.studentName 
-    }).sort({ createdAt: 1 });
-    
-    const html = generateStudentReportHTML(student, allAssessments);
-    res.json({ success: true, html });
-  } catch (error) {
-    console.error('Error generating report:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ============================================
-// COMPREHENSIVE REPORT
-// ============================================
-app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) => {
-  try {
-    const studentName = decodeURIComponent(req.params.studentName);
-    const allAssessments = await StudentAssessment.find({ 
-      studentName: studentName 
-    }).sort({ createdAt: 1 });
-    
-    if (allAssessments.length === 0) {
-      return res.status(404).json({ success: false, message: 'No assessments found' });
-    }
-    
-    const latest = allAssessments[allAssessments.length - 1];
-    const html = generateStudentReportHTML(latest, allAssessments);
-    res.json({ success: true, html });
-  } catch (error) {
-    console.error('Error generating comprehensive report:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ============================================
-// COPY ASSESSMENTS
-// ============================================
-app.post('/api/assessments/copy', async (req, res) => {
-  try {
-    const { 
-      fromGrade, fromType, fromPeriod, fromMonth, fromYear, fromTerm,
-      toGrade, toType, toPeriod, toMonth, toYear, toTerm
-    } = req.body;
-    
-    const sourceFilter = { grade: fromGrade };
-    if (fromType) sourceFilter.type = fromType;
-    if (fromPeriod) sourceFilter.period = fromPeriod;
-    if (fromMonth) sourceFilter.month = fromMonth;
-    if (fromYear) sourceFilter.year = fromYear;
-    if (fromTerm) sourceFilter.term = fromTerm;
-    
-    const sourceStudents = await StudentAssessment.find(sourceFilter);
-    
-    if (sourceStudents.length === 0) {
-      return res.json({ success: true, message: 'No students found to copy', count: 0 });
-    }
-    
-    let config = await SubjectConfig.findOne({ grade: toGrade, type: toType || 'monthly' });
-    if (!config) {
-      const defaultSubjects = getDefaultSubjects(toGrade, toType || 'monthly');
-      config = { grade: toGrade, type: toType || 'monthly', subjects: defaultSubjects };
-    }
-    
-    let copiedCount = 0;
-    
-    for (const source of sourceStudents) {
-      const existingFilter = {
-        studentName: source.studentName,
-        grade: toGrade,
-        type: toType || 'monthly',
-        period: toPeriod,
-        month: toMonth,
-        year: toYear,
-        term: toTerm
-      };
-      
-      const existing = await StudentAssessment.findOne(existingFilter);
-      if (existing) continue;
-      
-      const newAssessments = config.subjects.map(subj => {
-        const sourceAssessment = source.assessments.find(a => a.subject === subj.name);
-        return {
-          subject: subj.name,
-          maxScore: subj.max,
-          score: sourceAssessment ? Math.min(sourceAssessment.score, subj.max) : 0
-        };
-      });
-      
-      const { totalScore } = calculateTotals(newAssessments);
-      const avgScore = newAssessments.length > 0 ? totalScore / newAssessments.length : 0;
-      const performanceLevel = calculatePerformanceLevel(newAssessments);
-      
-      const newStudent = new StudentAssessment({
-        studentName: source.studentName,
-        admissionNumber: source.admissionNumber || '',
-        grade: toGrade,
-        type: toType || 'monthly',
-        period: toPeriod,
-        month: toMonth,
-        year: toYear,
-        term: toTerm,
-        assessments: newAssessments,
-        totalScore,
-        averageScore: avgScore,
-        performanceLevel
-      });
-      
-      await newStudent.save();
-      copiedCount++;
-    }
-    
-    res.json({ 
-      success: true, 
-      message: `Copied ${copiedCount} students successfully!`,
-      count: copiedCount
-    });
-  } catch (error) {
-    console.error('Error copying assessments:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
