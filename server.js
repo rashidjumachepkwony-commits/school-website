@@ -61,6 +61,18 @@ function formatKenyaFullTime(date) {
     });
 }
 
+function formatKenyaDate(date) {
+    if (!date) return '-';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-KE', {
+        timeZone: 'Africa/Nairobi',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        weekday: 'short'
+    });
+}
+
 // ============================================
 // CONNECT TO MONGODB
 // ============================================
@@ -166,7 +178,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 app.use('/uploads', express.static('uploads'));
 
 // ============================================
-// CONTENT SCHEMA (CMS) - SHORTENED
+// CONTENT SCHEMA (CMS)
 // ============================================
 const contentSchema = new mongoose.Schema({
   heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
@@ -198,6 +210,7 @@ const contentSchema = new mongoose.Schema({
   aboutMotto: { type: String, default: 'Excellence in Education' },
   aboutWhy: { type: String, default: 'Holistic education, qualified teachers, modern facilities.' },
 
+  academicsIntro: { type: String, default: '' },
   academics: [{
     grade: { type: String, default: 'Grade 1' },
     subjects: { type: String, default: 'Math, English, Science' },
@@ -206,12 +219,14 @@ const contentSchema = new mongoose.Schema({
     teacherSupport: { type: String, default: 'Individual attention' }
   }],
 
+  admissionsIntro: { type: String, default: '' },
   admissionsRequirements: { type: String, default: 'Admission is open to all students who meet the age requirements.' },
   admissionsAge: { type: String, default: 'Playgroup: 2-3 years, PP1: 4 years, PP2: 5 years, Grade 1: 6 years, Grade 2-6: 7-12 years' },
   admissionsDocuments: { type: String, default: 'Birth certificate, Previous school records, Passport photo, Parent ID, Medical records' },
   admissionsProcess: { type: String, default: '1. Visit the school for a tour. 2. Fill the admission form. 3. Submit required documents. 4. Pay registration fee.' },
   admissionsFees: { type: String, default: 'Please contact the school administration for the current fee structure.' },
 
+  facilitiesIntro: { type: String, default: '' },
   facilities: [{
     name: { type: String, default: 'Modern Classrooms' },
     description: { type: String, default: 'Well-equipped classrooms with modern learning resources.' },
@@ -241,9 +256,11 @@ const contentSchema = new mongoose.Schema({
     image: { type: String, default: '' }
   }],
 
+  performanceIntro: { type: String, default: '' },
   performanceKcpe: { type: String, default: 'Our students consistently perform well in national examinations.' },
   performanceInternal: { type: String, default: 'Regular internal assessments track student progress.' },
 
+  parentsIntro: { type: String, default: '' },
   parentsCalendar: { type: String, default: 'School calendar for 2026 with all important dates.' },
   parentsHomework: { type: String, default: 'Homework is given regularly to reinforce learning.' },
   parentsAttendance: { type: String, default: 'Attendance is mandatory and monitored daily.' },
@@ -251,6 +268,7 @@ const contentSchema = new mongoose.Schema({
   parentsUniform: { type: String, default: 'All students must wear the official school uniform.' },
   parentsFees: { type: String, default: 'Fees must be paid at the beginning of each term.' },
 
+  downloadsIntro: { type: String, default: '' },
   downloads: [{
     name: { type: String, default: 'Admission Form' },
     file: { type: String, default: '/downloads/admission-form.pdf' },
@@ -258,6 +276,11 @@ const contentSchema = new mongoose.Schema({
     icon: { type: String, default: '📄' }
   }],
 
+  feesIntro: { type: String, default: '' },
+  feesPaybill: { type: String, default: '474752' },
+  feesInstructions: { type: String, default: '' },
+
+  contactIntro: { type: String, default: '' },
   contactAddress: { type: String, default: 'Nairobi, Kenya' },
   contactPhone: { type: String, default: '+254 721 556 252' },
   contactEmail: { type: String, default: 'starchangara@gmail.com' },
@@ -459,7 +482,7 @@ function calculateTotals(assessments) {
 }
 
 // ============================================
-// STUDENT REPORT HTML GENERATOR - SHORTENED
+// STUDENT REPORT HTML GENERATOR
 // ============================================
 function generateStudentReportHTML(student, allAssessments = null) {
   const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
@@ -792,6 +815,229 @@ function generateStudentReportHTML(student, allAssessments = null) {
 }
 
 // ============================================
+// GENERATE STAFF REPORT HTML FOR PDF
+// ============================================
+function generateStaffReportHTML(report, title) {
+  const now = getKenyaTime();
+  
+  let rowsHtml = report.map((staff, index) => {
+    const rate = staff.totalDays > 0 ? ((staff.onTime / staff.totalDays) * 100).toFixed(1) : 0;
+    return `
+      <tr>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${staff.name}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${staff.employeeId || '-'}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;">${staff.department || '-'}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${staff.totalDays || 0}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;color:#28a745;font-weight:600;">${staff.onTime || 0}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;color:#d4a017;font-weight:600;">${staff.late || 0}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;color:#dc3545;font-weight:600;">${staff.absent || 0}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:700;">${rate}%</td>
+      </tr>
+    `;
+  }).join('');
+
+  // Calculate summary
+  let totalStaff = report.length;
+  let totalOnTime = 0;
+  let totalLate = 0;
+  let totalAbsent = 0;
+  let totalDays = 0;
+  
+  report.forEach(staff => {
+    totalOnTime += staff.onTime || 0;
+    totalLate += staff.late || 0;
+    totalAbsent += staff.absent || 0;
+    totalDays += staff.totalDays || 0;
+  });
+  
+  const attendanceRate = totalDays > 0 ? ((totalOnTime / totalDays) * 100).toFixed(1) : 0;
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Staff Attendance Report</title>
+      <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 1100px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { color: #0A1628; font-size: 24px; margin: 0; }
+        .header h1 .school-name { color: #D4A017; }
+        .header p { color: #666; margin: 5px 0; }
+        .summary-box { background: #f8f9fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e8ecf1; }
+        .summary-box .row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .summary-box .item { text-align: center; padding: 10px 20px; background: white; border-radius: 8px; border: 1px solid #e8ecf1; min-width: 80px; }
+        .summary-box .item .num { font-size: 24px; font-weight: 700; }
+        .summary-box .item .label { font-size: 12px; color: #666; }
+        .summary-box .item .num.green { color: #28a745; }
+        .summary-box .item .num.orange { color: #d4a017; }
+        .summary-box .item .num.red { color: #dc3545; }
+        .summary-box .item .num.blue { color: #17a2b8; }
+        .summary-box .item .num.gold { color: #D4A017; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
+        table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
+        table td { padding: 6px 10px; border-bottom: 1px solid #e8ecf1; }
+        table tr:nth-child(even) { background: #fafbfc; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 11px; font-weight: 700; }
+        .badge-success { background: #28a745; color: white; }
+        .badge-warning { background: #d4a017; color: white; }
+        .badge-danger { background: #dc3545; color: white; }
+        @media print { body { padding: 10px; } .no-print { display: none; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
+        <p>${title}</p>
+      </div>
+      
+      <div class="summary-box">
+        <div class="row">
+          <div class="item"><div class="num gold">${totalStaff}</div><div class="label">Total Staff</div></div>
+          <div class="item"><div class="num green">${totalOnTime}</div><div class="label">✅ On Time</div></div>
+          <div class="item"><div class="num orange">${totalLate}</div><div class="label">⚠️ Late</div></div>
+          <div class="item"><div class="num red">${totalAbsent}</div><div class="label">❌ Absent</div></div>
+          <div class="item"><div class="num blue">${attendanceRate}%</div><div class="label">📈 Attendance Rate</div></div>
+        </div>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Staff Name</th>
+            <th>Employee ID</th>
+            <th>Department</th>
+            <th>Total Days</th>
+            <th>On Time</th>
+            <th>Late</th>
+            <th>Absent</th>
+            <th>Attendance Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+      
+      <div class="footer">
+        <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+        <p>Generated on ${formatKenyaFullTime(now)}</p>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+// ============================================
+// GENERATE VISITOR REPORT HTML FOR PDF
+// ============================================
+function generateVisitorReportHTML(report, title) {
+  const now = getKenyaTime();
+  
+  let rowsHtml = report.map((visitor, index) => {
+    return `
+      <tr>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${visitor.fullName || visitor.firstName + ' ' + visitor.lastName}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${visitor.badgeNumber || '-'}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;">${visitor.purpose || '-'}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;">${visitor.personToVisit || '-'}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${visitor.checkInTime || '-'}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${visitor.checkOutTime || '-'}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">
+          <span class="badge ${visitor.status === 'Checked In' ? 'badge-success' : 'badge-secondary'}">${visitor.status || '-'}</span>
+        </td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${visitor.duration > 0 ? visitor.duration + ' min' : '-'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  // Calculate summary
+  let totalVisitors = report.length;
+  let active = report.filter(v => v.status === 'Checked In').length;
+  let completed = report.filter(v => v.status === 'Checked Out').length;
+  let totalDuration = 0;
+  report.forEach(v => { totalDuration += v.duration || 0; });
+  const avgDuration = totalVisitors > 0 ? Math.round(totalDuration / totalVisitors) : 0;
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Visitor Report</title>
+      <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 1100px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { color: #0A1628; font-size: 24px; margin: 0; }
+        .header h1 .school-name { color: #D4A017; }
+        .header p { color: #666; margin: 5px 0; }
+        .summary-box { background: #f8f9fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e8ecf1; }
+        .summary-box .row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .summary-box .item { text-align: center; padding: 10px 20px; background: white; border-radius: 8px; border: 1px solid #e8ecf1; min-width: 80px; }
+        .summary-box .item .num { font-size: 24px; font-weight: 700; }
+        .summary-box .item .label { font-size: 12px; color: #666; }
+        .summary-box .item .num.gold { color: #D4A017; }
+        .summary-box .item .num.blue { color: #17a2b8; }
+        .summary-box .item .num.green { color: #28a745; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 11px; font-weight: 700; }
+        .badge-success { background: #28a745; color: white; }
+        .badge-secondary { background: #6c757d; color: white; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
+        table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
+        table td { padding: 6px 10px; border-bottom: 1px solid #e8ecf1; }
+        table tr:nth-child(even) { background: #fafbfc; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
+        @media print { body { padding: 10px; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
+        <p>${title}</p>
+      </div>
+      
+      <div class="summary-box">
+        <div class="row">
+          <div class="item"><div class="num gold">${totalVisitors}</div><div class="label">Total Visitors</div></div>
+          <div class="item"><div class="num blue">${active}</div><div class="label">✅ Checked In</div></div>
+          <div class="item"><div class="num green">${completed}</div><div class="label">✅ Checked Out</div></div>
+          <div class="item"><div class="num" style="color:#d4a017;">${avgDuration} min</div><div class="label">⏱️ Avg Duration</div></div>
+        </div>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Visitor Name</th>
+            <th>Badge #</th>
+            <th>Purpose</th>
+            <th>Person to Visit</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Status</th>
+            <th>Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+      
+      <div class="footer">
+        <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+        <p>Generated on ${formatKenyaFullTime(now)}</p>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+// ============================================
 // API ROUTES - CONTENT (CMS)
 // ============================================
 
@@ -968,7 +1214,7 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ============================================
-// API ROUTES - TEACHER
+// API ROUTES - TEACHER (SHORTENED FOR SPACE)
 // ============================================
 
 app.post('/api/teacher/register', async (req, res) => {
@@ -1952,7 +2198,7 @@ app.get('/api/assessments/search', async (req, res) => {
 });
 
 // ============================================
-// DOWNLOAD REPORT - GENERATES ACTUAL PDF
+// DOWNLOAD STUDENT REPORT - PDF
 // ============================================
 app.get('/api/assessments/download-report/:studentId', async (req, res) => {
   try {
@@ -1980,10 +2226,7 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
       type: 'pdf',
       timeout: 30000,
       quality: '100',
-      zoomFactor: '0.8',
-      paginationOffset: 0,
-      header: { height: '0mm' },
-      footer: { height: '0mm' }
+      zoomFactor: '0.8'
     };
     
     pdf.create(html, options).toBuffer((err, buffer) => {
@@ -2005,7 +2248,371 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
 });
 
 // ============================================
-// GENERATE REPORT
+// DOWNLOAD STAFF REPORT - PDF
+// ============================================
+app.get('/api/reports/staff/download-pdf', async (req, res) => {
+  try {
+    const { period, date, department } = req.query;
+    
+    // Build date range
+    let startDate, endDate;
+    const selectedDate = date ? new Date(date) : getKenyaDate();
+    
+    if (period === 'daily') {
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    } else if (period === 'weekly') {
+      const day = selectedDate.getDay();
+      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(selectedDate);
+      startDate.setDate(diff);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+    } else if (period === 'monthly') {
+      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else {
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    // Build filter
+    let filter = {};
+    if (department) {
+      filter.department = department;
+    }
+    
+    const teachers = await Teacher.find(filter);
+    
+    const report = teachers.map(teacher => {
+      let totalDays = 0;
+      let onTime = 0;
+      let late = 0;
+      let absent = 0;
+      
+      teacher.attendance.forEach(record => {
+        const recordDate = new Date(record.date);
+        if (recordDate >= startDate && recordDate < endDate) {
+          totalDays++;
+          if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
+            if (record.isLate) {
+              late++;
+            } else {
+              onTime++;
+            }
+          } else {
+            absent++;
+          }
+        }
+      });
+      
+      return {
+        name: `${teacher.firstName} ${teacher.lastName}`,
+        employeeId: teacher.employeeId || 'N/A',
+        department: teacher.department || 'N/A',
+        totalDays,
+        onTime,
+        late,
+        absent
+      };
+    });
+    
+    const title = `Staff Attendance Report - ${period.charAt(0).toUpperCase() + period.slice(1)}`;
+    const html = generateStaffReportHTML(report, title);
+    
+    const options = {
+      format: 'A4',
+      border: {
+        top: '0.5cm',
+        right: '0.5cm',
+        bottom: '0.5cm',
+        left: '0.5cm'
+      },
+      printBackground: true,
+      landscape: false,
+      type: 'pdf',
+      timeout: 30000,
+      quality: '100'
+    };
+    
+    pdf.create(html, options).toBuffer((err, buffer) => {
+      if (err) {
+        console.error('PDF generation error:', err);
+        return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
+      }
+      
+      const filename = `staff_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', buffer.length);
+      res.send(buffer);
+    });
+    
+  } catch (error) {
+    console.error('Error downloading staff report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// DOWNLOAD VISITOR REPORT - PDF
+// ============================================
+app.get('/api/reports/visitors/download-pdf', async (req, res) => {
+  try {
+    const { period, date, purpose } = req.query;
+    
+    let startDate, endDate;
+    const selectedDate = date ? new Date(date) : getKenyaDate();
+    
+    if (period === 'daily') {
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    } else if (period === 'weekly') {
+      const day = selectedDate.getDay();
+      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(selectedDate);
+      startDate.setDate(diff);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+    } else if (period === 'monthly') {
+      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else {
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    let filter = {
+      checkIn: { $gte: startDate, $lt: endDate }
+    };
+    if (purpose) {
+      filter.purpose = purpose;
+    }
+    
+    const visitors = await Visitor.find(filter);
+    
+    const report = visitors.map(visitor => {
+      const duration = visitor.checkOut ? 
+        Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
+      
+      return {
+        fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`,
+        firstName: visitor.firstName,
+        lastName: visitor.lastName,
+        badgeNumber: visitor.badgeNumber || 'N/A',
+        purpose: visitor.purpose || 'N/A',
+        personToVisit: visitor.personToVisit || 'N/A',
+        checkIn: visitor.checkIn,
+        checkOut: visitor.checkOut || null,
+        checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-',
+        checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-',
+        status: visitor.status || 'Checked In',
+        duration: duration
+      };
+    });
+    
+    const title = `Visitor Report - ${period.charAt(0).toUpperCase() + period.slice(1)}`;
+    const html = generateVisitorReportHTML(report, title);
+    
+    const options = {
+      format: 'A4',
+      border: {
+        top: '0.5cm',
+        right: '0.5cm',
+        bottom: '0.5cm',
+        left: '0.5cm'
+      },
+      printBackground: true,
+      landscape: false,
+      type: 'pdf',
+      timeout: 30000,
+      quality: '100'
+    };
+    
+    pdf.create(html, options).toBuffer((err, buffer) => {
+      if (err) {
+        console.error('PDF generation error:', err);
+        return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
+      }
+      
+      const filename = `visitor_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', buffer.length);
+      res.send(buffer);
+    });
+    
+  } catch (error) {
+    console.error('Error downloading visitor report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// STAFF REPORTS (JSON)
+// ============================================
+app.get('/api/reports/staff/attendance', async (req, res) => {
+  try {
+    const { period, date, department } = req.query;
+    
+    let startDate, endDate;
+    const selectedDate = date ? new Date(date) : getKenyaDate();
+    
+    if (period === 'daily') {
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    } else if (period === 'weekly') {
+      const day = selectedDate.getDay();
+      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(selectedDate);
+      startDate.setDate(diff);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+    } else if (period === 'monthly') {
+      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else {
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    let filter = {};
+    if (department) {
+      filter.department = department;
+    }
+    
+    const teachers = await Teacher.find(filter);
+    
+    const report = teachers.map(teacher => {
+      let totalDays = 0;
+      let onTime = 0;
+      let late = 0;
+      let absent = 0;
+      
+      teacher.attendance.forEach(record => {
+        const recordDate = new Date(record.date);
+        if (recordDate >= startDate && recordDate < endDate) {
+          totalDays++;
+          if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
+            if (record.isLate) {
+              late++;
+            } else {
+              onTime++;
+            }
+          } else {
+            absent++;
+          }
+        }
+      });
+      
+      return {
+        name: `${teacher.firstName} ${teacher.lastName}`,
+        employeeId: teacher.employeeId || 'N/A',
+        department: teacher.department || 'N/A',
+        totalDays,
+        onTime,
+        late,
+        absent
+      };
+    });
+    
+    res.json({ success: true, report });
+  } catch (error) {
+    console.error('Error generating staff report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// VISITOR REPORTS (JSON)
+// ============================================
+app.get('/api/reports/visitors', async (req, res) => {
+  try {
+    const { period, date, purpose } = req.query;
+    
+    let startDate, endDate;
+    const selectedDate = date ? new Date(date) : getKenyaDate();
+    
+    if (period === 'daily') {
+      startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    } else if (period === 'weekly') {
+      const day = selectedDate.getDay();
+      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(selectedDate);
+      startDate.setDate(diff);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+    } else if (period === 'monthly') {
+      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else {
+      startDate = getKenyaDate();
+      endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+    }
+    
+    let filter = {
+      checkIn: { $gte: startDate, $lt: endDate }
+    };
+    if (purpose) {
+      filter.purpose = purpose;
+    }
+    
+    const visitors = await Visitor.find(filter);
+    
+    const report = visitors.map(visitor => {
+      const duration = visitor.checkOut ? 
+        Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
+      
+      return {
+        fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`,
+        firstName: visitor.firstName,
+        lastName: visitor.lastName,
+        badgeNumber: visitor.badgeNumber || 'N/A',
+        purpose: visitor.purpose || 'N/A',
+        personToVisit: visitor.personToVisit || 'N/A',
+        checkIn: visitor.checkIn,
+        checkOut: visitor.checkOut || null,
+        checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-',
+        checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-',
+        status: visitor.status || 'Checked In',
+        duration: duration
+      };
+    });
+    
+    res.json({ success: true, report });
+  } catch (error) {
+    console.error('Error generating visitor report:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// GENERATE REPORT (for viewing)
 // ============================================
 app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
   try {
@@ -2133,159 +2740,6 @@ app.post('/api/assessments/copy', async (req, res) => {
     });
   } catch (error) {
     console.error('Error copying assessments:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ============================================
-// STAFF AND VISITOR REPORTS
-// ============================================
-
-// Staff Attendance Reports
-app.get('/api/reports/staff/attendance', async (req, res) => {
-  try {
-    const { period, date, department } = req.query;
-    
-    // Build date range
-    let startDate, endDate;
-    const selectedDate = date ? new Date(date) : getKenyaDate();
-    
-    if (period === 'daily') {
-      startDate = new Date(selectedDate);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 1);
-    } else if (period === 'weekly') {
-      const day = selectedDate.getDay();
-      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-      startDate = new Date(selectedDate);
-      startDate.setDate(diff);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 7);
-    } else if (period === 'monthly') {
-      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + 1);
-    } else {
-      startDate = getKenyaDate();
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 1);
-    }
-    
-    // Build filter
-    let filter = {};
-    if (department) {
-      filter.department = department;
-    }
-    
-    const teachers = await Teacher.find(filter);
-    
-    const report = teachers.map(teacher => {
-      let totalDays = 0;
-      let onTime = 0;
-      let late = 0;
-      let absent = 0;
-      
-      teacher.attendance.forEach(record => {
-        const recordDate = new Date(record.date);
-        if (recordDate >= startDate && recordDate < endDate) {
-          totalDays++;
-          if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
-            if (record.isLate) {
-              late++;
-            } else {
-              onTime++;
-            }
-          } else {
-            absent++;
-          }
-        }
-      });
-      
-      return {
-        name: `${teacher.firstName} ${teacher.lastName}`,
-        employeeId: teacher.employeeId || 'N/A',
-        department: teacher.department || 'N/A',
-        totalDays,
-        onTime,
-        late,
-        absent
-      };
-    });
-    
-    res.json({ success: true, report });
-  } catch (error) {
-    console.error('Error generating staff report:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Visitor Reports
-app.get('/api/reports/visitors', async (req, res) => {
-  try {
-    const { period, date, purpose } = req.query;
-    
-    let startDate, endDate;
-    const selectedDate = date ? new Date(date) : getKenyaDate();
-    
-    if (period === 'daily') {
-      startDate = new Date(selectedDate);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 1);
-    } else if (period === 'weekly') {
-      const day = selectedDate.getDay();
-      const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-      startDate = new Date(selectedDate);
-      startDate.setDate(diff);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 7);
-    } else if (period === 'monthly') {
-      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + 1);
-    } else {
-      startDate = getKenyaDate();
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 1);
-    }
-    
-    let filter = {
-      checkIn: { $gte: startDate, $lt: endDate }
-    };
-    if (purpose) {
-      filter.purpose = purpose;
-    }
-    
-    const visitors = await Visitor.find(filter);
-    
-    const report = visitors.map(visitor => {
-      const duration = visitor.checkOut ? 
-        Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
-      
-      return {
-        fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`,
-        firstName: visitor.firstName,
-        lastName: visitor.lastName,
-        badgeNumber: visitor.badgeNumber || 'N/A',
-        purpose: visitor.purpose || 'N/A',
-        personToVisit: visitor.personToVisit || 'N/A',
-        checkIn: visitor.checkIn,
-        checkOut: visitor.checkOut || null,
-        checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-',
-        checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-',
-        status: visitor.status || 'Checked In',
-        duration: duration
-      };
-    });
-    
-    res.json({ success: true, report });
-  } catch (error) {
-    console.error('Error generating visitor report:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -2434,7 +2888,9 @@ app.get('/api/test', (req, res) => {
         },
         reports: {
           staff: '/api/reports/staff/attendance',
-          visitors: '/api/reports/visitors'
+          staffPdf: '/api/reports/staff/download-pdf',
+          visitors: '/api/reports/visitors',
+          visitorsPdf: '/api/reports/visitors/download-pdf'
         }
       }
     }
