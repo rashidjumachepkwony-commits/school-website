@@ -18,7 +18,6 @@
             min-height: 100vh; 
         }
         
-        /* ===== SIDEBAR ===== */
         .sidebar { 
             width: 260px; 
             background: linear-gradient(180deg, #0a1628, #1a2a4a); 
@@ -69,7 +68,6 @@
         .sidebar-menu .logout a { color: rgba(255,107,107,0.7); }
         .sidebar-menu .logout a:hover { color: #ff6b6b; background: rgba(255,107,107,0.1); }
 
-        /* ===== MAIN CONTENT ===== */
         .main-content { 
             margin-left: 260px; 
             padding: 25px 30px; 
@@ -161,6 +159,8 @@
         .btn-purple { background: linear-gradient(135deg, #6f42c1, #4a2a8a); color: white; }
         .btn-purple:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(111,66,193,0.35); }
         .btn-sm { padding: 5px 12px; font-size: 12px; }
+        .btn-pdf { background: #dc3545; color: white; }
+        .btn-pdf:hover { background: #c82333; transform: translateY(-2px); }
 
         .dashboard-cards { 
             display: grid; 
@@ -183,7 +183,6 @@
         .dashboard-card h3 { color: #1a2a4a; font-size: 16px; }
         .dashboard-card p { color: #666; font-size: 12px; }
 
-        /* ===== TABLES ===== */
         .table-wrapper { overflow-x: auto; max-height: 500px; overflow-y: auto; }
         .table-wrapper table {
             width: 100%;
@@ -234,7 +233,6 @@
         .stat-card .number.green { color: #28a745; }
         .stat-card .number.red { color: #dc3545; }
         .stat-card .number.blue { color: #17a2b8; }
-        .stat-card .number.purple { color: #6f42c1; }
         .stat-card .number.orange { color: #d4a017; }
 
         .filter-bar {
@@ -328,6 +326,13 @@
         .analysis-summary .item .label { font-size: 12px; color: #666; }
         .analysis-summary .item .value { font-size: 22px; font-weight: 700; }
 
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
         @media (max-width: 768px) {
             .sidebar { width: 100%; position: relative; min-height: auto; padding: 10px 0; }
             .main-content { margin-left: 0; padding: 15px; }
@@ -386,13 +391,10 @@
 
         <div id="alert" class="alert"></div>
 
-        <!-- ======================================== -->
-        <!-- DASHBOARD SECTION -->
-        <!-- ======================================== -->
+        <!-- ===== DASHBOARD SECTION ===== -->
         <div id="section-dashboard" class="editor-container active">
             <h2>📊 Dashboard Overview</h2>
             <p class="desc">Welcome to the Admin Dashboard. Manage staff, visitors, assessments, and view reports.</p>
-
             <div class="dashboard-cards">
                 <div class="dashboard-card" onclick="showSection('staff-management')">
                     <span class="icon">👨‍💼</span>
@@ -425,98 +427,33 @@
                     <p>Daily/Weekly/Monthly</p>
                 </div>
             </div>
-
-            <div style="background:white;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);">
-                <h3 style="color:#1a2a4a;margin-bottom:15px;">Quick Actions</h3>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button class="btn btn-success" onclick="showSection('staff-management')"><i class="fas fa-user-plus"></i> Add Staff</button>
-                    <button class="btn btn-info" onclick="showSection('staff-attendance')"><i class="fas fa-user-check"></i> Staff Attendance</button>
-                    <button class="btn btn-primary" onclick="showSection('visitor-management')"><i class="fas fa-user-friends"></i> Visitors</button>
-                    <button class="btn btn-purple" onclick="window.location.href='admin-academics.html'"><i class="fas fa-edit"></i> Assessments</button>
-                    <button class="btn btn-warning" onclick="showSection('staff-reports')"><i class="fas fa-chart-bar"></i> Staff Reports</button>
-                    <button class="btn btn-secondary" onclick="showSection('visitor-reports')"><i class="fas fa-chart-pie"></i> Visitor Reports</button>
-                </div>
-            </div>
         </div>
 
-        <!-- ======================================== -->
-        <!-- STAFF MANAGEMENT SECTION -->
-        <!-- ======================================== -->
+        <!-- ===== STAFF MANAGEMENT ===== -->
         <div id="section-staff-management" class="editor-container">
             <h2>👨‍💼 Staff Management</h2>
             <p class="desc">Add, edit, and manage all staff members.</p>
-
             <div style="background:#f8f9fc;padding:20px;border-radius:12px;border:1px solid #e8ecf1;margin-bottom:20px;">
                 <h4 style="color:#1a2a4a;margin-bottom:15px;">➕ Add New Staff Member</h4>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-                    <div class="form-group">
-                        <label>First Name</label>
-                        <input type="text" id="staffFirstName" placeholder="First Name" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;">
-                    </div>
-                    <div class="form-group">
-                        <label>Last Name</label>
-                        <input type="text" id="staffLastName" placeholder="Last Name" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="staffEmail" placeholder="Email" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;">
-                    </div>
-                    <div class="form-group">
-                        <label>Employee ID</label>
-                        <input type="text" id="staffEmployeeId" placeholder="Employee ID" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;">
-                    </div>
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="text" id="staffPhone" placeholder="Phone Number" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;">
-                    </div>
-                    <div class="form-group">
-                        <label>Department</label>
-                        <select id="staffDepartment" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;">
-                            <option value="Teaching">Teaching</option>
-                            <option value="Administration">Administration</option>
-                            <option value="Support">Support</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Sports">Sports</option>
-                            <option value="IT">IT</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>PIN (4-6 digits)</label>
-                        <input type="password" id="staffPin" placeholder="Enter PIN" maxlength="6" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;">
-                    </div>
+                    <div class="form-group"><label>First Name</label><input type="text" id="staffFirstName" placeholder="First Name" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;"></div>
+                    <div class="form-group"><label>Last Name</label><input type="text" id="staffLastName" placeholder="Last Name" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="staffEmail" placeholder="Email" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;"></div>
+                    <div class="form-group"><label>Employee ID</label><input type="text" id="staffEmployeeId" placeholder="Employee ID" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;"></div>
+                    <div class="form-group"><label>Phone Number</label><input type="text" id="staffPhone" placeholder="Phone Number" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;"></div>
+                    <div class="form-group"><label>Department</label><select id="staffDepartment" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;"><option value="Teaching">Teaching</option><option value="Administration">Administration</option><option value="Support">Support</option><option value="Finance">Finance</option><option value="Sports">Sports</option><option value="IT">IT</option><option value="Other">Other</option></select></div>
+                    <div class="form-group"><label>PIN (4-6 digits)</label><input type="password" id="staffPin" placeholder="Enter PIN" maxlength="6" style="width:100%;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;"></div>
                 </div>
                 <button class="btn btn-success" onclick="addStaffMember()" style="margin-top:15px;"><i class="fas fa-plus"></i> Add Staff Member</button>
             </div>
-
             <h4 style="color:#1a2a4a;margin-bottom:10px;">📋 All Staff Members</h4>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Employee ID</th>
-                            <th>Email</th>
-                            <th>Department</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staffTableBody">
-                        <tr><td colspan="7" style="text-align:center;color:#999;">Loading staff data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <div class="table-wrapper"><table><thead><tr><th>#</th><th>Name</th><th>Employee ID</th><th>Email</th><th>Department</th><th>Status</th><th>Actions</th></tr></thead><tbody id="staffTableBody"><tr><td colspan="7" style="text-align:center;color:#999;">Loading staff data...</td></tr></tbody></table></div>
         </div>
 
-        <!-- ======================================== -->
-        <!-- STAFF ATTENDANCE SECTION -->
-        <!-- ======================================== -->
+        <!-- ===== STAFF ATTENDANCE ===== -->
         <div id="section-staff-attendance" class="editor-container">
             <h2>👨‍🏫 Staff Attendance</h2>
             <p class="desc">View and manage staff attendance records for today.</p>
-
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:15px;">
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
                     <button class="btn btn-success btn-sm" onclick="loadStaffAttendance()"><i class="fas fa-sync"></i> Refresh</button>
@@ -524,7 +461,6 @@
                 </div>
                 <span style="color:#666;font-size:13px;" id="staffAttendanceDate">Loading...</span>
             </div>
-
             <div class="stats-grid" id="staffAttendanceStats">
                 <div class="stat-card"><div class="number" id="staffTotal">0</div><div class="label">Total Staff</div></div>
                 <div class="stat-card"><div class="number green" id="staffPresent">0</div><div class="label">Present</div></div>
@@ -532,35 +468,13 @@
                 <div class="stat-card"><div class="number green" id="staffOnTime">0</div><div class="label">On Time</div></div>
                 <div class="stat-card"><div class="number red" id="staffAbsent">0</div><div class="label">Absent</div></div>
             </div>
-
-            <div class="table-wrapper">
-                <table id="staffAttendanceTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Staff Name</th>
-                            <th>Employee ID</th>
-                            <th>Department</th>
-                            <th>Status</th>
-                            <th>Check In</th>
-                            <th>Check Out</th>
-                            <th>Hours Worked</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staffAttendanceBody">
-                        <tr><td colspan="8" style="text-align:center;color:#999;">Loading attendance data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <div class="table-wrapper"><table id="staffAttendanceTable"><thead><tr><th>#</th><th>Staff Name</th><th>Employee ID</th><th>Department</th><th>Status</th><th>Check In</th><th>Check Out</th><th>Hours Worked</th></tr></thead><tbody id="staffAttendanceBody"><tr><td colspan="8" style="text-align:center;color:#999;">Loading attendance data...</td></tr></tbody></table></div>
         </div>
 
-        <!-- ======================================== -->
-        <!-- VISITOR MANAGEMENT SECTION -->
-        <!-- ======================================== -->
+        <!-- ===== VISITOR MANAGEMENT ===== -->
         <div id="section-visitor-management" class="editor-container">
             <h2>🚪 Visitor Management</h2>
             <p class="desc">View and manage visitor check-in/out records.</p>
-
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:15px;">
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
                     <button class="btn btn-success btn-sm" onclick="loadVisitors()"><i class="fas fa-sync"></i> Refresh</button>
@@ -569,38 +483,15 @@
                 </div>
                 <span style="color:#666;font-size:13px;" id="visitorDate">Loading...</span>
             </div>
-
             <div class="stats-grid" id="visitorStats">
                 <div class="stat-card"><div class="number gold" id="visitorTotal">0</div><div class="label">Total Today</div></div>
                 <div class="stat-card"><div class="number blue" id="visitorActive">0</div><div class="label">Active (Checked In)</div></div>
                 <div class="stat-card"><div class="number" style="color:#6c757d;" id="visitorCompleted">0</div><div class="label">Completed (Checked Out)</div></div>
             </div>
-
-            <div class="table-wrapper">
-                <table id="visitorTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Visitor Name</th>
-                            <th>Badge #</th>
-                            <th>Purpose</th>
-                            <th>Person to Visit</th>
-                            <th>Check In</th>
-                            <th>Check Out</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="visitorBody">
-                        <tr><td colspan="9" style="text-align:center;color:#999;">Loading visitor data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <div class="table-wrapper"><table id="visitorTable"><thead><tr><th>#</th><th>Visitor Name</th><th>Badge #</th><th>Purpose</th><th>Person to Visit</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Action</th></tr></thead><tbody id="visitorBody"><tr><td colspan="9" style="text-align:center;color:#999;">Loading visitor data...</td></tr></tbody></table></div>
         </div>
 
-        <!-- ======================================== -->
-        <!-- STAFF REPORTS SECTION -->
-        <!-- ======================================== -->
+        <!-- ===== STAFF REPORTS WITH PDF DOWNLOAD ===== -->
         <div id="section-staff-reports" class="editor-container">
             <h2>📊 Staff Attendance Reports</h2>
             <p class="desc">Generate and view staff attendance reports with analysis.</p>
@@ -631,10 +522,10 @@
                     </select>
                 </div>
                 <button class="btn btn-primary" onclick="generateStaffReport()"><i class="fas fa-sync"></i> Generate</button>
-                <button class="btn btn-success" onclick="exportStaffReport()"><i class="fas fa-download"></i> Export CSV</button>
+                <button class="btn btn-info" onclick="exportStaffReport()"><i class="fas fa-file-excel"></i> Export CSV</button>
+                <button class="btn btn-pdf" onclick="downloadStaffReportPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
             </div>
 
-            <!-- Analysis Summary -->
             <div class="analysis-summary" id="staffAnalysisSummary">
                 <h4 style="color:#0A1628;margin-bottom:10px;">📊 Attendance Analysis</h4>
                 <div class="row" id="staffAnalysisRow">
@@ -647,41 +538,19 @@
             </div>
 
             <div class="chart-container">
-                <div class="chart-box">
-                    <h4>Attendance Status</h4>
-                    <canvas id="staffStatusChart"></canvas>
-                </div>
-                <div class="chart-box">
-                    <h4>Daily Trend</h4>
-                    <canvas id="staffTrendChart"></canvas>
-                </div>
+                <div class="chart-box"><h4>Attendance Status</h4><canvas id="staffStatusChart"></canvas></div>
+                <div class="chart-box"><h4>Daily Trend</h4><canvas id="staffTrendChart"></canvas></div>
             </div>
 
             <div class="table-wrapper">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Staff Name</th>
-                            <th>Employee ID</th>
-                            <th>Department</th>
-                            <th>Total Days</th>
-                            <th>On Time</th>
-                            <th>Late</th>
-                            <th>Absent</th>
-                            <th>Attendance Rate</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staffReportBody">
-                        <tr><td colspan="9" style="text-align:center;color:#999;">Select filters and click Generate</td></tr>
-                    </tbody>
+                    <thead><tr><th>#</th><th>Staff Name</th><th>Employee ID</th><th>Department</th><th>Total Days</th><th>On Time</th><th>Late</th><th>Absent</th><th>Attendance Rate</th></tr></thead>
+                    <tbody id="staffReportBody"><tr><td colspan="9" style="text-align:center;color:#999;">Select filters and click Generate</td></tr></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ======================================== -->
-        <!-- VISITOR REPORTS SECTION -->
-        <!-- ======================================== -->
+        <!-- ===== VISITOR REPORTS WITH PDF DOWNLOAD ===== -->
         <div id="section-visitor-reports" class="editor-container">
             <h2>📈 Visitor Reports</h2>
             <p class="desc">Generate and view visitor reports with analysis.</p>
@@ -712,10 +581,10 @@
                     </select>
                 </div>
                 <button class="btn btn-primary" onclick="generateVisitorReport()"><i class="fas fa-sync"></i> Generate</button>
-                <button class="btn btn-success" onclick="exportVisitorReport()"><i class="fas fa-download"></i> Export CSV</button>
+                <button class="btn btn-info" onclick="exportVisitorReport()"><i class="fas fa-file-excel"></i> Export CSV</button>
+                <button class="btn btn-pdf" onclick="downloadVisitorReportPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
             </div>
 
-            <!-- Analysis Summary -->
             <div class="analysis-summary" id="visitorAnalysisSummary">
                 <h4 style="color:#0A1628;margin-bottom:10px;">📊 Visitor Analysis</h4>
                 <div class="row" id="visitorAnalysisRow">
@@ -727,34 +596,14 @@
             </div>
 
             <div class="chart-container">
-                <div class="chart-box">
-                    <h4>Visitor Purpose Distribution</h4>
-                    <canvas id="visitorPurposeChart"></canvas>
-                </div>
-                <div class="chart-box">
-                    <h4>Daily Visitor Trend</h4>
-                    <canvas id="visitorTrendChart"></canvas>
-                </div>
+                <div class="chart-box"><h4>Visitor Purpose Distribution</h4><canvas id="visitorPurposeChart"></canvas></div>
+                <div class="chart-box"><h4>Daily Visitor Trend</h4><canvas id="visitorTrendChart"></canvas></div>
             </div>
 
             <div class="table-wrapper">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Visitor Name</th>
-                            <th>Badge #</th>
-                            <th>Purpose</th>
-                            <th>Person to Visit</th>
-                            <th>Check In</th>
-                            <th>Check Out</th>
-                            <th>Status</th>
-                            <th>Duration</th>
-                        </tr>
-                    </thead>
-                    <tbody id="visitorReportBody">
-                        <tr><td colspan="9" style="text-align:center;color:#999;">Select filters and click Generate</td></tr>
-                    </tbody>
+                    <thead><tr><th>#</th><th>Visitor Name</th><th>Badge #</th><th>Purpose</th><th>Person to Visit</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Duration</th></tr></thead>
+                    <tbody id="visitorReportBody"><tr><td colspan="9" style="text-align:center;color:#999;">Select filters and click Generate</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -799,19 +648,13 @@
             if (section === 'staff-reports') setTimeout(generateStaffReport, 300);
             if (section === 'visitor-reports') setTimeout(generateVisitorReport, 300);
 
-            // Set default dates
             if (section === 'staff-reports' || section === 'visitor-reports') {
                 const today = new Date().toISOString().split('T')[0];
                 const dateInputs = document.querySelectorAll('input[type="date"]');
-                dateInputs.forEach(input => {
-                    if (!input.value) input.value = today;
-                });
+                dateInputs.forEach(input => { if (!input.value) input.value = today; });
             }
         }
 
-        // ============================================
-        // SHOW ALERT
-        // ============================================
         function showAlert(message, type) {
             const alertEl = document.getElementById('alert');
             alertEl.className = 'alert ' + type;
@@ -870,7 +713,6 @@
                 showAlert('Please fill in all required fields', 'error');
                 return;
             }
-
             if (pin.length < 4 || pin.length > 6) {
                 showAlert('PIN must be 4-6 digits', 'error');
                 return;
@@ -953,10 +795,7 @@
             try {
                 const response = await fetch('/api/teacher/attendance/today');
                 const data = await response.json();
-
-                document.getElementById('staffAttendanceDate').textContent = '📅 ' + new Date().toLocaleDateString('en-KE', { 
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-                });
+                document.getElementById('staffAttendanceDate').textContent = '📅 ' + new Date().toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
                 if (data.success) {
                     const attendance = data.attendance || [];
@@ -984,21 +823,11 @@
                         let statusClass = 'status-absent';
                         let statusText = 'Absent';
                         if (staff.status === 'Checked In') {
-                            if (staff.isLate) {
-                                statusClass = 'status-late';
-                                statusText = '⚠️ Late';
-                            } else {
-                                statusClass = 'status-ontime';
-                                statusText = '✅ On Time';
-                            }
+                            if (staff.isLate) { statusClass = 'status-late'; statusText = '⚠️ Late'; }
+                            else { statusClass = 'status-ontime'; statusText = '✅ On Time'; }
                         } else if (staff.status === 'Checked Out') {
-                            if (staff.isLate) {
-                                statusClass = 'status-late';
-                                statusText = '⚠️ Late';
-                            } else {
-                                statusClass = 'status-ontime';
-                                statusText = '✅ On Time';
-                            }
+                            if (staff.isLate) { statusClass = 'status-late'; statusText = '⚠️ Late'; }
+                            else { statusClass = 'status-ontime'; statusText = '✅ On Time'; }
                         } else if (staff.status === 'Late') {
                             statusClass = 'status-late';
                             statusText = '⚠️ Late';
@@ -1043,10 +872,7 @@
             try {
                 const response = await fetch('/api/visitors/today');
                 const data = await response.json();
-
-                document.getElementById('visitorDate').textContent = '📅 ' + new Date().toLocaleDateString('en-KE', { 
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-                });
+                document.getElementById('visitorDate').textContent = '📅 ' + new Date().toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
                 if (data.success) {
                     const visitors = data.visitors || [];
@@ -1078,9 +904,7 @@
                             <td>${visitor.checkInTime || '-'}</td>
                             <td>${visitor.checkOutTime || '-'}</td>
                             <td><span class="${isCheckedIn ? 'status-checked-in' : 'status-checked-out'}">${isCheckedIn ? '✅ Checked In' : '✅ Checked Out'}</span></td>
-                            <td>
-                                ${isCheckedIn ? `<button class="btn btn-primary btn-sm" onclick="checkoutVisitor('${visitor.badgeNumber}')"><i class="fas fa-sign-out-alt"></i> Check Out</button>` : '<span style="color:#6c757d;">Completed</span>'}
-                            </td>
+                            <td>${isCheckedIn ? `<button class="btn btn-primary btn-sm" onclick="checkoutVisitor('${visitor.badgeNumber}')"><i class="fas fa-sign-out-alt"></i> Check Out</button>` : '<span style="color:#6c757d;">Completed</span>'}</td>
                         `;
                         tbody.appendChild(tr);
                     });
@@ -1093,7 +917,6 @@
 
         async function checkoutVisitor(badgeNumber) {
             if (!confirm('Are you sure you want to check out this visitor?')) return;
-
             try {
                 const response = await fetch('/api/visitor/checkout/' + badgeNumber, { method: 'PUT' });
                 const data = await response.json();
@@ -1131,7 +954,6 @@
             const department = document.getElementById('staffReportDepartment').value;
 
             try {
-                // Build URL with query parameters
                 let url = `/api/reports/staff/attendance?period=${period}&date=${date}`;
                 if (department) url += `&department=${department}`;
 
@@ -1142,7 +964,6 @@
                     const report = data.report || [];
                     const tbody = document.getElementById('staffReportBody');
 
-                    // Calculate summary
                     let totalStaff = report.length;
                     let totalOnTime = 0;
                     let totalLate = 0;
@@ -1246,6 +1067,22 @@
         }
 
         // ============================================
+        // DOWNLOAD STAFF REPORT PDF
+        // ============================================
+        function downloadStaffReportPDF() {
+            const period = document.getElementById('staffReportPeriod').value;
+            const date = document.getElementById('staffReportDate').value;
+            const department = document.getElementById('staffReportDepartment').value;
+
+            let url = `/api/reports/staff/download-pdf?period=${period}&date=${date}`;
+            if (department) url += `&department=${department}`;
+
+            // Open in new window to trigger download
+            window.open(url, '_blank');
+            showAlert('📄 Staff report PDF is downloading...', 'info');
+        }
+
+        // ============================================
         // VISITOR REPORTS
         // ============================================
         let visitorPurposeChart = null;
@@ -1267,7 +1104,6 @@
                     const report = data.report || [];
                     const tbody = document.getElementById('visitorReportBody');
 
-                    // Calculate summary
                     let totalVisitors = report.length;
                     let active = report.filter(v => v.status === 'Checked In').length;
                     let completed = report.filter(v => v.status === 'Checked Out').length;
@@ -1360,6 +1196,21 @@
         }
 
         // ============================================
+        // DOWNLOAD VISITOR REPORT PDF
+        // ============================================
+        function downloadVisitorReportPDF() {
+            const period = document.getElementById('visitorReportPeriod').value;
+            const date = document.getElementById('visitorReportDate').value;
+            const purpose = document.getElementById('visitorReportPurpose').value;
+
+            let url = `/api/reports/visitors/download-pdf?period=${period}&date=${date}`;
+            if (purpose) url += `&purpose=${purpose}`;
+
+            window.open(url, '_blank');
+            showAlert('📄 Visitor report PDF is downloading...', 'info');
+        }
+
+        // ============================================
         // HELPER FUNCTIONS
         // ============================================
         function downloadCSV(csv, filename) {
@@ -1389,7 +1240,6 @@
                 if (!input.value) input.value = today;
             });
             
-            // Load initial data
             loadStaffList();
             loadStaffAttendance();
             loadVisitors();
