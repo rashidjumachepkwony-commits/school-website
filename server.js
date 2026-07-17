@@ -70,93 +70,72 @@ function convertUTCToKenyaTime(utcDate) {
 }
 
 // ============================================
-// FIX PAST RECORDS - MIGRATION SCRIPT
+// FIX PAST RECORDS - UPDATED MIGRATION SCRIPT
 // ============================================
 async function fixPastRecords() {
     try {
         console.log('🔄 Starting time fix for past records...');
         let totalFixed = 0;
 
-        // Fix Teacher attendance records
+        // Fix Teacher attendance records - DIRECT FIX
         const teachers = await Teacher.find({});
         let teacherFixed = 0;
         
+        console.log(`📊 Found ${teachers.length} teachers to check`);
+        
         for (const teacher of teachers) {
             let changed = false;
+            let recordCount = 0;
             for (const record of teacher.attendance) {
-                // Fix checkIn time
+                // Fix checkIn time - Add 3 hours directly
                 if (record.checkIn) {
                     const originalTime = new Date(record.checkIn);
-                    // Check if the time appears to be in UTC
-                    const utcHour = originalTime.getUTCHours();
-                    const localHour = originalTime.getHours();
-                    
-                    // If the time seems to be in UTC (the hour difference is 3), fix it
-                    if (utcHour !== localHour && (utcHour - localHour === 3 || utcHour - localHour === -21)) {
-                        const kenyaTime = convertUTCToKenyaTime(record.checkIn);
-                        if (kenyaTime) {
-                            record.checkIn = kenyaTime;
-                            changed = true;
-                        }
-                    }
+                    // Add 3 hours to convert UTC to Kenya time
+                    const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+                    record.checkIn = kenyaTime;
+                    changed = true;
+                    recordCount++;
                 }
                 
-                // Fix checkOut time
+                // Fix checkOut time - Add 3 hours directly
                 if (record.checkOut) {
                     const originalTime = new Date(record.checkOut);
-                    const utcHour = originalTime.getUTCHours();
-                    const localHour = originalTime.getHours();
-                    
-                    if (utcHour !== localHour && (utcHour - localHour === 3 || utcHour - localHour === -21)) {
-                        const kenyaTime = convertUTCToKenyaTime(record.checkOut);
-                        if (kenyaTime) {
-                            record.checkOut = kenyaTime;
-                            changed = true;
-                        }
-                    }
+                    const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+                    record.checkOut = kenyaTime;
+                    changed = true;
+                    recordCount++;
                 }
             }
             if (changed) {
                 await teacher.save();
                 teacherFixed++;
                 totalFixed++;
+                console.log(`  ✅ Fixed ${recordCount} records for ${teacher.firstName} ${teacher.lastName}`);
             }
         }
         console.log(`✅ Fixed ${teacherFixed} teacher records`);
 
-        // Fix Visitor records
+        // Fix Visitor records - DIRECT FIX
         const visitors = await Visitor.find({});
         let visitorFixed = 0;
+        
+        console.log(`📊 Found ${visitors.length} visitors to check`);
         
         for (const visitor of visitors) {
             let changed = false;
             
             if (visitor.checkIn) {
                 const originalTime = new Date(visitor.checkIn);
-                const utcHour = originalTime.getUTCHours();
-                const localHour = originalTime.getHours();
-                
-                if (utcHour !== localHour && (utcHour - localHour === 3 || utcHour - localHour === -21)) {
-                    const kenyaTime = convertUTCToKenyaTime(visitor.checkIn);
-                    if (kenyaTime) {
-                        visitor.checkIn = kenyaTime;
-                        changed = true;
-                    }
-                }
+                const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+                visitor.checkIn = kenyaTime;
+                changed = true;
             }
             
             if (visitor.checkOut) {
                 const originalTime = new Date(visitor.checkOut);
-                const utcHour = originalTime.getUTCHours();
-                const localHour = originalTime.getHours();
-                
-                if (utcHour !== localHour && (utcHour - localHour === 3 || utcHour - localHour === -21)) {
-                    const kenyaTime = convertUTCToKenyaTime(visitor.checkOut);
-                    if (kenyaTime) {
-                        visitor.checkOut = kenyaTime;
-                        changed = true;
-                    }
-                }
+                const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+                visitor.checkOut = kenyaTime;
+                changed = true;
             }
             
             if (changed) {
