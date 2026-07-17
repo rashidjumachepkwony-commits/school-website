@@ -19,13 +19,33 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================
-// HELPER: GET KENYA TIME (UTC+3) - RELIABLE
+// HELPER: GET KENYA TIME (UTC+3) - SUPER RELIABLE
 // ============================================
 function getKenyaTime() {
-    // Use built-in toLocaleString with timezone for reliable Kenya time
+    // Method 1: Use Intl.DateTimeFormat for reliable timezone conversion
     const now = new Date();
-    const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
-    return new Date(kenyaTimeString);
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Africa/Nairobi',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+    
+    const parts = formatter.formatToParts(now);
+    const dateParts = {};
+    parts.forEach(part => {
+        if (part.type !== 'literal') {
+            dateParts[part.type] = part.value;
+        }
+    });
+    
+    // Build the date string
+    const dateStr = `${dateParts.year}-${dateParts.month}-${dateParts.day}T${dateParts.hour}:${dateParts.minute}:${dateParts.second}`;
+    return new Date(dateStr);
 }
 
 function getKenyaDate() {
@@ -36,7 +56,13 @@ function getKenyaDate() {
 }
 
 function getKenyaHour() {
-    return getKenyaTime().getHours();
+    const kenyaTime = getKenyaTime();
+    return kenyaTime.getHours();
+}
+
+function getKenyaMinutes() {
+    const kenyaTime = getKenyaTime();
+    return kenyaTime.getMinutes();
 }
 
 function formatKenyaTime(date) {
@@ -59,6 +85,17 @@ function formatKenyaFullTime(date) {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
+    });
+}
+
+function formatKenyaDate(date) {
+    if (!date) return '-';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-KE', {
+        timeZone: 'Africa/Nairobi',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
     });
 }
 
@@ -875,24 +912,24 @@ function generateStudentReportHTML(student, allAssessments = null) {
 }
 
 // ============================================
-// GENERATE STAFF REPORT HTML FOR PDF
+// GENERATE STAFF REPORT HTML FOR PDF - SINGLE PAGE
 // ============================================
-function generateStaffReportHTML(report, title) {
+function generateStaffReportHTML(report, title, periodInfo) {
   const now = getKenyaTime();
   
   let rowsHtml = report.map((staff, index) => {
     const rate = staff.totalDays > 0 ? ((staff.onTime / staff.totalDays) * 100).toFixed(1) : 0;
     return `
       <tr>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${staff.name}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${staff.employeeId || '-'}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;">${staff.department || '-'}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${staff.totalDays || 0}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;color:#28a745;font-weight:600;">${staff.onTime || 0}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;color:#d4a017;font-weight:600;">${staff.late || 0}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;color:#dc3545;font-weight:600;">${staff.absent || 0}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:700;">${rate}%</td>
+        <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-size:7px;">${index + 1}</td>
+        <td style="padding:3px 4px;border:1px solid #ddd;font-weight:600;font-size:7px;">${staff.name}</td>
+        <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-size:7px;">${staff.employeeId || '-'}</td>
+        <td style="padding:3px 4px;border:1px solid #ddd;font-size:7px;">${staff.department || '-'}</td>
+        <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-size:7px;">${staff.totalDays || 0}</td>
+        <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;color:#28a745;font-weight:600;font-size:7px;">${staff.onTime || 0}</td>
+        <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;color:#d4a017;font-weight:600;font-size:7px;">${staff.late || 0}</td>
+        <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;color:#dc3545;font-weight:600;font-size:7px;">${staff.absent || 0}</td>
+        <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-weight:700;font-size:7px;">${rate}%</td>
       </tr>
     `;
   }).join('');
@@ -913,6 +950,13 @@ function generateStaffReportHTML(report, title) {
   
   const attendanceRate = totalDays > 0 ? ((totalOnTime / totalDays) * 100).toFixed(1) : 0;
 
+  // Find top performers
+  const topPerformers = [...report].sort((a, b) => {
+    const rateA = a.totalDays > 0 ? (a.onTime / a.totalDays) : 0;
+    const rateB = b.totalDays > 0 ? (b.onTime / b.totalDays) : 0;
+    return rateB - rateA;
+  }).slice(0, 3);
+
   return `
     <!DOCTYPE html>
     <html>
@@ -920,67 +964,98 @@ function generateStaffReportHTML(report, title) {
       <meta charset="UTF-8">
       <title>Staff Attendance Report</title>
       <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 1100px; margin: 0 auto; }
-        .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { color: #0A1628; font-size: 24px; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+          font-family: 'Segoe UI', Arial, sans-serif; 
+          padding: 8px; 
+          max-width: 1100px; 
+          margin: 0 auto; 
+          font-size: 8px;
+          line-height: 1.2;
+        }
+        .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 4px; margin-bottom: 6px; }
+        .header h1 { color: #0A1628; font-size: 14px; margin: 0; }
         .header h1 .school-name { color: #D4A017; }
-        .header p { color: #666; margin: 5px 0; }
-        .summary-box { background: #f8f9fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e8ecf1; }
-        .summary-box .row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-        .summary-box .item { text-align: center; padding: 10px 20px; background: white; border-radius: 8px; border: 1px solid #e8ecf1; min-width: 80px; }
-        .summary-box .item .num { font-size: 24px; font-weight: 700; }
-        .summary-box .item .label { font-size: 12px; color: #666; }
+        .header p { color: #666; margin: 1px 0; font-size: 8px; }
+        .summary-box { 
+          display: grid; 
+          grid-template-columns: repeat(6, 1fr); 
+          gap: 4px; 
+          margin-bottom: 6px; 
+        }
+        .summary-box .item { 
+          text-align: center; 
+          padding: 3px 4px; 
+          background: #f8f9fc; 
+          border-radius: 4px; 
+          border: 1px solid #e8ecf1; 
+        }
+        .summary-box .item .num { font-size: 14px; font-weight: 700; }
+        .summary-box .item .label { font-size: 6px; color: #666; }
+        .summary-box .item .num.gold { color: #D4A017; }
         .summary-box .item .num.green { color: #28a745; }
         .summary-box .item .num.orange { color: #d4a017; }
         .summary-box .item .num.red { color: #dc3545; }
         .summary-box .item .num.blue { color: #17a2b8; }
-        .summary-box .item .num.gold { color: #D4A017; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
-        table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
-        table td { padding: 6px 10px; border-bottom: 1px solid #e8ecf1; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 7px; }
+        table th { background: #0A1628; color: white; padding: 4px 4px; text-align: left; font-size: 6px; }
+        table td { padding: 3px 4px; border-bottom: 1px solid #e8ecf1; }
         table tr:nth-child(even) { background: #fafbfc; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
-        .badge { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 11px; font-weight: 700; }
-        .badge-success { background: #28a745; color: white; }
-        .badge-warning { background: #d4a017; color: white; }
-        .badge-danger { background: #dc3545; color: white; }
-        @media print { body { padding: 10px; } .no-print { display: none; } }
+        .footer { text-align: center; margin-top: 6px; padding-top: 4px; border-top: 1px solid #ddd; color: #999; font-size: 6px; }
+        .top-performers { display: flex; justify-content: center; gap: 12px; margin: 4px 0; flex-wrap: wrap; }
+        .top-performers .performer { text-align: center; padding: 2px 8px; background: #e8f5e9; border-radius: 4px; }
+        .top-performers .performer .name { font-weight: 600; font-size: 7px; }
+        .top-performers .performer .rate { color: #28a745; font-weight: 700; font-size: 8px; }
+        @media print { body { padding: 4px; } .no-print { display: none; } }
       </style>
     </head>
     <body>
       <div class="header">
         <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
         <p>${title}</p>
+        <p style="font-size:6px;color:#999;">${periodInfo}</p>
       </div>
       
       <div class="summary-box">
-        <div class="row">
-          <div class="item"><div class="num gold">${totalStaff}</div><div class="label">Total Staff</div></div>
-          <div class="item"><div class="num green">${totalOnTime}</div><div class="label">✅ On Time</div></div>
-          <div class="item"><div class="num orange">${totalLate}</div><div class="label">⚠️ Late</div></div>
-          <div class="item"><div class="num red">${totalAbsent}</div><div class="label">❌ Absent</div></div>
-          <div class="item"><div class="num blue">${attendanceRate}%</div><div class="label">📈 Attendance Rate</div></div>
-        </div>
+        <div class="item"><div class="num gold">${totalStaff}</div><div class="label">Total Staff</div></div>
+        <div class="item"><div class="num green">${totalOnTime}</div><div class="label">✅ On Time</div></div>
+        <div class="item"><div class="num orange">${totalLate}</div><div class="label">⚠️ Late</div></div>
+        <div class="item"><div class="num red">${totalAbsent}</div><div class="label">❌ Absent</div></div>
+        <div class="item"><div class="num blue">${attendanceRate}%</div><div class="label">📈 Attendance</div></div>
+        <div class="item"><div class="num" style="color:#0A1628;">${totalDays}</div><div class="label">📅 Total Days</div></div>
       </div>
       
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Staff Name</th>
-            <th>Employee ID</th>
-            <th>Department</th>
-            <th>Total Days</th>
-            <th>On Time</th>
-            <th>Late</th>
-            <th>Absent</th>
-            <th>Attendance Rate</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rowsHtml}
-        </tbody>
-      </table>
+      ${topPerformers.length > 0 ? `
+      <div class="top-performers">
+        <span style="font-weight:600;font-size:7px;">🏆 Top Performers:</span>
+        ${topPerformers.map((p, i) => {
+          const rate = p.totalDays > 0 ? ((p.onTime / p.totalDays) * 100).toFixed(1) : 0;
+          return `<div class="performer"><span class="name">${i+1}. ${p.name}</span> <span class="rate">${rate}%</span></div>`;
+        }).join('')}
+      </div>
+      ` : ''}
+      
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:center;">#</th>
+              <th>Staff Name</th>
+              <th style="text-align:center;">ID</th>
+              <th>Department</th>
+              <th style="text-align:center;">Days</th>
+              <th style="text-align:center;">On Time</th>
+              <th style="text-align:center;">Late</th>
+              <th style="text-align:center;">Absent</th>
+              <th style="text-align:center;">Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
       
       <div class="footer">
         <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
@@ -992,25 +1067,26 @@ function generateStaffReportHTML(report, title) {
 }
 
 // ============================================
-// GENERATE VISITOR REPORT HTML FOR PDF
+// GENERATE VISITOR REPORT HTML FOR PDF - SINGLE PAGE
 // ============================================
-function generateVisitorReportHTML(report, title) {
+function generateVisitorReportHTML(report, title, periodInfo) {
   const now = getKenyaTime();
   
   let rowsHtml = report.map((visitor, index) => {
+    const duration = visitor.duration || 0;
     return `
       <tr>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${visitor.fullName || visitor.firstName + ' ' + visitor.lastName}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${visitor.badgeNumber || '-'}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;">${visitor.purpose || '-'}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;">${visitor.personToVisit || '-'}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${visitor.checkInTime || '-'}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${visitor.checkOutTime || '-'}</td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">
-          <span class="badge ${visitor.status === 'Checked In' ? 'badge-success' : 'badge-secondary'}">${visitor.status || '-'}</span>
+        <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">${index + 1}</td>
+        <td style="padding:2px 3px;border:1px solid #ddd;font-weight:600;font-size:6px;">${visitor.fullName || visitor.firstName + ' ' + visitor.lastName}</td>
+        <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">${visitor.badgeNumber || '-'}</td>
+        <td style="padding:2px 3px;border:1px solid #ddd;font-size:6px;">${visitor.purpose || '-'}</td>
+        <td style="padding:2px 3px;border:1px solid #ddd;font-size:6px;">${visitor.personToVisit || '-'}</td>
+        <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">${visitor.checkInTime || '-'}</td>
+        <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">${visitor.checkOutTime || '-'}</td>
+        <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">
+          <span style="display:inline-block;padding:1px 6px;border-radius:50px;font-size:5px;font-weight:700;color:white;background:${visitor.status === 'Checked In' ? '#28a745' : '#6c757d'};">${visitor.status || '-'}</span>
         </td>
-        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${visitor.duration > 0 ? visitor.duration + ' min' : '-'}</td>
+        <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">${duration > 0 ? duration + 'm' : '-'}</td>
       </tr>
     `;
   }).join('');
@@ -1020,8 +1096,18 @@ function generateVisitorReportHTML(report, title) {
   let active = report.filter(v => v.status === 'Checked In').length;
   let completed = report.filter(v => v.status === 'Checked Out').length;
   let totalDuration = 0;
-  report.forEach(v => { totalDuration += v.duration || 0; });
+  let purposeCount = {};
+  report.forEach(v => { 
+    totalDuration += v.duration || 0;
+    const p = v.purpose || 'Other';
+    purposeCount[p] = (purposeCount[p] || 0) + 1;
+  });
   const avgDuration = totalVisitors > 0 ? Math.round(totalDuration / totalVisitors) : 0;
+  
+  // Get top purposes
+  const topPurposes = Object.entries(purposeCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
 
   return `
     <!DOCTYPE html>
@@ -1030,63 +1116,94 @@ function generateVisitorReportHTML(report, title) {
       <meta charset="UTF-8">
       <title>Visitor Report</title>
       <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 1100px; margin: 0 auto; }
-        .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { color: #0A1628; font-size: 24px; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+          font-family: 'Segoe UI', Arial, sans-serif; 
+          padding: 6px; 
+          max-width: 1100px; 
+          margin: 0 auto; 
+          font-size: 7px;
+          line-height: 1.1;
+        }
+        .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 3px; margin-bottom: 4px; }
+        .header h1 { color: #0A1628; font-size: 13px; margin: 0; }
         .header h1 .school-name { color: #D4A017; }
-        .header p { color: #666; margin: 5px 0; }
-        .summary-box { background: #f8f9fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e8ecf1; }
-        .summary-box .row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-        .summary-box .item { text-align: center; padding: 10px 20px; background: white; border-radius: 8px; border: 1px solid #e8ecf1; min-width: 80px; }
-        .summary-box .item .num { font-size: 24px; font-weight: 700; }
-        .summary-box .item .label { font-size: 12px; color: #666; }
+        .header p { color: #666; margin: 1px 0; font-size: 7px; }
+        .summary-box { 
+          display: grid; 
+          grid-template-columns: repeat(6, 1fr); 
+          gap: 3px; 
+          margin-bottom: 4px; 
+        }
+        .summary-box .item { 
+          text-align: center; 
+          padding: 2px 3px; 
+          background: #f8f9fc; 
+          border-radius: 3px; 
+          border: 1px solid #e8ecf1; 
+        }
+        .summary-box .item .num { font-size: 12px; font-weight: 700; }
+        .summary-box .item .label { font-size: 5px; color: #666; }
         .summary-box .item .num.gold { color: #D4A017; }
         .summary-box .item .num.blue { color: #17a2b8; }
         .summary-box .item .num.green { color: #28a745; }
-        .badge { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 11px; font-weight: 700; }
-        .badge-success { background: #28a745; color: white; }
-        .badge-secondary { background: #6c757d; color: white; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
-        table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
-        table td { padding: 6px 10px; border-bottom: 1px solid #e8ecf1; }
+        .summary-box .item .num.orange { color: #d4a017; }
+        .summary-box .item .num.purple { color: #6f42c1; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 6px; }
+        table th { background: #0A1628; color: white; padding: 3px 3px; text-align: left; font-size: 5.5px; }
+        table td { padding: 2px 3px; border-bottom: 1px solid #e8ecf1; }
         table tr:nth-child(even) { background: #fafbfc; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
-        @media print { body { padding: 10px; } }
+        .footer { text-align: center; margin-top: 4px; padding-top: 3px; border-top: 1px solid #ddd; color: #999; font-size: 5px; }
+        .purpose-tags { display: flex; justify-content: center; gap: 8px; margin: 3px 0; flex-wrap: wrap; }
+        .purpose-tags .tag { padding: 1px 6px; background: #e8ecf1; border-radius: 3px; font-size: 6px; }
+        .purpose-tags .tag .count { font-weight: 700; }
+        @media print { body { padding: 3px; } .no-print { display: none; } }
       </style>
     </head>
     <body>
       <div class="header">
         <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
         <p>${title}</p>
+        <p style="font-size:5px;color:#999;">${periodInfo}</p>
       </div>
       
       <div class="summary-box">
-        <div class="row">
-          <div class="item"><div class="num gold">${totalVisitors}</div><div class="label">Total Visitors</div></div>
-          <div class="item"><div class="num blue">${active}</div><div class="label">✅ Checked In</div></div>
-          <div class="item"><div class="num green">${completed}</div><div class="label">✅ Checked Out</div></div>
-          <div class="item"><div class="num" style="color:#d4a017;">${avgDuration} min</div><div class="label">⏱️ Avg Duration</div></div>
-        </div>
+        <div class="item"><div class="num gold">${totalVisitors}</div><div class="label">Total Visitors</div></div>
+        <div class="item"><div class="num blue">${active}</div><div class="label">✅ Checked In</div></div>
+        <div class="item"><div class="num green">${completed}</div><div class="label">✅ Checked Out</div></div>
+        <div class="item"><div class="num orange">${avgDuration}m</div><div class="label">⏱️ Avg Duration</div></div>
+        <div class="item"><div class="num purple">${Object.keys(purposeCount).length}</div><div class="label">📋 Purposes</div></div>
       </div>
       
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Visitor Name</th>
-            <th>Badge #</th>
-            <th>Purpose</th>
-            <th>Person to Visit</th>
-            <th>Check In</th>
-            <th>Check Out</th>
-            <th>Status</th>
-            <th>Duration</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rowsHtml}
-        </tbody>
-      </table>
+      ${topPurposes.length > 0 ? `
+      <div class="purpose-tags">
+        ${topPurposes.map(([purpose, count]) => 
+          `<span class="tag">${purpose}: <span class="count">${count}</span></span>`
+        ).join('')}
+      </div>
+      ` : ''}
+      
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:center;">#</th>
+              <th>Visitor</th>
+              <th style="text-align:center;">Badge</th>
+              <th>Purpose</th>
+              <th>Person</th>
+              <th style="text-align:center;">Check In</th>
+              <th style="text-align:center;">Check Out</th>
+              <th style="text-align:center;">Status</th>
+              <th style="text-align:center;">Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml || `<tr><td colspan="9" style="text-align:center;padding:10px;color:#999;">No visitors found</td></tr>`}
+          </tbody>
+        </table>
+      </div>
       
       <div class="footer">
         <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
@@ -2598,7 +2715,7 @@ app.get('/api/reports/visitors', async (req, res) => {
 });
 
 // ============================================
-// DOWNLOAD STAFF REPORT - PDF
+// DOWNLOAD STAFF REPORT - PDF (SINGLE PAGE)
 // ============================================
 app.get('/api/reports/staff/download-pdf', async (req, res) => {
   try {
@@ -2607,11 +2724,13 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
     let startDate, endDate;
     const selectedDate = date ? new Date(date) : getKenyaDate();
     
+    let periodLabel = '';
     if (period === 'daily') {
       startDate = new Date(selectedDate);
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 1);
+      periodLabel = `Daily Report - ${formatKenyaDate(selectedDate)}`;
     } else if (period === 'weekly') {
       const day = selectedDate.getDay();
       const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
@@ -2620,15 +2739,18 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 7);
+      periodLabel = `Weekly Report - ${formatKenyaDate(startDate)} to ${formatKenyaDate(endDate)}`;
     } else if (period === 'monthly') {
       startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(startDate);
       endDate.setMonth(endDate.getMonth() + 1);
+      periodLabel = `Monthly Report - ${selectedDate.toLocaleString('en-KE', { month: 'long', year: 'numeric' })}`;
     } else {
       startDate = getKenyaDate();
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 1);
+      periodLabel = `Daily Report - ${formatKenyaDate(startDate)}`;
     }
     
     let filter = {};
@@ -2671,19 +2793,19 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
       };
     });
     
-    const title = `Staff Attendance Report - ${period.charAt(0).toUpperCase() + period.slice(1)}`;
-    const html = generateStaffReportHTML(report, title);
+    const title = `Staff Attendance Report`;
+    const html = generateStaffReportHTML(report, title, periodLabel);
     
     const options = {
       format: 'A4',
       border: {
-        top: '0.5cm',
-        right: '0.5cm',
-        bottom: '0.5cm',
-        left: '0.5cm'
+        top: '0.3cm',
+        right: '0.3cm',
+        bottom: '0.3cm',
+        left: '0.3cm'
       },
       printBackground: true,
-      landscape: false,
+      landscape: true,
       type: 'pdf',
       timeout: 30000,
       quality: '100'
@@ -2709,7 +2831,7 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
 });
 
 // ============================================
-// DOWNLOAD VISITOR REPORT - PDF
+// DOWNLOAD VISITOR REPORT - PDF (SINGLE PAGE)
 // ============================================
 app.get('/api/reports/visitors/download-pdf', async (req, res) => {
   try {
@@ -2718,11 +2840,13 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
     let startDate, endDate;
     const selectedDate = date ? new Date(date) : getKenyaDate();
     
+    let periodLabel = '';
     if (period === 'daily') {
       startDate = new Date(selectedDate);
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 1);
+      periodLabel = `Daily Report - ${formatKenyaDate(selectedDate)}`;
     } else if (period === 'weekly') {
       const day = selectedDate.getDay();
       const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
@@ -2731,15 +2855,18 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 7);
+      periodLabel = `Weekly Report - ${formatKenyaDate(startDate)} to ${formatKenyaDate(endDate)}`;
     } else if (period === 'monthly') {
       startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(startDate);
       endDate.setMonth(endDate.getMonth() + 1);
+      periodLabel = `Monthly Report - ${selectedDate.toLocaleString('en-KE', { month: 'long', year: 'numeric' })}`;
     } else {
       startDate = getKenyaDate();
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 1);
+      periodLabel = `Daily Report - ${formatKenyaDate(startDate)}`;
     }
     
     let filter = {
@@ -2771,19 +2898,19 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
       };
     });
     
-    const title = `Visitor Report - ${period.charAt(0).toUpperCase() + period.slice(1)}`;
-    const html = generateVisitorReportHTML(report, title);
+    const title = `Visitor Report`;
+    const html = generateVisitorReportHTML(report, title, periodLabel);
     
     const options = {
       format: 'A4',
       border: {
-        top: '0.5cm',
-        right: '0.5cm',
-        bottom: '0.5cm',
-        left: '0.5cm'
+        top: '0.3cm',
+        right: '0.3cm',
+        bottom: '0.3cm',
+        left: '0.3cm'
       },
       printBackground: true,
-      landscape: false,
+      landscape: true,
       type: 'pdf',
       timeout: 30000,
       quality: '100'
