@@ -19,12 +19,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================
-// HELPER: GET KENYA TIME (UTC+3)
+// HELPER: GET KENYA TIME (UTC+3) - FIXED
 // ============================================
 function getKenyaTime() {
     const now = new Date();
-    const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
-    return new Date(kenyaTimeString);
+    // Force Kenya time by directly adjusting UTC
+    const kenyaTime = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+    return kenyaTime;
 }
 
 function getKenyaDate() {
@@ -61,43 +62,39 @@ function formatKenyaFullTime(date) {
     });
 }
 
-function convertUTCToKenyaTime(utcDate) {
-    if (!utcDate) return null;
-    const d = new Date(utcDate);
-    // Add 3 hours to convert from UTC to Kenya time (EAT)
-    const kenyaTime = new Date(d.getTime() + (3 * 60 * 60 * 1000));
-    return kenyaTime;
+// Convert any date to Kenya time
+function toKenyaTime(date) {
+    if (!date) return null;
+    const d = new Date(date);
+    return new Date(d.getTime() + (3 * 60 * 60 * 1000));
 }
 
 // ============================================
-// FIX PAST RECORDS - UPDATED MIGRATION SCRIPT
+// FIX PAST RECORDS - DIRECT AND FORCEFUL
 // ============================================
 async function fixPastRecords() {
     try {
         console.log('🔄 Starting time fix for past records...');
         let totalFixed = 0;
 
-        // Fix Teacher attendance records - DIRECT FIX
+        // Fix Teacher attendance records
         const teachers = await Teacher.find({});
         let teacherFixed = 0;
-        
-        console.log(`📊 Found ${teachers.length} teachers to check`);
         
         for (const teacher of teachers) {
             let changed = false;
             let recordCount = 0;
             for (const record of teacher.attendance) {
-                // Fix checkIn time - Add 3 hours directly
+                // Fix checkIn time - Force add 3 hours
                 if (record.checkIn) {
                     const originalTime = new Date(record.checkIn);
-                    // Add 3 hours to convert UTC to Kenya time
                     const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
                     record.checkIn = kenyaTime;
                     changed = true;
                     recordCount++;
                 }
                 
-                // Fix checkOut time - Add 3 hours directly
+                // Fix checkOut time - Force add 3 hours
                 if (record.checkOut) {
                     const originalTime = new Date(record.checkOut);
                     const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
@@ -115,11 +112,9 @@ async function fixPastRecords() {
         }
         console.log(`✅ Fixed ${teacherFixed} teacher records`);
 
-        // Fix Visitor records - DIRECT FIX
+        // Fix Visitor records
         const visitors = await Visitor.find({});
         let visitorFixed = 0;
-        
-        console.log(`📊 Found ${visitors.length} visitors to check`);
         
         for (const visitor of visitors) {
             let changed = false;
@@ -1366,7 +1361,7 @@ app.post('/api/teacher/register', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-IN - FIXED WITH KENYA TIME
+// TEACHER CHECK-IN - COMPLETE FIX
 // ============================================
 app.post('/api/teacher/checkin', async (req, res) => {
   try {
@@ -1392,6 +1387,9 @@ app.post('/api/teacher/checkin', async (req, res) => {
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
     const dayOfWeek = kenyaNow.getDay();
+    
+    console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
+    console.log('🕐 Hour (Kenya time):', kenyaHour);
     
     // Weekend check
     if (dayOfWeek === 0 || dayOfWeek === 6) {
@@ -1434,7 +1432,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       status: status,
       location: 'School',
       isLate: isLate,
-      notes: isLate ? 'Late check-in at ' + formatKenyaFullTime(kenyaNow) : 'On-time check-in at ' + formatKenyaFullTime(kenyaNow)
+      notes: isLate ? 'Late check-in' : 'On-time check-in'
     });
     
     await teacher.save();
@@ -1466,7 +1464,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-OUT - FIXED WITH KENYA TIME
+// TEACHER CHECK-OUT - COMPLETE FIX
 // ============================================
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
@@ -1491,6 +1489,9 @@ app.post('/api/teacher/checkout', async (req, res) => {
     const kenyaNow = getKenyaTime();
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
+    
+    console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
+    console.log('🕐 Hour (Kenya time):', kenyaHour);
     
     // Find today's attendance
     const todayAttendance = teacher.attendance.find(a => {
@@ -1523,7 +1524,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     
     // Store check-out time in Kenya time
     todayAttendance.checkOut = kenyaNow;
-    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + formatKenyaFullTime(kenyaNow);
+    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
     
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
@@ -1553,7 +1554,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
 });
 
 // ============================================
-// GET TODAY'S ATTENDANCE - FIXED WITH KENYA TIME
+// GET TODAY'S ATTENDANCE - COMPLETE FIX
 // ============================================
 app.get('/api/teacher/attendance/today', async (req, res) => {
   try {
@@ -2017,7 +2018,7 @@ app.get('/api/visitors/today', async (req, res) => {
 });
 
 // ============================================
-// ACADEMIC ASSESSMENT API ROUTES - RESTORED
+// ACADEMIC ASSESSMENT API ROUTES
 // ============================================
 
 app.get('/api/assessments/subjects/:grade', async (req, res) => {
