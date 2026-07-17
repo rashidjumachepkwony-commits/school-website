@@ -61,18 +61,6 @@ function formatKenyaFullTime(date) {
     });
 }
 
-function formatKenyaDate(date) {
-    if (!date) return '-';
-    const d = new Date(date);
-    return d.toLocaleDateString('en-KE', {
-        timeZone: 'Africa/Nairobi',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        weekday: 'short'
-    });
-}
-
 // ============================================
 // CONNECT TO MONGODB
 // ============================================
@@ -178,7 +166,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 app.use('/uploads', express.static('uploads'));
 
 // ============================================
-// CONTENT SCHEMA (CMS)
+// CONTENT SCHEMA (CMS) - SHORTENED
 // ============================================
 const contentSchema = new mongoose.Schema({
   heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
@@ -210,7 +198,6 @@ const contentSchema = new mongoose.Schema({
   aboutMotto: { type: String, default: 'Excellence in Education' },
   aboutWhy: { type: String, default: 'Holistic education, qualified teachers, modern facilities.' },
 
-  academicsIntro: { type: String, default: '' },
   academics: [{
     grade: { type: String, default: 'Grade 1' },
     subjects: { type: String, default: 'Math, English, Science' },
@@ -219,14 +206,12 @@ const contentSchema = new mongoose.Schema({
     teacherSupport: { type: String, default: 'Individual attention' }
   }],
 
-  admissionsIntro: { type: String, default: '' },
   admissionsRequirements: { type: String, default: 'Admission is open to all students who meet the age requirements.' },
   admissionsAge: { type: String, default: 'Playgroup: 2-3 years, PP1: 4 years, PP2: 5 years, Grade 1: 6 years, Grade 2-6: 7-12 years' },
   admissionsDocuments: { type: String, default: 'Birth certificate, Previous school records, Passport photo, Parent ID, Medical records' },
   admissionsProcess: { type: String, default: '1. Visit the school for a tour. 2. Fill the admission form. 3. Submit required documents. 4. Pay registration fee.' },
   admissionsFees: { type: String, default: 'Please contact the school administration for the current fee structure.' },
 
-  facilitiesIntro: { type: String, default: '' },
   facilities: [{
     name: { type: String, default: 'Modern Classrooms' },
     description: { type: String, default: 'Well-equipped classrooms with modern learning resources.' },
@@ -256,11 +241,9 @@ const contentSchema = new mongoose.Schema({
     image: { type: String, default: '' }
   }],
 
-  performanceIntro: { type: String, default: '' },
   performanceKcpe: { type: String, default: 'Our students consistently perform well in national examinations.' },
   performanceInternal: { type: String, default: 'Regular internal assessments track student progress.' },
 
-  parentsIntro: { type: String, default: '' },
   parentsCalendar: { type: String, default: 'School calendar for 2026 with all important dates.' },
   parentsHomework: { type: String, default: 'Homework is given regularly to reinforce learning.' },
   parentsAttendance: { type: String, default: 'Attendance is mandatory and monitored daily.' },
@@ -268,7 +251,6 @@ const contentSchema = new mongoose.Schema({
   parentsUniform: { type: String, default: 'All students must wear the official school uniform.' },
   parentsFees: { type: String, default: 'Fees must be paid at the beginning of each term.' },
 
-  downloadsIntro: { type: String, default: '' },
   downloads: [{
     name: { type: String, default: 'Admission Form' },
     file: { type: String, default: '/downloads/admission-form.pdf' },
@@ -276,11 +258,6 @@ const contentSchema = new mongoose.Schema({
     icon: { type: String, default: '📄' }
   }],
 
-  feesIntro: { type: String, default: '' },
-  feesPaybill: { type: String, default: '474752' },
-  feesInstructions: { type: String, default: '' },
-
-  contactIntro: { type: String, default: '' },
   contactAddress: { type: String, default: 'Nairobi, Kenya' },
   contactPhone: { type: String, default: '+254 721 556 252' },
   contactEmail: { type: String, default: 'starchangara@gmail.com' },
@@ -403,7 +380,6 @@ const Visitor = mongoose.model('Visitor', visitorSchema);
 // ACADEMIC ASSESSMENT SCHEMAS
 // ============================================
 
-// Subject Config Schema
 const subjectConfigSchema = new mongoose.Schema({
   grade: { type: String, required: true },
   type: { type: String, required: true, default: 'monthly' },
@@ -422,7 +398,6 @@ subjectConfigSchema.index({ grade: 1, type: 1 }, { unique: true });
 
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
 
-// Student Assessment Schema
 const studentAssessmentSchema = new mongoose.Schema({
   studentName: { type: String, required: true },
   admissionNumber: { type: String, default: '' },
@@ -484,7 +459,7 @@ function calculateTotals(assessments) {
 }
 
 // ============================================
-// STUDENT REPORT HTML GENERATOR
+// STUDENT REPORT HTML GENERATOR - SHORTENED
 // ============================================
 function generateStudentReportHTML(student, allAssessments = null) {
   const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
@@ -669,7 +644,6 @@ function generateStudentReportHTML(student, allAssessments = null) {
   const titleSize = isCompact ? '14px' : '18px';
   const subTitleSize = isCompact ? '10px' : '13px';
   const bodySize = isCompact ? '8px' : '11px';
-  const smallSize = isCompact ? '7px' : '9px';
 
   return `
     <!DOCTYPE html>
@@ -702,14 +676,14 @@ function generateStudentReportHTML(student, allAssessments = null) {
         .performance-box .level { font-size: ${isCompact ? '16px' : '22px'}; font-weight: 700; }
         .performance-box .score { font-size: ${subTitleSize}; color: #555; margin-top: 2px; }
         .performance-box .badges { margin-top: 4px; display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
-        .badge { display: inline-block; padding: ${isCompact ? '1px 6px' : '2px 12px'}; border-radius: 50px; font-size: ${smallSize}; font-weight: 700; color: white; }
+        .badge { display: inline-block; padding: ${isCompact ? '1px 6px' : '2px 12px'}; border-radius: 50px; font-size: ${isCompact ? '7px' : '9px'}; font-weight: 700; color: white; }
         .badge-exceeding { background: #28a745; }
         .badge-meeting { background: #17a2b8; }
         .badge-approaching { background: #d4a017; }
         .badge-below { background: #dc3545; }
         .table-wrap { overflow-x: auto; margin: ${isCompact ? '4px 0' : '8px 0'}; }
         table { width: 100%; border-collapse: collapse; font-size: ${bodySize}; }
-        table th { background: #0A1628; color: white; padding: ${isCompact ? '3px 4px' : '6px 10px'}; text-align: left; font-size: ${smallSize}; }
+        table th { background: #0A1628; color: white; padding: ${isCompact ? '3px 4px' : '6px 10px'}; text-align: left; font-size: ${isCompact ? '7px' : '9px'}; }
         table td { padding: ${isCompact ? '2px 4px' : '4px 10px'}; border-bottom: 1px solid #e8ecf1; }
         table tr:nth-child(even) { background: #fafbfc; }
         .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: ${isCompact ? '6px' : '12px'}; margin: ${isCompact ? '4px 0' : '8px 0'}; }
@@ -720,13 +694,13 @@ function generateStudentReportHTML(student, allAssessments = null) {
         .analysis-box .item:last-child { border-bottom: none; }
         .analysis-box .item .score-high { color: #28a745; font-weight: 700; }
         .analysis-box .item .score-low { color: #dc3545; font-weight: 700; }
-        .analysis-box .more-text { font-size: ${smallSize}; color: #999; text-align: center; padding-top: 2px; }
+        .analysis-box .more-text { font-size: ${isCompact ? '6px' : '8px'}; color: #999; text-align: center; padding-top: 2px; }
         .trend-box { margin-top: ${isCompact ? '4px' : '8px'}; padding: ${isCompact ? '6px 8px' : '10px 14px'}; background: white; border-radius: 6px; border: 1px solid #e8ecf1; }
         .trend-box h4 { color: #0A1628; font-size: ${subTitleSize}; margin-bottom: 2px; }
         .summary-box { margin-top: ${isCompact ? '4px' : '8px'}; padding: ${isCompact ? '4px 8px' : '8px 14px'}; background: #f8f9fc; border-radius: 6px; border: 1px solid #e8ecf1; }
         .summary-box p { font-size: ${bodySize}; color: #555; line-height: ${isCompact ? '1.3' : '1.6'}; margin: 0; }
         .summary-box p strong { color: #0A1628; }
-        .footer { text-align: center; margin-top: ${isCompact ? '6px' : '12px'}; padding-top: ${isCompact ? '4px' : '8px'}; border-top: 1px solid #ddd; color: #999; font-size: ${smallSize}; }
+        .footer { text-align: center; margin-top: ${isCompact ? '6px' : '12px'}; padding-top: ${isCompact ? '4px' : '8px'}; border-top: 1px solid #ddd; color: #999; font-size: ${isCompact ? '7px' : '9px'}; }
         .no-print { display: none; }
         @media print { body { padding: 8px; background: white; } .report-container { box-shadow: none; padding: 0; } .no-print { display: none !important; } }
         @media (max-width: 600px) { .analysis-grid { grid-template-columns: 1fr; } table { font-size: 8px; } table th, table td { padding: 2px 4px; } }
@@ -1098,7 +1072,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
     if (existingAttendance) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn)
+        message: '⚠️ You already checked in today'
       });
     }
     
@@ -1121,7 +1095,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       status: status,
       location: 'School',
       isLate: isLate,
-      notes: isLate ? 'Late check-in at ' + formatKenyaFullTime(kenyaNow) : 'On-time check-in at ' + formatKenyaFullTime(kenyaNow)
+      notes: isLate ? 'Late check-in' : 'On-time check-in'
     });
     
     await teacher.save();
@@ -1196,7 +1170,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     if (todayAttendance.checkOut) {
       return res.status(400).json({
         success: false,
-        message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut)
+        message: '⚠️ You already checked out today'
       });
     }
     
@@ -1210,7 +1184,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
     
     // Store check-out time in Kenya time
     todayAttendance.checkOut = kenyaNow;
-    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out at ' + formatKenyaFullTime(kenyaNow);
+    todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
     
     const checkInTime = new Date(todayAttendance.checkIn);
     const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
