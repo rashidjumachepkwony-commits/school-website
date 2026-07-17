@@ -19,13 +19,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================
-// HELPER: GET KENYA TIME (UTC+3) - FIXED
+// HELPER: GET KENYA TIME (UTC+3) - RELIABLE
 // ============================================
 function getKenyaTime() {
+    // Use built-in toLocaleString with timezone for reliable Kenya time
     const now = new Date();
-    // Force Kenya time by directly adjusting UTC
-    const kenyaTime = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-    return kenyaTime;
+    const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
+    return new Date(kenyaTimeString);
 }
 
 function getKenyaDate() {
@@ -62,86 +62,59 @@ function formatKenyaFullTime(date) {
     });
 }
 
-// Convert any date to Kenya time
-function toKenyaTime(date) {
-    if (!date) return null;
-    const d = new Date(date);
-    return new Date(d.getTime() + (3 * 60 * 60 * 1000));
-}
-
 // ============================================
-// FIX PAST RECORDS - DIRECT AND FORCEFUL
+// FIX PAST RECORDS - Add 3 hours to all times
 // ============================================
 async function fixPastRecords() {
     try {
-        console.log('🔄 Starting time fix for past records...');
+        console.log('🔄 Fixing past records time...');
         let totalFixed = 0;
 
-        // Fix Teacher attendance records
+        // Fix Teachers
         const teachers = await Teacher.find({});
-        let teacherFixed = 0;
-        
         for (const teacher of teachers) {
             let changed = false;
-            let recordCount = 0;
             for (const record of teacher.attendance) {
-                // Fix checkIn time - Force add 3 hours
                 if (record.checkIn) {
-                    const originalTime = new Date(record.checkIn);
-                    const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+                    const original = new Date(record.checkIn);
+                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
                     record.checkIn = kenyaTime;
                     changed = true;
-                    recordCount++;
                 }
-                
-                // Fix checkOut time - Force add 3 hours
                 if (record.checkOut) {
-                    const originalTime = new Date(record.checkOut);
-                    const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
+                    const original = new Date(record.checkOut);
+                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
                     record.checkOut = kenyaTime;
                     changed = true;
-                    recordCount++;
                 }
             }
             if (changed) {
                 await teacher.save();
-                teacherFixed++;
                 totalFixed++;
-                console.log(`  ✅ Fixed ${recordCount} records for ${teacher.firstName} ${teacher.lastName}`);
             }
         }
-        console.log(`✅ Fixed ${teacherFixed} teacher records`);
 
-        // Fix Visitor records
+        // Fix Visitors
         const visitors = await Visitor.find({});
-        let visitorFixed = 0;
-        
         for (const visitor of visitors) {
             let changed = false;
-            
             if (visitor.checkIn) {
-                const originalTime = new Date(visitor.checkIn);
-                const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
-                visitor.checkIn = kenyaTime;
+                const original = new Date(visitor.checkIn);
+                visitor.checkIn = new Date(original.getTime() + (3 * 60 * 60 * 1000));
                 changed = true;
             }
-            
             if (visitor.checkOut) {
-                const originalTime = new Date(visitor.checkOut);
-                const kenyaTime = new Date(originalTime.getTime() + (3 * 60 * 60 * 1000));
-                visitor.checkOut = kenyaTime;
+                const original = new Date(visitor.checkOut);
+                visitor.checkOut = new Date(original.getTime() + (3 * 60 * 60 * 1000));
                 changed = true;
             }
-            
             if (changed) {
                 await visitor.save();
-                visitorFixed++;
                 totalFixed++;
             }
         }
-        console.log(`✅ Fixed ${visitorFixed} visitor records`);
-        
-        console.log(`✅ Time fix completed! Total records fixed: ${totalFixed}`);
+
+        console.log(`✅ Time fix completed! Fixed ${totalFixed} records.`);
     } catch (error) {
         console.error('❌ Error fixing records:', error);
     }
@@ -165,7 +138,6 @@ app.post('/api/fix-past-times', async (req, res) => {
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB')
   .then(() => {
     console.log('✅ MongoDB Connected');
-    // Run the fix after connection
     setTimeout(fixPastRecords, 2000);
   })
   .catch(err => console.error('❌ MongoDB Error:', err.message));
@@ -1361,7 +1333,7 @@ app.post('/api/teacher/register', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-IN - COMPLETE FIX
+// TEACHER CHECK-IN - FIXED WITH KENYA TIME
 // ============================================
 app.post('/api/teacher/checkin', async (req, res) => {
   try {
@@ -1464,7 +1436,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
 });
 
 // ============================================
-// TEACHER CHECK-OUT - COMPLETE FIX
+// TEACHER CHECK-OUT - FIXED WITH KENYA TIME
 // ============================================
 app.post('/api/teacher/checkout', async (req, res) => {
   try {
@@ -1554,7 +1526,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
 });
 
 // ============================================
-// GET TODAY'S ATTENDANCE - COMPLETE FIX
+// GET TODAY'S ATTENDANCE - FIXED WITH KENYA TIME
 // ============================================
 app.get('/api/teacher/attendance/today', async (req, res) => {
   try {
@@ -1890,7 +1862,7 @@ app.get('/api/admin/attendance/summary', async (req, res) => {
 });
 
 // ============================================
-// VISITOR API ROUTES
+// VISITOR API ROUTES - FIXED WITH KENYA TIME
 // ============================================
 
 app.post('/api/visitor/checkin', async (req, res) => {
