@@ -87,10 +87,8 @@ async function fixPastRecords() {
                 // Fix checkIn time
                 if (record.checkIn) {
                     const originalTime = new Date(record.checkIn);
-                    // Check if the time appears to be in UTC (hour is 3 hours behind Kenya time)
+                    // Check if the time appears to be in UTC
                     const utcHour = originalTime.getUTCHours();
-                    // If the hour is between 0-6, it's likely UTC and needs fixing
-                    // Or if the time is stored as UTC but we can detect by checking if it's the same as getHours()
                     const localHour = originalTime.getHours();
                     
                     // If the time seems to be in UTC (the hour difference is 3), fix it
@@ -178,10 +176,10 @@ async function fixPastRecords() {
 // ============================================
 // API ROUTE TO FIX PAST RECORDS MANUALLY
 // ============================================
-app.post('/api/fix-times', async (req, res) => {
+app.post('/api/fix-past-times', async (req, res) => {
     try {
         await fixPastRecords();
-        res.json({ success: true, message: 'Past records time fixed successfully!' });
+        res.json({ success: true, message: '✅ Past records time fixed successfully!' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -1416,9 +1414,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
     const kenyaHour = getKenyaHour();
     const dayOfWeek = kenyaNow.getDay();
     
-    console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
-    console.log('🕐 Hour (Kenya time):', kenyaHour);
-    
     // Weekend check
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       return res.status(400).json({
@@ -1517,9 +1512,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
     const kenyaNow = getKenyaTime();
     const kenyaToday = getKenyaDate();
     const kenyaHour = getKenyaHour();
-    
-    console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
-    console.log('🕐 Hour (Kenya time):', kenyaHour);
     
     // Find today's attendance
     const todayAttendance = teacher.attendance.find(a => {
@@ -2046,7 +2038,7 @@ app.get('/api/visitors/today', async (req, res) => {
 });
 
 // ============================================
-// ACADEMIC ASSESSMENT API ROUTES
+// ACADEMIC ASSESSMENT API ROUTES - RESTORED
 // ============================================
 
 app.get('/api/assessments/subjects/:grade', async (req, res) => {
@@ -3017,7 +3009,10 @@ app.get('/api/test', (req, res) => {
           student: '/api/assessments/student/:id',
           all: '/api/assessments/all',
           search: '/api/assessments/search',
-          download: '/api/assessments/download-report/:studentId'
+          download: '/api/assessments/download-report/:studentId',
+          generate: '/api/assessments/generate-report/:studentId',
+          comprehensive: '/api/assessments/comprehensive-report/:studentName',
+          copy: '/api/assessments/copy'
         },
         reports: {
           staff: '/api/reports/staff/attendance',
