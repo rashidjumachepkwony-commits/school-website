@@ -23,9 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 // ============================================
 function getKenyaTime() {
     const now = new Date();
-    // Get Kenya time directly using Africa/Nairobi
-    const kenyaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
-    return kenyaTime;
+    const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
+    return new Date(kenyaTimeString);
 }
 
 function getKenyaDate() {
@@ -62,10 +61,12 @@ function formatKenyaFullTime(date) {
     });
 }
 
-function convertToKenyaTime(date) {
-    if (!date) return null;
-    const d = new Date(date);
-    return new Date(d.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
+function convertUTCToKenyaTime(utcDate) {
+    if (!utcDate) return null;
+    const d = new Date(utcDate);
+    // Add 3 hours to convert from UTC to Kenya time (EAT)
+    const kenyaTime = new Date(d.getTime() + (3 * 60 * 60 * 1000));
+    return kenyaTime;
 }
 
 // ============================================
@@ -73,37 +74,44 @@ function convertToKenyaTime(date) {
 // ============================================
 async function fixPastRecords() {
     try {
-        console.log('🔄 Checking for past records to fix time...');
-        
+        console.log('🔄 Starting time fix for past records...');
+        let totalFixed = 0;
+
         // Fix Teacher attendance records
         const teachers = await Teacher.find({});
-        let fixedCount = 0;
+        let teacherFixed = 0;
         
         for (const teacher of teachers) {
             let changed = false;
             for (const record of teacher.attendance) {
+                // Fix checkIn time
                 if (record.checkIn) {
                     const originalTime = new Date(record.checkIn);
-                    // If the time is in UTC (hour is 3 hours ahead), convert to Kenya time
-                    const kenyaTime = convertToKenyaTime(record.checkIn);
-                    if (kenyaTime) {
-                        // Check if it's a UTC time (check if hour difference is 3)
-                        const utcHour = originalTime.getUTCHours();
-                        const kenyaHour = kenyaTime.getHours();
-                        // If the time was stored as UTC (common issue), fix it
-                        if (utcHour !== kenyaHour && (utcHour - kenyaHour === 3 || utcHour - kenyaHour === -21)) {
+                    // Check if the time appears to be in UTC (hour is 3 hours behind Kenya time)
+                    const utcHour = originalTime.getUTCHours();
+                    // If the hour is between 0-6, it's likely UTC and needs fixing
+                    // Or if the time is stored as UTC but we can detect by checking if it's the same as getHours()
+                    const localHour = originalTime.getHours();
+                    
+                    // If the time seems to be in UTC (the hour difference is 3), fix it
+                    if (utcHour !== localHour && (utcHour - localHour === 3 || utcHour - localHour === -21)) {
+                        const kenyaTime = convertUTCToKenyaTime(record.checkIn);
+                        if (kenyaTime) {
                             record.checkIn = kenyaTime;
                             changed = true;
                         }
                     }
                 }
+                
+                // Fix checkOut time
                 if (record.checkOut) {
-                    const kenyaTime = convertToKenyaTime(record.checkOut);
-                    if (kenyaTime) {
-                        const originalTime = new Date(record.checkOut);
-                        const utcHour = originalTime.getUTCHours();
-                        const kenyaHour = kenyaTime.getHours();
-                        if (utcHour !== kenyaHour && (utcHour - kenyaHour === 3 || utcHour - kenyaHour === -21)) {
+                    const originalTime = new Date(record.checkOut);
+                    const utcHour = originalTime.getUTCHours();
+                    const localHour = originalTime.getHours();
+                    
+                    if (utcHour !== localHour && (utcHour - localHour === 3 || utcHour - localHour === -21)) {
+                        const kenyaTime = convertUTCToKenyaTime(record.checkOut);
+                        if (kenyaTime) {
                             record.checkOut = kenyaTime;
                             changed = true;
                         }
@@ -112,53 +120,72 @@ async function fixPastRecords() {
             }
             if (changed) {
                 await teacher.save();
-                fixedCount++;
+                teacherFixed++;
+                totalFixed++;
             }
         }
-        
-        console.log(`✅ Fixed ${fixedCount} teacher records`);
-        
+        console.log(`✅ Fixed ${teacherFixed} teacher records`);
+
         // Fix Visitor records
         const visitors = await Visitor.find({});
         let visitorFixed = 0;
+        
         for (const visitor of visitors) {
             let changed = false;
+            
             if (visitor.checkIn) {
-                const kenyaTime = convertToKenyaTime(visitor.checkIn);
-                if (kenyaTime) {
-                    const originalTime = new Date(visitor.checkIn);
-                    const utcHour = originalTime.getUTCHours();
-                    const kenyaHour = kenyaTime.getHours();
-                    if (utcHour !== kenyaHour && (utcHour - kenyaHour === 3 || utcHour - kenyaHour === -21)) {
+                const originalTime = new Date(visitor.checkIn);
+                const utcHour = originalTime.getUTCHours();
+                const localHour = originalTime.getHours();
+                
+                if (utcHour !== localHour && (utcHour - localHour === 3 || utcHour - localHour === -21)) {
+                    const kenyaTime = convertUTCToKenyaTime(visitor.checkIn);
+                    if (kenyaTime) {
                         visitor.checkIn = kenyaTime;
                         changed = true;
                     }
                 }
             }
+            
             if (visitor.checkOut) {
-                const kenyaTime = convertToKenyaTime(visitor.checkOut);
-                if (kenyaTime) {
-                    const originalTime = new Date(visitor.checkOut);
-                    const utcHour = originalTime.getUTCHours();
-                    const kenyaHour = kenyaTime.getHours();
-                    if (utcHour !== kenyaHour && (utcHour - kenyaHour === 3 || utcHour - kenyaHour === -21)) {
+                const originalTime = new Date(visitor.checkOut);
+                const utcHour = originalTime.getUTCHours();
+                const localHour = originalTime.getHours();
+                
+                if (utcHour !== localHour && (utcHour - localHour === 3 || utcHour - localHour === -21)) {
+                    const kenyaTime = convertUTCToKenyaTime(visitor.checkOut);
+                    if (kenyaTime) {
                         visitor.checkOut = kenyaTime;
                         changed = true;
                     }
                 }
             }
+            
             if (changed) {
                 await visitor.save();
                 visitorFixed++;
+                totalFixed++;
             }
         }
         console.log(`✅ Fixed ${visitorFixed} visitor records`);
         
-        console.log('✅ Time fix completed!');
+        console.log(`✅ Time fix completed! Total records fixed: ${totalFixed}`);
     } catch (error) {
-        console.error('Error fixing records:', error);
+        console.error('❌ Error fixing records:', error);
     }
 }
+
+// ============================================
+// API ROUTE TO FIX PAST RECORDS MANUALLY
+// ============================================
+app.post('/api/fix-times', async (req, res) => {
+    try {
+        await fixPastRecords();
+        res.json({ success: true, message: 'Past records time fixed successfully!' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 // ============================================
 // CONNECT TO MONGODB
@@ -167,7 +194,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB'
   .then(() => {
     console.log('✅ MongoDB Connected');
     // Run the fix after connection
-    setTimeout(fixPastRecords, 1000);
+    setTimeout(fixPastRecords, 2000);
   })
   .catch(err => console.error('❌ MongoDB Error:', err.message));
 
@@ -2838,6 +2865,19 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
 });
 
 // ============================================
+// FIX PAST RECORDS - MANUAL API
+// ============================================
+app.post('/api/fix-past-times', async (req, res) => {
+  try {
+    await fixPastRecords();
+    res.json({ success: true, message: '✅ Past records time fixed successfully!' });
+  } catch (error) {
+    console.error('Error fixing records:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
 // DEFAULT SUBJECT CONFIGURATIONS
 // ============================================
 function getDefaultSubjects(grade, type) {
@@ -2984,7 +3024,8 @@ app.get('/api/test', (req, res) => {
           staffPdf: '/api/reports/staff/download-pdf',
           visitors: '/api/reports/visitors',
           visitorsPdf: '/api/reports/visitors/download-pdf'
-        }
+        },
+        fixTimes: '/api/fix-past-times'
       }
     }
   });
@@ -3024,14 +3065,6 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`🕐 Kenya Time: ${kenyaNow.toLocaleString()}`);
   console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
-  console.log(`🌐 Website: http://localhost:${PORT}/`);
-  console.log(`📊 Admin: http://localhost:${PORT}/admin-login.html`);
-  console.log(`👨‍🏫 Staff Check-in: http://localhost:${PORT}/teacher-checkin.html`);
-  console.log(`📋 Admin Attendance: http://localhost:${PORT}/admin-attendance.html`);
-  console.log(`👨‍🏫 Manage Teachers: http://localhost:${PORT}/admin-teachers.html`);
-  console.log(`🚪 Visitor Check-in: http://localhost:${PORT}/visitor-checkin.html`);
-  console.log(`📋 Admin Visitors: http://localhost:${PORT}/admin-visitors.html`);
-  console.log(`📝 Academic Assessments: http://localhost:${PORT}/admin-academics.html`);
   console.log(`📚 Parent Results: http://localhost:${PORT}/academics.html#assessments`);
   console.log('='.repeat(50));
   console.log('✅ Server started successfully!');
