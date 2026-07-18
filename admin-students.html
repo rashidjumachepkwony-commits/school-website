@@ -53,7 +53,6 @@
         }
         .header .btn-home:hover { background: #1a2a4a; transform: scale(1.02); }
 
-        /* ===== STATS ===== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -76,7 +75,6 @@
         .stat-card .number.orange { color: #d4a017; }
         .stat-card .number.red { color: #dc3545; }
 
-        /* ===== ADD FORM ===== */
         .add-section {
             background: #f8f9fc;
             padding: 25px;
@@ -115,6 +113,10 @@
             border-color: #D4A017;
             outline: none;
         }
+        .form-group input[readonly] {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
         .btn-add {
             padding: 12px 35px;
             background: #28a745;
@@ -132,7 +134,6 @@
         }
         .btn-add:hover { background: #1e7e34; transform: scale(1.02); }
 
-        /* ===== FILTERS ===== */
         .filter-bar {
             display: flex;
             gap: 12px;
@@ -194,7 +195,6 @@
         }
         .filter-bar .btn-reset:hover { background: #5a6268; transform: scale(1.02); }
 
-        /* ===== TOOLBAR ===== */
         .toolbar {
             display: flex;
             justify-content: space-between;
@@ -237,7 +237,6 @@
         .btn-delete { background: #dc3545; color: white; }
         .btn-delete:hover { background: #c82333; }
 
-        /* ===== TABLE ===== */
         .table-wrapper {
             overflow-x: auto;
             border-radius: 12px;
@@ -276,7 +275,6 @@
         .gender-male { color: #1a6fb5; font-weight: bold; }
         .gender-female { color: #e83e8c; font-weight: bold; }
 
-        /* ===== MODAL ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -342,7 +340,6 @@
         .modal-actions .btn-cancel { background: #6c757d; color: white; }
         .modal-actions .btn-delete-modal { background: #dc3545; color: white; }
 
-        /* ===== ALERT ===== */
         .alert {
             padding: 12px 20px;
             border-radius: 10px;
@@ -355,7 +352,20 @@
         .alert.warning { display: block; background: #fff3cd; color: #856404; border: 2px solid #ffc107; }
         .alert.info { display: block; background: #d1ecf1; color: #0c5460; border: 2px solid #0b5394; }
 
-        /* ===== RESPONSIVE ===== */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e8ecf1;
+            border-top: 3px solid #D4A017;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .form-grid { grid-template-columns: 1fr; }
@@ -403,15 +413,15 @@
         <h3><i class="fas fa-plus-circle"></i> Add New Student</h3>
         <div class="form-grid">
             <div class="form-group">
-                <label>Full Name</label>
+                <label>Full Name *</label>
                 <input type="text" id="studentName" placeholder="Enter full name">
             </div>
             <div class="form-group">
-                <label>Student ID</label>
-                <input type="text" id="studentId" placeholder="e.g., ST001">
+                <label>Student ID (Auto-generated)</label>
+                <input type="text" id="studentId" placeholder="Auto-generated" readonly>
             </div>
             <div class="form-group">
-                <label>Grade/Class</label>
+                <label>Grade/Class *</label>
                 <select id="studentClass">
                     <option value="Play Group">Play Group</option>
                     <option value="PP1">PP1</option>
@@ -425,7 +435,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Gender</label>
+                <label>Gender *</label>
                 <select id="studentGender">
                     <option value="Male">👨 Male</option>
                     <option value="Female">👩 Female</option>
@@ -448,6 +458,7 @@
             </div>
         </div>
         <button class="btn-add" onclick="addStudent()"><i class="fas fa-plus"></i> Add Student</button>
+        <button class="btn btn-secondary" onclick="loadStudents()" style="margin-left:10px;"><i class="fas fa-sync"></i> Refresh</button>
     </div>
 
     <!-- ===== FILTERS ===== -->
@@ -519,7 +530,7 @@
                 </tr>
             </thead>
             <tbody id="studentTableBody">
-                <tr><td colspan="8" class="no-records">Loading students...</td></tr>
+                <tr><td colspan="8" class="no-records"><span class="loading-spinner"></span> Loading students...</td></tr>
             </tbody>
         </table>
     </div>
@@ -536,7 +547,7 @@
         </div>
         <div class="form-group">
             <label>Student ID</label>
-            <input type="text" id="editStudentIdField" placeholder="e.g., ST001">
+            <input type="text" id="editStudentIdField" readonly style="background:#f0f0f0;cursor:not-allowed;">
         </div>
         <div class="form-group">
             <label>Grade/Class</label>
@@ -605,44 +616,37 @@
     // LOAD STUDENTS
     // ============================================
     async function loadStudents() {
+        const tbody = document.getElementById('studentTableBody');
+        tbody.innerHTML = '<tr><td colspan="8" class="no-records"><span class="loading-spinner"></span> Loading students...</td></tr>';
+
         try {
             const response = await fetch('/api/students');
             const data = await response.json();
+
             if (data.success) {
                 allStudents = data.students || [];
                 filteredStudents = allStudents.slice();
                 renderStudents();
                 updateStats();
                 document.getElementById('recordCount').textContent = allStudents.length + ' records';
+
+                // Generate next ID for new student
+                if (allStudents.length > 0) {
+                    const lastId = allStudents[allStudents.length - 1].studentId;
+                    const num = parseInt(lastId.replace('ST', '')) + 1;
+                    document.getElementById('studentId').value = 'ST' + String(num).padStart(3, '0');
+                } else {
+                    document.getElementById('studentId').value = 'ST001';
+                }
             } else {
                 showAlert('❌ Error loading students: ' + data.message, 'error');
+                tbody.innerHTML = '<tr><td colspan="8" class="no-records">❌ Error loading students</td></tr>';
             }
         } catch (error) {
-            // If API not available, use demo data
-            console.log('API not available, using demo data');
-            allStudents = getDemoStudents();
-            filteredStudents = allStudents.slice();
-            renderStudents();
-            updateStats();
-            document.getElementById('recordCount').textContent = allStudents.length + ' records';
-            showAlert('📋 Using demo data. Connect to API for live data.', 'info');
+            console.log('Error loading students:', error);
+            showAlert('❌ Error connecting to server. Make sure MongoDB is running.', 'error');
+            tbody.innerHTML = '<tr><td colspan="8" class="no-records">❌ Could not connect to server. Please check your connection.</td></tr>';
         }
-    }
-
-    // ============================================
-    // DEMO STUDENTS DATA (Fallback)
-    // ============================================
-    function getDemoStudents() {
-        return [
-            { id: 'ST001', name: 'John Mwangi', grade: 'Grade 4', gender: 'Male', type: 'Day Scholar', guardian: '0712345678', pin: '1234' },
-            { id: 'ST002', name: 'Mary Wanjiru', grade: 'Grade 4', gender: 'Female', type: 'Day Scholar', guardian: '0723456789', pin: '1234' },
-            { id: 'ST003', name: 'Peter Ochieng', grade: 'Grade 5', gender: 'Male', type: 'Boarder', guardian: '0734567890', pin: '1234' },
-            { id: 'ST004', name: 'Sarah Akinyi', grade: 'Grade 5', gender: 'Female', type: 'Day Scholar', guardian: '0745678901', pin: '1234' },
-            { id: 'ST005', name: 'David Omondi', grade: 'Grade 6', gender: 'Male', type: 'Boarder', guardian: '0756789012', pin: '1234' },
-            { id: 'ST006', name: 'Grace Kemunto', grade: 'Grade 6', gender: 'Female', type: 'Day Scholar', guardian: '0767890123', pin: '1234' },
-            { id: 'ST007', name: 'James Kiprop', grade: 'Grade 3', gender: 'Male', type: 'Day Scholar', guardian: '0778901234', pin: '1234' },
-            { id: 'ST008', name: 'Faith Chelangat', grade: 'Grade 3', gender: 'Female', type: 'Boarder', guardian: '0789012345', pin: '1234' },
-        ];
     }
 
     // ============================================
@@ -667,17 +671,17 @@
             html += `
                 <tr>
                     <td>${index + 1}</td>
-                    <td><strong>${student.id || student.studentId || '-'}</strong></td>
+                    <td><strong>${student.studentId || '-'}</strong></td>
                     <td><strong>${student.name || '-'}</strong></td>
                     <td>${student.grade || '-'}</td>
                     <td class="${genderClass}">${student.gender || '-'}</td>
                     <td>${typeBadge}</td>
                     <td>${student.guardian || '-'}</td>
                     <td>
-                        <button class="btn btn-edit btn-sm" onclick="openEditModal('${student.id || student.studentId}')">
+                        <button class="btn btn-edit btn-sm" onclick="openEditModal('${student.studentId}')" title="Edit Student">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-delete btn-sm" onclick="deleteStudent('${student.id || student.studentId}')">
+                        <button class="btn btn-delete btn-sm" onclick="deleteStudent('${student.studentId}')" title="Delete Student">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -737,63 +741,58 @@
     }
 
     // ============================================
-    // ADD STUDENT
+    // ADD STUDENT (Auto-generates ID)
     // ============================================
     async function addStudent() {
         const name = document.getElementById('studentName').value.trim();
-        const studentId = document.getElementById('studentId').value.trim();
         const grade = document.getElementById('studentClass').value;
         const gender = document.getElementById('studentGender').value;
         const type = document.getElementById('studentType').value;
         const guardian = document.getElementById('guardianPhone').value.trim();
         const pin = document.getElementById('studentPin').value.trim() || '1234';
 
-        if (!name || !studentId) {
-            showAlert('❌ Please enter Name and Student ID', 'error');
+        if (!name) {
+            showAlert('❌ Please enter Student Name', 'error');
+            document.getElementById('studentName').focus();
             return;
         }
+
         if (pin.length < 4 || pin.length > 6) {
             showAlert('❌ PIN must be 4-6 digits', 'error');
             return;
         }
 
-        // Check for duplicate ID
-        if (allStudents.some(s => s.id === studentId || s.studentId === studentId)) {
-            showAlert('❌ Student ID already exists!', 'error');
-            return;
-        }
+        // Show loading state
+        const addBtn = document.querySelector('.btn-add');
+        const originalText = addBtn.innerHTML;
+        addBtn.innerHTML = '<span class="loading-spinner"></span> Adding...';
+        addBtn.disabled = true;
 
-        const newStudent = { id: studentId, name, grade, gender, type, guardian, pin };
+        const studentData = { name, grade, gender, type, guardian, pin };
 
         try {
             const response = await fetch('/api/students', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newStudent)
+                body: JSON.stringify(studentData)
             });
             const data = await response.json();
+
             if (data.success) {
-                showAlert('✅ Student added successfully!', 'success');
+                showAlert('✅ Student ' + data.student.studentId + ' added successfully!', 'success');
                 document.getElementById('studentName').value = '';
-                document.getElementById('studentId').value = '';
                 document.getElementById('guardianPhone').value = '';
                 document.getElementById('studentPin').value = '1234';
-                loadStudents();
+                await loadStudents();
             } else {
                 showAlert('❌ Error: ' + data.message, 'error');
             }
         } catch (error) {
-            // Fallback: Add to local array
-            allStudents.push(newStudent);
-            filteredStudents = allStudents.slice();
-            renderStudents();
-            updateStats();
-            document.getElementById('recordCount').textContent = allStudents.length + ' records';
-            document.getElementById('studentName').value = '';
-            document.getElementById('studentId').value = '';
-            document.getElementById('guardianPhone').value = '';
-            document.getElementById('studentPin').value = '1234';
-            showAlert('✅ Student added successfully (local)!', 'success');
+            console.error('Error adding student:', error);
+            showAlert('❌ Error adding student: ' + error.message, 'error');
+        } finally {
+            addBtn.innerHTML = originalText;
+            addBtn.disabled = false;
         }
     }
 
@@ -801,21 +800,22 @@
     // OPEN EDIT MODAL
     // ============================================
     function openEditModal(studentId) {
-        const student = allStudents.find(s => s.id === studentId || s.studentId === studentId);
+        const student = allStudents.find(s => s.studentId === studentId);
         if (!student) {
             showAlert('❌ Student not found', 'error');
             return;
         }
 
-        document.getElementById('editStudentId').value = student.id || student.studentId;
+        document.getElementById('editStudentId').value = student.studentId;
         document.getElementById('editName').value = student.name || '';
-        document.getElementById('editStudentIdField').value = student.id || student.studentId || '';
+        document.getElementById('editStudentIdField').value = student.studentId || '';
         document.getElementById('editClass').value = student.grade || '';
         document.getElementById('editGender').value = student.gender || 'Male';
         document.getElementById('editType').value = student.type || 'Day Scholar';
         document.getElementById('editGuardian').value = student.guardian || '';
         document.getElementById('editPin').value = student.pin || '1234';
         document.getElementById('editResult').style.display = 'none';
+        document.getElementById('editResult').innerHTML = '';
 
         document.getElementById('editModal').classList.add('active');
     }
@@ -828,17 +828,16 @@
     // SAVE EDIT STUDENT
     // ============================================
     async function saveEditStudent() {
-        const originalId = document.getElementById('editStudentId').value;
+        const studentId = document.getElementById('editStudentId').value;
         const name = document.getElementById('editName').value.trim();
-        const studentId = document.getElementById('editStudentIdField').value.trim();
         const grade = document.getElementById('editClass').value;
         const gender = document.getElementById('editGender').value;
         const type = document.getElementById('editType').value;
         const guardian = document.getElementById('editGuardian').value.trim();
         const pin = document.getElementById('editPin').value.trim() || '1234';
 
-        if (!name || !studentId) {
-            showEditResult('❌ Please enter Name and Student ID', 'error');
+        if (!name) {
+            showEditResult('❌ Please enter Student Name', 'error');
             return;
         }
         if (pin.length < 4 || pin.length > 6) {
@@ -846,21 +845,22 @@
             return;
         }
 
-        // Check duplicate ID (excluding current student)
-        if (studentId !== originalId && allStudents.some(s => s.id === studentId || s.studentId === studentId)) {
-            showEditResult('❌ Student ID already exists!', 'error');
-            return;
-        }
+        const updatedData = { name, grade, gender, type, guardian, pin };
 
-        const updatedStudent = { id: studentId, name, grade, gender, type, guardian, pin };
+        // Show loading
+        const saveBtn = document.querySelector('.btn-save');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
+        saveBtn.disabled = true;
 
         try {
-            const response = await fetch('/api/students/' + originalId, {
+            const response = await fetch('/api/students/' + studentId, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedStudent)
+                body: JSON.stringify(updatedData)
             });
             const data = await response.json();
+
             if (data.success) {
                 showEditResult('✅ Student updated successfully!', 'success');
                 setTimeout(() => {
@@ -871,18 +871,10 @@
                 showEditResult('❌ Error: ' + data.message, 'error');
             }
         } catch (error) {
-            // Fallback: Update locally
-            const index = allStudents.findIndex(s => s.id === originalId || s.studentId === originalId);
-            if (index !== -1) {
-                allStudents[index] = { ...allStudents[index], ...updatedStudent };
-                filteredStudents = allStudents.slice();
-                renderStudents();
-                updateStats();
-                showEditResult('✅ Student updated successfully (local)!', 'success');
-                setTimeout(() => { closeEditModal(); }, 1000);
-            } else {
-                showEditResult('❌ Student not found', 'error');
-            }
+            showEditResult('❌ Error updating student: ' + error.message, 'error');
+        } finally {
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
         }
     }
 
@@ -904,20 +896,15 @@
         try {
             const response = await fetch('/api/students/' + studentId, { method: 'DELETE' });
             const data = await response.json();
+
             if (data.success) {
                 showAlert('✅ Student deleted successfully!', 'success');
-                loadStudents();
+                await loadStudents();
             } else {
                 showAlert('❌ Error: ' + data.message, 'error');
             }
         } catch (error) {
-            // Fallback: Delete locally
-            allStudents = allStudents.filter(s => s.id !== studentId && s.studentId !== studentId);
-            filteredStudents = allStudents.slice();
-            renderStudents();
-            updateStats();
-            document.getElementById('recordCount').textContent = allStudents.length + ' records';
-            showAlert('✅ Student deleted successfully (local)!', 'success');
+            showAlert('❌ Error deleting student: ' + error.message, 'error');
         }
     }
 
@@ -940,14 +927,16 @@
         let csv = '\uFEFF'; // UTF-8 BOM for Excel
         csv += 'Student ID,Name,Grade,Gender,Type,Guardian\n';
         students.forEach(s => {
-            csv += `"${s.id || s.studentId || '-'}","${s.name || '-'}","${s.grade || '-'}","${s.gender || '-'}","${s.type || '-'}","${s.guardian || '-'}"\n`;
+            csv += `"${s.studentId || '-'}","${s.name || '-'}","${s.grade || '-'}","${s.gender || '-'}","${s.type || '-'}","${s.guardian || '-'}"\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = `students_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
         showAlert('✅ CSV exported successfully!', 'success');
     }
@@ -963,12 +952,17 @@
         }
 
         const printWindow = window.open('', '_blank', 'width=1100,height=800');
+        if (!printWindow) {
+            showAlert('❌ Please allow popups for this site', 'error');
+            return;
+        }
+
         const now = new Date();
 
         let rowsHtml = students.map((s, i) => `
             <tr>
                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${i + 1}</td>
-                <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${s.id || s.studentId || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${s.studentId || '-'}</td>
                 <td style="padding:6px 10px;border:1px solid #ddd;">${s.name || '-'}</td>
                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.grade || '-'}</td>
                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.gender || '-'}</td>
@@ -1031,7 +1025,7 @@
             </html>
         `);
         printWindow.document.close();
-        showAlert('📄 Print window opened', 'info');
+        showAlert('📄 Print window opened', 'success');
     }
 
     // ============================================
@@ -1042,12 +1036,18 @@
     });
 
     // ============================================
+    // ENTER KEY FOR ADD STUDENT
+    // ============================================
+    document.getElementById('studentPin').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') addStudent();
+    });
+
+    // ============================================
     // INIT
     // ============================================
     document.addEventListener('DOMContentLoaded', function() {
         loadStudents();
     });
 </script>
-
 </body>
 </html>

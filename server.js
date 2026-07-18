@@ -19,13 +19,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================
-// HELPER: GET KENYA TIME (UTC+3) - SIMPLE & RELIABLE
+// HELPER: GET KENYA TIME (UTC+3) - RELIABLE
 // ============================================
 function getKenyaTime() {
-    // Get current UTC time and add 3 hours (Kenya is UTC+3)
     const now = new Date();
-    const kenyaTime = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-    return kenyaTime;
+    const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
+    return new Date(kenyaTimeString);
 }
 
 function getKenyaDate() {
@@ -39,46 +38,42 @@ function getKenyaHour() {
     return getKenyaTime().getHours();
 }
 
-function getKenyaMinutes() {
-    return getKenyaTime().getMinutes();
-}
-
 function formatKenyaTime(date) {
     if (!date) return '-';
     const d = new Date(date);
-    let hours = d.getHours();
-    let minutes = d.getMinutes();
-    const ampm = hours >= 12 ? 'pm' : 'am';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const strMinutes = minutes < 10 ? '0' + minutes : minutes;
-    return hours + ':' + strMinutes + ' ' + ampm;
+    return d.toLocaleTimeString('en-KE', {
+        timeZone: 'Africa/Nairobi',
+        hour12: true,
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
 
 function formatKenyaFullTime(date) {
     if (!date) return '-';
     const d = new Date(date);
-    let hours = d.getHours();
-    let minutes = d.getMinutes();
-    let seconds = d.getSeconds();
-    const ampm = hours >= 12 ? 'pm' : 'am';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const strMinutes = minutes < 10 ? '0' + minutes : minutes;
-    const strSeconds = seconds < 10 ? '0' + seconds : seconds;
-    return hours + ':' + strMinutes + ':' + strSeconds + ' ' + ampm;
+    return d.toLocaleTimeString('en-KE', {
+        timeZone: 'Africa/Nairobi',
+        hour12: true,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
 }
 
 function formatKenyaDate(date) {
     if (!date) return '-';
     const d = new Date(date);
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    return days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    return d.toLocaleDateString('en-KE', {
+        timeZone: 'Africa/Nairobi',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
 }
 
 // ============================================
-// REPORT HTML GENERATORS - DEFINED FIRST
+// REPORT HTML GENERATORS
 // ============================================
 
 // STAFF REPORT HTML GENERATOR - SINGLE PAGE
@@ -131,31 +126,13 @@ function generateStaffReportHTML(report, title, periodInfo) {
             <title>Staff Attendance Report</title>
             <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { 
-                    font-family: 'Segoe UI', Arial, sans-serif; 
-                    padding: 8px; 
-                    max-width: 1100px; 
-                    margin: 0 auto; 
-                    font-size: 8px;
-                    line-height: 1.2;
-                }
+                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 8px; max-width: 1100px; margin: 0 auto; font-size: 8px; line-height: 1.2; }
                 .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 4px; margin-bottom: 6px; }
                 .header h1 { color: #0A1628; font-size: 14px; margin: 0; }
                 .header h1 .school-name { color: #D4A017; }
                 .header p { color: #666; margin: 1px 0; font-size: 8px; }
-                .summary-box { 
-                    display: grid; 
-                    grid-template-columns: repeat(6, 1fr); 
-                    gap: 4px; 
-                    margin-bottom: 6px; 
-                }
-                .summary-box .item { 
-                    text-align: center; 
-                    padding: 3px 4px; 
-                    background: #f8f9fc; 
-                    border-radius: 4px; 
-                    border: 1px solid #e8ecf1; 
-                }
+                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 6px; }
+                .summary-box .item { text-align: center; padding: 3px 4px; background: #f8f9fc; border-radius: 4px; border: 1px solid #e8ecf1; }
                 .summary-box .item .num { font-size: 14px; font-weight: 700; }
                 .summary-box .item .label { font-size: 6px; color: #666; }
                 .summary-box .item .num.gold { color: #D4A017; }
@@ -182,7 +159,6 @@ function generateStaffReportHTML(report, title, periodInfo) {
                 <p>${title}</p>
                 <p style="font-size:6px;color:#999;">${periodInfo}</p>
             </div>
-            
             <div class="summary-box">
                 <div class="item"><div class="num gold">${totalStaff}</div><div class="label">Total Staff</div></div>
                 <div class="item"><div class="num green">${totalOnTime}</div><div class="label">✅ On Time</div></div>
@@ -191,7 +167,6 @@ function generateStaffReportHTML(report, title, periodInfo) {
                 <div class="item"><div class="num blue">${attendanceRate}%</div><div class="label">📈 Attendance</div></div>
                 <div class="item"><div class="num" style="color:#0A1628;">${totalDays}</div><div class="label">📅 Total Days</div></div>
             </div>
-            
             ${topPerformers.length > 0 ? `
             <div class="top-performers">
                 <span style="font-weight:600;font-size:7px;">🏆 Top Performers:</span>
@@ -201,7 +176,6 @@ function generateStaffReportHTML(report, title, periodInfo) {
                 }).join('')}
             </div>
             ` : ''}
-            
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -222,7 +196,6 @@ function generateStaffReportHTML(report, title, periodInfo) {
                     </tbody>
                 </table>
             </div>
-            
             <div class="footer">
                 <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
                 <p>Generated on ${formatKenyaFullTime(now)}</p>
@@ -279,31 +252,13 @@ function generateVisitorReportHTML(report, title, periodInfo) {
             <title>Visitor Report</title>
             <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { 
-                    font-family: 'Segoe UI', Arial, sans-serif; 
-                    padding: 6px; 
-                    max-width: 1100px; 
-                    margin: 0 auto; 
-                    font-size: 7px;
-                    line-height: 1.1;
-                }
+                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 6px; max-width: 1100px; margin: 0 auto; font-size: 7px; line-height: 1.1; }
                 .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 3px; margin-bottom: 4px; }
                 .header h1 { color: #0A1628; font-size: 13px; margin: 0; }
                 .header h1 .school-name { color: #D4A017; }
                 .header p { color: #666; margin: 1px 0; font-size: 7px; }
-                .summary-box { 
-                    display: grid; 
-                    grid-template-columns: repeat(6, 1fr); 
-                    gap: 3px; 
-                    margin-bottom: 4px; 
-                }
-                .summary-box .item { 
-                    text-align: center; 
-                    padding: 2px 3px; 
-                    background: #f8f9fc; 
-                    border-radius: 3px; 
-                    border: 1px solid #e8ecf1; 
-                }
+                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; margin-bottom: 4px; }
+                .summary-box .item { text-align: center; padding: 2px 3px; background: #f8f9fc; border-radius: 3px; border: 1px solid #e8ecf1; }
                 .summary-box .item .num { font-size: 12px; font-weight: 700; }
                 .summary-box .item .label { font-size: 5px; color: #666; }
                 .summary-box .item .num.gold { color: #D4A017; }
@@ -329,7 +284,6 @@ function generateVisitorReportHTML(report, title, periodInfo) {
                 <p>${title}</p>
                 <p style="font-size:5px;color:#999;">${periodInfo}</p>
             </div>
-            
             <div class="summary-box">
                 <div class="item"><div class="num gold">${totalVisitors}</div><div class="label">Total Visitors</div></div>
                 <div class="item"><div class="num blue">${active}</div><div class="label">✅ Checked In</div></div>
@@ -337,7 +291,6 @@ function generateVisitorReportHTML(report, title, periodInfo) {
                 <div class="item"><div class="num orange">${avgDuration}m</div><div class="label">⏱️ Avg Duration</div></div>
                 <div class="item"><div class="num purple">${Object.keys(purposeCount).length}</div><div class="label">📋 Purposes</div></div>
             </div>
-            
             ${topPurposes.length > 0 ? `
             <div class="purpose-tags">
                 ${topPurposes.map(([purpose, count]) => 
@@ -345,7 +298,6 @@ function generateVisitorReportHTML(report, title, periodInfo) {
                 ).join('')}
             </div>
             ` : ''}
-            
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -366,7 +318,6 @@ function generateVisitorReportHTML(report, title, periodInfo) {
                     </tbody>
                 </table>
             </div>
-            
             <div class="footer">
                 <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
                 <p>Generated on ${formatKenyaFullTime(now)}</p>
@@ -495,6 +446,7 @@ const upload = multer({
 // SCHEMAS
 // ============================================
 
+// Content Schema
 const contentSchema = new mongoose.Schema({
     heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
     heroSubtitle: { type: String, default: 'Your trusted partner in quality education and school management' },
@@ -566,6 +518,7 @@ contentSchema.statics.getContent = async function() {
 
 const Content = mongoose.model('Content', contentSchema);
 
+// Admin Schema
 const adminSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
@@ -578,6 +531,7 @@ const adminSchema = new mongoose.Schema({
 
 const Admin = mongoose.model('Admin', adminSchema);
 
+// Teacher Schema
 const teacherSchema = new mongoose.Schema({
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
@@ -602,6 +556,7 @@ const teacherSchema = new mongoose.Schema({
 
 const Teacher = mongoose.model('Teacher', teacherSchema);
 
+// Visitor Schema
 const visitorSchema = new mongoose.Schema({
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
@@ -630,6 +585,23 @@ visitorSchema.set('toObject', { virtuals: true });
 
 const Visitor = mongoose.model('Visitor', visitorSchema);
 
+// Student Schema
+const studentSchema = new mongoose.Schema({
+    studentId: { type: String, unique: true },
+    name: { type: String, required: true },
+    grade: { type: String, required: true },
+    gender: { type: String, enum: ['Male', 'Female'], required: true },
+    type: { type: String, enum: ['Day Scholar', 'Boarder'], default: 'Day Scholar' },
+    guardian: { type: String, default: '' },
+    pin: { type: String, default: '1234' },
+    isActive: { type: Boolean, default: true },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+});
+
+const Student = mongoose.model('Student', studentSchema);
+
+// Subject Config Schema
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
@@ -642,6 +614,7 @@ subjectConfigSchema.index({ grade: 1, type: 1 }, { unique: true });
 
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
 
+// Student Assessment Schema
 const studentAssessmentSchema = new mongoose.Schema({
     studentName: { type: String, required: true },
     admissionNumber: { type: String, default: '' },
@@ -719,6 +692,24 @@ function getDefaultSubjects(grade, type) {
         return configs[type]?.[grade] || configs['weekly']['Grade 1'] || fallback;
     } catch {
         return fallback;
+    }
+}
+
+// ============================================
+// GENERATE STUDENT ID
+// ============================================
+async function generateStudentId() {
+    try {
+        const lastStudent = await Student.findOne({}).sort({ studentId: -1 });
+        if (!lastStudent) {
+            return 'ST001';
+        }
+        const lastId = lastStudent.studentId;
+        const num = parseInt(lastId.replace('ST', '')) + 1;
+        return 'ST' + String(num).padStart(3, '0');
+    } catch (error) {
+        console.error('Error generating student ID:', error);
+        return 'ST001';
     }
 }
 
@@ -841,7 +832,6 @@ function generateStudentReportHTML(student, allAssessments = null) {
                 <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
                 <p>Student Assessment Report - CBC Performance Analysis</p>
             </div>
-            
             <div class="student-info">
                 <table>
                     <tr><td class="label">Student Name:</td><td class="value">${student.studentName || 'N/A'}</td></tr>
@@ -853,7 +843,6 @@ function generateStudentReportHTML(student, allAssessments = null) {
                     <tr><td class="label">Report Date:</td><td>${formatKenyaFullTime(new Date())}</td></tr>
                 </table>
             </div>
-            
             <div class="performance-box" style="background: ${overallColor}15; border: 2px solid ${overallColor};">
                 <div class="level" style="color: ${overallColor};">${overallLevel}</div>
                 <div class="score">Total Score: ${totalScore} | Average: ${avgPercentage.toFixed(1)}%</div>
@@ -864,25 +853,20 @@ function generateStudentReportHTML(student, allAssessments = null) {
                     <span class="badge badge-below">📕 Below: ${belowCount}</span>
                 </div>
             </div>
-            
             <table>
                 <thead><tr><th>Subject</th><th style="text-align:center;">Max</th><th style="text-align:center;">Score</th><th style="text-align:center;">%</th><th style="text-align:center;">Performance</th></tr></thead>
                 <tbody>${subjectsHtml}</tbody>
             </table>
-            
             <div class="analysis-grid">
                 <div class="analysis-box"><h4 style="color:#28a745;">🏆 Strengths</h4>${strengthsHtml}</div>
                 <div class="analysis-box weakness"><h4 style="color:#dc3545;">📚 Needs Improvement</h4>${weaknessesHtml}</div>
             </div>
-            
             <div class="summary-box">
                 <p><strong>Overall:</strong> ${student.studentName || 'The student'} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()}</strong> with an average of <strong>${avgPercentage.toFixed(1)}%</strong>.</p>
             </div>
-            
             <div class="footer">
                 <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
             </div>
-            
             <div class="no-print" style="text-align:center;margin-top:10px;">
                 <button onclick="window.print()" style="padding:8px 20px;background:#D4A017;color:#0A1628;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:12px;">🖨️ Print / Save as PDF</button>
             </div>
@@ -1031,9 +1015,6 @@ app.post('/api/teacher/register', async (req, res) => {
     }
 });
 
-// ============================================
-// TEACHER CHECK-IN - FIXED WITH KENYA TIME
-// ============================================
 app.post('/api/teacher/checkin', async (req, res) => {
     try {
         const { employeeId, pin } = req.body;
@@ -1045,28 +1026,18 @@ app.post('/api/teacher/checkin', async (req, res) => {
             return res.status(401).json({ success: false, message: '❌ Invalid PIN. Please try again.' });
         }
         
-        // Get Kenya time
         const kenyaNow = getKenyaTime();
         const kenyaToday = getKenyaDate();
         const kenyaHour = getKenyaHour();
         const dayOfWeek = kenyaNow.getDay();
         
-        console.log('========================================');
-        console.log('📍 CHECK-IN REQUEST');
-        console.log('📅 Date:', kenyaNow.toISOString());
-        console.log('🕐 Raw Time:', kenyaNow.getTime());
-        console.log('🕐 Hours (24h):', kenyaHour);
-        console.log('🕐 Formatted:', formatKenyaFullTime(kenyaNow));
-        console.log('🕐 UTC Time:', new Date().toISOString());
-        console.log('🕐 UTC Hours:', new Date().getUTCHours());
-        console.log('========================================');
+        console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
+        console.log('🕐 Hour (Kenya time):', kenyaHour);
         
-        // Weekend check
         if (dayOfWeek === 0 || dayOfWeek === 6) {
             return res.status(400).json({ success: false, message: '📅 Weekend! Check-in is only available on weekdays (Monday-Friday).' });
         }
         
-        // Check if already checked in today
         const existingAttendance = teacher.attendance.find(a => {
             const aDate = new Date(a.date);
             aDate.setHours(0, 0, 0, 0);
@@ -1077,16 +1048,13 @@ app.post('/api/teacher/checkin', async (req, res) => {
             return res.status(400).json({ success: false, message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn) });
         }
         
-        // Check if after 5:00 PM (17:00)
         if (kenyaHour >= 17) {
             return res.status(400).json({ success: false, message: '⏰ Check-in is not allowed after 5:00 PM. Please try again tomorrow.' });
         }
         
-        // Determine if late (after 7:00 AM)
         const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
         const status = isLate ? 'Late' : 'Present';
         
-        // Store check-in time
         teacher.attendance.push({
             date: kenyaToday,
             checkIn: kenyaNow,
@@ -1100,7 +1068,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
         
         const message = isLate ? '⚠️ Check-in successful! (You are LATE - after 7:00 AM)' : '✅ Check-in successful! (On time)';
         const formattedTime = formatKenyaTime(kenyaNow);
-        console.log('📤 Returning check-in time:', formattedTime);
         
         res.json({
             success: true,
@@ -1117,9 +1084,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
     }
 });
 
-// ============================================
-// TEACHER CHECK-OUT - FIXED WITH KENYA TIME
-// ============================================
 app.post('/api/teacher/checkout', async (req, res) => {
     try {
         const { employeeId, pin } = req.body;
@@ -1131,20 +1095,13 @@ app.post('/api/teacher/checkout', async (req, res) => {
             return res.status(401).json({ success: false, message: '❌ Invalid PIN. Please try again.' });
         }
         
-        // Get Kenya time
         const kenyaNow = getKenyaTime();
         const kenyaToday = getKenyaDate();
         const kenyaHour = getKenyaHour();
         
-        console.log('========================================');
-        console.log('📍 CHECK-OUT REQUEST');
-        console.log('📅 Date:', kenyaNow.toISOString());
-        console.log('🕐 Raw Time:', kenyaNow.getTime());
-        console.log('🕐 Hours (24h):', kenyaHour);
-        console.log('🕐 Formatted:', formatKenyaFullTime(kenyaNow));
-        console.log('========================================');
+        console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
+        console.log('🕐 Hour (Kenya time):', kenyaHour);
         
-        // Find today's attendance
         const todayAttendance = teacher.attendance.find(a => {
             const aDate = new Date(a.date);
             aDate.setHours(0, 0, 0, 0);
@@ -1154,17 +1111,13 @@ app.post('/api/teacher/checkout', async (req, res) => {
         if (!todayAttendance) {
             return res.status(400).json({ success: false, message: '❌ No check-in found for today. Please check in first.' });
         }
-        
         if (todayAttendance.checkOut) {
             return res.status(400).json({ success: false, message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut) });
         }
-        
-        // Allow check-out after 3:00 PM (15:00)
         if (kenyaHour < 15) {
             return res.status(400).json({ success: false, message: '⏰ Check-out is only allowed after 3:00 PM. Please continue working.' });
         }
         
-        // Store check-out time
         todayAttendance.checkOut = kenyaNow;
         todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
         const checkInTime = new Date(todayAttendance.checkIn);
@@ -1185,10 +1138,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
-// ============================================
-// GET TODAY'S ATTENDANCE
-// ============================================
 
 app.get('/api/teacher/attendance/today', async (req, res) => {
     try {
@@ -1438,6 +1387,174 @@ app.get('/api/visitors/today', async (req, res) => {
         const active = visitors.filter(v => v.status === 'Checked In');
         const completed = visitors.filter(v => v.status === 'Checked Out');
         res.json({ success: true, date: kenyaToday, total: visitors.length, active: active.length, completed: completed.length, visitors: visitors.map(v => ({ ...v.toObject(), checkInTime: formatKenyaTime(v.checkIn), checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null })) });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// STUDENT MANAGEMENT API ROUTES
+// ============================================
+
+// GET ALL STUDENTS
+app.get('/api/students', async (req, res) => {
+    try {
+        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+        res.json({ success: true, students });
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET SINGLE STUDENT
+app.get('/api/students/:id', async (req, res) => {
+    try {
+        const student = await Student.findOne({ studentId: req.params.id });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        res.json({ success: true, student });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ADD STUDENT (Auto-generates ID)
+app.post('/api/students', async (req, res) => {
+    try {
+        const { name, grade, gender, type, guardian, pin } = req.body;
+
+        if (!name || !grade || !gender) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Name, Grade, and Gender are required' 
+            });
+        }
+
+        const studentId = await generateStudentId();
+
+        const student = new Student({
+            studentId,
+            name,
+            grade,
+            gender,
+            type: type || 'Day Scholar',
+            guardian: guardian || '',
+            pin: pin || '1234',
+            isActive: true
+        });
+
+        await student.save();
+
+        res.status(201).json({
+            success: true,
+            message: `✅ Student ${studentId} added successfully!`,
+            student
+        });
+
+    } catch (error) {
+        console.error('Error adding student:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// UPDATE STUDENT
+app.put('/api/students/:id', async (req, res) => {
+    try {
+        const { name, grade, gender, type, guardian, pin } = req.body;
+        const student = await Student.findOne({ studentId: req.params.id });
+
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+
+        if (name) student.name = name;
+        if (grade) student.grade = grade;
+        if (gender) student.gender = gender;
+        if (type) student.type = type;
+        if (guardian) student.guardian = guardian;
+        if (pin) student.pin = pin;
+        student.updatedAt = new Date();
+
+        await student.save();
+
+        res.json({
+            success: true,
+            message: `✅ Student ${student.studentId} updated successfully!`,
+            student
+        });
+
+    } catch (error) {
+        console.error('Error updating student:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// DELETE STUDENT (Soft delete)
+app.delete('/api/students/:id', async (req, res) => {
+    try {
+        const student = await Student.findOne({ studentId: req.params.id });
+
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+
+        student.isActive = false;
+        await student.save();
+
+        res.json({
+            success: true,
+            message: `✅ Student ${student.studentId} deleted successfully!`
+        });
+
+    } catch (error) {
+        console.error('Error deleting student:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// STUDENT LOGIN
+app.post('/api/student/login', async (req, res) => {
+    try {
+        const { studentId, pin } = req.body;
+
+        if (!studentId || !pin) {
+            return res.status(400).json({
+                success: false,
+                message: 'Student ID and PIN are required'
+            });
+        }
+
+        const student = await Student.findOne({ studentId, isActive: true });
+
+        if (!student) {
+            return res.status(404).json({
+                success: false,
+                message: 'Student not found'
+            });
+        }
+
+        if (student.pin !== pin) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid PIN'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Login successful',
+            student: {
+                studentId: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                type: student.type,
+                guardian: student.guardian
+            }
+        });
+
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -2019,24 +2136,12 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 app.use('/uploads', express.static('uploads'));
 
 // ============================================
-// TEST ROUTE - CHECK TIME
+// TEST ROUTE
 // ============================================
 
 app.get('/api/test', (req, res) => {
     const kenyaNow = getKenyaTime();
-    res.json({ 
-        success: true, 
-        message: '🎉 Changara Star Academy is running!', 
-        data: { 
-            server: 'Online', 
-            kenyaTime: kenyaNow.toISOString(),
-            kenyaTimeFormatted: formatKenyaFullTime(kenyaNow),
-            kenyaDate: formatKenyaDate(kenyaNow),
-            hour: getKenyaHour(),
-            minutes: getKenyaMinutes(),
-            timestamp: new Date().toISOString() 
-        } 
-    });
+    res.json({ success: true, message: '🎉 Changara Star Academy is running!', data: { server: 'Online', kenyaTime: kenyaNow.toLocaleString(), kenyaTimeFormatted: formatKenyaFullTime(kenyaNow), timestamp: new Date().toISOString() } });
 });
 
 // ============================================
@@ -2068,9 +2173,9 @@ app.listen(PORT, () => {
     console.log('🏫 CHANGARA STAR ACADEMY');
     console.log('='.repeat(50));
     console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`🕐 Kenya Time: ${formatKenyaFullTime(kenyaNow)}`);
-    console.log(`📅 Kenya Date: ${formatKenyaDate(kenyaNow)}`);
+    console.log(`🕐 Kenya Time: ${kenyaNow.toLocaleString()}`);
     console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
+    console.log(`📚 Student API: http://localhost:${PORT}/api/students`);
     console.log('='.repeat(50));
     console.log('✅ Server started successfully!');
 });
