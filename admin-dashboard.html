@@ -454,6 +454,9 @@
             <div class="menu-label" style="margin-top:10px;">Academic Assessments</div>
             <a onclick="window.location.href='admin-academics.html'"><i class="fas fa-edit"></i> Assessments</a>
             
+            <div class="menu-label" style="margin-top:10px;">Finance Management</div>
+            <a onclick="window.location.href='ClerkDashboard.html'"><i class="fas fa-coins"></i> Clerk Dashboard</a>
+            
             <div class="menu-label" style="margin-top:10px;">Reports</div>
             <a onclick="showSection('staff-reports')"><i class="fas fa-chart-bar"></i> Staff Reports</a>
             <a onclick="showSection('visitor-reports')"><i class="fas fa-chart-pie"></i> Visitor Reports</a>
@@ -487,7 +490,7 @@
         <!-- ===== DASHBOARD SECTION ===== -->
         <div id="section-dashboard" class="editor-container active">
             <h2>📊 Dashboard Overview</h2>
-            <p class="desc">Welcome to the Admin Dashboard. Manage staff, students, visitors, assessments, and view reports.</p>
+            <p class="desc">Welcome to the Admin Dashboard. Manage staff, students, visitors, finance, assessments, and view reports.</p>
             <div class="dashboard-cards">
                 <div class="dashboard-card" onclick="showSection('staff-management')">
                     <span class="icon">👨‍💼</span>
@@ -513,6 +516,11 @@
                     <span class="icon">📝</span>
                     <h3>Assessments</h3>
                     <p>Manage student results</p>
+                </div>
+                <div class="dashboard-card" onclick="window.location.href='ClerkDashboard.html'" style="border-color:#d4a017;">
+                    <span class="icon">💰</span>
+                    <h3>Clerk Dashboard</h3>
+                    <p>Manage fees & payments</p>
                 </div>
                 <div class="dashboard-card" onclick="showSection('staff-reports')">
                     <span class="icon">📊</span>
@@ -721,6 +729,7 @@
                 <button class="btn btn-info" onclick="exportStaffReport()"><i class="fas fa-file-excel"></i> Export CSV</button>
                 <button class="btn btn-pdf" onclick="downloadStaffReportPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
             </div>
+
             <div class="analysis-summary" id="staffAnalysisSummary">
                 <h4 style="color:#0A1628;margin-bottom:10px;">📊 Attendance Analysis</h4>
                 <div class="row" id="staffAnalysisRow">
@@ -731,10 +740,12 @@
                     <div class="item"><div class="label">📈 Attendance Rate</div><div class="value" id="staffReportRate" style="color:#17a2b8;">0%</div></div>
                 </div>
             </div>
+
             <div class="chart-container">
                 <div class="chart-box"><h4>Attendance Status</h4><canvas id="staffStatusChart"></canvas></div>
                 <div class="chart-box"><h4>Daily Trend</h4><canvas id="staffTrendChart"></canvas></div>
             </div>
+
             <div class="table-wrapper">
                 <table>
                     <thead><tr><th>#</th><th>Staff Name</th><th>Employee ID</th><th>Department</th><th>Total Days</th><th>On Time</th><th>Late</th><th>Absent</th><th>Attendance Rate</th></tr></thead>
@@ -776,6 +787,7 @@
                 <button class="btn btn-info" onclick="exportVisitorReport()"><i class="fas fa-file-excel"></i> Export CSV</button>
                 <button class="btn btn-pdf" onclick="downloadVisitorReportPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
             </div>
+
             <div class="analysis-summary" id="visitorAnalysisSummary">
                 <h4 style="color:#0A1628;margin-bottom:10px;">📊 Visitor Analysis</h4>
                 <div class="row" id="visitorAnalysisRow">
@@ -785,10 +797,12 @@
                     <div class="item"><div class="label">⏱️ Avg Duration</div><div class="value" id="visitorReportAvgDuration" style="color:#D4A017;">0 min</div></div>
                 </div>
             </div>
+
             <div class="chart-container">
                 <div class="chart-box"><h4>Visitor Purpose Distribution</h4><canvas id="visitorPurposeChart"></canvas></div>
                 <div class="chart-box"><h4>Daily Visitor Trend</h4><canvas id="visitorTrendChart"></canvas></div>
             </div>
+
             <div class="table-wrapper">
                 <table>
                     <thead><tr><th>#</th><th>Visitor Name</th><th>Badge #</th><th>Purpose</th><th>Person to Visit</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Duration</th></tr></thead>
