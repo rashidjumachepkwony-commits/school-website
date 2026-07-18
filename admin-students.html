@@ -423,7 +423,7 @@
             <div class="form-group">
                 <label>Grade/Class *</label>
                 <select id="studentClass">
-                    <option value="Play Group">Play Group</option>
+                    <option value="Playgroup">Playgroup</option>
                     <option value="PP1">PP1</option>
                     <option value="PP2">PP2</option>
                     <option value="Grade 1">Grade 1</option>
@@ -471,7 +471,7 @@
             <label>📚 Grade</label>
             <select id="filterGrade" onchange="filterStudents()">
                 <option value="">All Grades</option>
-                <option value="Play Group">Play Group</option>
+                <option value="Playgroup">Playgroup</option>
                 <option value="PP1">PP1</option>
                 <option value="PP2">PP2</option>
                 <option value="Grade 1">Grade 1</option>
@@ -552,7 +552,7 @@
         <div class="form-group">
             <label>Grade/Class</label>
             <select id="editClass">
-                <option value="Play Group">Play Group</option>
+                <option value="Playgroup">Playgroup</option>
                 <option value="PP1">PP1</option>
                 <option value="PP2">PP2</option>
                 <option value="Grade 1">Grade 1</option>
@@ -630,11 +630,15 @@
                 updateStats();
                 document.getElementById('recordCount').textContent = allStudents.length + ' records';
 
-                // Generate next ID for new student
+                // Generate next ID
                 if (allStudents.length > 0) {
                     const lastId = allStudents[allStudents.length - 1].studentId;
-                    const num = parseInt(lastId.replace('ST', '')) + 1;
-                    document.getElementById('studentId').value = 'ST' + String(num).padStart(3, '0');
+                    if (lastId) {
+                        const num = parseInt(lastId.replace('ST', '')) + 1;
+                        document.getElementById('studentId').value = 'ST' + String(num).padStart(3, '0');
+                    } else {
+                        document.getElementById('studentId').value = 'ST001';
+                    }
                 } else {
                     document.getElementById('studentId').value = 'ST001';
                 }
@@ -668,20 +672,28 @@
                 '<span class="badge-boarder">🏠 Boarder</span>' :
                 '<span class="badge-day">📖 Day Scholar</span>';
 
+            // Use studentId field (from imported data)
+            const studentId = student.studentId || student.id || '-';
+            const name = student.name || '-';
+            const grade = student.grade || '-';
+            const gender = student.gender || '-';
+            const type = student.type || 'Day Scholar';
+            const guardian = student.guardian || '-';
+
             html += `
                 <tr>
                     <td>${index + 1}</td>
-                    <td><strong>${student.studentId || '-'}</strong></td>
-                    <td><strong>${student.name || '-'}</strong></td>
-                    <td>${student.grade || '-'}</td>
-                    <td class="${genderClass}">${student.gender || '-'}</td>
+                    <td><strong>${studentId}</strong></td>
+                    <td><strong>${name}</strong></td>
+                    <td>${grade}</td>
+                    <td class="${genderClass}">${gender}</td>
                     <td>${typeBadge}</td>
-                    <td>${student.guardian || '-'}</td>
+                    <td>${guardian}</td>
                     <td>
-                        <button class="btn btn-edit btn-sm" onclick="openEditModal('${student.studentId}')" title="Edit Student">
+                        <button class="btn btn-edit btn-sm" onclick="openEditModal('${studentId}')" title="Edit Student">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-delete btn-sm" onclick="deleteStudent('${student.studentId}')" title="Delete Student">
+                        <button class="btn btn-delete btn-sm" onclick="deleteStudent('${studentId}')" title="Delete Student">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -741,7 +753,7 @@
     }
 
     // ============================================
-    // ADD STUDENT (Auto-generates ID)
+    // ADD STUDENT
     // ============================================
     async function addStudent() {
         const name = document.getElementById('studentName').value.trim();
@@ -762,7 +774,6 @@
             return;
         }
 
-        // Show loading state
         const addBtn = document.querySelector('.btn-add');
         const originalText = addBtn.innerHTML;
         addBtn.innerHTML = '<span class="loading-spinner"></span> Adding...';
@@ -800,15 +811,15 @@
     // OPEN EDIT MODAL
     // ============================================
     function openEditModal(studentId) {
-        const student = allStudents.find(s => s.studentId === studentId);
+        const student = allStudents.find(s => s.studentId === studentId || s.id === studentId);
         if (!student) {
             showAlert('❌ Student not found', 'error');
             return;
         }
 
-        document.getElementById('editStudentId').value = student.studentId;
+        document.getElementById('editStudentId').value = student.studentId || student.id;
         document.getElementById('editName').value = student.name || '';
-        document.getElementById('editStudentIdField').value = student.studentId || '';
+        document.getElementById('editStudentIdField').value = student.studentId || student.id || '';
         document.getElementById('editClass').value = student.grade || '';
         document.getElementById('editGender').value = student.gender || 'Male';
         document.getElementById('editType').value = student.type || 'Day Scholar';
@@ -847,7 +858,6 @@
 
         const updatedData = { name, grade, gender, type, guardian, pin };
 
-        // Show loading
         const saveBtn = document.querySelector('.btn-save');
         const originalText = saveBtn.innerHTML;
         saveBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
@@ -924,10 +934,11 @@
             return;
         }
 
-        let csv = '\uFEFF'; // UTF-8 BOM for Excel
+        let csv = '\uFEFF';
         csv += 'Student ID,Name,Grade,Gender,Type,Guardian\n';
         students.forEach(s => {
-            csv += `"${s.studentId || '-'}","${s.name || '-'}","${s.grade || '-'}","${s.gender || '-'}","${s.type || '-'}","${s.guardian || '-'}"\n`;
+            const id = s.studentId || s.id || '-';
+            csv += `"${id}","${s.name || '-'}","${s.grade || '-'}","${s.gender || '-'}","${s.type || '-'}","${s.guardian || '-'}"\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -959,17 +970,20 @@
 
         const now = new Date();
 
-        let rowsHtml = students.map((s, i) => `
-            <tr>
-                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${i + 1}</td>
-                <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${s.studentId || '-'}</td>
-                <td style="padding:6px 10px;border:1px solid #ddd;">${s.name || '-'}</td>
-                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.grade || '-'}</td>
-                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.gender || '-'}</td>
-                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.type || '-'}</td>
-                <td style="padding:6px 10px;border:1px solid #ddd;">${s.guardian || '-'}</td>
-            </tr>
-        `).join('');
+        let rowsHtml = students.map((s, i) => {
+            const id = s.studentId || s.id || '-';
+            return `
+                <tr>
+                    <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${i + 1}</td>
+                    <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${id}</td>
+                    <td style="padding:6px 10px;border:1px solid #ddd;">${s.name || '-'}</td>
+                    <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.grade || '-'}</td>
+                    <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.gender || '-'}</td>
+                    <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.type || '-'}</td>
+                    <td style="padding:6px 10px;border:1px solid #ddd;">${s.guardian || '-'}</td>
+                </tr>
+            `;
+        }).join('');
 
         printWindow.document.write(`
             <!DOCTYPE html>
