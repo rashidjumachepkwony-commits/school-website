@@ -594,6 +594,7 @@ const studentSchema = new mongoose.Schema({
     type: { type: String, enum: ['Day Scholar', 'Boarder'], default: 'Day Scholar' },
     guardian: { type: String, default: '' },
     pin: { type: String, default: '1234' },
+    paid: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
@@ -617,6 +618,7 @@ const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
 // Student Assessment Schema
 const studentAssessmentSchema = new mongoose.Schema({
     studentName: { type: String, required: true },
+    studentId: { type: String },
     admissionNumber: { type: String, default: '' },
     grade: { type: String, required: true },
     type: { type: String, default: 'monthly' },
@@ -1442,6 +1444,7 @@ app.post('/api/students', async (req, res) => {
             type: type || 'Day Scholar',
             guardian: guardian || '',
             pin: pin || '1234',
+            paid: 0,
             isActive: true
         });
 
@@ -1561,6 +1564,200 @@ app.post('/api/student/login', async (req, res) => {
 });
 
 // ============================================
+// STUDENT FEE MANAGEMENT ROUTES
+// ============================================
+
+// Get all students with fee details
+app.get('/api/students/fees', async (req, res) => {
+    try {
+        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+        
+        const studentFees = students.map(student => {
+            const feeData = getFeeStructure(student.grade, student.type);
+            const paid = student.paid || 0;
+            const totalFees = feeData.total || 0;
+            const balance = totalFees - paid;
+            
+            return {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                studentType: student.type,
+                isBoarding: student.type === 'Boarder',
+                totalFees: totalFees,
+                paid: paid,
+                balance: balance,
+                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
+            };
+        });
+        
+        const totalStudents = studentFees.length;
+        const totalDayScholars = studentFees.filter(s => s.studentType === 'Day Scholar').length;
+        const totalBoarders = studentFees.filter(s => s.studentType === 'Boarder').length;
+        const totalPaid = studentFees.reduce((sum, s) => sum + s.paid, 0);
+        const totalBalance = studentFees.reduce((sum, s) => sum + s.balance, 0);
+        
+        res.json({
+            success: true,
+            students: studentFees,
+            totalStudents,
+            totalDayScholars,
+            totalBoarders,
+            totalPaid,
+            totalBalance
+        });
+    } catch (error) {
+        console.error('Error fetching student fees:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get single student fee details
+app.get('/api/students/fees/:studentId', async (req, res) => {
+    try {
+        const student = await Student.findOne({ studentId: req.params.studentId, isActive: true });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        
+        const feeData = getFeeStructure(student.grade, student.type);
+        const paid = student.paid || 0;
+        const totalFees = feeData.total || 0;
+        const balance = totalFees - paid;
+        
+        res.json({
+            success: true,
+            student: {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                studentType: student.type,
+                isBoarding: student.type === 'Boarder'
+            },
+            fees: {
+                total: totalFees,
+                paid: paid,
+                balance: balance,
+                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
+            },
+            feeBreakdown: feeData
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Record payment for student
+app.post('/api/students/payment', async (req, res) => {
+    try {
+        const { studentId, amount, category, method, reference, notes } = req.body;
+        
+        if (!studentId || !amount || amount <= 0) {
+            return res.status(400).json({ success: false, message: 'Student ID and valid amount are required' });
+        }
+        
+        const student = await Student.findOne({ studentId, isActive: true });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        
+        student.paid = (student.paid || 0) + amount;
+        student.updatedAt = new Date();
+        await student.save();
+        
+        res.json({
+            success: true,
+            message: `✅ Payment of KES ${amount.toLocaleString()} recorded for ${student.name}`,
+            student: {
+                id: student.studentId,
+                name: student.name,
+                paid: student.paid,
+                balance: getFeeStructure(student.grade, student.type).total - student.paid
+            }
+        });
+    } catch (error) {
+        console.error('Error recording payment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// FEE STRUCTURE HELPER
+// ============================================
+function getFeeStructure(grade, type) {
+    const dayFees = {
+        'Playgroup': { term1: 2500, term2: 2500, term3: 2500, total: 7500 },
+        'PP1': { term1: 3000, term2: 3000, term3: 3000, total: 9000 },
+        'PP2': { term1: 3000, term2: 3000, term3: 3000, total: 9000 },
+        'Grade 1': { term1: 3500, term2: 3500, term3: 3500, total: 10500 },
+        'Grade 2': { term1: 3500, term2: 3500, term3: 3500, total: 10500 },
+        'Grade 3': { term1: 4000, term2: 4000, term3: 4000, total: 12000 },
+        'Grade 4': { term1: 4000, term2: 4000, term3: 4000, total: 12000 },
+        'Grade 5': { term1: 4500, term2: 4500, term3: 4500, total: 13500 },
+        'Grade 6': { term1: 4500, term2: 4500, term3: 4500, total: 13500 }
+    };
+    
+    const boardingFees = {
+        'Grade 3': { term1: 8000, term2: 8000, term3: 8000, total: 24000 },
+        'Grade 4': { term1: 8000, term2: 8000, term3: 8000, total: 24000 },
+        'Grade 5': { term1: 8500, term2: 8500, term3: 8500, total: 25500 },
+        'Grade 6': { term1: 8500, term2: 8500, term3: 8500, total: 25500 }
+    };
+    
+    if (type === 'Boarder' && boardingFees[grade]) {
+        return boardingFees[grade];
+    }
+    
+    return dayFees[grade] || { term1: 0, term2: 0, term3: 0, total: 0 };
+}
+
+// ============================================
+// STUDENT ASSESSMENT ROUTES
+// ============================================
+
+// Get students for assessment by grade
+app.get('/api/assessments/students/:grade', async (req, res) => {
+    try {
+        const { grade } = req.params;
+        const students = await Student.find({ 
+            grade: grade,
+            isActive: true 
+        }).sort({ studentId: 1 });
+        
+        res.json({
+            success: true,
+            students: students.map(s => ({
+                studentId: s.studentId,
+                name: s.name,
+                grade: s.grade,
+                gender: s.gender,
+                type: s.type
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get student assessment by ID
+app.get('/api/assessments/student/:studentId', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const assessment = await StudentAssessment.findOne({ studentId });
+        
+        if (!assessment) {
+            return res.status(404).json({ success: false, message: 'Assessment not found for this student' });
+        }
+        
+        res.json({ success: true, assessment });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
 // ASSESSMENT ROUTES
 // ============================================
 
@@ -1656,14 +1853,28 @@ app.get('/api/assessments/student/:id', async (req, res) => {
 
 app.post('/api/assessments', async (req, res) => {
     try {
-        const { studentName, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
+        const { studentName, studentId, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
         if (!studentName || !grade || !assessments || !Array.isArray(assessments) || assessments.length === 0) {
             return res.status(400).json({ success: false, message: 'Invalid data. Need studentName, grade, and assessments array.' });
         }
         const { totalScore } = calculateTotals(assessments);
         const avgScore = assessments.length > 0 ? totalScore / assessments.length : 0;
         const performanceLevel = calculatePerformanceLevel(assessments);
-        const student = new StudentAssessment({ studentName, admissionNumber: admissionNumber || '', grade, type: type || 'monthly', period: period || '', month: month || '', year: year || '', term: term || '', assessments, totalScore, averageScore: avgScore, performanceLevel });
+        const student = new StudentAssessment({ 
+            studentName, 
+            studentId: studentId || '',
+            admissionNumber: admissionNumber || '', 
+            grade, 
+            type: type || 'monthly', 
+            period: period || '', 
+            month: month || '', 
+            year: year || '', 
+            term: term || '', 
+            assessments, 
+            totalScore, 
+            averageScore: avgScore, 
+            performanceLevel 
+        });
         await student.save();
         res.status(201).json({ success: true, message: 'Student assessment created successfully!', student });
     } catch (error) {
@@ -1674,12 +1885,13 @@ app.post('/api/assessments', async (req, res) => {
 app.put('/api/assessments/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { studentName, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
+        const { studentName, studentId, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
         const student = await StudentAssessment.findById(id);
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
         if (studentName) student.studentName = studentName;
+        if (studentId) student.studentId = studentId;
         if (admissionNumber) student.admissionNumber = admissionNumber;
         if (grade) student.grade = grade;
         if (type) student.type = type;
@@ -1830,7 +2042,21 @@ app.post('/api/assessments/copy', async (req, res) => {
             const { totalScore } = calculateTotals(newAssessments);
             const avgScore = newAssessments.length > 0 ? totalScore / newAssessments.length : 0;
             const performanceLevel = calculatePerformanceLevel(newAssessments);
-            const newStudent = new StudentAssessment({ studentName: source.studentName, admissionNumber: source.admissionNumber || '', grade: toGrade, type: toType || 'monthly', period: toPeriod, month: toMonth, year: toYear, term: toTerm, assessments: newAssessments, totalScore, averageScore: avgScore, performanceLevel });
+            const newStudent = new StudentAssessment({ 
+                studentName: source.studentName, 
+                studentId: source.studentId || '',
+                admissionNumber: source.admissionNumber || '', 
+                grade: toGrade, 
+                type: toType || 'monthly', 
+                period: toPeriod, 
+                month: toMonth, 
+                year: toYear, 
+                term: toTerm, 
+                assessments: newAssessments, 
+                totalScore, 
+                averageScore: avgScore, 
+                performanceLevel 
+            });
             await newStudent.save();
             copiedCount++;
         }
@@ -2176,6 +2402,7 @@ app.listen(PORT, () => {
     console.log(`🕐 Kenya Time: ${kenyaNow.toLocaleString()}`);
     console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
     console.log(`📚 Student API: http://localhost:${PORT}/api/students`);
+    console.log(`💰 Fees API: http://localhost:${PORT}/api/students/fees`);
     console.log('='.repeat(50));
     console.log('✅ Server started successfully!');
 });
