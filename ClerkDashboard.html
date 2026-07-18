@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; }
+body {
+margin: 0;
+font-family: 'Segoe UI', Arial, sans-serif;
+background: linear-gradient(135deg, #001f5c 0%, #0b5394 35%, #d4a017 70%, #ffeb99 100%);
+min-height: 100vh;
+padding: 15px;
+}
+.container {
+width: 100%;
+max-width: 1400px;
+padding: 20px;
+border-radius: 30px;
+background: linear-gradient(135deg, #ffffff, #f5f9ff, #fff8dc);
+box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+margin: 0 auto;
+}
+.header {
+background: linear-gradient(135deg, #001f5c, #0b5394);
+padding: 20px;
+border-radius: 20px;
+margin-bottom: 25px;
+color: white;
+text-align: center;
+}
+.header h1 { font-size: 38px; margin: 5px 0; color: #ffeb99; }
+.header p { font-size: 22px; margin: 5px 0; color: #d4a017; font-weight: bold; }
+.pin-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.85);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 9999;
+backdrop-filter: blur(5px);
+}
+.pin-box {
+background: white;
+padding: 40px;
+border-radius: 30px;
+max-width: 450px;
+width: 90%;
+box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+text-align: center;
+}
+.pin-box h2 { color: #001f5c; font-size: 32px; margin-bottom: 10px; }
+.pin-box p { color: #666; font-size: 18px; margin-bottom: 20px; }
+.pin-box input {
+width: 100%; padding: 18px; font-size: 28px;
+border: 3px solid #ccc; border-radius: 15px;
+text-align: center; letter-spacing: 10px; margin-bottom: 15px;
+}
+.pin-box input:focus { border-color: #0b5394; outline: none; }
+.pin-box .btn-unlock {
+background: linear-gradient(135deg, #0b5394, #1a6fb5);
+color: white; padding: 18px; font-size: 24px; font-weight: bold;
+border: none; border-radius: 15px; width: 100%; cursor: pointer;
+}
+.pin-box .btn-unlock:hover { transform: scale(1.02); }
+.pin-box .home-btn {
+display: inline-block; padding: 12px 25px; font-size: 18px;
+font-weight: bold; color: white; background: #6c757d;
+border: none; border-radius: 10px; cursor: pointer;
+margin-top: 10px; width: 100%;
+}
+.pin-box .home-btn:hover { background: #5a6268; transform: scale(1.02); }
+.pin-box .pin-error { color: #dc3545; font-size: 18px; margin-top: 10px; display: none; }
+.pin-box .pin-error.show { display: block; }
+.hidden-content { display: none; }
+.home-btn-main {
+display: inline-block; padding: 12px 25px; font-size: 18px;
+font-weight: bold; color: white; background: #0b5394;
+border: none; border-radius: 10px; cursor: pointer; margin-bottom: 15px;
+}
+.home-btn-main:hover { background: #1a6fb5; transform: scale(1.02); }
+.tabs {
+display: flex; gap: 10px; margin-bottom: 20px;
+flex-wrap: wrap; justify-content: center;
+}
+.tab {
+padding: 14px 30px; font-size: 20px; font-weight: bold;
+border: none; border-radius: 12px; cursor: pointer;
+background: #e8e8e8; color: #333;
+}
+.tab:hover { transform: scale(1.03); background: #d4d4d4; }
+.tab.active { background: #0b5394; color: white; box-shadow: 0 4px 15px rgba(11,83,148,0.4); }
+.tab.fees-tab.active { background: #d4a017; color: #001f5c; }
+.search-section {
+background: #f0f4f8; border-radius: 15px; padding: 20px;
+margin-bottom: 20px; border: 2px solid #d4a017;
+}
+.search-row {
+display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+}
+.search-row input { flex: 2; min-width: 200px; padding: 14px 18px; font-size: 18px; border: 2px solid #ccc; border-radius: 10px; background: white; }
+.search-row input:focus { border-color: #0b5394; outline: none; }
+.search-row select { flex: 1; min-width: 150px; padding: 14px 18px; font-size: 18px; border: 2px solid #ccc; border-radius: 10px; background: white; }
+.search-row select:focus { border-color: #0b5394; outline: none; }
+.search-row .btn { padding: 14px 30px; font-size: 18px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; min-width: 100px; }
+.search-row .btn:hover { transform: scale(1.03); }
+.btn-primary { background: #0b5394; color: white; }
+.btn-success { background: #0b8f34; color: white; }
+.btn-warning { background: #d4a017; color: #001f5c; }
+.btn-secondary { background: #6c757d; color: white; }
+.btn-danger { background: #dc3545; color: white; }
+.btn-info { background: #17a2b8; color: white; }
+.btn-sm { padding: 8px 16px; font-size: 14px; min-width: auto; }
+.btn-xs { padding: 4px 10px; font-size: 12px; min-width: auto; }
+.card { background: white; border-radius: 15px; padding: 20px; margin: 15px 0; border: 2px solid #e0e0e0; }
+.card h3 { color: #001f5c; border-bottom: 3px solid #d4a017; padding-bottom: 10px; font-size: 22px; margin-top: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: #001f5c; color: white; padding: 10px 12px; text-align: left; }
+td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+tr:hover { background: #f5f5f5; }
+tr:nth-child(even) { background: #f9f9f9; }
+.table-container { overflow-x: auto; margin-top: 15px; }
+.stat-grid {
+display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+gap: 15px; margin: 15px 0;
+}
+.stat-card { background: #f8f9fa; padding: 20px; text-align: center; border: 2px solid #e0e0e0; border-radius: 12px; }
+.stat-card .number { font-size: 32px; font-weight: bold; }
+.stat-card .label { font-size: 14px; color: #666; }
+.stat-card .paid { color: #0b8f34; }
+.stat-card .balance { color: #dc3545; }
+.hidden { display: none; }
+.amount { font-weight: bold; color: #d4a017; }
+.badge-day { background: #d1ecf1; color: #0b5394; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+.badge-boarder { background: #f8d7da; color: #721c24; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+.modal-overlay {
+position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+background: rgba(0, 0, 0, 0.7); display: none;
+justify-content: center; align-items: center; z-index: 9999;
+backdrop-filter: blur(5px); padding: 15px;
+}
+.modal-overlay.show { display: flex; }
+.modal-content {
+background: white; padding: 35px; border-radius: 25px;
+max-width: 750px; width: 100%; max-height: 90vh; overflow-y: auto;
+box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.modal-content h2 { color: #001f5c; border-bottom: 3px solid #d4a017; padding-bottom: 15px; margin-top: 0; font-size: 28px; text-align: center; }
+.modal-content label { display: block; font-weight: bold; color: #001f5c; margin-top: 10px; font-size: 14px; }
+.modal-content input, .modal-content select {
+width: 100%; padding: 10px; font-size: 16px;
+border: 2px solid #ccc; border-radius: 8px; margin-top: 3px;
+}
+.modal-content input:focus, .modal-content select:focus { border-color: #d4a017; outline: none; }
+.modal-actions { display: flex; gap: 12px; margin-top: 20px; }
+.modal-actions button { flex: 1; padding: 14px; font-size: 18px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; }
+.modal-actions button:hover { transform: scale(1.02); }
+.payment-categories {
+display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;
+}
+.payment-categories .cat-item {
+display: flex; align-items: center; gap: 8px;
+background: #f8f9fa; padding: 8px 12px; border-radius: 8px;
+border: 1px solid #e0e0e0;
+}
+.payment-categories .cat-item label { margin: 0; font-size: 14px; flex: 1; }
+.payment-categories .cat-item input {
+width: 100px; padding: 6px 8px; font-size: 14px; text-align: right;
+border: 2px solid #ccc; border-radius: 6px;
+}
+.payment-categories .cat-item input:focus { border-color: #d4a017; outline: none; }
+.receipt-container {
+max-width: 500px; margin: 0 auto; padding: 20px;
+background: white; border: 2px solid #001f5c; border-radius: 10px;
+font-family: 'Courier New', monospace;
+}
+.receipt-header { text-align: center; border-bottom: 2px dashed #d4a017; padding-bottom: 15px; margin-bottom: 15px; }
+.receipt-header h2 { color: #001f5c; margin: 0; font-size: 24px; }
+.receipt-header p { color: #666; margin: 5px 0; font-size: 14px; }
+.receipt-details { margin: 15px 0; }
+.receipt-details .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dotted #ddd; font-size: 14px; }
+.receipt-details .row .label { font-weight: bold; color: #001f5c; }
+.receipt-details .row .value { color: #333; }
+.receipt-amount { text-align: center; padding: 15px; margin: 15px 0; background: #e8f5e9; border-radius: 10px; border: 2px solid #0b8f34; }
+.receipt-amount .amount { font-size: 32px; font-weight: bold; color: #0b8f34; }
+.receipt-footer { text-align: center; margin-top: 20px; padding-top: 15px; border-top: 2px dashed #001f5c; font-size: 12px; color: #999; }
+.receipt-footer .stamp { color: #001f5c; font-weight: bold; font-size: 16px; }
+.history-stats {
+display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+gap: 10px; margin: 10px 0 20px 0;
+}
+.history-stat { background: #f8f9fa; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #e0e0e0; }
+.history-stat .num { font-size: 24px; font-weight: bold; color: #0b5394; }
+.history-stat .label { font-size: 12px; color: #666; }
+.history-search-row {
+display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; align-items: center;
+}
+.history-search-row input {
+flex: 2; min-width: 180px; padding: 12px 16px; font-size: 16px;
+border: 2px solid #ccc; border-radius: 8px; background: white;
+}
+.history-search-row input:focus { border-color: #0b5394; outline: none; }
+.history-search-row select {
+flex: 1; min-width: 130px; padding: 12px 16px; font-size: 16px;
+border: 2px solid #ccc; border-radius: 8px; background: white;
+}
+.history-search-row select:focus { border-color: #0b5394; outline: none; }
+.history-search-row .btn { padding: 12px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+.history-search-row .btn:hover { transform: scale(1.03); }
+#message { padding: 15px; border-radius: 10px; margin: 15px 0; display: none; }
+.status-paid { color: #0b8f34; font-weight: bold; }
+.status-partial { color: #ff9800; font-weight: bold; }
+.status-unpaid { color: #dc3545; font-weight: bold; }
+.download-section {
+background: #f0f4f8; border-radius: 10px; padding: 15px; margin: 10px 0;
+border: 2px solid #d4a017; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center;
+}
+.download-section .btn { margin: 5px; }
+@media (max-width: 600px) {
+.container { padding: 12px; }
+.header h1 { font-size: 28px; }
+.header p { font-size: 18px; }
+.search-row { flex-direction: column; }
+.search-row input, .search-row select { width: 100%; min-width: unset; }
+.search-row .btn { width: 100%; }
+.history-search-row { flex-direction: column; }
+.history-search-row input, .history-search-row select { width: 100%; min-width: unset; }
+.history-search-row .btn { width: 100%; }
+table { font-size: 12px; }
+th, td { padding: 6px 8px; }
+.modal-content { padding: 20px; }
+.pin-box { padding: 25px; }
+.pin-box h2 { font-size: 22px; }
+.pin-box input { font-size: 22px; padding: 14px; }
+.tabs { flex-direction: column; }
+.tab { width: 100%; text-align: center; }
+.modal-actions { flex-direction: column; }
+.receipt-container { padding: 15px; }
+.payment-categories { grid-template-columns: 1fr; }
+.history-stats { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="pin-overlay" id="pinOverlay">
+<div class="pin-box">
+<h2>🔐 Clerk Dashboard</h2>
+<p>Enter PIN to access fee records</p>
+<input type="password" id="clerkPin" placeholder="••••" maxlength="4" onkeypress="if(event.keyCode==13) unlockClerk()">
+<button class="btn-unlock" onclick="unlockClerk()">🔓 UNLOCK</button>
+<button class="home-btn" onclick="goHome()">🏠 Back to Home</button>
+<div class="pin-error" id="pinError">❌ Invalid PIN. Please try again.</div>
+</div>
+</div>
+<div class="container hidden-content" id="mainContent" style="display:none;">
+<button class="home-btn-main" onclick="goHome()">🏠 Back to Home</button>
+<div class="header">
+<h1>💰 Clerk Dashboard</h1>
+<p>Student Fees Management</p>
+<div id="datetime" style="font-size:18px;color:white;margin-top:5px;"></div>
+</div>
+<div id="message"></div>
+<div class="tabs">
+<button class="tab active" onclick="switchTab('students')">👨‍🎓 Students</button>
+<button class="tab fees-tab" onclick="switchTab('fees')">📊 Fees Structure</button>
+<button class="tab fees-tab" onclick="switchTab('payments')">💳 Payment History</button>
+</div>
+<!-- STUDENTS TAB -->
+<div id="studentsTab">
+<div class="search-section">
+<div class="search-row">
+<input type="text" id="searchInput" placeholder="🔍 Search by Name, ID, Grade, or Gender..." onkeyup="searchStudents()">
+<select id="gradeFilter" onchange="searchStudents()">
+<option value="">All Grades</option>
+<option value="Playgroup">Playgroup</option>
+<option value="PP1">PP1</option>
+<option value="PP2">PP2</option>
+<option value="Grade 1">Grade 1</option>
+<option value="Grade 2">Grade 2</option>
+<option value="Grade 3">Grade 3</option>
+<option value="Grade 4">Grade 4</option>
+<option value="Grade 5">Grade 5</option>
+<option value="Grade 6">Grade 6</option>
+</select>
+<select id="statusFilter" onchange="searchStudents()">
+<option value="">All Status</option>
+<option value="paid">✅ Paid</option>
+<option value="partial">⏳ Partial</option>
+<option value="unpaid">❌ Unpaid</option>
+</select>
+<select id="typeFilter" onchange="searchStudents()">
+<option value="">All Types</option>
+<option value="Day Scholar">Day Scholar</option>
+<option value="Boarder">Boarder</option>
+</select>
+<select id="genderFilter" onchange="searchStudents()">
+<option value="">All Genders</option>
+<option value="Male">Male</option>
+<option value="Female">Female</option>
+</select>
+<button class="btn btn-secondary" onclick="resetSearch()">🔄 Reset</button>
+</div>
+</div>
+<div class="stat-grid" id="feeStats">
+<div class="stat-card"><div class="number paid" id="totalStudents">0</div><div class="label">Total Students</div></div>
+<div class="stat-card"><div class="number paid" id="totalDayScholars">0</div><div class="label">Day Scholars</div></div>
+<div class="stat-card"><div class="number paid" id="totalBoarders">0</div><div class="label">Boarders</div></div>
+<div class="stat-card"><div class="number paid" id="totalPaid">0</div><div class="label">Total Paid (KES)</div></div>
+<div class="stat-card"><div class="number balance" id="totalBalance">0</div><div class="label">Total Balance (KES)</div></div>
+</div>
+<div class="download-section">
+<strong>📥 Download Reports:</strong>
+<button class="btn btn-primary btn-sm" onclick="downloadReport('summary')">Summary</button>
+<button class="btn btn-success btn-sm" onclick="downloadReport('detailed')">Detailed</button>
+<button class="btn btn-warning btn-sm" onclick="downloadReport('payment')">Payments</button>
+</div>
+<div class="card">
+<h3>📋 Student Fee Records</h3>
+<div class="table-container">
+<table>
+<thead><tr><th>ID</th><th>Name</th><th>Grade</th><th>Gender</th><th>Type</th><th>Total Fees</th><th>Paid</th><th>Balance</th><th>Status</th><th>Action</th></tr></thead>
+<tbody id="studentFeeTable"><tr><td colspan="10" style="text-align:center;color:#999;">Loading students...</td></tr></tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- FEES STRUCTURE TAB -->
+<div id="feesTab" style="display:none;">
+<div class="card">
+<h3>📊 Day Scholar Fees Structure
+<button class="btn btn-warning btn-sm" onclick="openEditFeesModal('day')" style="float:right;padding:8px 20px;">✏️ Edit Day Fees</button>
+</h3>
+<div class="table-container">
+<table>
+<thead><tr><th>Grade</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr></thead>
+<tbody id="dayFeesTable"><tr><td colspan="5" style="text-align:center;color:#999;">Loading...</td></tr></tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<h3>🏠 Boarding Fees Structure (Grades 3-6 Only)
+<button class="btn btn-warning btn-sm" onclick="openEditFeesModal('boarding')" style="float:right;padding:8px 20px;">✏️ Edit Boarding Fees</button>
+</h3>
+<div class="table-container">
+<table>
+<thead><tr><th>Vote Head</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr></thead>
+<tbody id="boardingFeesTable"><tr><td colspan="5" style="text-align:center;color:#999;">Loading...</td></tr></tbody>
+</table>
+</div>
+</div>
+<div class="download-section">
+<button class="btn btn-danger btn-sm" onclick="downloadFeesStructurePDF()">📄 Download Full Fees Structure PDF</button>
+</div>
+</div>
+<!-- PAYMENTS TAB -->
+<div id="paymentsTab" style="display:none;">
+<div class="card" style="border-color:#0b5394;">
+<h3>📜 Student Payment History
+<button class="btn btn-primary btn-sm" onclick="populateHistoryStudentSelect()" style="float:right;padding:8px 20px;">🔄 Refresh Students</button>
+</h3>
+
+<div class="history-search-row">
+<input type="text" id="historySearchInput" placeholder="🔍 Search by Name, ID, Grade, or Gender..." onkeyup="filterHistoryStudents()">
+<select id="historyGradeFilter" onchange="filterHistoryStudents()">
+<option value="">All Grades</option>
+<option value="Playgroup">Playgroup</option>
+<option value="PP1">PP1</option>
+<option value="PP2">PP2</option>
+<option value="Grade 1">Grade 1</option>
+<option value="Grade 2">Grade 2</option>
+<option value="Grade 3">Grade 3</option>
+<option value="Grade 4">Grade 4</option>
+<option value="Grade 5">Grade 5</option>
+<option value="Grade 6">Grade 6</option>
+</select>
+<select id="historyGenderFilter" onchange="filterHistoryStudents()">
+<option value="">All Genders</option>
+<option value="Male">Male</option>
+<option value="Female">Female</option>
+</select>
+<select id="historyTypeFilter" onchange="filterHistoryStudents()">
+<option value="">All Types</option>
+<option value="Day Scholar">Day Scholar</option>
+<option value="Boarder">Boarder</option>
+</select>
+<button class="btn btn-info" onclick="filterHistoryStudents()">🔍 Search</button>
+<button class="btn btn-secondary" onclick="resetHistorySearch()">🔄 Reset</button>
+</div>
+
+<select id="historyStudentSelect" style="width:100%;padding:12px 16px;font-size:16px;border:2px solid #ccc;border-radius:8px;margin-bottom:15px;background:white;">
+<option value="">-- Select Student --</option>
+</select>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:15px;">
+<button class="btn btn-success btn-sm" onclick="showAllPaidStudents()" style="padding:10px 25px;">📊 All Students with Payments</button>
+<button class="btn btn-info btn-sm" onclick="viewStudentPaymentHistory()" style="padding:10px 25px;">📋 View Selected</button>
+<button class="btn btn-warning btn-sm" onclick="refreshPaymentHistory()" style="padding:10px 25px;">🔄 Refresh</button>
+</div>
+
+<div id="paymentHistoryDisplay" style="margin-top:10px;display:none;">
+<div id="historyStudentInfo" style="background:#f0f4f8;padding:15px;border-radius:10px;margin-bottom:15px;"></div>
+<div id="historyStats" class="history-stats"></div>
+<div class="table-container">
+<table>
+<thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Method</th><th>Reference</th><th>Action</th></tr></thead>
+<tbody id="historyPaymentsTable"><tr><td colspan="6" style="text-align:center;color:#999;">Select a student and click "View Selected" or "All Students with Payments"</td></tr></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<button class="home-btn-main" onclick="goHome()" style="width:100%;text-align:center;margin-top:15px;">🏠 Back to Home</button>
+</div>
+<!-- EDIT FEES MODAL -->
+<div class="modal-overlay" id="editFeesModal">
+<div class="modal-content"><div id="feesModalContent"></div></div>
+</div>
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="paymentModal">
+<div class="modal-content">
+<h2>💰 Record Payment</h2>
+<div id="paymentStudentInfo"></div>
+<label>💳 Payment Method:</label>
+<select id="paymentMethod">
+<option value="MPESA">MPESA</option>
+<option value="Cash">Cash</option>
+<option value="Bank Transfer">Bank Transfer</option>
+<option value="Cheque">Cheque</option>
+</select>
+<label>📝 Reference Number:</label>
+<input type="text" id="paymentReference" placeholder="e.g., MPESA Confirmation Code">
+<label>📝 Notes:</label>
+<input type="text" id="paymentNotes" placeholder="Additional notes...">
+<hr>
+<label style="font-size:16px;color:#d4a017;">📂 Select Categories to Pay:</label>
+<div class="payment-categories" id="paymentCategories">
+<div class="cat-item"><label>School Fees</label><input type="number" id="cat_schoolfees" placeholder="0" min="0" step="100"></div>
+<div class="cat-item"><label>Boarding</label><input type="number" id="cat_boarding" placeholder="0" min="0" step="100"></div>
+<div class="cat-item"><label>Remedials</label><input type="number" id="cat_remedials" placeholder="0" min="0" step="100"></div>
+<div class="cat-item"><label>Stationaries</label><input type="number" id="cat_stationaries" placeholder="0" min="0" step="100"></div>
+<div class="cat-item"><label>Activity</label><input type="number" id="cat_activity" placeholder="0" min="0" step="100"></div>
+<div class="cat-item"><label>Assessment</label><input type="number" id="cat_assessment" placeholder="0" min="0" step="100"></div>
+<div class="cat-item"><label>Admission</label><input type="number" id="cat_admission" placeholder="0" min="0" step="100"></div>
+<div class="cat-item"><label>Other</label><input type="number" id="cat_other" placeholder="0" min="0" step="100"></div>
+</div>
+<div style="background:#f8f9fa;padding:12px;border-radius:8px;margin:10px 0;text-align:center;border:2px solid #d4a017;">
+<span style="font-size:16px;font-weight:bold;">Total Amount:</span>
+<span id="paymentTotal" style="font-size:24px;font-weight:bold;color:#d4a017;">KES 0</span>
+</div>
+<div id="paymentResult" style="margin-top:10px;padding:12px;border-radius:12px;display:none;"></div>
+<div class="modal-actions">
+<button class="btn-success" onclick="saveMultiPayment()">✅ RECORD PAYMENT</button>
+<button class="btn-danger" onclick="closePaymentModal()">❌ CANCEL</button>
+</div>
+</div>
+</div>
+<!-- EDIT PAYMENT MODAL -->
+<div class="modal-overlay" id="editPaymentModal">
+<div class="modal-content">
+<h2>✏️ Edit Payment</h2>
+<p style="color:#666;text-align:center;margin-bottom:15px;">Update payment record below</p>
+<input type="hidden" id="editPaymentRow">
+<label>👤 Student:</label>
+<input type="text" id="editPaymentStudent" readonly style="background:#f0f0f0;">
+<label>📂 Category:</label>
+<select id="editPaymentCategory">
+<option value="School Fees">School Fees</option>
+<option value="Boarding">Boarding</option>
+<option value="Remedials">Remedials</option>
+<option value="Stationaries">Stationaries</option>
+<option value="Activity">Activity</option>
+<option value="Assessment">Assessment</option>
+<option value="Admission">Admission</option>
+<option value="Other">Other</option>
+</select>
+<label>💰 Amount (KES):</label>
+<input type="number" id="editPaymentAmount" placeholder="Enter amount">
+<label>💳 Payment Method:</label>
+<select id="editPaymentMethod">
+<option value="MPESA">MPESA</option>
+<option value="Cash">Cash</option>
+<option value="Bank Transfer">Bank Transfer</option>
+<option value="Cheque">Cheque</option>
+</select>
+<label>📝 Reference Number:</label>
+<input type="text" id="editPaymentReference" placeholder="e.g., MPESA Confirmation Code">
+<label>📝 Notes:</label>
+<input type="text" id="editPaymentNotes" placeholder="Additional notes...">
+<div id="editPaymentResult" style="margin-top:10px;padding:12px;border-radius:12px;display:none;"></div>
+<div class="modal-actions">
+<button class="btn-success" onclick="saveEditPaymentRecord()">💾 UPDATE</button>
+<button class="btn-danger" onclick="deleteEditedPayment()">🗑️ DELETE</button>
+<button class="btn-secondary" onclick="closeEditPaymentModal()">❌ CANCEL</button>
+</div>
+</div>
+</div>
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receiptModal">
+<div class="modal-content" style="max-width: 550px;">
+<div id="receiptContent"></div>
+<div class="modal-actions">
+<button class="btn-primary" onclick="printReceipt()">🖨️ PRINT</button>
+<button class="btn-success" onclick="saveReceiptPDF()">💾 SAVE PDF</button>
+<button class="btn-secondary" onclick="closeReceiptModal()">❌ CLOSE</button>
+</div>
+</div>
+</div>
+<script>
+// ========================
+// GO HOME
+// ========================
+function goHome() {
+  google.script.run.withSuccessHandler(function(url) {
+    window.top.location.href = url;
+  }).getWebAppUrl();
+}
+
+// ========================
+// PIN PROTECTION
+// ========================
+const CLERK_PIN = "1010";
+
+function unlockClerk() {
+  var pin = document.getElementById("clerkPin").value.trim();
+  var errorEl = document.getElementById("pinError");
+  if (pin === CLERK_PIN) {
+    document.getElementById("pinOverlay").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
+    document.getElementById("mainContent").classList.remove("hidden-content");
+    loadAllData();
+  } else {
+    errorEl.classList.add("show");
+    document.getElementById("clerkPin").value = "";
+    document.getElementById("clerkPin").focus();
+    setTimeout(function() { errorEl.classList.remove("show"); }, 3000);
+  }
+}
+
+document.getElementById("clerkPin").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") { unlockClerk(); }
+});
+
+var allStudents = [];
+var allPayments = [];
+var filteredHistoryStudents = [];
+var currentStudentId = null;
+var currentTab = 'students';
+var isLoading = false;
+var receiptData = null;
+var currentHistoryStudentId = null;
+
+function updateDateTime() {
+  var now = new Date();
+  document.getElementById("datetime").innerHTML = now.toLocaleDateString('en-GB') + " | " + now.toLocaleTimeString('en-GB');
+}
+setInterval(updateDateTime, 1000);
+updateDateTime();
+
+function switchTab(tab) {
+  if (isLoading) return;
+  currentTab = tab;
+  var tabs = document.querySelectorAll('.tab');
+  tabs.forEach(function(t) { t.classList.remove('active'); });
+  if (tab === 'students') {
+    tabs[0].classList.add('active');
+    document.getElementById('studentsTab').style.display = 'block';
+    document.getElementById('feesTab').style.display = 'none';
+    document.getElementById('paymentsTab').style.display = 'none';
+    loadStudentFeeList();
+  } else if (tab === 'fees') {
+    tabs[1].classList.add('active');
+    document.getElementById('studentsTab').style.display = 'none';
+    document.getElementById('feesTab').style.display = 'block';
+    document.getElementById('paymentsTab').style.display = 'none';
+    loadFeesStructure();
+  } else {
+    tabs[2].classList.add('active');
+    document.getElementById('studentsTab').style.display = 'none';
+    document.getElementById('feesTab').style.display = 'none';
+    document.getElementById('paymentsTab').style.display = 'block';
+    loadPayments();
+    populateHistoryStudentSelect();
+  }
+}
+
+function loadAllData() {
+  loadStudentFeeList();
+  loadFeesStructure();
+  loadPayments();
+  populateHistoryStudentSelect();
+}
+
+// ========================
+// STUDENT FUNCTIONS
+// ========================
+function searchStudents() {
+  var searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+  var gradeFilter = document.getElementById('gradeFilter').value;
+  var statusFilter = document.getElementById('statusFilter').value;
+  var typeFilter = document.getElementById('typeFilter').value;
+  var genderFilter = document.getElementById('genderFilter').value;
+  var filtered = allStudents;
+  if (gradeFilter) filtered = filtered.filter(function(s) { return s.grade === gradeFilter; });
+  if (typeFilter) filtered = filtered.filter(function(s) { return s.studentType === typeFilter; });
+  if (genderFilter) filtered = filtered.filter(function(s) { return s.gender === genderFilter; });
+  if (searchTerm) {
+    filtered = filtered.filter(function(s) { 
+      return (s.name || '').toLowerCase().includes(searchTerm) ||
+             (s.id || '').toLowerCase().includes(searchTerm) ||
+             (s.grade || '').toLowerCase().includes(searchTerm) ||
+             (s.gender || '').toLowerCase().includes(searchTerm);
+    });
+  }
+  if (statusFilter === 'paid') { filtered = filtered.filter(function(s) { return s.balance === 0; }); }
+  else if (statusFilter === 'partial') { filtered = filtered.filter(function(s) { return s.balance > 0 && s.balance < s.totalFees; }); }
+  else if (statusFilter === 'unpaid') { filtered = filtered.filter(function(s) { return s.balance === s.totalFees; }); }
+  renderStudentTable(filtered);
+}
+
+function resetSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('gradeFilter').value = '';
+  document.getElementById('statusFilter').value = '';
+  document.getElementById('typeFilter').value = '';
+  document.getElementById('genderFilter').value = '';
+  renderStudentTable(allStudents);
+}
+
+function loadStudentFeeList() {
+  if (isLoading) return;
+  isLoading = true;
+  document.getElementById('studentFeeTable').innerHTML = '<tr><td colspan="10" style="text-align:center;color:#0b5394;">Loading students...</td></tr>';
+  google.script.run
+    .withSuccessHandler(function(data) {
+      isLoading = false;
+      allStudents = data.students || [];
+      document.getElementById('totalStudents').textContent = allStudents.length;
+      document.getElementById('totalDayScholars').textContent = data.totalDayScholars || 0;
+      document.getElementById('totalBoarders').textContent = data.totalBoarders || 0;
+      document.getElementById('totalPaid').textContent = 'KES ' + (data.totalPaid || 0).toLocaleString();
+      document.getElementById('totalBalance').textContent = 'KES ' + (data.totalBalance || 0).toLocaleString();
+      renderStudentTable(allStudents);
+      filteredHistoryStudents = allStudents.slice();
+      populateHistoryStudentSelect();
+    })
+    .withFailureHandler(function(error) {
+      isLoading = false;
+      document.getElementById('studentFeeTable').innerHTML = '<tr><td colspan="10" style="color:red;text-align:center;">❌ Error: ' + error.message + '</td></tr>';
+    })
+    .getAllStudentFees();
+}
+
+function renderStudentTable(students) {
+  var html = '';
+  if (!students || students.length === 0) {
+    html = '<tr><td colspan="10" style="text-align:center;color:#999;">No students found</td></tr>';
+  } else {
+    for (var i = 0; i < students.length; i++) {
+      var s = students[i];
+      var statusClass = s.balance === 0 ? 'status-paid' : s.balance < s.totalFees ? 'status-partial' : 'status-unpaid';
+      var statusText = s.balance === 0 ? '✅ Paid' : s.balance < s.totalFees ? '⏳ Partial' : '❌ Unpaid';
+      var typeBadge = s.isBoarding ? '<span class="badge-boarder">🏠 Boarder</span>' : '<span class="badge-day">📖 Day Scholar</span>';
+      html += '<tr><td><strong>' + (s.id || '-') + '</strong></td><td>' + (s.name || '-') + '</td><td>' + (s.grade || '-') + '</td><td>' + (s.gender || '-') + '</td><td>' + typeBadge + '</td><td>KES ' + (s.totalFees || 0).toLocaleString() + '</td><td style="font-weight:bold;color:#0b8f34;">KES ' + (s.paid || 0).toLocaleString() + '</td><td>KES ' + (s.balance || 0).toLocaleString() + '</td><td class="' + statusClass + '">' + statusText + '</td><td><button class="btn btn-sm btn-success" onclick="openPaymentModal(\'' + (s.id || '') + '\')">💰 Pay</button></td></tr>';
+    }
+  }
+  document.getElementById('studentFeeTable').innerHTML = html;
+}
+
+// ========================
+// HISTORY FUNCTIONS
+// ========================
+function filterHistoryStudents() {
+  var searchTerm = document.getElementById('historySearchInput').value.toLowerCase().trim();
+  var gradeFilter = document.getElementById('historyGradeFilter').value;
+  var genderFilter = document.getElementById('historyGenderFilter').value;
+  var typeFilter = document.getElementById('historyTypeFilter').value;
+  var filtered = allStudents.slice();
+  if (gradeFilter) filtered = filtered.filter(function(s) { return s.grade === gradeFilter; });
+  if (genderFilter) filtered = filtered.filter(function(s) { return s.gender === genderFilter; });
+  if (typeFilter) filtered = filtered.filter(function(s) { return s.studentType === typeFilter; });
+  if (searchTerm) {
+    filtered = filtered.filter(function(s) { 
+      return (s.name || '').toLowerCase().includes(searchTerm) ||
+             (s.id || '').toLowerCase().includes(searchTerm) ||
+             (s.grade || '').toLowerCase().includes(searchTerm) ||
+             (s.gender || '').toLowerCase().includes(searchTerm);
+    });
+  }
+  filteredHistoryStudents = filtered;
+  populateHistoryStudentSelect(filtered);
+}
+
+function resetHistorySearch() {
+  document.getElementById('historySearchInput').value = '';
+  document.getElementById('historyGradeFilter').value = '';
+  document.getElementById('historyGenderFilter').value = '';
+  document.getElementById('historyTypeFilter').value = '';
+  filteredHistoryStudents = allStudents.slice();
+  populateHistoryStudentSelect(filteredHistoryStudents);
+  showMessage('🔄 History search reset', 'info');
+}
+
+function populateHistoryStudentSelect(students) {
+  var select = document.getElementById('historyStudentSelect');
+  var currentValue = select.value;
+  var studentList = students || filteredHistoryStudents || allStudents;
+  select.innerHTML = '<option value="">-- Select Student --</option>';
+  var sortedStudents = studentList.slice().sort(function(a, b) { return a.name.localeCompare(b.name); });
+  sortedStudents.forEach(function(s) {
+    var option = document.createElement('option');
+    option.value = s.id;
+    option.textContent = s.id + ' - ' + s.name + ' (' + s.grade + ')';
+    select.appendChild(option);
+  });
+  if (currentValue) { select.value = currentValue; }
+}
+
+// ========================
+// PAYMENT MODAL
+// ========================
+function openPaymentModal(studentId) {
+  currentStudentId = studentId;
+  var student = allStudents.find(function(s) { return s.id === studentId; });
+  if (!student) { showMessage('❌ Student not found', 'error'); return; }
+  document.getElementById('paymentStudentInfo').innerHTML =
+    '<p><strong>Student:</strong> ' + student.name + ' (' + student.id + ')</p>' +
+    '<p><strong>Grade:</strong> ' + student.grade + ' | <strong>Type:</strong> ' + student.studentType + '</p>' +
+    '<p><strong>Balance:</strong> KES ' + student.balance.toLocaleString() + '</p><hr>';
+  var inputs = document.querySelectorAll('.payment-categories input');
+  inputs.forEach(function(inp) { inp.value = ''; });
+  document.getElementById('paymentMethod').value = 'MPESA';
+  document.getElementById('paymentReference').value = '';
+  document.getElementById('paymentNotes').value = '';
+  document.getElementById('paymentResult').innerHTML = '';
+  document.getElementById('paymentResult').style.display = 'none';
+  updatePaymentTotal();
+  document.getElementById('paymentModal').classList.add('show');
+}
+
+function closePaymentModal() {
+  document.getElementById('paymentModal').classList.remove('show');
+  currentStudentId = null;
+}
+
+function updatePaymentTotal() {
+  var total = 0;
+  var inputs = document.querySelectorAll('.payment-categories input');
+  inputs.forEach(function(inp) {
+    var val = parseFloat(inp.value) || 0;
+    if (val > 0) total += val;
+  });
+  document.getElementById('paymentTotal').textContent = 'KES ' + total.toLocaleString();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var inputs = document.querySelectorAll('.payment-categories input');
+  inputs.forEach(function(inp) { inp.addEventListener('input', updatePaymentTotal); });
+});
+
+function saveMultiPayment() {
+  var student = allStudents.find(function(s) { return s.id === currentStudentId; });
+  if (!student) { showMessage('❌ Student not found', 'error'); return; }
+  var payments = {};
+  var total = 0;
+  var categories = {
+    'cat_schoolfees': 'School Fees', 'cat_boarding': 'Boarding',
+    'cat_remedials': 'Remedials', 'cat_stationaries': 'Stationaries',
+    'cat_activity': 'Activity', 'cat_assessment': 'Assessment',
+    'cat_admission': 'Admission', 'cat_other': 'Other'
+  };
+  for (var key in categories) {
+    var val = parseFloat(document.getElementById(key).value) || 0;
+    if (val > 0) { payments[categories[key]] = val; total += val; }
+  }
+  if (total === 0) {
+    var resultEl = document.getElementById('paymentResult');
+    resultEl.innerHTML = '❌ Please enter at least one payment amount';
+    resultEl.style.display = 'block';
+    resultEl.style.background = '#f8d7da';
+    resultEl.style.color = '#721c24';
+    resultEl.style.border = '2px solid #dc3545';
+    return;
+  }
+  var method = document.getElementById('paymentMethod').value;
+  var reference = document.getElementById('paymentReference').value.trim();
+  var notes = document.getElementById('paymentNotes').value.trim();
+  var resultEl = document.getElementById('paymentResult');
+  resultEl.innerHTML = '⏳ Recording payment...';
+  resultEl.style.display = 'block';
+  resultEl.style.background = '#d1ecf1';
+  resultEl.style.color = '#0c5460';
+  resultEl.style.border = '2px solid #0b5394';
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        receiptData = {
+          studentId: currentStudentId,
+          studentName: student.name,
+          studentType: student.studentType,
+          grade: student.grade,
+          totalAmount: result.totalAmount,
+          categories: result.categories,
+          method: method,
+          reference: reference,
+          notes: notes,
+          date: result.date || new Date().toISOString()
+        };
+        resultEl.innerHTML = '✅ ' + result.message + ' (Total: KES ' + result.totalAmount.toLocaleString() + ')';
+        resultEl.style.background = '#d4edda';
+        resultEl.style.color = '#155724';
+        resultEl.style.border = '2px solid #0b8f34';
+        showMessage('✅ Payment recorded successfully!', 'success');
+        setTimeout(function() {
+          closePaymentModal();
+          generateReceipt(receiptData);
+          loadStudentFeeList();
+          loadPayments();
+          populateHistoryStudentSelect();
+        }, 1500);
+      } else {
+        resultEl.innerHTML = '❌ ' + (result.message || 'Payment failed');
+        resultEl.style.background = '#f8d7da';
+        resultEl.style.color = '#721c24';
+        resultEl.style.border = '2px solid #dc3545';
+        showMessage('❌ ' + result.message, 'error');
+      }
+    })
+    .withFailureHandler(function(error) {
+      var resultEl = document.getElementById('paymentResult');
+      resultEl.innerHTML = '❌ Error: ' + error.message;
+      resultEl.style.background = '#f8d7da';
+      resultEl.style.color = '#721c24';
+      resultEl.style.border = '2px solid #dc3545';
+      showMessage('❌ Error: ' + error.message, 'error');
+    })
+    .recordMultiPayment(currentStudentId, payments, method, reference, notes);
+}
+
+// ========================
+// RECEIPT FUNCTIONS
+// ========================
+function generateReceipt(data) {
+  var categoriesHtml = '';
+  if (data.categories && data.categories.length > 0) {
+    data.categories.forEach(function(cat) {
+      categoriesHtml += '<div class="row"><span class="label">' + cat.category + ':</span><span class="value">KES ' + cat.amount.toLocaleString() + '</span></div>';
+    });
+  }
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('en-GB');
+  var timeStr = now.toLocaleTimeString('en-GB');
+  var receiptNo = Math.floor(Math.random() * 90000) + 10000;
+  var receiptHTML = '<div class="receipt-container"><div class="receipt-header"><h2>🏫 Changara Star Academy</h2><p>Official Payment Receipt</p><p style="font-size:12px;color:#999;">Receipt No: ' + receiptNo + '</p></div><div class="receipt-details"><div class="row"><span class="label">Student Name:</span><span class="value">' + data.studentName + '</span></div><div class="row"><span class="label">Student ID:</span><span class="value">' + data.studentId + '</span></div><div class="row"><span class="label">Grade:</span><span class="value">' + (data.grade || 'N/A') + '</span></div><div class="row"><span class="label">Student Type:</span><span class="value">' + data.studentType + '</span></div><div class="row"><span class="label">Payment Date:</span><span class="value">' + dateStr + '</span></div><div class="row"><span class="label">Payment Method:</span><span class="value">' + data.method + '</span></div>' + (data.reference ? '<div class="row"><span class="label">Reference:</span><span class="value">' + data.reference + '</span></div>' : '') + '</div><div style="margin:10px 0;padding:10px;background:#f8f9fa;border-radius:8px;border:1px solid #e0e0e0;"><h5 style="margin:0 0 10px 0;color:#001f5c;">Payment Breakdown:</h5>' + categoriesHtml + '</div><div class="receipt-amount"><div style="font-size:14px;color:#666;">Total Amount Paid</div><div class="amount">KES ' + data.totalAmount.toLocaleString() + '</div></div><div style="text-align:center;padding:10px 0;"><p style="font-size:13px;color:#0b8f34;font-weight:bold;">✅ Payment Confirmed</p><p style="font-size:12px;color:#666;">"This is a computer-generated receipt"</p></div><div class="receipt-footer"><div class="stamp">📌 SCHOOL STAMP</div><p>Printed on: ' + dateStr + ' at ' + timeStr + '</p><p>Thank you for your payment!</p><p style="color:#c51616;font-weight:bold;font-size:11px;">N/B: NO CASH IS ALLOWED IN SCHOOL</p></div></div>';
+  document.getElementById('receiptContent').innerHTML = receiptHTML;
+  document.getElementById('receiptModal').classList.add('show');
+}
+
+function closeReceiptModal() { document.getElementById('receiptModal').classList.remove('show'); }
+
+function printReceipt() {
+  var content = document.getElementById('receiptContent').innerHTML;
+  if (!content || content.trim() === '') { showMessage('❌ No receipt to print', 'error'); return; }
+  var printWindow = window.open('', '_blank', 'width=600,height=800');
+  if (!printWindow) { showMessage('❌ Please allow popups for this site', 'error'); return; }
+  printWindow.document.write('<!DOCTYPE html><html><head><title>Payment Receipt</title><style>body{font-family:Arial,sans-serif;margin:0;padding:20px;background:white;}.receipt-container{max-width:500px;margin:0 auto;padding:20px;background:white;border:2px solid #001f5c;border-radius:10px;font-family:"Courier New",monospace;}.receipt-header{text-align:center;border-bottom:2px dashed #001f5c;padding-bottom:15px;margin-bottom:15px;}.receipt-header h2{color:#001f5c;margin:0;font-size:24px;}.receipt-header p{color:#666;margin:5px 0;font-size:14px;}.receipt-details{margin:15px 0;}.receipt-details .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted #ddd;font-size:14px;}.receipt-details .row .label{font-weight:bold;color:#001f5c;}.receipt-details .row .value{color:#333;}.receipt-amount{text-align:center;padding:15px;margin:15px 0;background:#e8f5e9;border-radius:10px;border:2px solid #0b8f34;}.receipt-amount .amount{font-size:32px;font-weight:bold;color:#0b8f34;}.receipt-footer{text-align:center;margin-top:20px;padding-top:15px;border-top:2px dashed #001f5c;font-size:12px;color:#999;}.receipt-footer .stamp{color:#001f5c;font-weight:bold;font-size:16px;}@media print{body{padding:10px;}}</style></head><body>' + content + '<script>window.onload=function(){setTimeout(function(){window.print();},500);}<\/script></body></html>');
+  printWindow.document.close();
+}
+
+function saveReceiptPDF() {
+  var content = document.getElementById('receiptContent').innerHTML;
+  if (!content || content.trim() === '') { showMessage('❌ No receipt to save', 'error'); return; }
+  showMessage('⏳ Generating PDF receipt...', 'info');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.url) { showMessage('✅ PDF receipt ready! Opening in new tab...', 'success'); window.open(result.url, '_blank'); }
+      else if (result && result.error) { showMessage('❌ Error: ' + result.error, 'error'); }
+      else { showMessage('❌ Error generating PDF', 'error'); }
+    })
+    .withFailureHandler(function(error) { showMessage('❌ Error: ' + error.message, 'error'); })
+    .generateReceiptPDF(receiptData);
+}
+
+// ========================
+// LOAD PAYMENTS
+// ========================
+function loadPayments() {
+  google.script.run
+    .withSuccessHandler(function(payments) {
+      allPayments = payments || [];
+      console.log('✅ Payments loaded:', allPayments.length);
+    })
+    .withFailureHandler(function(error) {
+      console.error('Error loading payments:', error);
+    })
+    .getAllPayments();
+}
+
+// ========================
+// REFRESH PAYMENT HISTORY
+// ========================
+function refreshPaymentHistory() {
+  var studentId = document.getElementById('historyStudentSelect').value;
+  if (studentId) { viewStudentPaymentHistory(); } 
+  else { populateHistoryStudentSelect(); showMessage('🔄 Payment history refreshed!', 'info'); }
+}
+
+// ========================
+// SHOW ALL STUDENTS WHO HAVE PAID
+// ========================
+function showAllPaidStudents() {
+  showMessage('⏳ Loading all students with payments...', 'info');
+  
+  document.getElementById('paymentHistoryDisplay').style.display = 'block';
+  document.getElementById('historyStudentInfo').innerHTML = '<p style="color:#0b5394;">⏳ Fetching all payment records...</p>';
+  document.getElementById('historyPaymentsTable').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Loading...</td></tr>';
+  document.getElementById('historyStats').innerHTML = '';
+  
+  google.script.run
+    .withSuccessHandler(function(data) {
+      console.log('All student fees data:', data);
+      
+      if (!data || !data.students) {
+        showMessage('❌ No data returned', 'error');
+        document.getElementById('historyStudentInfo').innerHTML = '<p style="color:red;">❌ No data returned</p>';
+        return;
+      }
+      
+      var paidStudents = data.students.filter(function(s) { return s.paid > 0; });
+      
+      if (paidStudents.length === 0) {
+        document.getElementById('historyStudentInfo').innerHTML = '<p style="color:#ff9800;">📭 No students have made payments yet</p>';
+        document.getElementById('historyPaymentsTable').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">No payment records found</td></tr>';
+        document.getElementById('historyStats').innerHTML = '<div class="history-stat"><div class="num">0</div><div class="label">Students with Payments</div></div>';
+        showMessage('📭 No students have made payments yet', 'warning');
+        return;
+      }
+      
+      var totalPaid = 0;
+      paidStudents.forEach(function(s) { totalPaid += s.paid; });
+      
+      document.getElementById('historyStudentInfo').innerHTML = 
+        '<p style="margin:0;font-size:16px;font-weight:bold;color:#001f5c;">📊 Students with Payment Records</p>' +
+        '<p style="margin:0;color:#0b8f34;font-weight:bold;">Total Students with Payments: ' + paidStudents.length + '</p>' +
+        '<p style="margin:0;color:#0b5394;">Total Amount Paid: KES ' + totalPaid.toLocaleString() + '</p>';
+      
+      var statsHtml = '';
+      statsHtml += '<div class="history-stat"><div class="num">' + paidStudents.length + '</div><div class="label">Students with Payments</div></div>';
+      statsHtml += '<div class="history-stat"><div class="num">KES ' + totalPaid.toLocaleString() + '</div><div class="label">Total Paid</div></div>';
+      document.getElementById('historyStats').innerHTML = statsHtml;
+      
+      var tableHtml = '';
+      paidStudents.forEach(function(s) {
+        var statusClass = s.balance === 0 ? 'status-paid' : 'status-partial';
+        var statusText = s.balance === 0 ? '✅ Fully Paid' : '⏳ Partial';
+        var typeBadge = s.isBoarding ? '<span class="badge-boarder">🏠 Boarder</span>' : '<span class="badge-day">📖 Day Scholar</span>';
+        tableHtml += '<tr>' +
+          '<td><strong>' + (s.id || '-') + '</strong></td>' +
+          '<td>' + (s.name || '-') + '</td>' +
+          '<td>' + (s.grade || '-') + '</td>' +
+          '<td>' + typeBadge + '</td>' +
+          '<td style="font-weight:bold;">KES ' + (s.totalFees || 0).toLocaleString() + '</td>' +
+          '<td style="font-weight:bold;color:#0b8f34;">KES ' + (s.paid || 0).toLocaleString() + '</td>' +
+          '<td>KES ' + (s.balance || 0).toLocaleString() + '</td>' +
+          '<td class="' + statusClass + '">' + statusText + '</td>' +
+          '<td><button class="btn btn-xs btn-info" onclick="viewStudentPayments(\'' + s.id + '\')">📋 View Payments</button></td>' +
+          '</tr>';
+      });
+      document.getElementById('historyPaymentsTable').innerHTML = tableHtml;
+      
+      showMessage('✅ Found ' + paidStudents.length + ' students with payments', 'success');
+    })
+    .withFailureHandler(function(error) {
+      console.error('Error:', error);
+      showMessage('❌ Error: ' + error.message, 'error');
+      document.getElementById('historyStudentInfo').innerHTML = '<p style="color:red;">❌ Error: ' + error.message + '</p>';
+    })
+    .getAllStudentFees();
+}
+
+// ========================
+// VIEW INDIVIDUAL STUDENT PAYMENTS - FIXED
+// ========================
+function viewStudentPayments(studentId) {
+  console.log('viewStudentPayments called with:', studentId);
+  
+  // Find the student
+  var student = allStudents.find(function(s) { return s.id === studentId; });
+  if (!student) {
+    showMessage('❌ Student not found', 'error');
+    return;
+  }
+  
+  // Set the dropdown
+  var select = document.getElementById('historyStudentSelect');
+  select.value = studentId;
+  
+  // Store current student ID
+  currentHistoryStudentId = studentId;
+  
+  // Show the display area
+  document.getElementById('paymentHistoryDisplay').style.display = 'block';
+  document.getElementById('historyStudentInfo').innerHTML = '<p style="color:#0b5394;">⏳ Loading payment history for ' + student.name + '...</p>';
+  document.getElementById('historyPaymentsTable').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Loading...</td></tr>';
+  document.getElementById('historyStats').innerHTML = '';
+  
+  showMessage('⏳ Loading payment history for ' + student.name + '...', 'info');
+  
+  // Call the server function
+  google.script.run
+    .withSuccessHandler(function(data) {
+      console.log('Student payment data received:', data);
+      
+      if (data && data.error) {
+        showMessage('❌ Error: ' + data.error, 'error');
+        document.getElementById('historyStudentInfo').innerHTML = '<p style="color:red;">❌ ' + data.error + '</p>';
+        return;
+      }
+      
+      if (!data) {
+        showMessage('❌ No data returned', 'error');
+        document.getElementById('historyStudentInfo').innerHTML = '<p style="color:red;">❌ No data returned</p>';
+        return;
+      }
+      
+      var payments = data.payments || [];
+      var studentData = data.student || {};
+      
+      // Show student summary
+      document.getElementById('historyStudentInfo').innerHTML =
+        '<p style="margin:0;font-size:16px;font-weight:bold;color:#001f5c;">📋 ' + (studentData.name || student.name) + ' (' + (studentData.id || studentId) + ')</p>' +
+        '<p style="margin:0;"><strong>Grade:</strong> ' + (studentData.grade || 'N/A') + ' | <strong>Type:</strong> ' + (data.studentType || 'N/A') + '</p>' +
+        '<p style="margin:0;font-weight:bold;color:#0b5394;">Total Fees: KES ' + (data.totalFees || 0).toLocaleString() + 
+        ' | Total Paid: KES ' + (data.paid || 0).toLocaleString() +
+        ' | Balance: KES ' + (data.balance || 0).toLocaleString() + '</p>' +
+        '<p style="margin:0;color:#0b8f34;font-weight:bold;">✅ ' + payments.length + ' payment(s) found</p>';
+      
+      if (payments.length === 0) {
+        document.getElementById('historyStats').innerHTML = '<div class="history-stat"><div class="num">0</div><div class="label">No Payments</div></div>';
+        document.getElementById('historyPaymentsTable').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">No payments recorded for this student</td></tr>';
+        showMessage('📭 No payment records found for ' + student.name, 'warning');
+        return;
+      }
+      
+      // Calculate stats
+      var totalAmount = 0;
+      var categories = {};
+      payments.forEach(function(p) {
+        totalAmount += p.amount || 0;
+        var cat = p.category || 'School Fees';
+        categories[cat] = (categories[cat] || 0) + (p.amount || 0);
+      });
+      
+      // Display stats
+      var statsHtml = '';
+      statsHtml += '<div class="history-stat"><div class="num">' + payments.length + '</div><div class="label">Total Payments</div></div>';
+      statsHtml += '<div class="history-stat"><div class="num">KES ' + totalAmount.toLocaleString() + '</div><div class="label">Total Amount</div></div>';
+      for (var cat in categories) {
+        statsHtml += '<div class="history-stat"><div class="num">KES ' + categories[cat].toLocaleString() + '</div><div class="label">' + cat + '</div></div>';
+      }
+      document.getElementById('historyStats').innerHTML = statsHtml;
+      
+      // Display payments table with Edit and Receipt buttons
+      var tableHtml = '';
+      payments.forEach(function(p) {
+        var dateStr = p.date ? p.date.split(' ')[0] : '-';
+        if (dateStr && dateStr.includes('T')) dateStr = dateStr.split('T')[0];
+        var pStudentName = p.studentName || student.name;
+        var pStudentId = p.studentId || studentId;
+        
+        tableHtml += '<tr>' +
+          '<td>' + dateStr + '</td>' +
+          '<td>' + (p.category || 'School Fees') + '</td>' +
+          '<td style="font-weight:bold;color:#0b8f34;">KES ' + (p.amount || 0).toLocaleString() + '</td>' +
+          '<td>' + (p.method || '-') + '</td>' +
+          '<td>' + (p.reference || '-') + '</td>' +
+          '<td>' +
+          '<button class="btn btn-xs btn-warning" onclick="openEditPaymentModal(\'' + p.row + '\',\'' + pStudentId + '\',\'' + pStudentName + '\',\'' + (p.amount || 0) + '\',\'' + (p.category || 'School Fees') + '\',\'' + (p.method || '') + '\',\'' + (p.reference || '') + '\',\'' + (p.notes || '') + '\')">✏️ Edit</button> ' +
+          '<button class="btn btn-xs btn-info" onclick="viewSingleReceipt(\'' + p.row + '\',\'' + pStudentId + '\',\'' + pStudentName + '\',\'' + (p.amount || 0) + '\',\'' + (p.category || 'School Fees') + '\',\'' + (p.method || '') + '\',\'' + (p.reference || '') + '\',\'' + (p.date || '') + '\')">🧾 Receipt</button>' +
+          '</td>' +
+          '</tr>';
+      });
+      document.getElementById('historyPaymentsTable').innerHTML = tableHtml;
+      
+      showMessage('✅ Found ' + payments.length + ' payments for ' + student.name, 'success');
+    })
+    .withFailureHandler(function(error) {
+      console.error('Error:', error);
+      showMessage('❌ Error loading payment history: ' + error.message, 'error');
+      document.getElementById('historyStudentInfo').innerHTML = '<p style="color:red;">❌ Error: ' + error.message + '</p>';
+    })
+    .getStudentFeeDetails(studentId);
+}
+
+// ========================
+// VIEW SELECTED STUDENT PAYMENT HISTORY
+// ========================
+function viewStudentPaymentHistory() {
+  var studentId = document.getElementById('historyStudentSelect').value;
+  if (!studentId) { 
+    showMessage('❌ Please select a student', 'error'); 
+    return; 
+  }
+  viewStudentPayments(studentId);
+}
+
+// ========================
+// FEES STRUCTURE FUNCTIONS
+// ========================
+function loadFeesStructure() {
+  google.script.run
+    .withSuccessHandler(function(fees) {
+      var html = '';
+      var gradeOrder = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+      gradeOrder.forEach(function(grade) {
+        var f = fees[grade];
+        if (f) { html += '<tr><td><strong>' + grade + '</strong></td><td>KES ' + f.term1.toLocaleString() + '</td><td>KES ' + f.term2.toLocaleString() + '</td><td>KES ' + f.term3.toLocaleString() + '</td><td class="amount">KES ' + f.total.toLocaleString() + '</td></tr>'; }
+      });
+      document.getElementById('dayFeesTable').innerHTML = html;
+    })
+    .withFailureHandler(function(error) { document.getElementById('dayFeesTable').innerHTML = '<tr><td colspan="5" style="color:red;text-align:center;">❌ Error loading fees</td></tr>'; })
+    .getFeesStructure();
+  google.script.run
+    .withSuccessHandler(function(fees) {
+      var html = '';
+      var boardingOrder = ['Full Boarding'];
+      boardingOrder.forEach(function(head) {
+        var f = fees[head];
+        if (f) { html += '<tr><td><strong>' + head + '</strong></td><td>KES ' + f.term1.toLocaleString() + '</td><td>KES ' + f.term2.toLocaleString() + '</td><td>KES ' + f.term3.toLocaleString() + '</td><td class="amount">KES ' + f.total.toLocaleString() + '</td></tr>'; }
+      });
+      document.getElementById('boardingFeesTable').innerHTML = html;
+    })
+    .withFailureHandler(function(error) { document.getElementById('boardingFeesTable').innerHTML = '<tr><td colspan="5" style="color:red;text-align:center;">❌ Error loading boarding fees</td></tr>'; })
+    .getBoardingFees();
+}
+
+function openEditFeesModal(type) {
+  if (type === 'boarding') {
+    google.script.run
+      .withSuccessHandler(function(fees) {
+        var f = fees['Full Boarding'] || { term1: 0, term2: 0, term3: 0 };
+        var html = '<h2>✏️ Edit Boarding Fees</h2><p style="color:#666;text-align:center;margin-bottom:15px;">Update boarding fees</p><div class="fees-edit-group"><h4>Full Boarding</h4><div class="row"><div><label>Term 1:</label><input type="number" id="boarding_term1" value="' + (f.term1 || 0) + '"></div><div><label>Term 2:</label><input type="number" id="boarding_term2" value="' + (f.term2 || 0) + '"></div><div><label>Term 3:</label><input type="number" id="boarding_term3" value="' + (f.term3 || 0) + '"></div><div><label>Total (Auto):</label><input type="text" id="boarding_total" readonly style="background:#f0f0f0;font-weight:bold;" value="' + (f.total || 0) + '"></div></div></div><input type="hidden" id="editFeesType" value="boarding"><div id="feesEditResult" style="margin-top:15px;padding:12px;border-radius:12px;display:none;"></div><div class="modal-actions"><button class="btn-success" onclick="saveFeesStructure()">💾 SAVE FEES</button><button class="btn-danger" onclick="closeEditFeesModal()">❌ CANCEL</button></div>';
+        document.getElementById('feesModalContent').innerHTML = html;
+        document.getElementById('editFeesModal').classList.add('show');
+        document.getElementById('boarding_term1').addEventListener('input', updateBoardingTotal);
+        document.getElementById('boarding_term2').addEventListener('input', updateBoardingTotal);
+        document.getElementById('boarding_term3').addEventListener('input', updateBoardingTotal);
+      })
+      .withFailureHandler(function(error) { showMessage('❌ Error loading boarding fees: ' + error.message, 'error'); })
+      .getBoardingFees();
+  } else {
+    google.script.run
+      .withSuccessHandler(function(fees) {
+        var gradeOrder = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+        var html = '<h2>✏️ Edit Day Scholar Fees</h2><p style="color:#666;text-align:center;margin-bottom:15px;">Update fees for each grade</p>';
+        gradeOrder.forEach(function(grade) {
+          var f = fees[grade] || { term1: 0, term2: 0, term3: 0 };
+          var key = grade.replace(/ /g,'_');
+          html += '<div class="fees-edit-group"><h4>' + grade + '</h4><div class="row"><div><label>Term 1:</label><input type="number" id="day_' + key + '_term1" value="' + (f.term1 || 0) + '"></div><div><label>Term 2:</label><input type="number" id="day_' + key + '_term2" value="' + (f.term2 || 0) + '"></div><div><label>Term 3:</label><input type="number" id="day_' + key + '_term3" value="' + (f.term3 || 0) + '"></div><div><label>Total (Auto):</label><input type="text" id="day_' + key + '_total" readonly style="background:#f0f0f0;font-weight:bold;" value="' + (f.total || 0) + '"></div></div></div>';
+        });
+        html += '<input type="hidden" id="editFeesType" value="day"><div id="feesEditResult" style="margin-top:15px;padding:12px;border-radius:12px;display:none;"></div><div class="modal-actions"><button class="btn-success" onclick="saveFeesStructure()">💾 SAVE FEES</button><button class="btn-danger" onclick="closeEditFeesModal()">❌ CANCEL</button></div>';
+        document.getElementById('feesModalContent').innerHTML = html;
+        document.getElementById('editFeesModal').classList.add('show');
+        gradeOrder.forEach(function(grade) {
+          var key = grade.replace(/ /g,'_');
+          document.getElementById('day_' + key + '_term1').addEventListener('input', function() { updateDayTotal(key); });
+          document.getElementById('day_' + key + '_term2').addEventListener('input', function() { updateDayTotal(key); });
+          document.getElementById('day_' + key + '_term3').addEventListener('input', function() { updateDayTotal(key); });
+        });
+      })
+      .withFailureHandler(function(error) { showMessage('❌ Error loading fees: ' + error.message, 'error'); })
+      .getFeesStructure();
+  }
+}
+
+function updateBoardingTotal() {
+  var t1 = parseInt(document.getElementById('boarding_term1').value) || 0;
+  var t2 = parseInt(document.getElementById('boarding_term2').value) || 0;
+  var t3 = parseInt(document.getElementById('boarding_term3').value) || 0;
+  document.getElementById('boarding_total').value = t1 + t2 + t3;
+}
+
+function updateDayTotal(key) {
+  var t1 = parseInt(document.getElementById('day_' + key + '_term1').value) || 0;
+  var t2 = parseInt(document.getElementById('day_' + key + '_term2').value) || 0;
+  var t3 = parseInt(document.getElementById('day_' + key + '_term3').value) || 0;
+  document.getElementById('day_' + key + '_total').value = t1 + t2 + t3;
+}
+
+function closeEditFeesModal() { document.getElementById('editFeesModal').classList.remove('show'); }
+
+function saveFeesStructure() {
+  var type = document.getElementById('editFeesType').value;
+  var feesData = {};
+  var resultEl = document.getElementById('feesEditResult');
+  if (type === 'boarding') {
+    var term1 = parseInt(document.getElementById('boarding_term1').value) || 0;
+    var term2 = parseInt(document.getElementById('boarding_term2').value) || 0;
+    var term3 = parseInt(document.getElementById('boarding_term3').value) || 0;
+    var total = term1 + term2 + term3;
+    if (term1 < 0 || term2 < 0 || term3 < 0) {
+      resultEl.innerHTML = '❌ Please enter valid fees (cannot be negative)';
+      resultEl.style.display = 'block';
+      resultEl.style.background = '#f8d7da';
+      resultEl.style.color = '#721c24';
+      resultEl.style.border = '2px solid #dc3545';
+      return;
+    }
+    feesData['Full Boarding'] = { term1: term1, term2: term2, term3: term3, total: total };
+    resultEl.innerHTML = '⏳ Saving boarding fees...';
+    resultEl.style.display = 'block';
+    resultEl.style.background = '#d1ecf1';
+    resultEl.style.color = '#0c5460';
+    resultEl.style.border = '2px solid #0b5394';
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result.success) {
+          resultEl.innerHTML = '✅ ' + result.message;
+          resultEl.style.background = '#d4edda';
+          resultEl.style.color = '#155724';
+          resultEl.style.border = '2px solid #0b8f34';
+          showMessage('✅ Boarding fees updated successfully!', 'success');
+          setTimeout(function() { closeEditFeesModal(); loadFeesStructure(); loadStudentFeeList(); }, 1500);
+        } else {
+          resultEl.innerHTML = '❌ ' + result.message;
+          resultEl.style.background = '#f8d7da';
+          resultEl.style.color = '#721c24';
+          resultEl.style.border = '2px solid #dc3545';
+        }
+      })
+      .withFailureHandler(function(error) {
+        resultEl.innerHTML = '❌ Error: ' + error.message;
+        resultEl.style.background = '#f8d7da';
+        resultEl.style.color = '#721c24';
+        resultEl.style.border = '2px solid #dc3545';
+      })
+      .updateFeesStructure(feesData, 'boarding');
+  } else {
+    var gradeOrder = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+    var valid = true;
+    gradeOrder.forEach(function(grade) {
+      var key = grade.replace(/ /g,'_');
+      var term1 = parseInt(document.getElementById('day_' + key + '_term1').value) || 0;
+      var term2 = parseInt(document.getElementById('day_' + key + '_term2').value) || 0;
+      var term3 = parseInt(document.getElementById('day_' + key + '_term3').value) || 0;
+      var total = term1 + term2 + term3;
+      if (term1 < 0 || term2 < 0 || term3 < 0) {
+        valid = false;
+        resultEl.innerHTML = '❌ Please enter valid fees for ' + grade + ' (cannot be negative)';
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#f8d7da';
+        resultEl.style.color = '#721c24';
+        resultEl.style.border = '2px solid #dc3545';
+        return;
+      }
+      feesData[grade] = { term1: term1, term2: term2, term3: term3, total: total };
+    });
+    if (!valid) return;
+    resultEl.innerHTML = '⏳ Saving day scholar fees...';
+    resultEl.style.display = 'block';
+    resultEl.style.background = '#d1ecf1';
+    resultEl.style.color = '#0c5460';
+    resultEl.style.border = '2px solid #0b5394';
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result.success) {
+          resultEl.innerHTML = '✅ ' + result.message;
+          resultEl.style.background = '#d4edda';
+          resultEl.style.color = '#155724';
+          resultEl.style.border = '2px solid #0b8f34';
+          showMessage('✅ Day scholar fees updated successfully!', 'success');
+          setTimeout(function() { closeEditFeesModal(); loadFeesStructure(); loadStudentFeeList(); }, 1500);
+        } else {
+          resultEl.innerHTML = '❌ ' + result.message;
+          resultEl.style.background = '#f8d7da';
+          resultEl.style.color = '#721c24';
+          resultEl.style.border = '2px solid #dc3545';
+        }
+      })
+      .withFailureHandler(function(error) {
+        resultEl.innerHTML = '❌ Error: ' + error.message;
+        resultEl.style.background = '#f8d7da';
+        resultEl.style.color = '#721c24';
+        resultEl.style.border = '2px solid #dc3545';
+      })
+      .updateFeesStructure(feesData, 'day');
+  }
+}
+
+function downloadFeesStructurePDF() {
+  showMessage('⏳ Generating Fees Structure PDF...', 'info');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.url) { showMessage('✅ PDF ready! Opening in new tab...', 'success'); window.open(result.url, '_blank'); }
+      else if (result && result.error) { showMessage('❌ Error: ' + result.error, 'error'); }
+      else { showMessage('❌ Error generating PDF.', 'error'); }
+    })
+    .withFailureHandler(function(error) { showMessage('❌ Error: ' + error.message, 'error'); })
+    .generateFeesStructurePDF();
+}
+
+// ========================
+// EDIT PAYMENT FUNCTIONS
+// ========================
+var editingPaymentRow = null;
+
+function openEditPaymentModal(paymentRow, studentId, studentName, amount, category, method, reference, notes) {
+  editingPaymentRow = paymentRow;
+  document.getElementById('editPaymentRow').value = paymentRow;
+  document.getElementById('editPaymentStudent').value = studentId + ' - ' + studentName;
+  document.getElementById('editPaymentAmount').value = amount || '';
+  document.getElementById('editPaymentCategory').value = category || 'School Fees';
+  document.getElementById('editPaymentMethod').value = method || 'MPESA';
+  document.getElementById('editPaymentReference').value = reference || '';
+  document.getElementById('editPaymentNotes').value = notes || '';
+  document.getElementById('editPaymentResult').innerHTML = '';
+  document.getElementById('editPaymentResult').style.display = 'none';
+  document.getElementById('editPaymentModal').classList.add('show');
+}
+
+function closeEditPaymentModal() {
+  document.getElementById('editPaymentModal').classList.remove('show');
+  editingPaymentRow = null;
+}
+
+function saveEditPaymentRecord() {
+  var row = document.getElementById('editPaymentRow').value;
+  var amount = document.getElementById('editPaymentAmount').value;
+  var category = document.getElementById('editPaymentCategory').value;
+  var method = document.getElementById('editPaymentMethod').value;
+  var reference = document.getElementById('editPaymentReference').value.trim();
+  var notes = document.getElementById('editPaymentNotes').value.trim();
+  var studentInfo = document.getElementById('editPaymentStudent').value;
+  var studentId = studentInfo.split(' - ')[0];
+  if (!amount || parseFloat(amount) <= 0) { showEditPaymentResult('❌ Please enter a valid amount', 'error'); return; }
+  showEditPaymentResult('⏳ Updating payment...', 'info');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        showEditPaymentResult('✅ ' + result.message, 'success');
+        showMessage('Payment updated successfully!', 'success');
+        setTimeout(function() {
+          closeEditPaymentModal();
+          loadStudentFeeList();
+          loadPayments();
+          populateHistoryStudentSelect();
+          if (currentHistoryStudentId) { viewStudentPayments(currentHistoryStudentId); }
+        }, 1500);
+      } else { showEditPaymentResult('❌ ' + result.message, 'error'); }
+    })
+    .withFailureHandler(function(error) { showEditPaymentResult('❌ Error: ' + error.message, 'error'); })
+    .editPayment(parseInt(row), studentId, parseFloat(amount), category, method, reference, notes);
+}
+
+function deleteEditedPayment() {
+  var row = document.getElementById('editPaymentRow').value;
+  if (!confirm('Are you sure you want to delete this payment record? This action cannot be undone!')) { return; }
+  showEditPaymentResult('⏳ Deleting payment...', 'info');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        showEditPaymentResult('✅ ' + result.message, 'success');
+        showMessage('Payment deleted successfully!', 'success');
+        setTimeout(function() {
+          closeEditPaymentModal();
+          loadStudentFeeList();
+          loadPayments();
+          populateHistoryStudentSelect();
+          if (currentHistoryStudentId) { viewStudentPayments(currentHistoryStudentId); }
+        }, 1500);
+      } else { showEditPaymentResult('❌ ' + result.message, 'error'); }
+    })
+    .withFailureHandler(function(error) { showEditPaymentResult('❌ Error: ' + error.message, 'error'); })
+    .deletePayment(parseInt(row));
+}
+
+function showEditPaymentResult(msg, type) {
+  var el = document.getElementById('editPaymentResult');
+  el.innerHTML = msg;
+  el.style.display = 'block';
+  if (type === 'success') { el.style.background = '#d4edda'; el.style.color = '#155724'; el.style.border = '2px solid #0b8f34'; }
+  else if (type === 'error') { el.style.background = '#f8d7da'; el.style.color = '#721c24'; el.style.border = '2px solid #dc3545'; }
+  else { el.style.background = '#d1ecf1'; el.style.color = '#0c5460'; el.style.border = '2px solid #0b5394'; }
+}
+
+function viewSingleReceipt(row, studentId, studentName, amount, category, method, reference, date) {
+  var student = allStudents.find(function(s) { return s.id === studentId; });
+  var grade = student ? student.grade : 'N/A';
+  var studentType = student ? student.studentType : 'N/A';
+  var data = {
+    studentId: studentId,
+    studentName: studentName || (student ? student.name : 'N/A'),
+    studentType: studentType,
+    grade: grade,
+    totalAmount: amount,
+    categories: [{ category: category || 'School Fees', amount: amount }],
+    method: method,
+    reference: reference,
+    date: date
+  };
+  receiptData = data;
+  generateReceipt(data);
+}
+
+// ========================
+// REPORT FUNCTIONS
+// ========================
+function downloadReport(type) {
+  showMessage('⏳ Generating ' + type + ' report...', 'info');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.url) { window.open(result.url, '_blank'); showMessage('✅ ' + type.charAt(0).toUpperCase() + type.slice(1) + ' report generated!', 'success'); }
+      else if (result && result.error) { showMessage('❌ Error: ' + result.error, 'error'); }
+      else { showMessage('❌ Error generating report', 'error'); }
+    })
+    .withFailureHandler(function(error) { showMessage('❌ Error: ' + error.message, 'error'); })
+    .generateFeeReport(type, '');
+}
+
+function showMessage(msg, type) {
+  var el = document.getElementById('message');
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.style.background = type === 'success' ? '#d4edda' : type === 'warning' ? '#fff3cd' : type === 'info' ? '#d1ecf1' : '#f8d7da';
+  el.style.color = type === 'success' ? '#155724' : type === 'warning' ? '#856404' : type === 'info' ? '#0c5460' : '#721c24';
+  el.style.border = type === 'success' ? '2px solid #0b8f34' : type === 'warning' ? '2px solid #ffc107' : type === 'info' ? '2px solid #0b5394' : '2px solid #dc3545';
+  setTimeout(function() { el.style.display = 'none'; }, 6000);
+}
+
+window.onload = function() {
+  document.getElementById("clerkPin").focus();
+  var inputs = document.querySelectorAll('.payment-categories input');
+  inputs.forEach(function(inp) { inp.addEventListener('input', updatePaymentTotal); });
+};
+</script>
+</body>
+</html>
