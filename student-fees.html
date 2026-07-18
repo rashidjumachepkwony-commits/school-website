@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My Fees - Changara Star Academy</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #001f5c 0%, #0b5394 35%, #d4a017 70%, #ffeb99 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .header {
+            background: linear-gradient(135deg, #001f5c, #0b5394);
+            padding: 20px;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 { color: #ffeb99; margin: 0; }
+        .btn-back {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #0b5394;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .btn-back:hover { background: #1a6fb5; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #001f5c; color: white; padding: 10px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .paid { color: #0b8f34; font-weight: bold; }
+        .balance { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="student-portal.html" class="btn-back">🏠 Back to Portal</a>
+        <div class="header">
+            <h1>💰 My Fee Details</h1>
+            <p style="color:#d4a017;font-size:18px;">Student: <span id="studentName">Loading...</span></p>
+        </div>
+        <div id="feeContent">
+            <p style="text-align:center;color:#999;">Loading fee details...</p>
+        </div>
+    </div>
+    <script>
+        // Get student ID from URL
+        const params = new URLSearchParams(window.location.search);
+        const studentId = params.get('studentId');
+
+        if (studentId) {
+            document.getElementById('studentName').textContent = studentId;
+            // In production, fetch actual fee data
+            document.getElementById('feeContent').innerHTML = `
+                <h3>📊 Fee Summary</h3>
+                <table>
+                    <tr><th>Category</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr>
+                    <tr><td>School Fees</td><td>5,000</td><td>5,000</td><td>5,000</td><td>15,000</td></tr>
+                    <tr><td>Activity</td><td>0</td><td>2,000</td><td>0</td><td>2,000</td></tr>
+                </table>
+                <br>
+                <h3>💳 Payment History</h3>
+                <table>
+                    <tr><th>Date</th><th>Category</th><th>Amount</th><th>Method</th></tr>
+                    <tr><td>2026-07-10</td><td>School Fees</td><td class="paid">3,000</td><td>MPESA</td></tr>
+                    <tr><td>2026-07-05</td><td>Activity</td><td class="paid">2,000</td><td>Cash</td></tr>
+                    <tr><td>2026-06-28</td><td>School Fees</td><td class="paid">3,000</td><td>MPESA</td></tr>
+                </table>
+                <br>
+                <div style="background:#f8f9fa;padding:15px;border-radius:10px;text-align:center;">
+                    <p><strong>Total Paid:</strong> <span class="paid">KES 8,000</span></p>
+                    <p><strong>Total Balance:</strong> <span class="balance">KES 7,000</span></p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

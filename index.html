@@ -167,6 +167,31 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
         
+        /* ===== NEW: Student Portal Link ===== */
+        .main-header .nav-links a.student-portal-link {
+            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
+            color: white;
+            font-weight: 600;
+            padding: 5px 16px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 11px;
+            animation: pulseStudentPortal 2s infinite;
+        }
+        .main-header .nav-links a.student-portal-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(111, 66, 193, 0.4);
+        }
+        .main-header .nav-links a.student-portal-link::after { display: none; }
+        .main-header .nav-links a.student-portal-link i {
+            margin-right: 4px;
+        }
+
+        @keyframes pulseStudentPortal {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(111, 66, 193, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(111, 66, 193, 0); }
+        }
+
         /* ===== NEW: Continuous Assessment Link ===== */
         .main-header .nav-links a.assessment-link {
             background: linear-gradient(135deg, var(--kenya-green), #004d00);
@@ -277,7 +302,7 @@
            NEWS TICKER
            ======================================== */
         .news-ticker-section {
-            background: linear-gradient(135deg, var(--school-blue-dark), #001F5C);
+            background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
             color: white;
             padding: 4px 0;
             border-bottom: 2px solid var(--school-gold);
@@ -1101,6 +1126,32 @@
             color: white;
         }
 
+        /* ===== NEW: Student Portal Card ===== */
+        .card-student-portal {
+            border-color: #6f42c1 !important;
+            background: linear-gradient(135deg, #ffffff, #f5f0ff) !important;
+        }
+        .card-student-portal .badge {
+            background: #6f42c1;
+            color: white;
+            animation: pulseStudentPortal 2s infinite;
+        }
+        .card-student-portal .card-cta {
+            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
+            color: white;
+        }
+        .card-student-portal .icon {
+            background: rgba(111, 66, 193, 0.08);
+        }
+        .card-student-portal:hover .icon {
+            background: #6f42c1;
+        }
+
+        @keyframes pulseStudentPortal {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(111, 66, 193, 0.7); }
+        }
+
         /* ===== NEW: Continuous Assessment Card ===== */
         .card-assessment {
             border-color: var(--kenya-green) !important;
@@ -1237,7 +1288,7 @@
            ======================================== */
         .gallery-section {
             padding: 50px 0;
-            background: linear-gradient(135deg, var(--school-blue-dark), #001F5C);
+            background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
             scroll-margin-top: 50px;
         }
         .gallery-swiper {
@@ -1575,11 +1626,15 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
+                <!-- NEW: Student Portal Link -->
+                <a href="student-portal.html" class="student-portal-link">
+                    <i class="fas fa-user-graduate"></i> Student Portal
+                </a>
                 <!-- NEW: Continuous Assessment Link -->
                 <a href="academics.html#assessments" class="assessment-link">
-                    <i class="fas fa-clipboard-check"></i> Continuous Assessment
+                    <i class="fas fa-clipboard-check"></i> Assessment
                 </a>
-                <a href="portal.html" class="portal-link">🔐 Portal</a>
+                <a href="portal.html" class="portal-link">🔐 Admin</a>
                 <a href="contact.html">Contact</a>
             </nav>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
@@ -1650,6 +1705,10 @@
                 <a href="index.html" class="active">
                     <i class="fas fa-home"></i> Home
                 </a>
+                <a href="student-portal.html">
+                    <i class="fas fa-user-graduate"></i> Student Portal
+                    <span class="badge-green">NEW</span>
+                </a>
                 <a href="academics.html#assessments">
                     <i class="fas fa-clipboard-check"></i> Assessment
                     <span class="badge-green">NEW</span>
@@ -1665,12 +1724,12 @@
                     <i class="fas fa-phone"></i> Contact
                 </a>
                 <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;">
-                    <i class="fas fa-user-lock"></i> Portal
+                    <i class="fas fa-user-lock"></i> Admin
                 </a>
             </div>
             <div class="nav-right">
-                <a href="#" class="quick-link" style="display:none;">
-                    <i class="fas fa-user-shield"></i> Admin
+                <a href="student-portal.html" class="quick-link" style="color:var(--school-gold);font-weight:600;">
+                    <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
             </div>
         </div>
@@ -1702,6 +1761,11 @@
             </button>
             <button class="tab-btn" onclick="scrollToSection('slide-fees')">
                 <span class="tab-icon">💰</span> Fees
+            </button>
+            <!-- NEW: Student Portal Tab -->
+            <button class="tab-btn" onclick="window.location.href='student-portal.html'">
+                <span class="tab-icon">🎓</span> Student Portal
+                <span class="tab-badge">NEW</span>
             </button>
             <!-- NEW: Assessment Tab -->
             <button class="tab-btn" onclick="window.location.href='academics.html#assessments'">
@@ -1755,6 +1819,9 @@
                 </button>
                 <a href="admissions.html" class="btn-outline">
                     <i class="fas fa-pen-fancy"></i> Apply Now
+                </a>
+                <a href="student-portal.html" class="btn-outline" style="border-color:#6f42c1;background:rgba(111,66,193,0.15);">
+                    <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
             </div>
         </div>
@@ -1894,8 +1961,23 @@
                     <div class="card-cta">👆 View Fees</div>
                 </div>
 
-                <!-- CARD 8: CONTINUOUS ASSESSMENT - NEW -->
-                <div class="content-card card-assessment" onclick="window.location.href='academics.html#assessments'" data-aos="fade-up" data-aos-delay="310">
+                <!-- CARD 8: STUDENT PORTAL - NEW -->
+                <div class="content-card card-student-portal" onclick="window.location.href='student-portal.html'" data-aos="fade-up" data-aos-delay="310">
+                    <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseStudentPortal 2s infinite; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.5);">
+                        🎓 NEW
+                    </div>
+                    <span class="icon">🎓</span>
+                    <h3>Student Portal</h3>
+                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 View Profile • Fees • Attendance</p>
+                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                        <span>✅ Check Results</span> • <span>✅ View Fees</span> • <span>✅ Download Reports</span>
+                    </div>
+                    <span class="badge">🎓 Login</span>
+                    <div class="card-cta">👆 Access Portal</div>
+                </div>
+
+                <!-- CARD 9: CONTINUOUS ASSESSMENT - NEW -->
+                <div class="content-card card-assessment" onclick="window.location.href='academics.html#assessments'" data-aos="fade-up" data-aos-delay="340">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.5);">
                         📊 NEW
                     </div>
@@ -2093,7 +2175,7 @@
                     <h4>Quick Links</h4>
                     <a href="index.html">🏠 Home</a>
                     <a href="about.html">📖 About Us</a>
-                    <a href="portal.html">🔐 Portal</a>
+                    <a href="student-portal.html">🎓 Student Portal</a>
                     <a href="admissions.html">📝 Admissions</a>
                     <a href="contact.html">📞 Contact</a>
                 </div>

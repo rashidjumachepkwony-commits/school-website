@@ -1,0 +1,267 @@
+// fix-all-data.js - Complete fix: Import data + Fix times
+const mongoose = require('mongoose');
+
+// ============================================
+// YOUR DATA FROM THE DASHBOARD
+// ============================================
+const teacherData = [
+    {
+        firstName: 'RASHID',
+        lastName: 'JUMA',
+        employeeId: 'T006',
+        department: 'Teaching',
+        checkInTime: '9:33 am',
+        checkOutTime: null
+    },
+    {
+        firstName: 'NEDDY',
+        lastName: 'WANGUSI',
+        employeeId: 'T001',
+        department: 'Administration',
+        checkInTime: '9:53 am',
+        checkOutTime: null
+    },
+    {
+        firstName: 'RICAHARD',
+        lastName: 'WAFULA',
+        employeeId: 'T002',
+        department: 'Administration',
+        checkInTime: '9:44 am',
+        checkOutTime: null
+    },
+    {
+        firstName: 'ABRAHAM',
+        lastName: 'TENGE',
+        employeeId: 'T003',
+        department: 'Teaching',
+        checkInTime: '9:47 am',
+        checkOutTime: null
+    },
+    {
+        firstName: 'STELLA',
+        lastName: 'ACHALAT',
+        employeeId: 'T004',
+        department: 'Teaching',
+        checkInTime: '9:41 am',
+        checkOutTime: null
+    },
+    {
+        firstName: 'SYLVIA',
+        lastName: 'NABIRANDA',
+        employeeId: 'T005',
+        department: 'Teaching',
+        checkInTime: '9:42 am',
+        checkOutTime: '3:17 pm'
+    },
+    {
+        firstName: 'EPHRAHIM',
+        lastName: 'MBAJA',
+        employeeId: 'T007',
+        department: 'Teaching',
+        checkInTime: '9:10 am',
+        checkOutTime: null
+    }
+];
+
+// ============================================
+// FUNCTION: Convert time string to Date
+// ============================================
+function parseTimeToDate(timeStr, dateStr = '2026-07-17') {
+    if (!timeStr) return null;
+    
+    const today = new Date(dateStr);
+    const timeParts = timeStr.match(/(\d+):(\d+)\s*(am|pm)/i);
+    if (!timeParts) return null;
+    
+    let hours = parseInt(timeParts[1]);
+    const minutes = parseInt(timeParts[2]);
+    const ampm = timeParts[3].toLowerCase();
+    
+    if (ampm === 'pm' && hours !== 12) hours += 12;
+    if (ampm === 'am' && hours === 12) hours = 0;
+    
+    today.setHours(hours, minutes, 0, 0);
+    return today;
+}
+
+// ============================================
+// MAIN FUNCTION
+// ============================================
+async function run() {
+    try {
+        console.log('✅ Connected to MongoDB\n');
+        
+        const db = mongoose.connection.db;
+        
+        // ============================================
+        // 1. CLEAR EXISTING TEACHERS
+        // ============================================
+        console.log('🗑️ Clearing existing teachers...');
+        await db.collection('teachers').deleteMany({});
+        console.log('✅ Cleared\n');
+        
+        // ============================================
+        // 2. IMPORT TEACHERS
+        // ============================================
+        console.log('📥 Importing teachers...\n');
+        
+        let imported = 0;
+        for (const data of teacherData) {
+            // Parse times
+            const checkInDate = parseTimeToDate(data.checkInTime);
+            const checkOutDate = parseTimeToDate(data.checkOutTime);
+            
+            // Create attendance record
+            const attendance = [{
+                date: new Date('2026-07-17'),
+                checkIn: checkInDate,
+                checkOut: checkOutDate || null,
+                status: 'On Time',
+                isLate: false,
+                hoursWorked: 0,
+                notes: 'Imported from dashboard',
+                location: 'School'
+            }];
+            
+            // Calculate hours if checked out
+            if (checkInDate && checkOutDate) {
+                const hours = ((checkOutDate - checkInDate) / (1000 * 60 * 60)).toFixed(2);
+                attendance[0].hoursWorked = parseFloat(hours);
+            }
+            
+            // Create teacher document
+            const teacher = {
+                firstName: data.firstName,
+                lastName: data.lastName,
+                employeeId: data.employeeId,
+                department: data.department,
+                isActive: true,
+                password: '1234',
+                email: `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@school.com`,
+                attendance: attendance,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
+            
+            await db.collection('teachers').insertOne(teacher);
+            imported++;
+            console.log(`  ✅ ${data.firstName} ${data.lastName} (${data.employeeId})`);
+            console.log(`     CheckIn: ${data.checkInTime} → ${checkInDate}`);
+            if (data.checkOutTime) {
+                console.log(`     CheckOut: ${data.checkOutTime} → ${checkOutDate}`);
+                console.log(`     Hours: ${attendance[0].hoursWorked} hrs`);
+            }
+            console.log('');
+        }
+        
+        console.log(`✅ Imported ${imported} teachers\n`);
+        
+        // ============================================
+        // 3. FIX TIMES (ADD 3 HOURS FOR KENYA TIME)
+        // ============================================
+        console.log('🔧 Fixing times (Kenya time UTC+3)...\n');
+        
+        const teachers = await db.collection('teachers').find({}).toArray();
+        let fixed = 0;
+        let recordCount = 0;
+        
+        for (const teacher of teachers) {
+            let changed = false;
+            console.log(`📝 ${teacher.firstName} ${teacher.lastName}`);
+            
+            for (const record of teacher.attendance || []) {
+                // Fix checkIn - add 3 hours
+                if (record.checkIn) {
+                    const original = new Date(record.checkIn);
+                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
+                    record.checkIn = kenyaTime;
+                    changed = true;
+                    recordCount++;
+                    console.log(`  ✅ CheckIn: ${original.toLocaleTimeString()} → ${kenyaTime.toLocaleTimeString()}`);
+                }
+                
+                // Fix checkOut - add 3 hours
+                if (record.checkOut) {
+                    const original = new Date(record.checkOut);
+                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
+                    record.checkOut = kenyaTime;
+                    changed = true;
+                    recordCount++;
+                    console.log(`  ✅ CheckOut: ${original.toLocaleTimeString()} → ${kenyaTime.toLocaleTimeString()}`);
+                }
+                
+                // Fix date field
+                if (record.date) {
+                    const original = new Date(record.date);
+                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
+                    record.date = kenyaTime;
+                    changed = true;
+                }
+                
+                // Recalculate hours
+                if (record.checkIn && record.checkOut) {
+                    const checkIn = new Date(record.checkIn);
+                    const checkOut = new Date(record.checkOut);
+                    const hours = ((checkOut - checkIn) / (1000 * 60 * 60)).toFixed(2);
+                    record.hoursWorked = parseFloat(hours);
+                    changed = true;
+                    console.log(`  ✅ Hours: ${hours} hrs`);
+                }
+            }
+            
+            if (changed) {
+                await db.collection('teachers').updateOne(
+                    { _id: teacher._id },
+                    { $set: { attendance: teacher.attendance } }
+                );
+                fixed++;
+                console.log(`  ✅ ${teacher.firstName} ${teacher.lastName} FIXED\n`);
+            } else {
+                console.log(`  ⏭️ No changes needed\n`);
+            }
+        }
+        
+        console.log(`✅ Fixed ${fixed} teachers, ${recordCount} records\n`);
+        
+        // ============================================
+        // 4. VERIFY
+        // ============================================
+        console.log('🔍 VERIFYING...\n');
+        const sample = await db.collection('teachers').findOne({ employeeId: 'T006' });
+        if (sample && sample.attendance && sample.attendance.length > 0) {
+            const last = sample.attendance[sample.attendance.length - 1];
+            console.log(`📋 ${sample.firstName} ${sample.lastName} (${sample.employeeId}):`);
+            console.log(`   Date: ${last.date}`);
+            console.log(`   CheckIn: ${last.checkIn}`);
+            console.log(`   CheckOut: ${last.checkOut || 'N/A'}`);
+            console.log(`   Hours: ${last.hoursWorked || 'N/A'}`);
+            console.log(`   Status: ${last.status || 'N/A'}`);
+        }
+        
+        console.log('\n' + '='.repeat(50));
+        console.log('✅ ALL DONE!');
+        console.log(`📊 Total teachers: ${imported}`);
+        console.log(`🔧 Records fixed: ${recordCount}`);
+        console.log('='.repeat(50));
+        console.log('\n🔄 REFRESH YOUR DASHBOARD NOW!');
+        
+        process.exit(0);
+        
+    } catch (err) {
+        console.error('❌ Error:', err.message);
+        process.exit(1);
+    }
+}
+
+// ============================================
+// CONNECT AND RUN
+// ============================================
+mongoose.connect('mongodb://127.0.0.1:27017/schoolDB')
+  .then(() => {
+    console.log('✅ Connected to MongoDB\n');
+    run();
+  })
+  .catch(err => {
+    console.error('❌ Connection error:', err.message);
+    process.exit(1);
+  });

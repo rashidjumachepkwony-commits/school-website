@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My Attendance - Changara Star Academy</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #001f5c 0%, #0b5394 35%, #d4a017 70%, #ffeb99 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .header {
+            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
+            padding: 20px;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 { color: #ffeb99; margin: 0; }
+        .btn-back {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #6f42c1;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .btn-back:hover { background: #8a5cd4; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #6f42c1; color: white; padding: 10px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .present { color: #0b8f34; font-weight: bold; }
+        .absent { color: #dc3545; font-weight: bold; }
+        .late { color: #d4a017; font-weight: bold; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        .stat-card .num { font-size: 24px; font-weight: bold; }
+        .stat-card .label { font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="student-portal.html" class="btn-back">🏠 Back to Portal</a>
+        <div class="header">
+            <h1>✅ My Attendance</h1>
+            <p style="color:#d4a017;font-size:18px;">Student: <span id="studentName">Loading...</span></p>
+        </div>
+        <div id="attendanceContent">
+            <p style="text-align:center;color:#999;">Loading attendance records...</p>
+        </div>
+    </div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const studentId = params.get('studentId');
+
+        if (studentId) {
+            document.getElementById('studentName').textContent = studentId;
+            document.getElementById('attendanceContent').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="num" style="color:#0b8f34;">18</div><div class="label">✅ Present</div></div>
+                    <div class="stat-card"><div class="num" style="color:#d4a017;">3</div><div class="label">⚠️ Late</div></div>
+                    <div class="stat-card"><div class="num" style="color:#dc3545;">2</div><div class="label">❌ Absent</div></div>
+                    <div class="stat-card"><div class="num" style="color:#0b5394;">85%</div><div class="label">📈 Attendance Rate</div></div>
+                </div>
+                <table>
+                    <tr><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th></tr>
+                    <tr><td>2026-07-17</td><td class="present">✅ Present</td><td>8:15 am</td><td>3:30 pm</td></tr>
+                    <tr><td>2026-07-16</td><td class="present">✅ Present</td><td>8:20 am</td><td>3:25 pm</td></tr>
+                    <tr><td>2026-07-15</td><td class="late">⚠️ Late</td><td>9:05 am</td><td>3:30 pm</td></tr>
+                    <tr><td>2026-07-14</td><td class="present">✅ Present</td><td>8:10 am</td><td>3:20 pm</td></tr>
+                    <tr><td>2026-07-13</td><td class="absent">❌ Absent</td><td>-</td><td>-</td></tr>
+                </table>
+            `;
+        }
+    </script>
+</body>
+</html>
