@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #D4A017;
+        }
+        .header h1 {
+            color: #0A1628;
+            font-size: 28px;
+        }
+        .header h1 i { color: #D4A017; margin-right: 10px; }
+        .header .btn-home {
+            padding: 10px 25px;
+            background: #0A1628;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .header .btn-home:hover { background: #1a2a4a; transform: scale(1.02); }
+
+        /* ===== STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: #f8f9fc;
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #e8ecf1;
+        }
+        .stat-card .number { font-size: 32px; font-weight: 700; color: #0A1628; }
+        .stat-card .label { font-size: 13px; color: #666; }
+        .stat-card .number.gold { color: #D4A017; }
+        .stat-card .number.green { color: #28a745; }
+        .stat-card .number.blue { color: #17a2b8; }
+        .stat-card .number.purple { color: #6f42c1; }
+        .stat-card .number.orange { color: #d4a017; }
+        .stat-card .number.red { color: #dc3545; }
+
+        /* ===== ADD FORM ===== */
+        .add-section {
+            background: #f8f9fc;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e8ecf1;
+            margin-bottom: 25px;
+        }
+        .add-section h3 {
+            color: #0A1628;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .add-section h3 i { color: #28a745; margin-right: 8px; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #D4A017;
+            outline: none;
+        }
+        .btn-add {
+            padding: 12px 35px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .btn-add:hover { background: #1e7e34; transform: scale(1.02); }
+
+        /* ===== FILTERS ===== */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 15px 0 20px;
+            padding: 15px;
+            background: #f8f9fc;
+            border-radius: 12px;
+            border: 1px solid #e8ecf1;
+            align-items: flex-end;
+        }
+        .filter-bar .form-group {
+            flex: 1;
+            min-width: 140px;
+        }
+        .filter-bar .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 3px;
+        }
+        .filter-bar .form-group input,
+        .filter-bar .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            background: white;
+        }
+        .filter-bar .form-group input:focus,
+        .filter-bar .form-group select:focus {
+            border-color: #D4A017;
+            outline: none;
+        }
+        .filter-bar .btn-search {
+            padding: 8px 25px;
+            background: #D4A017;
+            color: #0A1628;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+        .filter-bar .btn-search:hover { background: #f5c842; transform: scale(1.02); }
+        .filter-bar .btn-reset {
+            padding: 8px 25px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+        .filter-bar .btn-reset:hover { background: #5a6268; transform: scale(1.02); }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .toolbar .left { display: flex; gap: 10px; flex-wrap: wrap; }
+        .toolbar .right { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .btn:hover { transform: scale(1.02); }
+        .btn-primary { background: #D4A017; color: #0A1628; }
+        .btn-primary:hover { background: #f5c842; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        .btn-warning { background: #ffc107; color: #0A1628; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-sm { padding: 4px 12px; font-size: 12px; }
+        .btn-edit { background: #ffc107; color: #0A1628; }
+        .btn-edit:hover { background: #e0a800; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-delete:hover { background: #c82333; }
+
+        /* ===== TABLE ===== */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #e8ecf1;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        table th {
+            background: #0A1628;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e8ecf1;
+        }
+        table tr:nth-child(even) { background: #fafbfc; }
+        table tr:hover { background: #f0f4ff; }
+        .no-records {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .badge-day { background: #d1ecf1; color: #0b5394; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .badge-boarder { background: #f8d7da; color: #721c24; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .gender-male { color: #1a6fb5; font-weight: bold; }
+        .gender-female { color: #e83e8c; font-weight: bold; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 550px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-content h2 {
+            color: #0A1628;
+            border-bottom: 3px solid #D4A017;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .modal-content h2 i { color: #D4A017; margin-right: 10px; }
+        .modal-content .form-group { margin-bottom: 12px; }
+        .modal-content .form-group label { font-weight: 600; color: #333; font-size: 13px; display: block; margin-bottom: 3px; }
+        .modal-content .form-group input, .modal-content .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .modal-content .form-group input:focus, .modal-content .form-group select:focus {
+            border-color: #D4A017;
+            outline: none;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .modal-actions button:hover { transform: scale(1.02); }
+        .modal-actions .btn-save { background: #28a745; color: white; }
+        .modal-actions .btn-cancel { background: #6c757d; color: white; }
+        .modal-actions .btn-delete-modal { background: #dc3545; color: white; }
+
+        /* ===== ALERT ===== */
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+            font-weight: 600;
+        }
+        .alert.success { display: block; background: #d4edda; color: #155724; border: 2px solid #0b8f34; }
+        .alert.error { display: block; background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
+        .alert.warning { display: block; background: #fff3cd; color: #856404; border: 2px solid #ffc107; }
+        .alert.info { display: block; background: #d1ecf1; color: #0c5460; border: 2px solid #0b5394; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .filter-bar { flex-direction: column; }
+            .filter-bar .form-group { min-width: 100%; }
+            .header { flex-direction: column; gap: 10px; text-align: center; }
+            .toolbar { flex-direction: column; }
+            .toolbar .left, .toolbar .right { width: 100%; justify-content: center; }
+            .modal-content { padding: 20px; margin: 10px; }
+            .modal-actions { flex-direction: column; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            table { font-size: 11px; }
+            table th, table td { padding: 6px 8px; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <h1><i class="fas fa-user-graduate"></i> Student Management</h1>
+        <div>
+            <a href="admin-dashboard.html" class="btn-home"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <!-- ===== STATS ===== -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="number gold" id="totalStudents">0</div><div class="label">Total Students</div></div>
+        <div class="stat-card"><div class="number green" id="totalMale">0</div><div class="label">👨 Male</div></div>
+        <div class="stat-card"><div class="number blue" id="totalFemale">0</div><div class="label">👩 Female</div></div>
+        <div class="stat-card"><div class="number orange" id="totalDay">0</div><div class="label">📖 Day Scholars</div></div>
+        <div class="stat-card"><div class="number purple" id="totalBoarders">0</div><div class="label">🏠 Boarders</div></div>
+    </div>
+
+    <!-- ===== ADD STUDENT SECTION ===== -->
+    <div class="add-section">
+        <h3><i class="fas fa-plus-circle"></i> Add New Student</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="studentName" placeholder="Enter full name">
+            </div>
+            <div class="form-group">
+                <label>Student ID</label>
+                <input type="text" id="studentId" placeholder="e.g., ST001">
+            </div>
+            <div class="form-group">
+                <label>Grade/Class</label>
+                <select id="studentClass">
+                    <option value="Play Group">Play Group</option>
+                    <option value="PP1">PP1</option>
+                    <option value="PP2">PP2</option>
+                    <option value="Grade 1">Grade 1</option>
+                    <option value="Grade 2">Grade 2</option>
+                    <option value="Grade 3">Grade 3</option>
+                    <option value="Grade 4" selected>Grade 4</option>
+                    <option value="Grade 5">Grade 5</option>
+                    <option value="Grade 6">Grade 6</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Gender</label>
+                <select id="studentGender">
+                    <option value="Male">👨 Male</option>
+                    <option value="Female">👩 Female</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Student Type</label>
+                <select id="studentType">
+                    <option value="Day Scholar">📖 Day Scholar</option>
+                    <option value="Boarder">🏠 Boarder</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Guardian Phone</label>
+                <input type="text" id="guardianPhone" placeholder="e.g., 0712345678">
+            </div>
+            <div class="form-group">
+                <label>PIN (4-6 digits)</label>
+                <input type="password" id="studentPin" placeholder="Enter PIN" maxlength="6" value="1234">
+            </div>
+        </div>
+        <button class="btn-add" onclick="addStudent()"><i class="fas fa-plus"></i> Add Student</button>
+    </div>
+
+    <!-- ===== FILTERS ===== -->
+    <div class="filter-bar">
+        <div class="form-group">
+            <label>🔍 Search by Name</label>
+            <input type="text" id="searchName" placeholder="Type name..." onkeyup="filterStudents()">
+        </div>
+        <div class="form-group">
+            <label>📚 Grade</label>
+            <select id="filterGrade" onchange="filterStudents()">
+                <option value="">All Grades</option>
+                <option value="Play Group">Play Group</option>
+                <option value="PP1">PP1</option>
+                <option value="PP2">PP2</option>
+                <option value="Grade 1">Grade 1</option>
+                <option value="Grade 2">Grade 2</option>
+                <option value="Grade 3">Grade 3</option>
+                <option value="Grade 4">Grade 4</option>
+                <option value="Grade 5">Grade 5</option>
+                <option value="Grade 6">Grade 6</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>👤 Gender</label>
+            <select id="filterGender" onchange="filterStudents()">
+                <option value="">All Genders</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>🏠 Type</label>
+            <select id="filterType" onchange="filterStudents()">
+                <option value="">All Types</option>
+                <option value="Day Scholar">Day Scholar</option>
+                <option value="Boarder">Boarder</option>
+            </select>
+        </div>
+        <button class="btn-search" onclick="filterStudents()"><i class="fas fa-search"></i> Search</button>
+        <button class="btn-reset" onclick="resetFilters()"><i class="fas fa-undo"></i> Reset</button>
+    </div>
+
+    <!-- ===== TOOLBAR ===== -->
+    <div class="toolbar">
+        <div class="left">
+            <button class="btn btn-primary" onclick="loadStudents()"><i class="fas fa-sync"></i> Refresh</button>
+            <span style="color:#666;font-size:13px;" id="recordCount">0 records</span>
+        </div>
+        <div class="right">
+            <button class="btn btn-success" onclick="exportCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
+            <button class="btn btn-info" onclick="printStudents()"><i class="fas fa-print"></i> Print</button>
+        </div>
+    </div>
+
+    <!-- ===== STUDENT TABLE ===== -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Grade</th>
+                    <th>Gender</th>
+                    <th>Type</th>
+                    <th>Guardian</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="studentTableBody">
+                <tr><td colspan="8" class="no-records">Loading students...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===== EDIT MODAL ===== -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+        <h2><i class="fas fa-edit"></i> Edit Student</h2>
+        <input type="hidden" id="editStudentId">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="editName" placeholder="Enter full name">
+        </div>
+        <div class="form-group">
+            <label>Student ID</label>
+            <input type="text" id="editStudentIdField" placeholder="e.g., ST001">
+        </div>
+        <div class="form-group">
+            <label>Grade/Class</label>
+            <select id="editClass">
+                <option value="Play Group">Play Group</option>
+                <option value="PP1">PP1</option>
+                <option value="PP2">PP2</option>
+                <option value="Grade 1">Grade 1</option>
+                <option value="Grade 2">Grade 2</option>
+                <option value="Grade 3">Grade 3</option>
+                <option value="Grade 4">Grade 4</option>
+                <option value="Grade 5">Grade 5</option>
+                <option value="Grade 6">Grade 6</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Gender</label>
+            <select id="editGender">
+                <option value="Male">👨 Male</option>
+                <option value="Female">👩 Female</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Student Type</label>
+            <select id="editType">
+                <option value="Day Scholar">📖 Day Scholar</option>
+                <option value="Boarder">🏠 Boarder</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Guardian Phone</label>
+            <input type="text" id="editGuardian" placeholder="e.g., 0712345678">
+        </div>
+        <div class="form-group">
+            <label>PIN (4-6 digits)</label>
+            <input type="password" id="editPin" placeholder="Enter PIN" maxlength="6">
+        </div>
+        <div id="editResult" style="display:none;padding:10px;border-radius:8px;margin-top:10px;"></div>
+        <div class="modal-actions">
+            <button class="btn-save" onclick="saveEditStudent()"><i class="fas fa-save"></i> Update</button>
+            <button class="btn-delete-modal" onclick="deleteStudentFromModal()"><i class="fas fa-trash"></i> Delete</button>
+            <button class="btn-cancel" onclick="closeEditModal()"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================
+    // GLOBAL VARIABLES
+    // ============================================
+    let allStudents = [];
+    let filteredStudents = [];
+
+    // ============================================
+    // SHOW ALERT
+    // ============================================
+    function showAlert(message, type) {
+        const alertEl = document.getElementById('alert');
+        alertEl.className = 'alert ' + type;
+        alertEl.textContent = message;
+        alertEl.style.display = 'block';
+        setTimeout(() => { alertEl.style.display = 'none'; }, 5000);
+    }
+
+    // ============================================
+    // LOAD STUDENTS
+    // ============================================
+    async function loadStudents() {
+        try {
+            const response = await fetch('/api/students');
+            const data = await response.json();
+            if (data.success) {
+                allStudents = data.students || [];
+                filteredStudents = allStudents.slice();
+                renderStudents();
+                updateStats();
+                document.getElementById('recordCount').textContent = allStudents.length + ' records';
+            } else {
+                showAlert('❌ Error loading students: ' + data.message, 'error');
+            }
+        } catch (error) {
+            // If API not available, use demo data
+            console.log('API not available, using demo data');
+            allStudents = getDemoStudents();
+            filteredStudents = allStudents.slice();
+            renderStudents();
+            updateStats();
+            document.getElementById('recordCount').textContent = allStudents.length + ' records';
+            showAlert('📋 Using demo data. Connect to API for live data.', 'info');
+        }
+    }
+
+    // ============================================
+    // DEMO STUDENTS DATA (Fallback)
+    // ============================================
+    function getDemoStudents() {
+        return [
+            { id: 'ST001', name: 'John Mwangi', grade: 'Grade 4', gender: 'Male', type: 'Day Scholar', guardian: '0712345678', pin: '1234' },
+            { id: 'ST002', name: 'Mary Wanjiru', grade: 'Grade 4', gender: 'Female', type: 'Day Scholar', guardian: '0723456789', pin: '1234' },
+            { id: 'ST003', name: 'Peter Ochieng', grade: 'Grade 5', gender: 'Male', type: 'Boarder', guardian: '0734567890', pin: '1234' },
+            { id: 'ST004', name: 'Sarah Akinyi', grade: 'Grade 5', gender: 'Female', type: 'Day Scholar', guardian: '0745678901', pin: '1234' },
+            { id: 'ST005', name: 'David Omondi', grade: 'Grade 6', gender: 'Male', type: 'Boarder', guardian: '0756789012', pin: '1234' },
+            { id: 'ST006', name: 'Grace Kemunto', grade: 'Grade 6', gender: 'Female', type: 'Day Scholar', guardian: '0767890123', pin: '1234' },
+            { id: 'ST007', name: 'James Kiprop', grade: 'Grade 3', gender: 'Male', type: 'Day Scholar', guardian: '0778901234', pin: '1234' },
+            { id: 'ST008', name: 'Faith Chelangat', grade: 'Grade 3', gender: 'Female', type: 'Boarder', guardian: '0789012345', pin: '1234' },
+        ];
+    }
+
+    // ============================================
+    // RENDER STUDENTS
+    // ============================================
+    function renderStudents() {
+        const tbody = document.getElementById('studentTableBody');
+        const students = filteredStudents;
+
+        if (students.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="no-records">📭 No students found</td></tr>';
+            return;
+        }
+
+        let html = '';
+        students.forEach((student, index) => {
+            const genderClass = student.gender === 'Male' ? 'gender-male' : 'gender-female';
+            const typeBadge = student.type === 'Boarder' ?
+                '<span class="badge-boarder">🏠 Boarder</span>' :
+                '<span class="badge-day">📖 Day Scholar</span>';
+
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><strong>${student.id || student.studentId || '-'}</strong></td>
+                    <td><strong>${student.name || '-'}</strong></td>
+                    <td>${student.grade || '-'}</td>
+                    <td class="${genderClass}">${student.gender || '-'}</td>
+                    <td>${typeBadge}</td>
+                    <td>${student.guardian || '-'}</td>
+                    <td>
+                        <button class="btn btn-edit btn-sm" onclick="openEditModal('${student.id || student.studentId}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-delete btn-sm" onclick="deleteStudent('${student.id || student.studentId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    // ============================================
+    // UPDATE STATS
+    // ============================================
+    function updateStats() {
+        const total = allStudents.length;
+        const male = allStudents.filter(s => s.gender === 'Male').length;
+        const female = allStudents.filter(s => s.gender === 'Female').length;
+        const day = allStudents.filter(s => s.type === 'Day Scholar').length;
+        const boarders = allStudents.filter(s => s.type === 'Boarder').length;
+
+        document.getElementById('totalStudents').textContent = total;
+        document.getElementById('totalMale').textContent = male;
+        document.getElementById('totalFemale').textContent = female;
+        document.getElementById('totalDay').textContent = day;
+        document.getElementById('totalBoarders').textContent = boarders;
+    }
+
+    // ============================================
+    // FILTER STUDENTS
+    // ============================================
+    function filterStudents() {
+        const name = document.getElementById('searchName').value.toLowerCase().trim();
+        const grade = document.getElementById('filterGrade').value;
+        const gender = document.getElementById('filterGender').value;
+        const type = document.getElementById('filterType').value;
+
+        filteredStudents = allStudents.filter(student => {
+            let match = true;
+            if (name && !(student.name || '').toLowerCase().includes(name)) match = false;
+            if (grade && student.grade !== grade) match = false;
+            if (gender && student.gender !== gender) match = false;
+            if (type && student.type !== type) match = false;
+            return match;
+        });
+
+        renderStudents();
+        document.getElementById('recordCount').textContent = filteredStudents.length + ' records';
+    }
+
+    function resetFilters() {
+        document.getElementById('searchName').value = '';
+        document.getElementById('filterGrade').value = '';
+        document.getElementById('filterGender').value = '';
+        document.getElementById('filterType').value = '';
+        filteredStudents = allStudents.slice();
+        renderStudents();
+        document.getElementById('recordCount').textContent = filteredStudents.length + ' records';
+    }
+
+    // ============================================
+    // ADD STUDENT
+    // ============================================
+    async function addStudent() {
+        const name = document.getElementById('studentName').value.trim();
+        const studentId = document.getElementById('studentId').value.trim();
+        const grade = document.getElementById('studentClass').value;
+        const gender = document.getElementById('studentGender').value;
+        const type = document.getElementById('studentType').value;
+        const guardian = document.getElementById('guardianPhone').value.trim();
+        const pin = document.getElementById('studentPin').value.trim() || '1234';
+
+        if (!name || !studentId) {
+            showAlert('❌ Please enter Name and Student ID', 'error');
+            return;
+        }
+        if (pin.length < 4 || pin.length > 6) {
+            showAlert('❌ PIN must be 4-6 digits', 'error');
+            return;
+        }
+
+        // Check for duplicate ID
+        if (allStudents.some(s => s.id === studentId || s.studentId === studentId)) {
+            showAlert('❌ Student ID already exists!', 'error');
+            return;
+        }
+
+        const newStudent = { id: studentId, name, grade, gender, type, guardian, pin };
+
+        try {
+            const response = await fetch('/api/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newStudent)
+            });
+            const data = await response.json();
+            if (data.success) {
+                showAlert('✅ Student added successfully!', 'success');
+                document.getElementById('studentName').value = '';
+                document.getElementById('studentId').value = '';
+                document.getElementById('guardianPhone').value = '';
+                document.getElementById('studentPin').value = '1234';
+                loadStudents();
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            // Fallback: Add to local array
+            allStudents.push(newStudent);
+            filteredStudents = allStudents.slice();
+            renderStudents();
+            updateStats();
+            document.getElementById('recordCount').textContent = allStudents.length + ' records';
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentId').value = '';
+            document.getElementById('guardianPhone').value = '';
+            document.getElementById('studentPin').value = '1234';
+            showAlert('✅ Student added successfully (local)!', 'success');
+        }
+    }
+
+    // ============================================
+    // OPEN EDIT MODAL
+    // ============================================
+    function openEditModal(studentId) {
+        const student = allStudents.find(s => s.id === studentId || s.studentId === studentId);
+        if (!student) {
+            showAlert('❌ Student not found', 'error');
+            return;
+        }
+
+        document.getElementById('editStudentId').value = student.id || student.studentId;
+        document.getElementById('editName').value = student.name || '';
+        document.getElementById('editStudentIdField').value = student.id || student.studentId || '';
+        document.getElementById('editClass').value = student.grade || '';
+        document.getElementById('editGender').value = student.gender || 'Male';
+        document.getElementById('editType').value = student.type || 'Day Scholar';
+        document.getElementById('editGuardian').value = student.guardian || '';
+        document.getElementById('editPin').value = student.pin || '1234';
+        document.getElementById('editResult').style.display = 'none';
+
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
+    }
+
+    // ============================================
+    // SAVE EDIT STUDENT
+    // ============================================
+    async function saveEditStudent() {
+        const originalId = document.getElementById('editStudentId').value;
+        const name = document.getElementById('editName').value.trim();
+        const studentId = document.getElementById('editStudentIdField').value.trim();
+        const grade = document.getElementById('editClass').value;
+        const gender = document.getElementById('editGender').value;
+        const type = document.getElementById('editType').value;
+        const guardian = document.getElementById('editGuardian').value.trim();
+        const pin = document.getElementById('editPin').value.trim() || '1234';
+
+        if (!name || !studentId) {
+            showEditResult('❌ Please enter Name and Student ID', 'error');
+            return;
+        }
+        if (pin.length < 4 || pin.length > 6) {
+            showEditResult('❌ PIN must be 4-6 digits', 'error');
+            return;
+        }
+
+        // Check duplicate ID (excluding current student)
+        if (studentId !== originalId && allStudents.some(s => s.id === studentId || s.studentId === studentId)) {
+            showEditResult('❌ Student ID already exists!', 'error');
+            return;
+        }
+
+        const updatedStudent = { id: studentId, name, grade, gender, type, guardian, pin };
+
+        try {
+            const response = await fetch('/api/students/' + originalId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedStudent)
+            });
+            const data = await response.json();
+            if (data.success) {
+                showEditResult('✅ Student updated successfully!', 'success');
+                setTimeout(() => {
+                    closeEditModal();
+                    loadStudents();
+                }, 1000);
+            } else {
+                showEditResult('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            // Fallback: Update locally
+            const index = allStudents.findIndex(s => s.id === originalId || s.studentId === originalId);
+            if (index !== -1) {
+                allStudents[index] = { ...allStudents[index], ...updatedStudent };
+                filteredStudents = allStudents.slice();
+                renderStudents();
+                updateStats();
+                showEditResult('✅ Student updated successfully (local)!', 'success');
+                setTimeout(() => { closeEditModal(); }, 1000);
+            } else {
+                showEditResult('❌ Student not found', 'error');
+            }
+        }
+    }
+
+    function showEditResult(msg, type) {
+        const el = document.getElementById('editResult');
+        el.style.display = 'block';
+        el.textContent = msg;
+        el.style.background = type === 'success' ? '#d4edda' : '#f8d7da';
+        el.style.color = type === 'success' ? '#155724' : '#721c24';
+        el.style.border = type === 'success' ? '2px solid #0b8f34' : '2px solid #dc3545';
+    }
+
+    // ============================================
+    // DELETE STUDENT
+    // ============================================
+    async function deleteStudent(studentId) {
+        if (!confirm('Are you sure you want to delete student ' + studentId + '? This cannot be undone!')) return;
+
+        try {
+            const response = await fetch('/api/students/' + studentId, { method: 'DELETE' });
+            const data = await response.json();
+            if (data.success) {
+                showAlert('✅ Student deleted successfully!', 'success');
+                loadStudents();
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            // Fallback: Delete locally
+            allStudents = allStudents.filter(s => s.id !== studentId && s.studentId !== studentId);
+            filteredStudents = allStudents.slice();
+            renderStudents();
+            updateStats();
+            document.getElementById('recordCount').textContent = allStudents.length + ' records';
+            showAlert('✅ Student deleted successfully (local)!', 'success');
+        }
+    }
+
+    function deleteStudentFromModal() {
+        const studentId = document.getElementById('editStudentId').value;
+        closeEditModal();
+        deleteStudent(studentId);
+    }
+
+    // ============================================
+    // EXPORT CSV
+    // ============================================
+    function exportCSV() {
+        const students = filteredStudents.length > 0 ? filteredStudents : allStudents;
+        if (students.length === 0) {
+            showAlert('❌ No students to export', 'error');
+            return;
+        }
+
+        let csv = '\uFEFF'; // UTF-8 BOM for Excel
+        csv += 'Student ID,Name,Grade,Gender,Type,Guardian\n';
+        students.forEach(s => {
+            csv += `"${s.id || s.studentId || '-'}","${s.name || '-'}","${s.grade || '-'}","${s.gender || '-'}","${s.type || '-'}","${s.guardian || '-'}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `students_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showAlert('✅ CSV exported successfully!', 'success');
+    }
+
+    // ============================================
+    // PRINT STUDENTS
+    // ============================================
+    function printStudents() {
+        const students = filteredStudents.length > 0 ? filteredStudents : allStudents;
+        if (students.length === 0) {
+            showAlert('❌ No students to print', 'error');
+            return;
+        }
+
+        const printWindow = window.open('', '_blank', 'width=1100,height=800');
+        const now = new Date();
+
+        let rowsHtml = students.map((s, i) => `
+            <tr>
+                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${i + 1}</td>
+                <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${s.id || s.studentId || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #ddd;">${s.name || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.grade || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.gender || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${s.type || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #ddd;">${s.guardian || '-'}</td>
+            </tr>
+        `).join('');
+
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Student List - Changara Star Academy</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 1100px; margin: 0 auto; }
+                    .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
+                    .header h1 { color: #0A1628; font-size: 24px; }
+                    .header h1 .school-name { color: #D4A017; }
+                    .header p { color: #666; margin: 5px 0; }
+                    .summary { display: flex; gap: 20px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+                    .summary .item { text-align: center; padding: 5px 15px; background: #f8f9fc; border-radius: 6px; border: 1px solid #e8ecf1; }
+                    .summary .item .num { font-size: 18px; font-weight: 700; color: #D4A017; }
+                    .summary .item .label { font-size: 12px; color: #666; }
+                    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 15px; }
+                    table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
+                    table td { padding: 6px 10px; border-bottom: 1px solid #e8ecf1; }
+                    table tr:nth-child(even) { background: #fafbfc; }
+                    .footer { text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 11px; }
+                    @media print { body { padding: 10px; } .no-print { display: none; } }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
+                    <p>Student Register</p>
+                    <p style="font-size:12px;color:#999;">Generated on ${now.toLocaleString()}</p>
+                </div>
+                <div class="summary">
+                    <div class="item"><span class="num">${students.length}</span><span class="label">Total Students</span></div>
+                    <div class="item"><span class="num">${students.filter(s => s.gender === 'Male').length}</span><span class="label">👨 Male</span></div>
+                    <div class="item"><span class="num">${students.filter(s => s.gender === 'Female').length}</span><span class="label">👩 Female</span></div>
+                    <div class="item"><span class="num">${students.filter(s => s.type === 'Day Scholar').length}</span><span class="label">📖 Day Scholars</span></div>
+                    <div class="item"><span class="num">${students.filter(s => s.type === 'Boarder').length}</span><span class="label">🏠 Boarders</span></div>
+                </div>
+                <table>
+                    <thead><tr><th style="text-align:center;">#</th><th>Student ID</th><th>Name</th><th style="text-align:center;">Grade</th><th style="text-align:center;">Gender</th><th style="text-align:center;">Type</th><th>Guardian</th></tr></thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+                <div class="footer">
+                    <p>© ${now.getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                    <p>This is a computer-generated document</p>
+                </div>
+                <div class="no-print" style="text-align:center;margin-top:15px;">
+                    <button onclick="window.print()" style="padding:10px 25px;background:#D4A017;color:#0A1628;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">🖨️ Print / Save as PDF</button>
+                    <button onclick="window.close()" style="padding:10px 25px;background:#6c757d;color:white;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;margin-left:10px;">✖ Close</button>
+                </div>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        showAlert('📄 Print window opened', 'info');
+    }
+
+    // ============================================
+    // ENTER KEY FOR SEARCH
+    // ============================================
+    document.getElementById('searchName').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') filterStudents();
+    });
+
+    // ============================================
+    // INIT
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStudents();
+    });
+</script>
+
+</body>
+</html>
