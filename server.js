@@ -602,27 +602,20 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model('Student', studentSchema);
 
-// ============================================
-// SUBJECT CONFIG SCHEMA - NO UNIQUE INDEX
-// ============================================
+// Subject Config Schema - NO INDEXES WITH autoIndex: false
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
     subjects: [{ name: { type: String, required: true }, max: { type: Number, required: true } }],
     rankLevels: { type: [String], default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] },
     updatedAt: { type: Date, default: Date.now }
-});
+}, { autoIndex: false });  // <-- THIS PREVENTS AUTO-INDEX CREATION
 
-// IMPORTANT: No unique index - just a regular index for queries
-// If this line exists, REMOVE IT or comment it out:
-// subjectConfigSchema.index({ grade: 1, type: 1 }, { unique: true });
-
-// Use this instead (or no index at all):
-// NO INDEX - Let MongoDB handle it naturally
-// subjectConfigSchema.index({ grade: 1, type: 1 });
+// IMPORTANT: Do NOT call subjectConfigSchema.index() anywhere
+// Remove or comment out any index creation lines
+// subjectConfigSchema.index({ grade: 1, type: 1 }); // DELETE THIS LINE
 
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
-
 // Student Assessment Schema
 const studentAssessmentSchema = new mongoose.Schema({
     studentName: { type: String, required: true },
