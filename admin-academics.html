@@ -129,8 +129,9 @@
         .btn-pdf { background: #dc3545; color: white; }
         .btn-print { background: #6f42c1; color: white; }
         .btn-print:hover { background: #4a2a8a; }
-        .btn-subject-edit { background: #d4a017; color: #0A1628; }
-        .btn-subject-edit:hover { background: #f5c842; }
+        .btn-subject-edit { background: #d4a017; color: #0A1628; font-weight: 700; padding: 10px 22px; }
+        .btn-subject-edit:hover { background: #f5c842; transform: scale(1.02); }
+        .btn-subject-edit i { margin-right: 6px; }
 
         .loading-spinner {
             display: inline-block;
@@ -292,6 +293,10 @@
             border-radius: 15px;
             border: 2px solid #D4A017;
             margin-bottom: 25px;
+            display: none;
+        }
+        .subject-config-section.active {
+            display: block;
         }
         .subject-config-section h3 {
             color: #0A1628;
@@ -315,7 +320,19 @@
             font-weight: 600;
             font-size: 13px;
         }
-        .config-subject-item input {
+        .config-subject-item .name-input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+        }
+        .config-subject-item .name-input:focus {
+            border-color: #D4A017;
+            outline: none;
+        }
+        .config-subject-item input[type="number"] {
             width: 80px;
             padding: 6px 10px;
             border: 2px solid #e0e0e0;
@@ -323,17 +340,21 @@
             font-size: 14px;
             text-align: center;
         }
-        .config-subject-item input:focus { border-color: #D4A017; outline: none; }
+        .config-subject-item input[type="number"]:focus {
+            border-color: #D4A017;
+            outline: none;
+        }
         .config-subject-item .remove-btn {
             background: #dc3545;
             color: white;
             border: none;
             border-radius: 6px;
-            padding: 4px 10px;
+            padding: 4px 12px;
             cursor: pointer;
             font-size: 12px;
+            transition: all 0.3s;
         }
-        .config-subject-item .remove-btn:hover { background: #c82333; }
+        .config-subject-item .remove-btn:hover { background: #c82333; transform: scale(1.05); }
 
         .btn-add-subject {
             padding: 8px 20px;
@@ -351,6 +372,13 @@
             margin-top: 10px;
         }
         .btn-add-subject:hover { background: #1e7e34; transform: scale(1.02); }
+
+        .config-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
 
         /* ===== EDIT MODAL ===== */
         .modal-overlay {
@@ -514,6 +542,8 @@
             table th, table td { padding: 6px 8px; }
             .edit-subject-item, .view-subject-item, .config-subject-item { flex-wrap: wrap; }
             .student-summary .row { flex-direction: column; gap: 5px; }
+            .config-actions { flex-direction: column; }
+            .config-actions .btn { width: 100%; justify-content: center; }
         }
         @media (max-width: 480px) {
             .subjects-grid { grid-template-columns: 1fr; }
@@ -584,17 +614,19 @@
     </div>
 
     <!-- ===== SUBJECT CONFIGURATION SECTION ===== -->
-    <div class="subject-config-section" id="subjectConfigSection" style="display:none;">
+    <div class="subject-config-section" id="subjectConfigSection">
         <h3><i class="fas fa-cog"></i> Subject Configuration</h3>
-        <p style="color:#666; margin-bottom:15px; font-size:14px;">Edit subjects and their maximum scores for the selected grade.</p>
+        <p style="color:#666; margin-bottom:15px; font-size:14px;">Edit subjects and their maximum scores for <strong id="configGradeDisplay">Grade 4</strong></p>
         
         <div id="subjectConfigContainer">
-            <p style="color:#999;">Loading subjects...</p>
+            <p style="color:#999;"><span class="loading-spinner"></span> Loading subjects...</p>
         </div>
         
-        <button class="btn-add-subject" onclick="addSubjectField()"><i class="fas fa-plus"></i> Add Subject</button>
-        <button class="btn btn-success" onclick="saveSubjectConfig()" style="margin-left:10px;padding:8px 25px;"><i class="fas fa-save"></i> Save Subjects</button>
-        <button class="btn btn-secondary" onclick="toggleSubjectConfig()" style="margin-left:10px;padding:8px 25px;"><i class="fas fa-times"></i> Close</button>
+        <div class="config-actions">
+            <button class="btn-add-subject" onclick="addSubjectField()"><i class="fas fa-plus"></i> Add Subject</button>
+            <button class="btn btn-success" onclick="saveSubjectConfig()" style="padding:8px 25px;"><i class="fas fa-save"></i> Save Subjects</button>
+            <button class="btn btn-secondary" onclick="toggleSubjectConfig()" style="padding:8px 25px;"><i class="fas fa-times"></i> Close</button>
+        </div>
     </div>
 
     <!-- ===== TOOLBAR ===== -->
@@ -710,11 +742,13 @@
     // ============================================
     function toggleSubjectConfig() {
         const section = document.getElementById('subjectConfigSection');
-        if (section.style.display === 'none') {
-            section.style.display = 'block';
-            loadSubjectConfigForEdit();
+        if (section.classList.contains('active')) {
+            section.classList.remove('active');
         } else {
-            section.style.display = 'none';
+            section.classList.add('active');
+            const grade = document.getElementById('gradeFilter').value;
+            document.getElementById('configGradeDisplay').textContent = grade;
+            loadSubjectConfigForEdit();
         }
     }
 
@@ -754,24 +788,28 @@
             container.innerHTML = `
                 <p style="color:#d4a017; margin-bottom:10px;">⚠️ No subjects configured. Add subjects below.</p>
                 <div class="config-subject-item">
-                    <span class="name">Mathematics</span>
+                    <span class="name">📚 Mathematics</span>
                     <input type="number" id="config_subject_0" value="50" min="1" step="1">
                     <input type="hidden" id="config_name_0" value="Mathematics">
+                    <button class="remove-btn" onclick="removeSubjectField(0)"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="config-subject-item">
-                    <span class="name">English</span>
+                    <span class="name">📚 English</span>
                     <input type="number" id="config_subject_1" value="50" min="1" step="1">
                     <input type="hidden" id="config_name_1" value="English">
+                    <button class="remove-btn" onclick="removeSubjectField(1)"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="config-subject-item">
-                    <span class="name">Kiswahili</span>
+                    <span class="name">📚 Kiswahili</span>
                     <input type="number" id="config_subject_2" value="50" min="1" step="1">
                     <input type="hidden" id="config_name_2" value="Kiswahili">
+                    <button class="remove-btn" onclick="removeSubjectField(2)"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="config-subject-item">
-                    <span class="name">Science</span>
+                    <span class="name">📚 Science</span>
                     <input type="number" id="config_subject_3" value="50" min="1" step="1">
                     <input type="hidden" id="config_name_3" value="Science">
+                    <button class="remove-btn" onclick="removeSubjectField(3)"><i class="fas fa-times"></i></button>
                 </div>
             `;
             return;
@@ -779,12 +817,12 @@
         
         let html = '';
         subjects.forEach((subject, index) => {
+            const safeName = subject.name.replace(/[^a-zA-Z0-9]/g, '_');
             html += `
                 <div class="config-subject-item" id="config_row_${index}">
-                    <span class="name">${subject.name}</span>
+                    <input type="text" class="name-input" id="config_name_${index}" value="${subject.name}" placeholder="Subject name">
                     <input type="number" id="config_subject_${index}" value="${subject.max}" min="1" step="1">
-                    <input type="hidden" id="config_name_${index}" value="${subject.name}">
-                    <button class="remove-btn" onclick="removeSubjectField(${index})"><i class="fas fa-times"></i></button>
+                    <button class="remove-btn" onclick="removeSubjectField(${index})"><i class="fas fa-times"></i> Remove</button>
                 </div>
             `;
         });
@@ -802,9 +840,9 @@
         div.className = 'config-subject-item';
         div.id = `config_row_${index}`;
         div.innerHTML = `
-            <input type="text" id="config_name_${index}" value="New Subject" placeholder="Subject name" style="flex:1;padding:6px 10px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;">
-            <input type="number" id="config_subject_${index}" value="50" min="1" step="1" style="width:80px;padding:6px 10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;text-align:center;">
-            <button class="remove-btn" onclick="removeSubjectField(${index})"><i class="fas fa-times"></i></button>
+            <input type="text" class="name-input" id="config_name_${index}" value="New Subject" placeholder="Enter subject name">
+            <input type="number" id="config_subject_${index}" value="50" min="1" step="1">
+            <button class="remove-btn" onclick="removeSubjectField(${index})"><i class="fas fa-times"></i> Remove</button>
         `;
         container.appendChild(div);
     }
@@ -844,7 +882,7 @@
         
         const subjects = [];
         rows.forEach(row => {
-            const nameInput = row.querySelector('input[type="text"]');
+            const nameInput = row.querySelector('.name-input');
             const maxInput = row.querySelector('input[type="number"]');
             const name = nameInput ? nameInput.value.trim() : '';
             const max = maxInput ? parseInt(maxInput.value) : 50;
@@ -869,12 +907,16 @@
             const data = await response.json();
             if (data.success) {
                 showAlert(`✅ Subjects for ${grade} updated successfully!`, 'success');
-                toggleSubjectConfig();
+                // Close config section
+                document.getElementById('subjectConfigSection').classList.remove('active');
+                // Reload subjects
                 await loadSubjectConfig();
                 // Reload subjects for the selected student
                 if (currentStudentId) {
                     loadStudentSubjects();
                 }
+                // Reload assessments
+                loadAssessments();
             } else {
                 showAlert('❌ Error: ' + data.message, 'error');
             }
@@ -970,7 +1012,7 @@
                 <p style="color:#d4a017; text-align:center; padding:20px;">
                     ⚠️ No subjects configured for this grade. 
                     <br><br>
-                    <button class="btn btn-primary btn-sm" onclick="toggleSubjectConfig()">
+                    <button class="btn btn-subject-edit" onclick="toggleSubjectConfig()" style="padding:10px 25px;">
                         <i class="fas fa-cog"></i> Configure Subjects
                     </button>
                 </p>
@@ -1423,6 +1465,8 @@
         document.getElementById('subjectsContainer').innerHTML = '<p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p>';
         document.getElementById('studentSelect').value = '';
         loadStudentsForGrade();
+        // Update config section grade display
+        document.getElementById('configGradeDisplay').textContent = this.value;
     });
 
     // ============================================
