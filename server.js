@@ -618,7 +618,8 @@ const subjectConfigSchema = new mongoose.Schema({
 // subjectConfigSchema.index({ grade: 1, type: 1 }, { unique: true });
 
 // Use this instead (or no index at all):
-subjectConfigSchema.index({ grade: 1, type: 1 });
+// NO INDEX - Let MongoDB handle it naturally
+// subjectConfigSchema.index({ grade: 1, type: 1 });
 
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
 
@@ -1853,10 +1854,10 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     }
 });
 
-// PUT (Create/Update) subject config - FIXED VERSION
+// PUT (Create/Update) subject config - RAW MONGODB ONLY
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
-        const { grade } = req.params;
+        const grade = req.params.grade;
         const { type, subjects } = req.body;
         
         console.log('📥 SAVE config for:', grade, type);
@@ -1889,25 +1890,25 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         }));
         
         // ============================================
-        // THE FIX: Delete ALL then Insert ONE
-        // This completely avoids duplicate key errors
+        // USE RAW MONGODB - Bypass Mongoose entirely
         // ============================================
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs');
         
-        // Step 1: Delete all documents with this grade + type
-        await SubjectConfig.deleteMany({ grade: grade, type: type });
+        // Delete existing
+        await collection.deleteMany({ grade: grade, type: type });
         console.log(`✅ Deleted existing config for ${grade} (${type})`);
         
-        // Step 2: Create new config
-        const config = new SubjectConfig({ 
+        // Insert new
+        const newConfig = {
             grade: grade,
             type: type,
             subjects: cleanedSubjects,
-            updatedAt: new Date() 
-        });
-        
-        // Step 3: Save
-        await config.save();
-        console.log(`✅ Saved new config for ${grade} (${type})`);
+            rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+            updatedAt: new Date()
+        };
+        await collection.insertOne(newConfig);
+        console.log(`✅ Inserted new config for ${grade} (${type})`);
         
         // Update existing assessments with new max scores
         const students = await StudentAssessment.find({ grade, type });
@@ -1933,54 +1934,10 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         res.json({ 
             success: true, 
             message: 'Subject configuration saved successfully!', 
-            config 
+            config: newConfig
         });
     } catch (error) {
         console.error('❌ Save error:', error);
-        
-        // If still duplicate key error, use raw MongoDB as fallback
-        if (error.code === 11000) {
-            try {
-                console.log('🔄 Retry with raw MongoDB...');
-                const db = mongoose.connection.db;
-                const collection = db.collection('subjectconfigs');
-                
-                // FIX: Get grade from params again since we're in catch block
-                const gradeParam = req.params.grade;
-                const { type, subjects } = req.body;
-                const cleanedSubjects = subjects.map(s => ({
-                    name: s.name.trim(),
-                    max: s.max
-                }));
-                
-                // Delete using raw MongoDB
-                await collection.deleteMany({ grade: gradeParam, type: type });
-                console.log(`✅ Raw delete done for ${gradeParam} (${type})`);
-                
-                // Insert using raw MongoDB
-                const result = await collection.insertOne({
-                    grade: gradeParam,
-                    type: type,
-                    subjects: cleanedSubjects,
-                    rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
-                    updatedAt: new Date()
-                });
-                console.log(`✅ Raw insert done for ${gradeParam} (${type})`);
-                
-                return res.json({ 
-                    success: true, 
-                    message: 'Subject configuration saved successfully!',
-                    config: { grade: gradeParam, type, subjects: cleanedSubjects }
-                });
-            } catch (retryError) {
-                console.error('❌ Retry failed:', retryError);
-                return res.status(500).json({ 
-                    success: false, 
-                    message: 'Error saving subjects: ' + retryError.message 
-                });
-            }
-        }
-        
         res.status(500).json({ 
             success: false, 
             message: 'Error saving subjects: ' + error.message 
