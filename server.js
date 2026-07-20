@@ -602,7 +602,9 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model('Student', studentSchema);
 
-// Subject Config Schema
+// ============================================
+// SUBJECT CONFIG SCHEMA - NO UNIQUE INDEX
+// ============================================
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
@@ -611,10 +613,10 @@ const subjectConfigSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
-subjectConfigSchema.index({ grade: 1, type: 1 }, { unique: true });
+// NO UNIQUE INDEX - Just a regular index for faster queries
+subjectConfigSchema.index({ grade: 1, type: 1 });
 
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
-
 // Student Assessment Schema
 const studentAssessmentSchema = new mongoose.Schema({
     studentName: { type: String, required: true },
@@ -1783,7 +1785,7 @@ app.get('/api/assessments/student/:studentId', async (req, res) => {
 });
 
 // ============================================
-// SUBJECT CONFIG ROUTES - COMPLETE FIX
+// SUBJECT CONFIG ROUTES - COMPLETE REWRITE
 // ============================================
 
 // GET subject config
@@ -1791,26 +1793,35 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
         const type = req.query.type || 'monthly';
+        
+        console.log('📖 GET config for:', grade, type);
+        
         let config = await SubjectConfig.findOne({ grade, type });
         if (!config) {
             const defaultSubjects = getDefaultSubjects(grade, type);
-            config = { grade, type, subjects: defaultSubjects };
+            config = new SubjectConfig({ 
+                grade: grade, 
+                type: type, 
+                subjects: defaultSubjects,
+                updatedAt: new Date()
+            });
+            await config.save();
+            console.log('✅ Created default config for:', grade, type);
         }
         res.json({ success: true, config });
     } catch (error) {
+        console.error('GET error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// DELETE subject config - FORCE DELETE
+// DELETE subject config
 app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
         const { type } = req.query;
         
-        console.log('🗑️ DELETE request received:');
-        console.log('   Grade:', grade);
-        console.log('   Type:', type);
+        console.log('🗑️ DELETE config for:', grade, type);
         
         if (!type) {
             return res.status(400).json({ 
@@ -1828,86 +1839,71 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
             deleted: result.deletedCount
         });
     } catch (error) {
-        console.log('❌ Delete error (ignored):', error.message);
+        console.log('Delete error:', error);
         res.json({ 
             success: true, 
-            message: `Config for ${grade} (${type}) cleared`,
+            message: `Config for ${grade} cleared`,
             deleted: 0
         });
     }
 });
 
-// PUT (Create/Update) subject config - WITH VALIDATION FIX
+// PUT (Create/Update) subject config - USING FINDONEANDUPDATE WITH UPSERT
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
         const { type, subjects } = req.body;
         
-        console.log('📥 Received subject config request:');
-        console.log('   Grade:', grade);
-        console.log('   Type:', type);
-        console.log('   Subjects:', subjects);
+        console.log('📥 SAVE config for:', grade, type);
+        console.log('   Subjects:', JSON.stringify(subjects));
         
-        // Validate grade from params
+        // Validate
         if (!grade) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Grade is required in the URL' 
-            });
+            return res.status(400).json({ success: false, message: 'Grade is required' });
         }
-        
-        // Validate type
         if (!type) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Assessment type is required' 
-            });
+            return res.status(400).json({ success: false, message: 'Type is required' });
         }
-        
-        // Validate subjects
         if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Subjects array is required and must not be empty' 
-            });
+            return res.status(400).json({ success: false, message: 'Subjects array is required' });
         }
         
-        // Validate each subject
         for (const s of subjects) {
             if (!s.name || typeof s.name !== 'string' || s.name.trim() === '') {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Each subject must have a name' 
-                });
+                return res.status(400).json({ success: false, message: 'Each subject must have a name' });
             }
             if (typeof s.max !== 'number' || s.max < 1) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Each subject must have a max score > 0' 
-                });
+                return res.status(400).json({ success: false, message: 'Each subject must have a max score > 0' });
             }
         }
         
-        // Clean subject names
+        // Clean subjects
         const cleanedSubjects = subjects.map(s => ({
             name: s.name.trim(),
             max: s.max
         }));
         
-        // FORCE DELETE FIRST - using deleteMany to be safe
-        const deleteResult = await SubjectConfig.deleteMany({ grade, type });
-        console.log(`✅ Deleted ${deleteResult.deletedCount} existing configs for ${grade} (${type})`);
+        // ============================================
+        // THE FIX: Use findOneAndUpdate with upsert
+        // This avoids duplicate key errors entirely
+        // ============================================
         
-        // Create new config - make sure grade is explicitly set
-        const config = new SubjectConfig({ 
-            grade: grade,  // Explicitly set from params
-            type: type,
-            subjects: cleanedSubjects,
-            updatedAt: new Date() 
-        });
+        const config = await SubjectConfig.findOneAndUpdate(
+            { grade: grade, type: type },
+            { 
+                $set: { 
+                    subjects: cleanedSubjects,
+                    updatedAt: new Date()
+                }
+            },
+            { 
+                upsert: true,  // Create if doesn't exist
+                new: true,     // Return the updated document
+                setDefaultsOnInsert: true
+            }
+        );
         
-        await config.save();
-        console.log(`✅ Saved new config for ${grade} (${type})`);
+        console.log(`✅ Saved config for ${grade} (${type})`);
         
         // Update existing assessments with new max scores
         const students = await StudentAssessment.find({ grade, type });
@@ -1936,45 +1932,13 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             config 
         });
     } catch (error) {
-        console.error('❌ Error updating subject config:', error);
-        
-        // If duplicate key error, force delete and retry
-        if (error.code === 11000) {
-            try {
-                console.log('🔄 Duplicate key error - retrying with force delete...');
-                const { grade } = req.params;
-                const { type, subjects } = req.body;
-                
-                await SubjectConfig.deleteMany({ grade, type });
-                console.log(`✅ Force deleted existing config for ${grade} (${type})`);
-                
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                const config = new SubjectConfig({ grade, type, subjects });
-                await config.save();
-                console.log(`✅ Saved new config for ${grade} (${type}) on retry`);
-                
-                return res.json({ 
-                    success: true, 
-                    message: 'Subject configuration saved successfully!', 
-                    config 
-                });
-            } catch (retryError) {
-                console.error('❌ Retry failed:', retryError);
-                return res.status(500).json({ 
-                    success: false, 
-                    message: 'Error saving subjects: ' + retryError.message 
-                });
-            }
-        }
-        
+        console.error('❌ Save error:', error);
         res.status(500).json({ 
             success: false, 
             message: 'Error saving subjects: ' + error.message 
         });
     }
 });
-
 // ============================================
 // ASSESSMENT ROUTES
 // ============================================
