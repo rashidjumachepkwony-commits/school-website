@@ -875,68 +875,70 @@
     }
 
     async function loadAssessments() {
-        const grade = document.getElementById('gradeFilter').value;
-        const type = document.getElementById('typeFilter').value;
-        const term = document.getElementById('termFilter').value;
-        const year = document.getElementById('yearFilter').value;
-        if (!grade) return;
-        const tbody = document.getElementById('assessmentsBody');
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999;"><span class="loading-spinner"></span> Loading assessments...</td></tr>';
-        try {
-            const response = await fetch(`/api/assessments/grade/${encodeURIComponent(grade)}?type=${type}&term=${term}&year=${year}`);
-            const data = await response.json();
-            if (data.success) {
-                const students = data.students || [];
-                let exceeding = 0, meeting = 0, approaching = 0, below = 0;
-                if (students.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999;">No assessments found for this grade</td></tr>';
-                    updateStats(0, 0, 0, 0, 0);
-                    return;
-                }
-                const uniqueStudents = {};
-                students.forEach(student => {
-                    const key = student.studentId || student.studentName;
-                    if (!uniqueStudents[key] || new Date(student.createdAt) > new Date(uniqueStudents[key].createdAt)) {
-                        uniqueStudents[key] = student;
-                    }
-                });
-                const uniqueStudentList = Object.values(uniqueStudents);
-                let html = '';
-                uniqueStudentList.forEach((student, index) => {
-                    const level = student.performanceLevel || 'Approaching Expectation';
-                    const levelClass = level.toLowerCase().replace(' ', '-');
-                    const avg = student.averageScore ? student.averageScore.toFixed(1) : '0';
-                    if (level === 'Exceeding Expectation') exceeding++;
-                    else if (level === 'Meeting Expectation') meeting++;
-                    else if (level === 'Approaching Expectation') approaching++;
-                    else below++;
-                    html += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td><strong>${student.studentName}</strong></td>
-                            <td>${student.studentId || '-'}</td>
-                            <td>${student.totalScore || 0}</td>
-                            <td>${avg}</td>
-                            <td><span class="performance-badge ${levelClass}">${level}</span></td>
-                            <td>
-                                <button class="btn btn-info btn-sm" onclick="viewAssessment('${student._id}')" title="View Details"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-pdf btn-sm" onclick="downloadStudentReport('${student._id}')" title="Download PDF"><i class="fas fa-file-pdf"></i></button>
-                                <button class="btn btn-warning btn-sm" onclick="openEditModal('${student._id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteAssessment('${student._id}')" title="Delete"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-                updateStats(uniqueStudentList.length, exceeding, meeting, approaching, below);
-            } else {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
+    const grade = document.getElementById('gradeFilter').value;
+    const type = document.getElementById('typeFilter').value;
+    const term = document.getElementById('termFilter').value;
+    const year = document.getElementById('yearFilter').value;
+    if (!grade) return;
+    const tbody = document.getElementById('assessmentsBody');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;"><span class="loading-spinner"></span> Loading assessments...</td></tr>';
+    try {
+        const response = await fetch(`/api/assessments/grade/${encodeURIComponent(grade)}?type=${type}&term=${term}&year=${year}`);
+        const data = await response.json();
+        if (data.success) {
+            const students = data.students || [];
+            let exceeding = 0, meeting = 0, approaching = 0, below = 0;
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;">No assessments found for this grade</td></tr>';
+                updateStats(0, 0, 0, 0, 0);
+                return;
             }
-        } catch (error) {
-            console.error('Error loading assessments:', error);
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
+            const uniqueStudents = {};
+            students.forEach(student => {
+                const key = student.studentId || student.studentName;
+                if (!uniqueStudents[key] || new Date(student.createdAt) > new Date(uniqueStudents[key].createdAt)) {
+                    uniqueStudents[key] = student;
+                }
+            });
+            const uniqueStudentList = Object.values(uniqueStudents);
+            let html = '';
+            uniqueStudentList.forEach((student, index) => {
+                const level = student.performanceLevel || 'Approaching Expectation';
+                const levelClass = level.toLowerCase().replace(' ', '-');
+                const avg = student.averageScore ? student.averageScore.toFixed(1) : '0';
+                const periodDisplay = student.period || student.month || 'N/A';
+                if (level === 'Exceeding Expectation') exceeding++;
+                else if (level === 'Meeting Expectation') meeting++;
+                else if (level === 'Approaching Expectation') approaching++;
+                else below++;
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${student.studentName}</strong></td>
+                        <td>${student.studentId || '-'}</td>
+                        <td style="font-size:11px;color:#666;">${periodDisplay}</td>
+                        <td>${student.totalScore || 0}</td>
+                        <td>${avg}</td>
+                        <td><span class="performance-badge ${levelClass}">${level}</span></td>
+                        <td>
+                            <button class="btn btn-info btn-sm" onclick="viewAssessment('${student._id}')" title="View Details"><i class="fas fa-eye"></i></button>
+                            <button class="btn btn-pdf btn-sm" onclick="downloadStudentReport('${student._id}')" title="Download PDF"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-warning btn-sm" onclick="openEditModal('${student._id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteAssessment('${student._id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+            updateStats(uniqueStudentList.length, exceeding, meeting, approaching, below);
+        } else {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
         }
+    } catch (error) {
+        console.error('Error loading assessments:', error);
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
     }
+}
 
     function updateStats(total, exceeding, meeting, approaching, below) {
         document.getElementById('totalStudents').textContent = total || 0;
@@ -1018,11 +1020,29 @@
     const term = document.getElementById('termFilter').value;
     const year = document.getElementById('yearFilter').value;
     
+    // Ask user for period/month if needed
+    let period = '';
+    if (type === 'monthly') {
+        const monthOptions = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const monthInput = prompt('Enter the month (e.g., March, April) or leave blank for all:', '');
+        if (monthInput !== null) {
+            period = monthInput.trim();
+        } else {
+            return; // User cancelled
+        }
+    }
+    
     // Show loading
     showAlert('📄 Generating grade report PDF...', 'info');
     
+    // Build URL
+    let url = `/api/assessments/download-class-pdf?grade=${encodeURIComponent(grade)}&type=${type}&term=${term}&year=${year}`;
+    if (period) {
+        url += `&period=${encodeURIComponent(period)}`;
+    }
+    
     // Open in new window to download
-    window.open(`/api/assessments/download-class-pdf?grade=${encodeURIComponent(grade)}&type=${type}&term=${term}&year=${year}`, '_blank');
+    window.open(url, '_blank');
     
     setTimeout(() => {
         showAlert('✅ Grade report PDF is downloading!', 'success');
@@ -1041,12 +1061,20 @@
 
     async function openEditModal(assessmentId) {
     try {
-        console.log('🔍 Opening edit modal for:', assessmentId);
+        console.log('🔍 Opening edit modal for ID:', assessmentId);
+        
+        if (!assessmentId) {
+            showAlert('❌ Invalid assessment ID', 'error');
+            return;
+        }
+        
         const response = await fetch(`/api/assessments/student/${assessmentId}`);
         const data = await response.json();
         
+        console.log('📊 Response:', data);
+        
         if (!data.success || !data.assessment) {
-            showAlert('❌ Assessment not found', 'error');
+            showAlert('❌ Assessment not found: ' + (data.message || 'Unknown error'), 'error');
             return;
         }
         
@@ -1075,7 +1103,7 @@
         container.innerHTML = html;
         document.getElementById('editModal').classList.add('active');
     } catch (error) {
-        console.error('Error loading assessment:', error);
+        console.error('❌ Error loading assessment:', error);
         showAlert('❌ Error loading assessment: ' + error.message, 'error');
     }
 }

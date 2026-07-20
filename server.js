@@ -2472,11 +2472,11 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
     }
 });
 // ============================================
-// DOWNLOAD CLASS/GRADE PDF REPORT
+// DOWNLOAD CLASS/GRADE PDF REPORT - FIXED
 // ============================================
 app.get('/api/assessments/download-class-pdf', async (req, res) => {
     try {
-        const { grade, type, term, year } = req.query;
+        const { grade, type, term, year, period } = req.query;
         
         if (!grade) {
             return res.status(400).json({ success: false, message: 'Grade is required' });
@@ -2487,16 +2487,29 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
         if (type) filter.type = type;
         if (term) filter.term = term;
         if (year) filter.year = year;
+        if (period) filter.period = period;
         
-        // Get all students for this grade
-        const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
+        // Get all students for this grade - ONLY THE LATEST RECORD PER STUDENT
+        const allStudents = await StudentAssessment.find(filter).sort({ studentName: 1, createdAt: -1 });
+        
+        // DEDUPLICATE - Keep only the latest record per student
+        const uniqueStudents = {};
+        allStudents.forEach(student => {
+            const key = student.studentName;
+            // If student not in map OR this record is newer
+            if (!uniqueStudents[key] || new Date(student.createdAt) > new Date(uniqueStudents[key].createdAt)) {
+                uniqueStudents[key] = student;
+            }
+        });
+        
+        const students = Object.values(uniqueStudents).sort((a, b) => a.studentName.localeCompare(b.studentName));
         
         if (students.length === 0) {
             return res.status(404).json({ success: false, message: 'No students found for this grade' });
         }
         
         // Generate HTML report
-        const html = generateClassReportHTML(students, grade, type, term, year);
+        const html = generateClassReportHTML(students, grade, type, term, year, period);
         
         // Generate PDF
         const options = { 
@@ -2515,7 +2528,8 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
                 return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
             }
             
-            const filename = `grade_report_${grade}_${type || 'monthly'}_${term || 'all'}_${year || '2026'}.pdf`;
+            const periodLabel = period ? `_${period}` : '';
+            const filename = `grade_report_${grade}_${type || 'monthly'}_${term || 'all'}_${year || '2026'}${periodLabel}.pdf`;
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
             res.setHeader('Content-Length', buffer.length);
@@ -2528,17 +2542,20 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
 });
 
 // ============================================
-// GENERATE CLASS REPORT HTML
+// GENERATE CLASS REPORT HTML - FIXED
 // ============================================
-function generateClassReportHTML(students, grade, type, term, year) {
+function generateClassReportHTML(students, grade, type, term, year, period) {
     const now = getKenyaTime();
     const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
+    const periodLabel = period ? ` - ${period}` : '';
     
     // Calculate overall class statistics
     let totalStudents = students.length;
     let totalScoreSum = 0;
     let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
+    let allSubjects = [];
     
+    // First pass: collect all unique subject names and calculate stats
     students.forEach(student => {
         totalScoreSum += student.totalScore || 0;
         const level = student.performanceLevel || 'Approaching Expectation';
@@ -2546,59 +2563,90 @@ function generateClassReportHTML(students, grade, type, term, year) {
         else if (level === 'Meeting Expectation') meetingCount++;
         else if (level === 'Approaching Expectation') approachingCount++;
         else belowCount++;
+        
+        // Collect subject names
+        if (student.assessments && student.assessments.length > 0) {
+            student.assessments.forEach(a => {
+                if (!allSubjects.includes(a.subject)) {
+                    allSubjects.push(a.subject);
+                }
+            });
+        }
     });
+    
+    // Sort subjects alphabetically
+    allSubjects.sort();
     
     const avgClassScore = totalStudents > 0 ? (totalScoreSum / totalStudents).toFixed(1) : 0;
     
-    // Build student rows
+    // Build subject headers
+    const subjectHeaders = allSubjects.map(subject => 
+        `<th style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:7px;background:#0A1628;color:white;font-weight:700;">${subject}</th>`
+    ).join('');
+    
+    // Build rows
     let rowsHtml = students.map((student, index) => {
         const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
         const level = student.performanceLevel || 'Approaching Expectation';
         let levelColor = '';
-        if (level === 'Exceeding Expectation') levelColor = '#28a745';
-        else if (level === 'Meeting Expectation') levelColor = '#17a2b8';
-        else if (level === 'Approaching Expectation') levelColor = '#d4a017';
-        else levelColor = '#dc3545';
+        let levelIcon = '';
+        if (level === 'Exceeding Expectation') { levelColor = '#28a745'; levelIcon = '🌟'; }
+        else if (level === 'Meeting Expectation') { levelColor = '#17a2b8'; levelIcon = '✅'; }
+        else if (level === 'Approaching Expectation') { levelColor = '#d4a017'; levelIcon = '📗'; }
+        else { levelColor = '#dc3545'; levelIcon = '📕'; }
         
-        // Build subjects row
-        let subjectsHtml = '';
-        if (student.assessments && student.assessments.length > 0) {
-            subjectsHtml = student.assessments.map(a => {
-                const percentage = a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0;
-                return `<td style="padding:2px 4px;border:1px solid #ddd;text-align:center;font-size:8px;">${a.score}/${a.maxScore}<br><span style="font-size:7px;color:#666;">${percentage}%</span></td>`;
-            }).join('');
-        }
-        
-        // Get subject names for header
-        const subjectNames = student.assessments && student.assessments.length > 0 
-            ? student.assessments.map(a => a.subject).join(', ')
-            : 'No subjects';
+        // Build subject scores for this student
+        let subjectScores = '';
+        allSubjects.forEach(subject => {
+            const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
+            if (assessment) {
+                const percentage = assessment.maxScore > 0 ? ((assessment.score / assessment.maxScore) * 100).toFixed(0) : 0;
+                subjectScores += `
+                    <td style="padding:3px 6px;border:1px solid #ddd;text-align:center;font-size:8px;">
+                        <strong>${assessment.score}</strong>
+                        <span style="display:block;font-size:6px;color:#999;">/${assessment.maxScore}</span>
+                        <span style="display:block;font-size:6px;font-weight:600;color:${percentage >= 60 ? '#28a745' : percentage >= 40 ? '#d4a017' : '#dc3545'};">${percentage}%</span>
+                    </td>
+                `;
+            } else {
+                subjectScores += `
+                    <td style="padding:3px 6px;border:1px solid #ddd;text-align:center;font-size:8px;color:#ccc;">-</td>
+                `;
+            }
+        });
         
         return `
             <tr>
-                <td style="padding:3px 5px;border:1px solid #ddd;text-align:center;font-size:8px;">${index + 1}</td>
-                <td style="padding:3px 5px;border:1px solid #ddd;font-weight:600;font-size:8px;">${student.studentName}</td>
-                <td style="padding:3px 5px;border:1px solid #ddd;text-align:center;font-size:8px;">${student.studentId || 'N/A'}</td>
-                <td style="padding:3px 5px;border:1px solid #ddd;text-align:center;font-size:8px;font-weight:bold;">${student.totalScore || 0}</td>
-                <td style="padding:3px 5px;border:1px solid #ddd;text-align:center;font-size:8px;font-weight:bold;">${avgScore}</td>
-                <td style="padding:3px 5px;border:1px solid #ddd;text-align:center;font-size:8px;">
-                    <span style="background:${levelColor};color:white;padding:1px 8px;border-radius:50px;font-weight:700;font-size:7px;">${level}</span>
+                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:8px;font-weight:600;">${index + 1}</td>
+                <td style="padding:4px 6px;border:1px solid #ddd;font-weight:600;font-size:9px;">${student.studentName}</td>
+                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:8px;color:#666;">${student.studentId || 'N/A'}</td>
+                ${subjectScores}
+                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:9px;font-weight:700;color:#D4A017;">${student.totalScore || 0}</td>
+                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:9px;font-weight:700;color:#17a2b8;">${avgScore}</td>
+                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:8px;">
+                    <span style="background:${levelColor};color:white;padding:2px 10px;border-radius:50px;font-weight:700;font-size:7px;display:inline-block;white-space:nowrap;">
+                        ${levelIcon} ${level}
+                    </span>
                 </td>
             </tr>
         `;
     }).join('');
     
-    // Build subject headers
-    let subjectHeaders = '';
-    let subjectColumns = '';
-    if (students.length > 0 && students[0].assessments && students[0].assessments.length > 0) {
-        subjectHeaders = students[0].assessments.map(a => 
-            `<th style="padding:2px 4px;border:1px solid #ddd;text-align:center;font-size:7px;background:#0A1628;color:white;">${a.subject}</th>`
-        ).join('');
-        subjectColumns = students[0].assessments.map(a => 
-            `<td style="padding:2px 4px;border:1px solid #ddd;text-align:center;font-size:7px;color:#999;">${a.maxScore}</td>`
-        ).join('');
-    }
+    // Build max scores row
+    const maxScoresRow = allSubjects.map(subject => {
+        // Find the max score for this subject from the first student that has it
+        let maxScore = 0;
+        for (const student of students) {
+            if (student.assessments) {
+                const found = student.assessments.find(a => a.subject === subject);
+                if (found) {
+                    maxScore = found.maxScore;
+                    break;
+                }
+            }
+        }
+        return `<td style="padding:2px 4px;border:1px solid #ddd;text-align:center;font-size:6px;color:#999;background:#f8f9fc;">Max: ${maxScore}</td>`;
+    }).join('');
     
     return `
         <!DOCTYPE html>
@@ -2608,58 +2656,173 @@ function generateClassReportHTML(students, grade, type, term, year) {
             <title>Grade Report - ${grade}</title>
             <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 8px; max-width: 1200px; margin: 0 auto; font-size: 8px; }
-                .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 5px; margin-bottom: 8px; }
-                .header h1 { color: #0A1628; font-size: 16px; margin: 0; }
+                body { 
+                    font-family: 'Segoe UI', Arial, sans-serif; 
+                    padding: 10px; 
+                    max-width: 1200px; 
+                    margin: 0 auto; 
+                    font-size: 8px; 
+                    background: white;
+                }
+                .header { 
+                    text-align: center; 
+                    border-bottom: 3px solid #D4A017; 
+                    padding-bottom: 8px; 
+                    margin-bottom: 10px; 
+                }
+                .header h1 { 
+                    color: #0A1628; 
+                    font-size: 18px; 
+                    margin: 0; 
+                    font-family: 'Georgia', serif;
+                }
                 .header h1 .school-name { color: #D4A017; }
-                .header p { color: #666; margin: 2px 0; font-size: 8px; }
-                .header .report-info { font-size: 7px; color: #999; }
-                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 6px; }
-                .summary-box .item { text-align: center; padding: 3px 4px; background: #f8f9fc; border-radius: 4px; border: 1px solid #e8ecf1; }
-                .summary-box .item .num { font-size: 14px; font-weight: 700; }
-                .summary-box .item .label { font-size: 6px; color: #666; }
+                .header .school-motto {
+                    color: #666;
+                    font-size: 9px;
+                    font-style: italic;
+                    margin-top: 2px;
+                }
+                .header .report-info { 
+                    font-size: 8px; 
+                    color: #888; 
+                    margin-top: 3px;
+                }
+                .summary-box { 
+                    display: grid; 
+                    grid-template-columns: repeat(7, 1fr); 
+                    gap: 4px; 
+                    margin-bottom: 10px; 
+                }
+                .summary-box .item { 
+                    text-align: center; 
+                    padding: 6px 4px; 
+                    background: #f8f9fc; 
+                    border-radius: 6px; 
+                    border: 1px solid #e8ecf1; 
+                }
+                .summary-box .item .num { 
+                    font-size: 16px; 
+                    font-weight: 700; 
+                }
+                .summary-box .item .label { 
+                    font-size: 6px; 
+                    color: #666; 
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
                 .summary-box .item .num.gold { color: #D4A017; }
                 .summary-box .item .num.green { color: #28a745; }
                 .summary-box .item .num.blue { color: #17a2b8; }
                 .summary-box .item .num.orange { color: #d4a017; }
                 .summary-box .item .num.red { color: #dc3545; }
-                .table-wrap { overflow-x: auto; }
-                table { width: 100%; border-collapse: collapse; font-size: 7px; }
-                table th { background: #0A1628; color: white; padding: 3px 4px; text-align: left; font-size: 6px; }
-                table td { padding: 2px 4px; border-bottom: 1px solid #e8ecf1; }
+                .summary-box .item .num.purple { color: #6f42c1; }
+                .table-wrap { 
+                    overflow-x: auto; 
+                    margin-top: 5px;
+                }
+                table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    font-size: 7px; 
+                }
+                table th { 
+                    background: #0A1628; 
+                    color: white; 
+                    padding: 4px 6px; 
+                    text-align: center; 
+                    font-size: 6.5px; 
+                    font-weight: 700;
+                    white-space: nowrap;
+                }
+                table td { 
+                    padding: 3px 6px; 
+                    border-bottom: 1px solid #e8ecf1; 
+                }
                 table tr:nth-child(even) { background: #fafbfc; }
-                .footer { text-align: center; margin-top: 6px; padding-top: 4px; border-top: 1px solid #ddd; color: #999; font-size: 6px; }
-                .subject-header-row th { background: #1a2a4a; font-size: 5px; }
-                @media print { body { padding: 4px; } }
+                table tr:hover { background: #f0f4ff; }
+                .footer { 
+                    text-align: center; 
+                    margin-top: 12px; 
+                    padding-top: 8px; 
+                    border-top: 1px solid #ddd; 
+                    color: #999; 
+                    font-size: 6px; 
+                }
+                .footer .contact {
+                    color: #ccc;
+                    font-size: 6px;
+                }
+                .subject-max-row td {
+                    background: #f8f9fc !important;
+                    color: #999;
+                    font-size: 6px;
+                    font-weight: 600;
+                }
+                @media print { 
+                    body { padding: 5px; } 
+                    .summary-box .item { padding: 4px; }
+                    table th { font-size: 5.5px; padding: 2px 4px; }
+                    table td { padding: 2px 4px; font-size: 6px; }
+                }
+                @page {
+                    margin: 8mm;
+                }
+                .watermark {
+                    position: fixed;
+                    opacity: 0.03;
+                    font-size: 80px;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-30deg);
+                    pointer-events: none;
+                    z-index: 0;
+                    color: #0A1628;
+                    font-weight: 900;
+                    letter-spacing: 10px;
+                }
             </style>
         </head>
         <body>
+            <div class="watermark">CHANGARA STAR ACADEMY</div>
+            
             <div class="header">
                 <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                <p>${grade} - ${typeNames[type] || type || 'Monthly'} Assessment Report</p>
-                <p class="report-info">${term || ''} ${year || ''} | Generated on ${formatKenyaFullTime(now)}</p>
+                <div class="school-motto">"Assurance to Excellence"</div>
+                <p style="font-size:10px;font-weight:700;color:#0A1628;margin-top:3px;">
+                    ${grade} - ${typeNames[type] || type || 'Monthly'} Assessment Report
+                </p>
+                <p class="report-info">
+                    ${term ? term + ' | ' : ''} ${year || '2026'} ${periodLabel} | Generated on ${formatKenyaFullTime(now)}
+                </p>
             </div>
             
             <div class="summary-box">
-                <div class="item"><div class="num gold">${totalStudents}</div><div class="label">Total Students</div></div>
-                <div class="item"><div class="num green">${exceedingCount}</div><div class="label">✅ Exceeding</div></div>
-                <div class="item"><div class="num blue">${meetingCount}</div><div class="label">📘 Meeting</div></div>
+                <div class="item"><div class="num gold">${totalStudents}</div><div class="label">👨‍🎓 Students</div></div>
+                <div class="item"><div class="num green">${exceedingCount}</div><div class="label">🌟 Exceeding</div></div>
+                <div class="item"><div class="num blue">${meetingCount}</div><div class="label">✅ Meeting</div></div>
                 <div class="item"><div class="num orange">${approachingCount}</div><div class="label">📗 Approaching</div></div>
                 <div class="item"><div class="num red">${belowCount}</div><div class="label">📕 Below</div></div>
-                <div class="item"><div class="num" style="color:#0A1628;">${avgClassScore}</div><div class="label">📊 Class Avg</div></div>
+                <div class="item"><div class="num purple">${avgClassScore}</div><div class="label">📊 Class Avg</div></div>
+                <div class="item"><div class="num" style="color:#0A1628;">${allSubjects.length}</div><div class="label">📚 Subjects</div></div>
             </div>
             
             <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
-                            <th style="text-align:center;width:30px;">#</th>
-                            <th style="min-width:120px;">Student Name</th>
-                            <th style="text-align:center;width:60px;">ID</th>
+                            <th style="width:30px;">#</th>
+                            <th style="min-width:120px;text-align:left;">Student Name</th>
+                            <th style="width:50px;">ID</th>
                             ${subjectHeaders}
-                            <th style="text-align:center;width:50px;">Total</th>
-                            <th style="text-align:center;width:45px;">Avg</th>
-                            <th style="text-align:center;width:70px;">Performance</th>
+                            <th style="width:50px;">Total</th>
+                            <th style="width:45px;">Avg</th>
+                            <th style="width:80px;">Performance</th>
+                        </tr>
+                        <tr class="subject-max-row">
+                            <td colspan="3" style="text-align:right;font-weight:600;color:#666;">Max Score:</td>
+                            ${maxScoresRow}
+                            <td colspan="3" style="background:#f8f9fc;"></td>
                         </tr>
                     </thead>
                     <tbody>
@@ -2669,7 +2832,8 @@ function generateClassReportHTML(students, grade, type, term, year) {
             </div>
             
             <div class="footer">
-                <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais</p>
+                <p class="contact">📞 +254 721 556 252 | 📧 starchangara@gmail.com | 🇰🇪 Proudly Kenyan</p>
             </div>
         </body>
         </html>
