@@ -1945,24 +1945,32 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
                 const db = mongoose.connection.db;
                 const collection = db.collection('subjectconfigs');
                 
+                // FIX: Get grade from params again since we're in catch block
+                const gradeParam = req.params.grade;
+                const { type, subjects } = req.body;
+                const cleanedSubjects = subjects.map(s => ({
+                    name: s.name.trim(),
+                    max: s.max
+                }));
+                
                 // Delete using raw MongoDB
-                await collection.deleteMany({ grade: grade, type: type });
-                console.log(`✅ Raw delete done for ${grade} (${type})`);
+                await collection.deleteMany({ grade: gradeParam, type: type });
+                console.log(`✅ Raw delete done for ${gradeParam} (${type})`);
                 
                 // Insert using raw MongoDB
                 const result = await collection.insertOne({
-                    grade: grade,
+                    grade: gradeParam,
                     type: type,
                     subjects: cleanedSubjects,
                     rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
                     updatedAt: new Date()
                 });
-                console.log(`✅ Raw insert done for ${grade} (${type})`);
+                console.log(`✅ Raw insert done for ${gradeParam} (${type})`);
                 
                 return res.json({ 
                     success: true, 
                     message: 'Subject configuration saved successfully!',
-                    config: { grade, type, subjects: cleanedSubjects }
+                    config: { grade: gradeParam, type, subjects: cleanedSubjects }
                 });
             } catch (retryError) {
                 console.error('❌ Retry failed:', retryError);
@@ -1979,7 +1987,6 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         });
     }
 });
-
 // ============================================
 // ASSESSMENT ROUTES
 // ============================================
