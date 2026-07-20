@@ -129,6 +129,8 @@
         .btn-pdf { background: #dc3545; color: white; }
         .btn-print { background: #6f42c1; color: white; }
         .btn-print:hover { background: #4a2a8a; }
+        .btn-subject-edit { background: #d4a017; color: #0A1628; }
+        .btn-subject-edit:hover { background: #f5c842; }
 
         .loading-spinner {
             display: inline-block;
@@ -282,6 +284,73 @@
             flex-wrap: wrap;
             margin: 15px 0;
         }
+
+        /* ===== SUBJECT CONFIG SECTION ===== */
+        .subject-config-section {
+            background: #fff8e7;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #D4A017;
+            margin-bottom: 25px;
+        }
+        .subject-config-section h3 {
+            color: #0A1628;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .subject-config-section h3 i { color: #D4A017; margin-right: 8px; }
+
+        .config-subject-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border: 1px solid #e8ecf1;
+        }
+        .config-subject-item .name {
+            flex: 1;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .config-subject-item input {
+            width: 80px;
+            padding: 6px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .config-subject-item input:focus { border-color: #D4A017; outline: none; }
+        .config-subject-item .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .config-subject-item .remove-btn:hover { background: #c82333; }
+
+        .btn-add-subject {
+            padding: 8px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .btn-add-subject:hover { background: #1e7e34; transform: scale(1.02); }
 
         /* ===== EDIT MODAL ===== */
         .modal-overlay {
@@ -443,7 +512,7 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
             table { font-size: 11px; }
             table th, table td { padding: 6px 8px; }
-            .edit-subject-item, .view-subject-item { flex-wrap: wrap; }
+            .edit-subject-item, .view-subject-item, .config-subject-item { flex-wrap: wrap; }
             .student-summary .row { flex-direction: column; gap: 5px; }
         }
         @media (max-width: 480px) {
@@ -474,11 +543,11 @@
         <div class="stat-card"><div class="number red" id="belowCount">0</div><div class="label">📕 Below</div></div>
     </div>
 
-    <!-- ===== FILTERS - FIXED: Play Group added ===== -->
+    <!-- ===== FILTERS ===== -->
     <div class="filter-bar">
         <div class="form-group">
             <label>📚 Grade</label>
-            <select id="gradeFilter" onchange="loadStudentsForGrade(); loadAssessments();">
+            <select id="gradeFilter" onchange="loadStudentsForGrade(); loadAssessments(); loadSubjectConfig();">
                 <option value="Playgroup">Playgroup</option>
                 <option value="PP1">PP1</option>
                 <option value="PP2">PP2</option>
@@ -511,6 +580,21 @@
             <input type="number" id="yearFilter" value="2026" onchange="loadAssessments();" style="width:100%;padding:8px 12px;border:2px solid #e0e0e0;border-radius:8px;">
         </div>
         <button class="btn btn-primary" onclick="loadAssessments(); loadStudentsForGrade();"><i class="fas fa-sync"></i> Refresh</button>
+        <button class="btn btn-subject-edit" onclick="toggleSubjectConfig()"><i class="fas fa-cog"></i> Edit Subjects</button>
+    </div>
+
+    <!-- ===== SUBJECT CONFIGURATION SECTION ===== -->
+    <div class="subject-config-section" id="subjectConfigSection" style="display:none;">
+        <h3><i class="fas fa-cog"></i> Subject Configuration</h3>
+        <p style="color:#666; margin-bottom:15px; font-size:14px;">Edit subjects and their maximum scores for the selected grade.</p>
+        
+        <div id="subjectConfigContainer">
+            <p style="color:#999;">Loading subjects...</p>
+        </div>
+        
+        <button class="btn-add-subject" onclick="addSubjectField()"><i class="fas fa-plus"></i> Add Subject</button>
+        <button class="btn btn-success" onclick="saveSubjectConfig()" style="margin-left:10px;padding:8px 25px;"><i class="fas fa-save"></i> Save Subjects</button>
+        <button class="btn btn-secondary" onclick="toggleSubjectConfig()" style="margin-left:10px;padding:8px 25px;"><i class="fas fa-times"></i> Close</button>
     </div>
 
     <!-- ===== TOOLBAR ===== -->
@@ -622,15 +706,191 @@
     }
 
     // ============================================
-    // LOAD STUDENTS FOR GRADE - FIXED
+    // TOGGLE SUBJECT CONFIG
+    // ============================================
+    function toggleSubjectConfig() {
+        const section = document.getElementById('subjectConfigSection');
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            loadSubjectConfigForEdit();
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    // ============================================
+    // LOAD SUBJECT CONFIG FOR EDIT
+    // ============================================
+    async function loadSubjectConfigForEdit() {
+        const grade = document.getElementById('gradeFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const container = document.getElementById('subjectConfigContainer');
+        
+        container.innerHTML = '<p style="color:#999;"><span class="loading-spinner"></span> Loading subjects...</p>';
+        
+        try {
+            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`);
+            const data = await response.json();
+            
+            if (data.success && data.config) {
+                const subjects = data.config.subjects || [];
+                renderSubjectConfig(subjects);
+            } else {
+                renderSubjectConfig([]);
+            }
+        } catch (error) {
+            console.error('Error loading subjects:', error);
+            renderSubjectConfig([]);
+        }
+    }
+
+    // ============================================
+    // RENDER SUBJECT CONFIG
+    // ============================================
+    function renderSubjectConfig(subjects) {
+        const container = document.getElementById('subjectConfigContainer');
+        
+        if (!subjects || subjects.length === 0) {
+            container.innerHTML = `
+                <p style="color:#d4a017; margin-bottom:10px;">⚠️ No subjects configured. Add subjects below.</p>
+                <div class="config-subject-item">
+                    <span class="name">Mathematics</span>
+                    <input type="number" id="config_subject_0" value="50" min="1" step="1">
+                    <input type="hidden" id="config_name_0" value="Mathematics">
+                </div>
+                <div class="config-subject-item">
+                    <span class="name">English</span>
+                    <input type="number" id="config_subject_1" value="50" min="1" step="1">
+                    <input type="hidden" id="config_name_1" value="English">
+                </div>
+                <div class="config-subject-item">
+                    <span class="name">Kiswahili</span>
+                    <input type="number" id="config_subject_2" value="50" min="1" step="1">
+                    <input type="hidden" id="config_name_2" value="Kiswahili">
+                </div>
+                <div class="config-subject-item">
+                    <span class="name">Science</span>
+                    <input type="number" id="config_subject_3" value="50" min="1" step="1">
+                    <input type="hidden" id="config_name_3" value="Science">
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        subjects.forEach((subject, index) => {
+            html += `
+                <div class="config-subject-item" id="config_row_${index}">
+                    <span class="name">${subject.name}</span>
+                    <input type="number" id="config_subject_${index}" value="${subject.max}" min="1" step="1">
+                    <input type="hidden" id="config_name_${index}" value="${subject.name}">
+                    <button class="remove-btn" onclick="removeSubjectField(${index})"><i class="fas fa-times"></i></button>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // ============================================
+    // ADD SUBJECT FIELD
+    // ============================================
+    function addSubjectField() {
+        const container = document.getElementById('subjectConfigContainer');
+        const index = container.querySelectorAll('.config-subject-item').length;
+        
+        const div = document.createElement('div');
+        div.className = 'config-subject-item';
+        div.id = `config_row_${index}`;
+        div.innerHTML = `
+            <input type="text" id="config_name_${index}" value="New Subject" placeholder="Subject name" style="flex:1;padding:6px 10px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;">
+            <input type="number" id="config_subject_${index}" value="50" min="1" step="1" style="width:80px;padding:6px 10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;text-align:center;">
+            <button class="remove-btn" onclick="removeSubjectField(${index})"><i class="fas fa-times"></i></button>
+        `;
+        container.appendChild(div);
+    }
+
+    // ============================================
+    // REMOVE SUBJECT FIELD
+    // ============================================
+    function removeSubjectField(index) {
+        const row = document.getElementById(`config_row_${index}`);
+        if (row) {
+            row.remove();
+        }
+        // Re-index remaining rows
+        const rows = document.querySelectorAll('#subjectConfigContainer .config-subject-item');
+        rows.forEach((row, i) => {
+            row.id = `config_row_${i}`;
+            const inputs = row.querySelectorAll('input');
+            inputs.forEach(input => {
+                if (input.id) {
+                    input.id = input.id.replace(/\d+$/, i);
+                }
+            });
+            const btn = row.querySelector('.remove-btn');
+            if (btn) {
+                btn.onclick = function() { removeSubjectField(i); };
+            }
+        });
+    }
+
+    // ============================================
+    // SAVE SUBJECT CONFIG
+    // ============================================
+    async function saveSubjectConfig() {
+        const grade = document.getElementById('gradeFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const rows = document.querySelectorAll('#subjectConfigContainer .config-subject-item');
+        
+        const subjects = [];
+        rows.forEach(row => {
+            const nameInput = row.querySelector('input[type="text"]');
+            const maxInput = row.querySelector('input[type="number"]');
+            const name = nameInput ? nameInput.value.trim() : '';
+            const max = maxInput ? parseInt(maxInput.value) : 50;
+            
+            if (name && max > 0) {
+                subjects.push({ name, max });
+            }
+        });
+        
+        if (subjects.length === 0) {
+            showAlert('❌ Please add at least one subject', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type, subjects })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                showAlert(`✅ Subjects for ${grade} updated successfully!`, 'success');
+                toggleSubjectConfig();
+                await loadSubjectConfig();
+                // Reload subjects for the selected student
+                if (currentStudentId) {
+                    loadStudentSubjects();
+                }
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error saving subjects:', error);
+            showAlert('❌ Error saving subjects: ' + error.message, 'error');
+        }
+    }
+
+    // ============================================
+    // LOAD STUDENTS FOR GRADE
     // ============================================
     async function loadStudentsForGrade() {
         const grade = document.getElementById('gradeFilter').value;
         
-        if (!grade) {
-            console.log('No grade selected');
-            return;
-        }
+        if (!grade) return;
         
         try {
             const response = await fetch(`/api/assessments/students/${encodeURIComponent(grade)}`);
@@ -640,9 +900,6 @@
                 allStudents = data.students || [];
                 populateStudentSelect(allStudents);
                 document.getElementById('totalStudents').textContent = allStudents.length;
-                console.log(`Loaded ${allStudents.length} students for grade: ${grade}`);
-            } else {
-                console.error('Error loading students:', data.message);
             }
         } catch (error) {
             console.error('Error loading students:', error);
@@ -670,16 +927,13 @@
     }
 
     // ============================================
-    // LOAD SUBJECT CONFIG - FIXED for Playgroup
+    // LOAD SUBJECT CONFIG
     // ============================================
     async function loadSubjectConfig() {
         const grade = document.getElementById('gradeFilter').value;
         const type = document.getElementById('typeFilter').value;
         
-        if (!grade) {
-            console.log('No grade selected');
-            return;
-        }
+        if (!grade) return;
         
         try {
             const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`);
@@ -687,10 +941,8 @@
             
             if (data.success && data.config) {
                 subjectConfig = data.config.subjects || [];
-                console.log(`Loaded ${subjectConfig.length} subjects for ${grade}`);
             } else {
                 subjectConfig = [];
-                console.log('No subjects found, using empty config');
             }
         } catch (error) {
             console.error('Error loading subjects:', error);
@@ -718,8 +970,8 @@
                 <p style="color:#d4a017; text-align:center; padding:20px;">
                     ⚠️ No subjects configured for this grade. 
                     <br><br>
-                    <button class="btn btn-primary btn-sm" onclick="setupDefaultSubjects()">
-                        <i class="fas fa-cog"></i> Setup Default Subjects
+                    <button class="btn btn-primary btn-sm" onclick="toggleSubjectConfig()">
+                        <i class="fas fa-cog"></i> Configure Subjects
                     </button>
                 </p>
             `;
@@ -740,138 +992,6 @@
         html += `<p style="font-size:12px;color:#999;margin-top:5px;">Max scores: ${subjectConfig.map(s => `${s.name} (${s.max})`).join(', ')}</p>`;
         
         container.innerHTML = html;
-    }
-
-    // ============================================
-    // SETUP DEFAULT SUBJECTS
-    // ============================================
-    async function setupDefaultSubjects() {
-        const grade = document.getElementById('gradeFilter').value;
-        const type = document.getElementById('typeFilter').value;
-        
-        const defaultSubjects = {
-            'Playgroup': [
-                { name: 'MATH', max: 10 },
-                { name: 'LANG', max: 10 },
-                { name: 'LIT', max: 10 },
-                { name: 'KUS', max: 10 },
-                { name: 'ENVI/CRE', max: 10 },
-                { name: 'C/A', max: 10 }
-            ],
-            'PP1': [
-                { name: 'MATH', max: 10 },
-                { name: 'LANG', max: 10 },
-                { name: 'LIT', max: 10 },
-                { name: 'KIS', max: 10 },
-                { name: 'KUS', max: 10 },
-                { name: 'ENV', max: 10 },
-                { name: 'CRE/I.R.E', max: 10 },
-                { name: 'C/A', max: 10 }
-            ],
-            'PP2': [
-                { name: 'MATH', max: 10 },
-                { name: 'LANG', max: 10 },
-                { name: 'LIT', max: 10 },
-                { name: 'KIS', max: 10 },
-                { name: 'KUS', max: 10 },
-                { name: 'ENV', max: 10 },
-                { name: 'CRE/I.R.E', max: 10 },
-                { name: 'C/A', max: 10 }
-            ],
-            'Grade 1': [
-                { name: 'MATH', max: 30 },
-                { name: 'LIST/SPEAKING', max: 20 },
-                { name: 'READING', max: 20 },
-                { name: 'GRAMMAR', max: 20 },
-                { name: 'KUSOMA', max: 20 },
-                { name: 'SARUFI', max: 20 },
-                { name: 'ENV', max: 30 },
-                { name: 'C.R.E', max: 20 },
-                { name: 'CREATIVE ARTS', max: 20 }
-            ],
-            'Grade 2': [
-                { name: 'LIST & SPEAKING', max: 20 },
-                { name: 'READING ALOUD', max: 20 },
-                { name: 'GRAMMAR', max: 20 },
-                { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 20 },
-                { name: 'KUSOMA KWA SAUTI', max: 20 },
-                { name: 'LUGHA', max: 20 },
-                { name: 'MATH', max: 30 },
-                { name: 'ENVIRONMENTAL', max: 30 },
-                { name: 'C/A', max: 20 },
-                { name: 'RE', max: 20 }
-            ],
-            'Grade 3': [
-                { name: 'LIST & SPEAKING', max: 20 },
-                { name: 'READING ALOUD', max: 20 },
-                { name: 'GRAMMAR', max: 20 },
-                { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 20 },
-                { name: 'KUSOMA KWA SAUTI', max: 20 },
-                { name: 'SARUFI', max: 20 },
-                { name: 'MATHS', max: 30 },
-                { name: 'ENVIRONMENTAL', max: 30 },
-                { name: 'C.R.E', max: 20 },
-                { name: 'I.R.E', max: 20 },
-                { name: 'C/A', max: 20 }
-            ],
-            'Grade 4': [
-                { name: 'MATHS ACTIVITIES', max: 60 },
-                { name: 'ENGLISH ACTIVITIES', max: 80 },
-                { name: 'SCI & TECH', max: 60 },
-                { name: 'KISW LUGHA', max: 80 },
-                { name: 'SST', max: 60 },
-                { name: 'RELIGIOUS EDUCATION', max: 40 },
-                { name: 'AGRICULTURE', max: 40 },
-                { name: 'CREATIVE ART', max: 50 }
-            ],
-            'Grade 5': [
-                { name: 'MATHS ACTIVITIES', max: 60 },
-                { name: 'ENGLISH ACTIVITIES', max: 80 },
-                { name: 'SCI & TECH', max: 60 },
-                { name: 'KISW LUGHA', max: 80 },
-                { name: 'SST', max: 60 },
-                { name: 'RELIGIOUS EDUCATION', max: 40 },
-                { name: 'AGRICULTURE', max: 40 },
-                { name: 'CREATIVE ART', max: 50 }
-            ],
-            'Grade 6': [
-                { name: 'MATHS ACTIVITIES', max: 60 },
-                { name: 'ENGLISH ACTIVITIES', max: 80 },
-                { name: 'SCI & TECH', max: 60 },
-                { name: 'KISW LUGHA', max: 80 },
-                { name: 'SST', max: 60 },
-                { name: 'RELIGIOUS EDUCATION', max: 40 },
-                { name: 'AGRICULTURE', max: 40 },
-                { name: 'CREATIVE ART', max: 50 }
-            ]
-        };
-        
-        const subjects = defaultSubjects[grade] || [
-            { name: 'MATHEMATICS', max: 50 },
-            { name: 'ENGLISH', max: 50 },
-            { name: 'KISWAHILI', max: 50 },
-            { name: 'SCIENCE', max: 50 }
-        ];
-        
-        try {
-            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: type, subjects: subjects })
-            });
-            
-            const data = await response.json();
-            if (data.success) {
-                showAlert(`✅ Subjects configured for ${grade}!`, 'success');
-                await loadSubjectConfig();
-                loadStudentSubjects();
-            } else {
-                showAlert('❌ Error: ' + data.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error setting up subjects:', error);
-            showAlert('❌ Error setting up subjects: ' + error.message, 'error');
-        }
     }
 
     // ============================================
@@ -975,9 +1095,7 @@
         const term = document.getElementById('termFilter').value;
         const year = document.getElementById('yearFilter').value;
         
-        if (!grade) {
-            return;
-        }
+        if (!grade) return;
         
         const tbody = document.getElementById('assessmentsBody');
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999;"><span class="loading-spinner"></span> Loading assessments...</td></tr>';
@@ -1311,7 +1429,6 @@
     // INIT
     // ============================================
     document.addEventListener('DOMContentLoaded', function() {
-        // Set default grade and load
         setTimeout(function() {
             loadSubjectConfig();
             loadStudentsForGrade();
