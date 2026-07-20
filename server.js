@@ -1884,28 +1884,25 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         }));
         
         // ============================================
-        // THE FIX: Use findOneAndUpdate with upsert
-        // This avoids duplicate key errors entirely
+        // SIMPLE APPROACH: Delete then Create
         // ============================================
         
-        const config = await SubjectConfig.findOneAndUpdate(
-            { grade: grade, type: type },
-            { 
-                $set: { 
-                    subjects: cleanedSubjects,
-                    updatedAt: new Date()
-                }
-            },
-            { 
-                upsert: true,  // Create if doesn't exist
-                new: true,     // Return the updated document
-                setDefaultsOnInsert: true
-            }
-        );
+        // First, delete any existing config
+        await SubjectConfig.deleteMany({ grade, type });
+        console.log(`✅ Deleted existing config for ${grade} (${type})`);
         
-        console.log(`✅ Saved config for ${grade} (${type})`);
+        // Then create new one
+        const config = new SubjectConfig({
+            grade: grade,
+            type: type,
+            subjects: cleanedSubjects,
+            updatedAt: new Date()
+        });
         
-        // Update existing assessments with new max scores
+        await config.save();
+        console.log(`✅ Saved new config for ${grade} (${type})`);
+        
+        // Update existing assessments
         const students = await StudentAssessment.find({ grade, type });
         for (const student of students) {
             let updated = false;
@@ -1926,16 +1923,16 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             }
         }
         
-        res.json({ 
-            success: true, 
-            message: 'Subject configuration saved successfully!', 
-            config 
+        res.json({
+            success: true,
+            message: 'Subject configuration saved successfully!',
+            config
         });
     } catch (error) {
         console.error('❌ Save error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error saving subjects: ' + error.message 
+        res.status(500).json({
+            success: false,
+            message: 'Error saving subjects: ' + error.message
         });
     }
 });
