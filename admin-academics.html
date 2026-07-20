@@ -1,1313 +1,438 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Assessments - Admin</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #D4A017;
-        }
-        .header h1 { color: #0A1628; font-size: 28px; }
-        .header h1 i { color: #D4A017; margin-right: 10px; }
-        .header .btn-home {
-            padding: 10px 25px;
-            background: #0A1628;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-        .header .btn-home:hover { background: #1a2a4a; transform: scale(1.02); }
-
-        .alert {
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin: 15px 0;
-            display: none;
-            font-weight: 600;
-        }
-        .alert.success { display: block; background: #d4edda; color: #155724; border: 2px solid #0b8f34; }
-        .alert.error { display: block; background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
-        .alert.warning { display: block; background: #fff3cd; color: #856404; border: 2px solid #ffc107; }
-        .alert.info { display: block; background: #d1ecf1; color: #0c5460; border: 2px solid #0b5394; }
-
-        .filter-bar {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin: 15px 0 20px;
-            padding: 15px;
-            background: #f8f9fc;
-            border-radius: 12px;
-            border: 1px solid #e8ecf1;
-            align-items: flex-end;
-        }
-        .filter-bar .form-group {
-            flex: 1;
-            min-width: 140px;
-        }
-        .filter-bar .form-group label {
-            display: block;
-            font-weight: 600;
-            font-size: 12px;
-            color: #555;
-            margin-bottom: 3px;
-        }
-        .filter-bar .form-group select,
-        .filter-bar .form-group input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 13px;
-            background: white;
-        }
-        .filter-bar .form-group select:focus,
-        .filter-bar .form-group input:focus { border-color: #D4A017; outline: none; }
-
-        .btn {
-            padding: 8px 18px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-        }
-        .btn:hover { transform: scale(1.02); }
-        .btn-primary { background: #D4A017; color: #0A1628; }
-        .btn-primary:hover { background: #f5c842; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-success:hover { background: #1e7e34; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-danger:hover { background: #c82333; }
-        .btn-info { background: #17a2b8; color: white; }
-        .btn-info:hover { background: #138496; }
-        .btn-secondary { background: #6c757d; color: white; }
-        .btn-secondary:hover { background: #5a6268; }
-        .btn-sm { padding: 4px 12px; font-size: 12px; }
-        .btn-pdf { background: #dc3545; color: white; }
-        .btn-pdf:hover { background: #c82333; }
-        .btn-print { background: #6f42c1; color: white; }
-        .btn-print:hover { background: #4a2a8a; }
-        .btn-subject-edit { background: #d4a017; color: #0A1628; font-weight: 700; padding: 10px 22px; }
-        .btn-subject-edit:hover { background: #f5c842; transform: scale(1.02); }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #e8ecf1;
-            border-top: 3px solid #D4A017;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ===== COMPACT STATS BAR ===== */
-        .stats-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2px;
-            background: #0A1628;
-            border-radius: 10px;
-            padding: 6px 10px;
-            margin: 10px 0 15px;
-            align-items: center;
-            justify-content: center;
-        }
-        .stats-bar .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 12px;
-            border-right: 1px solid rgba(255,255,255,0.08);
-            color: white;
-        }
-        .stats-bar .stat-item:last-child { border-right: none; }
-        .stats-bar .stat-item .num {
-            font-size: 18px;
-            font-weight: 700;
-            color: #D4A017;
-        }
-        .stats-bar .stat-item .num.green { color: #28a745; }
-        .stats-bar .stat-item .num.blue { color: #17a2b8; }
-        .stats-bar .stat-item .num.orange { color: #d4a017; }
-        .stats-bar .stat-item .num.red { color: #dc3545; }
-        .stats-bar .stat-item .num.purple { color: #6f42c1; }
-        .stats-bar .stat-item .num.gold { color: #D4A017; }
-        .stats-bar .stat-item .label {
-            font-size: 10px;
-            color: rgba(255,255,255,0.5);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .stats-bar .stat-item .icon { font-size: 12px; margin-right: 2px; }
-
-        .table-wrapper { overflow-x: auto; max-height: 500px; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        table th { background: #0A1628; color: white; padding: 10px 12px; text-align: left; position: sticky; top: 0; z-index: 10; white-space: nowrap; }
-        table td { padding: 8px 12px; border-bottom: 1px solid #e8ecf1; }
-        table tr:nth-child(even) { background: #fafbfc; }
-        table tr:hover { background: #f0f4ff; }
-        .no-records { text-align: center; padding: 30px; color: #999; }
-
-        .performance-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 50px;
-            font-size: 11px;
-            font-weight: 700;
-            color: white;
-        }
-        .performance-badge.exceeding { background: #28a745; }
-        .performance-badge.meeting { background: #17a2b8; }
-        .performance-badge.approaching { background: #d4a017; color: #0A1628; }
-        .performance-badge.below { background: #dc3545; }
-
-        .subject-input-section {
-            background: #f8f9fc;
-            padding: 25px;
-            border-radius: 15px;
-            border: 2px solid #e8ecf1;
-            margin-bottom: 25px;
-        }
-        .subject-input-section h3 { color: #0A1628; margin-bottom: 15px; font-size: 20px; }
-        .subject-input-section h3 i { color: #D4A017; margin-right: 8px; }
-
-        .subjects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin: 15px 0;
-        }
-        .subject-item {
-            background: white;
-            padding: 12px 15px;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .subject-item label { font-weight: 600; color: #0A1628; font-size: 13px; flex: 1; }
-        .subject-item input {
-            width: 70px;
-            padding: 6px 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-            text-align: center;
-        }
-        .subject-item input:focus { border-color: #D4A017; outline: none; }
-
-        .student-select {
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .student-select:focus { border-color: #D4A017; outline: none; }
-        .student-select option { padding: 6px 10px; }
-
-        .btn-add-score {
-            padding: 12px 35px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 15px;
-        }
-        .btn-add-score:hover { background: #1e7e34; transform: scale(1.02); }
-
-        .toolbar-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
-
-        .subject-config-section {
-            background: #fff8e7;
-            padding: 25px;
-            border-radius: 15px;
-            border: 2px solid #D4A017;
-            margin-bottom: 25px;
-            display: none;
-        }
-        .subject-config-section.active { display: block; }
-        .subject-config-section h3 { color: #0A1628; margin-bottom: 15px; font-size: 20px; }
-        .subject-config-section h3 i { color: #D4A017; margin-right: 8px; }
-
-        .config-subject-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 12px;
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            border: 1px solid #e8ecf1;
-        }
-        .config-subject-item .name-input {
-            flex: 1;
-            padding: 6px 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 13px;
-            background: white;
-        }
-        .config-subject-item .name-input:focus { border-color: #D4A017; outline: none; }
-        .config-subject-item input[type="number"] {
-            width: 80px;
-            padding: 6px 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-            text-align: center;
-        }
-        .config-subject-item input[type="number"]:focus { border-color: #D4A017; outline: none; }
-        .config-subject-item .remove-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 12px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-        }
-        .config-subject-item .remove-btn:hover { background: #c82333; transform: scale(1.05); }
-
-        .btn-add-subject {
-            padding: 8px 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            margin-top: 10px;
-        }
-        .btn-add-subject:hover { background: #1e7e34; transform: scale(1.02); }
-
-        .config-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 750px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .modal-content h2 { color: #0A1628; border-bottom: 3px solid #D4A017; padding-bottom: 12px; margin-bottom: 20px; font-size: 24px; }
-        .modal-content h2 i { color: #D4A017; margin-right: 10px; }
-
-        .modal-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
-        .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.3s; min-width: 120px; }
-        .modal-actions button:hover { transform: scale(1.02); }
-        .modal-actions .btn-save { background: #28a745; color: white; }
-        .modal-actions .btn-cancel { background: #6c757d; color: white; }
-
-        .edit-subject-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 12px;
-            background: #f8f9fc;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            border: 1px solid #e8ecf1;
-        }
-        .edit-subject-item .name { flex: 1; font-weight: 600; font-size: 13px; }
-        .edit-subject-item input {
-            width: 80px;
-            padding: 6px 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-            text-align: center;
-        }
-        .edit-subject-item input:focus { border-color: #D4A017; outline: none; }
-        .edit-subject-item .max-score { font-size: 11px; color: #999; min-width: 30px; }
-
-        .student-summary {
-            background: #f8f9fc;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #e8ecf1;
-            margin-bottom: 15px;
-        }
-        .student-summary .row { display: flex; gap: 20px; flex-wrap: wrap; }
-        .student-summary .item { font-size: 13px; }
-        .student-summary .item strong { color: #0A1628; }
-
-        .view-subject-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 12px;
-            background: #f8f9fc;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            border: 1px solid #e8ecf1;
-        }
-        .view-subject-item .name { flex: 1; font-weight: 600; font-size: 13px; }
-        .view-subject-item .score { font-weight: bold; color: #0A1628; min-width: 50px; text-align: center; }
-        .view-subject-item .max { color: #999; min-width: 30px; text-align: center; }
-        .view-subject-item .percentage { font-weight: bold; min-width: 60px; text-align: center; }
-        .view-subject-item .perf {
-            padding: 2px 10px;
-            border-radius: 50px;
-            font-size: 10px;
-            font-weight: 700;
-            color: white;
-            min-width: 80px;
-            text-align: center;
-        }
-        .perf-exceeding { background: #28a745; }
-        .perf-meeting { background: #17a2b8; }
-        .perf-approaching { background: #d4a017; color: #0A1628; }
-        .perf-below { background: #dc3545; }
-
-        @media (max-width: 768px) {
-            .container { padding: 15px; }
-            .filter-bar { flex-direction: column; }
-            .filter-bar .form-group { min-width: 100%; }
-            .subjects-grid { grid-template-columns: 1fr 1fr; }
-            .header { flex-direction: column; gap: 10px; text-align: center; }
-            .modal-content { padding: 20px; margin: 10px; }
-            .modal-actions { flex-direction: column; }
-            .stats-bar { flex-wrap: wrap; gap: 2px; }
-            .stats-bar .stat-item { padding: 2px 8px; font-size: 11px; }
-            .stats-bar .stat-item .num { font-size: 14px; }
-            table { font-size: 11px; }
-            table th, table td { padding: 6px 8px; }
-            .config-subject-item { flex-wrap: wrap; }
-            .config-actions { flex-direction: column; }
-            .config-actions .btn { width: 100%; justify-content: center; }
-        }
-        @media (max-width: 480px) {
-            .subjects-grid { grid-template-columns: 1fr; }
-            .stats-bar .stat-item { padding: 2px 6px; }
-            .stats-bar .stat-item .num { font-size: 12px; }
-            .stats-bar .stat-item .label { font-size: 8px; }
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="header">
-        <h1><i class="fas fa-edit"></i> Academic Assessments</h1>
-        <div>
-            <a href="admin-dashboard.html" class="btn-home"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-        </div>
-    </div>
-
-    <div id="alert" class="alert"></div>
-
-    <!-- ===== COMPACT STATS BAR ===== -->
-    <div class="stats-bar" id="statsBar">
-        <div class="stat-item">
-            <span class="icon">👨‍🎓</span>
-            <span class="num gold" id="statStudents">0</span>
-            <span class="label">Students</span>
-        </div>
-        <div class="stat-item">
-            <span class="icon">🌟</span>
-            <span class="num green" id="statExceeding">0</span>
-            <span class="label">Exceeding</span>
-        </div>
-        <div class="stat-item">
-            <span class="icon">✅</span>
-            <span class="num blue" id="statMeeting">0</span>
-            <span class="label">Meeting</span>
-        </div>
-        <div class="stat-item">
-            <span class="icon">📗</span>
-            <span class="num orange" id="statApproaching">0</span>
-            <span class="label">Approaching</span>
-        </div>
-        <div class="stat-item">
-            <span class="icon">📕</span>
-            <span class="num red" id="statBelow">0</span>
-            <span class="label">Below</span>
-        </div>
-        <div class="stat-item">
-            <span class="icon">📊</span>
-            <span class="num purple" id="statClassAvg">0</span>
-            <span class="label">Class Avg</span>
-        </div>
-        <div class="stat-item">
-            <span class="icon">📚</span>
-            <span class="num" id="statSubjects" style="color:#17a2b8;">0</span>
-            <span class="label">Subjects</span>
-        </div>
-    </div>
-
-    <div class="filter-bar">
-        <div class="form-group">
-            <label>📚 Grade</label>
-            <select id="gradeFilter" onchange="loadStudentsForGrade(); loadAssessments(); loadSubjectConfig();">
-                <option value="Playgroup">Playgroup</option>
-                <option value="PP1">PP1</option>
-                <option value="PP2">PP2</option>
-                <option value="Grade 1">Grade 1</option>
-                <option value="Grade 2">Grade 2</option>
-                <option value="Grade 3">Grade 3</option>
-                <option value="Grade 4" selected>Grade 4</option>
-                <option value="Grade 5">Grade 5</option>
-                <option value="Grade 6">Grade 6</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>📋 Assessment Type</label>
-            <select id="typeFilter" onchange="loadSubjectConfig(); loadAssessments();">
-                <option value="weekly">Weekly</option>
-                <option value="monthly" selected>Monthly</option>
-                <option value="term">End of Term</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>📅 Term</label>
-            <select id="termFilter" onchange="loadAssessments();">
-                <option value="Term 1">Term 1</option>
-                <option value="Term 2" selected>Term 2</option>
-                <option value="Term 3">Term 3</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>📅 Year</label>
-            <input type="number" id="yearFilter" value="2026" onchange="loadAssessments();" style="width:100%;padding:8px 12px;border:2px solid #e0e0e0;border-radius:8px;">
-        </div>
-        <button class="btn btn-primary" onclick="loadAssessments(); loadStudentsForGrade();"><i class="fas fa-sync"></i> Refresh</button>
-        <button class="btn btn-subject-edit" onclick="toggleSubjectConfig()"><i class="fas fa-cog"></i> Edit Subjects</button>
-    </div>
-
-    <!-- ===== SUBJECT CONFIGURATION SECTION ===== -->
-    <div class="subject-config-section" id="subjectConfigSection">
-        <h3><i class="fas fa-cog"></i> Subject Configuration</h3>
-        <p style="color:#666; margin-bottom:15px; font-size:14px;">Edit subjects and their maximum scores for <strong id="configGradeDisplay">Grade 4</strong></p>
-        <div id="subjectConfigContainer"><p style="color:#999;"><span class="loading-spinner"></span> Loading subjects...</p></div>
-        <div class="config-actions">
-            <button class="btn-add-subject" onclick="addSubjectField()"><i class="fas fa-plus"></i> Add Subject</button>
-            <button class="btn btn-success" onclick="saveSubjectConfig()" style="padding:8px 25px;"><i class="fas fa-save"></i> Save Subjects</button>
-            <button class="btn btn-secondary" onclick="toggleSubjectConfig()" style="padding:8px 25px;"><i class="fas fa-times"></i> Close</button>
-        </div>
-    </div>
-
-    <div class="toolbar-actions">
-        <button class="btn btn-success" onclick="downloadGradeReportPDF()"><i class="fas fa-file-pdf"></i> Download Grade PDF</button>
-        <button class="btn btn-info" onclick="window.print()"><i class="fas fa-print"></i> Print Grade Report</button>
-        <button class="btn btn-primary" onclick="loadAssessments()"><i class="fas fa-sync"></i> Load Results</button>
-    </div>
-
-    <!-- ===== ADD SCORES SECTION ===== -->
-    <div class="subject-input-section">
-        <h3><i class="fas fa-plus-circle"></i> Enter Student Scores</h3>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
-            <div>
-                <label style="font-weight:600; font-size:13px; color:#333;">👤 Select Student</label>
-                <select id="studentSelect" class="student-select" onchange="loadStudentSubjects()">
-                    <option value="">-- Select Student --</option>
-                </select>
-            </div>
-            <div>
-                <label style="font-weight:600; font-size:13px; color:#333;">📅 Period (Optional)</label>
-                <input type="text" id="periodInput" placeholder="e.g., March, Week 1" style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;">
-            </div>
-        </div>
-        <div id="subjectsContainer"><p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p></div>
-        <button class="btn-add-score" onclick="saveStudentScores()"><i class="fas fa-save"></i> Save Scores</button>
-    </div>
-
-    <!-- ===== ASSESSMENTS TABLE ===== -->
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Student Name</th>
-                    <th>Admission No.</th>
-                    <th>Period</th>
-                    <th>Total Score</th>
-                    <th>Average</th>
-                    <th>Performance Level</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="assessmentsBody"><tr><td colspan="8" class="no-records"><span class="loading-spinner"></span> Loading assessments...</td></tr></tbody>
-        </table>
-    </div>
-</div>
-
-<!-- ===== VIEW MODAL ===== -->
-<div class="modal-overlay" id="viewModal">
-    <div class="modal-content">
-        <h2><i class="fas fa-file-alt"></i> Student Assessment Details</h2>
-        <div id="viewStudentInfo" class="student-summary"></div>
-        <div id="viewSubjectsContainer"></div>
-        <div class="modal-actions">
-            <button class="btn btn-pdf" onclick="downloadViewReport()" style="flex:1;padding:12px;border:none;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;background:#dc3545;color:white;"><i class="fas fa-file-pdf"></i> Download PDF</button>
-            <button class="btn btn-cancel" onclick="closeViewModal()"><i class="fas fa-times"></i> Close</button>
-        </div>
-    </div>
-</div>
-
-<!-- ===== EDIT MODAL ===== -->
-<div class="modal-overlay" id="editModal">
-    <div class="modal-content">
-        <h2><i class="fas fa-edit"></i> Edit Assessment</h2>
-        <input type="hidden" id="editAssessmentId">
-        <div style="margin-bottom:15px;">
-            <label style="font-weight:600; font-size:13px; color:#333;">👤 Student</label>
-            <input type="text" id="editStudentName" readonly style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;background:#f0f0f0;">
-        </div>
-        <div id="editSubjectsContainer"><p style="color:#999;">Loading subjects...</p></div>
-        <div class="modal-actions">
-            <button class="btn-save" onclick="saveEditAssessment()"><i class="fas fa-save"></i> Update</button>
-            <button class="btn-danger" onclick="deleteAssessmentFromModal()" style="flex:1;padding:12px;border:none;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;background:#dc3545;color:white;"><i class="fas fa-trash"></i> Delete</button>
-            <button class="btn-cancel" onclick="closeEditModal()"><i class="fas fa-times"></i> Cancel</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    let allStudents = [];
-    let subjectConfig = [];
-    let currentStudentId = null;
-    let viewStudentId = null;
-
-    function showAlert(message, type) {
-        const el = document.getElementById('alert');
-        el.className = 'alert ' + type;
-        el.textContent = message;
-        el.style.display = 'block';
-        setTimeout(() => { el.style.display = 'none'; }, 5000);
-    }
-
-    function toggleSubjectConfig() {
-        const section = document.getElementById('subjectConfigSection');
-        if (section.classList.contains('active')) {
-            section.classList.remove('active');
-        } else {
-            section.classList.add('active');
-            const grade = document.getElementById('gradeFilter').value;
-            document.getElementById('configGradeDisplay').textContent = grade;
-            loadSubjectConfigForEdit();
-        }
-    }
-
-    async function loadSubjectConfigForEdit() {
-        const grade = document.getElementById('gradeFilter').value;
-        const type = document.getElementById('typeFilter').value;
-        const container = document.getElementById('subjectConfigContainer');
-        container.innerHTML = '<p style="color:#999;"><span class="loading-spinner"></span> Loading subjects...</p>';
-        try {
-            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`);
-            const data = await response.json();
-            if (data.success && data.config) {
-                renderSubjectConfig(data.config.subjects || []);
-            } else {
-                renderSubjectConfig([]);
+// ============================================
+// GENERATE CLASS REPORT HTML - LANDSCAPE WITH SHORTENED NAMES
+// ============================================
+function generateClassReportHTML(students, grade, type, term, year, period) {
+    const now = getKenyaTime();
+    const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
+    const periodLabel = period ? ` - ${period}` : '';
+    
+    // Subject name shortener
+    function shortenSubject(name) {
+        const shortMap = {
+            'MATHS ACTIVITIES': 'Maths',
+            'ENGLISH ACTIVITIES': 'English',
+            'SCI & TECH': 'Sci/Tech',
+            'KISW LUGHA': 'Kisw',
+            'RELIGIOUS EDUCATION': 'RE',
+            'AGRICULTURE': 'Agric',
+            'CREATIVE ART': 'C.Art',
+            'MATHEMATICS': 'Maths',
+            'KISWAHILI': 'Kisw',
+            'SCIENCE': 'Science',
+            'SOCIAL STUDIES': 'SST',
+            'CREATIVE ARTS': 'C.Arts',
+            'LIST/SPEAKING': 'Listening',
+            'READING': 'Reading',
+            'GRAMMAR': 'Grammar',
+            'KUSOMA': 'Kusoma',
+            'SARUFI': 'Sarufi',
+            'ENVIRONMENTAL': 'Env',
+            'C.R.E': 'CRE',
+            'I.R.E': 'IRE',
+            'LITERACY': 'Literacy',
+            'NUMERACY': 'Numeracy',
+            'PSYCHOMOTOR': 'Psychomotor',
+            'LANGUAGE': 'Language',
+            'LIST & SPEAKING': 'Listen/Speak',
+            'READING ALOUD': 'Read Aloud',
+            'KUSIKILIZA NA KUZUNGUMZA': 'Kusikiliza',
+            'KUSOMA KWA SAUTI': 'Soma Sauti',
+            'LUGHA': 'Lugha'
+        };
+        // Check if name starts with any key in the map
+        for (const [key, value] of Object.entries(shortMap)) {
+            if (name.includes(key) || name === key) {
+                return value;
             }
-        } catch (error) {
-            console.error('Error loading subjects:', error);
-            renderSubjectConfig([]);
         }
-    }
-
-    function renderSubjectConfig(subjects) {
-        const container = document.getElementById('subjectConfigContainer');
-        if (!subjects || subjects.length === 0) {
-            container.innerHTML = `
-                <p style="color:#d4a017; margin-bottom:10px;">⚠️ No subjects configured. Add subjects below.</p>
-                <div class="config-subject-item">
-                    <input type="text" class="name-input" id="config_name_0" value="Mathematics" placeholder="Subject name">
-                    <input type="number" id="config_subject_0" value="50" min="1" step="1">
-                    <button class="remove-btn" onclick="removeSubjectField(0)"><i class="fas fa-times"></i> Remove</button>
-                </div>
-                <div class="config-subject-item">
-                    <input type="text" class="name-input" id="config_name_1" value="English" placeholder="Subject name">
-                    <input type="number" id="config_subject_1" value="50" min="1" step="1">
-                    <button class="remove-btn" onclick="removeSubjectField(1)"><i class="fas fa-times"></i> Remove</button>
-                </div>
-                <div class="config-subject-item">
-                    <input type="text" class="name-input" id="config_name_2" value="Kiswahili" placeholder="Subject name">
-                    <input type="number" id="config_subject_2" value="50" min="1" step="1">
-                    <button class="remove-btn" onclick="removeSubjectField(2)"><i class="fas fa-times"></i> Remove</button>
-                </div>
-                <div class="config-subject-item">
-                    <input type="text" class="name-input" id="config_name_3" value="Science" placeholder="Subject name">
-                    <input type="number" id="config_subject_3" value="50" min="1" step="1">
-                    <button class="remove-btn" onclick="removeSubjectField(3)"><i class="fas fa-times"></i> Remove</button>
-                </div>
-            `;
-            return;
+        // If too long, truncate
+        if (name.length > 12) {
+            return name.substring(0, 10) + '...';
         }
-        let html = '';
-        subjects.forEach((subject, index) => {
-            html += `
-                <div class="config-subject-item" id="config_row_${index}">
-                    <input type="text" class="name-input" id="config_name_${index}" value="${subject.name}" placeholder="Subject name">
-                    <input type="number" id="config_subject_${index}" value="${subject.max}" min="1" step="1">
-                    <button class="remove-btn" onclick="removeSubjectField(${index})"><i class="fas fa-times"></i> Remove</button>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
+        return name;
     }
-
-    function addSubjectField() {
-        const container = document.getElementById('subjectConfigContainer');
-        const index = container.querySelectorAll('.config-subject-item').length;
-        const div = document.createElement('div');
-        div.className = 'config-subject-item';
-        div.id = `config_row_${index}`;
-        div.innerHTML = `
-            <input type="text" class="name-input" id="config_name_${index}" value="New Subject" placeholder="Enter subject name">
-            <input type="number" id="config_subject_${index}" value="50" min="1" step="1">
-            <button class="remove-btn" onclick="removeSubjectField(${index})"><i class="fas fa-times"></i> Remove</button>
-        `;
-        container.appendChild(div);
-    }
-
-    function removeSubjectField(index) {
-        const row = document.getElementById(`config_row_${index}`);
-        if (row) row.remove();
-        const rows = document.querySelectorAll('#subjectConfigContainer .config-subject-item');
-        rows.forEach((row, i) => {
-            row.id = `config_row_${i}`;
-            const inputs = row.querySelectorAll('input');
-            inputs.forEach(input => {
-                if (input.id) input.id = input.id.replace(/\d+$/, i);
-            });
-            const btn = row.querySelector('.remove-btn');
-            if (btn) btn.onclick = function() { removeSubjectField(i); };
-        });
-    }
-
-    // ============================================
-    // SAVE SUBJECT CONFIG
-    // ============================================
-    async function saveSubjectConfig() {
-        const grade = document.getElementById('gradeFilter').value;
-        const type = document.getElementById('typeFilter').value;
-        const rows = document.querySelectorAll('#subjectConfigContainer .config-subject-item');
+    
+    // Calculate overall class statistics
+    let totalStudents = students.length;
+    let totalScoreSum = 0;
+    let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
+    let allSubjects = [];
+    
+    // First pass: collect all unique subject names and calculate stats
+    students.forEach(student => {
+        totalScoreSum += student.totalScore || 0;
+        const level = student.performanceLevel || 'Approaching Expectation';
+        if (level === 'Exceeding Expectation') exceedingCount++;
+        else if (level === 'Meeting Expectation') meetingCount++;
+        else if (level === 'Approaching Expectation') approachingCount++;
+        else belowCount++;
         
-        const subjects = [];
-        rows.forEach(row => {
-            const nameInput = row.querySelector('.name-input');
-            const maxInput = row.querySelector('input[type="number"]');
-            const name = nameInput ? nameInput.value.trim() : '';
-            const max = maxInput ? parseInt(maxInput.value) : 50;
-            if (name && max > 0) subjects.push({ name, max });
-        });
-        
-        if (subjects.length === 0) {
-            showAlert('❌ Please add at least one subject', 'error');
-            return;
-        }
-
-        const saveBtn = document.querySelector('.btn-success');
-        const originalText = saveBtn.innerHTML;
-        saveBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
-        saveBtn.disabled = true;
-
-        try {
-            await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`, {
-                method: 'DELETE'
-            });
-            
-            await new Promise(resolve => setTimeout(resolve, 200));
-            
-            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, subjects })
-            });
-            
-            const data = await response.json();
-            if (data.success) {
-                showAlert(`✅ Subjects for ${grade} saved successfully!`, 'success');
-                document.getElementById('subjectConfigSection').classList.remove('active');
-                await loadSubjectConfig();
-                if (currentStudentId) loadStudentSubjects();
-                loadAssessments();
-            } else {
-                showAlert('❌ Error: ' + data.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error saving subjects:', error);
-            showAlert('❌ Error saving subjects: ' + error.message, 'error');
-        } finally {
-            saveBtn.innerHTML = originalText;
-            saveBtn.disabled = false;
-        }
-    }
-
-    // ============================================
-    // LOAD FUNCTIONS
-    // ============================================
-    async function loadStudentsForGrade() {
-        const grade = document.getElementById('gradeFilter').value;
-        if (!grade) return;
-        try {
-            const response = await fetch(`/api/assessments/students/${encodeURIComponent(grade)}`);
-            const data = await response.json();
-            if (data.success) {
-                allStudents = data.students || [];
-                populateStudentSelect(allStudents);
-            }
-        } catch (error) { console.error('Error loading students:', error); }
-    }
-
-    function populateStudentSelect(students) {
-        const select = document.getElementById('studentSelect');
-        select.innerHTML = '<option value="">-- Select Student --</option>';
-        if (!students || students.length === 0) {
-            select.innerHTML += '<option value="" disabled>No students found for this grade</option>';
-            return;
-        }
-        students.forEach(student => {
-            const option = document.createElement('option');
-            option.value = student.studentId;
-            option.textContent = `${student.studentId} - ${student.name} (${student.grade})`;
-            select.appendChild(option);
-        });
-    }
-
-    async function loadSubjectConfig() {
-        const grade = document.getElementById('gradeFilter').value;
-        const type = document.getElementById('typeFilter').value;
-        if (!grade) return;
-        try {
-            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`);
-            const data = await response.json();
-            if (data.success && data.config) {
-                subjectConfig = data.config.subjects || [];
-                // Update subject count in stats
-                document.getElementById('statSubjects').textContent = subjectConfig.length || 0;
-            } else {
-                subjectConfig = [];
-                document.getElementById('statSubjects').textContent = 0;
-            }
-        } catch (error) { console.error('Error loading subjects:', error); subjectConfig = []; }
-    }
-
-    function loadStudentSubjects() {
-        const studentId = document.getElementById('studentSelect').value;
-        const container = document.getElementById('subjectsContainer');
-        if (!studentId) {
-            container.innerHTML = '<p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p>';
-            currentStudentId = null;
-            return;
-        }
-        currentStudentId = studentId;
-        if (subjectConfig.length === 0) {
-            container.innerHTML = `
-                <p style="color:#d4a017; text-align:center; padding:20px;">
-                    ⚠️ No subjects configured for this grade. 
-                    <br><br>
-                    <button class="btn btn-subject-edit" onclick="toggleSubjectConfig()" style="padding:10px 25px;">
-                        <i class="fas fa-cog"></i> Configure Subjects
-                    </button>
-                </p>
-            `;
-            return;
-        }
-        let html = '<div class="subjects-grid">';
-        subjectConfig.forEach(subject => {
-            html += `
-                <div class="subject-item">
-                    <label>${subject.name}</label>
-                    <input type="number" id="subject_${subject.name.replace(/\s/g, '_')}" placeholder="0" max="${subject.max}" min="0" step="0.5">
-                    <span style="font-size:11px;color:#999;">/${subject.max}</span>
-                </div>
-            `;
-        });
-        html += '</div>';
-        html += `<p style="font-size:12px;color:#999;margin-top:5px;">Max scores: ${subjectConfig.map(s => `${s.name} (${s.max})`).join(', ')}</p>`;
-        container.innerHTML = html;
-    }
-
-    async function saveStudentScores() {
-        const studentId = currentStudentId;
-        const grade = document.getElementById('gradeFilter').value;
-        const type = document.getElementById('typeFilter').value;
-        const term = document.getElementById('termFilter').value;
-        const year = document.getElementById('yearFilter').value;
-        const period = document.getElementById('periodInput').value.trim();
-        if (!studentId) { showAlert('❌ Please select a student', 'error'); return; }
-        const student = allStudents.find(s => s.studentId === studentId);
-        if (!student) { showAlert('❌ Student not found', 'error'); return; }
-        const assessments = [];
-        let allValid = true;
-        subjectConfig.forEach(subject => {
-            const input = document.getElementById(`subject_${subject.name.replace(/\s/g, '_')}`);
-            const score = parseFloat(input.value);
-            if (isNaN(score) || score < 0) { allValid = false; return; }
-            if (score > subject.max) { allValid = false; showAlert(`❌ Score for ${subject.name} cannot exceed ${subject.max}`, 'error'); return; }
-            assessments.push({ subject: subject.name, maxScore: subject.max, score: score });
-        });
-        if (!allValid) { showAlert('❌ Please enter valid scores for all subjects', 'error'); return; }
-        const hasScore = assessments.some(a => a.score > 0);
-        if (!hasScore) { showAlert('❌ Please enter at least one score', 'error'); return; }
-        const data = { studentName: student.name, studentId: studentId, grade, type, term, year, period, assessments };
-        try {
-            const response = await fetch('/api/assessments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            const result = await response.json();
-            if (result.success) {
-                showAlert(`✅ Scores saved for ${student.name}!`, 'success');
-                document.getElementById('periodInput').value = '';
-                document.getElementById('studentSelect').value = '';
-                document.getElementById('subjectsContainer').innerHTML = '<p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p>';
-                loadAssessments();
-            } else {
-                showAlert('❌ Error: ' + result.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error saving scores:', error);
-            showAlert('❌ Error saving scores: ' + error.message, 'error');
-        }
-    }
-
-    // ============================================
-    // LOAD ASSESSMENTS WITH STATS
-    // ============================================
-    async function loadAssessments() {
-        const grade = document.getElementById('gradeFilter').value;
-        const type = document.getElementById('typeFilter').value;
-        const term = document.getElementById('termFilter').value;
-        const year = document.getElementById('yearFilter').value;
-        if (!grade) return;
-        const tbody = document.getElementById('assessmentsBody');
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;"><span class="loading-spinner"></span> Loading assessments...</td></tr>';
-        try {
-            const response = await fetch(`/api/assessments/grade/${encodeURIComponent(grade)}?type=${type}&term=${term}&year=${year}`);
-            const data = await response.json();
-            if (data.success) {
-                const students = data.students || [];
-                let exceeding = 0, meeting = 0, approaching = 0, below = 0;
-                let totalScoreSum = 0;
-                
-                if (students.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;">No assessments found for this grade</td></tr>';
-                    updateStats(0, 0, 0, 0, 0, 0);
-                    return;
+        // Collect subject names
+        if (student.assessments && student.assessments.length > 0) {
+            student.assessments.forEach(a => {
+                if (!allSubjects.includes(a.subject)) {
+                    allSubjects.push(a.subject);
                 }
-                
-                // Deduplicate - keep latest record per student
-                const uniqueStudents = {};
-                students.forEach(student => {
-                    const key = student.studentId || student.studentName;
-                    if (!uniqueStudents[key] || new Date(student.createdAt) > new Date(uniqueStudents[key].createdAt)) {
-                        uniqueStudents[key] = student;
-                    }
-                });
-                const uniqueStudentList = Object.values(uniqueStudents);
-                
-                let html = '';
-                uniqueStudentList.forEach((student, index) => {
-                    const level = student.performanceLevel || 'Approaching Expectation';
-                    const levelClass = level.toLowerCase().replace(' ', '-');
-                    const avg = student.averageScore ? student.averageScore.toFixed(1) : '0';
-                    const periodDisplay = student.period || student.month || 'N/A';
-                    totalScoreSum += student.totalScore || 0;
-                    
-                    if (level === 'Exceeding Expectation') exceeding++;
-                    else if (level === 'Meeting Expectation') meeting++;
-                    else if (level === 'Approaching Expectation') approaching++;
-                    else below++;
-                    
-                    html += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td><strong>${student.studentName}</strong></td>
-                            <td>${student.studentId || '-'}</td>
-                            <td style="font-size:11px;color:#666;">${periodDisplay}</td>
-                            <td style="font-weight:700;color:#D4A017;">${student.totalScore || 0}</td>
-                            <td style="font-weight:700;color:#17a2b8;">${avg}</td>
-                            <td><span class="performance-badge ${levelClass}">${level}</span></td>
-                            <td>
-                                <button class="btn btn-info btn-sm" onclick="viewAssessment('${student._id}')" title="View Details"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-pdf btn-sm" onclick="downloadStudentReport('${student._id}')" title="Download PDF"><i class="fas fa-file-pdf"></i></button>
-                                <button class="btn btn-warning btn-sm" onclick="openEditModal('${student._id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteAssessment('${student._id}')" title="Delete"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-                
-                const avgClassScore = uniqueStudentList.length > 0 ? (totalScoreSum / uniqueStudentList.length) : 0;
-                updateStats(uniqueStudentList.length, exceeding, meeting, approaching, below, avgClassScore);
-            } else {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
-                updateStats(0, 0, 0, 0, 0, 0);
-            }
-        } catch (error) {
-            console.error('Error loading assessments:', error);
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
-            updateStats(0, 0, 0, 0, 0, 0);
+            });
         }
-    }
-
-    function updateStats(total, exceeding, meeting, approaching, below, avgClassScore) {
-        document.getElementById('statStudents').textContent = total || 0;
-        document.getElementById('statExceeding').textContent = exceeding || 0;
-        document.getElementById('statMeeting').textContent = meeting || 0;
-        document.getElementById('statApproaching').textContent = approaching || 0;
-        document.getElementById('statBelow').textContent = below || 0;
-        document.getElementById('statClassAvg').textContent = avgClassScore ? avgClassScore.toFixed(1) : '0';
-    }
-
-    // ============================================
-    // VIEW ASSESSMENT
-    // ============================================
-    async function viewAssessment(assessmentId) {
-        try {
-            const response = await fetch(`/api/assessments/student/${assessmentId}`);
-            const data = await response.json();
-            if (!data.success || !data.assessment) { showAlert('❌ Assessment not found', 'error'); return; }
-            const assessment = data.assessment;
-            viewStudentId = assessment._id;
-            
-            document.getElementById('viewStudentInfo').innerHTML = `
-                <div class="row">
-                    <div class="item"><strong>Student:</strong> ${assessment.studentName}</div>
-                    <div class="item"><strong>ID:</strong> ${assessment.studentId || 'N/A'}</div>
-                    <div class="item"><strong>Grade:</strong> ${assessment.grade}</div>
-                    <div class="item"><strong>Type:</strong> ${assessment.type || 'Monthly'}</div>
-                    <div class="item"><strong>Period:</strong> ${assessment.period || assessment.month || 'N/A'}</div>
-                    <div class="item"><strong>Term:</strong> ${assessment.term || 'N/A'}</div>
-                    <div class="item"><strong>Total Score:</strong> ${assessment.totalScore || 0}</div>
-                    <div class="item"><strong>Average:</strong> ${assessment.averageScore ? assessment.averageScore.toFixed(1) : '0'}</div>
-                    <div class="item"><strong>Performance:</strong> <span class="performance-badge ${(assessment.performanceLevel || 'approaching').toLowerCase().replace(' ', '-')}">${assessment.performanceLevel || 'N/A'}</span></div>
-                </div>
-            `;
-            
-            const container = document.getElementById('viewSubjectsContainer');
-            if (!assessment.assessments || assessment.assessments.length === 0) {
-                container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
+    });
+    
+    // Sort subjects alphabetically
+    allSubjects.sort();
+    
+    const avgClassScore = totalStudents > 0 ? (totalScoreSum / totalStudents).toFixed(1) : 0;
+    
+    // Build subject headers with shortened names
+    const subjectHeaders = allSubjects.map(subject => {
+        const shortName = shortenSubject(subject);
+        return `<th style="padding:4px 3px;border:1px solid #ddd;text-align:center;font-size:6px;background:#0A1628;color:white;font-weight:700;min-width:40px;max-width:55px;word-wrap:break-word;">${shortName}</th>`;
+    }).join('');
+    
+    // Build max scores row
+    const maxScoresRow = allSubjects.map(subject => {
+        let maxScore = 0;
+        for (const student of students) {
+            if (student.assessments) {
+                const found = student.assessments.find(a => a.subject === subject);
+                if (found) {
+                    maxScore = found.maxScore;
+                    break;
+                }
+            }
+        }
+        return `<td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:5px;color:#999;background:#f8f9fc;font-weight:600;">${maxScore}</td>`;
+    }).join('');
+    
+    // Build rows
+    let rowsHtml = students.map((student, index) => {
+        const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
+        const level = student.performanceLevel || 'Approaching Expectation';
+        let levelColor = '#d4a017';
+        let levelIcon = '📗';
+        if (level === 'Exceeding Expectation') { levelColor = '#28a745'; levelIcon = '🌟'; }
+        else if (level === 'Meeting Expectation') { levelColor = '#17a2b8'; levelIcon = '✅'; }
+        else if (level === 'Approaching Expectation') { levelColor = '#d4a017'; levelIcon = '📗'; }
+        else { levelColor = '#dc3545'; levelIcon = '📕'; }
+        
+        // Build subject scores for this student
+        let subjectScores = '';
+        allSubjects.forEach(subject => {
+            const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
+            if (assessment) {
+                const percentage = assessment.maxScore > 0 ? ((assessment.score / assessment.maxScore) * 100).toFixed(0) : 0;
+                let scoreColor = '#0A1628';
+                if (percentage >= 80) scoreColor = '#28a745';
+                else if (percentage >= 60) scoreColor = '#17a2b8';
+                else if (percentage >= 40) scoreColor = '#d4a017';
+                else scoreColor = '#dc3545';
+                
+                subjectScores += `
+                    <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:8px;font-weight:700;color:${scoreColor};">
+                        ${assessment.score}
+                        <span style="display:block;font-size:5px;font-weight:400;color:#999;">/${assessment.maxScore}</span>
+                    </td>
+                `;
             } else {
-                let html = `
-                    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;">
+                subjectScores += `
+                    <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:7px;color:#ddd;">-</td>
+                `;
+            }
+        });
+        
+        return `
+            <tr style="${index % 2 === 0 ? 'background:#fafbfc;' : 'background:white;'}">
+                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-size:7px;font-weight:600;color:#666;">${index + 1}</td>
+                <td style="padding:3px 4px;border:1px solid #ddd;font-weight:600;font-size:7px;color:#0A1628;white-space:nowrap;">${student.studentName}</td>
+                ${subjectScores}
+                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-size:8px;font-weight:700;color:#D4A017;">${student.totalScore || 0}</td>
+                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-size:8px;font-weight:700;color:#17a2b8;">${avgScore}</td>
+                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;">
+                    <span style="background:${levelColor};color:white;padding:2px 6px;border-radius:50px;font-weight:700;font-size:6px;display:inline-block;white-space:nowrap;min-width:55px;">
+                        ${levelIcon} ${level}
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>${grade} - Assessment Report</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { 
+                    font-family: 'Segoe UI', Arial, sans-serif; 
+                    padding: 5px; 
+                    max-width: 1200px; 
+                    margin: 0 auto; 
+                    font-size: 7px; 
+                    background: white;
+                }
+                .report-container {
+                    border: 2px solid #0A1628;
+                    border-radius: 6px;
+                    padding: 8px;
+                    background: white;
+                }
+                .header { 
+                    text-align: center; 
+                    border-bottom: 3px solid #D4A017; 
+                    padding-bottom: 5px; 
+                    margin-bottom: 6px; 
+                    position: relative;
+                }
+                .header .school-name { 
+                    font-size: 16px; 
+                    font-weight: 900; 
+                    color: #0A1628;
+                    font-family: 'Georgia', serif;
+                    letter-spacing: 1px;
+                }
+                .header .school-name .gold { color: #D4A017; }
+                .header .motto {
+                    color: #888;
+                    font-size: 7px;
+                    font-style: italic;
+                    margin-top: 1px;
+                    letter-spacing: 1px;
+                }
+                .header .report-title {
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: #0A1628;
+                    margin-top: 3px;
+                }
+                .header .report-info { 
+                    font-size: 6px; 
+                    color: #999; 
+                    margin-top: 1px;
+                }
+                .header .flag-strip {
+                    display: flex;
+                    height: 3px;
+                    width: 80px;
+                    margin: 3px auto 0;
+                    border-radius: 2px;
+                    overflow: hidden;
+                }
+                .header .flag-strip span { flex: 1; height: 100%; }
+                .header .flag-strip .b { background: #000000; }
+                .header .flag-strip .r { background: #BB0000; }
+                .header .flag-strip .g { background: #006600; }
+                .header .flag-strip .w { background: #FFFFFF; }
+                
+                .summary-box { 
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 3px;
+                    justify-content: center;
+                    margin-bottom: 5px; 
+                }
+                .summary-box .item { 
+                    text-align: center; 
+                    padding: 3px 8px; 
+                    background: #f8f9fc; 
+                    border-radius: 4px; 
+                    border: 1px solid #e8ecf1; 
+                }
+                .summary-box .item .num { 
+                    font-size: 12px; 
+                    font-weight: 700; 
+                }
+                .summary-box .item .label { 
+                    font-size: 5px; 
+                    color: #888; 
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    font-weight: 600;
+                    margin-left: 3px;
+                }
+                .summary-box .item .num.gold { color: #D4A017; }
+                .summary-box .item .num.green { color: #28a745; }
+                .summary-box .item .num.blue { color: #17a2b8; }
+                .summary-box .item .num.orange { color: #d4a017; }
+                .summary-box .item .num.red { color: #dc3545; }
+                .summary-box .item .num.purple { color: #6f42c1; }
+                
+                .table-wrap { 
+                    overflow-x: auto; 
+                    margin-top: 3px;
+                }
+                table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    font-size: 6px; 
+                    border: 1px solid #ddd;
+                }
+                table th { 
+                    background: #0A1628; 
+                    color: white; 
+                    padding: 3px 2px; 
+                    text-align: center; 
+                    font-size: 5.5px; 
+                    font-weight: 700;
+                    white-space: nowrap;
+                    border: 1px solid #1a2a4a;
+                }
+                table td { 
+                    padding: 2px 2px; 
+                    border: 1px solid #ddd; 
+                }
+                .header-row td {
+                    background: #f8f9fc !important;
+                    font-weight: 600;
+                    color: #555;
+                    font-size: 5px;
+                }
+                .footer { 
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 5px; 
+                    padding-top: 4px; 
+                    border-top: 1px solid #ddd; 
+                    color: #999; 
+                    font-size: 5px; 
+                }
+                .footer .left { text-align: left; }
+                .footer .right { text-align: right; }
+                .footer .contact {
+                    color: #ccc;
+                }
+                .footer .signature {
+                    display: flex;
+                    gap: 20px;
+                    margin-top: 2px;
+                }
+                .footer .signature .sig-line {
+                    display: inline-block;
+                    width: 80px;
+                    border-bottom: 1px solid #999;
+                    margin-top: 2px;
+                }
+                @media print { 
+                    body { padding: 3px; } 
+                    .summary-box .item { padding: 2px 6px; }
+                    table th { font-size: 5px; padding: 2px 2px; }
+                    table td { padding: 1px 2px; font-size: 5.5px; }
+                    .report-container { border: 1px solid #ddd; padding: 5px; }
+                }
+                @page {
+                    margin: 4mm;
+                    size: A4 landscape;
+                }
+                .watermark {
+                    position: fixed;
+                    opacity: 0.015;
+                    font-size: 40px;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-30deg);
+                    pointer-events: none;
+                    z-index: 0;
+                    color: #0A1628;
+                    font-weight: 900;
+                    letter-spacing: 6px;
+                    white-space: nowrap;
+                }
+                .legend {
+                    display: flex;
+                    gap: 8px;
+                    justify-content: center;
+                    margin-top: 3px;
+                    font-size: 5px;
+                }
+                .legend .item { display: flex; align-items: center; gap: 2px; }
+                .legend .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+                .legend .dot.exceeding { background: #28a745; }
+                .legend .dot.meeting { background: #17a2b8; }
+                .legend .dot.approaching { background: #d4a017; }
+                .legend .dot.below { background: #dc3545; }
+            </style>
+        </head>
+        <body>
+            <div class="watermark">CHANGARA STAR ACADEMY</div>
+            
+            <div class="report-container">
+                <div class="header">
+                    <div class="school-name">🏫 <span class="gold">Changara</span> Star Academy</div>
+                    <div class="motto">"Assurance to Excellence"</div>
+                    <div class="flag-strip">
+                        <span class="b"></span><span class="r"></span>
+                        <span class="g"></span><span class="w"></span>
+                        <span class="b"></span><span class="r"></span>
+                        <span class="g"></span><span class="w"></span>
+                    </div>
+                    <div class="report-title">${grade} - ${typeNames[type] || type || 'Monthly'} Assessment Results</div>
+                    <div class="report-info">
+                        ${term ? term + ' | ' : ''} ${year || '2026'} ${periodLabel} | Generated: ${formatKenyaDate(now)}
+                    </div>
+                </div>
+                
+                <div class="summary-box">
+                    <div class="item"><span class="num gold">${totalStudents}</span><span class="label">Students</span></div>
+                    <div class="item"><span class="num green">${exceedingCount}</span><span class="label">🌟 Exceeding</span></div>
+                    <div class="item"><span class="num blue">${meetingCount}</span><span class="label">✅ Meeting</span></div>
+                    <div class="item"><span class="num orange">${approachingCount}</span><span class="label">📗 Approaching</span></div>
+                    <div class="item"><span class="num red">${belowCount}</span><span class="label">📕 Below</span></div>
+                    <div class="item"><span class="num purple">${avgClassScore}</span><span class="label">📊 Class Avg</span></div>
+                    <div class="item"><span class="num" style="color:#0A1628;">${allSubjects.length}</span><span class="label">📚 Subjects</span></div>
+                </div>
+                
+                <div class="legend">
+                    <span class="item"><span class="dot exceeding"></span> Exceeding (≥80%)</span>
+                    <span class="item"><span class="dot meeting"></span> Meeting (60-79%)</span>
+                    <span class="item"><span class="dot approaching"></span> Approaching (40-59%)</span>
+                    <span class="item"><span class="dot below"></span> Below (&lt;40%)</span>
+                </div>
+                
+                <div class="table-wrap">
+                    <table>
                         <thead>
-                            <tr style="background:#0A1628;color:white;">
-                                <th style="padding:8px 12px;text-align:left;">Subject</th>
-                                <th style="padding:8px 12px;text-align:center;">Max Score</th>
-                                <th style="padding:8px 12px;text-align:center;">Score</th>
-                                <th style="padding:8px 12px;text-align:center;">Percentage</th>
-                                <th style="padding:8px 12px;text-align:center;">Performance</th>
+                            <tr>
+                                <th style="width:18px;">#</th>
+                                <th style="min-width:80px;text-align:left;">Student</th>
+                                ${subjectHeaders}
+                                <th style="width:32px;">Total</th>
+                                <th style="width:28px;">Avg</th>
+                                <th style="width:55px;">Performance</th>
+                            </tr>
+                            <tr class="header-row">
+                                <td colspan="2" style="text-align:right;color:#0A1628;font-weight:700;">Max:</td>
+                                ${maxScoresRow}
+                                <td colspan="3" style="background:#f8f9fc;border:1px solid #ddd;"></td>
                             </tr>
                         </thead>
                         <tbody>
-                `;
-                assessment.assessments.forEach(subject => {
-                    const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(1) : 0;
-                    let perfLevel = 'Approaching Expectation', perfClass = 'perf-approaching';
-                    if (percentage >= 80) { perfLevel = 'Exceeding Expectation'; perfClass = 'perf-exceeding'; }
-                    else if (percentage >= 60) { perfLevel = 'Meeting Expectation'; perfClass = 'perf-meeting'; }
-                    else if (percentage >= 40) { perfLevel = 'Approaching Expectation'; perfClass = 'perf-approaching'; }
-                    else { perfLevel = 'Below Expectation'; perfClass = 'perf-below'; }
-                    html += `
-                        <tr style="border-bottom:1px solid #e8ecf1;">
-                            <td style="padding:8px 12px;font-weight:600;">${subject.subject}</td>
-                            <td style="padding:8px 12px;text-align:center;">${subject.maxScore}</td>
-                            <td style="padding:8px 12px;text-align:center;font-weight:bold;color:#0A1628;">${subject.score}</td>
-                            <td style="padding:8px 12px;text-align:center;font-weight:bold;color:${percentage >= 60 ? '#28a745' : percentage >= 40 ? '#d4a017' : '#dc3545'};">${percentage}%</td>
-                            <td style="padding:8px 12px;text-align:center;"><span class="perf ${perfClass}">${perfLevel}</span></td>
-                        </tr>
-                    `;
-                });
-                html += `</tbody></table>`;
-                container.innerHTML = html;
-            }
-            document.getElementById('viewModal').classList.add('active');
-        } catch (error) {
-            console.error('Error viewing assessment:', error);
-            showAlert('❌ Error loading assessment details: ' + error.message, 'error');
-        }
-    }
-
-    function downloadViewReport() { if (viewStudentId) downloadStudentReport(viewStudentId); }
-    function closeViewModal() { document.getElementById('viewModal').classList.remove('active'); }
-    
-    function downloadStudentReport(studentId) { 
-        window.open(`/api/assessments/download-report/${studentId}`, '_blank'); 
-        showAlert('📄 Student report is downloading...', 'info'); 
-    }
-    
-    // ============================================
-    // DOWNLOAD GRADE PDF
-    // ============================================
-    function downloadGradeReportPDF() {
-        const grade = document.getElementById('gradeFilter').value;
-        const type = document.getElementById('typeFilter').value;
-        const term = document.getElementById('termFilter').value;
-        const year = document.getElementById('yearFilter').value;
-        
-        let period = '';
-        if (type === 'monthly') {
-            const monthInput = prompt('Enter the month (e.g., March, April) or leave blank for all:', '');
-            if (monthInput !== null) {
-                period = monthInput.trim();
-            } else {
-                return;
-            }
-        }
-        
-        showAlert('📄 Generating grade report PDF...', 'info');
-        
-        let url = `/api/assessments/download-class-pdf?grade=${encodeURIComponent(grade)}&type=${type}&term=${term}&year=${year}`;
-        if (period) {
-            url += `&period=${encodeURIComponent(period)}`;
-        }
-        
-        window.open(url, '_blank');
-        
-        setTimeout(() => {
-            showAlert('✅ Grade report PDF is downloading!', 'success');
-        }, 2000);
-    }
-
-    // ============================================
-    // DELETE ASSESSMENT
-    // ============================================
-    async function deleteAssessment(studentId) {
-        if (!confirm('Are you sure you want to delete this assessment?')) return;
-        try {
-            const response = await fetch(`/api/assessments/${studentId}`, { method: 'DELETE' });
-            const data = await response.json();
-            if (data.success) { showAlert('✅ Assessment deleted successfully!', 'success'); loadAssessments(); }
-            else { showAlert('❌ Error: ' + data.message, 'error'); }
-        } catch (error) { showAlert('❌ Error deleting assessment: ' + error.message, 'error'); }
-    }
-
-    // ============================================
-    // EDIT ASSESSMENT - FIXED
-    // ============================================
-    async function openEditModal(assessmentId) {
-        try {
-            console.log('🔍 Opening edit modal for ID:', assessmentId);
-            
-            if (!assessmentId) {
-                showAlert('❌ Invalid assessment ID', 'error');
-                return;
-            }
-            
-            const container = document.getElementById('editSubjectsContainer');
-            container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;"><span class="loading-spinner"></span> Loading assessment...</p>';
-            document.getElementById('editModal').classList.add('active');
-            
-            const response = await fetch(`/api/assessments/student/${assessmentId}`);
-            const data = await response.json();
-            
-            console.log('📊 Response:', data);
-            
-            if (!data.success || !data.assessment) {
-                showAlert('❌ Assessment not found: ' + (data.message || 'Unknown error'), 'error');
-                document.getElementById('editModal').classList.remove('active');
-                return;
-            }
-            
-            const assessment = data.assessment;
-            document.getElementById('editAssessmentId').value = assessment._id;
-            document.getElementById('editStudentName').value = `${assessment.studentName} (${assessment.studentId || 'N/A'}) - ${assessment.period || assessment.month || ''}`;
-            
-            let html = '<div style="margin-top:10px;">';
-            
-            if (!assessment.assessments || assessment.assessments.length === 0) {
-                html += '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
-            } else {
-                html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">';
-                assessment.assessments.forEach((subject) => {
-                    const safeId = subject.subject.replace(/[^a-zA-Z0-9]/g, '_');
-                    const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(0) : 0;
-                    let perfColor = '#28a745';
-                    if (percentage >= 80) perfColor = '#28a745';
-                    else if (percentage >= 60) perfColor = '#17a2b8';
-                    else if (percentage >= 40) perfColor = '#d4a017';
-                    else perfColor = '#dc3545';
-                    
-                    html += `
-                        <div class="edit-subject-item" style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8f9fc;border-radius:6px;border:1px solid #e8ecf1;">
-                            <span class="name" style="flex:1;font-weight:600;font-size:12px;color:#0A1628;">${subject.subject}</span>
-                            <input type="number" id="edit_subject_${safeId}" value="${subject.score || 0}" max="${subject.maxScore || 100}" min="0" step="0.5" style="width:60px;padding:4px 6px;border:2px solid #e0e0e0;border-radius:4px;font-size:13px;text-align:center;">
-                            <span class="max-score" style="font-size:10px;color:#999;min-width:30px;">/${subject.maxScore || 100}</span>
-                            <span style="font-size:9px;font-weight:700;color:${perfColor};min-width:35px;">${percentage}%</span>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="footer">
+                    <div class="left">
+                        <div class="contact">📞 +254 721 556 252 | 📧 starchangara@gmail.com</div>
+                    </div>
+                    <div class="right">
+                        <div>© ${new Date().getFullYear()} Changara Star Academy</div>
+                        <div style="color:#D4A017;font-weight:700;">🇰🇪 Proudly Kenyan</div>
+                        <div class="signature">
+                            <div>
+                                <div class="sig-line"></div>
+                                <div style="font-size:5px;color:#999;">Principal's Signature</div>
+                            </div>
+                            <div>
+                                <div class="sig-line"></div>
+                                <div style="font-size:5px;color:#999;">Date</div>
+                            </div>
                         </div>
-                    `;
-                });
-                html += '</div>';
-            }
-            html += '</div>';
-            container.innerHTML = html;
-            
-        } catch (error) {
-            console.error('❌ Error loading assessment:', error);
-            showAlert('❌ Error loading assessment: ' + error.message, 'error');
-            document.getElementById('editModal').classList.remove('active');
-        }
-    }
-
-    function closeEditModal() { document.getElementById('editModal').classList.remove('active'); }
-
-    async function saveEditAssessment() {
-        const assessmentId = document.getElementById('editAssessmentId').value;
-        if (!assessmentId) {
-            showAlert('❌ No assessment selected', 'error');
-            return;
-        }
-        
-        const updatedAssessments = [];
-        const subjectInputs = document.querySelectorAll('#editSubjectsContainer .edit-subject-item');
-        let hasError = false;
-        
-        subjectInputs.forEach(item => {
-            const nameSpan = item.querySelector('.name');
-            const input = item.querySelector('input');
-            const maxSpan = item.querySelector('.max-score');
-            const subjectName = nameSpan.textContent.trim();
-            const maxScore = parseInt(maxSpan.textContent.replace('/', '')) || 100;
-            const score = parseFloat(input.value) || 0;
-            
-            if (score > maxScore) {
-                showAlert(`❌ Score for ${subjectName} cannot exceed ${maxScore}`, 'error');
-                hasError = true;
-                return;
-            }
-            
-            updatedAssessments.push({ subject: subjectName, maxScore: maxScore, score: score });
-        });
-        
-        if (hasError) return;
-        
-        if (updatedAssessments.length === 0) {
-            showAlert('❌ No subjects to update', 'error');
-            return;
-        }
-        
-        const saveBtn = document.querySelector('.modal-actions .btn-save');
-        const originalText = saveBtn.innerHTML;
-        saveBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
-        saveBtn.disabled = true;
-        
-        try {
-            const response = await fetch(`/api/assessments/${assessmentId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ assessments: updatedAssessments })
-            });
-            const result = await response.json();
-            if (result.success) {
-                showAlert('✅ Assessment updated successfully!', 'success');
-                closeEditModal();
-                loadAssessments();
-            } else {
-                showAlert('❌ Error: ' + result.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error updating assessment:', error);
-            showAlert('❌ Error updating assessment: ' + error.message, 'error');
-        } finally {
-            saveBtn.innerHTML = originalText;
-            saveBtn.disabled = false;
-        }
-    }
-
-    function deleteAssessmentFromModal() {
-        const assessmentId = document.getElementById('editAssessmentId').value;
-        closeEditModal();
-        deleteAssessment(assessmentId);
-    }
-
-    // ============================================
-    // EVENT LISTENERS
-    // ============================================
-    document.getElementById('gradeFilter').addEventListener('change', function() {
-        loadSubjectConfig();
-        document.getElementById('subjectsContainer').innerHTML = '<p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p>';
-        document.getElementById('studentSelect').value = '';
-        loadStudentsForGrade();
-        document.getElementById('configGradeDisplay').textContent = this.value;
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            loadSubjectConfig();
-            loadStudentsForGrade();
-            loadAssessments();
-        }, 500);
-    });
-</script>
-</body>
-</html>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+}
