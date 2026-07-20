@@ -119,6 +119,7 @@
         .btn-secondary:hover { background: #5a6268; }
         .btn-sm { padding: 4px 12px; font-size: 12px; }
         .btn-pdf { background: #dc3545; color: white; }
+        .btn-pdf:hover { background: #c82333; }
         .btn-print { background: #6f42c1; color: white; }
         .btn-print:hover { background: #4a2a8a; }
         .btn-subject-edit { background: #d4a017; color: #0A1628; font-weight: 700; padding: 10px 22px; }
@@ -136,26 +137,46 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin: 15px 0;
-        }
-        .stat-card {
-            background: #f8f9fc;
-            padding: 15px;
+        /* ===== COMPACT STATS BAR ===== */
+        .stats-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            background: #0A1628;
             border-radius: 10px;
-            text-align: center;
-            border: 1px solid #e8ecf1;
+            padding: 6px 10px;
+            margin: 10px 0 15px;
+            align-items: center;
+            justify-content: center;
         }
-        .stat-card .number { font-size: 28px; font-weight: 700; color: #0A1628; }
-        .stat-card .label { font-size: 13px; color: #666; }
-        .stat-card .number.gold { color: #D4A017; }
-        .stat-card .number.green { color: #28a745; }
-        .stat-card .number.blue { color: #17a2b8; }
-        .stat-card .number.orange { color: #d4a017; }
-        .stat-card .number.red { color: #dc3545; }
+        .stats-bar .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-right: 1px solid rgba(255,255,255,0.08);
+            color: white;
+        }
+        .stats-bar .stat-item:last-child { border-right: none; }
+        .stats-bar .stat-item .num {
+            font-size: 18px;
+            font-weight: 700;
+            color: #D4A017;
+        }
+        .stats-bar .stat-item .num.green { color: #28a745; }
+        .stats-bar .stat-item .num.blue { color: #17a2b8; }
+        .stats-bar .stat-item .num.orange { color: #d4a017; }
+        .stats-bar .stat-item .num.red { color: #dc3545; }
+        .stats-bar .stat-item .num.purple { color: #6f42c1; }
+        .stats-bar .stat-item .num.gold { color: #D4A017; }
+        .stats-bar .stat-item .label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stats-bar .stat-item .icon { font-size: 12px; margin-right: 2px; }
 
         .table-wrapper { overflow-x: auto; max-height: 500px; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -175,7 +196,7 @@
         }
         .performance-badge.exceeding { background: #28a745; }
         .performance-badge.meeting { background: #17a2b8; }
-        .performance-badge.approaching { background: #d4a017; }
+        .performance-badge.approaching { background: #d4a017; color: #0A1628; }
         .performance-badge.below { background: #dc3545; }
 
         .subject-input-section {
@@ -344,8 +365,8 @@
         .modal-content h2 { color: #0A1628; border-bottom: 3px solid #D4A017; padding-bottom: 12px; margin-bottom: 20px; font-size: 24px; }
         .modal-content h2 i { color: #D4A017; margin-right: 10px; }
 
-        .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
-        .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.3s; }
+        .modal-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+        .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.3s; min-width: 120px; }
         .modal-actions button:hover { transform: scale(1.02); }
         .modal-actions .btn-save { background: #28a745; color: white; }
         .modal-actions .btn-cancel { background: #6c757d; color: white; }
@@ -408,7 +429,7 @@
         }
         .perf-exceeding { background: #28a745; }
         .perf-meeting { background: #17a2b8; }
-        .perf-approaching { background: #d4a017; }
+        .perf-approaching { background: #d4a017; color: #0A1628; }
         .perf-below { background: #dc3545; }
 
         @media (max-width: 768px) {
@@ -419,7 +440,9 @@
             .header { flex-direction: column; gap: 10px; text-align: center; }
             .modal-content { padding: 20px; margin: 10px; }
             .modal-actions { flex-direction: column; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .stats-bar { flex-wrap: wrap; gap: 2px; }
+            .stats-bar .stat-item { padding: 2px 8px; font-size: 11px; }
+            .stats-bar .stat-item .num { font-size: 14px; }
             table { font-size: 11px; }
             table th, table td { padding: 6px 8px; }
             .config-subject-item { flex-wrap: wrap; }
@@ -428,12 +451,10 @@
         }
         @media (max-width: 480px) {
             .subjects-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: 1fr; }
+            .stats-bar .stat-item { padding: 2px 6px; }
+            .stats-bar .stat-item .num { font-size: 12px; }
+            .stats-bar .stat-item .label { font-size: 8px; }
         }
-        .perf-exceeding { background: #28a745; color: white; padding: 3px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; }
-.perf-meeting { background: #17a2b8; color: white; padding: 3px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; }
-.perf-approaching { background: #d4a017; color: #0A1628; padding: 3px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; }
-.perf-below { background: #dc3545; color: white; padding: 3px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -448,12 +469,43 @@
 
     <div id="alert" class="alert"></div>
 
-    <div class="stats-grid" id="statsGrid">
-        <div class="stat-card"><div class="number gold" id="totalStudents">0</div><div class="label">Total Students</div></div>
-        <div class="stat-card"><div class="number green" id="exceedingCount">0</div><div class="label">✅ Exceeding</div></div>
-        <div class="stat-card"><div class="number blue" id="meetingCount">0</div><div class="label">📘 Meeting</div></div>
-        <div class="stat-card"><div class="number orange" id="approachingCount">0</div><div class="label">📗 Approaching</div></div>
-        <div class="stat-card"><div class="number red" id="belowCount">0</div><div class="label">📕 Below</div></div>
+    <!-- ===== COMPACT STATS BAR ===== -->
+    <div class="stats-bar" id="statsBar">
+        <div class="stat-item">
+            <span class="icon">👨‍🎓</span>
+            <span class="num gold" id="statStudents">0</span>
+            <span class="label">Students</span>
+        </div>
+        <div class="stat-item">
+            <span class="icon">🌟</span>
+            <span class="num green" id="statExceeding">0</span>
+            <span class="label">Exceeding</span>
+        </div>
+        <div class="stat-item">
+            <span class="icon">✅</span>
+            <span class="num blue" id="statMeeting">0</span>
+            <span class="label">Meeting</span>
+        </div>
+        <div class="stat-item">
+            <span class="icon">📗</span>
+            <span class="num orange" id="statApproaching">0</span>
+            <span class="label">Approaching</span>
+        </div>
+        <div class="stat-item">
+            <span class="icon">📕</span>
+            <span class="num red" id="statBelow">0</span>
+            <span class="label">Below</span>
+        </div>
+        <div class="stat-item">
+            <span class="icon">📊</span>
+            <span class="num purple" id="statClassAvg">0</span>
+            <span class="label">Class Avg</span>
+        </div>
+        <div class="stat-item">
+            <span class="icon">📚</span>
+            <span class="num" id="statSubjects" style="color:#17a2b8;">0</span>
+            <span class="label">Subjects</span>
+        </div>
     </div>
 
     <div class="filter-bar">
@@ -510,6 +562,7 @@
     <div class="toolbar-actions">
         <button class="btn btn-success" onclick="downloadGradeReportPDF()"><i class="fas fa-file-pdf"></i> Download Grade PDF</button>
         <button class="btn btn-info" onclick="window.print()"><i class="fas fa-print"></i> Print Grade Report</button>
+        <button class="btn btn-primary" onclick="loadAssessments()"><i class="fas fa-sync"></i> Load Results</button>
     </div>
 
     <!-- ===== ADD SCORES SECTION ===== -->
@@ -524,7 +577,7 @@
             </div>
             <div>
                 <label style="font-weight:600; font-size:13px; color:#333;">📅 Period (Optional)</label>
-                <input type="text" id="periodInput" placeholder="e.g., Week 1, March" style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;">
+                <input type="text" id="periodInput" placeholder="e.g., March, Week 1" style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;">
             </div>
         </div>
         <div id="subjectsContainer"><p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p></div>
@@ -535,9 +588,18 @@
     <div class="table-wrapper">
         <table>
             <thead>
-                <tr><th>#</th><th>Student Name</th><th>Student ID</th><th>Total Score</th><th>Average</th><th>Performance Level</th><th>Action</th></tr>
+                <tr>
+                    <th>#</th>
+                    <th>Student Name</th>
+                    <th>Admission No.</th>
+                    <th>Period</th>
+                    <th>Total Score</th>
+                    <th>Average</th>
+                    <th>Performance Level</th>
+                    <th>Action</th>
+                </tr>
             </thead>
-            <tbody id="assessmentsBody"><tr><td colspan="7" class="no-records"><span class="loading-spinner"></span> Loading assessments...</td></tr></tbody>
+            <tbody id="assessmentsBody"><tr><td colspan="8" class="no-records"><span class="loading-spinner"></span> Loading assessments...</td></tr></tbody>
         </table>
     </div>
 </div>
@@ -689,7 +751,7 @@
     }
 
     // ============================================
-    // SAVE SUBJECT CONFIG - COMPLETE FIX
+    // SAVE SUBJECT CONFIG
     // ============================================
     async function saveSubjectConfig() {
         const grade = document.getElementById('gradeFilter').value;
@@ -716,15 +778,12 @@
         saveBtn.disabled = true;
 
         try {
-            // Delete existing config first
             await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`, {
                 method: 'DELETE'
             });
             
-            // Wait a moment
             await new Promise(resolve => setTimeout(resolve, 200));
             
-            // Save new config
             const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -762,7 +821,6 @@
             if (data.success) {
                 allStudents = data.students || [];
                 populateStudentSelect(allStudents);
-                document.getElementById('totalStudents').textContent = allStudents.length;
             }
         } catch (error) { console.error('Error loading students:', error); }
     }
@@ -791,8 +849,11 @@
             const data = await response.json();
             if (data.success && data.config) {
                 subjectConfig = data.config.subjects || [];
+                // Update subject count in stats
+                document.getElementById('statSubjects').textContent = subjectConfig.length || 0;
             } else {
                 subjectConfig = [];
+                document.getElementById('statSubjects').textContent = 0;
             }
         } catch (error) { console.error('Error loading subjects:', error); subjectConfig = []; }
     }
@@ -878,185 +939,209 @@
         }
     }
 
+    // ============================================
+    // LOAD ASSESSMENTS WITH STATS
+    // ============================================
     async function loadAssessments() {
-    const grade = document.getElementById('gradeFilter').value;
-    const type = document.getElementById('typeFilter').value;
-    const term = document.getElementById('termFilter').value;
-    const year = document.getElementById('yearFilter').value;
-    if (!grade) return;
-    const tbody = document.getElementById('assessmentsBody');
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;"><span class="loading-spinner"></span> Loading assessments...</td></tr>';
-    try {
-        const response = await fetch(`/api/assessments/grade/${encodeURIComponent(grade)}?type=${type}&term=${term}&year=${year}`);
-        const data = await response.json();
-        if (data.success) {
-            const students = data.students || [];
-            let exceeding = 0, meeting = 0, approaching = 0, below = 0;
-            if (students.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;">No assessments found for this grade</td></tr>';
-                updateStats(0, 0, 0, 0, 0);
-                return;
-            }
-            const uniqueStudents = {};
-            students.forEach(student => {
-                const key = student.studentId || student.studentName;
-                if (!uniqueStudents[key] || new Date(student.createdAt) > new Date(uniqueStudents[key].createdAt)) {
-                    uniqueStudents[key] = student;
+        const grade = document.getElementById('gradeFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const term = document.getElementById('termFilter').value;
+        const year = document.getElementById('yearFilter').value;
+        if (!grade) return;
+        const tbody = document.getElementById('assessmentsBody');
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;"><span class="loading-spinner"></span> Loading assessments...</td></tr>';
+        try {
+            const response = await fetch(`/api/assessments/grade/${encodeURIComponent(grade)}?type=${type}&term=${term}&year=${year}`);
+            const data = await response.json();
+            if (data.success) {
+                const students = data.students || [];
+                let exceeding = 0, meeting = 0, approaching = 0, below = 0;
+                let totalScoreSum = 0;
+                
+                if (students.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;">No assessments found for this grade</td></tr>';
+                    updateStats(0, 0, 0, 0, 0, 0);
+                    return;
                 }
-            });
-            const uniqueStudentList = Object.values(uniqueStudents);
-            let html = '';
-            uniqueStudentList.forEach((student, index) => {
-                const level = student.performanceLevel || 'Approaching Expectation';
-                const levelClass = level.toLowerCase().replace(' ', '-');
-                const avg = student.averageScore ? student.averageScore.toFixed(1) : '0';
-                const periodDisplay = student.period || student.month || 'N/A';
-                if (level === 'Exceeding Expectation') exceeding++;
-                else if (level === 'Meeting Expectation') meeting++;
-                else if (level === 'Approaching Expectation') approaching++;
-                else below++;
-                html += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td><strong>${student.studentName}</strong></td>
-                        <td>${student.studentId || '-'}</td>
-                        <td style="font-size:11px;color:#666;">${periodDisplay}</td>
-                        <td>${student.totalScore || 0}</td>
-                        <td>${avg}</td>
-                        <td><span class="performance-badge ${levelClass}">${level}</span></td>
-                        <td>
-                            <button class="btn btn-info btn-sm" onclick="viewAssessment('${student._id}')" title="View Details"><i class="fas fa-eye"></i></button>
-                            <button class="btn btn-pdf btn-sm" onclick="downloadStudentReport('${student._id}')" title="Download PDF"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-warning btn-sm" onclick="openEditModal('${student._id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteAssessment('${student._id}')" title="Delete"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-            updateStats(uniqueStudentList.length, exceeding, meeting, approaching, below);
-        } else {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
-        }
-    } catch (error) {
-        console.error('Error loading assessments:', error);
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
-    }
-}
-
-    function updateStats(total, exceeding, meeting, approaching, below) {
-        document.getElementById('totalStudents').textContent = total || 0;
-        document.getElementById('exceedingCount').textContent = exceeding || 0;
-        document.getElementById('meetingCount').textContent = meeting || 0;
-        document.getElementById('approachingCount').textContent = approaching || 0;
-        document.getElementById('belowCount').textContent = below || 0;
-    }
-
-    async function viewAssessment(assessmentId) {
-    try {
-        const response = await fetch(`/api/assessments/student/${assessmentId}`);
-        const data = await response.json();
-        if (!data.success || !data.assessment) { showAlert('❌ Assessment not found', 'error'); return; }
-        const assessment = data.assessment;
-        viewStudentId = assessment._id;
-        
-        document.getElementById('viewStudentInfo').innerHTML = `
-            <div class="row">
-                <div class="item"><strong>Student:</strong> ${assessment.studentName}</div>
-                <div class="item"><strong>ID:</strong> ${assessment.studentId || 'N/A'}</div>
-                <div class="item"><strong>Grade:</strong> ${assessment.grade}</div>
-                <div class="item"><strong>Type:</strong> ${assessment.type || 'Monthly'}</div>
-                <div class="item"><strong>Period:</strong> ${assessment.period || assessment.month || 'N/A'}</div>
-                <div class="item"><strong>Term:</strong> ${assessment.term || 'N/A'}</div>
-                <div class="item"><strong>Total Score:</strong> ${assessment.totalScore || 0}</div>
-                <div class="item"><strong>Average:</strong> ${assessment.averageScore ? assessment.averageScore.toFixed(1) : '0'}</div>
-                <div class="item"><strong>Performance:</strong> <span class="performance-badge ${(assessment.performanceLevel || 'approaching').toLowerCase().replace(' ', '-')}">${assessment.performanceLevel || 'N/A'}</span></div>
-            </div>
-        `;
-        
-        const container = document.getElementById('viewSubjectsContainer');
-        if (!assessment.assessments || assessment.assessments.length === 0) {
-            container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
-        } else {
-            let html = `
-                <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;">
-                    <thead>
-                        <tr style="background:#0A1628;color:white;">
-                            <th style="padding:8px 12px;text-align:left;">Subject</th>
-                            <th style="padding:8px 12px;text-align:center;">Max Score</th>
-                            <th style="padding:8px 12px;text-align:center;">Score</th>
-                            <th style="padding:8px 12px;text-align:center;">Percentage</th>
-                            <th style="padding:8px 12px;text-align:center;">Performance</th>
+                
+                // Deduplicate - keep latest record per student
+                const uniqueStudents = {};
+                students.forEach(student => {
+                    const key = student.studentId || student.studentName;
+                    if (!uniqueStudents[key] || new Date(student.createdAt) > new Date(uniqueStudents[key].createdAt)) {
+                        uniqueStudents[key] = student;
+                    }
+                });
+                const uniqueStudentList = Object.values(uniqueStudents);
+                
+                let html = '';
+                uniqueStudentList.forEach((student, index) => {
+                    const level = student.performanceLevel || 'Approaching Expectation';
+                    const levelClass = level.toLowerCase().replace(' ', '-');
+                    const avg = student.averageScore ? student.averageScore.toFixed(1) : '0';
+                    const periodDisplay = student.period || student.month || 'N/A';
+                    totalScoreSum += student.totalScore || 0;
+                    
+                    if (level === 'Exceeding Expectation') exceeding++;
+                    else if (level === 'Meeting Expectation') meeting++;
+                    else if (level === 'Approaching Expectation') approaching++;
+                    else below++;
+                    
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${student.studentName}</strong></td>
+                            <td>${student.studentId || '-'}</td>
+                            <td style="font-size:11px;color:#666;">${periodDisplay}</td>
+                            <td style="font-weight:700;color:#D4A017;">${student.totalScore || 0}</td>
+                            <td style="font-weight:700;color:#17a2b8;">${avg}</td>
+                            <td><span class="performance-badge ${levelClass}">${level}</span></td>
+                            <td>
+                                <button class="btn btn-info btn-sm" onclick="viewAssessment('${student._id}')" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-pdf btn-sm" onclick="downloadStudentReport('${student._id}')" title="Download PDF"><i class="fas fa-file-pdf"></i></button>
+                                <button class="btn btn-warning btn-sm" onclick="openEditModal('${student._id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteAssessment('${student._id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-            `;
-            assessment.assessments.forEach(subject => {
-                const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(1) : 0;
-                let perfLevel = 'Approaching Expectation', perfClass = 'perf-approaching';
-                if (percentage >= 80) { perfLevel = 'Exceeding Expectation'; perfClass = 'perf-exceeding'; }
-                else if (percentage >= 60) { perfLevel = 'Meeting Expectation'; perfClass = 'perf-meeting'; }
-                else if (percentage >= 40) { perfLevel = 'Approaching Expectation'; perfClass = 'perf-approaching'; }
-                else { perfLevel = 'Below Expectation'; perfClass = 'perf-below'; }
-                html += `
-                    <tr style="border-bottom:1px solid #e8ecf1;">
-                        <td style="padding:8px 12px;font-weight:600;">${subject.subject}</td>
-                        <td style="padding:8px 12px;text-align:center;">${subject.maxScore}</td>
-                        <td style="padding:8px 12px;text-align:center;font-weight:bold;color:#0A1628;">${subject.score}</td>
-                        <td style="padding:8px 12px;text-align:center;font-weight:bold;color:${percentage >= 60 ? '#28a745' : percentage >= 40 ? '#d4a017' : '#dc3545'};">${percentage}%</td>
-                        <td style="padding:8px 12px;text-align:center;"><span class="perf ${perfClass}">${perfLevel}</span></td>
-                    </tr>
-                `;
-            });
-            html += `</tbody></table>`;
-            container.innerHTML = html;
+                    `;
+                });
+                tbody.innerHTML = html;
+                
+                const avgClassScore = uniqueStudentList.length > 0 ? (totalScoreSum / uniqueStudentList.length) : 0;
+                updateStats(uniqueStudentList.length, exceeding, meeting, approaching, below, avgClassScore);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
+                updateStats(0, 0, 0, 0, 0, 0);
+            }
+        } catch (error) {
+            console.error('Error loading assessments:', error);
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
+            updateStats(0, 0, 0, 0, 0, 0);
         }
-        document.getElementById('viewModal').classList.add('active');
-    } catch (error) {
-        console.error('Error viewing assessment:', error);
-        showAlert('❌ Error loading assessment details: ' + error.message, 'error');
     }
-}
+
+    function updateStats(total, exceeding, meeting, approaching, below, avgClassScore) {
+        document.getElementById('statStudents').textContent = total || 0;
+        document.getElementById('statExceeding').textContent = exceeding || 0;
+        document.getElementById('statMeeting').textContent = meeting || 0;
+        document.getElementById('statApproaching').textContent = approaching || 0;
+        document.getElementById('statBelow').textContent = below || 0;
+        document.getElementById('statClassAvg').textContent = avgClassScore ? avgClassScore.toFixed(1) : '0';
+    }
+
+    // ============================================
+    // VIEW ASSESSMENT
+    // ============================================
+    async function viewAssessment(assessmentId) {
+        try {
+            const response = await fetch(`/api/assessments/student/${assessmentId}`);
+            const data = await response.json();
+            if (!data.success || !data.assessment) { showAlert('❌ Assessment not found', 'error'); return; }
+            const assessment = data.assessment;
+            viewStudentId = assessment._id;
+            
+            document.getElementById('viewStudentInfo').innerHTML = `
+                <div class="row">
+                    <div class="item"><strong>Student:</strong> ${assessment.studentName}</div>
+                    <div class="item"><strong>ID:</strong> ${assessment.studentId || 'N/A'}</div>
+                    <div class="item"><strong>Grade:</strong> ${assessment.grade}</div>
+                    <div class="item"><strong>Type:</strong> ${assessment.type || 'Monthly'}</div>
+                    <div class="item"><strong>Period:</strong> ${assessment.period || assessment.month || 'N/A'}</div>
+                    <div class="item"><strong>Term:</strong> ${assessment.term || 'N/A'}</div>
+                    <div class="item"><strong>Total Score:</strong> ${assessment.totalScore || 0}</div>
+                    <div class="item"><strong>Average:</strong> ${assessment.averageScore ? assessment.averageScore.toFixed(1) : '0'}</div>
+                    <div class="item"><strong>Performance:</strong> <span class="performance-badge ${(assessment.performanceLevel || 'approaching').toLowerCase().replace(' ', '-')}">${assessment.performanceLevel || 'N/A'}</span></div>
+                </div>
+            `;
+            
+            const container = document.getElementById('viewSubjectsContainer');
+            if (!assessment.assessments || assessment.assessments.length === 0) {
+                container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
+            } else {
+                let html = `
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;">
+                        <thead>
+                            <tr style="background:#0A1628;color:white;">
+                                <th style="padding:8px 12px;text-align:left;">Subject</th>
+                                <th style="padding:8px 12px;text-align:center;">Max Score</th>
+                                <th style="padding:8px 12px;text-align:center;">Score</th>
+                                <th style="padding:8px 12px;text-align:center;">Percentage</th>
+                                <th style="padding:8px 12px;text-align:center;">Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                assessment.assessments.forEach(subject => {
+                    const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(1) : 0;
+                    let perfLevel = 'Approaching Expectation', perfClass = 'perf-approaching';
+                    if (percentage >= 80) { perfLevel = 'Exceeding Expectation'; perfClass = 'perf-exceeding'; }
+                    else if (percentage >= 60) { perfLevel = 'Meeting Expectation'; perfClass = 'perf-meeting'; }
+                    else if (percentage >= 40) { perfLevel = 'Approaching Expectation'; perfClass = 'perf-approaching'; }
+                    else { perfLevel = 'Below Expectation'; perfClass = 'perf-below'; }
+                    html += `
+                        <tr style="border-bottom:1px solid #e8ecf1;">
+                            <td style="padding:8px 12px;font-weight:600;">${subject.subject}</td>
+                            <td style="padding:8px 12px;text-align:center;">${subject.maxScore}</td>
+                            <td style="padding:8px 12px;text-align:center;font-weight:bold;color:#0A1628;">${subject.score}</td>
+                            <td style="padding:8px 12px;text-align:center;font-weight:bold;color:${percentage >= 60 ? '#28a745' : percentage >= 40 ? '#d4a017' : '#dc3545'};">${percentage}%</td>
+                            <td style="padding:8px 12px;text-align:center;"><span class="perf ${perfClass}">${perfLevel}</span></td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            }
+            document.getElementById('viewModal').classList.add('active');
+        } catch (error) {
+            console.error('Error viewing assessment:', error);
+            showAlert('❌ Error loading assessment details: ' + error.message, 'error');
+        }
+    }
 
     function downloadViewReport() { if (viewStudentId) downloadStudentReport(viewStudentId); }
     function closeViewModal() { document.getElementById('viewModal').classList.remove('active'); }
-    function downloadStudentReport(studentId) { window.open(`/api/assessments/download-report/${studentId}`, '_blank'); showAlert('📄 Student report is downloading...', 'info'); }
     
+    function downloadStudentReport(studentId) { 
+        window.open(`/api/assessments/download-report/${studentId}`, '_blank'); 
+        showAlert('📄 Student report is downloading...', 'info'); 
+    }
+    
+    // ============================================
+    // DOWNLOAD GRADE PDF
+    // ============================================
     function downloadGradeReportPDF() {
-    const grade = document.getElementById('gradeFilter').value;
-    const type = document.getElementById('typeFilter').value;
-    const term = document.getElementById('termFilter').value;
-    const year = document.getElementById('yearFilter').value;
-    
-    // Ask user for period/month if needed
-    let period = '';
-    if (type === 'monthly') {
-        const monthOptions = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        const monthInput = prompt('Enter the month (e.g., March, April) or leave blank for all:', '');
-        if (monthInput !== null) {
-            period = monthInput.trim();
-        } else {
-            return; // User cancelled
+        const grade = document.getElementById('gradeFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const term = document.getElementById('termFilter').value;
+        const year = document.getElementById('yearFilter').value;
+        
+        let period = '';
+        if (type === 'monthly') {
+            const monthInput = prompt('Enter the month (e.g., March, April) or leave blank for all:', '');
+            if (monthInput !== null) {
+                period = monthInput.trim();
+            } else {
+                return;
+            }
         }
+        
+        showAlert('📄 Generating grade report PDF...', 'info');
+        
+        let url = `/api/assessments/download-class-pdf?grade=${encodeURIComponent(grade)}&type=${type}&term=${term}&year=${year}`;
+        if (period) {
+            url += `&period=${encodeURIComponent(period)}`;
+        }
+        
+        window.open(url, '_blank');
+        
+        setTimeout(() => {
+            showAlert('✅ Grade report PDF is downloading!', 'success');
+        }, 2000);
     }
-    
-    // Show loading
-    showAlert('📄 Generating grade report PDF...', 'info');
-    
-    // Build URL
-    let url = `/api/assessments/download-class-pdf?grade=${encodeURIComponent(grade)}&type=${type}&term=${term}&year=${year}`;
-    if (period) {
-        url += `&period=${encodeURIComponent(period)}`;
-    }
-    
-    // Open in new window to download
-    window.open(url, '_blank');
-    
-    setTimeout(() => {
-        showAlert('✅ Grade report PDF is downloading!', 'success');
-    }, 2000);
-}
 
+    // ============================================
+    // DELETE ASSESSMENT
+    // ============================================
     async function deleteAssessment(studentId) {
         if (!confirm('Are you sure you want to delete this assessment?')) return;
         try {
@@ -1067,134 +1152,137 @@
         } catch (error) { showAlert('❌ Error deleting assessment: ' + error.message, 'error'); }
     }
 
+    // ============================================
+    // EDIT ASSESSMENT - FIXED
+    // ============================================
     async function openEditModal(assessmentId) {
-    try {
-        console.log('🔍 Opening edit modal for ID:', assessmentId);
-        
-        if (!assessmentId) {
-            showAlert('❌ Invalid assessment ID', 'error');
-            return;
-        }
-        
-        // Show loading
-        const container = document.getElementById('editSubjectsContainer');
-        container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;"><span class="loading-spinner"></span> Loading assessment...</p>';
-        document.getElementById('editModal').classList.add('active');
-        
-        const response = await fetch(`/api/assessments/student/${assessmentId}`);
-        const data = await response.json();
-        
-        console.log('📊 Response:', data);
-        
-        if (!data.success || !data.assessment) {
-            showAlert('❌ Assessment not found: ' + (data.message || 'Unknown error'), 'error');
-            document.getElementById('editModal').classList.remove('active');
-            return;
-        }
-        
-        const assessment = data.assessment;
-        document.getElementById('editAssessmentId').value = assessment._id;
-        document.getElementById('editStudentName').value = `${assessment.studentName} (${assessment.studentId || 'N/A'}) - ${assessment.period || assessment.month || ''}`;
-        
-        let html = '<div style="margin-top:10px;">';
-        
-        if (!assessment.assessments || assessment.assessments.length === 0) {
-            html += '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
-        } else {
-            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">';
-            assessment.assessments.forEach((subject, index) => {
-                const safeId = subject.subject.replace(/[^a-zA-Z0-9]/g, '_');
-                const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(0) : 0;
-                let perfColor = '#28a745';
-                if (percentage >= 80) perfColor = '#28a745';
-                else if (percentage >= 60) perfColor = '#17a2b8';
-                else if (percentage >= 40) perfColor = '#d4a017';
-                else perfColor = '#dc3545';
-                
-                html += `
-                    <div class="edit-subject-item" style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8f9fc;border-radius:6px;border:1px solid #e8ecf1;">
-                        <span class="name" style="flex:1;font-weight:600;font-size:12px;color:#0A1628;">${subject.subject}</span>
-                        <input type="number" id="edit_subject_${safeId}" value="${subject.score || 0}" max="${subject.maxScore || 100}" min="0" step="0.5" style="width:60px;padding:4px 6px;border:2px solid #e0e0e0;border-radius:4px;font-size:13px;text-align:center;">
-                        <span class="max-score" style="font-size:10px;color:#999;min-width:30px;">/${subject.maxScore || 100}</span>
-                        <span style="font-size:9px;font-weight:700;color:${perfColor};min-width:35px;">${percentage}%</span>
-                    </div>
-                `;
-            });
+        try {
+            console.log('🔍 Opening edit modal for ID:', assessmentId);
+            
+            if (!assessmentId) {
+                showAlert('❌ Invalid assessment ID', 'error');
+                return;
+            }
+            
+            const container = document.getElementById('editSubjectsContainer');
+            container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;"><span class="loading-spinner"></span> Loading assessment...</p>';
+            document.getElementById('editModal').classList.add('active');
+            
+            const response = await fetch(`/api/assessments/student/${assessmentId}`);
+            const data = await response.json();
+            
+            console.log('📊 Response:', data);
+            
+            if (!data.success || !data.assessment) {
+                showAlert('❌ Assessment not found: ' + (data.message || 'Unknown error'), 'error');
+                document.getElementById('editModal').classList.remove('active');
+                return;
+            }
+            
+            const assessment = data.assessment;
+            document.getElementById('editAssessmentId').value = assessment._id;
+            document.getElementById('editStudentName').value = `${assessment.studentName} (${assessment.studentId || 'N/A'}) - ${assessment.period || assessment.month || ''}`;
+            
+            let html = '<div style="margin-top:10px;">';
+            
+            if (!assessment.assessments || assessment.assessments.length === 0) {
+                html += '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
+            } else {
+                html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">';
+                assessment.assessments.forEach((subject) => {
+                    const safeId = subject.subject.replace(/[^a-zA-Z0-9]/g, '_');
+                    const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(0) : 0;
+                    let perfColor = '#28a745';
+                    if (percentage >= 80) perfColor = '#28a745';
+                    else if (percentage >= 60) perfColor = '#17a2b8';
+                    else if (percentage >= 40) perfColor = '#d4a017';
+                    else perfColor = '#dc3545';
+                    
+                    html += `
+                        <div class="edit-subject-item" style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8f9fc;border-radius:6px;border:1px solid #e8ecf1;">
+                            <span class="name" style="flex:1;font-weight:600;font-size:12px;color:#0A1628;">${subject.subject}</span>
+                            <input type="number" id="edit_subject_${safeId}" value="${subject.score || 0}" max="${subject.maxScore || 100}" min="0" step="0.5" style="width:60px;padding:4px 6px;border:2px solid #e0e0e0;border-radius:4px;font-size:13px;text-align:center;">
+                            <span class="max-score" style="font-size:10px;color:#999;min-width:30px;">/${subject.maxScore || 100}</span>
+                            <span style="font-size:9px;font-weight:700;color:${perfColor};min-width:35px;">${percentage}%</span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
             html += '</div>';
+            container.innerHTML = html;
+            
+        } catch (error) {
+            console.error('❌ Error loading assessment:', error);
+            showAlert('❌ Error loading assessment: ' + error.message, 'error');
+            document.getElementById('editModal').classList.remove('active');
         }
-        html += '</div>';
-        container.innerHTML = html;
-        
-    } catch (error) {
-        console.error('❌ Error loading assessment:', error);
-        showAlert('❌ Error loading assessment: ' + error.message, 'error');
-        document.getElementById('editModal').classList.remove('active');
     }
-}
+
     function closeEditModal() { document.getElementById('editModal').classList.remove('active'); }
 
     async function saveEditAssessment() {
-    const assessmentId = document.getElementById('editAssessmentId').value;
-    if (!assessmentId) {
-        showAlert('❌ No assessment selected', 'error');
-        return;
-    }
-    
-    const updatedAssessments = [];
-    const subjectInputs = document.querySelectorAll('#editSubjectsContainer .edit-subject-item');
-    let hasError = false;
-    
-    subjectInputs.forEach(item => {
-        const nameSpan = item.querySelector('.name');
-        const input = item.querySelector('input');
-        const maxSpan = item.querySelector('.max-score');
-        const subjectName = nameSpan.textContent.trim();
-        const maxScore = parseInt(maxSpan.textContent.replace('/', '')) || 100;
-        const score = parseFloat(input.value) || 0;
-        
-        if (score > maxScore) {
-            showAlert(`❌ Score for ${subjectName} cannot exceed ${maxScore}`, 'error');
-            hasError = true;
+        const assessmentId = document.getElementById('editAssessmentId').value;
+        if (!assessmentId) {
+            showAlert('❌ No assessment selected', 'error');
             return;
         }
         
-        updatedAssessments.push({ subject: subjectName, maxScore: maxScore, score: score });
-    });
-    
-    if (hasError) return;
-    
-    if (updatedAssessments.length === 0) {
-        showAlert('❌ No subjects to update', 'error');
-        return;
-    }
-    
-    const saveBtn = document.querySelector('.modal-actions .btn-save');
-    const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
-    saveBtn.disabled = true;
-    
-    try {
-        const response = await fetch(`/api/assessments/${assessmentId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ assessments: updatedAssessments })
+        const updatedAssessments = [];
+        const subjectInputs = document.querySelectorAll('#editSubjectsContainer .edit-subject-item');
+        let hasError = false;
+        
+        subjectInputs.forEach(item => {
+            const nameSpan = item.querySelector('.name');
+            const input = item.querySelector('input');
+            const maxSpan = item.querySelector('.max-score');
+            const subjectName = nameSpan.textContent.trim();
+            const maxScore = parseInt(maxSpan.textContent.replace('/', '')) || 100;
+            const score = parseFloat(input.value) || 0;
+            
+            if (score > maxScore) {
+                showAlert(`❌ Score for ${subjectName} cannot exceed ${maxScore}`, 'error');
+                hasError = true;
+                return;
+            }
+            
+            updatedAssessments.push({ subject: subjectName, maxScore: maxScore, score: score });
         });
-        const result = await response.json();
-        if (result.success) {
-            showAlert('✅ Assessment updated successfully!', 'success');
-            closeEditModal();
-            loadAssessments();
-        } else {
-            showAlert('❌ Error: ' + result.message, 'error');
+        
+        if (hasError) return;
+        
+        if (updatedAssessments.length === 0) {
+            showAlert('❌ No subjects to update', 'error');
+            return;
         }
-    } catch (error) {
-        console.error('Error updating assessment:', error);
-        showAlert('❌ Error updating assessment: ' + error.message, 'error');
-    } finally {
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
+        
+        const saveBtn = document.querySelector('.modal-actions .btn-save');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
+        saveBtn.disabled = true;
+        
+        try {
+            const response = await fetch(`/api/assessments/${assessmentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assessments: updatedAssessments })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showAlert('✅ Assessment updated successfully!', 'success');
+                closeEditModal();
+                loadAssessments();
+            } else {
+                showAlert('❌ Error: ' + result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error updating assessment:', error);
+            showAlert('❌ Error updating assessment: ' + error.message, 'error');
+        } finally {
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
+        }
     }
-}
 
     function deleteAssessmentFromModal() {
         const assessmentId = document.getElementById('editAssessmentId').value;
@@ -1202,6 +1290,9 @@
         deleteAssessment(assessmentId);
     }
 
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
     document.getElementById('gradeFilter').addEventListener('change', function() {
         loadSubjectConfig();
         document.getElementById('subjectsContainer').innerHTML = '<p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p>';
