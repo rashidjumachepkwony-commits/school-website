@@ -2542,7 +2542,7 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
 });
 
 // ============================================
-// GENERATE CLASS REPORT HTML - COMPACT LANDSCAPE
+// GENERATE CLASS REPORT HTML - LANDSCAPE WITH RANK
 // ============================================
 function generateClassReportHTML(students, grade, type, term, year, period) {
     const now = getKenyaTime();
@@ -2599,6 +2599,7 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
     let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
     let allSubjects = [];
     
+    // First pass: collect all unique subject names and calculate stats
     students.forEach(student => {
         totalScoreSum += student.totalScore || 0;
         const level = student.performanceLevel || 'Approaching Expectation';
@@ -2619,10 +2620,13 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
     allSubjects.sort();
     const avgClassScore = totalStudents > 0 ? (totalScoreSum / totalStudents).toFixed(1) : 0;
     
+    // Sort students by total score (descending) for ranking
+    const sortedStudents = [...students].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+    
     // Build subject headers with shortened names
     const subjectHeaders = allSubjects.map(subject => {
         const shortName = shortenSubject(subject);
-        return `<th style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:5.5px;background:#0A1628;color:white;font-weight:700;min-width:32px;max-width:45px;word-wrap:break-word;">${shortName}</th>`;
+        return `<th style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:5.5px;background:#0A1628;color:white;font-weight:700;min-width:30px;max-width:42px;word-wrap:break-word;">${shortName}</th>`;
     }).join('');
     
     // Build max scores row
@@ -2640,8 +2644,9 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
         return `<td style="padding:1px 1px;border:1px solid #ddd;text-align:center;font-size:4.5px;color:#999;background:#f8f9fc;font-weight:600;">${maxScore}</td>`;
     }).join('');
     
-    // Build rows
-    let rowsHtml = students.map((student, index) => {
+    // Build rows with RANK
+    let rowsHtml = sortedStudents.map((student, index) => {
+        const rank = index + 1;
         const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
         const level = student.performanceLevel || 'Approaching Expectation';
         let levelColor = '#d4a017';
@@ -2649,6 +2654,13 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
         else if (level === 'Meeting Expectation') { levelColor = '#17a2b8'; }
         else if (level === 'Approaching Expectation') { levelColor = '#d4a017'; }
         else { levelColor = '#dc3545'; }
+        
+        // Rank medal
+        let rankDisplay = rank;
+        if (rank === 1) rankDisplay = '🥇 1';
+        else if (rank === 2) rankDisplay = '🥈 2';
+        else if (rank === 3) rankDisplay = '🥉 3';
+        else rankDisplay = rank;
         
         let subjectScores = '';
         allSubjects.forEach(subject => {
@@ -2676,13 +2688,15 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
         
         return `
             <tr style="${index % 2 === 0 ? 'background:#fafbfc;' : 'background:white;'}">
-                <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:6px;font-weight:600;color:#666;">${index + 1}</td>
+                <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:6.5px;font-weight:700;color:${rank <= 3 ? '#D4A017' : '#666'};">
+                    ${rankDisplay}
+                </td>
                 <td style="padding:2px 3px;border:1px solid #ddd;font-weight:600;font-size:6.5px;color:#0A1628;white-space:nowrap;">${student.studentName}</td>
                 ${subjectScores}
                 <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:7px;font-weight:700;color:#D4A017;">${student.totalScore || 0}</td>
                 <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:6.5px;font-weight:700;color:#17a2b8;">${avgScore}</td>
                 <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;">
-                    <span style="background:${levelColor};color:white;padding:1px 4px;border-radius:50px;font-weight:700;font-size:5.5px;display:inline-block;white-space:nowrap;min-width:45px;">
+                    <span style="background:${levelColor};color:white;padding:1px 4px;border-radius:50px;font-weight:700;font-size:5.5px;display:inline-block;white-space:nowrap;min-width:42px;">
                         ${level}
                     </span>
                 </td>
@@ -2897,6 +2911,13 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
         .legend .dot.meeting { background: #17a2b8; }
         .legend .dot.approaching { background: #d4a017; }
         .legend .dot.below { background: #dc3545; }
+        .rank-badge {
+            display: inline-block;
+            font-weight: 700;
+        }
+        .rank-1 { color: #D4A017; }
+        .rank-2 { color: #C0C0C0; }
+        .rank-3 { color: #CD7F32; }
     </style>
 </head>
 <body>
@@ -2954,7 +2975,7 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
             <table>
                 <thead>
                     <tr>
-                        <th style="width:14px;">#</th>
+                        <th style="width:20px;">Rank</th>
                         <th style="min-width:60px;text-align:left;">Student</th>
                         ${subjectHeaders}
                         <th style="width:26px;">Total</th>
@@ -2978,6 +2999,7 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
             <span class="item"><span class="dot meeting"></span> Meeting (60-79%)</span>
             <span class="item"><span class="dot approaching"></span> Approaching (40-59%)</span>
             <span class="item"><span class="dot below"></span> Below (&lt;40%)</span>
+            <span class="item" style="color:#D4A017;font-weight:700;">🏆 Rank: 1st 🥇, 2nd 🥈, 3rd 🥉</span>
         </div>
         
         <div class="footer">
