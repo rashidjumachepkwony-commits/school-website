@@ -613,10 +613,15 @@ const subjectConfigSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
-// NO UNIQUE INDEX - Just a regular index for faster queries
+// IMPORTANT: No unique index - just a regular index for queries
+// If this line exists, REMOVE IT or comment it out:
+// subjectConfigSchema.index({ grade: 1, type: 1 }, { unique: true });
+
+// Use this instead (or no index at all):
 subjectConfigSchema.index({ grade: 1, type: 1 });
 
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
+
 // Student Assessment Schema
 const studentAssessmentSchema = new mongoose.Schema({
     studentName: { type: String, required: true },
@@ -1785,7 +1790,27 @@ app.get('/api/assessments/student/:studentId', async (req, res) => {
 });
 
 // ============================================
-// SUBJECT CONFIG ROUTES - COMPLETE REWRITE
+// SUBJECT CONFIG SCHEMA - NO UNIQUE INDEX
+// ============================================
+const subjectConfigSchema = new mongoose.Schema({
+    grade: { type: String, required: true },
+    type: { type: String, required: true, default: 'monthly' },
+    subjects: [{ name: { type: String, required: true }, max: { type: Number, required: true } }],
+    rankLevels: { type: [String], default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] },
+    updatedAt: { type: Date, default: Date.now }
+});
+
+// IMPORTANT: No unique index - just a regular index for queries
+// If this line exists, REMOVE IT or comment it out:
+// subjectConfigSchema.index({ grade: 1, type: 1 }, { unique: true });
+
+// Use this instead (or no index at all):
+subjectConfigSchema.index({ grade: 1, type: 1 });
+
+const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
+
+// ============================================
+// SUBJECT CONFIG ROUTES - USING deleteMany + insertMany
 // ============================================
 
 // GET subject config
@@ -1848,7 +1873,7 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     }
 });
 
-// PUT (Create/Update) subject config - USING FINDONEANDUPDATE WITH UPSERT
+// PUT (Create/Update) subject config - FIXED VERSION
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
@@ -1884,25 +1909,27 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         }));
         
         // ============================================
-        // SIMPLE APPROACH: Delete then Create
+        // THE FIX: Delete ALL then Insert ONE
+        // This completely avoids duplicate key errors
         // ============================================
         
-        // First, delete any existing config
-        await SubjectConfig.deleteMany({ grade, type });
+        // Step 1: Delete all documents with this grade + type
+        await SubjectConfig.deleteMany({ grade: grade, type: type });
         console.log(`✅ Deleted existing config for ${grade} (${type})`);
         
-        // Then create new one
-        const config = new SubjectConfig({
+        // Step 2: Create new config
+        const config = new SubjectConfig({ 
             grade: grade,
             type: type,
             subjects: cleanedSubjects,
-            updatedAt: new Date()
+            updatedAt: new Date() 
         });
         
+        // Step 3: Save
         await config.save();
         console.log(`✅ Saved new config for ${grade} (${type})`);
         
-        // Update existing assessments
+        // Update existing assessments with new max scores
         const students = await StudentAssessment.find({ grade, type });
         for (const student of students) {
             let updated = false;
@@ -1923,16 +1950,52 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             }
         }
         
-        res.json({
-            success: true,
-            message: 'Subject configuration saved successfully!',
-            config
+        res.json({ 
+            success: true, 
+            message: 'Subject configuration saved successfully!', 
+            config 
         });
     } catch (error) {
         console.error('❌ Save error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error saving subjects: ' + error.message
+        
+        // If still duplicate key error, use raw MongoDB as fallback
+        if (error.code === 11000) {
+            try {
+                console.log('🔄 Retry with raw MongoDB...');
+                const db = mongoose.connection.db;
+                const collection = db.collection('subjectconfigs');
+                
+                // Delete using raw MongoDB
+                await collection.deleteMany({ grade: grade, type: type });
+                console.log(`✅ Raw delete done for ${grade} (${type})`);
+                
+                // Insert using raw MongoDB
+                const result = await collection.insertOne({
+                    grade: grade,
+                    type: type,
+                    subjects: cleanedSubjects,
+                    rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+                    updatedAt: new Date()
+                });
+                console.log(`✅ Raw insert done for ${grade} (${type})`);
+                
+                return res.json({ 
+                    success: true, 
+                    message: 'Subject configuration saved successfully!',
+                    config: { grade, type, subjects: cleanedSubjects }
+                });
+            } catch (retryError) {
+                console.error('❌ Retry failed:', retryError);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Error saving subjects: ' + retryError.message 
+                });
+            }
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error saving subjects: ' + error.message 
         });
     }
 });
