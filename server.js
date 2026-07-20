@@ -2542,7 +2542,7 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
 });
 
 // ============================================
-// GENERATE CLASS REPORT HTML - FIXED
+// GENERATE CLASS REPORT HTML - SKETCH STYLE
 // ============================================
 function generateClassReportHTML(students, grade, type, term, year, period) {
     const now = getKenyaTime();
@@ -2581,15 +2581,30 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
     
     // Build subject headers
     const subjectHeaders = allSubjects.map(subject => 
-        `<th style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:7px;background:#0A1628;color:white;font-weight:700;">${subject}</th>`
+        `<th style="padding:6px 4px;border:1px solid #ddd;text-align:center;font-size:7px;background:#0A1628;color:white;font-weight:700;min-width:60px;">${subject}</th>`
     ).join('');
+    
+    // Build max scores row
+    const maxScoresRow = allSubjects.map(subject => {
+        let maxScore = 0;
+        for (const student of students) {
+            if (student.assessments) {
+                const found = student.assessments.find(a => a.subject === subject);
+                if (found) {
+                    maxScore = found.maxScore;
+                    break;
+                }
+            }
+        }
+        return `<td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-size:6px;color:#999;background:#f8f9fc;font-weight:600;">${maxScore}</td>`;
+    }).join('');
     
     // Build rows
     let rowsHtml = students.map((student, index) => {
         const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
         const level = student.performanceLevel || 'Approaching Expectation';
-        let levelColor = '';
-        let levelIcon = '';
+        let levelColor = '#d4a017';
+        let levelIcon = '📗';
         if (level === 'Exceeding Expectation') { levelColor = '#28a745'; levelIcon = '🌟'; }
         else if (level === 'Meeting Expectation') { levelColor = '#17a2b8'; levelIcon = '✅'; }
         else if (level === 'Approaching Expectation') { levelColor = '#d4a017'; levelIcon = '📗'; }
@@ -2601,30 +2616,34 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
             const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
             if (assessment) {
                 const percentage = assessment.maxScore > 0 ? ((assessment.score / assessment.maxScore) * 100).toFixed(0) : 0;
+                let scoreColor = '#0A1628';
+                if (percentage >= 80) scoreColor = '#28a745';
+                else if (percentage >= 60) scoreColor = '#17a2b8';
+                else if (percentage >= 40) scoreColor = '#d4a017';
+                else scoreColor = '#dc3545';
+                
                 subjectScores += `
-                    <td style="padding:3px 6px;border:1px solid #ddd;text-align:center;font-size:8px;">
-                        <strong>${assessment.score}</strong>
-                        <span style="display:block;font-size:6px;color:#999;">/${assessment.maxScore}</span>
-                        <span style="display:block;font-size:6px;font-weight:600;color:${percentage >= 60 ? '#28a745' : percentage >= 40 ? '#d4a017' : '#dc3545'};">${percentage}%</span>
+                    <td style="padding:4px 4px;border:1px solid #ddd;text-align:center;font-size:9px;font-weight:700;color:${scoreColor};">
+                        ${assessment.score}
+                        <span style="display:block;font-size:6px;font-weight:400;color:#999;">/${assessment.maxScore}</span>
                     </td>
                 `;
             } else {
                 subjectScores += `
-                    <td style="padding:3px 6px;border:1px solid #ddd;text-align:center;font-size:8px;color:#ccc;">-</td>
+                    <td style="padding:4px 4px;border:1px solid #ddd;text-align:center;font-size:8px;color:#ddd;">-</td>
                 `;
             }
         });
         
         return `
-            <tr>
-                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:8px;font-weight:600;">${index + 1}</td>
-                <td style="padding:4px 6px;border:1px solid #ddd;font-weight:600;font-size:9px;">${student.studentName}</td>
-                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:8px;color:#666;">${student.studentId || 'N/A'}</td>
+            <tr style="${index % 2 === 0 ? 'background:#fafbfc;' : 'background:white;'}">
+                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:8px;font-weight:600;color:#666;">${index + 1}</td>
+                <td style="padding:4px 8px;border:1px solid #ddd;font-weight:600;font-size:9px;color:#0A1628;">${student.studentName}</td>
                 ${subjectScores}
-                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:9px;font-weight:700;color:#D4A017;">${student.totalScore || 0}</td>
+                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:10px;font-weight:700;color:#D4A017;">${student.totalScore || 0}</td>
                 <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:9px;font-weight:700;color:#17a2b8;">${avgScore}</td>
-                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-size:8px;">
-                    <span style="background:${levelColor};color:white;padding:2px 10px;border-radius:50px;font-weight:700;font-size:7px;display:inline-block;white-space:nowrap;">
+                <td style="padding:4px 6px;border:1px solid #ddd;text-align:center;">
+                    <span style="background:${levelColor};color:white;padding:3px 10px;border-radius:50px;font-weight:700;font-size:7px;display:inline-block;white-space:nowrap;min-width:70px;">
                         ${levelIcon} ${level}
                     </span>
                 </td>
@@ -2632,36 +2651,26 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
         `;
     }).join('');
     
-    // Build max scores row
-    const maxScoresRow = allSubjects.map(subject => {
-        // Find the max score for this subject from the first student that has it
-        let maxScore = 0;
-        for (const student of students) {
-            if (student.assessments) {
-                const found = student.assessments.find(a => a.subject === subject);
-                if (found) {
-                    maxScore = found.maxScore;
-                    break;
-                }
-            }
-        }
-        return `<td style="padding:2px 4px;border:1px solid #ddd;text-align:center;font-size:6px;color:#999;background:#f8f9fc;">Max: ${maxScore}</td>`;
-    }).join('');
-    
     return `
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>Grade Report - ${grade}</title>
+            <title>${grade} - Assessment Report</title>
             <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; }
                 body { 
                     font-family: 'Segoe UI', Arial, sans-serif; 
-                    padding: 10px; 
+                    padding: 8px; 
                     max-width: 1200px; 
                     margin: 0 auto; 
                     font-size: 8px; 
+                    background: white;
+                }
+                .report-container {
+                    border: 2px solid #0A1628;
+                    border-radius: 8px;
+                    padding: 12px;
                     background: white;
                 }
                 .header { 
@@ -2669,25 +2678,48 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
                     border-bottom: 3px solid #D4A017; 
                     padding-bottom: 8px; 
                     margin-bottom: 10px; 
+                    position: relative;
                 }
-                .header h1 { 
-                    color: #0A1628; 
-                    font-size: 18px; 
-                    margin: 0; 
+                .header .school-name { 
+                    font-size: 20px; 
+                    font-weight: 900; 
+                    color: #0A1628;
                     font-family: 'Georgia', serif;
+                    letter-spacing: 2px;
                 }
-                .header h1 .school-name { color: #D4A017; }
-                .header .school-motto {
-                    color: #666;
+                .header .school-name .gold { color: #D4A017; }
+                .header .motto {
+                    color: #888;
                     font-size: 9px;
                     font-style: italic;
                     margin-top: 2px;
+                    letter-spacing: 1px;
+                }
+                .header .report-title {
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: #0A1628;
+                    margin-top: 4px;
                 }
                 .header .report-info { 
                     font-size: 8px; 
-                    color: #888; 
-                    margin-top: 3px;
+                    color: #999; 
+                    margin-top: 2px;
                 }
+                .header .flag-strip {
+                    display: flex;
+                    height: 4px;
+                    width: 120px;
+                    margin: 4px auto 0;
+                    border-radius: 2px;
+                    overflow: hidden;
+                }
+                .header .flag-strip span { flex: 1; height: 100%; }
+                .header .flag-strip .b { background: #000000; }
+                .header .flag-strip .r { background: #BB0000; }
+                .header .flag-strip .g { background: #006600; }
+                .header .flag-strip .w { background: #FFFFFF; }
+                
                 .summary-box { 
                     display: grid; 
                     grid-template-columns: repeat(7, 1fr); 
@@ -2707,9 +2739,10 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
                 }
                 .summary-box .item .label { 
                     font-size: 6px; 
-                    color: #666; 
+                    color: #888; 
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
+                    font-weight: 600;
                 }
                 .summary-box .item .num.gold { color: #D4A017; }
                 .summary-box .item .num.green { color: #28a745; }
@@ -2717,6 +2750,7 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
                 .summary-box .item .num.orange { color: #d4a017; }
                 .summary-box .item .num.red { color: #dc3545; }
                 .summary-box .item .num.purple { color: #6f42c1; }
+                
                 .table-wrap { 
                     overflow-x: auto; 
                     margin-top: 5px;
@@ -2725,53 +2759,69 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
                     width: 100%; 
                     border-collapse: collapse; 
                     font-size: 7px; 
+                    border: 1px solid #ddd;
                 }
                 table th { 
                     background: #0A1628; 
                     color: white; 
-                    padding: 4px 6px; 
+                    padding: 5px 4px; 
                     text-align: center; 
                     font-size: 6.5px; 
                     font-weight: 700;
                     white-space: nowrap;
+                    border: 1px solid #1a2a4a;
                 }
                 table td { 
-                    padding: 3px 6px; 
-                    border-bottom: 1px solid #e8ecf1; 
+                    padding: 3px 4px; 
+                    border: 1px solid #ddd; 
                 }
-                table tr:nth-child(even) { background: #fafbfc; }
-                table tr:hover { background: #f0f4ff; }
+                .header-row td {
+                    background: #f8f9fc !important;
+                    font-weight: 600;
+                    color: #555;
+                    font-size: 6px;
+                }
                 .footer { 
-                    text-align: center; 
-                    margin-top: 12px; 
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 10px; 
                     padding-top: 8px; 
                     border-top: 1px solid #ddd; 
                     color: #999; 
                     font-size: 6px; 
                 }
+                .footer .left { text-align: left; }
+                .footer .right { text-align: right; }
                 .footer .contact {
                     color: #ccc;
-                    font-size: 6px;
                 }
-                .subject-max-row td {
-                    background: #f8f9fc !important;
-                    color: #999;
-                    font-size: 6px;
-                    font-weight: 600;
+                .footer .signature {
+                    display: flex;
+                    gap: 40px;
+                    margin-top: 4px;
+                }
+                .footer .signature .sig-line {
+                    display: inline-block;
+                    width: 120px;
+                    border-bottom: 1px solid #999;
+                    margin-top: 4px;
                 }
                 @media print { 
-                    body { padding: 5px; } 
-                    .summary-box .item { padding: 4px; }
-                    table th { font-size: 5.5px; padding: 2px 4px; }
-                    table td { padding: 2px 4px; font-size: 6px; }
+                    body { padding: 4px; } 
+                    .summary-box .item { padding: 3px; }
+                    table th { font-size: 5.5px; padding: 3px 3px; }
+                    table td { padding: 2px 3px; font-size: 6px; }
+                    .report-container { border: 1px solid #ddd; padding: 8px; }
                 }
                 @page {
-                    margin: 8mm;
+                    margin: 6mm;
+                    size: A4 landscape;
                 }
                 .watermark {
                     position: fixed;
-                    opacity: 0.03;
-                    font-size: 80px;
+                    opacity: 0.02;
+                    font-size: 60px;
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%) rotate(-30deg);
@@ -2779,61 +2829,103 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
                     z-index: 0;
                     color: #0A1628;
                     font-weight: 900;
-                    letter-spacing: 10px;
+                    letter-spacing: 8px;
+                    white-space: nowrap;
                 }
+                .legend {
+                    display: flex;
+                    gap: 12px;
+                    justify-content: center;
+                    margin-top: 6px;
+                    font-size: 6px;
+                }
+                .legend .item { display: flex; align-items: center; gap: 3px; }
+                .legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+                .legend .dot.exceeding { background: #28a745; }
+                .legend .dot.meeting { background: #17a2b8; }
+                .legend .dot.approaching { background: #d4a017; }
+                .legend .dot.below { background: #dc3545; }
             </style>
         </head>
         <body>
             <div class="watermark">CHANGARA STAR ACADEMY</div>
             
-            <div class="header">
-                <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                <div class="school-motto">"Assurance to Excellence"</div>
-                <p style="font-size:10px;font-weight:700;color:#0A1628;margin-top:3px;">
-                    ${grade} - ${typeNames[type] || type || 'Monthly'} Assessment Report
-                </p>
-                <p class="report-info">
-                    ${term ? term + ' | ' : ''} ${year || '2026'} ${periodLabel} | Generated on ${formatKenyaFullTime(now)}
-                </p>
-            </div>
-            
-            <div class="summary-box">
-                <div class="item"><div class="num gold">${totalStudents}</div><div class="label">👨‍🎓 Students</div></div>
-                <div class="item"><div class="num green">${exceedingCount}</div><div class="label">🌟 Exceeding</div></div>
-                <div class="item"><div class="num blue">${meetingCount}</div><div class="label">✅ Meeting</div></div>
-                <div class="item"><div class="num orange">${approachingCount}</div><div class="label">📗 Approaching</div></div>
-                <div class="item"><div class="num red">${belowCount}</div><div class="label">📕 Below</div></div>
-                <div class="item"><div class="num purple">${avgClassScore}</div><div class="label">📊 Class Avg</div></div>
-                <div class="item"><div class="num" style="color:#0A1628;">${allSubjects.length}</div><div class="label">📚 Subjects</div></div>
-            </div>
-            
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width:30px;">#</th>
-                            <th style="min-width:120px;text-align:left;">Student Name</th>
-                            <th style="width:50px;">ID</th>
-                            ${subjectHeaders}
-                            <th style="width:50px;">Total</th>
-                            <th style="width:45px;">Avg</th>
-                            <th style="width:80px;">Performance</th>
-                        </tr>
-                        <tr class="subject-max-row">
-                            <td colspan="3" style="text-align:right;font-weight:600;color:#666;">Max Score:</td>
-                            ${maxScoresRow}
-                            <td colspan="3" style="background:#f8f9fc;"></td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml}
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="footer">
-                <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais</p>
-                <p class="contact">📞 +254 721 556 252 | 📧 starchangara@gmail.com | 🇰🇪 Proudly Kenyan</p>
+            <div class="report-container">
+                <div class="header">
+                    <div class="school-name">🏫 <span class="gold">Changara</span> Star Academy</div>
+                    <div class="motto">"Assurance to Excellence"</div>
+                    <div class="flag-strip">
+                        <span class="b"></span><span class="r"></span>
+                        <span class="g"></span><span class="w"></span>
+                        <span class="b"></span><span class="r"></span>
+                        <span class="g"></span><span class="w"></span>
+                    </div>
+                    <div class="report-title">${grade} - ${typeNames[type] || type || 'Monthly'} Assessment Report</div>
+                    <div class="report-info">
+                        ${term ? term + ' | ' : ''} ${year || '2026'} ${periodLabel} | Generated: ${formatKenyaDate(now)} at ${formatKenyaTime(now)}
+                    </div>
+                </div>
+                
+                <div class="summary-box">
+                    <div class="item"><div class="num gold">${totalStudents}</div><div class="label">👨‍🎓 Students</div></div>
+                    <div class="item"><div class="num green">${exceedingCount}</div><div class="label">🌟 Exceeding</div></div>
+                    <div class="item"><div class="num blue">${meetingCount}</div><div class="label">✅ Meeting</div></div>
+                    <div class="item"><div class="num orange">${approachingCount}</div><div class="label">📗 Approaching</div></div>
+                    <div class="item"><div class="num red">${belowCount}</div><div class="label">📕 Below</div></div>
+                    <div class="item"><div class="num purple">${avgClassScore}</div><div class="label">📊 Class Avg</div></div>
+                    <div class="item"><div class="num" style="color:#0A1628;">${allSubjects.length}</div><div class="label">📚 Subjects</div></div>
+                </div>
+                
+                <div class="legend">
+                    <span class="item"><span class="dot exceeding"></span> Exceeding (≥80%)</span>
+                    <span class="item"><span class="dot meeting"></span> Meeting (60-79%)</span>
+                    <span class="item"><span class="dot approaching"></span> Approaching (40-59%)</span>
+                    <span class="item"><span class="dot below"></span> Below (&lt;40%)</span>
+                </div>
+                
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:25px;">#</th>
+                                <th style="min-width:100px;text-align:left;">Student Name</th>
+                                ${subjectHeaders}
+                                <th style="width:45px;">Total</th>
+                                <th style="width:40px;">Avg</th>
+                                <th style="width:75px;">Performance</th>
+                            </tr>
+                            <tr class="header-row">
+                                <td colspan="2" style="text-align:right;color:#0A1628;font-weight:700;">Max Score:</td>
+                                ${maxScoresRow}
+                                <td colspan="3" style="background:#f8f9fc;border:1px solid #ddd;"></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="footer">
+                    <div class="left">
+                        <div class="contact">📞 +254 721 556 252</div>
+                        <div class="contact">📧 starchangara@gmail.com</div>
+                    </div>
+                    <div class="right">
+                        <div>© ${new Date().getFullYear()} Changara Star Academy</div>
+                        <div style="color:#D4A017;font-weight:700;">🇰🇪 Proudly Kenyan</div>
+                        <div class="signature">
+                            <div>
+                                <div class="sig-line"></div>
+                                <div style="font-size:6px;color:#999;">Principal's Signature</div>
+                            </div>
+                            <div>
+                                <div class="sig-line"></div>
+                                <div style="font-size:6px;color:#999;">Date</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </body>
         </html>

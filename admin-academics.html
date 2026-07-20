@@ -430,6 +430,10 @@
             .subjects-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr; }
         }
+        .perf-exceeding { background: #28a745; color: white; padding: 3px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; }
+.perf-meeting { background: #17a2b8; color: white; padding: 3px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; }
+.perf-approaching { background: #d4a017; color: #0A1628; padding: 3px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; }
+.perf-below { background: #dc3545; color: white; padding: 3px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -949,66 +953,70 @@
     }
 
     async function viewAssessment(assessmentId) {
-        try {
-            const response = await fetch(`/api/assessments/student/${assessmentId}`);
-            const data = await response.json();
-            if (!data.success || !data.assessment) { showAlert('❌ Assessment not found', 'error'); return; }
-            const assessment = data.assessment;
-            viewStudentId = assessment._id;
-            document.getElementById('viewStudentInfo').innerHTML = `
-                <div class="row">
-                    <div class="item"><strong>Student:</strong> ${assessment.studentName} (${assessment.studentId || 'N/A'})</div>
-                    <div class="item"><strong>Grade:</strong> ${assessment.grade}</div>
-                    <div class="item"><strong>Type:</strong> ${assessment.type || 'Monthly'}</div>
-                    <div class="item"><strong>Term:</strong> ${assessment.term || 'N/A'}</div>
-                    <div class="item"><strong>Total Score:</strong> ${assessment.totalScore || 0}</div>
-                    <div class="item"><strong>Average:</strong> ${assessment.averageScore ? assessment.averageScore.toFixed(1) : '0'}</div>
-                    <div class="item"><strong>Performance:</strong> <span class="performance-badge ${(assessment.performanceLevel || 'approaching').toLowerCase().replace(' ', '-')}">${assessment.performanceLevel || 'N/A'}</span></div>
-                </div>
-            `;
-            const container = document.getElementById('viewSubjectsContainer');
-            if (!assessment.assessments || assessment.assessments.length === 0) {
-                container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
-            } else {
-                let html = `
-                    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;">
-                        <thead>
-                            <tr style="background:#0A1628;color:white;">
-                                <th style="padding:8px 12px;text-align:left;">Subject</th>
-                                <th style="padding:8px 12px;text-align:center;">Max Score</th>
-                                <th style="padding:8px 12px;text-align:center;">Score</th>
-                                <th style="padding:8px 12px;text-align:center;">Percentage</th>
-                                <th style="padding:8px 12px;text-align:center;">Performance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                assessment.assessments.forEach(subject => {
-                    const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(1) : 0;
-                    let perfLevel = 'Approaching Expectation', perfClass = 'perf-approaching';
-                    if (percentage >= 80) { perfLevel = 'Exceeding Expectation'; perfClass = 'perf-exceeding'; }
-                    else if (percentage >= 60) { perfLevel = 'Meeting Expectation'; perfClass = 'perf-meeting'; }
-                    else if (percentage >= 40) { perfLevel = 'Approaching Expectation'; perfClass = 'perf-approaching'; }
-                    else { perfLevel = 'Below Expectation'; perfClass = 'perf-below'; }
-                    html += `
-                        <tr style="border-bottom:1px solid #e8ecf1;">
-                            <td style="padding:8px 12px;font-weight:600;">${subject.subject}</td>
-                            <td style="padding:8px 12px;text-align:center;">${subject.maxScore}</td>
-                            <td style="padding:8px 12px;text-align:center;font-weight:bold;color:#0A1628;">${subject.score}</td>
-                            <td style="padding:8px 12px;text-align:center;font-weight:bold;">${percentage}%</td>
-                            <td style="padding:8px 12px;text-align:center;"><span class="perf ${perfClass}">${perfLevel}</span></td>
+    try {
+        const response = await fetch(`/api/assessments/student/${assessmentId}`);
+        const data = await response.json();
+        if (!data.success || !data.assessment) { showAlert('❌ Assessment not found', 'error'); return; }
+        const assessment = data.assessment;
+        viewStudentId = assessment._id;
+        
+        document.getElementById('viewStudentInfo').innerHTML = `
+            <div class="row">
+                <div class="item"><strong>Student:</strong> ${assessment.studentName}</div>
+                <div class="item"><strong>ID:</strong> ${assessment.studentId || 'N/A'}</div>
+                <div class="item"><strong>Grade:</strong> ${assessment.grade}</div>
+                <div class="item"><strong>Type:</strong> ${assessment.type || 'Monthly'}</div>
+                <div class="item"><strong>Period:</strong> ${assessment.period || assessment.month || 'N/A'}</div>
+                <div class="item"><strong>Term:</strong> ${assessment.term || 'N/A'}</div>
+                <div class="item"><strong>Total Score:</strong> ${assessment.totalScore || 0}</div>
+                <div class="item"><strong>Average:</strong> ${assessment.averageScore ? assessment.averageScore.toFixed(1) : '0'}</div>
+                <div class="item"><strong>Performance:</strong> <span class="performance-badge ${(assessment.performanceLevel || 'approaching').toLowerCase().replace(' ', '-')}">${assessment.performanceLevel || 'N/A'}</span></div>
+            </div>
+        `;
+        
+        const container = document.getElementById('viewSubjectsContainer');
+        if (!assessment.assessments || assessment.assessments.length === 0) {
+            container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
+        } else {
+            let html = `
+                <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;">
+                    <thead>
+                        <tr style="background:#0A1628;color:white;">
+                            <th style="padding:8px 12px;text-align:left;">Subject</th>
+                            <th style="padding:8px 12px;text-align:center;">Max Score</th>
+                            <th style="padding:8px 12px;text-align:center;">Score</th>
+                            <th style="padding:8px 12px;text-align:center;">Percentage</th>
+                            <th style="padding:8px 12px;text-align:center;">Performance</th>
                         </tr>
-                    `;
-                });
-                html += `</tbody></table>`;
-                container.innerHTML = html;
-            }
-            document.getElementById('viewModal').classList.add('active');
-        } catch (error) {
-            console.error('Error viewing assessment:', error);
-            showAlert('❌ Error loading assessment details: ' + error.message, 'error');
+                    </thead>
+                    <tbody>
+            `;
+            assessment.assessments.forEach(subject => {
+                const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(1) : 0;
+                let perfLevel = 'Approaching Expectation', perfClass = 'perf-approaching';
+                if (percentage >= 80) { perfLevel = 'Exceeding Expectation'; perfClass = 'perf-exceeding'; }
+                else if (percentage >= 60) { perfLevel = 'Meeting Expectation'; perfClass = 'perf-meeting'; }
+                else if (percentage >= 40) { perfLevel = 'Approaching Expectation'; perfClass = 'perf-approaching'; }
+                else { perfLevel = 'Below Expectation'; perfClass = 'perf-below'; }
+                html += `
+                    <tr style="border-bottom:1px solid #e8ecf1;">
+                        <td style="padding:8px 12px;font-weight:600;">${subject.subject}</td>
+                        <td style="padding:8px 12px;text-align:center;">${subject.maxScore}</td>
+                        <td style="padding:8px 12px;text-align:center;font-weight:bold;color:#0A1628;">${subject.score}</td>
+                        <td style="padding:8px 12px;text-align:center;font-weight:bold;color:${percentage >= 60 ? '#28a745' : percentage >= 40 ? '#d4a017' : '#dc3545'};">${percentage}%</td>
+                        <td style="padding:8px 12px;text-align:center;"><span class="perf ${perfClass}">${perfLevel}</span></td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table>`;
+            container.innerHTML = html;
         }
+        document.getElementById('viewModal').classList.add('active');
+    } catch (error) {
+        console.error('Error viewing assessment:', error);
+        showAlert('❌ Error loading assessment details: ' + error.message, 'error');
     }
+}
 
     function downloadViewReport() { if (viewStudentId) downloadStudentReport(viewStudentId); }
     function closeViewModal() { document.getElementById('viewModal').classList.remove('active'); }
@@ -1068,6 +1076,11 @@
             return;
         }
         
+        // Show loading
+        const container = document.getElementById('editSubjectsContainer');
+        container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;"><span class="loading-spinner"></span> Loading assessment...</p>';
+        document.getElementById('editModal').classList.add('active');
+        
         const response = await fetch(`/api/assessments/student/${assessmentId}`);
         const data = await response.json();
         
@@ -1075,44 +1088,61 @@
         
         if (!data.success || !data.assessment) {
             showAlert('❌ Assessment not found: ' + (data.message || 'Unknown error'), 'error');
+            document.getElementById('editModal').classList.remove('active');
             return;
         }
         
         const assessment = data.assessment;
         document.getElementById('editAssessmentId').value = assessment._id;
-        document.getElementById('editStudentName').value = `${assessment.studentName} (${assessment.studentId || 'N/A'})`;
+        document.getElementById('editStudentName').value = `${assessment.studentName} (${assessment.studentId || 'N/A'}) - ${assessment.period || assessment.month || ''}`;
         
-        const container = document.getElementById('editSubjectsContainer');
         let html = '<div style="margin-top:10px;">';
         
         if (!assessment.assessments || assessment.assessments.length === 0) {
             html += '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
         } else {
-            assessment.assessments.forEach(subject => {
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">';
+            assessment.assessments.forEach((subject, index) => {
                 const safeId = subject.subject.replace(/[^a-zA-Z0-9]/g, '_');
+                const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(0) : 0;
+                let perfColor = '#28a745';
+                if (percentage >= 80) perfColor = '#28a745';
+                else if (percentage >= 60) perfColor = '#17a2b8';
+                else if (percentage >= 40) perfColor = '#d4a017';
+                else perfColor = '#dc3545';
+                
                 html += `
-                    <div class="edit-subject-item">
-                        <span class="name">${subject.subject}</span>
-                        <input type="number" id="edit_subject_${safeId}" value="${subject.score || 0}" max="${subject.maxScore || 100}" min="0" step="0.5">
-                        <span class="max-score">/${subject.maxScore || 100}</span>
+                    <div class="edit-subject-item" style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8f9fc;border-radius:6px;border:1px solid #e8ecf1;">
+                        <span class="name" style="flex:1;font-weight:600;font-size:12px;color:#0A1628;">${subject.subject}</span>
+                        <input type="number" id="edit_subject_${safeId}" value="${subject.score || 0}" max="${subject.maxScore || 100}" min="0" step="0.5" style="width:60px;padding:4px 6px;border:2px solid #e0e0e0;border-radius:4px;font-size:13px;text-align:center;">
+                        <span class="max-score" style="font-size:10px;color:#999;min-width:30px;">/${subject.maxScore || 100}</span>
+                        <span style="font-size:9px;font-weight:700;color:${perfColor};min-width:35px;">${percentage}%</span>
                     </div>
                 `;
             });
+            html += '</div>';
         }
         html += '</div>';
         container.innerHTML = html;
-        document.getElementById('editModal').classList.add('active');
+        
     } catch (error) {
         console.error('❌ Error loading assessment:', error);
         showAlert('❌ Error loading assessment: ' + error.message, 'error');
+        document.getElementById('editModal').classList.remove('active');
     }
 }
     function closeEditModal() { document.getElementById('editModal').classList.remove('active'); }
 
     async function saveEditAssessment() {
     const assessmentId = document.getElementById('editAssessmentId').value;
+    if (!assessmentId) {
+        showAlert('❌ No assessment selected', 'error');
+        return;
+    }
+    
     const updatedAssessments = [];
     const subjectInputs = document.querySelectorAll('#editSubjectsContainer .edit-subject-item');
+    let hasError = false;
     
     subjectInputs.forEach(item => {
         const nameSpan = item.querySelector('.name');
@@ -1124,24 +1154,30 @@
         
         if (score > maxScore) {
             showAlert(`❌ Score for ${subjectName} cannot exceed ${maxScore}`, 'error');
+            hasError = true;
             return;
         }
         
         updatedAssessments.push({ subject: subjectName, maxScore: maxScore, score: score });
     });
     
+    if (hasError) return;
+    
     if (updatedAssessments.length === 0) {
         showAlert('❌ No subjects to update', 'error');
         return;
     }
     
-    const data = { assessments: updatedAssessments };
+    const saveBtn = document.querySelector('.modal-actions .btn-save');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
+    saveBtn.disabled = true;
     
     try {
         const response = await fetch(`/api/assessments/${assessmentId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify({ assessments: updatedAssessments })
         });
         const result = await response.json();
         if (result.success) {
@@ -1154,6 +1190,9 @@
     } catch (error) {
         console.error('Error updating assessment:', error);
         showAlert('❌ Error updating assessment: ' + error.message, 'error');
+    } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
     }
 }
 
