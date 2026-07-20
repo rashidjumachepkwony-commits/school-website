@@ -1790,26 +1790,6 @@ app.get('/api/assessments/student/:studentId', async (req, res) => {
 });
 
 // ============================================
-// SUBJECT CONFIG SCHEMA - NO UNIQUE INDEX
-// ============================================
-const subjectConfigSchema = new mongoose.Schema({
-    grade: { type: String, required: true },
-    type: { type: String, required: true, default: 'monthly' },
-    subjects: [{ name: { type: String, required: true }, max: { type: Number, required: true } }],
-    rankLevels: { type: [String], default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] },
-    updatedAt: { type: Date, default: Date.now }
-});
-
-// IMPORTANT: No unique index - just a regular index for queries
-// If this line exists, REMOVE IT or comment it out:
-// subjectConfigSchema.index({ grade: 1, type: 1 }, { unique: true });
-
-// Use this instead (or no index at all):
-subjectConfigSchema.index({ grade: 1, type: 1 });
-
-const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
-
-// ============================================
 // SUBJECT CONFIG ROUTES - USING deleteMany + insertMany
 // ============================================
 
@@ -1999,6 +1979,7 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         });
     }
 });
+
 // ============================================
 // ASSESSMENT ROUTES
 // ============================================
