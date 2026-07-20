@@ -491,6 +491,7 @@
         <button class="btn btn-subject-edit" onclick="toggleSubjectConfig()"><i class="fas fa-cog"></i> Edit Subjects</button>
     </div>
 
+    <!-- ===== SUBJECT CONFIGURATION SECTION ===== -->
     <div class="subject-config-section" id="subjectConfigSection">
         <h3><i class="fas fa-cog"></i> Subject Configuration</h3>
         <p style="color:#666; margin-bottom:15px; font-size:14px;">Edit subjects and their maximum scores for <strong id="configGradeDisplay">Grade 4</strong></p>
@@ -507,6 +508,7 @@
         <button class="btn btn-info" onclick="window.print()"><i class="fas fa-print"></i> Print Grade Report</button>
     </div>
 
+    <!-- ===== ADD SCORES SECTION ===== -->
     <div class="subject-input-section">
         <h3><i class="fas fa-plus-circle"></i> Enter Student Scores</h3>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
@@ -525,6 +527,7 @@
         <button class="btn-add-score" onclick="saveStudentScores()"><i class="fas fa-save"></i> Save Scores</button>
     </div>
 
+    <!-- ===== ASSESSMENTS TABLE ===== -->
     <div class="table-wrapper">
         <table>
             <thead>
@@ -682,7 +685,7 @@
     }
 
     // ============================================
-    // SAVE SUBJECT CONFIG - FIXED
+    // SAVE SUBJECT CONFIG - FIXED: Delete existing first
     // ============================================
     async function saveSubjectConfig() {
         const grade = document.getElementById('gradeFilter').value;
@@ -709,15 +712,12 @@
         saveBtn.disabled = true;
 
         try {
-            // FIRST DELETE EXISTING CONFIG FOR THIS GRADE/TYPE
-            try {
-                const deleteResponse = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`, {
-                    method: 'DELETE'
-                });
-                // Ignore if not found
-            } catch(e) {}
-
-            // THEN CREATE NEW CONFIG
+            // STEP 1: Delete existing config for this grade & type
+            await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`, {
+                method: 'DELETE'
+            });
+            
+            // STEP 2: Create new config
             const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -782,8 +782,11 @@
         try {
             const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`);
             const data = await response.json();
-            if (data.success && data.config) subjectConfig = data.config.subjects || [];
-            else subjectConfig = [];
+            if (data.success && data.config) {
+                subjectConfig = data.config.subjects || [];
+            } else {
+                subjectConfig = [];
+            }
         } catch (error) { console.error('Error loading subjects:', error); subjectConfig = []; }
     }
 
