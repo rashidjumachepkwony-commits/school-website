@@ -412,6 +412,26 @@
         .perf-approaching { background: #d4a017; }
         .perf-below { background: #dc3545; }
 
+        /* ===== STUDENT SUMMARY ===== */
+        .student-summary {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+            margin-bottom: 15px;
+        }
+        .student-summary .row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .student-summary .item {
+            font-size: 13px;
+        }
+        .student-summary .item strong {
+            color: #0A1628;
+        }
+
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .filter-bar { flex-direction: column; }
@@ -424,6 +444,7 @@
             table { font-size: 11px; }
             table th, table td { padding: 6px 8px; }
             .edit-subject-item, .view-subject-item { flex-wrap: wrap; }
+            .student-summary .row { flex-direction: column; gap: 5px; }
         }
         @media (max-width: 480px) {
             .subjects-grid { grid-template-columns: 1fr; }
@@ -547,7 +568,7 @@
 <div class="modal-overlay" id="viewModal">
     <div class="modal-content">
         <h2><i class="fas fa-file-alt"></i> Student Assessment Details</h2>
-        <div id="viewStudentInfo" style="margin-bottom:15px;padding:12px;background:#f8f9fc;border-radius:10px;border:1px solid #e8ecf1;"></div>
+        <div id="viewStudentInfo" class="student-summary"></div>
         <div id="viewSubjectsContainer"></div>
         <div class="modal-actions">
             <button class="btn btn-pdf" onclick="downloadViewReport()" style="flex:1;padding:12px;border:none;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;background:#dc3545;color:white;"><i class="fas fa-file-pdf"></i> Download PDF</button>
@@ -786,7 +807,7 @@
     }
 
     // ============================================
-    // LOAD ASSESSMENTS
+    // LOAD ASSESSMENTS - FIXED (No Duplicates)
     // ============================================
     async function loadAssessments() {
         const grade = document.getElementById('gradeFilter').value;
@@ -813,8 +834,19 @@
                     return;
                 }
                 
+                // FIX: Show each student only once (use the latest assessment per student)
+                const uniqueStudents = {};
+                students.forEach(student => {
+                    const key = student.studentId || student.studentName;
+                    if (!uniqueStudents[key] || new Date(student.createdAt) > new Date(uniqueStudents[key].createdAt)) {
+                        uniqueStudents[key] = student;
+                    }
+                });
+                
+                const uniqueStudentList = Object.values(uniqueStudents);
+                
                 let html = '';
-                students.forEach((student, index) => {
+                uniqueStudentList.forEach((student, index) => {
                     const level = student.performanceLevel || 'Approaching Expectation';
                     const levelClass = level.toLowerCase().replace(' ', '-');
                     const avg = student.averageScore ? student.averageScore.toFixed(1) : '0';
@@ -843,7 +875,7 @@
                 });
                 
                 tbody.innerHTML = html;
-                updateStats(students.length, exceeding, meeting, approaching, below);
+                updateStats(uniqueStudentList.length, exceeding, meeting, approaching, below);
             } else {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assessments</td></tr>';
             }
@@ -882,13 +914,15 @@
             
             // Student info
             document.getElementById('viewStudentInfo').innerHTML = `
-                <strong>Student:</strong> ${assessment.studentName} (${assessment.studentId || 'N/A'}) &nbsp;|&nbsp;
-                <strong>Grade:</strong> ${assessment.grade} &nbsp;|&nbsp;
-                <strong>Type:</strong> ${assessment.type || 'Monthly'} &nbsp;|&nbsp;
-                <strong>Term:</strong> ${assessment.term || 'N/A'} &nbsp;|&nbsp;
-                <strong>Total Score:</strong> ${assessment.totalScore || 0} &nbsp;|&nbsp;
-                <strong>Average:</strong> ${assessment.averageScore ? assessment.averageScore.toFixed(1) : '0'} &nbsp;|&nbsp;
-                <strong>Performance:</strong> <span class="performance-badge ${(assessment.performanceLevel || 'approaching').toLowerCase().replace(' ', '-')}">${assessment.performanceLevel || 'N/A'}</span>
+                <div class="row">
+                    <div class="item"><strong>Student:</strong> ${assessment.studentName} (${assessment.studentId || 'N/A'})</div>
+                    <div class="item"><strong>Grade:</strong> ${assessment.grade}</div>
+                    <div class="item"><strong>Type:</strong> ${assessment.type || 'Monthly'}</div>
+                    <div class="item"><strong>Term:</strong> ${assessment.term || 'N/A'}</div>
+                    <div class="item"><strong>Total Score:</strong> ${assessment.totalScore || 0}</div>
+                    <div class="item"><strong>Average:</strong> ${assessment.averageScore ? assessment.averageScore.toFixed(1) : '0'}</div>
+                    <div class="item"><strong>Performance:</strong> <span class="performance-badge ${(assessment.performanceLevel || 'approaching').toLowerCase().replace(' ', '-')}">${assessment.performanceLevel || 'N/A'}</span></div>
+                </div>
             `;
             
             // Subject breakdown
