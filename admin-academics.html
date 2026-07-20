@@ -274,25 +274,7 @@
         }
         .btn-add-score:hover { background: #1e7e34; transform: scale(1.02); }
 
-        .btn-add-bulk {
-            padding: 12px 35px;
-            background: #0b5394;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 15px;
-            margin-left: 10px;
-        }
-        .btn-add-bulk:hover { background: #1a6fb5; transform: scale(1.02); }
-
-        /* ===== MODAL ===== */
+        /* ===== EDIT MODAL ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -345,8 +327,7 @@
         .modal-actions .btn-save { background: #28a745; color: white; }
         .modal-actions .btn-cancel { background: #6c757d; color: white; }
 
-        /* ===== BULK SCORE MODAL ===== */
-        .bulk-student-item {
+        .edit-subject-item {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -356,20 +337,20 @@
             margin-bottom: 6px;
             border: 1px solid #e8ecf1;
         }
-        .bulk-student-item .name {
+        .edit-subject-item .name {
             flex: 1;
             font-weight: 600;
             font-size: 13px;
         }
-        .bulk-student-item input {
-            width: 70px;
-            padding: 4px 8px;
+        .edit-subject-item input {
+            width: 80px;
+            padding: 6px 10px;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 14px;
             text-align: center;
         }
-        .bulk-student-item input:focus { border-color: #D4A017; outline: none; }
+        .edit-subject-item input:focus { border-color: #D4A017; outline: none; }
 
         @media (max-width: 768px) {
             .container { padding: 15px; }
@@ -471,10 +452,7 @@
             <p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p>
         </div>
 
-        <div>
-            <button class="btn-add-score" onclick="saveStudentScores()"><i class="fas fa-save"></i> Save Scores</button>
-            <button class="btn-add-bulk" onclick="openBulkModal()"><i class="fas fa-users"></i> Bulk Entry</button>
-        </div>
+        <button class="btn-add-score" onclick="saveStudentScores()"><i class="fas fa-save"></i> Save Scores</button>
     </div>
 
     <!-- ===== ASSESSMENTS TABLE ===== -->
@@ -498,23 +476,25 @@
     </div>
 </div>
 
-<!-- ===== BULK ENTRY MODAL ===== -->
-<div class="modal-overlay" id="bulkModal">
+<!-- ===== EDIT MODAL ===== -->
+<div class="modal-overlay" id="editModal">
     <div class="modal-content">
-        <h2><i class="fas fa-users"></i> Bulk Score Entry</h2>
-        <p style="color:#666; margin-bottom:15px;">Enter scores for all students in the selected grade.</p>
+        <h2><i class="fas fa-edit"></i> Edit Assessment</h2>
+        <input type="hidden" id="editAssessmentId">
         
-        <div id="bulkSubjects" style="margin-bottom:15px;">
-            <p style="color:#999;">Loading subjects...</p>
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:600; font-size:13px; color:#333;">👤 Student</label>
+            <input type="text" id="editStudentName" readonly style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;background:#f0f0f0;">
         </div>
-        
-        <div id="bulkStudentsList" style="max-height:300px; overflow-y:auto;">
-            <p style="color:#999;">Loading students...</p>
+
+        <div id="editSubjectsContainer">
+            <p style="color:#999;">Loading subjects...</p>
         </div>
 
         <div class="modal-actions">
-            <button class="btn-save" onclick="saveBulkScores()"><i class="fas fa-save"></i> Save All</button>
-            <button class="btn-cancel" onclick="closeBulkModal()"><i class="fas fa-times"></i> Cancel</button>
+            <button class="btn-save" onclick="saveEditAssessment()"><i class="fas fa-save"></i> Update</button>
+            <button class="btn-danger" onclick="deleteAssessmentFromModal()" style="flex:1;padding:12px;border:none;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;background:#dc3545;color:white;"><i class="fas fa-trash"></i> Delete</button>
+            <button class="btn-cancel" onclick="closeEditModal()"><i class="fas fa-times"></i> Cancel</button>
         </div>
     </div>
 </div>
@@ -558,7 +538,6 @@
             }
         } catch (error) {
             console.error('Error loading students:', error);
-            showAlert('❌ Error loading students: ' + error.message, 'error');
         }
     }
 
@@ -718,8 +697,9 @@
             if (result.success) {
                 showAlert(`✅ Scores saved for ${student.name}!`, 'success');
                 document.getElementById('periodInput').value = '';
+                document.getElementById('studentSelect').value = '';
+                document.getElementById('subjectsContainer').innerHTML = '<p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p>';
                 loadAssessments();
-                loadStudentSubjects();
             } else {
                 showAlert('❌ Error: ' + result.message, 'error');
             }
@@ -779,6 +759,7 @@
                             <td>
                                 <button class="btn btn-info btn-sm" onclick="viewStudentReport('${student._id}')"><i class="fas fa-file-alt"></i></button>
                                 <button class="btn btn-pdf btn-sm" onclick="downloadStudentReport('${student._id}')"><i class="fas fa-file-pdf"></i></button>
+                                <button class="btn btn-warning btn-sm" onclick="openEditModal('${student._id}')"><i class="fas fa-edit"></i></button>
                                 <button class="btn btn-danger btn-sm" onclick="deleteAssessment('${student._id}')"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
@@ -854,129 +835,111 @@
     }
 
     // ============================================
-    // BULK ENTRY MODAL
+    // OPEN EDIT MODAL
     // ============================================
-    async function openBulkModal() {
-        const grade = document.getElementById('gradeFilter').value;
-        const type = document.getElementById('typeFilter').value;
-        
-        // Load subjects
+    async function openEditModal(assessmentId) {
         try {
-            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`);
+            const response = await fetch(`/api/assessments/student/${assessmentId}`);
             const data = await response.json();
-            if (data.success && data.config) {
-                subjectConfig = data.config.subjects || [];
+            
+            if (!data.success || !data.assessment) {
+                showAlert('❌ Assessment not found', 'error');
+                return;
             }
+            
+            const assessment = data.assessment;
+            document.getElementById('editAssessmentId').value = assessment._id;
+            document.getElementById('editStudentName').value = `${assessment.studentName} (${assessment.studentId || 'N/A'})`;
+            
+            // Build edit subjects
+            const container = document.getElementById('editSubjectsContainer');
+            let html = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">';
+            
+            const assessments = assessment.assessments || [];
+            assessment.assessments.forEach(subject => {
+                html += `
+                    <div class="edit-subject-item">
+                        <span class="name">${subject.subject}</span>
+                        <input type="number" id="edit_subject_${subject.subject.replace(/\s/g, '_')}" value="${subject.score || 0}" max="${subject.maxScore || 100}" min="0" step="0.5">
+                        <span style="font-size:11px;color:#999;">/${subject.maxScore || 100}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+            
+            document.getElementById('editModal').classList.add('active');
         } catch (error) {
-            subjectConfig = [];
+            console.error('Error loading assessment for edit:', error);
+            showAlert('❌ Error loading assessment: ' + error.message, 'error');
         }
-        
-        // Load students
-        try {
-            const response = await fetch(`/api/assessments/students/${encodeURIComponent(grade)}`);
-            const data = await response.json();
-            if (data.success) {
-                allStudents = data.students || [];
-            }
-        } catch (error) {
-            allStudents = [];
-        }
-        
-        // Build bulk modal content
-        let subjectsHtml = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">';
-        subjectConfig.forEach(subject => {
-            subjectsHtml += `<span style="background:#f0f0f0;padding:4px 12px;border-radius:4px;font-size:12px;">${subject.name} (${subject.max})</span>`;
-        });
-        subjectsHtml += '</div>';
-        document.getElementById('bulkSubjects').innerHTML = subjectsHtml;
-        
-        let studentsHtml = '';
-        allStudents.forEach(student => {
-            studentsHtml += `
-                <div class="bulk-student-item">
-                    <span class="name">${student.studentId} - ${student.name}</span>
-                    ${subjectConfig.map(subject => `
-                        <input type="number" id="bulk_${student.studentId}_${subject.name.replace(/\s/g, '_')}" placeholder="0" max="${subject.max}" min="0" step="0.5" style="width:60px;">
-                    `).join('')}
-                </div>
-            `;
-        });
-        document.getElementById('bulkStudentsList').innerHTML = studentsHtml || '<p style="color:#999;text-align:center;padding:20px;">No students found</p>';
-        
-        document.getElementById('bulkModal').classList.add('active');
     }
 
     // ============================================
-    // CLOSE BULK MODAL
+    // CLOSE EDIT MODAL
     // ============================================
-    function closeBulkModal() {
-        document.getElementById('bulkModal').classList.remove('active');
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
     }
 
     // ============================================
-    // SAVE BULK SCORES
+    // SAVE EDIT ASSESSMENT
     // ============================================
-    async function saveBulkScores() {
-        const grade = document.getElementById('gradeFilter').value;
-        const type = document.getElementById('typeFilter').value;
-        const term = document.getElementById('termFilter').value;
-        const year = document.getElementById('yearFilter').value;
+    async function saveEditAssessment() {
+        const assessmentId = document.getElementById('editAssessmentId').value;
         
-        let saved = 0;
-        let errors = 0;
+        // Collect updated scores
+        const updatedAssessments = [];
+        const subjectInputs = document.querySelectorAll('#editSubjectsContainer .edit-subject-item');
         
-        for (const student of allStudents) {
-            const assessments = [];
-            let hasScore = false;
+        subjectInputs.forEach(item => {
+            const nameSpan = item.querySelector('.name');
+            const input = item.querySelector('input');
+            const maxSpan = item.querySelector('span');
             
-            for (const subject of subjectConfig) {
-                const input = document.getElementById(`bulk_${student.studentId}_${subject.name.replace(/\s/g, '_')}`);
-                if (input) {
-                    const score = parseFloat(input.value);
-                    if (!isNaN(score) && score >= 0) {
-                        if (score > subject.max) {
-                            showAlert(`❌ Score for ${student.name} - ${subject.name} exceeds max (${subject.max})`, 'error');
-                            return;
-                        }
-                        assessments.push({ subject: subject.name, maxScore: subject.max, score: score });
-                        if (score > 0) hasScore = true;
-                    }
-                }
+            const subjectName = nameSpan.textContent;
+            const maxScore = parseInt(maxSpan.textContent.replace('/', '')) || 100;
+            const score = parseFloat(input.value) || 0;
+            
+            updatedAssessments.push({
+                subject: subjectName,
+                maxScore: maxScore,
+                score: score
+            });
+        });
+        
+        const data = {
+            assessments: updatedAssessments
+        };
+        
+        try {
+            const response = await fetch(`/api/assessments/${assessmentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                showAlert('✅ Assessment updated successfully!', 'success');
+                closeEditModal();
+                loadAssessments();
+            } else {
+                showAlert('❌ Error: ' + result.message, 'error');
             }
-            
-            if (!hasScore) continue;
-            
-            const data = {
-                studentName: student.name,
-                studentId: student.studentId,
-                grade: grade,
-                type: type,
-                term: term,
-                year: year,
-                period: 'Bulk Entry',
-                assessments: assessments
-            };
-            
-            try {
-                const response = await fetch('/api/assessments', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await response.json();
-                if (result.success) {
-                    saved++;
-                } else {
-                    errors++;
-                }
-            } catch (error) {
-                errors++;
-            }
+        } catch (error) {
+            console.error('Error updating assessment:', error);
+            showAlert('❌ Error updating assessment: ' + error.message, 'error');
         }
-        
-        showAlert(`✅ Saved ${saved} students, ${errors} errors`, 'success');
-        closeBulkModal();
-        loadAssessments();
+    }
+
+    // ============================================
+    // DELETE FROM MODAL
+    // ============================================
+    function deleteAssessmentFromModal() {
+        const assessmentId = document.getElementById('editAssessmentId').value;
+        closeEditModal();
+        deleteAssessment(assessmentId);
     }
 
     // ============================================
