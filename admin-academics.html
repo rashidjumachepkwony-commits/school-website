@@ -685,7 +685,7 @@
     }
 
     // ============================================
-    // SAVE SUBJECT CONFIG - FIXED: Delete existing first
+    // SAVE SUBJECT CONFIG - COMPLETE FIX
     // ============================================
     async function saveSubjectConfig() {
         const grade = document.getElementById('gradeFilter').value;
@@ -712,12 +712,15 @@
         saveBtn.disabled = true;
 
         try {
-            // STEP 1: Delete existing config for this grade & type
+            // Delete existing config first
             await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`, {
                 method: 'DELETE'
             });
             
-            // STEP 2: Create new config
+            // Wait a moment
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
+            // Save new config
             const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
