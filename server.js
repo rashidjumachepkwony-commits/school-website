@@ -1821,10 +1821,10 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
     }
 });
 
-// DELETE subject config
+// DELETE subject config - RAW MONGODB
 app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     try {
-        const { grade } = req.params;
+        const grade = req.params.grade;
         const { type } = req.query;
         
         console.log('🗑️ DELETE config for:', grade, type);
@@ -1836,7 +1836,9 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
             });
         }
         
-        const result = await SubjectConfig.deleteMany({ grade, type });
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs');
+        const result = await collection.deleteMany({ grade: grade, type: type });
         console.log(`✅ Deleted ${result.deletedCount} configs for ${grade} (${type})`);
         
         res.json({ 
@@ -1853,7 +1855,6 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
         });
     }
 });
-
 // PUT (Create/Update) subject config - RAW MONGODB ONLY
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
