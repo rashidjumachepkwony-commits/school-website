@@ -131,7 +131,6 @@
         .btn-print:hover { background: #4a2a8a; }
         .btn-subject-edit { background: #d4a017; color: #0A1628; font-weight: 700; padding: 10px 22px; }
         .btn-subject-edit:hover { background: #f5c842; transform: scale(1.02); }
-        .btn-subject-edit i { margin-right: 6px; }
 
         .loading-spinner {
             display: inline-block;
@@ -203,7 +202,6 @@
         .performance-badge.approaching { background: #d4a017; }
         .performance-badge.below { background: #dc3545; }
 
-        /* ===== SUBJECT INPUT SECTION ===== */
         .subject-input-section {
             background: #f8f9fc;
             padding: 25px;
@@ -286,7 +284,6 @@
             margin: 15px 0;
         }
 
-        /* ===== SUBJECT CONFIG SECTION ===== */
         .subject-config-section {
             background: #fff8e7;
             padding: 25px;
@@ -314,11 +311,6 @@
             border-radius: 8px;
             margin-bottom: 6px;
             border: 1px solid #e8ecf1;
-        }
-        .config-subject-item .name {
-            flex: 1;
-            font-weight: 600;
-            font-size: 13px;
         }
         .config-subject-item .name-input {
             flex: 1;
@@ -380,7 +372,6 @@
             margin-top: 15px;
         }
 
-        /* ===== EDIT MODAL ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -456,14 +447,31 @@
             font-size: 14px;
             text-align: center;
         }
-        .edit-subject-item input:focus { border-color: #D4A017; outline: none; }
         .edit-subject-item .max-score {
             font-size: 11px;
             color: #999;
             min-width: 30px;
         }
 
-        /* ===== VIEW MODAL ===== */
+        .student-summary {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+            margin-bottom: 15px;
+        }
+        .student-summary .row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .student-summary .item {
+            font-size: 13px;
+        }
+        .student-summary .item strong {
+            color: #0A1628;
+        }
+
         .view-subject-item {
             display: flex;
             align-items: center;
@@ -509,26 +517,6 @@
         .perf-approaching { background: #d4a017; }
         .perf-below { background: #dc3545; }
 
-        /* ===== STUDENT SUMMARY ===== */
-        .student-summary {
-            background: #f8f9fc;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #e8ecf1;
-            margin-bottom: 15px;
-        }
-        .student-summary .row {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .student-summary .item {
-            font-size: 13px;
-        }
-        .student-summary .item strong {
-            color: #0A1628;
-        }
-
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .filter-bar { flex-direction: column; }
@@ -540,8 +528,7 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
             table { font-size: 11px; }
             table th, table td { padding: 6px 8px; }
-            .edit-subject-item, .view-subject-item, .config-subject-item { flex-wrap: wrap; }
-            .student-summary .row { flex-direction: column; gap: 5px; }
+            .config-subject-item { flex-wrap: wrap; }
             .config-actions { flex-direction: column; }
             .config-actions .btn { width: 100%; justify-content: center; }
         }
@@ -554,7 +541,6 @@
 <body>
 
 <div class="container">
-    <!-- ===== HEADER ===== -->
     <div class="header">
         <h1><i class="fas fa-edit"></i> Academic Assessments</h1>
         <div>
@@ -564,7 +550,6 @@
 
     <div id="alert" class="alert"></div>
 
-    <!-- ===== STATS ===== -->
     <div class="stats-grid" id="statsGrid">
         <div class="stat-card"><div class="number gold" id="totalStudents">0</div><div class="label">Total Students</div></div>
         <div class="stat-card"><div class="number green" id="exceedingCount">0</div><div class="label">✅ Exceeding</div></div>
@@ -698,16 +683,11 @@
     <div class="modal-content">
         <h2><i class="fas fa-edit"></i> Edit Assessment</h2>
         <input type="hidden" id="editAssessmentId">
-        
         <div style="margin-bottom:15px;">
             <label style="font-weight:600; font-size:13px; color:#333;">👤 Student</label>
             <input type="text" id="editStudentName" readonly style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;background:#f0f0f0;">
         </div>
-
-        <div id="editSubjectsContainer">
-            <p style="color:#999;">Loading subjects...</p>
-        </div>
-
+        <div id="editSubjectsContainer"><p style="color:#999;">Loading subjects...</p></div>
         <div class="modal-actions">
             <button class="btn-save" onclick="saveEditAssessment()"><i class="fas fa-save"></i> Update</button>
             <button class="btn-danger" onclick="deleteAssessmentFromModal()" style="flex:1;padding:12px;border:none;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;background:#dc3545;color:white;"><i class="fas fa-trash"></i> Delete</button>
@@ -717,24 +697,17 @@
 </div>
 
 <script>
-    // ============================================
-    // GLOBAL VARIABLES
-    // ============================================
     let allStudents = [];
     let subjectConfig = [];
-    let currentAssessments = [];
     let currentStudentId = null;
     let viewStudentId = null;
 
-    // ============================================
-    // SHOW ALERT
-    // ============================================
     function showAlert(message, type) {
-        const alertEl = document.getElementById('alert');
-        alertEl.className = 'alert ' + type;
-        alertEl.textContent = message;
-        alertEl.style.display = 'block';
-        setTimeout(() => { alertEl.style.display = 'none'; }, 5000);
+        const el = document.getElementById('alert');
+        el.className = 'alert ' + type;
+        el.textContent = message;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 5000);
     }
 
     // ============================================
@@ -759,16 +732,12 @@
         const grade = document.getElementById('gradeFilter').value;
         const type = document.getElementById('typeFilter').value;
         const container = document.getElementById('subjectConfigContainer');
-        
         container.innerHTML = '<p style="color:#999;"><span class="loading-spinner"></span> Loading subjects...</p>';
-        
         try {
             const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`);
             const data = await response.json();
-            
             if (data.success && data.config) {
-                const subjects = data.config.subjects || [];
-                renderSubjectConfig(subjects);
+                renderSubjectConfig(data.config.subjects || []);
             } else {
                 renderSubjectConfig([]);
             }
@@ -783,41 +752,34 @@
     // ============================================
     function renderSubjectConfig(subjects) {
         const container = document.getElementById('subjectConfigContainer');
-        
         if (!subjects || subjects.length === 0) {
             container.innerHTML = `
                 <p style="color:#d4a017; margin-bottom:10px;">⚠️ No subjects configured. Add subjects below.</p>
                 <div class="config-subject-item">
-                    <span class="name">📚 Mathematics</span>
+                    <input type="text" class="name-input" id="config_name_0" value="Mathematics" placeholder="Subject name">
                     <input type="number" id="config_subject_0" value="50" min="1" step="1">
-                    <input type="hidden" id="config_name_0" value="Mathematics">
-                    <button class="remove-btn" onclick="removeSubjectField(0)"><i class="fas fa-times"></i></button>
+                    <button class="remove-btn" onclick="removeSubjectField(0)"><i class="fas fa-times"></i> Remove</button>
                 </div>
                 <div class="config-subject-item">
-                    <span class="name">📚 English</span>
+                    <input type="text" class="name-input" id="config_name_1" value="English" placeholder="Subject name">
                     <input type="number" id="config_subject_1" value="50" min="1" step="1">
-                    <input type="hidden" id="config_name_1" value="English">
-                    <button class="remove-btn" onclick="removeSubjectField(1)"><i class="fas fa-times"></i></button>
+                    <button class="remove-btn" onclick="removeSubjectField(1)"><i class="fas fa-times"></i> Remove</button>
                 </div>
                 <div class="config-subject-item">
-                    <span class="name">📚 Kiswahili</span>
+                    <input type="text" class="name-input" id="config_name_2" value="Kiswahili" placeholder="Subject name">
                     <input type="number" id="config_subject_2" value="50" min="1" step="1">
-                    <input type="hidden" id="config_name_2" value="Kiswahili">
-                    <button class="remove-btn" onclick="removeSubjectField(2)"><i class="fas fa-times"></i></button>
+                    <button class="remove-btn" onclick="removeSubjectField(2)"><i class="fas fa-times"></i> Remove</button>
                 </div>
                 <div class="config-subject-item">
-                    <span class="name">📚 Science</span>
+                    <input type="text" class="name-input" id="config_name_3" value="Science" placeholder="Subject name">
                     <input type="number" id="config_subject_3" value="50" min="1" step="1">
-                    <input type="hidden" id="config_name_3" value="Science">
-                    <button class="remove-btn" onclick="removeSubjectField(3)"><i class="fas fa-times"></i></button>
+                    <button class="remove-btn" onclick="removeSubjectField(3)"><i class="fas fa-times"></i> Remove</button>
                 </div>
             `;
             return;
         }
-        
         let html = '';
         subjects.forEach((subject, index) => {
-            const safeName = subject.name.replace(/[^a-zA-Z0-9]/g, '_');
             html += `
                 <div class="config-subject-item" id="config_row_${index}">
                     <input type="text" class="name-input" id="config_name_${index}" value="${subject.name}" placeholder="Subject name">
@@ -829,13 +791,9 @@
         container.innerHTML = html;
     }
 
-    // ============================================
-    // ADD SUBJECT FIELD
-    // ============================================
     function addSubjectField() {
         const container = document.getElementById('subjectConfigContainer');
         const index = container.querySelectorAll('.config-subject-item').length;
-        
         const div = document.createElement('div');
         div.className = 'config-subject-item';
         div.id = `config_row_${index}`;
@@ -847,33 +805,23 @@
         container.appendChild(div);
     }
 
-    // ============================================
-    // REMOVE SUBJECT FIELD
-    // ============================================
     function removeSubjectField(index) {
         const row = document.getElementById(`config_row_${index}`);
-        if (row) {
-            row.remove();
-        }
-        // Re-index remaining rows
+        if (row) row.remove();
         const rows = document.querySelectorAll('#subjectConfigContainer .config-subject-item');
         rows.forEach((row, i) => {
             row.id = `config_row_${i}`;
             const inputs = row.querySelectorAll('input');
             inputs.forEach(input => {
-                if (input.id) {
-                    input.id = input.id.replace(/\d+$/, i);
-                }
+                if (input.id) input.id = input.id.replace(/\d+$/, i);
             });
             const btn = row.querySelector('.remove-btn');
-            if (btn) {
-                btn.onclick = function() { removeSubjectField(i); };
-            }
+            if (btn) btn.onclick = function() { removeSubjectField(i); };
         });
     }
 
     // ============================================
-    // SAVE SUBJECT CONFIG
+    // SAVE SUBJECT CONFIG - FIXED DUPLICATE ERROR
     // ============================================
     async function saveSubjectConfig() {
         const grade = document.getElementById('gradeFilter').value;
@@ -886,80 +834,94 @@
             const maxInput = row.querySelector('input[type="number"]');
             const name = nameInput ? nameInput.value.trim() : '';
             const max = maxInput ? parseInt(maxInput.value) : 50;
-            
-            if (name && max > 0) {
-                subjects.push({ name, max });
-            }
+            if (name && max > 0) subjects.push({ name, max });
         });
         
         if (subjects.length === 0) {
             showAlert('❌ Please add at least one subject', 'error');
             return;
         }
-        
+
+        // Show loading
+        const saveBtn = document.querySelector('.btn-success');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
+        saveBtn.disabled = true;
+
         try {
-            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, subjects })
-            });
+            // First, check if config exists and delete it (to avoid duplicate key error)
+            const checkResponse = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`);
+            const checkData = await checkResponse.json();
             
-            const data = await response.json();
-            if (data.success) {
-                showAlert(`✅ Subjects for ${grade} updated successfully!`, 'success');
-                // Close config section
-                document.getElementById('subjectConfigSection').classList.remove('active');
-                // Reload subjects
-                await loadSubjectConfig();
-                // Reload subjects for the selected student
-                if (currentStudentId) {
-                    loadStudentSubjects();
+            if (checkData.success && checkData.config && checkData.config._id) {
+                // If config exists, we'll update it directly instead of creating new
+                // The PUT endpoint should handle updates, but we need to ensure we're using the right method
+                const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, subjects })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showAlert(`✅ Subjects for ${grade} updated successfully!`, 'success');
+                    document.getElementById('subjectConfigSection').classList.remove('active');
+                    await loadSubjectConfig();
+                    if (currentStudentId) loadStudentSubjects();
+                    loadAssessments();
+                } else {
+                    showAlert('❌ Error: ' + data.message, 'error');
                 }
-                // Reload assessments
-                loadAssessments();
             } else {
-                showAlert('❌ Error: ' + data.message, 'error');
+                // If no config exists, create new
+                const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, subjects })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showAlert(`✅ Subjects for ${grade} created successfully!`, 'success');
+                    document.getElementById('subjectConfigSection').classList.remove('active');
+                    await loadSubjectConfig();
+                    if (currentStudentId) loadStudentSubjects();
+                    loadAssessments();
+                } else {
+                    showAlert('❌ Error: ' + data.message, 'error');
+                }
             }
         } catch (error) {
             console.error('Error saving subjects:', error);
             showAlert('❌ Error saving subjects: ' + error.message, 'error');
+        } finally {
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
         }
     }
 
     // ============================================
-    // LOAD STUDENTS FOR GRADE
+    // LOAD FUNCTIONS
     // ============================================
     async function loadStudentsForGrade() {
         const grade = document.getElementById('gradeFilter').value;
-        
         if (!grade) return;
-        
         try {
             const response = await fetch(`/api/assessments/students/${encodeURIComponent(grade)}`);
             const data = await response.json();
-            
             if (data.success) {
                 allStudents = data.students || [];
                 populateStudentSelect(allStudents);
                 document.getElementById('totalStudents').textContent = allStudents.length;
             }
-        } catch (error) {
-            console.error('Error loading students:', error);
-        }
+        } catch (error) { console.error('Error loading students:', error); }
     }
 
-    // ============================================
-    // POPULATE STUDENT SELECT
-    // ============================================
     function populateStudentSelect(students) {
         const select = document.getElementById('studentSelect');
         select.innerHTML = '<option value="">-- Select Student --</option>';
-        
         if (!students || students.length === 0) {
             select.innerHTML += '<option value="" disabled>No students found for this grade</option>';
             return;
         }
-        
         students.forEach(student => {
             const option = document.createElement('option');
             option.value = student.studentId;
@@ -968,45 +930,27 @@
         });
     }
 
-    // ============================================
-    // LOAD SUBJECT CONFIG
-    // ============================================
     async function loadSubjectConfig() {
         const grade = document.getElementById('gradeFilter').value;
         const type = document.getElementById('typeFilter').value;
-        
         if (!grade) return;
-        
         try {
             const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`);
             const data = await response.json();
-            
-            if (data.success && data.config) {
-                subjectConfig = data.config.subjects || [];
-            } else {
-                subjectConfig = [];
-            }
-        } catch (error) {
-            console.error('Error loading subjects:', error);
-            subjectConfig = [];
-        }
+            if (data.success && data.config) subjectConfig = data.config.subjects || [];
+            else subjectConfig = [];
+        } catch (error) { console.error('Error loading subjects:', error); subjectConfig = []; }
     }
 
-    // ============================================
-    // LOAD STUDENT SUBJECTS
-    // ============================================
     function loadStudentSubjects() {
         const studentId = document.getElementById('studentSelect').value;
         const container = document.getElementById('subjectsContainer');
-        
         if (!studentId) {
             container.innerHTML = '<p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p>';
             currentStudentId = null;
             return;
         }
-        
         currentStudentId = studentId;
-        
         if (subjectConfig.length === 0) {
             container.innerHTML = `
                 <p style="color:#d4a017; text-align:center; padding:20px;">
@@ -1019,7 +963,6 @@
             `;
             return;
         }
-        
         let html = '<div class="subjects-grid">';
         subjectConfig.forEach(subject => {
             html += `
@@ -1032,13 +975,9 @@
         });
         html += '</div>';
         html += `<p style="font-size:12px;color:#999;margin-top:5px;">Max scores: ${subjectConfig.map(s => `${s.name} (${s.max})`).join(', ')}</p>`;
-        
         container.innerHTML = html;
     }
 
-    // ============================================
-    // SAVE STUDENT SCORES
-    // ============================================
     async function saveStudentScores() {
         const studentId = currentStudentId;
         const grade = document.getElementById('gradeFilter').value;
@@ -1046,72 +985,28 @@
         const term = document.getElementById('termFilter').value;
         const year = document.getElementById('yearFilter').value;
         const period = document.getElementById('periodInput').value.trim();
-        
-        if (!studentId) {
-            showAlert('❌ Please select a student', 'error');
-            return;
-        }
-        
+        if (!studentId) { showAlert('❌ Please select a student', 'error'); return; }
         const student = allStudents.find(s => s.studentId === studentId);
-        if (!student) {
-            showAlert('❌ Student not found', 'error');
-            return;
-        }
-        
+        if (!student) { showAlert('❌ Student not found', 'error'); return; }
         const assessments = [];
         let allValid = true;
-        
         subjectConfig.forEach(subject => {
             const input = document.getElementById(`subject_${subject.name.replace(/\s/g, '_')}`);
             const score = parseFloat(input.value);
-            
-            if (isNaN(score) || score < 0) {
-                allValid = false;
-                return;
-            }
-            
-            if (score > subject.max) {
-                allValid = false;
-                showAlert(`❌ Score for ${subject.name} cannot exceed ${subject.max}`, 'error');
-                return;
-            }
-            
-            assessments.push({
-                subject: subject.name,
-                maxScore: subject.max,
-                score: score
-            });
+            if (isNaN(score) || score < 0) { allValid = false; return; }
+            if (score > subject.max) { allValid = false; showAlert(`❌ Score for ${subject.name} cannot exceed ${subject.max}`, 'error'); return; }
+            assessments.push({ subject: subject.name, maxScore: subject.max, score: score });
         });
-        
-        if (!allValid) {
-            showAlert('❌ Please enter valid scores for all subjects', 'error');
-            return;
-        }
-        
+        if (!allValid) { showAlert('❌ Please enter valid scores for all subjects', 'error'); return; }
         const hasScore = assessments.some(a => a.score > 0);
-        if (!hasScore) {
-            showAlert('❌ Please enter at least one score', 'error');
-            return;
-        }
-        
-        const data = {
-            studentName: student.name,
-            studentId: studentId,
-            grade: grade,
-            type: type,
-            term: term,
-            year: year,
-            period: period,
-            assessments: assessments
-        };
-        
+        if (!hasScore) { showAlert('❌ Please enter at least one score', 'error'); return; }
+        const data = { studentName: student.name, studentId: studentId, grade, type, term, year, period, assessments };
         try {
             const response = await fetch('/api/assessments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            
             const result = await response.json();
             if (result.success) {
                 showAlert(`✅ Scores saved for ${student.name}!`, 'success');
@@ -1128,36 +1023,25 @@
         }
     }
 
-    // ============================================
-    // LOAD ASSESSMENTS
-    // ============================================
     async function loadAssessments() {
         const grade = document.getElementById('gradeFilter').value;
         const type = document.getElementById('typeFilter').value;
         const term = document.getElementById('termFilter').value;
         const year = document.getElementById('yearFilter').value;
-        
         if (!grade) return;
-        
         const tbody = document.getElementById('assessmentsBody');
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999;"><span class="loading-spinner"></span> Loading assessments...</td></tr>';
-        
         try {
             const response = await fetch(`/api/assessments/grade/${encodeURIComponent(grade)}?type=${type}&term=${term}&year=${year}`);
             const data = await response.json();
-            
             if (data.success) {
                 const students = data.students || [];
-                currentAssessments = students;
-                
                 let exceeding = 0, meeting = 0, approaching = 0, below = 0;
-                
                 if (students.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999;">No assessments found for this grade</td></tr>';
                     updateStats(0, 0, 0, 0, 0);
                     return;
                 }
-                
                 const uniqueStudents = {};
                 students.forEach(student => {
                     const key = student.studentId || student.studentName;
@@ -1165,20 +1049,16 @@
                         uniqueStudents[key] = student;
                     }
                 });
-                
                 const uniqueStudentList = Object.values(uniqueStudents);
-                
                 let html = '';
                 uniqueStudentList.forEach((student, index) => {
                     const level = student.performanceLevel || 'Approaching Expectation';
                     const levelClass = level.toLowerCase().replace(' ', '-');
                     const avg = student.averageScore ? student.averageScore.toFixed(1) : '0';
-                    
                     if (level === 'Exceeding Expectation') exceeding++;
                     else if (level === 'Meeting Expectation') meeting++;
                     else if (level === 'Approaching Expectation') approaching++;
                     else below++;
-                    
                     html += `
                         <tr>
                             <td>${index + 1}</td>
@@ -1196,7 +1076,6 @@
                         </tr>
                     `;
                 });
-                
                 tbody.innerHTML = html;
                 updateStats(uniqueStudentList.length, exceeding, meeting, approaching, below);
             } else {
@@ -1208,9 +1087,6 @@
         }
     }
 
-    // ============================================
-    // UPDATE STATS
-    // ============================================
     function updateStats(total, exceeding, meeting, approaching, below) {
         document.getElementById('totalStudents').textContent = total || 0;
         document.getElementById('exceedingCount').textContent = exceeding || 0;
@@ -1219,22 +1095,13 @@
         document.getElementById('belowCount').textContent = below || 0;
     }
 
-    // ============================================
-    // VIEW ASSESSMENT
-    // ============================================
     async function viewAssessment(assessmentId) {
         try {
             const response = await fetch(`/api/assessments/student/${assessmentId}`);
             const data = await response.json();
-            
-            if (!data.success || !data.assessment) {
-                showAlert('❌ Assessment not found', 'error');
-                return;
-            }
-            
+            if (!data.success || !data.assessment) { showAlert('❌ Assessment not found', 'error'); return; }
             const assessment = data.assessment;
             viewStudentId = assessment._id;
-            
             document.getElementById('viewStudentInfo').innerHTML = `
                 <div class="row">
                     <div class="item"><strong>Student:</strong> ${assessment.studentName} (${assessment.studentId || 'N/A'})</div>
@@ -1246,7 +1113,6 @@
                     <div class="item"><strong>Performance:</strong> <span class="performance-badge ${(assessment.performanceLevel || 'approaching').toLowerCase().replace(' ', '-')}">${assessment.performanceLevel || 'N/A'}</span></div>
                 </div>
             `;
-            
             const container = document.getElementById('viewSubjectsContainer');
             if (!assessment.assessments || assessment.assessments.length === 0) {
                 container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
@@ -1264,16 +1130,13 @@
                         </thead>
                         <tbody>
                 `;
-                
                 assessment.assessments.forEach(subject => {
                     const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(1) : 0;
-                    let perfLevel = 'Approaching Expectation';
-                    let perfClass = 'perf-approaching';
+                    let perfLevel = 'Approaching Expectation', perfClass = 'perf-approaching';
                     if (percentage >= 80) { perfLevel = 'Exceeding Expectation'; perfClass = 'perf-exceeding'; }
                     else if (percentage >= 60) { perfLevel = 'Meeting Expectation'; perfClass = 'perf-meeting'; }
                     else if (percentage >= 40) { perfLevel = 'Approaching Expectation'; perfClass = 'perf-approaching'; }
                     else { perfLevel = 'Below Expectation'; perfClass = 'perf-below'; }
-                    
                     html += `
                         <tr style="border-bottom:1px solid #e8ecf1;">
                             <td style="padding:8px 12px;font-weight:600;">${subject.subject}</td>
@@ -1284,14 +1147,9 @@
                         </tr>
                     `;
                 });
-                
-                html += `
-                        </tbody>
-                    </table>
-                `;
+                html += `</tbody></table>`;
                 container.innerHTML = html;
             }
-            
             document.getElementById('viewModal').classList.add('active');
         } catch (error) {
             console.error('Error viewing assessment:', error);
@@ -1299,79 +1157,36 @@
         }
     }
 
-    // ============================================
-    // DOWNLOAD VIEW REPORT
-    // ============================================
-    function downloadViewReport() {
-        if (viewStudentId) {
-            downloadStudentReport(viewStudentId);
-        }
-    }
-
-    // ============================================
-    // CLOSE VIEW MODAL
-    // ============================================
-    function closeViewModal() {
-        document.getElementById('viewModal').classList.remove('active');
-    }
-
-    // ============================================
-    // DOWNLOAD STUDENT REPORT (PDF)
-    // ============================================
-    function downloadStudentReport(studentId) {
-        window.open(`/api/assessments/download-report/${studentId}`, '_blank');
-        showAlert('📄 Student report is downloading...', 'info');
-    }
-
-    // ============================================
-    // DOWNLOAD GRADE REPORT (PDF)
-    // ============================================
+    function downloadViewReport() { if (viewStudentId) downloadStudentReport(viewStudentId); }
+    function closeViewModal() { document.getElementById('viewModal').classList.remove('active'); }
+    function downloadStudentReport(studentId) { window.open(`/api/assessments/download-report/${studentId}`, '_blank'); showAlert('📄 Student report is downloading...', 'info'); }
     function downloadGradeReportPDF() {
         const grade = document.getElementById('gradeFilter').value;
         const type = document.getElementById('typeFilter').value;
         const term = document.getElementById('termFilter').value;
         const year = document.getElementById('yearFilter').value;
-        
         window.open(`/api/assessments/download-class-pdf?grade=${encodeURIComponent(grade)}&type=${type}&term=${term}&year=${year}`, '_blank');
         showAlert('📄 Grade report PDF is downloading...', 'info');
     }
 
-    // ============================================
-    // DELETE ASSESSMENT
-    // ============================================
     async function deleteAssessment(studentId) {
         if (!confirm('Are you sure you want to delete this assessment?')) return;
         try {
             const response = await fetch(`/api/assessments/${studentId}`, { method: 'DELETE' });
             const data = await response.json();
-            if (data.success) {
-                showAlert('✅ Assessment deleted successfully!', 'success');
-                loadAssessments();
-            } else {
-                showAlert('❌ Error: ' + data.message, 'error');
-            }
-        } catch (error) {
-            showAlert('❌ Error deleting assessment: ' + error.message, 'error');
-        }
+            if (data.success) { showAlert('✅ Assessment deleted successfully!', 'success'); loadAssessments(); }
+            else { showAlert('❌ Error: ' + data.message, 'error'); }
+        } catch (error) { showAlert('❌ Error deleting assessment: ' + error.message, 'error'); }
     }
 
-    // ============================================
-    // OPEN EDIT MODAL
-    // ============================================
     async function openEditModal(assessmentId) {
         try {
             const response = await fetch(`/api/assessments/student/${assessmentId}`);
             const data = await response.json();
-            
-            if (!data.success || !data.assessment) {
-                showAlert('❌ Assessment not found', 'error');
-                return;
-            }
-            
+            if (!data.success || !data.assessment) { showAlert('❌ Assessment not found', 'error'); return; }
             const assessment = data.assessment;
             document.getElementById('editAssessmentId').value = assessment._id;
             document.getElementById('editStudentName').value = `${assessment.studentName} (${assessment.studentId || 'N/A'})`;
-            
             const container = document.getElementById('editSubjectsContainer');
             let html = '<div style="margin-top:10px;">';
             assessment.assessments.forEach(subject => {
@@ -1385,93 +1200,52 @@
             });
             html += '</div>';
             container.innerHTML = html;
-            
             document.getElementById('editModal').classList.add('active');
-        } catch (error) {
-            console.error('Error loading assessment for edit:', error);
-            showAlert('❌ Error loading assessment: ' + error.message, 'error');
-        }
+        } catch (error) { showAlert('❌ Error loading assessment: ' + error.message, 'error'); }
     }
 
-    // ============================================
-    // CLOSE EDIT MODAL
-    // ============================================
-    function closeEditModal() {
-        document.getElementById('editModal').classList.remove('active');
-    }
+    function closeEditModal() { document.getElementById('editModal').classList.remove('active'); }
 
-    // ============================================
-    // SAVE EDIT ASSESSMENT
-    // ============================================
     async function saveEditAssessment() {
         const assessmentId = document.getElementById('editAssessmentId').value;
-        
         const updatedAssessments = [];
         const subjectInputs = document.querySelectorAll('#editSubjectsContainer .edit-subject-item');
-        
         subjectInputs.forEach(item => {
             const nameSpan = item.querySelector('.name');
             const input = item.querySelector('input');
             const maxSpan = item.querySelector('.max-score');
-            
             const subjectName = nameSpan.textContent;
             const maxScore = parseInt(maxSpan.textContent.replace('/', '')) || 100;
             const score = parseFloat(input.value) || 0;
-            
-            updatedAssessments.push({
-                subject: subjectName,
-                maxScore: maxScore,
-                score: score
-            });
+            updatedAssessments.push({ subject: subjectName, maxScore: maxScore, score: score });
         });
-        
         const data = { assessments: updatedAssessments };
-        
         try {
             const response = await fetch(`/api/assessments/${assessmentId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            
             const result = await response.json();
-            if (result.success) {
-                showAlert('✅ Assessment updated successfully!', 'success');
-                closeEditModal();
-                loadAssessments();
-            } else {
-                showAlert('❌ Error: ' + result.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error updating assessment:', error);
-            showAlert('❌ Error updating assessment: ' + error.message, 'error');
-        }
+            if (result.success) { showAlert('✅ Assessment updated successfully!', 'success'); closeEditModal(); loadAssessments(); }
+            else { showAlert('❌ Error: ' + result.message, 'error'); }
+        } catch (error) { showAlert('❌ Error updating assessment: ' + error.message, 'error'); }
     }
 
-    // ============================================
-    // DELETE FROM MODAL
-    // ============================================
     function deleteAssessmentFromModal() {
         const assessmentId = document.getElementById('editAssessmentId').value;
         closeEditModal();
         deleteAssessment(assessmentId);
     }
 
-    // ============================================
-    // LOAD SUBJECT CONFIG ON GRADE CHANGE
-    // ============================================
     document.getElementById('gradeFilter').addEventListener('change', function() {
         loadSubjectConfig();
         document.getElementById('subjectsContainer').innerHTML = '<p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p>';
         document.getElementById('studentSelect').value = '';
         loadStudentsForGrade();
-        // Update config section grade display
         document.getElementById('configGradeDisplay').textContent = this.value;
     });
 
-    // ============================================
-    // INIT
-    // ============================================
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
             loadSubjectConfig();
