@@ -602,20 +602,22 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model('Student', studentSchema);
 
-// Subject Config Schema - NO INDEXES WITH autoIndex: false
+// ============================================
+// SUBJECT CONFIG SCHEMA - NO INDEXES, NEW COLLECTION
+// ============================================
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
     subjects: [{ name: { type: String, required: true }, max: { type: Number, required: true } }],
     rankLevels: { type: [String], default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] },
     updatedAt: { type: Date, default: Date.now }
-}, { autoIndex: false });  // <-- THIS PREVENTS AUTO-INDEX CREATION
+}, { autoIndex: false, collection: 'subjectconfigs_new' });  // NEW COLLECTION NAME
 
-// IMPORTANT: Do NOT call subjectConfigSchema.index() anywhere
-// Remove or comment out any index creation lines
-// subjectConfigSchema.index({ grade: 1, type: 1 }); // DELETE THIS LINE
+// NO INDEX - DO NOT add any index
+// subjectConfigSchema.index({ grade: 1, type: 1 }); // DELETED
 
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
+
 // Student Assessment Schema
 const studentAssessmentSchema = new mongoose.Schema({
     studentName: { type: String, required: true },
@@ -682,7 +684,6 @@ function getDefaultSubjects(grade, type) {
             'Grade 6': [{ name: 'MATHS ACTIVITIES', max: 30 }, { name: 'ENGLISH ACTIVITIES', max: 50 }, { name: 'SCI & TECH', max: 30 }, { name: 'KISW LUGHA', max: 50 }, { name: 'SST', max: 30 }, { name: 'RELIGIOUS EDUCATION', max: 20 }, { name: 'AGRICULTURE', max: 20 }, { name: 'CREATIVE ART', max: 35 }]
         },
         'monthly': {
-            // ===== ALL GRADES NOW HAVE MONTHLY DEFAULTS =====
             'Play Group': [{ name: 'MATH', max: 20 }, { name: 'LANG', max: 20 }, { name: 'LIT', max: 20 }, { name: 'KUS', max: 20 }, { name: 'ENVI/CRE', max: 20 }, { name: 'C/A', max: 20 }],
             'PP1': [{ name: 'MATH', max: 20 }, { name: 'LANG', max: 20 }, { name: 'LIT', max: 20 }, { name: 'KIS', max: 20 }, { name: 'KUS', max: 20 }, { name: 'ENV', max: 20 }, { name: 'CRE/I.R.E', max: 20 }, { name: 'C/A', max: 20 }],
             'PP2': [{ name: 'MATH', max: 20 }, { name: 'LANG', max: 20 }, { name: 'LIT', max: 20 }, { name: 'KIS', max: 20 }, { name: 'KUS', max: 20 }, { name: 'ENV', max: 20 }, { name: 'CRE/I.R.E', max: 20 }, { name: 'C/A', max: 20 }],
@@ -694,7 +695,6 @@ function getDefaultSubjects(grade, type) {
             'Grade 6': [{ name: 'MATHS ACTIVITIES', max: 60 }, { name: 'ENGLISH ACTIVITIES', max: 80 }, { name: 'SCI & TECH', max: 60 }, { name: 'KISW LUGHA', max: 80 }, { name: 'SST', max: 60 }, { name: 'RELIGIOUS EDUCATION', max: 40 }, { name: 'AGRICULTURE', max: 40 }, { name: 'CREATIVE ART', max: 50 }]
         },
         'term': {
-            // ===== ALL GRADES NOW HAVE TERM DEFAULTS =====
             'Play Group': [{ name: 'MATH', max: 30 }, { name: 'LANG', max: 30 }, { name: 'LIT', max: 30 }, { name: 'KUS', max: 30 }, { name: 'ENVI/CRE', max: 30 }, { name: 'C/A', max: 30 }],
             'PP1': [{ name: 'MATH', max: 30 }, { name: 'LANG', max: 30 }, { name: 'LIT', max: 30 }, { name: 'KIS', max: 30 }, { name: 'KUS', max: 30 }, { name: 'ENV', max: 30 }, { name: 'CRE/I.R.E', max: 30 }, { name: 'C/A', max: 30 }],
             'PP2': [{ name: 'MATH', max: 30 }, { name: 'LANG', max: 30 }, { name: 'LIT', max: 30 }, { name: 'KIS', max: 30 }, { name: 'KUS', max: 30 }, { name: 'ENV', max: 30 }, { name: 'CRE/I.R.E', max: 30 }, { name: 'C/A', max: 30 }],
@@ -713,6 +713,7 @@ function getDefaultSubjects(grade, type) {
         return fallback;
     }
 }
+
 // ============================================
 // GENERATE STUDENT ID
 // ============================================
@@ -1784,7 +1785,7 @@ app.get('/api/assessments/student/:studentId', async (req, res) => {
 });
 
 // ============================================
-// SUBJECT CONFIG - RAW MONGODB ONLY
+// SUBJECT CONFIG ROUTES - USING NEW COLLECTION
 // ============================================
 
 // GET subject config
@@ -1796,7 +1797,7 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
         console.log('📖 GET config for:', grade, type);
         
         const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs');
+        const collection = db.collection('subjectconfigs_new');
         
         let config = await collection.findOne({ grade: grade, type: type });
         if (!config) {
@@ -1834,7 +1835,7 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
         }
         
         const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs');
+        const collection = db.collection('subjectconfigs_new');
         const result = await collection.deleteMany({ grade: grade, type: type });
         console.log(`✅ Deleted ${result.deletedCount} configs for ${grade} (${type})`);
         
@@ -1888,11 +1889,9 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             max: s.max
         }));
         
-        // ============================================
-        // RAW MONGODB - DELETE THEN INSERT
-        // ============================================
+        // Use new collection
         const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs');
+        const collection = db.collection('subjectconfigs_new');
         
         // Delete existing
         await collection.deleteMany({ grade: grade, type: type });
@@ -1943,6 +1942,7 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         });
     }
 });
+
 // ============================================
 // ASSESSMENT ROUTES
 // ============================================
@@ -1958,10 +1958,13 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
         if (year) filter.year = year;
         if (term) filter.term = term;
         const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
-        let config = await SubjectConfig.findOne({ grade, type: type || 'monthly' });
+        
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        let config = await collection.findOne({ grade: grade, type: type || 'monthly' });
         if (!config) {
             const defaultSubjects = getDefaultSubjects(grade, type || 'monthly');
-            config = { grade, type: type || 'monthly', subjects: defaultSubjects };
+            config = { grade: grade, type: type || 'monthly', subjects: defaultSubjects };
         }
         res.json({ success: true, students, subjectConfig: { [`${grade}_${type || 'monthly'}`]: config } });
     } catch (error) {
@@ -2155,7 +2158,10 @@ app.post('/api/assessments/copy', async (req, res) => {
         if (sourceStudents.length === 0) {
             return res.json({ success: true, message: 'No students found to copy', count: 0 });
         }
-        let config = await SubjectConfig.findOne({ grade: toGrade, type: toType || 'monthly' });
+        
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        let config = await collection.findOne({ grade: toGrade, type: toType || 'monthly' });
         if (!config) {
             const defaultSubjects = getDefaultSubjects(toGrade, toType || 'monthly');
             config = { grade: toGrade, type: toType || 'monthly', subjects: defaultSubjects };
