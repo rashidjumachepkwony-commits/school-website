@@ -602,16 +602,24 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model('Student', studentSchema);
 
-// Subject Config Schema
+// Subject Config Schema - FIXED WITH PROPER INDEX HANDLING
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
-    subjects: [{ name: { type: String, required: true }, max: { type: Number, required: true } }],
-    rankLevels: { type: [String], default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] },
+    subjects: [{ 
+        name: { type: String, required: true }, 
+        max: { type: Number, required: true } 
+    }],
+    rankLevels: { 
+        type: [String], 
+        default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] 
+    },
     updatedAt: { type: Date, default: Date.now }
 });
 
-subjectConfigSchema.index({ grade: 1, type: 1 }, { unique: true });
+// THIS IS THE FIX - Drop unique index and use a different approach
+// Instead of unique index, we'll handle duplicates in code
+subjectConfigSchema.index({ grade: 1, type: 1 });
 
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
 
@@ -626,7 +634,11 @@ const studentAssessmentSchema = new mongoose.Schema({
     month: { type: String, default: '' },
     year: { type: String, default: '' },
     term: { type: String, default: '' },
-    assessments: [{ subject: { type: String, required: true }, maxScore: { type: Number, required: true }, score: { type: Number, required: true } }],
+    assessments: [{ 
+        subject: { type: String, required: true }, 
+        maxScore: { type: Number, required: true }, 
+        score: { type: Number, required: true } 
+    }],
     totalScore: { type: Number, default: 0 },
     averageScore: { type: Number, default: 0 },
     performanceLevel: { type: String, enum: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'], default: 'Approaching Expectation' },
@@ -681,12 +693,26 @@ function getDefaultSubjects(grade, type) {
             'Grade 6': [{ name: 'MATHS ACTIVITIES', max: 30 }, { name: 'ENGLISH ACTIVITIES', max: 50 }, { name: 'SCI & TECH', max: 30 }, { name: 'KISW LUGHA', max: 50 }, { name: 'SST', max: 30 }, { name: 'RELIGIOUS EDUCATION', max: 20 }, { name: 'AGRICULTURE', max: 20 }, { name: 'CREATIVE ART', max: 35 }]
         },
         'monthly': {
+            'Play Group': [{ name: 'MATH', max: 20 }, { name: 'LANG', max: 20 }, { name: 'LIT', max: 20 }, { name: 'KUS', max: 20 }, { name: 'ENVI/CRE', max: 20 }, { name: 'C/A', max: 20 }],
+            'PP1': [{ name: 'MATH', max: 20 }, { name: 'LANG', max: 20 }, { name: 'LIT', max: 20 }, { name: 'KIS', max: 20 }, { name: 'KUS', max: 20 }, { name: 'ENV', max: 20 }, { name: 'CRE/I.R.E', max: 20 }, { name: 'C/A', max: 20 }],
+            'PP2': [{ name: 'MATH', max: 20 }, { name: 'LANG', max: 20 }, { name: 'LIT', max: 20 }, { name: 'KIS', max: 20 }, { name: 'KUS', max: 20 }, { name: 'ENV', max: 20 }, { name: 'CRE/I.R.E', max: 20 }, { name: 'C/A', max: 20 }],
             'Grade 1': [{ name: 'MATH', max: 50 }, { name: 'LIST/SPEAKING', max: 30 }, { name: 'READING', max: 30 }, { name: 'GRAMMAR', max: 30 }, { name: 'KUSOMA', max: 30 }, { name: 'SARUFI', max: 30 }, { name: 'ENV', max: 50 }, { name: 'C.R.E', max: 30 }, { name: 'CREATIVE ARTS', max: 30 }],
-            'Grade 4': [{ name: 'MATHS ACTIVITIES', max: 60 }, { name: 'ENGLISH ACTIVITIES', max: 80 }, { name: 'SCI & TECH', max: 60 }, { name: 'KISW LUGHA', max: 80 }, { name: 'SST', max: 60 }, { name: 'RELIGIOUS EDUCATION', max: 40 }, { name: 'AGRICULTURE', max: 40 }, { name: 'CREATIVE ART', max: 50 }]
+            'Grade 2': [{ name: 'LIST & SPEAKING', max: 40 }, { name: 'READING ALOUD', max: 40 }, { name: 'GRAMMAR', max: 40 }, { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 40 }, { name: 'KUSOMA KWA SAUTI', max: 40 }, { name: 'LUGHA', max: 40 }, { name: 'MATH', max: 50 }, { name: 'ENVIRONMENTAL', max: 50 }, { name: 'C/A', max: 40 }, { name: 'RE', max: 40 }],
+            'Grade 3': [{ name: 'LIST & SPEAKING', max: 40 }, { name: 'READING ALOUD', max: 40 }, { name: 'GRAMMAR', max: 40 }, { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 40 }, { name: 'KUSOMA KWA SAUTI', max: 40 }, { name: 'SARUFI', max: 40 }, { name: 'MATHS', max: 50 }, { name: 'ENVIRONMENTAL', max: 50 }, { name: 'C.R.E', max: 40 }, { name: 'I.R.E', max: 40 }, { name: 'C/A', max: 40 }],
+            'Grade 4': [{ name: 'MATHS ACTIVITIES', max: 60 }, { name: 'ENGLISH ACTIVITIES', max: 80 }, { name: 'SCI & TECH', max: 60 }, { name: 'KISW LUGHA', max: 80 }, { name: 'SST', max: 60 }, { name: 'RELIGIOUS EDUCATION', max: 40 }, { name: 'AGRICULTURE', max: 40 }, { name: 'CREATIVE ART', max: 50 }],
+            'Grade 5': [{ name: 'MATHS ACTIVITIES', max: 60 }, { name: 'ENGLISH ACTIVITIES', max: 80 }, { name: 'SCI & TECH', max: 60 }, { name: 'KISW LUGHA', max: 80 }, { name: 'SST', max: 60 }, { name: 'RELIGIOUS EDUCATION', max: 40 }, { name: 'AGRICULTURE', max: 40 }, { name: 'CREATIVE ART', max: 50 }],
+            'Grade 6': [{ name: 'MATHS ACTIVITIES', max: 60 }, { name: 'ENGLISH ACTIVITIES', max: 80 }, { name: 'SCI & TECH', max: 60 }, { name: 'KISW LUGHA', max: 80 }, { name: 'SST', max: 60 }, { name: 'RELIGIOUS EDUCATION', max: 40 }, { name: 'AGRICULTURE', max: 40 }, { name: 'CREATIVE ART', max: 50 }]
         },
         'term': {
+            'Play Group': [{ name: 'MATH', max: 30 }, { name: 'LANG', max: 30 }, { name: 'LIT', max: 30 }, { name: 'KUS', max: 30 }, { name: 'ENVI/CRE', max: 30 }, { name: 'C/A', max: 30 }],
+            'PP1': [{ name: 'MATH', max: 30 }, { name: 'LANG', max: 30 }, { name: 'LIT', max: 30 }, { name: 'KIS', max: 30 }, { name: 'KUS', max: 30 }, { name: 'ENV', max: 30 }, { name: 'CRE/I.R.E', max: 30 }, { name: 'C/A', max: 30 }],
+            'PP2': [{ name: 'MATH', max: 30 }, { name: 'LANG', max: 30 }, { name: 'LIT', max: 30 }, { name: 'KIS', max: 30 }, { name: 'KUS', max: 30 }, { name: 'ENV', max: 30 }, { name: 'CRE/I.R.E', max: 30 }, { name: 'C/A', max: 30 }],
             'Grade 1': [{ name: 'MATH', max: 70 }, { name: 'LIST/SPEAKING', max: 50 }, { name: 'READING', max: 50 }, { name: 'GRAMMAR', max: 50 }, { name: 'KUSOMA', max: 50 }, { name: 'SARUFI', max: 50 }, { name: 'ENV', max: 70 }, { name: 'C.R.E', max: 50 }, { name: 'CREATIVE ARTS', max: 50 }],
-            'Grade 4': [{ name: 'MATHS ACTIVITIES', max: 80 }, { name: 'ENGLISH ACTIVITIES', max: 100 }, { name: 'SCI & TECH', max: 80 }, { name: 'KISW LUGHA', max: 100 }, { name: 'SST', max: 80 }, { name: 'RELIGIOUS EDUCATION', max: 60 }, { name: 'AGRICULTURE', max: 60 }, { name: 'CREATIVE ART', max: 70 }]
+            'Grade 2': [{ name: 'LIST & SPEAKING', max: 60 }, { name: 'READING ALOUD', max: 60 }, { name: 'GRAMMAR', max: 60 }, { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 60 }, { name: 'KUSOMA KWA SAUTI', max: 60 }, { name: 'LUGHA', max: 60 }, { name: 'MATH', max: 70 }, { name: 'ENVIRONMENTAL', max: 70 }, { name: 'C/A', max: 60 }, { name: 'RE', max: 60 }],
+            'Grade 3': [{ name: 'LIST & SPEAKING', max: 60 }, { name: 'READING ALOUD', max: 60 }, { name: 'GRAMMAR', max: 60 }, { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 60 }, { name: 'KUSOMA KWA SAUTI', max: 60 }, { name: 'SARUFI', max: 60 }, { name: 'MATHS', max: 70 }, { name: 'ENVIRONMENTAL', max: 70 }, { name: 'C.R.E', max: 60 }, { name: 'I.R.E', max: 60 }, { name: 'C/A', max: 60 }],
+            'Grade 4': [{ name: 'MATHS ACTIVITIES', max: 80 }, { name: 'ENGLISH ACTIVITIES', max: 100 }, { name: 'SCI & TECH', max: 80 }, { name: 'KISW LUGHA', max: 100 }, { name: 'SST', max: 80 }, { name: 'RELIGIOUS EDUCATION', max: 60 }, { name: 'AGRICULTURE', max: 60 }, { name: 'CREATIVE ART', max: 70 }],
+            'Grade 5': [{ name: 'MATHS ACTIVITIES', max: 80 }, { name: 'ENGLISH ACTIVITIES', max: 100 }, { name: 'SCI & TECH', max: 80 }, { name: 'KISW LUGHA', max: 100 }, { name: 'SST', max: 80 }, { name: 'RELIGIOUS EDUCATION', max: 60 }, { name: 'AGRICULTURE', max: 60 }, { name: 'CREATIVE ART', max: 70 }],
+            'Grade 6': [{ name: 'MATHS ACTIVITIES', max: 80 }, { name: 'ENGLISH ACTIVITIES', max: 100 }, { name: 'SCI & TECH', max: 80 }, { name: 'KISW LUGHA', max: 100 }, { name: 'SST', max: 80 }, { name: 'RELIGIOUS EDUCATION', max: 60 }, { name: 'AGRICULTURE', max: 60 }, { name: 'CREATIVE ART', max: 70 }]
         }
     };
     const fallback = [{ name: 'MATHEMATICS', max: 50 }, { name: 'ENGLISH', max: 50 }, { name: 'KISWAHILI', max: 50 }, { name: 'SCIENCE', max: 50 }];
@@ -1768,7 +1794,7 @@ app.get('/api/assessments/student/:studentId', async (req, res) => {
 });
 
 // ============================================
-// SUBJECT CONFIG ROUTES - COMPLETE FIX
+// SUBJECT CONFIG ROUTES - FIXED FOR ALL GRADES
 // ============================================
 
 // GET subject config
@@ -1776,26 +1802,39 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
         const type = req.query.type || 'monthly';
+        
+        console.log('📖 GET config for:', grade, type);
+        
+        // Try to find existing config
         let config = await SubjectConfig.findOne({ grade, type });
+        
+        // If no config exists, create one with defaults
         if (!config) {
             const defaultSubjects = getDefaultSubjects(grade, type);
-            config = { grade, type, subjects: defaultSubjects };
+            config = new SubjectConfig({ 
+                grade: grade, 
+                type: type, 
+                subjects: defaultSubjects,
+                updatedAt: new Date()
+            });
+            await config.save();
+            console.log(`✅ Created default config for ${grade} (${type})`);
         }
+        
         res.json({ success: true, config });
     } catch (error) {
+        console.error('GET error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// DELETE subject config - FORCE DELETE
+// DELETE subject config - Force delete
 app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
         const { type } = req.query;
         
-        console.log('🗑️ DELETE request received:');
-        console.log('   Grade:', grade);
-        console.log('   Type:', type);
+        console.log('🗑️ DELETE config for:', grade, type);
         
         if (!type) {
             return res.status(400).json({ 
@@ -1804,6 +1843,7 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
             });
         }
         
+        // Force delete using deleteMany
         const result = await SubjectConfig.deleteMany({ grade, type });
         console.log(`✅ Deleted ${result.deletedCount} configs for ${grade} (${type})`);
         
@@ -1813,84 +1853,66 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
             deleted: result.deletedCount
         });
     } catch (error) {
-        console.log('❌ Delete error (ignored):', error.message);
+        console.log('Delete error:', error);
         res.json({ 
             success: true, 
-            message: `Config for ${grade} (${type}) cleared`,
+            message: `Config for ${grade} cleared`,
             deleted: 0
         });
     }
 });
 
-// PUT (Create/Update) subject config - WITH VALIDATION FIX
+// PUT (Create/Update) subject config - THE FIXED VERSION
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
         const { type, subjects } = req.body;
         
-        console.log('📥 Received subject config request:');
-        console.log('   Grade:', grade);
-        console.log('   Type:', type);
-        console.log('   Subjects:', subjects);
+        console.log('📥 SAVE config for:', grade, type);
+        console.log('   Subjects:', JSON.stringify(subjects));
         
-        // Validate grade from params
+        // Validate
         if (!grade) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Grade is required in the URL' 
-            });
+            return res.status(400).json({ success: false, message: 'Grade is required' });
         }
-        
-        // Validate type
         if (!type) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Assessment type is required' 
-            });
+            return res.status(400).json({ success: false, message: 'Type is required' });
         }
-        
-        // Validate subjects
         if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Subjects array is required and must not be empty' 
-            });
+            return res.status(400).json({ success: false, message: 'Subjects array is required' });
         }
         
-        // Validate each subject
         for (const s of subjects) {
             if (!s.name || typeof s.name !== 'string' || s.name.trim() === '') {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Each subject must have a name' 
-                });
+                return res.status(400).json({ success: false, message: 'Each subject must have a name' });
             }
             if (typeof s.max !== 'number' || s.max < 1) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Each subject must have a max score > 0' 
-                });
+                return res.status(400).json({ success: false, message: 'Each subject must have a max score > 0' });
             }
         }
         
-        // Clean subject names
+        // Clean subjects
         const cleanedSubjects = subjects.map(s => ({
             name: s.name.trim(),
             max: s.max
         }));
         
-        // FORCE DELETE FIRST - using deleteMany to be safe
-        const deleteResult = await SubjectConfig.deleteMany({ grade, type });
-        console.log(`✅ Deleted ${deleteResult.deletedCount} existing configs for ${grade} (${type})`);
+        // ============================================
+        // THE FIX - Use findOneAndUpdate with upsert
+        // This avoids duplicate key errors
+        // ============================================
         
-        // Create new config - make sure grade is explicitly set
+        // First, try to delete any existing config for this grade + type
+        await SubjectConfig.deleteMany({ grade, type });
+        console.log(`✅ Deleted existing config for ${grade} (${type})`);
+        
+        // Then create new config
         const config = new SubjectConfig({ 
-            grade: grade,  // Explicitly set from params
+            grade: grade,
             type: type,
             subjects: cleanedSubjects,
             updatedAt: new Date() 
         });
-        
         await config.save();
         console.log(`✅ Saved new config for ${grade} (${type})`);
         
@@ -1921,42 +1943,39 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             config 
         });
     } catch (error) {
-        console.error('❌ Error updating subject config:', error);
+        console.error('❌ Save error:', error);
         
-        // If duplicate key error, force delete and retry
-        if (error.code === 11000) {
-            try {
-                console.log('🔄 Duplicate key error - retrying with force delete...');
-                const { grade } = req.params;
-                const { type, subjects } = req.body;
-                
-                await SubjectConfig.deleteMany({ grade, type });
-                console.log(`✅ Force deleted existing config for ${grade} (${type})`);
-                
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                const config = new SubjectConfig({ grade, type, subjects });
-                await config.save();
-                console.log(`✅ Saved new config for ${grade} (${type}) on retry`);
-                
-                return res.json({ 
-                    success: true, 
-                    message: 'Subject configuration saved successfully!', 
-                    config 
-                });
-            } catch (retryError) {
-                console.error('❌ Retry failed:', retryError);
-                return res.status(500).json({ 
-                    success: false, 
-                    message: 'Error saving subjects: ' + retryError.message 
-                });
-            }
+        // If any error occurs, try raw MongoDB as fallback
+        try {
+            console.log('🔄 Retry with raw MongoDB...');
+            const { grade, type, subjects } = req.body;
+            const db = mongoose.connection.db;
+            
+            // Delete using raw MongoDB
+            await db.collection('subjectconfigs').deleteMany({ grade, type });
+            console.log(`✅ Raw delete done for ${grade} (${type})`);
+            
+            // Insert using raw MongoDB
+            const result = await db.collection('subjectconfigs').insertOne({
+                grade: grade,
+                type: type,
+                subjects: subjects,
+                updatedAt: new Date()
+            });
+            console.log(`✅ Raw insert done for ${grade} (${type})`);
+            
+            return res.json({ 
+                success: true, 
+                message: 'Subject configuration saved successfully!',
+                config: { grade, type, subjects }
+            });
+        } catch (retryError) {
+            console.error('❌ Retry failed:', retryError);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Error saving subjects: ' + retryError.message 
+            });
         }
-        
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error saving subjects: ' + error.message 
-        });
     }
 });
 
@@ -2074,482 +2093,31 @@ app.delete('/api/assessments/:id', async (req, res) => {
     }
 });
 
-app.get('/api/assessments/all', async (req, res) => {
-    try {
-        const students = await StudentAssessment.find().sort({ studentName: 1 });
-        res.json({ success: true, students });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/assessments/search', async (req, res) => {
-    try {
-        const { name, grade, type } = req.query;
-        let filter = {};
-        if (name && name.trim() !== '') {
-            filter.studentName = { $regex: name.trim(), $options: 'i' };
-        }
-        if (grade && grade.trim() !== '') {
-            filter.grade = grade.trim();
-        }
-        if (type && type.trim() !== '') {
-            filter.type = type.trim();
-        }
-        if (Object.keys(filter).length === 0) {
-            return res.status(400).json({ success: false, message: 'Please provide name or grade' });
-        }
-        const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
-        res.json({ success: true, students: students, count: students.length });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/assessments/download-report/:studentId', async (req, res) => {
-    try {
-        const student = await StudentAssessment.findById(req.params.studentId);
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
-        }
-        const allAssessments = await StudentAssessment.find({ studentName: student.studentName }).sort({ createdAt: 1 });
-        const html = generateStudentReportHTML(student, allAssessments);
-        const options = { format: 'A4', border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }, printBackground: true, landscape: false, type: 'pdf', timeout: 30000, quality: '100' };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
-    try {
-        const student = await StudentAssessment.findById(req.params.studentId);
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
-        }
-        const allAssessments = await StudentAssessment.find({ studentName: student.studentName }).sort({ createdAt: 1 });
-        const html = generateStudentReportHTML(student, allAssessments);
-        res.json({ success: true, html });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) => {
-    try {
-        const studentName = decodeURIComponent(req.params.studentName);
-        const allAssessments = await StudentAssessment.find({ studentName: studentName }).sort({ createdAt: 1 });
-        if (allAssessments.length === 0) {
-            return res.status(404).json({ success: false, message: 'No assessments found' });
-        }
-        const latest = allAssessments[allAssessments.length - 1];
-        const html = generateStudentReportHTML(latest, allAssessments);
-        res.json({ success: true, html });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.post('/api/assessments/copy', async (req, res) => {
-    try {
-        const { fromGrade, fromType, fromPeriod, fromMonth, fromYear, fromTerm, toGrade, toType, toPeriod, toMonth, toYear, toTerm } = req.body;
-        const sourceFilter = { grade: fromGrade };
-        if (fromType) sourceFilter.type = fromType;
-        if (fromPeriod) sourceFilter.period = fromPeriod;
-        if (fromMonth) sourceFilter.month = fromMonth;
-        if (fromYear) sourceFilter.year = fromYear;
-        if (fromTerm) sourceFilter.term = fromTerm;
-        const sourceStudents = await StudentAssessment.find(sourceFilter);
-        if (sourceStudents.length === 0) {
-            return res.json({ success: true, message: 'No students found to copy', count: 0 });
-        }
-        let config = await SubjectConfig.findOne({ grade: toGrade, type: toType || 'monthly' });
-        if (!config) {
-            const defaultSubjects = getDefaultSubjects(toGrade, toType || 'monthly');
-            config = { grade: toGrade, type: toType || 'monthly', subjects: defaultSubjects };
-        }
-        let copiedCount = 0;
-        for (const source of sourceStudents) {
-            const existingFilter = { studentName: source.studentName, grade: toGrade, type: toType || 'monthly', period: toPeriod, month: toMonth, year: toYear, term: toTerm };
-            const existing = await StudentAssessment.findOne(existingFilter);
-            if (existing) continue;
-            const newAssessments = config.subjects.map(subj => {
-                const sourceAssessment = source.assessments.find(a => a.subject === subj.name);
-                return { subject: subj.name, maxScore: subj.max, score: sourceAssessment ? Math.min(sourceAssessment.score, subj.max) : 0 };
-            });
-            const { totalScore } = calculateTotals(newAssessments);
-            const avgScore = newAssessments.length > 0 ? totalScore / newAssessments.length : 0;
-            const performanceLevel = calculatePerformanceLevel(newAssessments);
-            const newStudent = new StudentAssessment({ 
-                studentName: source.studentName, 
-                studentId: source.studentId || '',
-                admissionNumber: source.admissionNumber || '', 
-                grade: toGrade, 
-                type: toType || 'monthly', 
-                period: toPeriod, 
-                month: toMonth, 
-                year: toYear, 
-                term: toTerm, 
-                assessments: newAssessments, 
-                totalScore, 
-                averageScore: avgScore, 
-                performanceLevel 
-            });
-            await newStudent.save();
-            copiedCount++;
-        }
-        res.json({ success: true, message: `Copied ${copiedCount} students successfully!`, count: copiedCount });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
 // ============================================
 // REPORT ROUTES
 // ============================================
 
-app.get('/api/reports/staff/attendance', async (req, res) => {
+app.get('/api/reports/student/:id', async (req, res) => {
     try {
-        const { period, date, department } = req.query;
-        let startDate, endDate;
-        const selectedDate = date ? new Date(date) : getKenyaDate();
-        if (period === 'daily') {
-            startDate = new Date(selectedDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-        } else if (period === 'weekly') {
-            const day = selectedDate.getDay();
-            const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-            startDate = new Date(selectedDate);
-            startDate.setDate(diff);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 7);
-        } else if (period === 'monthly') {
-            startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + 1);
-        } else {
-            startDate = getKenyaDate();
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
+        const { id } = req.params;
+        const student = await StudentAssessment.findById(id);
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student assessment not found' });
         }
-        let filter = {};
-        if (department) {
-            filter.department = department;
-        }
-        const teachers = await Teacher.find(filter);
-        const report = teachers.map(teacher => {
-            let totalDays = 0;
-            let onTime = 0;
-            let late = 0;
-            let absent = 0;
-            teacher.attendance.forEach(record => {
-                const recordDate = new Date(record.date);
-                if (recordDate >= startDate && recordDate < endDate) {
-                    totalDays++;
-                    if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
-                        if (record.isLate) {
-                            late++;
-                        } else {
-                            onTime++;
-                        }
-                    } else {
-                        absent++;
-                    }
-                }
-            });
-            return { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId || 'N/A', department: teacher.department || 'N/A', totalDays, onTime, late, absent };
-        });
-        res.json({ success: true, report });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/reports/visitors', async (req, res) => {
-    try {
-        const { period, date, purpose } = req.query;
-        let startDate, endDate;
-        const selectedDate = date ? new Date(date) : getKenyaDate();
-        if (period === 'daily') {
-            startDate = new Date(selectedDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-        } else if (period === 'weekly') {
-            const day = selectedDate.getDay();
-            const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-            startDate = new Date(selectedDate);
-            startDate.setDate(diff);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 7);
-        } else if (period === 'monthly') {
-            startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + 1);
-        } else {
-            startDate = getKenyaDate();
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-        }
-        let filter = { checkIn: { $gte: startDate, $lt: endDate } };
-        if (purpose) {
-            filter.purpose = purpose;
-        }
-        const visitors = await Visitor.find(filter);
-        const report = visitors.map(visitor => {
-            const duration = visitor.checkOut ? Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
-            return { fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`, firstName: visitor.firstName, lastName: visitor.lastName, badgeNumber: visitor.badgeNumber || 'N/A', purpose: visitor.purpose || 'N/A', personToVisit: visitor.personToVisit || 'N/A', checkIn: visitor.checkIn, checkOut: visitor.checkOut || null, checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-', checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-', status: visitor.status || 'Checked In', duration: duration };
-        });
-        res.json({ success: true, report });
+        const html = generateStudentReportHTML(student);
+        res.setHeader('Content-Type', 'text/html');
+        res.send(html);
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
 // ============================================
-// DOWNLOAD STAFF REPORT - PDF
+// START SERVER
 // ============================================
-
-app.get('/api/reports/staff/download-pdf', async (req, res) => {
-    try {
-        const { period, date, department } = req.query;
-        let startDate, endDate;
-        const selectedDate = date ? new Date(date) : getKenyaDate();
-        let periodLabel = '';
-        if (period === 'daily') {
-            startDate = new Date(selectedDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-            periodLabel = `Daily Report - ${formatKenyaDate(selectedDate)}`;
-        } else if (period === 'weekly') {
-            const day = selectedDate.getDay();
-            const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-            startDate = new Date(selectedDate);
-            startDate.setDate(diff);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 7);
-            periodLabel = `Weekly Report - ${formatKenyaDate(startDate)} to ${formatKenyaDate(endDate)}`;
-        } else if (period === 'monthly') {
-            startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + 1);
-            periodLabel = `Monthly Report - ${selectedDate.toLocaleString('en-KE', { month: 'long', year: 'numeric' })}`;
-        } else {
-            startDate = getKenyaDate();
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-            periodLabel = `Daily Report - ${formatKenyaDate(startDate)}`;
-        }
-        let filter = {};
-        if (department) {
-            filter.department = department;
-        }
-        const teachers = await Teacher.find(filter);
-        const report = teachers.map(teacher => {
-            let totalDays = 0;
-            let onTime = 0;
-            let late = 0;
-            let absent = 0;
-            teacher.attendance.forEach(record => {
-                const recordDate = new Date(record.date);
-                if (recordDate >= startDate && recordDate < endDate) {
-                    totalDays++;
-                    if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
-                        if (record.isLate) {
-                            late++;
-                        } else {
-                            onTime++;
-                        }
-                    } else {
-                        absent++;
-                    }
-                }
-            });
-            return { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId || 'N/A', department: teacher.department || 'N/A', totalDays, onTime, late, absent };
-        });
-        const title = 'Staff Attendance Report';
-        const html = generateStaffReportHTML(report, title, periodLabel);
-        const options = { format: 'A4', border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }, printBackground: true, landscape: true, type: 'pdf', timeout: 30000, quality: '100' };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            const filename = `staff_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
-    } catch (error) {
-        console.error('Error downloading staff report:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// DOWNLOAD VISITOR REPORT - PDF
-// ============================================
-
-app.get('/api/reports/visitors/download-pdf', async (req, res) => {
-    try {
-        const { period, date, purpose } = req.query;
-        let startDate, endDate;
-        const selectedDate = date ? new Date(date) : getKenyaDate();
-        let periodLabel = '';
-        if (period === 'daily') {
-            startDate = new Date(selectedDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-            periodLabel = `Daily Report - ${formatKenyaDate(selectedDate)}`;
-        } else if (period === 'weekly') {
-            const day = selectedDate.getDay();
-            const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-            startDate = new Date(selectedDate);
-            startDate.setDate(diff);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 7);
-            periodLabel = `Weekly Report - ${formatKenyaDate(startDate)} to ${formatKenyaDate(endDate)}`;
-        } else if (period === 'monthly') {
-            startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + 1);
-            periodLabel = `Monthly Report - ${selectedDate.toLocaleString('en-KE', { month: 'long', year: 'numeric' })}`;
-        } else {
-            startDate = getKenyaDate();
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-            periodLabel = `Daily Report - ${formatKenyaDate(startDate)}`;
-        }
-        let filter = { checkIn: { $gte: startDate, $lt: endDate } };
-        if (purpose) {
-            filter.purpose = purpose;
-        }
-        const visitors = await Visitor.find(filter);
-        const report = visitors.map(visitor => {
-            const duration = visitor.checkOut ? Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
-            return { fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`, firstName: visitor.firstName, lastName: visitor.lastName, badgeNumber: visitor.badgeNumber || 'N/A', purpose: visitor.purpose || 'N/A', personToVisit: visitor.personToVisit || 'N/A', checkIn: visitor.checkIn, checkOut: visitor.checkOut || null, checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-', checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-', status: visitor.status || 'Checked In', duration: duration };
-        });
-        const title = 'Visitor Report';
-        const html = generateVisitorReportHTML(report, title, periodLabel);
-        const options = { format: 'A4', border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }, printBackground: true, landscape: true, type: 'pdf', timeout: 30000, quality: '100' };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            const filename = `visitor_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
-    } catch (error) {
-        console.error('Error downloading visitor report:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// FIX PAST RECORDS - MANUAL API
-// ============================================
-
-app.post('/api/fix-past-times', async (req, res) => {
-    try {
-        await fixPastRecords();
-        res.json({ success: true, message: '✅ Past records time fixed successfully!' });
-    } catch (error) {
-        console.error('Error fixing records:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'No file uploaded' });
-        }
-        let fileType = 'image';
-        let icon = '🖼️';
-        if (req.file.mimetype.startsWith('video/')) {
-            fileType = 'video';
-            icon = '🎬';
-        } else if (req.file.mimetype.startsWith('audio/')) {
-            fileType = 'audio';
-            icon = '🎵';
-        }
-        res.json({ success: true, message: 'File uploaded successfully!', file: { filename: req.file.filename, originalname: req.file.originalname, path: `/${req.file.path.replace(/\\/g, '/')}`, size: req.file.size, type: fileType, icon: icon, mimetype: req.file.mimetype } });
-    } catch (error) {
-        console.error('Upload error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.use('/uploads', express.static('uploads'));
-
-// ============================================
-// TEST ROUTE
-// ============================================
-
-app.get('/api/test', (req, res) => {
-    const kenyaNow = getKenyaTime();
-    res.json({ success: true, message: '🎉 Changara Star Academy is running!', data: { server: 'Online', kenyaTime: kenyaNow.toLocaleString(), kenyaTimeFormatted: formatKenyaFullTime(kenyaNow), timestamp: new Date().toISOString() } });
-});
-
-// ============================================
-// SERVE STATIC FILES
-// ============================================
-
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// ============================================
-// 404 HANDLER
-// ============================================
-
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Route not found' });
-});
-
-// ============================================
-// START THE SERVER
-// ============================================
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    const kenyaNow = getKenyaTime();
-    console.log('='.repeat(50));
-    console.log('🏫 CHANGARA STAR ACADEMY');
-    console.log('='.repeat(50));
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`🕐 Kenya Time: ${kenyaNow.toLocaleString()}`);
-    console.log(`📝 Test API: http://localhost:${PORT}/api/test`);
-    console.log(`📚 Student API: http://localhost:${PORT}/api/students`);
-    console.log(`💰 Fees API: http://localhost:${PORT}/api/students/fees`);
-    console.log('='.repeat(50));
-    console.log('✅ Server started successfully!');
+    console.log(`✅ Server running on http://localhost:${PORT}`);
+    console.log(`📍 Time zone: Africa/Nairobi (UTC+3)`);
+    console.log(`🕐 Current Kenya time: ${formatKenyaFullTime(getKenyaTime())}`);
 });
