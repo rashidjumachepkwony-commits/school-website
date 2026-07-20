@@ -474,12 +474,12 @@
         <div class="stat-card"><div class="number red" id="belowCount">0</div><div class="label">📕 Below</div></div>
     </div>
 
-    <!-- ===== FILTERS ===== -->
+    <!-- ===== FILTERS - FIXED: Play Group added ===== -->
     <div class="filter-bar">
         <div class="form-group">
             <label>📚 Grade</label>
             <select id="gradeFilter" onchange="loadStudentsForGrade(); loadAssessments();">
-                <option value="Play Group">Play Group</option>
+                <option value="Playgroup">Playgroup</option>
                 <option value="PP1">PP1</option>
                 <option value="PP2">PP2</option>
                 <option value="Grade 1">Grade 1</option>
@@ -622,10 +622,15 @@
     }
 
     // ============================================
-    // LOAD STUDENTS FOR GRADE
+    // LOAD STUDENTS FOR GRADE - FIXED
     // ============================================
     async function loadStudentsForGrade() {
         const grade = document.getElementById('gradeFilter').value;
+        
+        if (!grade) {
+            console.log('No grade selected');
+            return;
+        }
         
         try {
             const response = await fetch(`/api/assessments/students/${encodeURIComponent(grade)}`);
@@ -635,6 +640,9 @@
                 allStudents = data.students || [];
                 populateStudentSelect(allStudents);
                 document.getElementById('totalStudents').textContent = allStudents.length;
+                console.log(`Loaded ${allStudents.length} students for grade: ${grade}`);
+            } else {
+                console.error('Error loading students:', data.message);
             }
         } catch (error) {
             console.error('Error loading students:', error);
@@ -648,6 +656,11 @@
         const select = document.getElementById('studentSelect');
         select.innerHTML = '<option value="">-- Select Student --</option>';
         
+        if (!students || students.length === 0) {
+            select.innerHTML += '<option value="" disabled>No students found for this grade</option>';
+            return;
+        }
+        
         students.forEach(student => {
             const option = document.createElement('option');
             option.value = student.studentId;
@@ -657,11 +670,16 @@
     }
 
     // ============================================
-    // LOAD SUBJECT CONFIG
+    // LOAD SUBJECT CONFIG - FIXED for Playgroup
     // ============================================
     async function loadSubjectConfig() {
         const grade = document.getElementById('gradeFilter').value;
         const type = document.getElementById('typeFilter').value;
+        
+        if (!grade) {
+            console.log('No grade selected');
+            return;
+        }
         
         try {
             const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`);
@@ -669,8 +687,10 @@
             
             if (data.success && data.config) {
                 subjectConfig = data.config.subjects || [];
+                console.log(`Loaded ${subjectConfig.length} subjects for ${grade}`);
             } else {
                 subjectConfig = [];
+                console.log('No subjects found, using empty config');
             }
         } catch (error) {
             console.error('Error loading subjects:', error);
@@ -694,7 +714,15 @@
         currentStudentId = studentId;
         
         if (subjectConfig.length === 0) {
-            container.innerHTML = '<p style="color:#d4a017; text-align:center; padding:20px;">⚠️ No subjects configured for this grade. Please set up subjects first.</p>';
+            container.innerHTML = `
+                <p style="color:#d4a017; text-align:center; padding:20px;">
+                    ⚠️ No subjects configured for this grade. 
+                    <br><br>
+                    <button class="btn btn-primary btn-sm" onclick="setupDefaultSubjects()">
+                        <i class="fas fa-cog"></i> Setup Default Subjects
+                    </button>
+                </p>
+            `;
             return;
         }
         
@@ -712,6 +740,138 @@
         html += `<p style="font-size:12px;color:#999;margin-top:5px;">Max scores: ${subjectConfig.map(s => `${s.name} (${s.max})`).join(', ')}</p>`;
         
         container.innerHTML = html;
+    }
+
+    // ============================================
+    // SETUP DEFAULT SUBJECTS
+    // ============================================
+    async function setupDefaultSubjects() {
+        const grade = document.getElementById('gradeFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        
+        const defaultSubjects = {
+            'Playgroup': [
+                { name: 'MATH', max: 10 },
+                { name: 'LANG', max: 10 },
+                { name: 'LIT', max: 10 },
+                { name: 'KUS', max: 10 },
+                { name: 'ENVI/CRE', max: 10 },
+                { name: 'C/A', max: 10 }
+            ],
+            'PP1': [
+                { name: 'MATH', max: 10 },
+                { name: 'LANG', max: 10 },
+                { name: 'LIT', max: 10 },
+                { name: 'KIS', max: 10 },
+                { name: 'KUS', max: 10 },
+                { name: 'ENV', max: 10 },
+                { name: 'CRE/I.R.E', max: 10 },
+                { name: 'C/A', max: 10 }
+            ],
+            'PP2': [
+                { name: 'MATH', max: 10 },
+                { name: 'LANG', max: 10 },
+                { name: 'LIT', max: 10 },
+                { name: 'KIS', max: 10 },
+                { name: 'KUS', max: 10 },
+                { name: 'ENV', max: 10 },
+                { name: 'CRE/I.R.E', max: 10 },
+                { name: 'C/A', max: 10 }
+            ],
+            'Grade 1': [
+                { name: 'MATH', max: 30 },
+                { name: 'LIST/SPEAKING', max: 20 },
+                { name: 'READING', max: 20 },
+                { name: 'GRAMMAR', max: 20 },
+                { name: 'KUSOMA', max: 20 },
+                { name: 'SARUFI', max: 20 },
+                { name: 'ENV', max: 30 },
+                { name: 'C.R.E', max: 20 },
+                { name: 'CREATIVE ARTS', max: 20 }
+            ],
+            'Grade 2': [
+                { name: 'LIST & SPEAKING', max: 20 },
+                { name: 'READING ALOUD', max: 20 },
+                { name: 'GRAMMAR', max: 20 },
+                { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 20 },
+                { name: 'KUSOMA KWA SAUTI', max: 20 },
+                { name: 'LUGHA', max: 20 },
+                { name: 'MATH', max: 30 },
+                { name: 'ENVIRONMENTAL', max: 30 },
+                { name: 'C/A', max: 20 },
+                { name: 'RE', max: 20 }
+            ],
+            'Grade 3': [
+                { name: 'LIST & SPEAKING', max: 20 },
+                { name: 'READING ALOUD', max: 20 },
+                { name: 'GRAMMAR', max: 20 },
+                { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 20 },
+                { name: 'KUSOMA KWA SAUTI', max: 20 },
+                { name: 'SARUFI', max: 20 },
+                { name: 'MATHS', max: 30 },
+                { name: 'ENVIRONMENTAL', max: 30 },
+                { name: 'C.R.E', max: 20 },
+                { name: 'I.R.E', max: 20 },
+                { name: 'C/A', max: 20 }
+            ],
+            'Grade 4': [
+                { name: 'MATHS ACTIVITIES', max: 60 },
+                { name: 'ENGLISH ACTIVITIES', max: 80 },
+                { name: 'SCI & TECH', max: 60 },
+                { name: 'KISW LUGHA', max: 80 },
+                { name: 'SST', max: 60 },
+                { name: 'RELIGIOUS EDUCATION', max: 40 },
+                { name: 'AGRICULTURE', max: 40 },
+                { name: 'CREATIVE ART', max: 50 }
+            ],
+            'Grade 5': [
+                { name: 'MATHS ACTIVITIES', max: 60 },
+                { name: 'ENGLISH ACTIVITIES', max: 80 },
+                { name: 'SCI & TECH', max: 60 },
+                { name: 'KISW LUGHA', max: 80 },
+                { name: 'SST', max: 60 },
+                { name: 'RELIGIOUS EDUCATION', max: 40 },
+                { name: 'AGRICULTURE', max: 40 },
+                { name: 'CREATIVE ART', max: 50 }
+            ],
+            'Grade 6': [
+                { name: 'MATHS ACTIVITIES', max: 60 },
+                { name: 'ENGLISH ACTIVITIES', max: 80 },
+                { name: 'SCI & TECH', max: 60 },
+                { name: 'KISW LUGHA', max: 80 },
+                { name: 'SST', max: 60 },
+                { name: 'RELIGIOUS EDUCATION', max: 40 },
+                { name: 'AGRICULTURE', max: 40 },
+                { name: 'CREATIVE ART', max: 50 }
+            ]
+        };
+        
+        const subjects = defaultSubjects[grade] || [
+            { name: 'MATHEMATICS', max: 50 },
+            { name: 'ENGLISH', max: 50 },
+            { name: 'KISWAHILI', max: 50 },
+            { name: 'SCIENCE', max: 50 }
+        ];
+        
+        try {
+            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: type, subjects: subjects })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                showAlert(`✅ Subjects configured for ${grade}!`, 'success');
+                await loadSubjectConfig();
+                loadStudentSubjects();
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error setting up subjects:', error);
+            showAlert('❌ Error setting up subjects: ' + error.message, 'error');
+        }
     }
 
     // ============================================
@@ -807,13 +967,17 @@
     }
 
     // ============================================
-    // LOAD ASSESSMENTS - FIXED (No Duplicates)
+    // LOAD ASSESSMENTS
     // ============================================
     async function loadAssessments() {
         const grade = document.getElementById('gradeFilter').value;
         const type = document.getElementById('typeFilter').value;
         const term = document.getElementById('termFilter').value;
         const year = document.getElementById('yearFilter').value;
+        
+        if (!grade) {
+            return;
+        }
         
         const tbody = document.getElementById('assessmentsBody');
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999;"><span class="loading-spinner"></span> Loading assessments...</td></tr>';
@@ -834,7 +998,6 @@
                     return;
                 }
                 
-                // FIX: Show each student only once (use the latest assessment per student)
                 const uniqueStudents = {};
                 students.forEach(student => {
                     const key = student.studentId || student.studentName;
@@ -897,7 +1060,7 @@
     }
 
     // ============================================
-    // VIEW ASSESSMENT (Subject Breakdown)
+    // VIEW ASSESSMENT
     // ============================================
     async function viewAssessment(assessmentId) {
         try {
@@ -912,7 +1075,6 @@
             const assessment = data.assessment;
             viewStudentId = assessment._id;
             
-            // Student info
             document.getElementById('viewStudentInfo').innerHTML = `
                 <div class="row">
                     <div class="item"><strong>Student:</strong> ${assessment.studentName} (${assessment.studentId || 'N/A'})</div>
@@ -925,7 +1087,6 @@
                 </div>
             `;
             
-            // Subject breakdown
             const container = document.getElementById('viewSubjectsContainer');
             if (!assessment.assessments || assessment.assessments.length === 0) {
                 container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
@@ -1143,15 +1304,19 @@
         loadSubjectConfig();
         document.getElementById('subjectsContainer').innerHTML = '<p style="color:#999; text-align:center; padding:20px;">Select a student to load subjects</p>';
         document.getElementById('studentSelect').value = '';
+        loadStudentsForGrade();
     });
 
     // ============================================
     // INIT
     // ============================================
     document.addEventListener('DOMContentLoaded', function() {
-        loadSubjectConfig();
-        loadStudentsForGrade();
-        loadAssessments();
+        // Set default grade and load
+        setTimeout(function() {
+            loadSubjectConfig();
+            loadStudentsForGrade();
+            loadAssessments();
+        }, 500);
     });
 </script>
 </body>
