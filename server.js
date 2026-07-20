@@ -1517,6 +1517,16 @@ app.delete('/api/students/:id', async (req, res) => {
     }
 });
 
+// CLEAR ALL STUDENTS
+app.delete('/api/students/clear', async (req, res) => {
+    try {
+        await Student.deleteMany({});
+        res.json({ success: true, message: 'All students cleared successfully!' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // STUDENT LOGIN
 app.post('/api/student/login', async (req, res) => {
     try {

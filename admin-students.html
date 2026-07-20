@@ -134,6 +134,80 @@
         }
         .btn-add:hover { background: #1e7e34; transform: scale(1.02); }
 
+        /* ===== EXCEL UPLOAD SECTION ===== */
+        .upload-section {
+            background: linear-gradient(135deg, #f0f9ff, #e8f5e9);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px dashed #28a745;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .upload-section h3 {
+            color: #0A1628;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        .upload-section h3 i { color: #28a745; margin-right: 8px; }
+        .upload-section p { color: #666; font-size: 14px; margin-bottom: 15px; }
+        .upload-section .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 30px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-section .upload-area:hover {
+            border-color: #28a745;
+            background: #fafffe;
+        }
+        .upload-section .upload-area .icon { font-size: 48px; display: block; margin-bottom: 10px; }
+        .upload-section .upload-area input[type="file"] { display: none; }
+        .upload-section .upload-area .file-name {
+            color: #0b5394;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .btn-upload {
+            padding: 12px 35px;
+            background: #0b5394;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .btn-upload:hover { background: #1a6fb5; transform: scale(1.02); }
+        .btn-upload:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-clear {
+            padding: 12px 35px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            margin-left: 10px;
+        }
+        .btn-clear:hover { background: #c82333; transform: scale(1.02); }
+
         .filter-bar {
             display: flex;
             gap: 12px;
@@ -366,6 +440,36 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Upload progress */
+        .upload-progress {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+        }
+        .upload-progress .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e8ecf1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .upload-progress .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #D4A017);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        .upload-progress .status-text {
+            font-size: 14px;
+            color: #0A1628;
+            font-weight: 500;
+        }
+
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .form-grid { grid-template-columns: 1fr; }
@@ -379,6 +483,7 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
             table { font-size: 11px; }
             table th, table td { padding: 6px 8px; }
+            .upload-section .upload-area { padding: 20px; }
         }
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr; }
@@ -406,6 +511,31 @@
         <div class="stat-card"><div class="number blue" id="totalFemale">0</div><div class="label">👩 Female</div></div>
         <div class="stat-card"><div class="number orange" id="totalDay">0</div><div class="label">📖 Day Scholars</div></div>
         <div class="stat-card"><div class="number purple" id="totalBoarders">0</div><div class="label">🏠 Boarders</div></div>
+    </div>
+
+    <!-- ===== EXCEL UPLOAD SECTION ===== -->
+    <div class="upload-section">
+        <h3><i class="fas fa-file-excel"></i> Import Students from Excel</h3>
+        <p>Upload an Excel file (.xlsx) containing student data to bulk import.</p>
+        <p style="font-size:12px;color:#999;">Required columns: StudentID, Name, Grade, Gender, Guardian, Pin</p>
+        
+        <div class="upload-area" onclick="document.getElementById('excelFile').click()">
+            <span class="icon">📂</span>
+            <p><strong>Click to select Excel file</strong></p>
+            <p style="font-size:13px;color:#666;">or drag and drop</p>
+            <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="handleFileSelect(event)">
+            <div class="file-name" id="fileName">No file selected</div>
+        </div>
+
+        <div class="upload-progress" id="uploadProgress">
+            <div class="status-text" id="uploadStatus">⏳ Processing...</div>
+            <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+        </div>
+
+        <div>
+            <button class="btn-upload" id="uploadBtn" onclick="uploadExcel()"><i class="fas fa-upload"></i> Upload & Import</button>
+            <button class="btn-clear" onclick="clearStudents()"><i class="fas fa-trash"></i> Clear All Students</button>
+        </div>
     </div>
 
     <!-- ===== ADD STUDENT SECTION ===== -->
@@ -600,6 +730,7 @@
     // ============================================
     let allStudents = [];
     let filteredStudents = [];
+    let selectedFile = null;
 
     // ============================================
     // SHOW ALERT
@@ -610,6 +741,173 @@
         alertEl.textContent = message;
         alertEl.style.display = 'block';
         setTimeout(() => { alertEl.style.display = 'none'; }, 5000);
+    }
+
+    // ============================================
+    // FILE HANDLING
+    // ============================================
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            selectedFile = file;
+            document.getElementById('fileName').textContent = '📄 ' + file.name + ' (' + (file.size / 1024).toFixed(2) + ' KB)';
+            document.getElementById('uploadBtn').disabled = false;
+        }
+    }
+
+    // ============================================
+    // UPLOAD EXCEL
+    // ============================================
+    async function uploadExcel() {
+        if (!selectedFile) {
+            showAlert('❌ Please select an Excel file first', 'error');
+            return;
+        }
+
+        const progressDiv = document.getElementById('uploadProgress');
+        const progressFill = document.getElementById('progressFill');
+        const statusText = document.getElementById('uploadStatus');
+        
+        progressDiv.style.display = 'block';
+        progressFill.style.width = '20%';
+        statusText.textContent = '⏳ Reading file...';
+        document.getElementById('uploadBtn').disabled = true;
+
+        try {
+            // Read the file using FileReader
+            const data = await readFileAsArrayBuffer(selectedFile);
+            
+            progressFill.style.width = '40%';
+            statusText.textContent = '⏳ Parsing Excel data...';
+
+            // Parse Excel using XLSX library
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet);
+
+            progressFill.style.width = '60%';
+            statusText.textContent = `⏳ Found ${rows.length} students. Importing...`;
+
+            let imported = 0;
+            let skipped = 0;
+            let errors = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const studentId = String(row.StudentID || row.studentId || '').trim();
+                const name = String(row.Name || row.name || '').trim();
+                const grade = String(row.Grade || row.grade || '').trim();
+                const gender = String(row.Gender || row.gender || '').trim();
+                const guardian = String(row.Guardian || row.guardian || '').trim();
+                const pin = String(row.Pin || row.pin || '1234').trim();
+
+                // Skip if required fields missing
+                if (!studentId || !name || !grade || !gender) {
+                    skipped++;
+                    continue;
+                }
+
+                // Determine student type (Boarder or Day Scholar)
+                let type = 'Day Scholar';
+                const boarding = row['__EMPTY'] || row['H'] || row['Boarding'] || row['boarding'] || '';
+                if (boarding && boarding.toString().toUpperCase().includes('YES')) {
+                    type = 'Boarder';
+                }
+
+                try {
+                    // Check if student already exists
+                    const existing = await fetch('/api/students/' + studentId);
+                    const existingData = await existing.json();
+                    
+                    if (existingData.success) {
+                        skipped++;
+                        continue;
+                    }
+
+                    // Create student
+                    const response = await fetch('/api/students', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: name,
+                            grade: grade,
+                            gender: gender,
+                            type: type,
+                            guardian: guardian,
+                            pin: pin || '1234'
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        imported++;
+                    } else {
+                        errors++;
+                        console.error('Error importing:', result.message);
+                    }
+                } catch (err) {
+                    errors++;
+                    console.error('Error:', err);
+                }
+
+                // Update progress
+                const progress = 60 + ((i + 1) / rows.length) * 35;
+                progressFill.style.width = progress + '%';
+                statusText.textContent = `⏳ Importing ${i + 1}/${rows.length}...`;
+            }
+
+            progressFill.style.width = '100%';
+            statusText.textContent = `✅ Import complete! Imported: ${imported}, Skipped: ${skipped}, Errors: ${errors}`;
+            
+            showAlert(`✅ Imported ${imported} students, Skipped ${skipped}, Errors ${errors}`, 'success');
+            
+            // Refresh the list
+            await loadStudents();
+
+        } catch (error) {
+            console.error('Upload error:', error);
+            showAlert('❌ Error uploading file: ' + error.message, 'error');
+            progressFill.style.width = '0%';
+            statusText.textContent = '❌ Upload failed: ' + error.message;
+        } finally {
+            document.getElementById('uploadBtn').disabled = false;
+            setTimeout(() => {
+                progressDiv.style.display = 'none';
+            }, 5000);
+        }
+    }
+
+    // ============================================
+    // READ FILE AS ARRAY BUFFER
+    // ============================================
+    function readFileAsArrayBuffer(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e.target.error);
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    // ============================================
+    // CLEAR ALL STUDENTS
+    // ============================================
+    async function clearStudents() {
+        if (!confirm('⚠️ Are you sure you want to delete ALL students? This cannot be undone!')) return;
+        if (!confirm('⚠️ Final confirmation: Delete ALL students from the database?')) return;
+
+        try {
+            const response = await fetch('/api/students/clear', { method: 'DELETE' });
+            const data = await response.json();
+            if (data.success) {
+                showAlert('✅ All students cleared successfully!', 'success');
+                await loadStudents();
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            showAlert('❌ Error clearing students: ' + error.message, 'error');
+        }
     }
 
     // ============================================
@@ -672,7 +970,6 @@
                 '<span class="badge-boarder">🏠 Boarder</span>' :
                 '<span class="badge-day">📖 Day Scholar</span>';
 
-            // Use studentId field (from imported data)
             const studentId = student.studentId || student.id || '-';
             const name = student.name || '-';
             const grade = student.grade || '-';
@@ -1060,6 +1357,14 @@
     // INIT
     // ============================================
     document.addEventListener('DOMContentLoaded', function() {
+        // Load XLSX library from CDN
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        script.onload = function() {
+            console.log('✅ XLSX library loaded');
+        };
+        document.head.appendChild(script);
+        
         loadStudents();
     });
 </script>
