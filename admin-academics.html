@@ -491,7 +491,6 @@
         <button class="btn btn-subject-edit" onclick="toggleSubjectConfig()"><i class="fas fa-cog"></i> Edit Subjects</button>
     </div>
 
-    <!-- ===== SUBJECT CONFIGURATION SECTION ===== -->
     <div class="subject-config-section" id="subjectConfigSection">
         <h3><i class="fas fa-cog"></i> Subject Configuration</h3>
         <p style="color:#666; margin-bottom:15px; font-size:14px;">Edit subjects and their maximum scores for <strong id="configGradeDisplay">Grade 4</strong></p>
@@ -508,7 +507,6 @@
         <button class="btn btn-info" onclick="window.print()"><i class="fas fa-print"></i> Print Grade Report</button>
     </div>
 
-    <!-- ===== ADD SCORES SECTION ===== -->
     <div class="subject-input-section">
         <h3><i class="fas fa-plus-circle"></i> Enter Student Scores</h3>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
@@ -527,7 +525,6 @@
         <button class="btn-add-score" onclick="saveStudentScores()"><i class="fas fa-save"></i> Save Scores</button>
     </div>
 
-    <!-- ===== ASSESSMENTS TABLE ===== -->
     <div class="table-wrapper">
         <table>
             <thead>
@@ -712,22 +709,31 @@
         saveBtn.disabled = true;
 
         try {
-            // Delete existing config first
-            await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${type}`, {
+            // STEP 1: Delete existing config
+            console.log('🔄 Deleting existing config for:', grade, type);
+            const deleteResponse = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}?type=${encodeURIComponent(type)}`, {
                 method: 'DELETE'
             });
+            const deleteData = await deleteResponse.json();
+            console.log('Delete response:', deleteData);
             
-            // Wait a moment
-            await new Promise(resolve => setTimeout(resolve, 200));
+            // STEP 2: Wait a moment
+            await new Promise(resolve => setTimeout(resolve, 300));
             
-            // Save new config
+            // STEP 3: Save new config
+            console.log('🔄 Saving new config for:', grade, type);
             const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(grade)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, subjects })
+                body: JSON.stringify({ 
+                    type: type, 
+                    subjects: subjects 
+                })
             });
             
             const data = await response.json();
+            console.log('Save response:', data);
+            
             if (data.success) {
                 showAlert(`✅ Subjects for ${grade} saved successfully!`, 'success');
                 document.getElementById('subjectConfigSection').classList.remove('active');
@@ -738,7 +744,7 @@
                 showAlert('❌ Error: ' + data.message, 'error');
             }
         } catch (error) {
-            console.error('Error saving subjects:', error);
+            console.error('❌ Error saving subjects:', error);
             showAlert('❌ Error saving subjects: ' + error.message, 'error');
         } finally {
             saveBtn.innerHTML = originalText;

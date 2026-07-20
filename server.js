@@ -1793,11 +1793,17 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
         const { grade } = req.params;
         const { type } = req.query;
         
+        console.log('🗑️ DELETE request received:');
+        console.log('   Grade:', grade);
+        console.log('   Type:', type);
+        
         if (!type) {
-            return res.status(400).json({ success: false, message: 'Type is required' });
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Type is required' 
+            });
         }
         
-        // Force delete using deleteMany to ensure it's removed
         const result = await SubjectConfig.deleteMany({ grade, type });
         console.log(`✅ Deleted ${result.deletedCount} configs for ${grade} (${type})`);
         
@@ -1807,7 +1813,7 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
             deleted: result.deletedCount
         });
     } catch (error) {
-        console.log('Delete error (ignored):', error.message);
+        console.log('❌ Delete error (ignored):', error.message);
         res.json({ 
             success: true, 
             message: `Config for ${grade} (${type}) cleared`,
@@ -1816,39 +1822,75 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     }
 });
 
-// PUT (Create/Update) subject config - WITH RETRY
+// PUT (Create/Update) subject config - WITH VALIDATION FIX
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
         const { type, subjects } = req.body;
         
-        if (!grade || !type || !subjects || !Array.isArray(subjects) || subjects.length === 0) {
+        console.log('📥 Received subject config request:');
+        console.log('   Grade:', grade);
+        console.log('   Type:', type);
+        console.log('   Subjects:', subjects);
+        
+        // Validate grade from params
+        if (!grade) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Invalid data. Need grade, type, and subjects array.' 
+                message: 'Grade is required in the URL' 
             });
         }
         
+        // Validate type
+        if (!type) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Assessment type is required' 
+            });
+        }
+        
+        // Validate subjects
+        if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Subjects array is required and must not be empty' 
+            });
+        }
+        
+        // Validate each subject
         for (const s of subjects) {
-            if (!s.name || typeof s.max !== 'number' || s.max < 1) {
+            if (!s.name || typeof s.name !== 'string' || s.name.trim() === '') {
                 return res.status(400).json({ 
                     success: false, 
-                    message: 'Each subject must have a name and a max score > 0' 
+                    message: 'Each subject must have a name' 
+                });
+            }
+            if (typeof s.max !== 'number' || s.max < 1) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Each subject must have a max score > 0' 
                 });
             }
         }
         
-        // FORCE DELETE FIRST - using deleteMany to be safe
-        await SubjectConfig.deleteMany({ grade, type });
-        console.log(`✅ Deleted existing config for ${grade} (${type})`);
+        // Clean subject names
+        const cleanedSubjects = subjects.map(s => ({
+            name: s.name.trim(),
+            max: s.max
+        }));
         
-        // Create new config
+        // FORCE DELETE FIRST - using deleteMany to be safe
+        const deleteResult = await SubjectConfig.deleteMany({ grade, type });
+        console.log(`✅ Deleted ${deleteResult.deletedCount} existing configs for ${grade} (${type})`);
+        
+        // Create new config - make sure grade is explicitly set
         const config = new SubjectConfig({ 
-            grade, 
-            type, 
-            subjects,
+            grade: grade,  // Explicitly set from params
+            type: type,
+            subjects: cleanedSubjects,
             updatedAt: new Date() 
         });
+        
         await config.save();
         console.log(`✅ Saved new config for ${grade} (${type})`);
         
@@ -1857,7 +1899,7 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         for (const student of students) {
             let updated = false;
             for (const assessment of student.assessments) {
-                const subjectConfig = subjects.find(s => s.name === assessment.subject);
+                const subjectConfig = cleanedSubjects.find(s => s.name === assessment.subject);
                 if (subjectConfig && assessment.maxScore !== subjectConfig.max) {
                     assessment.maxScore = subjectConfig.max;
                     updated = true;
@@ -1879,22 +1921,20 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             config 
         });
     } catch (error) {
-        console.error('Error updating subject config:', error);
+        console.error('❌ Error updating subject config:', error);
         
-        // If duplicate key error, force delete and retry ONE MORE TIME
+        // If duplicate key error, force delete and retry
         if (error.code === 11000) {
             try {
                 console.log('🔄 Duplicate key error - retrying with force delete...');
-                const { grade, type, subjects } = req.body;
+                const { grade } = req.params;
+                const { type, subjects } = req.body;
                 
-                // Force delete using deleteMany
                 await SubjectConfig.deleteMany({ grade, type });
                 console.log(`✅ Force deleted existing config for ${grade} (${type})`);
                 
-                // Wait a moment
                 await new Promise(resolve => setTimeout(resolve, 100));
                 
-                // Create new config
                 const config = new SubjectConfig({ grade, type, subjects });
                 await config.save();
                 console.log(`✅ Saved new config for ${grade} (${type}) on retry`);
@@ -1905,14 +1945,18 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
                     config 
                 });
             } catch (retryError) {
-                console.error('Retry failed:', retryError);
+                console.error('❌ Retry failed:', retryError);
                 return res.status(500).json({ 
                     success: false, 
-                    message: 'Error saving subjects. Please try again. Error: ' + retryError.message 
+                    message: 'Error saving subjects: ' + retryError.message 
                 });
             }
         }
-        res.status(500).json({ success: false, message: error.message });
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error saving subjects: ' + error.message 
+        });
     }
 });
 
