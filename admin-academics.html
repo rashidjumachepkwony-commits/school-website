@@ -127,6 +127,8 @@
         .btn-secondary:hover { background: #5a6268; }
         .btn-sm { padding: 4px 12px; font-size: 12px; }
         .btn-pdf { background: #dc3545; color: white; }
+        .btn-print { background: #6f42c1; color: white; }
+        .btn-print:hover { background: #4a2a8a; }
 
         .loading-spinner {
             display: inline-block;
@@ -274,6 +276,13 @@
         }
         .btn-add-score:hover { background: #1e7e34; transform: scale(1.02); }
 
+        .toolbar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
         /* ===== EDIT MODAL ===== */
         .modal-overlay {
             display: none;
@@ -293,7 +302,7 @@
             background: white;
             padding: 30px;
             border-radius: 20px;
-            max-width: 700px;
+            max-width: 750px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -351,6 +360,57 @@
             text-align: center;
         }
         .edit-subject-item input:focus { border-color: #D4A017; outline: none; }
+        .edit-subject-item .max-score {
+            font-size: 11px;
+            color: #999;
+            min-width: 30px;
+        }
+
+        /* ===== VIEW MODAL ===== */
+        .view-subject-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: #f8f9fc;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border: 1px solid #e8ecf1;
+        }
+        .view-subject-item .name {
+            flex: 1;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .view-subject-item .score {
+            font-weight: bold;
+            color: #0A1628;
+            min-width: 50px;
+            text-align: center;
+        }
+        .view-subject-item .max {
+            color: #999;
+            min-width: 30px;
+            text-align: center;
+        }
+        .view-subject-item .percentage {
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+        .view-subject-item .perf {
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+            min-width: 80px;
+            text-align: center;
+        }
+        .perf-exceeding { background: #28a745; }
+        .perf-meeting { background: #17a2b8; }
+        .perf-approaching { background: #d4a017; }
+        .perf-below { background: #dc3545; }
 
         @media (max-width: 768px) {
             .container { padding: 15px; }
@@ -363,6 +423,7 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
             table { font-size: 11px; }
             table th, table td { padding: 6px 8px; }
+            .edit-subject-item, .view-subject-item { flex-wrap: wrap; }
         }
         @media (max-width: 480px) {
             .subjects-grid { grid-template-columns: 1fr; }
@@ -431,6 +492,12 @@
         <button class="btn btn-primary" onclick="loadAssessments(); loadStudentsForGrade();"><i class="fas fa-sync"></i> Refresh</button>
     </div>
 
+    <!-- ===== TOOLBAR ===== -->
+    <div class="toolbar-actions">
+        <button class="btn btn-success" onclick="downloadGradeReportPDF()"><i class="fas fa-file-pdf"></i> Download Grade PDF</button>
+        <button class="btn btn-info" onclick="window.print()"><i class="fas fa-print"></i> Print Grade Report</button>
+    </div>
+
     <!-- ===== ADD SCORES SECTION ===== -->
     <div class="subject-input-section">
         <h3><i class="fas fa-plus-circle"></i> Enter Student Scores</h3>
@@ -470,9 +537,22 @@
                 </tr>
             </thead>
             <tbody id="assessmentsBody">
-                <tr><td colspan="7" class="no-records">Loading assessments...</td></tr>
+                <tr><td colspan="7" class="no-records"><span class="loading-spinner"></span> Loading assessments...</td></tr>
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- ===== VIEW MODAL ===== -->
+<div class="modal-overlay" id="viewModal">
+    <div class="modal-content">
+        <h2><i class="fas fa-file-alt"></i> Student Assessment Details</h2>
+        <div id="viewStudentInfo" style="margin-bottom:15px;padding:12px;background:#f8f9fc;border-radius:10px;border:1px solid #e8ecf1;"></div>
+        <div id="viewSubjectsContainer"></div>
+        <div class="modal-actions">
+            <button class="btn btn-pdf" onclick="downloadViewReport()" style="flex:1;padding:12px;border:none;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;background:#dc3545;color:white;"><i class="fas fa-file-pdf"></i> Download PDF</button>
+            <button class="btn btn-cancel" onclick="closeViewModal()"><i class="fas fa-times"></i> Close</button>
+        </div>
     </div>
 </div>
 
@@ -507,6 +587,7 @@
     let subjectConfig = [];
     let currentAssessments = [];
     let currentStudentId = null;
+    let viewStudentId = null;
 
     // ============================================
     // SHOW ALERT
@@ -532,8 +613,6 @@
             if (data.success) {
                 allStudents = data.students || [];
                 populateStudentSelect(allStudents);
-                
-                // Update stats
                 document.getElementById('totalStudents').textContent = allStudents.length;
             }
         } catch (error) {
@@ -630,14 +709,12 @@
             return;
         }
         
-        // Get student name
         const student = allStudents.find(s => s.studentId === studentId);
         if (!student) {
             showAlert('❌ Student not found', 'error');
             return;
         }
         
-        // Collect scores
         const assessments = [];
         let allValid = true;
         
@@ -668,7 +745,6 @@
             return;
         }
         
-        // Check if at least one score is entered
         const hasScore = assessments.some(a => a.score > 0);
         if (!hasScore) {
             showAlert('❌ Please enter at least one score', 'error');
@@ -757,10 +833,10 @@
                             <td>${avg}</td>
                             <td><span class="performance-badge ${levelClass}">${level}</span></td>
                             <td>
-                                <button class="btn btn-info btn-sm" onclick="viewStudentReport('${student._id}')"><i class="fas fa-file-alt"></i></button>
-                                <button class="btn btn-pdf btn-sm" onclick="downloadStudentReport('${student._id}')"><i class="fas fa-file-pdf"></i></button>
-                                <button class="btn btn-warning btn-sm" onclick="openEditModal('${student._id}')"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteAssessment('${student._id}')"><i class="fas fa-trash"></i></button>
+                                <button class="btn btn-info btn-sm" onclick="viewAssessment('${student._id}')" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-pdf btn-sm" onclick="downloadStudentReport('${student._id}')" title="Download PDF"><i class="fas fa-file-pdf"></i></button>
+                                <button class="btn btn-warning btn-sm" onclick="openEditModal('${student._id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteAssessment('${student._id}')" title="Delete"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
                     `;
@@ -789,30 +865,120 @@
     }
 
     // ============================================
-    // VIEW STUDENT REPORT
+    // VIEW ASSESSMENT (Subject Breakdown)
     // ============================================
-    async function viewStudentReport(studentId) {
+    async function viewAssessment(assessmentId) {
         try {
-            const response = await fetch(`/api/assessments/generate-report/${studentId}`);
+            const response = await fetch(`/api/assessments/student/${assessmentId}`);
             const data = await response.json();
-            if (data.success && data.html) {
-                const win = window.open('', '_blank', 'width=1100,height=800');
-                win.document.write(data.html);
-                win.document.close();
-            } else {
-                showAlert('❌ Error generating report: ' + data.message, 'error');
+            
+            if (!data.success || !data.assessment) {
+                showAlert('❌ Assessment not found', 'error');
+                return;
             }
+            
+            const assessment = data.assessment;
+            viewStudentId = assessment._id;
+            
+            // Student info
+            document.getElementById('viewStudentInfo').innerHTML = `
+                <strong>Student:</strong> ${assessment.studentName} (${assessment.studentId || 'N/A'}) &nbsp;|&nbsp;
+                <strong>Grade:</strong> ${assessment.grade} &nbsp;|&nbsp;
+                <strong>Type:</strong> ${assessment.type || 'Monthly'} &nbsp;|&nbsp;
+                <strong>Term:</strong> ${assessment.term || 'N/A'} &nbsp;|&nbsp;
+                <strong>Total Score:</strong> ${assessment.totalScore || 0} &nbsp;|&nbsp;
+                <strong>Average:</strong> ${assessment.averageScore ? assessment.averageScore.toFixed(1) : '0'} &nbsp;|&nbsp;
+                <strong>Performance:</strong> <span class="performance-badge ${(assessment.performanceLevel || 'approaching').toLowerCase().replace(' ', '-')}">${assessment.performanceLevel || 'N/A'}</span>
+            `;
+            
+            // Subject breakdown
+            const container = document.getElementById('viewSubjectsContainer');
+            if (!assessment.assessments || assessment.assessments.length === 0) {
+                container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No subjects found</p>';
+            } else {
+                let html = `
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;">
+                        <thead>
+                            <tr style="background:#0A1628;color:white;">
+                                <th style="padding:8px 12px;text-align:left;">Subject</th>
+                                <th style="padding:8px 12px;text-align:center;">Max Score</th>
+                                <th style="padding:8px 12px;text-align:center;">Score</th>
+                                <th style="padding:8px 12px;text-align:center;">Percentage</th>
+                                <th style="padding:8px 12px;text-align:center;">Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                assessment.assessments.forEach(subject => {
+                    const percentage = subject.maxScore > 0 ? ((subject.score / subject.maxScore) * 100).toFixed(1) : 0;
+                    let perfLevel = 'Approaching Expectation';
+                    let perfClass = 'perf-approaching';
+                    if (percentage >= 80) { perfLevel = 'Exceeding Expectation'; perfClass = 'perf-exceeding'; }
+                    else if (percentage >= 60) { perfLevel = 'Meeting Expectation'; perfClass = 'perf-meeting'; }
+                    else if (percentage >= 40) { perfLevel = 'Approaching Expectation'; perfClass = 'perf-approaching'; }
+                    else { perfLevel = 'Below Expectation'; perfClass = 'perf-below'; }
+                    
+                    html += `
+                        <tr style="border-bottom:1px solid #e8ecf1;">
+                            <td style="padding:8px 12px;font-weight:600;">${subject.subject}</td>
+                            <td style="padding:8px 12px;text-align:center;">${subject.maxScore}</td>
+                            <td style="padding:8px 12px;text-align:center;font-weight:bold;color:#0A1628;">${subject.score}</td>
+                            <td style="padding:8px 12px;text-align:center;font-weight:bold;">${percentage}%</td>
+                            <td style="padding:8px 12px;text-align:center;"><span class="perf ${perfClass}">${perfLevel}</span></td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+                container.innerHTML = html;
+            }
+            
+            document.getElementById('viewModal').classList.add('active');
         } catch (error) {
-            showAlert('❌ Error viewing report: ' + error.message, 'error');
+            console.error('Error viewing assessment:', error);
+            showAlert('❌ Error loading assessment details: ' + error.message, 'error');
         }
     }
 
     // ============================================
-    // DOWNLOAD STUDENT REPORT
+    // DOWNLOAD VIEW REPORT
+    // ============================================
+    function downloadViewReport() {
+        if (viewStudentId) {
+            downloadStudentReport(viewStudentId);
+        }
+    }
+
+    // ============================================
+    // CLOSE VIEW MODAL
+    // ============================================
+    function closeViewModal() {
+        document.getElementById('viewModal').classList.remove('active');
+    }
+
+    // ============================================
+    // DOWNLOAD STUDENT REPORT (PDF)
     // ============================================
     function downloadStudentReport(studentId) {
         window.open(`/api/assessments/download-report/${studentId}`, '_blank');
         showAlert('📄 Student report is downloading...', 'info');
+    }
+
+    // ============================================
+    // DOWNLOAD GRADE REPORT (PDF)
+    // ============================================
+    function downloadGradeReportPDF() {
+        const grade = document.getElementById('gradeFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const term = document.getElementById('termFilter').value;
+        const year = document.getElementById('yearFilter').value;
+        
+        window.open(`/api/assessments/download-class-pdf?grade=${encodeURIComponent(grade)}&type=${type}&term=${term}&year=${year}`, '_blank');
+        showAlert('📄 Grade report PDF is downloading...', 'info');
     }
 
     // ============================================
@@ -851,17 +1017,14 @@
             document.getElementById('editAssessmentId').value = assessment._id;
             document.getElementById('editStudentName').value = `${assessment.studentName} (${assessment.studentId || 'N/A'})`;
             
-            // Build edit subjects
             const container = document.getElementById('editSubjectsContainer');
-            let html = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">';
-            
-            const assessments = assessment.assessments || [];
+            let html = '<div style="margin-top:10px;">';
             assessment.assessments.forEach(subject => {
                 html += `
                     <div class="edit-subject-item">
                         <span class="name">${subject.subject}</span>
                         <input type="number" id="edit_subject_${subject.subject.replace(/\s/g, '_')}" value="${subject.score || 0}" max="${subject.maxScore || 100}" min="0" step="0.5">
-                        <span style="font-size:11px;color:#999;">/${subject.maxScore || 100}</span>
+                        <span class="max-score">/${subject.maxScore || 100}</span>
                     </div>
                 `;
             });
@@ -888,14 +1051,13 @@
     async function saveEditAssessment() {
         const assessmentId = document.getElementById('editAssessmentId').value;
         
-        // Collect updated scores
         const updatedAssessments = [];
         const subjectInputs = document.querySelectorAll('#editSubjectsContainer .edit-subject-item');
         
         subjectInputs.forEach(item => {
             const nameSpan = item.querySelector('.name');
             const input = item.querySelector('input');
-            const maxSpan = item.querySelector('span');
+            const maxSpan = item.querySelector('.max-score');
             
             const subjectName = nameSpan.textContent;
             const maxScore = parseInt(maxSpan.textContent.replace('/', '')) || 100;
@@ -908,9 +1070,7 @@
             });
         });
         
-        const data = {
-            assessments: updatedAssessments
-        };
+        const data = { assessments: updatedAssessments };
         
         try {
             const response = await fetch(`/api/assessments/${assessmentId}`, {
