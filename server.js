@@ -2063,8 +2063,9 @@ app.delete('/api/assessments/:id', async (req, res) => {
 app.get('/api/assessments/all', async (req, res) => {
     try {
         const students = await StudentAssessment.find().sort({ studentName: 1 });
-        res.json({ success: true, students });
+        res.json({ success: true, students: students, count: students.length });
     } catch (error) {
+        console.error('Error fetching all assessments:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -2073,21 +2074,32 @@ app.get('/api/assessments/search', async (req, res) => {
     try {
         const { name, grade, type } = req.query;
         let filter = {};
+        
+        // Handle name search - case insensitive
         if (name && name.trim() !== '') {
             filter.studentName = { $regex: name.trim(), $options: 'i' };
         }
+        
+        // Handle grade
         if (grade && grade.trim() !== '') {
             filter.grade = grade.trim();
         }
+        
+        // Handle type
         if (type && type.trim() !== '') {
             filter.type = type.trim();
         }
+        
+        // If no filters provided, return all assessments
         if (Object.keys(filter).length === 0) {
-            return res.status(400).json({ success: false, message: 'Please provide name or grade' });
+            const allStudents = await StudentAssessment.find().sort({ studentName: 1 });
+            return res.json({ success: true, students: allStudents, count: allStudents.length });
         }
+        
         const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
         res.json({ success: true, students: students, count: students.length });
     } catch (error) {
+        console.error('Search error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });

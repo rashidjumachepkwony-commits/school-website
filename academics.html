@@ -1295,99 +1295,160 @@
         // SEARCH STUDENT ASSESSMENT
         // ============================================
         async function searchStudentAssessment() {
-            const studentName = document.getElementById('studentSearch').value.trim();
-            const grade = document.getElementById('gradeFilter').value;
-            const type = document.getElementById('assessmentTypeFilter').value;
-            const resultsDiv = document.getElementById('assessmentResults');
+    const studentName = document.getElementById('studentSearch').value.trim();
+    const grade = document.getElementById('gradeFilter').value;
+    const type = document.getElementById('assessmentTypeFilter').value;
+    const resultsDiv = document.getElementById('assessmentResults');
 
-            if (!studentName && !grade) {
-                showAlert('Please enter a student name or select a grade', 'error');
-                resultsDiv.style.display = 'block';
+    // If no search criteria, show all
+    if (!studentName && !grade && !type) {
+        // Load all assessments
+        try {
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `<div style="text-align:center;padding:40px;">
+                <div style="display:inline-block;width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #D4A017;border-radius:50%;animation:spin 1s linear infinite;"></div>
+                <p style="margin-top:10px;color:#666;">Loading all assessments...</p>
+            </div>`;
+            
+            const response = await fetch('/api/assessments/all');
+            const data = await response.json();
+            
+            if (data.success && data.students && data.students.length > 0) {
+                resultsDiv.innerHTML = `
+                    <div style="background:#f8f9fc;padding:10px 16px;border-radius:8px;margin-bottom:15px;color:#666;font-size:13px;border:1px solid #e8ecf1;">
+                        <i class="fas fa-list" style="color:#D4A017;"></i> Showing all <strong>${data.students.length}</strong> students
+                    </div>
+                    ${data.students.map(student => renderStudentResult(student)).join('')}
+                `;
+            } else {
                 resultsDiv.innerHTML = `
                     <div class="no-results">
-                        <i class="fas fa-info-circle"></i>
-                        <h3>Enter a student name or select a grade</h3>
-                        <p>Please enter a student name or choose a grade to view results</p>
+                        <i class="fas fa-database"></i>
+                        <h3>No assessments found</h3>
+                        <p>No student assessments have been saved yet.</p>
                     </div>
                 `;
-                return;
             }
-
-            resultsDiv.style.display = 'block';
+            return;
+        } catch (error) {
+            console.error('Error loading all assessments:', error);
             resultsDiv.innerHTML = `
-                <div style="text-align:center;padding:40px;">
-                    <div style="display:inline-block;width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #D4A017;border-radius:50%;animation:spin 1s linear infinite;"></div>
-                    <p style="margin-top:10px;color:#666;">Searching for results...</p>
+                <div class="no-results" style="border:2px solid #dc3545;">
+                    <i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i>
+                    <h3 style="color:#dc3545;">Error loading assessments</h3>
+                    <p>${error.message || 'Please try again later'}</p>
                 </div>
             `;
-
-            if (!document.querySelector('#spinner-style')) {
-                const style = document.createElement('style');
-                style.id = 'spinner-style';
-                style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
-                document.head.appendChild(style);
-            }
-
-            try {
-                let url = '/api/assessments/search?';
-                const params = [];
-                if (studentName) params.push(`name=${encodeURIComponent(studentName)}`);
-                if (grade) params.push(`grade=${encodeURIComponent(grade)}`);
-                if (type) params.push(`type=${encodeURIComponent(type)}`);
-                url += params.join('&');
-
-                console.log('🔍 Searching:', url);
-
-                const response = await fetch(url);
-                const data = await response.json();
-
-                console.log('📊 Response:', data);
-
-                if (data.success && data.students && data.students.length > 0) {
-                    resultsDiv.style.display = 'block';
-                    resultsDiv.innerHTML = `
-                        <div style="background:#f8f9fc;padding:10px 16px;border-radius:8px;margin-bottom:15px;color:#666;font-size:13px;border:1px solid #e8ecf1;">
-                            <i class="fas fa-search" style="color:#D4A017;"></i> Found <strong>${data.students.length}</strong> result(s)
-                        </div>
-                        ${data.students.map(student => renderStudentResult(student)).join('')}
-                    `;
-                } else {
-                    resultsDiv.style.display = 'block';
-                    resultsDiv.innerHTML = `
-                        <div class="no-results">
-                            <i class="fas fa-user-graduate"></i>
-                            <h3>No results found</h3>
-                            <p>Try searching with a different name, grade, or assessment type</p>
-                            <p style="font-size:12px;color:#aaa;margin-top:8px;">
-                                💡 Tip: Make sure the student has been added in the admin panel
-                            </p>
-                            <div style="margin-top:15px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-                                <button onclick="searchStudentAssessment()" style="padding:8px 20px;background:#D4A017;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
-                                    <i class="fas fa-sync"></i> Try Again
-                                </button>
-                                <button onclick="loadAllStudents()" style="padding:8px 20px;background:#17a2b8;border:none;border-radius:8px;font-weight:600;cursor:pointer;color:white;">
-                                    <i class="fas fa-list"></i> Show All Students
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('❌ Error searching:', error);
-                resultsDiv.style.display = 'block';
-                resultsDiv.innerHTML = `
-                    <div class="no-results" style="border:2px solid #dc3545;">
-                        <i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i>
-                        <h3 style="color:#dc3545;">Error loading results</h3>
-                        <p>${error.message || 'Please try again later'}</p>
-                        <button onclick="searchStudentAssessment()" style="margin-top:10px;padding:8px 20px;background:#D4A017;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
-                            <i class="fas fa-sync"></i> Retry
-                        </button>
-                    </div>
-                `;
-                showAlert('Error loading results. Please try again.', 'error');
-            }
+            return;
         }
+    }
+
+    // Build URL with search params
+    let url = '/api/assessments/search?';
+    const params = [];
+    if (studentName) params.push(`name=${encodeURIComponent(studentName)}`);
+    if (grade) params.push(`grade=${encodeURIComponent(grade)}`);
+    if (type) params.push(`type=${encodeURIComponent(type)}`);
+    url += params.join('&');
+
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = `
+        <div style="text-align:center;padding:40px;">
+            <div style="display:inline-block;width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #D4A017;border-radius:50%;animation:spin 1s linear infinite;"></div>
+            <p style="margin-top:10px;color:#666;">Searching for results...</p>
+        </div>
+    `;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.success && data.students && data.students.length > 0) {
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <div style="background:#f8f9fc;padding:10px 16px;border-radius:8px;margin-bottom:15px;color:#666;font-size:13px;border:1px solid #e8ecf1;">
+                    <i class="fas fa-search" style="color:#D4A017;"></i> Found <strong>${data.students.length}</strong> result(s)
+                </div>
+                ${data.students.map(student => renderStudentResult(student)).join('')}
+            `;
+        } else {
+            resultsDiv.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>No results found</h3>
+                    <p>Try searching with a different name, grade, or assessment type</p>
+                    <div style="margin-top:15px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                        <button onclick="searchStudentAssessment()" style="padding:8px 20px;background:#D4A017;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                            <i class="fas fa-sync"></i> Try Again
+                        </button>
+                        <button onclick="loadAllAssessments()" style="padding:8px 20px;background:#17a2b8;border:none;border-radius:8px;font-weight:600;cursor:pointer;color:white;">
+    <i class="fas fa-list"></i> Show All
+</button>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('❌ Error searching:', error);
+        resultsDiv.innerHTML = `
+            <div class="no-results" style="border:2px solid #dc3545;">
+                <i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i>
+                <h3 style="color:#dc3545;">Error loading results</h3>
+                <p>${error.message || 'Please try again later'}</p>
+                <button onclick="searchStudentAssessment()" style="margin-top:10px;padding:8px 20px;background:#D4A017;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                    <i class="fas fa-sync"></i> Retry
+                </button>
+            </div>
+        `;
+        showAlert('Error loading results. Please try again.', 'error');
+    }
+}
+async function loadAllAssessments() {
+    const resultsDiv = document.getElementById('assessmentResults');
+    
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = `
+        <div style="text-align:center;padding:40px;">
+            <div style="display:inline-block;width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #D4A017;border-radius:50%;animation:spin 1s linear infinite;"></div>
+            <p style="margin-top:10px;color:#666;">Loading all assessments...</p>
+        </div>
+    `;
+
+    try {
+        const response = await fetch('/api/assessments/all');
+        const data = await response.json();
+
+        if (data.success && data.students && data.students.length > 0) {
+            resultsDiv.innerHTML = `
+                <div style="background:#f8f9fc;padding:10px 16px;border-radius:8px;margin-bottom:15px;color:#666;font-size:13px;border:1px solid #e8ecf1;">
+                    <i class="fas fa-list" style="color:#D4A017;"></i> Showing all <strong>${data.students.length}</strong> students
+                </div>
+                ${data.students.map(student => renderStudentResult(student)).join('')}
+            `;
+        } else {
+            resultsDiv.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-database"></i>
+                    <h3>No assessments found</h3>
+                    <p>No student assessments have been saved yet.</p>
+                    <p style="font-size:12px;color:#aaa;margin-top:8px;">
+                        💡 Go to the admin panel to add student assessments.
+                    </p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading all assessments:', error);
+        resultsDiv.innerHTML = `
+            <div class="no-results" style="border:2px solid #dc3545;">
+                <i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i>
+                <h3 style="color:#dc3545;">Error loading assessments</h3>
+                <p>${error.message || 'Please try again later'}</p>
+            </div>
+        `;
+        showAlert('Error loading all assessments. Please try again.', 'error');
+    }
+}
 
         // ============================================
         // LOAD ALL STUDENTS
@@ -1444,94 +1505,100 @@
         // RENDER STUDENT RESULT
         // ============================================
         function renderStudentResult(student) {
-            const performanceColors = {
-                'Exceeding Expectation': 'exceeding',
-                'Meeting Expectation': 'meeting',
-                'Approaching Expectation': 'approaching',
-                'Below Expectation': 'below'
-            };
+    const performanceColors = {
+        'Exceeding Expectation': 'exceeding',
+        'Meeting Expectation': 'meeting',
+        'Approaching Expectation': 'approaching',
+        'Below Expectation': 'below'
+    };
 
-            const typeNames = {
-                'weekly': 'Weekly Assessments',
-                'monthly': 'Monthly Examinations',
-                'term': 'End-of-Term Exams'
-            };
+    const typeNames = {
+        'weekly': 'Weekly Assessments',
+        'monthly': 'Monthly Examinations',
+        'term': 'End-of-Term Exams'
+    };
 
-            const subjectsWithPerf = student.assessments.map(a => {
-                const perf = getSubjectPerformance(a.score, a.maxScore);
-                return { ...a, performance: perf };
-            });
+    // Handle case where studentId might be null or undefined
+    const displayId = student.studentId && student.studentId !== '' ? student.studentId : 'N/A';
 
-            const subjectsHtml = subjectsWithPerf.map(a => `
-                <tr>
-                    <td><strong>${a.subject}</strong></td>
-                    <td style="text-align:center;">${a.maxScore}</td>
-                    <td style="text-align:center;font-weight:bold;">${a.score}</td>
-                    <td style="text-align:center;">${a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0}%</td>
-                    <td style="text-align:center;"><span class="subject-rank-badge ${a.performance.class}">${a.performance.level}</span></td>
-                </tr>
-            `).join('');
+    const subjectsWithPerf = (student.assessments || []).map(a => {
+        const perf = getSubjectPerformance(a.score, a.maxScore);
+        return { ...a, performance: perf };
+    });
 
-            return `
-                <div class="result-card" id="result-${student._id}">
-                    <div class="student-header">
-                        <div>
-                            <h3><i class="fas fa-user-graduate"></i> ${student.studentName}</h3>
-                            <span class="grade-badge">${student.grade}</span>
-                            <span class="type-badge">${typeNames[student.type] || student.type || 'Monthly'}</span>
-                            ${student.period ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.period}</span>` : ''}
-                            ${student.month ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.month}</span>` : ''}
-                            ${student.term ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.term}</span>` : ''}
-                        </div>
-                        <div>
-                            <span class="performance-badge ${performanceColors[student.performanceLevel] || 'meeting'}">
-                                ${student.performanceLevel || 'Meeting Expectation'}
-                            </span>
-                        </div>
-                    </div>
+    const subjectsHtml = subjectsWithPerf.length > 0 ? subjectsWithPerf.map(a => `
+        <tr>
+            <td><strong>${a.subject}</strong></td>
+            <td style="text-align:center;">${a.maxScore}</td>
+            <td style="text-align:center;font-weight:bold;">${a.score}</td>
+            <td style="text-align:center;">${a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0}%</td>
+            <td style="text-align:center;"><span class="subject-rank-badge ${a.performance.class}">${a.performance.level}</span></td>
+        </tr>
+    `).join('') : '<tr><td colspan="5" style="text-align:center;color:#999;">No subjects found</td></tr>';
 
-                    <div class="summary-stats">
-                        <div class="stat">
-                            <div class="number" style="color:#D4A017;">${student.totalScore || 0}</div>
-                            <div class="label">Total Score</div>
-                        </div>
-                        <div class="stat">
-                            <div class="number" style="color:#17a2b8;">${(student.averageScore || 0).toFixed(1)}</div>
-                            <div class="label">Average Score</div>
-                        </div>
-                        <div class="stat">
-                            <div class="number" style="color:#28a745;">${student.assessments ? student.assessments.length : 0}</div>
-                            <div class="label">Subjects</div>
-                        </div>
-                    </div>
-
-                    <table class="subjects-table">
-                        <thead>
-                            <tr>
-                                <th>Subject</th>
-                                <th style="text-align:center;">Max Score</th>
-                                <th style="text-align:center;">Score</th>
-                                <th style="text-align:center;">Percentage</th>
-                                <th style="text-align:center;">Performance Level</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${subjectsHtml || '<tr><td colspan="5" style="text-align:center;color:#999;">No subjects found</td></tr>'}
-                        </tbody>
-                    </table>
-
-                    <div class="action-buttons">
-                        <button onclick="downloadAssessmentPDF('${student._id}')" class="btn-download">
-                            <i class="fas fa-file-pdf"></i> Download Report
-                        </button>
-                        <button onclick="printResult('${student._id}')" class="btn-print">
-                            <i class="fas fa-print"></i> Print
-                        </button>
-                    </div>
+    return `
+        <div class="result-card" id="result-${student._id}">
+            <div class="student-header">
+                <div>
+                    <h3><i class="fas fa-user-graduate"></i> ${student.studentName || 'Unknown Student'}</h3>
+                    <span class="grade-badge">${student.grade || 'N/A'}</span>
+                    <span class="type-badge">${typeNames[student.type] || student.type || 'Monthly'}</span>
+                    ${student.period ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.period}</span>` : ''}
+                    ${student.month ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.month}</span>` : ''}
+                    ${student.term ? `<span style="margin-left:5px;font-size:11px;color:#666;">${student.term}</span>` : ''}
                 </div>
-            `;
-        }
+                <div>
+                    <span class="performance-badge ${performanceColors[student.performanceLevel] || 'meeting'}">
+                        ${student.performanceLevel || 'Meeting Expectation'}
+                    </span>
+                </div>
+            </div>
 
+            <div class="summary-stats">
+                <div class="stat">
+                    <div class="number" style="color:#D4A017;">${student.totalScore || 0}</div>
+                    <div class="label">Total Score</div>
+                </div>
+                <div class="stat">
+                    <div class="number" style="color:#17a2b8;">${(student.averageScore || 0).toFixed(1)}</div>
+                    <div class="label">Average Score</div>
+                </div>
+                <div class="stat">
+                    <div class="number" style="color:#28a745;">${student.assessments ? student.assessments.length : 0}</div>
+                    <div class="label">Subjects</div>
+                </div>
+                <div class="stat">
+                    <div class="number" style="color:#6f42c1;">${displayId}</div>
+                    <div class="label">Student ID</div>
+                </div>
+            </div>
+
+            <table class="subjects-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th style="text-align:center;">Max Score</th>
+                        <th style="text-align:center;">Score</th>
+                        <th style="text-align:center;">Percentage</th>
+                        <th style="text-align:center;">Performance Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${subjectsHtml}
+                </tbody>
+            </table>
+
+            <div class="action-buttons">
+                <button onclick="downloadAssessmentPDF('${student._id}')" class="btn-download">
+                    <i class="fas fa-file-pdf"></i> Download Report
+                </button>
+                <button onclick="printResult('${student._id}')" class="btn-print">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+    `;
+}
         // ============================================
         // PRINT RESULT
         // ============================================
