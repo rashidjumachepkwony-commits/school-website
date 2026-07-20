@@ -1855,52 +1855,29 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
         });
     }
 });
-// PUT (Create/Update) subject config - RAW MONGODB ONLY
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const grade = req.params.grade;
         const { type, subjects } = req.body;
         
         console.log('📥 SAVE config for:', grade, type);
-        console.log('   Subjects:', JSON.stringify(subjects));
         
         // Validate
-        if (!grade) {
-            return res.status(400).json({ success: false, message: 'Grade is required' });
-        }
-        if (!type) {
-            return res.status(400).json({ success: false, message: 'Type is required' });
-        }
-        if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
-            return res.status(400).json({ success: false, message: 'Subjects array is required' });
+        if (!grade || !type || !subjects || !Array.isArray(subjects) || subjects.length === 0) {
+            return res.status(400).json({ success: false, message: 'Invalid data' });
         }
         
-        for (const s of subjects) {
-            if (!s.name || typeof s.name !== 'string' || s.name.trim() === '') {
-                return res.status(400).json({ success: false, message: 'Each subject must have a name' });
-            }
-            if (typeof s.max !== 'number' || s.max < 1) {
-                return res.status(400).json({ success: false, message: 'Each subject must have a max score > 0' });
-            }
-        }
-        
-        // Clean subjects
         const cleanedSubjects = subjects.map(s => ({
             name: s.name.trim(),
             max: s.max
         }));
         
-        // ============================================
-        // USE RAW MONGODB - Bypass Mongoose entirely
-        // ============================================
+        // RAW MONGODB
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs');
         
-        // Delete existing
+        // Delete and insert
         await collection.deleteMany({ grade: grade, type: type });
-        console.log(`✅ Deleted existing config for ${grade} (${type})`);
-        
-        // Insert new
         const newConfig = {
             grade: grade,
             type: type,
@@ -1909,40 +1886,11 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             updatedAt: new Date()
         };
         await collection.insertOne(newConfig);
-        console.log(`✅ Inserted new config for ${grade} (${type})`);
         
-        // Update existing assessments with new max scores
-        const students = await StudentAssessment.find({ grade, type });
-        for (const student of students) {
-            let updated = false;
-            for (const assessment of student.assessments) {
-                const subjectConfig = cleanedSubjects.find(s => s.name === assessment.subject);
-                if (subjectConfig && assessment.maxScore !== subjectConfig.max) {
-                    assessment.maxScore = subjectConfig.max;
-                    updated = true;
-                }
-            }
-            if (updated) {
-                const { totalScore } = calculateTotals(student.assessments);
-                const avgScore = student.assessments.length > 0 ? totalScore / student.assessments.length : 0;
-                student.totalScore = totalScore;
-                student.averageScore = avgScore;
-                student.performanceLevel = calculatePerformanceLevel(student.assessments);
-                await student.save();
-            }
-        }
-        
-        res.json({ 
-            success: true, 
-            message: 'Subject configuration saved successfully!', 
-            config: newConfig
-        });
+        res.json({ success: true, message: 'Saved successfully!', config: newConfig });
     } catch (error) {
         console.error('❌ Save error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error saving subjects: ' + error.message 
-        });
+        res.status(500).json({ success: false, message: 'Error saving subjects: ' + error.message });
     }
 });
 // ============================================
