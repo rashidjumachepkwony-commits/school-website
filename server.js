@@ -2471,7 +2471,210 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+// ============================================
+// DOWNLOAD CLASS/GRADE PDF REPORT
+// ============================================
+app.get('/api/assessments/download-class-pdf', async (req, res) => {
+    try {
+        const { grade, type, term, year } = req.query;
+        
+        if (!grade) {
+            return res.status(400).json({ success: false, message: 'Grade is required' });
+        }
+        
+        // Build filter
+        const filter = { grade: grade };
+        if (type) filter.type = type;
+        if (term) filter.term = term;
+        if (year) filter.year = year;
+        
+        // Get all students for this grade
+        const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
+        
+        if (students.length === 0) {
+            return res.status(404).json({ success: false, message: 'No students found for this grade' });
+        }
+        
+        // Generate HTML report
+        const html = generateClassReportHTML(students, grade, type, term, year);
+        
+        // Generate PDF
+        const options = { 
+            format: 'A4', 
+            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }, 
+            printBackground: true, 
+            landscape: true, 
+            type: 'pdf', 
+            timeout: 30000, 
+            quality: '100' 
+        };
+        
+        pdf.create(html, options).toBuffer((err, buffer) => {
+            if (err) {
+                console.error('PDF generation error:', err);
+                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
+            }
+            
+            const filename = `grade_report_${grade}_${type || 'monthly'}_${term || 'all'}_${year || '2026'}.pdf`;
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Length', buffer.length);
+            res.send(buffer);
+        });
+    } catch (error) {
+        console.error('Error generating class PDF:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
+// ============================================
+// GENERATE CLASS REPORT HTML
+// ============================================
+function generateClassReportHTML(students, grade, type, term, year) {
+    const now = getKenyaTime();
+    const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
+    
+    // Calculate overall class statistics
+    let totalStudents = students.length;
+    let totalScoreSum = 0;
+    let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
+    
+    students.forEach(student => {
+        totalScoreSum += student.totalScore || 0;
+        const level = student.performanceLevel || 'Approaching Expectation';
+        if (level === 'Exceeding Expectation') exceedingCount++;
+        else if (level === 'Meeting Expectation') meetingCount++;
+        else if (level === 'Approaching Expectation') approachingCount++;
+        else belowCount++;
+    });
+    
+    const avgClassScore = totalStudents > 0 ? (totalScoreSum / totalStudents).toFixed(1) : 0;
+    
+    // Build student rows
+    let rowsHtml = students.map((student, index) => {
+        const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
+        const level = student.performanceLevel || 'Approaching Expectation';
+        let levelColor = '';
+        if (level === 'Exceeding Expectation') levelColor = '#28a745';
+        else if (level === 'Meeting Expectation') levelColor = '#17a2b8';
+        else if (level === 'Approaching Expectation') levelColor = '#d4a017';
+        else levelColor = '#dc3545';
+        
+        // Build subjects row
+        let subjectsHtml = '';
+        if (student.assessments && student.assessments.length > 0) {
+            subjectsHtml = student.assessments.map(a => {
+                const percentage = a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0;
+                return `<td style="padding:2px 4px;border:1px solid #ddd;text-align:center;font-size:8px;">${a.score}/${a.maxScore}<br><span style="font-size:7px;color:#666;">${percentage}%</span></td>`;
+            }).join('');
+        }
+        
+        // Get subject names for header
+        const subjectNames = student.assessments && student.assessments.length > 0 
+            ? student.assessments.map(a => a.subject).join(', ')
+            : 'No subjects';
+        
+        return `
+            <tr>
+                <td style="padding:3px 5px;border:1px solid #ddd;text-align:center;font-size:8px;">${index + 1}</td>
+                <td style="padding:3px 5px;border:1px solid #ddd;font-weight:600;font-size:8px;">${student.studentName}</td>
+                <td style="padding:3px 5px;border:1px solid #ddd;text-align:center;font-size:8px;">${student.studentId || 'N/A'}</td>
+                <td style="padding:3px 5px;border:1px solid #ddd;text-align:center;font-size:8px;font-weight:bold;">${student.totalScore || 0}</td>
+                <td style="padding:3px 5px;border:1px solid #ddd;text-align:center;font-size:8px;font-weight:bold;">${avgScore}</td>
+                <td style="padding:3px 5px;border:1px solid #ddd;text-align:center;font-size:8px;">
+                    <span style="background:${levelColor};color:white;padding:1px 8px;border-radius:50px;font-weight:700;font-size:7px;">${level}</span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    // Build subject headers
+    let subjectHeaders = '';
+    let subjectColumns = '';
+    if (students.length > 0 && students[0].assessments && students[0].assessments.length > 0) {
+        subjectHeaders = students[0].assessments.map(a => 
+            `<th style="padding:2px 4px;border:1px solid #ddd;text-align:center;font-size:7px;background:#0A1628;color:white;">${a.subject}</th>`
+        ).join('');
+        subjectColumns = students[0].assessments.map(a => 
+            `<td style="padding:2px 4px;border:1px solid #ddd;text-align:center;font-size:7px;color:#999;">${a.maxScore}</td>`
+        ).join('');
+    }
+    
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Grade Report - ${grade}</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 8px; max-width: 1200px; margin: 0 auto; font-size: 8px; }
+                .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 5px; margin-bottom: 8px; }
+                .header h1 { color: #0A1628; font-size: 16px; margin: 0; }
+                .header h1 .school-name { color: #D4A017; }
+                .header p { color: #666; margin: 2px 0; font-size: 8px; }
+                .header .report-info { font-size: 7px; color: #999; }
+                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 6px; }
+                .summary-box .item { text-align: center; padding: 3px 4px; background: #f8f9fc; border-radius: 4px; border: 1px solid #e8ecf1; }
+                .summary-box .item .num { font-size: 14px; font-weight: 700; }
+                .summary-box .item .label { font-size: 6px; color: #666; }
+                .summary-box .item .num.gold { color: #D4A017; }
+                .summary-box .item .num.green { color: #28a745; }
+                .summary-box .item .num.blue { color: #17a2b8; }
+                .summary-box .item .num.orange { color: #d4a017; }
+                .summary-box .item .num.red { color: #dc3545; }
+                .table-wrap { overflow-x: auto; }
+                table { width: 100%; border-collapse: collapse; font-size: 7px; }
+                table th { background: #0A1628; color: white; padding: 3px 4px; text-align: left; font-size: 6px; }
+                table td { padding: 2px 4px; border-bottom: 1px solid #e8ecf1; }
+                table tr:nth-child(even) { background: #fafbfc; }
+                .footer { text-align: center; margin-top: 6px; padding-top: 4px; border-top: 1px solid #ddd; color: #999; font-size: 6px; }
+                .subject-header-row th { background: #1a2a4a; font-size: 5px; }
+                @media print { body { padding: 4px; } }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
+                <p>${grade} - ${typeNames[type] || type || 'Monthly'} Assessment Report</p>
+                <p class="report-info">${term || ''} ${year || ''} | Generated on ${formatKenyaFullTime(now)}</p>
+            </div>
+            
+            <div class="summary-box">
+                <div class="item"><div class="num gold">${totalStudents}</div><div class="label">Total Students</div></div>
+                <div class="item"><div class="num green">${exceedingCount}</div><div class="label">✅ Exceeding</div></div>
+                <div class="item"><div class="num blue">${meetingCount}</div><div class="label">📘 Meeting</div></div>
+                <div class="item"><div class="num orange">${approachingCount}</div><div class="label">📗 Approaching</div></div>
+                <div class="item"><div class="num red">${belowCount}</div><div class="label">📕 Below</div></div>
+                <div class="item"><div class="num" style="color:#0A1628;">${avgClassScore}</div><div class="label">📊 Class Avg</div></div>
+            </div>
+            
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;width:30px;">#</th>
+                            <th style="min-width:120px;">Student Name</th>
+                            <th style="text-align:center;width:60px;">ID</th>
+                            ${subjectHeaders}
+                            <th style="text-align:center;width:50px;">Total</th>
+                            <th style="text-align:center;width:45px;">Avg</th>
+                            <th style="text-align:center;width:70px;">Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="footer">
+                <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+            </div>
+        </body>
+        </html>
+    `;
+}
 // ============================================
 // FIX PAST RECORDS - MANUAL API
 // ============================================
