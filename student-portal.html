@@ -288,28 +288,19 @@
         .badge-day { background: #d1ecf1; color: #0b5394; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: bold; }
         .badge-boarder { background: #f8d7da; color: #721c24; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: bold; }
 
-        .attendance-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 14px;
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e8ecf1;
+            border-top: 3px solid #D4A017;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
         }
-        .attendance-table th {
-            background: #6f42c1;
-            color: white;
-            padding: 10px 12px;
-            text-align: left;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        .attendance-table td {
-            padding: 8px 12px;
-            border-bottom: 1px solid #eee;
-        }
-        .attendance-table tr:nth-child(even) { background: #f9f9f9; }
-        .attendance-table tr:hover { background: #f5f5f5; }
-
-        .present { color: #0b8f34; font-weight: bold; }
-        .absent { color: #dc3545; font-weight: bold; }
-        .late { color: #d4a017; font-weight: bold; }
 
         @media (max-width: 600px) {
             .container { padding: 15px; }
@@ -372,7 +363,7 @@
         <div style="overflow-x:auto;">
             <table class="payment-history-table">
                 <thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Method</th><th>Reference</th></tr></thead>
-                <tbody id="paymentHistoryBody"><tr><td colspan="5" style="text-align:center;color:#999;">Loading payment history...</td></tr></tbody>
+                <tbody id="paymentHistoryBody"><tr><td colspan="5" style="text-align:center;color:#999;">Login to view payment history</td></tr></tbody>
             </table>
         </div>
 
@@ -418,9 +409,19 @@
     }
 
     // ============================================
-    // LOGIN STUDENT
+    // SHOW LOADING
     // ============================================
-    function loginStudent() {
+    function showLoading(message) {
+        const el = document.getElementById('msg');
+        el.innerHTML = '<span class="loading-spinner"></span> ' + message;
+        el.className = 'info';
+        el.classList.remove('hidden');
+    }
+
+    // ============================================
+    // LOGIN STUDENT - FETCH FROM DATABASE
+    // ============================================
+    async function loginStudent() {
         const id = document.getElementById('studentId').value.trim();
         const pin = document.getElementById('studentPin').value.trim();
 
@@ -429,41 +430,62 @@
             return;
         }
 
-        showMessage('⏳ Verifying credentials...', 'info');
+        showLoading('Verifying credentials...');
 
-        // Simulate login - in production, this would call your API
-        // For now, we'll use a demo student
-        const demoStudent = {
-            id: id,
-            name: 'Demo Student',
-            grade: 'Grade 4',
-            studentType: 'Day Scholar',
-            gender: 'Male',
-            totalFees: 15000,
-            paid: 8000,
-            balance: 7000,
-            payments: [
-                { date: '2026-07-10', category: 'School Fees', amount: 3000, method: 'MPESA', reference: 'REF001' },
-                { date: '2026-07-05', category: 'Activity', amount: 2000, method: 'Cash', reference: 'REF002' },
-                { date: '2026-06-28', category: 'School Fees', amount: 3000, method: 'MPESA', reference: 'REF003' }
-            ]
-        };
+        try {
+            const response = await fetch('/api/student/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId: id, pin: pin })
+            });
 
-        // In production, replace this with actual API call
-        // fetch('/api/student/login', { method: 'POST', body: JSON.stringify({ id, pin }) })
-        //   .then(res => res.json())
-        //   .then(data => { ... })
+            const data = await response.json();
 
-        // For demo, accept any ID with "ST" and pin "1234"
-        if (id.startsWith('ST') && pin === '1234') {
-            studentData = demoStudent;
-            studentPayments = demoStudent.payments;
-            showDashboard(studentData);
-            showMessage('✅ Login successful! Welcome ' + studentData.name, 'success');
-        } else {
-            showMessage('❌ Invalid Student ID or PIN. Please try again.', 'error');
-            document.getElementById('studentPin').value = '';
-            document.getElementById('studentPin').focus();
+            if (data.success) {
+                // Get full student data
+                const studentResponse = await fetch('/api/students/' + id);
+                const studentDataResult = await studentResponse.json();
+
+                if (studentDataResult.success) {
+                    const student = studentDataResult.student;
+                    
+                    // Get fee details
+                    const feeResponse = await fetch('/api/students/fees/' + id);
+                    const feeData = await feeResponse.json();
+
+                    if (feeData.success) {
+                        studentData = {
+                            id: student.studentId,
+                            name: student.name,
+                            grade: student.grade,
+                            gender: student.gender,
+                            type: student.type,
+                            guardian: student.guardian,
+                            totalFees: feeData.fees.total || 0,
+                            paid: feeData.fees.paid || 0,
+                            balance: feeData.fees.balance || 0,
+                            feeBreakdown: feeData.feeBreakdown || {}
+                        };
+                        
+                        // Set payments (use empty array for now since we don't have payment history yet)
+                        studentPayments = [];
+
+                        showDashboard(studentData);
+                        showMessage('✅ Login successful! Welcome ' + studentData.name, 'success');
+                    } else {
+                        showMessage('❌ Error loading fee details: ' + feeData.message, 'error');
+                    }
+                } else {
+                    showMessage('❌ Error loading student data: ' + studentDataResult.message, 'error');
+                }
+            } else {
+                showMessage('❌ ' + data.message, 'error');
+                document.getElementById('studentPin').value = '';
+                document.getElementById('studentPin').focus();
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showMessage('❌ Error connecting to server: ' + error.message, 'error');
         }
     }
 
@@ -475,7 +497,7 @@
         document.getElementById('dashboardSection').style.display = 'block';
 
         // Student Info
-        const typeBadge = student.studentType === 'Boarder' ?
+        const typeBadge = student.type === 'Boarder' ?
             '<span class="badge-boarder">🏠 Boarder</span>' :
             '<span class="badge-day">📖 Day Scholar</span>';
 
@@ -486,7 +508,8 @@
                 <div class="info-item"><div class="label">Grade</div><div class="value">${student.grade}</div></div>
                 <div class="info-item"><div class="label">Gender</div><div class="value">${student.gender}</div></div>
                 <div class="info-item"><div class="label">Student Type</div><div class="value">${typeBadge}</div></div>
-                <div class="info-item"><div class="label">Status</div><div class="value ${student.balance === 0 ? 'status-paid' : 'status-partial'}">${student.balance === 0 ? '✅ Fully Paid' : '⏳ Partial Payment'}</div></div>
+                <div class="info-item"><div class="label">Guardian</div><div class="value">${student.guardian || 'N/A'}</div></div>
+                <div class="info-item"><div class="label">Fee Status</div><div class="value ${student.balance === 0 ? 'status-paid' : student.balance < student.totalFees ? 'status-partial' : 'status-unpaid'}">${student.balance === 0 ? '✅ Fully Paid' : student.balance < student.totalFees ? '⏳ Partial Payment' : '❌ Unpaid'}</div></div>
             </div>
         `;
 
@@ -494,20 +517,37 @@
         document.getElementById('totalFees').textContent = 'KES ' + student.totalFees.toLocaleString();
         document.getElementById('totalPaid').textContent = 'KES ' + student.paid.toLocaleString();
         document.getElementById('totalBalance').textContent = 'KES ' + student.balance.toLocaleString();
-        document.getElementById('paymentCount').textContent = student.payments.length;
+        
+        // Show fee breakdown if available
+        let paymentCount = 0;
+        if (student.feeBreakdown) {
+            // Count non-zero term payments
+            if (student.feeBreakdown.term1) paymentCount++;
+            if (student.feeBreakdown.term2) paymentCount++;
+            if (student.feeBreakdown.term3) paymentCount++;
+        }
+        document.getElementById('paymentCount').textContent = paymentCount || 0;
 
-        // Payment History
+        // Payment History (for now, show fee breakdown)
         const tbody = document.getElementById('paymentHistoryBody');
-        if (student.payments && student.payments.length > 0) {
+        if (student.feeBreakdown && (student.feeBreakdown.term1 || student.feeBreakdown.term2 || student.feeBreakdown.term3)) {
             let html = '';
-            student.payments.forEach(p => {
-                html += `<tr>
-                    <td>${p.date}</td>
-                    <td>${p.category}</td>
-                    <td style="font-weight:bold;color:#0b8f34;">KES ${p.amount.toLocaleString()}</td>
-                    <td>${p.method}</td>
-                    <td>${p.reference || '-'}</td>
-                </tr>`;
+            const terms = [
+                { name: 'Term 1', amount: student.feeBreakdown.term1 || 0 },
+                { name: 'Term 2', amount: student.feeBreakdown.term2 || 0 },
+                { name: 'Term 3', amount: student.feeBreakdown.term3 || 0 }
+            ];
+            terms.forEach(term => {
+                if (term.amount > 0) {
+                    const paidStatus = term.amount <= student.paid ? '✅ Paid' : '⏳ Partial';
+                    html += `<tr>
+                        <td>2026</td>
+                        <td>${term.name}</td>
+                        <td style="font-weight:bold;color:#0b8f34;">KES ${term.amount.toLocaleString()}</td>
+                        <td>School Fees</td>
+                        <td>${paidStatus}</td>
+                    </tr>`;
+                }
             });
             tbody.innerHTML = html;
         } else {
@@ -524,13 +564,13 @@
             return;
         }
         showMessage('⏳ Generating your report...', 'info');
-        // In production, call your API to generate PDF
-        // window.open('/api/student/report/' + studentData.id, '_blank');
-
-        // For demo, show a message
+        
+        // Open report in new window
+        window.open('/api/assessments/student-report/' + studentData.id, '_blank');
+        
         setTimeout(() => {
-            showMessage('📄 Your report is being generated. Check your downloads folder.', 'success');
-        }, 1500);
+            showMessage('📄 Your report is being generated.', 'success');
+        }, 1000);
     }
 
     // ============================================
@@ -542,7 +582,6 @@
             return;
         }
         showMessage('💰 Opening fee details...', 'info');
-        // In production, navigate to fee page
         window.open('student-fees.html?studentId=' + studentData.id, '_blank');
     }
 
@@ -555,7 +594,6 @@
             return;
         }
         showMessage('✅ Opening attendance records...', 'info');
-        // In production, navigate to attendance page
         window.open('student-attendance.html?studentId=' + studentData.id, '_blank');
     }
 
