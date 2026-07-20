@@ -1786,6 +1786,27 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
     }
 });
 
+// DELETE SUBJECT CONFIG - FIX FOR DUPLICATE KEY ERROR
+app.delete('/api/assessments/subjects/:grade', async (req, res) => {
+    try {
+        const { grade } = req.params;
+        const { type } = req.query;
+        
+        if (!type) {
+            return res.status(400).json({ success: false, message: 'Type is required' });
+        }
+        
+        const result = await SubjectConfig.deleteOne({ grade, type });
+        res.json({ 
+            success: true, 
+            message: `Deleted config for ${grade} (${type})`,
+            deleted: result.deletedCount
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
@@ -1798,14 +1819,15 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
                 return res.status(400).json({ success: false, message: 'Each subject must have a name and a max score > 0' });
             }
         }
-        let config = await SubjectConfig.findOne({ grade, type });
-        if (config) {
-            config.subjects = subjects;
-            config.updatedAt = new Date();
-        } else {
-            config = new SubjectConfig({ grade, type, subjects });
-        }
+        
+        // First, delete any existing config to avoid duplicate key error
+        await SubjectConfig.deleteOne({ grade, type });
+        
+        // Then create new config
+        const config = new SubjectConfig({ grade, type, subjects });
         await config.save();
+        
+        // Update existing assessments with new max scores
         const students = await StudentAssessment.find({ grade, type });
         for (const student of students) {
             for (const assessment of student.assessments) {
@@ -1821,8 +1843,10 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             student.performanceLevel = calculatePerformanceLevel(student.assessments);
             await student.save();
         }
+        
         res.json({ success: true, message: 'Subject configuration updated successfully!', config });
     } catch (error) {
+        console.error('Error updating subject config:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
