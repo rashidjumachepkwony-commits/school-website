@@ -608,14 +608,19 @@ const Student = mongoose.model('Student', studentSchema);
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
+    period: { type: String, default: '' },  // Allow different periods (e.g., March, April, Week 1, etc.)
     subjects: [{ name: { type: String, required: true }, max: { type: Number, required: true } }],
     rankLevels: { type: [String], default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] },
+    rubric: {
+        exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#28a745' },
+        meeting: { min: 50, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#17a2b8' },
+        approaching: { min: 26, max: 49, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#d4a017' },
+        below: { min: 0, max: 25, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+    },
     updatedAt: { type: Date, default: Date.now }
-}, { autoIndex: false, collection: 'subjectconfigs_new' });  // NEW COLLECTION NAME
+}, { autoIndex: false, collection: 'subjectconfigs_new' });
 
 // NO INDEX - DO NOT add any index
-// subjectConfigSchema.index({ grade: 1, type: 1 }); // DELETED
-
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
 
 // Student Assessment Schema
@@ -629,10 +634,18 @@ const studentAssessmentSchema = new mongoose.Schema({
     month: { type: String, default: '' },
     year: { type: String, default: '' },
     term: { type: String, default: '' },
-    assessments: [{ subject: { type: String, required: true }, maxScore: { type: Number, required: true }, score: { type: Number, required: true } }],
+    assessments: [{ 
+        subject: { type: String, required: true }, 
+        maxScore: { type: Number, required: true }, 
+        score: { type: Number, required: true },
+        percentage: { type: Number, default: 0 },
+        performanceLevel: { type: String, default: 'Approaching Expectation' },
+        rating: { type: Number, default: 2 }
+    }],
     totalScore: { type: Number, default: 0 },
     averageScore: { type: Number, default: 0 },
     performanceLevel: { type: String, enum: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'], default: 'Approaching Expectation' },
+    overallRating: { type: Number, default: 2 },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
@@ -640,33 +653,18 @@ const studentAssessmentSchema = new mongoose.Schema({
 const StudentAssessment = mongoose.model('StudentAssessment', studentAssessmentSchema);
 
 // ============================================
-// CALCULATE PERFORMANCE LEVEL - CBC RUBRIC
+// HELPER FUNCTIONS - CBC RUBRIC
 // ============================================
-function calculatePerformanceLevel(assessments) {
-    if (!assessments || assessments.length === 0) return 'Approaching Expectation';
-    
-    let totalPercentage = 0;
-    let validCount = 0;
-    
-    assessments.forEach(a => {
-        if (a.maxScore > 0) {
-            totalPercentage += (a.score / a.maxScore) * 100;
-            validCount++;
-        }
-    });
-    
-    const avgPercentage = validCount > 0 ? totalPercentage / validCount : 0;
-    
-    // CBC RUBRIC-BASED PERFORMANCE LEVELS
-    if (avgPercentage >= 75) return 'Exceeding Expectation';
-    if (avgPercentage >= 50) return 'Meeting Expectation';
-    if (avgPercentage >= 26) return 'Approaching Expectation';
+
+// Calculate performance level based on percentage using CBC Rubric
+function calculatePerformanceLevel(percentage) {
+    if (percentage >= 75) return 'Exceeding Expectation';
+    if (percentage >= 50) return 'Meeting Expectation';
+    if (percentage >= 26) return 'Approaching Expectation';
     return 'Below Expectation';
 }
 
-// ============================================
-// GET PERFORMANCE RATING (1-4) - CBC RUBRIC
-// ============================================
+// Get rating (1-4) based on performance level
 function getPerformanceRating(level) {
     const ratings = {
         'Exceeding Expectation': 4,
@@ -677,45 +675,69 @@ function getPerformanceRating(level) {
     return ratings[level] || 2;
 }
 
-// ============================================
-// GET PERFORMANCE DESCRIPTOR - CBC RUBRIC
-// ============================================
-function getPerformanceDescriptor(level) {
-    const descriptors = {
-        'Exceeding Expectation': {
-            short: 'EE',
-            full: 'Exceeding Expectation',
-            description: 'Learner achieves all learning outcomes all the time and demonstrates Exemplary performance',
-            rating: 4,
-            color: '#28a745',
-            range: '75-100%'
-        },
-        'Meeting Expectation': {
-            short: 'ME',
-            full: 'Meeting Expectation',
-            description: 'Learner achieves all learning outcomes most of the time and demonstrates Proficient performance',
-            rating: 3,
-            color: '#17a2b8',
-            range: '50-74%'
-        },
-        'Approaching Expectation': {
-            short: 'AE',
-            full: 'Approaching Expectation',
-            description: 'Learner achieves all learning outcomes most of the time and demonstrates Adequate performance',
-            rating: 2,
-            color: '#d4a017',
-            range: '26-49%'
-        },
-        'Below Expectation': {
-            short: 'BE',
-            full: 'Below Expectation',
-            description: 'Learner achieves some outcomes all the time and demonstrates Limited performance',
-            rating: 1,
-            color: '#dc3545',
-            range: '0-25%'
-        }
+// Get short label (EE, ME, AE, BE)
+function getPerformanceShort(level) {
+    const shorts = {
+        'Exceeding Expectation': 'EE',
+        'Meeting Expectation': 'ME',
+        'Approaching Expectation': 'AE',
+        'Below Expectation': 'BE'
     };
-    return descriptors[level] || descriptors['Approaching Expectation'];
+    return shorts[level] || 'AE';
+}
+
+// Get color for performance level
+function getPerformanceColor(level) {
+    const colors = {
+        'Exceeding Expectation': '#28a745',
+        'Meeting Expectation': '#17a2b8',
+        'Approaching Expectation': '#d4a017',
+        'Below Expectation': '#dc3545'
+    };
+    return colors[level] || '#d4a017';
+}
+
+// Calculate performance for a single assessment
+function calculateAssessmentPerformance(score, maxScore) {
+    if (maxScore <= 0) return { percentage: 0, level: 'Approaching Expectation', rating: 2 };
+    const percentage = (score / maxScore) * 100;
+    const level = calculatePerformanceLevel(percentage);
+    return {
+        percentage: parseFloat(percentage.toFixed(1)),
+        level: level,
+        rating: getPerformanceRating(level),
+        short: getPerformanceShort(level),
+        color: getPerformanceColor(level)
+    };
+}
+
+// Calculate overall performance for a student
+function calculateStudentOverall(assessments) {
+    if (!assessments || assessments.length === 0) {
+        return { totalScore: 0, averageScore: 0, performanceLevel: 'Approaching Expectation', overallRating: 2 };
+    }
+    
+    let totalScore = 0;
+    let totalMax = 0;
+    let validCount = 0;
+    
+    assessments.forEach(a => {
+        totalScore += a.score || 0;
+        totalMax += a.maxScore || 0;
+        validCount++;
+    });
+    
+    const totalScoreValue = totalScore;
+    const avgScore = validCount > 0 ? totalScore / validCount : 0;
+    const avgPercentage = totalMax > 0 ? (totalScore / totalMax) * 100 : 0;
+    const performanceLevel = calculatePerformanceLevel(avgPercentage);
+    
+    return {
+        totalScore: totalScoreValue,
+        averageScore: parseFloat(avgScore.toFixed(1)),
+        performanceLevel: performanceLevel,
+        overallRating: getPerformanceRating(performanceLevel)
+    };
 }
 
 function calculateTotals(assessments) {
@@ -726,25 +748,6 @@ function calculateTotals(assessments) {
         totalMax += a.maxScore || 0;
     });
     return { totalScore, totalMax };
-}
-function getDefaultSubjects(grade, type) {
-    const configs = {
-        'weekly': {
-            // ... existing weekly configs ...
-        },
-        'monthly': {
-            // ... existing monthly configs ...
-        },
-        'term': {
-            // ... existing term configs ...
-        }
-    };
-    const fallback = [{ name: 'MATHEMATICS', max: 50 }, { name: 'ENGLISH', max: 50 }, { name: 'KISWAHILI', max: 50 }, { name: 'SCIENCE', max: 50 }];
-    try {
-        return configs[type]?.[grade] || configs['weekly']['Grade 1'] || fallback;
-    } catch {
-        return fallback;
-    }
 }
 
 function getDefaultSubjects(grade, type) {
@@ -833,32 +836,23 @@ function generateStudentReportHTML(student, allAssessments = null) {
         const subjectName = a.subject || a.name || a.subjectName || a.subj || 'Unknown Subject';
         const maxScore = a.maxScore || a.max || a.maximum || 100;
         const score = a.score || a.marks || a.value || 0;
-        const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
-        let level = 'Approaching Expectation';
-        let color = '#d4a017';
-        if (percentage >= 80) { level = 'Exceeding Expectation'; color = '#28a745'; }
-        else if (percentage >= 60) { level = 'Meeting Expectation'; color = '#17a2b8'; }
-        else if (percentage >= 40) { level = 'Approaching Expectation'; color = '#d4a017'; }
-        else { level = 'Below Expectation'; color = '#dc3545'; }
-        return { subject: subjectName, maxScore, score, percentage, level, color };
+        const perf = calculateAssessmentPerformance(score, maxScore);
+        return { subject: subjectName, maxScore, score, percentage: perf.percentage, level: perf.level, color: perf.color, short: perf.short, rating: perf.rating };
     });
 
-    const strengths = subjectsWithPerf.filter(s => s.percentage >= 60);
-    const weaknesses = subjectsWithPerf.filter(s => s.percentage < 60);
+    const strengths = subjectsWithPerf.filter(s => s.percentage >= 50);
+    const weaknesses = subjectsWithPerf.filter(s => s.percentage < 50);
     const avgPercentage = subjectsWithPerf.length > 0 ? subjectsWithPerf.reduce((sum, s) => sum + s.percentage, 0) / subjectsWithPerf.length : 0;
-    
-    let overallLevel = 'Approaching Expectation';
-    let overallColor = '#d4a017';
-    if (avgPercentage >= 80) { overallLevel = 'Exceeding Expectation'; overallColor = '#28a745'; }
-    else if (avgPercentage >= 60) { overallLevel = 'Meeting Expectation'; overallColor = '#17a2b8'; }
-    else if (avgPercentage >= 40) { overallLevel = 'Approaching Expectation'; overallColor = '#d4a017'; }
-    else { overallLevel = 'Below Expectation'; overallColor = '#dc3545'; }
+    const overallLevel = calculatePerformanceLevel(avgPercentage);
+    const overallColor = getPerformanceColor(overallLevel);
+    const overallShort = getPerformanceShort(overallLevel);
+    const overallRating = getPerformanceRating(overallLevel);
 
     const totalScore = subjectsWithPerf.reduce((sum, s) => sum + s.score, 0);
-    const exceedingCount = subjectsWithPerf.filter(s => s.percentage >= 80).length;
-    const meetingCount = subjectsWithPerf.filter(s => s.percentage >= 60 && s.percentage < 80).length;
-    const approachingCount = subjectsWithPerf.filter(s => s.percentage >= 40 && s.percentage < 60).length;
-    const belowCount = subjectsWithPerf.filter(s => s.percentage < 40).length;
+    const exceedingCount = subjectsWithPerf.filter(s => s.percentage >= 75).length;
+    const meetingCount = subjectsWithPerf.filter(s => s.percentage >= 50 && s.percentage < 75).length;
+    const approachingCount = subjectsWithPerf.filter(s => s.percentage >= 26 && s.percentage < 50).length;
+    const belowCount = subjectsWithPerf.filter(s => s.percentage < 26).length;
 
     const subjectsHtml = subjectsWithPerf.map(a => `
         <tr>
@@ -867,7 +861,7 @@ function generateStudentReportHTML(student, allAssessments = null) {
             <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;font-weight:bold;color:#0A1628;">${a.score}</td>
             <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;font-weight:bold;">${a.percentage.toFixed(1)}%</td>
             <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">
-                <span style="background:${a.color};color:white;padding:2px 10px;border-radius:50px;font-size:9px;font-weight:700;">${a.level}</span>
+                <span style="background:${a.color};color:white;padding:2px 10px;border-radius:50px;font-size:9px;font-weight:700;">${a.short} (${a.rating})</span>
             </td>
         </tr>
     `).join('');
@@ -940,13 +934,13 @@ function generateStudentReportHTML(student, allAssessments = null) {
                 </table>
             </div>
             <div class="performance-box" style="background: ${overallColor}15; border: 2px solid ${overallColor};">
-                <div class="level" style="color: ${overallColor};">${overallLevel}</div>
-                <div class="score">Total Score: ${totalScore} | Average: ${avgPercentage.toFixed(1)}%</div>
+                <div class="level" style="color: ${overallColor};">${overallLevel} (${overallShort})</div>
+                <div class="score">Total Score: ${totalScore} | Average: ${avgPercentage.toFixed(1)}% | Rating: ${overallRating}</div>
                 <div class="badges">
-                    <span class="badge badge-exceeding">✅ Exceeding: ${exceedingCount}</span>
-                    <span class="badge badge-meeting">📘 Meeting: ${meetingCount}</span>
-                    <span class="badge badge-approaching">📗 Approaching: ${approachingCount}</span>
-                    <span class="badge badge-below">📕 Below: ${belowCount}</span>
+                    <span class="badge badge-exceeding">✅ EE (4): ${exceedingCount}</span>
+                    <span class="badge badge-meeting">📘 ME (3): ${meetingCount}</span>
+                    <span class="badge badge-approaching">📗 AE (2): ${approachingCount}</span>
+                    <span class="badge badge-below">📕 BE (1): ${belowCount}</span>
                 </div>
             </div>
             <table>
@@ -958,7 +952,7 @@ function generateStudentReportHTML(student, allAssessments = null) {
                 <div class="analysis-box weakness"><h4 style="color:#dc3545;">📚 Needs Improvement</h4>${weaknessesHtml}</div>
             </div>
             <div class="summary-box">
-                <p><strong>Overall:</strong> ${student.studentName || 'The student'} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()}</strong> with an average of <strong>${avgPercentage.toFixed(1)}%</strong>.</p>
+                <p><strong>Overall:</strong> ${student.studentName || 'The student'} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()} (${overallShort})</strong> with an average of <strong>${avgPercentage.toFixed(1)}%</strong> (Rating: ${overallRating}/4).</p>
             </div>
             <div class="footer">
                 <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
@@ -1862,32 +1856,44 @@ app.get('/api/assessments/student/:studentId', async (req, res) => {
 });
 
 // ============================================
-// SUBJECT CONFIG ROUTES - USING NEW COLLECTION
+// SUBJECT CONFIG ROUTES - WITH PERIOD SUPPORT
 // ============================================
 
-// GET subject config
+// GET subject config (with optional period)
 app.get('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const grade = req.params.grade;
         const type = req.query.type || 'monthly';
+        const period = req.query.period || '';
         
-        console.log('📖 GET config for:', grade, type);
+        console.log('📖 GET config for:', grade, type, 'period:', period);
         
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
         
-        let config = await collection.findOne({ grade: grade, type: type });
+        // Try to find with period first, then fallback to without period
+        let config = await collection.findOne({ grade: grade, type: type, period: period });
+        if (!config && period) {
+            config = await collection.findOne({ grade: grade, type: type, period: '' });
+        }
         if (!config) {
             const defaultSubjects = getDefaultSubjects(grade, type);
             config = {
                 grade: grade,
                 type: type,
+                period: period || '',
                 subjects: defaultSubjects,
                 rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+                rubric: {
+                    exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#28a745' },
+                    meeting: { min: 50, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#17a2b8' },
+                    approaching: { min: 26, max: 49, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#d4a017' },
+                    below: { min: 0, max: 25, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+                },
                 updatedAt: new Date()
             };
             await collection.insertOne(config);
-            console.log('✅ Created default config for:', grade, type);
+            console.log('✅ Created default config for:', grade, type, period);
         }
         res.json({ success: true, config });
     } catch (error) {
@@ -1900,9 +1906,9 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
 app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const grade = req.params.grade;
-        const { type } = req.query;
+        const { type, period } = req.query;
         
-        console.log('🗑️ DELETE config for:', grade, type);
+        console.log('🗑️ DELETE config for:', grade, type, 'period:', period);
         
         if (!type) {
             return res.status(400).json({ 
@@ -1913,7 +1919,10 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
         
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
-        const result = await collection.deleteMany({ grade: grade, type: type });
+        const query = { grade: grade, type: type };
+        if (period) query.period = period;
+        
+        const result = await collection.deleteMany(query);
         console.log(`✅ Deleted ${result.deletedCount} configs for ${grade} (${type})`);
         
         res.json({ 
@@ -1931,13 +1940,13 @@ app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     }
 });
 
-// PUT (Create/Update) subject config
+// PUT (Create/Update) subject config - with period support
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const grade = req.params.grade;
-        const { type, subjects } = req.body;
+        const { type, period, subjects, rankLevels, rubric } = req.body;
         
-        console.log('📥 SAVE config for:', grade, type);
+        console.log('📥 SAVE config for:', grade, type, 'period:', period);
         console.log('   Subjects:', JSON.stringify(subjects));
         
         // Validate
@@ -1970,23 +1979,37 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
         
+        // Build query
+        const query = { grade: grade, type: type };
+        if (period) query.period = period;
+        
         // Delete existing
-        await collection.deleteMany({ grade: grade, type: type });
-        console.log(`✅ Deleted existing config for ${grade} (${type})`);
+        await collection.deleteMany(query);
+        console.log(`✅ Deleted existing config for ${grade} (${type}) ${period ? 'period: '+period : ''}`);
         
         // Insert new
         const newConfig = {
             grade: grade,
             type: type,
+            period: period || '',
             subjects: cleanedSubjects,
-            rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+            rankLevels: rankLevels || ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+            rubric: rubric || {
+                exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#28a745' },
+                meeting: { min: 50, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#17a2b8' },
+                approaching: { min: 26, max: 49, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#d4a017' },
+                below: { min: 0, max: 25, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+            },
             updatedAt: new Date()
         };
         await collection.insertOne(newConfig);
-        console.log(`✅ Inserted new config for ${grade} (${type})`);
+        console.log(`✅ Inserted new config for ${grade} (${type}) ${period ? 'period: '+period : ''}`);
         
-        // Update existing assessments with new max scores
-        const students = await StudentAssessment.find({ grade, type });
+        // Update existing assessments with new max scores and rubric
+        const filter = { grade: grade, type: type };
+        if (period) filter.period = period;
+        
+        const students = await StudentAssessment.find(filter);
         for (const student of students) {
             let updated = false;
             for (const assessment of student.assessments) {
@@ -1995,13 +2018,19 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
                     assessment.maxScore = subjectConfig.max;
                     updated = true;
                 }
+                // Recalculate percentage and performance for each assessment
+                const perf = calculateAssessmentPerformance(assessment.score, assessment.maxScore);
+                assessment.percentage = perf.percentage;
+                assessment.performanceLevel = perf.level;
+                assessment.rating = perf.rating;
+                updated = true;
             }
             if (updated) {
-                const { totalScore } = calculateTotals(student.assessments);
-                const avgScore = student.assessments.length > 0 ? totalScore / student.assessments.length : 0;
-                student.totalScore = totalScore;
-                student.averageScore = avgScore;
-                student.performanceLevel = calculatePerformanceLevel(student.assessments);
+                const overall = calculateStudentOverall(student.assessments);
+                student.totalScore = overall.totalScore;
+                student.averageScore = overall.averageScore;
+                student.performanceLevel = overall.performanceLevel;
+                student.overallRating = overall.overallRating;
                 await student.save();
             }
         }
@@ -2021,7 +2050,7 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
 });
 
 // ============================================
-// ASSESSMENT ROUTES
+// ASSESSMENT ROUTES - WITH AUTO RUBRIC CALCULATION
 // ============================================
 
 app.get('/api/assessments/grade/:grade', async (req, res) => {
@@ -2034,14 +2063,18 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
         if (month) filter.month = month;
         if (year) filter.year = year;
         if (term) filter.term = term;
+        
         const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
         
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
-        let config = await collection.findOne({ grade: grade, type: type || 'monthly' });
+        const configFilter = { grade: grade, type: type || 'monthly' };
+        if (period) configFilter.period = period;
+        
+        let config = await collection.findOne(configFilter);
         if (!config) {
             const defaultSubjects = getDefaultSubjects(grade, type || 'monthly');
-            config = { grade: grade, type: type || 'monthly', subjects: defaultSubjects };
+            config = { grade: grade, type: type || 'monthly', period: period || '', subjects: defaultSubjects };
         }
         res.json({ success: true, students, subjectConfig: { [`${grade}_${type || 'monthly'}`]: config } });
     } catch (error) {
@@ -2064,12 +2097,26 @@ app.get('/api/assessments/student/:id', async (req, res) => {
 app.post('/api/assessments', async (req, res) => {
     try {
         const { studentName, studentId, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
+        
         if (!studentName || !grade || !assessments || !Array.isArray(assessments) || assessments.length === 0) {
             return res.status(400).json({ success: false, message: 'Invalid data. Need studentName, grade, and assessments array.' });
         }
-        const { totalScore } = calculateTotals(assessments);
-        const avgScore = assessments.length > 0 ? totalScore / assessments.length : 0;
-        const performanceLevel = calculatePerformanceLevel(assessments);
+        
+        // Calculate rubric for each assessment
+        const assessmentsWithRubric = assessments.map(a => {
+            const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+            return {
+                subject: a.subject,
+                maxScore: a.maxScore,
+                score: a.score,
+                percentage: perf.percentage,
+                performanceLevel: perf.level,
+                rating: perf.rating
+            };
+        });
+        
+        const overall = calculateStudentOverall(assessmentsWithRubric);
+        
         const student = new StudentAssessment({ 
             studentName, 
             studentId: studentId || '',
@@ -2080,11 +2127,13 @@ app.post('/api/assessments', async (req, res) => {
             month: month || '', 
             year: year || '', 
             term: term || '', 
-            assessments, 
-            totalScore, 
-            averageScore: avgScore, 
-            performanceLevel 
+            assessments: assessmentsWithRubric, 
+            totalScore: overall.totalScore, 
+            averageScore: overall.averageScore, 
+            performanceLevel: overall.performanceLevel,
+            overallRating: overall.overallRating
         });
+        
         await student.save();
         res.status(201).json({ success: true, message: 'Student assessment created successfully!', student });
     } catch (error) {
@@ -2100,6 +2149,7 @@ app.put('/api/assessments/:id', async (req, res) => {
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
+        
         if (studentName) student.studentName = studentName;
         if (studentId) student.studentId = studentId;
         if (admissionNumber) student.admissionNumber = admissionNumber;
@@ -2109,14 +2159,29 @@ app.put('/api/assessments/:id', async (req, res) => {
         if (month) student.month = month;
         if (year) student.year = year;
         if (term) student.term = term;
+        
         if (assessments && Array.isArray(assessments) && assessments.length > 0) {
-            student.assessments = assessments;
-            const { totalScore } = calculateTotals(assessments);
-            const avgScore = assessments.length > 0 ? totalScore / assessments.length : 0;
-            student.totalScore = totalScore;
-            student.averageScore = avgScore;
-            student.performanceLevel = calculatePerformanceLevel(assessments);
+            // Calculate rubric for each assessment
+            const assessmentsWithRubric = assessments.map(a => {
+                const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+                return {
+                    subject: a.subject,
+                    maxScore: a.maxScore,
+                    score: a.score,
+                    percentage: perf.percentage,
+                    performanceLevel: perf.level,
+                    rating: perf.rating
+                };
+            });
+            student.assessments = assessmentsWithRubric;
+            
+            const overall = calculateStudentOverall(assessmentsWithRubric);
+            student.totalScore = overall.totalScore;
+            student.averageScore = overall.averageScore;
+            student.performanceLevel = overall.performanceLevel;
+            student.overallRating = overall.overallRating;
         }
+        
         student.updatedAt = new Date();
         await student.save();
         res.json({ success: true, message: 'Student assessment updated successfully!', student });
@@ -2152,22 +2217,16 @@ app.get('/api/assessments/search', async (req, res) => {
         const { name, grade, type } = req.query;
         let filter = {};
         
-        // Handle name search - case insensitive
         if (name && name.trim() !== '') {
             filter.studentName = { $regex: name.trim(), $options: 'i' };
         }
-        
-        // Handle grade
         if (grade && grade.trim() !== '') {
             filter.grade = grade.trim();
         }
-        
-        // Handle type
         if (type && type.trim() !== '') {
             filter.type = type.trim();
         }
         
-        // If no filters provided, return all assessments
         if (Object.keys(filter).length === 0) {
             const allStudents = await StudentAssessment.find().sort({ studentName: 1 });
             return res.json({ success: true, students: allStudents, count: allStudents.length });
@@ -2250,37 +2309,51 @@ app.post('/api/assessments/copy', async (req, res) => {
         
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
-        let config = await collection.findOne({ grade: toGrade, type: toType || 'monthly' });
+        const configFilter = { grade: toGrade, type: toType || 'monthly' };
+        if (toPeriod) configFilter.period = toPeriod;
+        
+        let config = await collection.findOne(configFilter);
         if (!config) {
             const defaultSubjects = getDefaultSubjects(toGrade, toType || 'monthly');
-            config = { grade: toGrade, type: toType || 'monthly', subjects: defaultSubjects };
+            config = { grade: toGrade, type: toType || 'monthly', period: toPeriod || '', subjects: defaultSubjects };
         }
         let copiedCount = 0;
         for (const source of sourceStudents) {
             const existingFilter = { studentName: source.studentName, grade: toGrade, type: toType || 'monthly', period: toPeriod, month: toMonth, year: toYear, term: toTerm };
             const existing = await StudentAssessment.findOne(existingFilter);
             if (existing) continue;
+            
             const newAssessments = config.subjects.map(subj => {
                 const sourceAssessment = source.assessments.find(a => a.subject === subj.name);
-                return { subject: subj.name, maxScore: subj.max, score: sourceAssessment ? Math.min(sourceAssessment.score, subj.max) : 0 };
+                const score = sourceAssessment ? Math.min(sourceAssessment.score, subj.max) : 0;
+                const perf = calculateAssessmentPerformance(score, subj.max);
+                return { 
+                    subject: subj.name, 
+                    maxScore: subj.max, 
+                    score: score,
+                    percentage: perf.percentage,
+                    performanceLevel: perf.level,
+                    rating: perf.rating
+                };
             });
-            const { totalScore } = calculateTotals(newAssessments);
-            const avgScore = newAssessments.length > 0 ? totalScore / newAssessments.length : 0;
-            const performanceLevel = calculatePerformanceLevel(newAssessments);
+            
+            const overall = calculateStudentOverall(newAssessments);
+            
             const newStudent = new StudentAssessment({ 
                 studentName: source.studentName, 
                 studentId: source.studentId || '',
                 admissionNumber: source.admissionNumber || '', 
                 grade: toGrade, 
                 type: toType || 'monthly', 
-                period: toPeriod, 
+                period: toPeriod || '', 
                 month: toMonth, 
                 year: toYear, 
                 term: toTerm, 
                 assessments: newAssessments, 
-                totalScore, 
-                averageScore: avgScore, 
-                performanceLevel 
+                totalScore: overall.totalScore, 
+                averageScore: overall.averageScore, 
+                performanceLevel: overall.performanceLevel,
+                overallRating: overall.overallRating
             });
             await newStudent.save();
             copiedCount++;
@@ -2548,8 +2621,9 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // ============================================
-// DOWNLOAD CLASS/GRADE PDF REPORT - FIXED
+// DOWNLOAD CLASS/GRADE PDF REPORT
 // ============================================
 app.get('/api/assessments/download-class-pdf', async (req, res) => {
     try {
@@ -2559,21 +2633,17 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Grade is required' });
         }
         
-        // Build filter
         const filter = { grade: grade };
         if (type) filter.type = type;
         if (term) filter.term = term;
         if (year) filter.year = year;
         if (period) filter.period = period;
         
-        // Get all students for this grade - ONLY THE LATEST RECORD PER STUDENT
         const allStudents = await StudentAssessment.find(filter).sort({ studentName: 1, createdAt: -1 });
         
-        // DEDUPLICATE - Keep only the latest record per student
         const uniqueStudents = {};
         allStudents.forEach(student => {
             const key = student.studentName;
-            // If student not in map OR this record is newer
             if (!uniqueStudents[key] || new Date(student.createdAt) > new Date(uniqueStudents[key].createdAt)) {
                 uniqueStudents[key] = student;
             }
@@ -2585,10 +2655,8 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
             return res.status(404).json({ success: false, message: 'No students found for this grade' });
         }
         
-        // Generate HTML report
         const html = generateClassReportHTML(students, grade, type, term, year, period);
         
-        // Generate PDF
         const options = { 
             format: 'A4', 
             border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }, 
@@ -2619,14 +2687,13 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
 });
 
 // ============================================
-// GENERATE CLASS REPORT HTML - LANDSCAPE WITH RANK
+// GENERATE CLASS REPORT HTML - WITH RUBRIC
 // ============================================
 function generateClassReportHTML(students, grade, type, term, year, period) {
     const now = getKenyaTime();
     const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
     const periodLabel = period ? ` - ${period}` : '';
     
-    // Subject name shortener
     function shortenSubject(name) {
         const shortMap = {
             'MATHS ACTIVITIES': 'Maths',
@@ -2670,13 +2737,11 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
         return name;
     }
     
-    // Calculate overall class statistics
     let totalStudents = students.length;
     let totalScoreSum = 0;
     let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
     let allSubjects = [];
     
-    // First pass: collect all unique subject names and calculate stats
     students.forEach(student => {
         totalScoreSum += student.totalScore || 0;
         const level = student.performanceLevel || 'Approaching Expectation';
@@ -2696,17 +2761,13 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
     
     allSubjects.sort();
     const avgClassScore = totalStudents > 0 ? (totalScoreSum / totalStudents).toFixed(1) : 0;
-    
-    // Sort students by total score (descending) for ranking
     const sortedStudents = [...students].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
     
-    // Build subject headers with shortened names
     const subjectHeaders = allSubjects.map(subject => {
         const shortName = shortenSubject(subject);
         return `<th style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:5.5px;background:#0A1628;color:white;font-weight:700;min-width:30px;max-width:42px;word-wrap:break-word;">${shortName}</th>`;
     }).join('');
     
-    // Build max scores row
     const maxScoresRow = allSubjects.map(subject => {
         let maxScore = 0;
         for (const student of students) {
@@ -2721,18 +2782,14 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
         return `<td style="padding:1px 1px;border:1px solid #ddd;text-align:center;font-size:4.5px;color:#999;background:#f8f9fc;font-weight:600;">${maxScore}</td>`;
     }).join('');
     
-    // Build rows with RANK
     let rowsHtml = sortedStudents.map((student, index) => {
         const rank = index + 1;
         const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
         const level = student.performanceLevel || 'Approaching Expectation';
-        let levelColor = '#d4a017';
-        if (level === 'Exceeding Expectation') { levelColor = '#28a745'; }
-        else if (level === 'Meeting Expectation') { levelColor = '#17a2b8'; }
-        else if (level === 'Approaching Expectation') { levelColor = '#d4a017'; }
-        else { levelColor = '#dc3545'; }
+        const levelColor = getPerformanceColor(level);
+        const shortLabel = getPerformanceShort(level);
+        const rating = getPerformanceRating(level);
         
-        // Rank medal
         let rankDisplay = rank;
         if (rank === 1) rankDisplay = '🥇 1';
         else if (rank === 2) rankDisplay = '🥈 2';
@@ -2743,11 +2800,11 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
         allSubjects.forEach(subject => {
             const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
             if (assessment) {
-                const percentage = assessment.maxScore > 0 ? ((assessment.score / assessment.maxScore) * 100).toFixed(0) : 0;
+                const percentage = assessment.percentage || (assessment.maxScore > 0 ? ((assessment.score / assessment.maxScore) * 100) : 0);
                 let scoreColor = '#0A1628';
-                if (percentage >= 80) scoreColor = '#28a745';
-                else if (percentage >= 60) scoreColor = '#17a2b8';
-                else if (percentage >= 40) scoreColor = '#d4a017';
+                if (percentage >= 75) scoreColor = '#28a745';
+                else if (percentage >= 50) scoreColor = '#17a2b8';
+                else if (percentage >= 26) scoreColor = '#d4a017';
                 else scoreColor = '#dc3545';
                 
                 subjectScores += `
@@ -2774,7 +2831,7 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
                 <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:6.5px;font-weight:700;color:#17a2b8;">${avgScore}</td>
                 <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;">
                     <span style="background:${levelColor};color:white;padding:1px 4px;border-radius:50px;font-weight:700;font-size:5.5px;display:inline-block;white-space:nowrap;min-width:42px;">
-                        ${level}
+                        ${shortLabel} (${rating})
                     </span>
                 </td>
             </tr>
@@ -2808,7 +2865,6 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
             border-bottom: 2px solid #D4A017; 
             padding-bottom: 3px; 
             margin-bottom: 4px; 
-            position: relative;
         }
         .header .school-name { 
             font-size: 14px; 
@@ -2847,7 +2903,6 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
         .header .flag-strip .g { background: #006600; }
         .header .flag-strip .w { background: #FFFFFF; }
         
-        /* ===== ONE-LINE STATS BAR ===== */
         .stats-bar {
             display: flex;
             flex-wrap: wrap;
@@ -2887,66 +2942,28 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
-        .stats-bar .stat-item .icon { font-size: 8px; margin-right: 1px; }
         
-        .table-wrap { 
-            overflow-x: auto; 
-            margin-top: 2px;
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            font-size: 5.5px; 
-            border: 1px solid #ddd;
-        }
+        .table-wrap { overflow-x: auto; margin-top: 2px; }
+        table { width: 100%; border-collapse: collapse; font-size: 5.5px; border: 1px solid #ddd; }
         table th { 
-            background: #0A1628; 
-            color: white; 
-            padding: 2px 2px; 
-            text-align: center; 
-            font-size: 5px; 
-            font-weight: 700;
-            white-space: nowrap;
-            border: 1px solid #1a2a4a;
+            background: #0A1628; color: white; padding: 2px 2px; text-align: center; 
+            font-size: 5px; font-weight: 700; white-space: nowrap; border: 1px solid #1a2a4a;
         }
-        table td { 
-            padding: 1px 2px; 
-            border: 1px solid #ddd; 
-        }
-        .header-row td {
-            background: #f8f9fc !important;
-            font-weight: 600;
-            color: #555;
-            font-size: 4.5px;
-        }
+        table td { padding: 1px 2px; border: 1px solid #ddd; }
+        .header-row td { background: #f8f9fc !important; font-weight: 600; color: #555; font-size: 4.5px; }
+        
         .footer { 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 3px; 
-            padding-top: 3px; 
-            border-top: 1px solid #ddd; 
-            color: #999; 
-            font-size: 4.5px; 
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 3px; padding-top: 3px; border-top: 1px solid #ddd;
+            color: #999; font-size: 4.5px; 
         }
         .footer .left { text-align: left; }
         .footer .right { text-align: right; }
         .footer .contact { color: #ccc; }
-        .footer .signature {
-            display: flex;
-            gap: 15px;
-            margin-top: 1px;
-        }
-        .footer .signature .sig-line {
-            display: inline-block;
-            width: 60px;
-            border-bottom: 1px solid #999;
-            margin-top: 1px;
-        }
-        .footer .signature .sig-label {
-            font-size: 4px;
-            color: #999;
-        }
+        .footer .signature { display: flex; gap: 15px; margin-top: 1px; }
+        .footer .signature .sig-line { display: inline-block; width: 60px; border-bottom: 1px solid #999; margin-top: 1px; }
+        .footer .signature .sig-label { font-size: 4px; color: #999; }
+        
         @media print { 
             body { padding: 2px; } 
             .stats-bar .stat-item { padding: 1px 5px; }
@@ -2957,44 +2974,27 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
             .header .school-name { font-size: 12px; }
             .header .report-title { font-size: 8px; }
         }
-        @page {
-            margin: 3mm;
-            size: A4 landscape;
-        }
+        @page { margin: 3mm; size: A4 landscape; }
         .watermark {
-            position: fixed;
-            opacity: 0.012;
-            font-size: 30px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            pointer-events: none;
-            z-index: 0;
-            color: #0A1628;
-            font-weight: 900;
-            letter-spacing: 4px;
-            white-space: nowrap;
+            position: fixed; opacity: 0.012; font-size: 30px;
+            top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
+            pointer-events: none; z-index: 0; color: #0A1628;
+            font-weight: 900; letter-spacing: 4px; white-space: nowrap;
         }
         .legend {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-            margin-top: 2px;
-            font-size: 4.5px;
+            display: flex; gap: 6px; justify-content: center; margin-top: 2px; font-size: 4.5px; flex-wrap: wrap;
         }
-        .legend .item { display: flex; align-items: center; gap: 1px; }
+        .legend .item { display: flex; align-items: center; gap: 2px; }
         .legend .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; }
         .legend .dot.exceeding { background: #28a745; }
         .legend .dot.meeting { background: #17a2b8; }
         .legend .dot.approaching { background: #d4a017; }
         .legend .dot.below { background: #dc3545; }
-        .rank-badge {
-            display: inline-block;
-            font-weight: 700;
-        }
-        .rank-1 { color: #D4A017; }
-        .rank-2 { color: #C0C0C0; }
-        .rank-3 { color: #CD7F32; }
+        .legend .rubric-label { font-weight: 600; font-size: 5px; }
+        .legend .rubric-label.ee { color: #28a745; }
+        .legend .rubric-label.me { color: #17a2b8; }
+        .legend .rubric-label.ae { color: #d4a017; }
+        .legend .rubric-label.be { color: #dc3545; }
     </style>
 </head>
 <body>
@@ -3016,36 +3016,22 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
             </div>
         </div>
         
-        <!-- ===== ONE-LINE STATS BAR ===== -->
         <div class="stats-bar">
-            <div class="stat-item">
-                <span class="num gold">${totalStudents}</span>
-                <span class="label">Students</span>
-            </div>
-            <div class="stat-item">
-                <span class="num green">${exceedingCount}</span>
-                <span class="label">Exceeding</span>
-            </div>
-            <div class="stat-item">
-                <span class="num blue">${meetingCount}</span>
-                <span class="label">Meeting</span>
-            </div>
-            <div class="stat-item">
-                <span class="num orange">${approachingCount}</span>
-                <span class="label">Approaching</span>
-            </div>
-            <div class="stat-item">
-                <span class="num red">${belowCount}</span>
-                <span class="label">Below</span>
-            </div>
-            <div class="stat-item">
-                <span class="num purple">${avgClassScore}</span>
-                <span class="label">Class Avg</span>
-            </div>
-            <div class="stat-item">
-                <span class="num cyan">${allSubjects.length}</span>
-                <span class="label">Subjects</span>
-            </div>
+            <div class="stat-item"><span class="num gold">${totalStudents}</span><span class="label">Students</span></div>
+            <div class="stat-item"><span class="num green">${exceedingCount}</span><span class="label">EE (4)</span></div>
+            <div class="stat-item"><span class="num blue">${meetingCount}</span><span class="label">ME (3)</span></div>
+            <div class="stat-item"><span class="num orange">${approachingCount}</span><span class="label">AE (2)</span></div>
+            <div class="stat-item"><span class="num red">${belowCount}</span><span class="label">BE (1)</span></div>
+            <div class="stat-item"><span class="num purple">${avgClassScore}</span><span class="label">Class Avg</span></div>
+            <div class="stat-item"><span class="num cyan">${allSubjects.length}</span><span class="label">Subjects</span></div>
+        </div>
+        
+        <div class="legend">
+            <span class="item"><span class="dot exceeding"></span> <span class="rubric-label ee">EE: Exceeding (75-100%)</span></span>
+            <span class="item"><span class="dot meeting"></span> <span class="rubric-label me">ME: Meeting (50-74%)</span></span>
+            <span class="item"><span class="dot approaching"></span> <span class="rubric-label ae">AE: Approaching (26-49%)</span></span>
+            <span class="item"><span class="dot below"></span> <span class="rubric-label be">BE: Below (0-25%)</span></span>
+            <span class="item" style="color:#D4A017;font-weight:700;">🏆 Rank: 1st 🥇, 2nd 🥈, 3rd 🥉</span>
         </div>
         
         <div class="table-wrap">
@@ -3057,7 +3043,7 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
                         ${subjectHeaders}
                         <th style="width:26px;">Total</th>
                         <th style="width:22px;">Avg</th>
-                        <th style="width:45px;">Performance</th>
+                        <th style="width:50px;">Level</th>
                     </tr>
                     <tr class="header-row">
                         <td colspan="2" style="text-align:right;color:#0A1628;font-weight:700;">Max:</td>
@@ -3071,14 +3057,6 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
             </table>
         </div>
         
-        <div class="legend">
-            <span class="item"><span class="dot exceeding"></span> Exceeding (≥80%)</span>
-            <span class="item"><span class="dot meeting"></span> Meeting (60-79%)</span>
-            <span class="item"><span class="dot approaching"></span> Approaching (40-59%)</span>
-            <span class="item"><span class="dot below"></span> Below (&lt;40%)</span>
-            <span class="item" style="color:#D4A017;font-weight:700;">🏆 Rank: 1st 🥇, 2nd 🥈, 3rd 🥉</span>
-        </div>
-        
         <div class="footer">
             <div class="left">
                 <span class="contact">📞 +254 721 556 252 | 📧 starchangara@gmail.com</span>
@@ -3087,14 +3065,8 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
                 <span>© ${new Date().getFullYear()} Changara Star Academy</span>
                 <span style="color:#D4A017;font-weight:700;margin-left:4px;">🇰🇪</span>
                 <div class="signature">
-                    <div>
-                        <div class="sig-line"></div>
-                        <div class="sig-label">Principal's Signature</div>
-                    </div>
-                    <div>
-                        <div class="sig-line"></div>
-                        <div class="sig-label">Date</div>
-                    </div>
+                    <div><div class="sig-line"></div><div class="sig-label">Principal's Signature</div></div>
+                    <div><div class="sig-line"></div><div class="sig-label">Date</div></div>
                 </div>
             </div>
         </div>
@@ -3103,6 +3075,7 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
 </html>
     `;
 }
+
 // ============================================
 // FIX PAST RECORDS - MANUAL API
 // ============================================
