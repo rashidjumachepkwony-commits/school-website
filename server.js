@@ -1173,9 +1173,27 @@ app.post('/api/teacher/checkout', async (req, res) => {
         console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
         console.log('🕐 Hour (Kenya time):', kenyaHour);
         
-        // ... rest of validation ...
+        // FIND today's attendance record FIRST
+        const todayAttendance = teacher.attendance.find(a => {
+            const aDate = new Date(a.date);
+            aDate.setHours(0, 0, 0, 0);
+            return aDate.getTime() === kenyaToday.getTime();
+        });
         
-        // Store the time
+        // Check if todayAttendance exists
+        if (!todayAttendance) {
+            return res.status(400).json({ success: false, message: '❌ No check-in found for today. Please check in first.' });
+        }
+        
+        if (todayAttendance.checkOut) {
+            return res.status(400).json({ success: false, message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut) });
+        }
+        
+        if (kenyaHour < 15) {
+            return res.status(400).json({ success: false, message: '⏰ Check-out is only allowed after 3:00 PM. Please continue working.' });
+        }
+        
+        // Update the record
         todayAttendance.checkOut = kenyaNow;
         todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
         const checkInTime = new Date(todayAttendance.checkIn);
