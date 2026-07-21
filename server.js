@@ -27,9 +27,20 @@ process.env.TZ = 'Africa/Nairobi';
 // HELPER: GET KENYA TIME (UTC+3) - RELIABLE
 // ============================================
 function getKenyaTime() {
-    return new Date();
+    const now = new Date();
+    // Convert to Kenya time using toLocaleString
+    const kenyaTimeString = now.toLocaleString('en-US', { 
+        timeZone: 'Africa/Nairobi',
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    return new Date(kenyaTimeString);
 }
-
 function getKenyaDate() {
     const kenyaTime = getKenyaTime();
     const date = new Date(kenyaTime);
