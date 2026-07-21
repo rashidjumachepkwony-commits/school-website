@@ -618,7 +618,6 @@ const subjectConfigSchema = new mongoose.Schema({
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
 
 // NO INDEX - DO NOT add any index
-const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
 
 // Student Assessment Schema
 const studentAssessmentSchema = new mongoose.Schema({
