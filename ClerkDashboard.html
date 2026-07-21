@@ -538,7 +538,7 @@ th, td { padding: 6px 8px; }
 // GLOBAL VARIABLES
 // =====================================================
 const CLERK_PIN = "1010";
-const API_BASE = '';  // Empty for relative paths
+const API_BASE = '';
 
 let allStudents = [];
 let allPayments = [];
@@ -548,6 +548,7 @@ let currentHistoryStudentId = null;
 let receiptData = null;
 let isLoading = false;
 let currentTab = 'students';
+let editingPaymentRow = null;
 
 // =====================================================
 // GO HOME FUNCTION
@@ -1159,8 +1160,6 @@ function viewSingleReceipt(row, studentId, studentName, amount, category, method
 // =====================================================
 // EDIT PAYMENT FUNCTIONS
 // =====================================================
-var editingPaymentRow = null;
-
 function openEditPaymentModal(paymentRow, studentId, studentName, amount, category, method, reference, notes) {
     editingPaymentRow = paymentRow;
     document.getElementById('editPaymentRow').value = paymentRow;
@@ -1186,36 +1185,37 @@ function showEditPaymentResult(msg, type) {
     el.style.display = 'block';
     if (type === 'success') { el.style.background = '#d4edda'; el.style.color = '#155724'; el.style.border = '2px solid #0b8f34'; }
     else if (type === 'error') { el.style.background = '#f8d7da'; el.style.color = '#721c24'; el.style.border = '2px solid #dc3545'; }
-    else { el.style.background = '#d1ecf1'; el.style.color = '#0c5460'; el.style.border = '2px solid #0b5394'; }
+    else { el.style.background = '#fff3cd'; el.style.color = '#856404'; el.style.border = '2px solid #ffc107'; }
 }
 
 async function saveEditPaymentRecord() {
-    var row = document.getElementById('editPaymentRow').value;
-    var amount = document.getElementById('editPaymentAmount').value;
+    var paymentId = document.getElementById('editPaymentRow').value;
+    if (!paymentId) { showEditPaymentResult('❌ No payment selected', 'error'); return; }
+    
+    var amount = parseFloat(document.getElementById('editPaymentAmount').value);
+    if (!amount || amount <= 0) { showEditPaymentResult('❌ Please enter a valid amount', 'error'); return; }
+    
     var category = document.getElementById('editPaymentCategory').value;
     var method = document.getElementById('editPaymentMethod').value;
     var reference = document.getElementById('editPaymentReference').value.trim();
     var notes = document.getElementById('editPaymentNotes').value.trim();
-    var studentInfo = document.getElementById('editPaymentStudent').value;
-    var studentId = studentInfo.split(' - ')[0];
-    if (!amount || parseFloat(amount) <= 0) { showEditPaymentResult('❌ Please enter a valid amount', 'error'); return; }
+    
     showEditPaymentResult('⏳ Updating payment...', 'info');
     
     try {
-        const data = await fetchAPI('/api/clerk/payments/' + row, {
+        const data = await fetchAPI('/api/clerk/payments/' + paymentId, {
             method: 'PUT',
-            body: JSON.stringify({ amount: parseFloat(amount), category, method, reference, notes })
+            body: JSON.stringify({ amount, category, method, reference, notes })
         });
         if (data.success) {
             showEditPaymentResult('✅ ' + data.message, 'success');
-            showMessage('Payment updated successfully!', 'success');
+            showMessage('✅ Payment updated successfully!', 'success');
             setTimeout(function() {
                 closeEditPaymentModal();
                 loadStudentFeeList();
                 loadPayments();
-                populateHistoryStudentSelect();
-                if (currentHistoryStudentId) { viewStudentPayments(currentHistoryStudentId); }
-            }, 1500);
+                viewStudentPayments(currentHistoryStudentId);
+            }, 1000);
         } else {
             showEditPaymentResult('❌ ' + data.message, 'error');
         }
@@ -1225,24 +1225,25 @@ async function saveEditPaymentRecord() {
 }
 
 async function deleteEditedPayment() {
-    var row = document.getElementById('editPaymentRow').value;
-    if (!confirm('Are you sure you want to delete this payment record? This action cannot be undone!')) { return; }
+    var paymentId = document.getElementById('editPaymentRow').value;
+    if (!paymentId) { showEditPaymentResult('❌ No payment selected', 'error'); return; }
+    if (!confirm('⚠️ Are you sure you want to delete this payment record?')) { return; }
+    
     showEditPaymentResult('⏳ Deleting payment...', 'info');
     
     try {
-        const data = await fetchAPI('/api/clerk/payments/' + row, {
+        const data = await fetchAPI('/api/clerk/payments/' + paymentId, {
             method: 'DELETE'
         });
         if (data.success) {
             showEditPaymentResult('✅ ' + data.message, 'success');
-            showMessage('Payment deleted successfully!', 'success');
+            showMessage('✅ Payment deleted successfully!', 'success');
             setTimeout(function() {
                 closeEditPaymentModal();
                 loadStudentFeeList();
                 loadPayments();
-                populateHistoryStudentSelect();
-                if (currentHistoryStudentId) { viewStudentPayments(currentHistoryStudentId); }
-            }, 1500);
+                viewStudentPayments(currentHistoryStudentId);
+            }, 1000);
         } else {
             showEditPaymentResult('❌ ' + data.message, 'error');
         }
@@ -1258,166 +1259,163 @@ async function loadFeesStructure() {
     try {
         const data = await fetchAPI('/api/clerk/fees/structure');
         if (data.success) {
-            var fees = data.fees || {};
-            var dayHtml = '';
-            var gradeOrder = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-            gradeOrder.forEach(function(grade) {
-                var f = fees[grade];
-                if (f) { dayHtml += '<tr><td><strong>' + grade + '</strong></td><td>KES ' + (f.term1 || 0).toLocaleString() + '</td><td>KES ' + (f.term2 || 0).toLocaleString() + '</td><td>KES ' + (f.term3 || 0).toLocaleString() + '</td><td class="amount">KES ' + (f.total || 0).toLocaleString() + '</td></tr>'; }
-            });
-            document.getElementById('dayFeesTable').innerHTML = dayHtml;
-            
-            var boardingHtml = '';
-            var boardingFees = fees['boarding'] || {};
-            for (var head in boardingFees) {
-                var f = boardingFees[head];
-                if (f) { boardingHtml += '<tr><td><strong>' + head + '</strong></td><td>KES ' + (f.term1 || 0).toLocaleString() + '</td><td>KES ' + (f.term2 || 0).toLocaleString() + '</td><td>KES ' + (f.term3 || 0).toLocaleString() + '</td><td class="amount">KES ' + (f.total || 0).toLocaleString() + '</td></tr>'; }
-            }
-            document.getElementById('boardingFeesTable').innerHTML = boardingHtml;
+            var dayFees = data.fees || {};
+            renderDayFees(dayFees);
+            renderBoardingFees(data.fees?.boarding || {});
         }
     } catch (error) {
-        document.getElementById('dayFeesTable').innerHTML = '<tr><td colspan="5" style="color:red;text-align:center;">❌ Error loading fees</td></tr>';
+        console.error('Error loading fees structure:', error);
     }
 }
 
-function openEditFeesModal(type) {
-    if (type === 'boarding') {
-        var html = '<h2>✏️ Edit Boarding Fees</h2><p style="color:#666;text-align:center;margin-bottom:15px;">Update boarding fees</p><div class="fees-edit-group"><h4>Full Boarding</h4><div class="row"><div><label>Term 1:</label><input type="number" id="boarding_term1" value="8000"></div><div><label>Term 2:</label><input type="number" id="boarding_term2" value="8000"></div><div><label>Term 3:</label><input type="number" id="boarding_term3" value="8000"></div><div><label>Total (Auto):</label><input type="text" id="boarding_total" readonly style="background:#f0f0f0;font-weight:bold;" value="24000"></div></div></div><input type="hidden" id="editFeesType" value="boarding"><div id="feesEditResult" style="margin-top:15px;padding:12px;border-radius:12px;display:none;"></div><div class="modal-actions"><button class="btn-success" onclick="saveFeesStructure()">💾 SAVE FEES</button><button class="btn-danger" onclick="closeEditFeesModal()">❌ CANCEL</button></div>';
-        document.getElementById('feesModalContent').innerHTML = html;
-        document.getElementById('editFeesModal').classList.add('show');
-        document.getElementById('boarding_term1').addEventListener('input', updateBoardingTotal);
-        document.getElementById('boarding_term2').addEventListener('input', updateBoardingTotal);
-        document.getElementById('boarding_term3').addEventListener('input', updateBoardingTotal);
-    } else {
-        var gradeOrder = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        var html = '<h2>✏️ Edit Day Scholar Fees</h2><p style="color:#666;text-align:center;margin-bottom:15px;">Update fees for each grade</p>';
-        gradeOrder.forEach(function(grade) {
-            var key = grade.replace(/ /g,'_');
-            html += '<div class="fees-edit-group"><h4>' + grade + '</h4><div class="row"><div><label>Term 1:</label><input type="number" id="day_' + key + '_term1" value="0"></div><div><label>Term 2:</label><input type="number" id="day_' + key + '_term2" value="0"></div><div><label>Term 3:</label><input type="number" id="day_' + key + '_term3" value="0"></div><div><label>Total (Auto):</label><input type="text" id="day_' + key + '_total" readonly style="background:#f0f0f0;font-weight:bold;" value="0"></div></div></div>';
-        });
-        html += '<input type="hidden" id="editFeesType" value="day"><div id="feesEditResult" style="margin-top:15px;padding:12px;border-radius:12px;display:none;"></div><div class="modal-actions"><button class="btn-success" onclick="saveFeesStructure()">💾 SAVE FEES</button><button class="btn-danger" onclick="closeEditFeesModal()">❌ CANCEL</button></div>';
-        document.getElementById('feesModalContent').innerHTML = html;
-        document.getElementById('editFeesModal').classList.add('show');
-        gradeOrder.forEach(function(grade) {
-            var key = grade.replace(/ /g,'_');
-            document.getElementById('day_' + key + '_term1').addEventListener('input', function() { updateDayTotal(key); });
-            document.getElementById('day_' + key + '_term2').addEventListener('input', function() { updateDayTotal(key); });
-            document.getElementById('day_' + key + '_term3').addEventListener('input', function() { updateDayTotal(key); });
-        });
-    }
+function renderDayFees(fees) {
+    var grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+    var html = '';
+    grades.forEach(function(grade) {
+        var f = fees[grade] || { term1: 0, term2: 0, term3: 0, total: 0 };
+        html += '<tr><td><strong>' + grade + '</strong></td><td>KES ' + (f.term1 || 0).toLocaleString() + '</td><td>KES ' + (f.term2 || 0).toLocaleString() + '</td><td>KES ' + (f.term3 || 0).toLocaleString() + '</td><td class="amount">KES ' + (f.total || 0).toLocaleString() + '</td></tr>';
+    });
+    document.getElementById('dayFeesTable').innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:#999;">No fees data available</td></tr>';
 }
 
-function updateBoardingTotal() {
-    var t1 = parseInt(document.getElementById('boarding_term1').value) || 0;
-    var t2 = parseInt(document.getElementById('boarding_term2').value) || 0;
-    var t3 = parseInt(document.getElementById('boarding_term3').value) || 0;
-    document.getElementById('boarding_total').value = t1 + t2 + t3;
-}
-
-function updateDayTotal(key) {
-    var t1 = parseInt(document.getElementById('day_' + key + '_term1').value) || 0;
-    var t2 = parseInt(document.getElementById('day_' + key + '_term2').value) || 0;
-    var t3 = parseInt(document.getElementById('day_' + key + '_term3').value) || 0;
-    document.getElementById('day_' + key + '_total').value = t1 + t2 + t3;
-}
-
-function closeEditFeesModal() { document.getElementById('editFeesModal').classList.remove('show'); }
-
-async function saveFeesStructure() {
-    var type = document.getElementById('editFeesType').value;
-    var feesData = {};
-    var resultEl = document.getElementById('feesEditResult');
-    if (type === 'boarding') {
-        var term1 = parseInt(document.getElementById('boarding_term1').value) || 0;
-        var term2 = parseInt(document.getElementById('boarding_term2').value) || 0;
-        var term3 = parseInt(document.getElementById('boarding_term3').value) || 0;
-        if (term1 < 0 || term2 < 0 || term3 < 0) {
-            resultEl.innerHTML = '❌ Please enter valid fees (cannot be negative)';
-            resultEl.style.display = 'block';
-            resultEl.style.background = '#f8d7da';
-            resultEl.style.color = '#721c24';
-            resultEl.style.border = '2px solid #dc3545';
-            return;
-        }
-        feesData['Full Boarding'] = { term1: term1, term2: term2, term3: term3, total: term1 + term2 + term3 };
-    } else {
-        var gradeOrder = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        var valid = true;
-        gradeOrder.forEach(function(grade) {
-            var key = grade.replace(/ /g,'_');
-            var term1 = parseInt(document.getElementById('day_' + key + '_term1').value) || 0;
-            var term2 = parseInt(document.getElementById('day_' + key + '_term2').value) || 0;
-            var term3 = parseInt(document.getElementById('day_' + key + '_term3').value) || 0;
-            if (term1 < 0 || term2 < 0 || term3 < 0) {
-                valid = false;
-                resultEl.innerHTML = '❌ Please enter valid fees for ' + grade + ' (cannot be negative)';
-                resultEl.style.display = 'block';
-                resultEl.style.background = '#f8d7da';
-                resultEl.style.color = '#721c24';
-                resultEl.style.border = '2px solid #dc3545';
-                return;
+function renderBoardingFees(fees) {
+    var html = '';
+    if (fees && typeof fees === 'object') {
+        for (var key in fees) {
+            var f = fees[key];
+            if (typeof f === 'object') {
+                html += '<tr><td><strong>' + key + '</strong></td><td>KES ' + (f.term1 || 0).toLocaleString() + '</td><td>KES ' + (f.term2 || 0).toLocaleString() + '</td><td>KES ' + (f.term3 || 0).toLocaleString() + '</td><td class="amount">KES ' + (f.total || 0).toLocaleString() + '</td></tr>';
             }
-            feesData[grade] = { term1: term1, term2: term2, term3: term3, total: term1 + term2 + term3 };
-        });
-        if (!valid) return;
+        }
     }
-    resultEl.innerHTML = '⏳ Saving fees...';
-    resultEl.style.display = 'block';
-    resultEl.style.background = '#d1ecf1';
-    resultEl.style.color = '#0c5460';
-    resultEl.style.border = '2px solid #0b5394';
+    document.getElementById('boardingFeesTable').innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:#999;">No boarding fees data available</td></tr>';
+}
+
+// =====================================================
+// OPEN EDIT FEES MODAL
+// =====================================================
+function openEditFeesModal(type) {
+    var content = document.getElementById('feesModalContent');
+    if (type === 'day') {
+        content.innerHTML = '<h2>✏️ Edit Day Scholar Fees</h2><p style="color:#666;text-align:center;">Enter term fees for each grade</p><div id="feesEditForm"></div><div id="feesEditResult" style="margin-top:10px;padding:12px;border-radius:12px;display:none;"></div><div class="modal-actions"><button class="btn-success" onclick="saveFeesStructure(\'day\')">💾 SAVE CHANGES</button><button class="btn-danger" onclick="closeFeesModal()">❌ CANCEL</button></div>';
+        var formHtml = '<table style="width:100%;font-size:14px;"><thead><tr><th>Grade</th><th>Term 1</th><th>Term 2</th><th>Term 3</th></tr></thead><tbody>';
+        var grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+        grades.forEach(function(grade) {
+            var f = window._feesData?.day?.[grade] || { term1: 0, term2: 0, term3: 0 };
+            formHtml += '<tr><td><strong>' + grade + '</strong></td><td><input type="number" id="fees_' + grade.replace(/ /g,'_') + '_term1" value="' + (f.term1 || 0) + '" step="100" style="width:100px;padding:6px;border:2px solid #ccc;border-radius:6px;"></td><td><input type="number" id="fees_' + grade.replace(/ /g,'_') + '_term2" value="' + (f.term2 || 0) + '" step="100" style="width:100px;padding:6px;border:2px solid #ccc;border-radius:6px;"></td><td><input type="number" id="fees_' + grade.replace(/ /g,'_') + '_term3" value="' + (f.term3 || 0) + '" step="100" style="width:100px;padding:6px;border:2px solid #ccc;border-radius:6px;"></td></tr>';
+        });
+        formHtml += '</tbody></table>';
+        document.getElementById('feesEditForm').innerHTML = formHtml;
+    } else {
+        content.innerHTML = '<h2>✏️ Edit Boarding Fees</h2><p style="color:#666;text-align:center;">Enter term fees for boarding (Grades 3-6)</p><div id="feesEditForm"></div><div id="feesEditResult" style="margin-top:10px;padding:12px;border-radius:12px;display:none;"></div><div class="modal-actions"><button class="btn-success" onclick="saveFeesStructure(\'boarding\')">💾 SAVE CHANGES</button><button class="btn-danger" onclick="closeFeesModal()">❌ CANCEL</button></div>';
+        var formHtml = '<table style="width:100%;font-size:14px;"><thead><tr><th>Vote Head</th><th>Term 1</th><th>Term 2</th><th>Term 3</th></tr></thead><tbody>';
+        var boardingHeads = ['Full Boarding'];
+        boardingHeads.forEach(function(head) {
+            var f = window._feesData?.boarding?.[head] || { term1: 0, term2: 0, term3: 0 };
+            formHtml += '<tr><td><strong>' + head + '</strong></td><td><input type="number" id="fees_boarding_' + head.replace(/ /g,'_') + '_term1" value="' + (f.term1 || 0) + '" step="100" style="width:100px;padding:6px;border:2px solid #ccc;border-radius:6px;"></td><td><input type="number" id="fees_boarding_' + head.replace(/ /g,'_') + '_term2" value="' + (f.term2 || 0) + '" step="100" style="width:100px;padding:6px;border:2px solid #ccc;border-radius:6px;"></td><td><input type="number" id="fees_boarding_' + head.replace(/ /g,'_') + '_term3" value="' + (f.term3 || 0) + '" step="100" style="width:100px;padding:6px;border:2px solid #ccc;border-radius:6px;"></td></tr>';
+        });
+        formHtml += '</tbody></table>';
+        document.getElementById('feesEditForm').innerHTML = formHtml;
+    }
+    document.getElementById('editFeesModal').classList.add('show');
+}
+
+function closeFeesModal() {
+    document.getElementById('editFeesModal').classList.remove('show');
+}
+
+function showFeesEditResult(msg, type) {
+    var el = document.getElementById('feesEditResult');
+    el.innerHTML = msg;
+    el.style.display = 'block';
+    if (type === 'success') { el.style.background = '#d4edda'; el.style.color = '#155724'; el.style.border = '2px solid #0b8f34'; }
+    else if (type === 'error') { el.style.background = '#f8d7da'; el.style.color = '#721c24'; el.style.border = '2px solid #dc3545'; }
+    else { el.style.background = '#fff3cd'; el.style.color = '#856404'; el.style.border = '2px solid #ffc107'; }
+}
+
+async function saveFeesStructure(type) {
+    showFeesEditResult('⏳ Saving fees structure...', 'info');
+    
+    var fees = {};
+    var inputs = document.querySelectorAll('#feesEditForm input');
+    inputs.forEach(function(inp) {
+        var idParts = inp.id.split('_');
+        var grade = idParts[1];
+        var term = idParts[2];
+        if (!fees[grade]) { fees[grade] = {}; }
+        fees[grade][term] = parseFloat(inp.value) || 0;
+    });
+    
+    for (var grade in fees) {
+        var total = 0;
+        for (var term in fees[grade]) {
+            total += fees[grade][term];
+        }
+        fees[grade].total = total;
+    }
     
     try {
         const data = await fetchAPI('/api/clerk/fees/update', {
             method: 'POST',
-            body: JSON.stringify({ fees: feesData, type: type })
+            body: JSON.stringify({ fees: fees, type: type })
         });
         if (data.success) {
-            resultEl.innerHTML = '✅ ' + data.message;
-            resultEl.style.background = '#d4edda';
-            resultEl.style.color = '#155724';
-            resultEl.style.border = '2px solid #0b8f34';
-            showMessage('✅ Fees updated successfully!', 'success');
-            setTimeout(function() { closeEditFeesModal(); loadFeesStructure(); loadStudentFeeList(); }, 1500);
+            showFeesEditResult('✅ ' + data.message, 'success');
+            showMessage('✅ Fees structure updated!', 'success');
+            setTimeout(function() {
+                closeFeesModal();
+                loadFeesStructure();
+            }, 1000);
         } else {
-            resultEl.innerHTML = '❌ ' + data.message;
-            resultEl.style.background = '#f8d7da';
-            resultEl.style.color = '#721c24';
-            resultEl.style.border = '2px solid #dc3545';
+            showFeesEditResult('❌ ' + data.message, 'error');
         }
     } catch (error) {
-        resultEl.innerHTML = '❌ Error: ' + error.message;
-        resultEl.style.background = '#f8d7da';
-        resultEl.style.color = '#721c24';
-        resultEl.style.border = '2px solid #dc3545';
+        showFeesEditResult('❌ Error: ' + error.message, 'error');
     }
 }
 
 // =====================================================
-// DOWNLOAD FUNCTIONS
+// DOWNLOAD REPORTS
 // =====================================================
 function downloadReport(type) {
     showMessage('⏳ Generating ' + type + ' report...', 'info');
-    window.open('/api/clerk/reports/fee/' + type, '_blank');
+    window.location.href = '/api/clerk/reports/fee/' + type;
     setTimeout(function() {
-        showMessage('✅ ' + type.charAt(0).toUpperCase() + type.slice(1) + ' report generated!', 'success');
-    }, 2000);
+        showMessage('📥 Report download started!', 'success');
+    }, 1000);
 }
 
 function downloadFeesStructurePDF() {
-    showMessage('⏳ Generating Fees Structure PDF...', 'info');
-    window.open('/api/clerk/reports/fees-structure', '_blank');
+    showMessage('⏳ Generating fees structure PDF...', 'info');
+    window.location.href = '/api/clerk/reports/fees-structure';
     setTimeout(function() {
-        showMessage('✅ Fees Structure PDF generated!', 'success');
-    }, 2000);
+        showMessage('📥 Fees structure PDF download started!', 'success');
+    }, 1000);
 }
 
 // =====================================================
-// ON LOAD - FOCUS PIN
+// INITIALIZATION
 // =====================================================
-window.onload = function() {
-    document.getElementById("clerkPin").focus();
+// Pre-load fee data for edit modal
+window._feesData = {};
+
+// Override loadFeesStructure to store data globally
+var originalLoadFees = loadFeesStructure;
+loadFeesStructure = async function() {
+    try {
+        const data = await fetchAPI('/api/clerk/fees/structure');
+        if (data.success) {
+            window._feesData = data.fees || {};
+            renderDayFees(window._feesData);
+            renderBoardingFees(window._feesData?.boarding || {});
+        }
+    } catch (error) {
+        console.error('Error loading fees structure:', error);
+    }
 };
+
+// Auto-load on page ready
+console.log('✅ Clerk Dashboard loaded successfully');
 </script>
 </body>
 </html>
