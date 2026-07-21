@@ -1196,15 +1196,14 @@ app.post('/api/teacher/checkout', async (req, res) => {
         
         console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
         console.log('🕐 Hour (Kenya time):', kenyaHour);
+        console.log('🕐 Formatted:', formatKenyaTime(kenyaNow));
         
-        // FIND today's attendance record FIRST
         const todayAttendance = teacher.attendance.find(a => {
             const aDate = new Date(a.date);
             aDate.setHours(0, 0, 0, 0);
             return aDate.getTime() === kenyaToday.getTime();
         });
         
-        // Check if todayAttendance exists
         if (!todayAttendance) {
             return res.status(400).json({ success: false, message: '❌ No check-in found for today. Please check in first.' });
         }
@@ -1217,12 +1216,13 @@ app.post('/api/teacher/checkout', async (req, res) => {
             return res.status(400).json({ success: false, message: '⏰ Check-out is only allowed after 3:00 PM. Please continue working.' });
         }
         
-        // Update the record
         todayAttendance.checkOut = kenyaNow;
         todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
         const checkInTime = new Date(todayAttendance.checkIn);
         const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
         todayAttendance.hoursWorked = parseFloat(hoursWorked);
+        todayAttendance.status = 'Checked Out';
+        
         await teacher.save();
         
         res.json({
