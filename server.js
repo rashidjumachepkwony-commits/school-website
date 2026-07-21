@@ -1114,7 +1114,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
             return res.status(401).json({ success: false, message: '❌ Invalid PIN. Please try again.' });
         }
         
-        // Get current Kenya time
         const kenyaNow = getKenyaTime();
         const kenyaToday = getKenyaDate();
         const kenyaHour = getKenyaHour();
@@ -1123,13 +1122,38 @@ app.post('/api/teacher/checkin', async (req, res) => {
         console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
         console.log('🕐 Hour (Kenya time):', kenyaHour);
         
-        // ... rest of validation ...
+        // Check if it's weekend
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            return res.status(400).json({ success: false, message: '📅 Weekend! Check-in is only available on weekdays (Monday-Friday).' });
+        }
         
-        // Store the time in the database (MongoDB will store as UTC)
+        // Check if already checked in today
+        const existingAttendance = teacher.attendance.find(a => {
+            const aDate = new Date(a.date);
+            aDate.setHours(0, 0, 0, 0);
+            return aDate.getTime() === kenyaToday.getTime();
+        });
+        
+        if (existingAttendance) {
+            return res.status(400).json({ success: false, message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn) });
+        }
+        
+        // Check if it's too late to check in
+        if (kenyaHour >= 17) {
+            return res.status(400).json({ success: false, message: '⏰ Check-in is not allowed after 5:00 PM. Please try again tomorrow.' });
+        }
+        
+        // ============================================
+        // DEFINE STATUS HERE BEFORE USING IT
+        // ============================================
+        const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
+        const status = isLate ? 'Late' : 'Present';
+        
+        // Add attendance record with the defined status
         teacher.attendance.push({
             date: kenyaToday,
-            checkIn: kenyaNow, // This is now a Date object in Kenya time
-            status: status,
+            checkIn: kenyaNow,
+            status: status,  // status is now defined
             location: 'School',
             isLate: isLate,
             notes: isLate ? 'Late check-in' : 'On-time check-in'
@@ -1137,7 +1161,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
         
         await teacher.save();
         
-        // Format the time for display
+        const message = isLate ? '⚠️ Check-in successful! (You are LATE - after 7:00 AM)' : '✅ Check-in successful! (On time)';
         const formattedTime = formatKenyaTime(kenyaNow);
         
         res.json({
@@ -1146,7 +1170,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
             checkInTime: kenyaNow,
             checkInTimeFormatted: formattedTime,
             isLate: isLate,
-            status: status,
+            status: status,  // status is defined here too
             teacher: { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId }
         });
     } catch (error) {
@@ -1154,7 +1178,6 @@ app.post('/api/teacher/checkin', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
 app.post('/api/teacher/checkout', async (req, res) => {
     try {
         const { employeeId, pin } = req.body;
