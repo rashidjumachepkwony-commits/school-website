@@ -538,7 +538,7 @@ th, td { padding: 6px 8px; }
 // GLOBAL VARIABLES
 // =====================================================
 const CLERK_PIN = "1010";
-const API_BASE = '';
+const API_BASE = 'http://localhost:5000';
 
 let allStudents = [];
 let allPayments = [];
@@ -673,7 +673,36 @@ async function loadStudentFeeList() {
     document.getElementById('studentFeeTable').innerHTML = '<tr><td colspan="10" style="text-align:center;color:#0b5394;">Loading students...</td></tr>';
     
     try {
-        const data = await fetchAPI('/api/clerk/students/fees');
+        // Try the clerk API first
+        let data = await fetchAPI('/api/clerk/students/fees');
+        
+        // If clerk API fails, fallback to regular student API
+        if (!data.success) {
+            console.log('⚠️ Clerk API failed, trying regular student API...');
+            data = await fetchAPI('/api/students');
+            if (data.success) {
+                // Transform regular student data to match clerk format
+                const students = data.students.map(s => ({
+                    id: s.studentId,
+                    name: s.name,
+                    grade: s.grade,
+                    gender: s.gender,
+                    studentType: s.type || 'Day Scholar',
+                    isBoarding: (s.type || 'Day Scholar') === 'Boarder',
+                    totalFees: 0,
+                    paid: s.paid || 0,
+                    balance: 0,
+                    status: 'unpaid'
+                }));
+                allStudents = students;
+                document.getElementById('totalStudents').textContent = allStudents.length;
+                renderStudentTable(allStudents);
+                filteredHistoryStudents = allStudents.slice();
+                populateHistoryStudentSelect();
+                return;
+            }
+        }
+        
         if (data.success) {
             allStudents = data.students || [];
             document.getElementById('totalStudents').textContent = allStudents.length;
@@ -692,7 +721,6 @@ async function loadStudentFeeList() {
     }
     isLoading = false;
 }
-
 // =====================================================
 // RENDER STUDENT TABLE
 // =====================================================
