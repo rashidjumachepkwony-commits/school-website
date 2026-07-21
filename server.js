@@ -3083,72 +3083,8 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
 </html>
     `;
 }
-
 // ============================================
-// FIX PAST RECORDS - MANUAL API
-// ============================================
-
-app.post('/api/fix-past-times', async (req, res) => {
-    try {
-        await fixPastRecords();
-        res.json({ success: true, message: '✅ Past records time fixed successfully!' });
-    } catch (error) {
-        console.error('Error fixing records:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'No file uploaded' });
-        }
-        let fileType = 'image';
-        let icon = '🖼️';
-        if (req.file.mimetype.startsWith('video/')) {
-            fileType = 'video';
-            icon = '🎬';
-        } else if (req.file.mimetype.startsWith('audio/')) {
-            fileType = 'audio';
-            icon = '🎵';
-        }
-        res.json({ success: true, message: 'File uploaded successfully!', file: { filename: req.file.filename, originalname: req.file.originalname, path: `/${req.file.path.replace(/\\/g, '/')}`, size: req.file.size, type: fileType, icon: icon, mimetype: req.file.mimetype } });
-    } catch (error) {
-        console.error('Upload error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.use('/uploads', express.static('uploads'));
-
-// ============================================
-// TEST ROUTE
-// ============================================
-
-app.get('/api/test', (req, res) => {
-    const kenyaNow = getKenyaTime();
-    res.json({ success: true, message: '🎉 Changara Star Academy is running!', data: { server: 'Online', kenyaTime: kenyaNow.toLocaleString(), kenyaTimeFormatted: formatKenyaFullTime(kenyaNow), timestamp: new Date().toISOString() } });
-});
-
-// ============================================
-// SERVE STATIC FILES
-// ============================================
-
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// ============================================
-// 404 HANDLER
-// ============================================
-
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Route not found' });
-});
-// ============================================
-// CLERK DASHBOARD API ROUTES - FIXED
+// CLERK DASHBOARD API ROUTES
 // ============================================
 
 // ============================================
@@ -3167,149 +3103,6 @@ const paymentSchema = new mongoose.Schema({
 });
 
 const Payment = mongoose.model('Payment', paymentSchema);
-
-// ============================================
-// FEE STRUCTURE HELPER (MOVED BEFORE ROUTES)
-// ============================================
-function getFeeStructure(grade, type) {
-    const dayFees = {
-        'Playgroup': { term1: 2500, term2: 2500, term3: 2500, total: 7500 },
-        'PP1': { term1: 3000, term2: 3000, term3: 3000, total: 9000 },
-        'PP2': { term1: 3000, term2: 3000, term3: 3000, total: 9000 },
-        'Grade 1': { term1: 3500, term2: 3500, term3: 3500, total: 10500 },
-        'Grade 2': { term1: 3500, term2: 3500, term3: 3500, total: 10500 },
-        'Grade 3': { term1: 4000, term2: 4000, term3: 4000, total: 12000 },
-        'Grade 4': { term1: 4000, term2: 4000, term3: 4000, total: 12000 },
-        'Grade 5': { term1: 4500, term2: 4500, term3: 4500, total: 13500 },
-        'Grade 6': { term1: 4500, term2: 4500, term3: 4500, total: 13500 }
-    };
-    
-    const boardingFees = {
-        'Grade 3': { term1: 8000, term2: 8000, term3: 8000, total: 24000 },
-        'Grade 4': { term1: 8000, term2: 8000, term3: 8000, total: 24000 },
-        'Grade 5': { term1: 8500, term2: 8500, term3: 8500, total: 25500 },
-        'Grade 6': { term1: 8500, term2: 8500, term3: 8500, total: 25500 }
-    };
-    
-    if (type === 'Boarder' && boardingFees[grade]) {
-        return boardingFees[grade];
-    }
-    return dayFees[grade] || { term1: 0, term2: 0, term3: 0, total: 0 };
-}
-
-// ============================================
-// GENERATE FEE REPORT HTML (MOVED BEFORE ROUTES)
-// ============================================
-function generateFeeReportHTML(students, type) {
-    const now = new Date();
-    const totalStudents = students.length;
-    const totalFees = students.reduce((sum, s) => sum + s.totalFees, 0);
-    const totalPaid = students.reduce((sum, s) => sum + s.paid, 0);
-    const totalBalance = students.reduce((sum, s) => sum + s.balance, 0);
-    const paidCount = students.filter(s => s.status === 'Paid').length;
-    const partialCount = students.filter(s => s.status === 'Partial').length;
-    const unpaidCount = students.filter(s => s.status === 'Unpaid').length;
-    
-    const typeNames = {
-        'summary': 'Summary Report',
-        'detailed': 'Detailed Fee Report',
-        'payment': 'Payment Report'
-    };
-    
-    let rowsHtml = students.map((student, index) => {
-        const statusColor = student.status === 'Paid' ? '#28a745' : student.status === 'Partial' ? '#ffc107' : '#dc3545';
-        return `
-            <tr>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;">${student.name}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.id}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.grade}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.studentType}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;">KES ${student.totalFees.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;color:#28a745;">KES ${student.paid.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;color:#dc3545;">KES ${student.balance.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">
-                    <span style="background:${statusColor};color:white;padding:2px 10px;border-radius:50px;font-weight:700;font-size:10px;">${student.status}</span>
-                </td>
-            </tr>
-        `;
-    }).join('');
-    
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Fee Report - ${type}</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 10px; max-width: 1200px; margin: 0 auto; font-size: 8px; }
-                .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 8px; margin-bottom: 10px; }
-                .header h1 { color: #0A1628; font-size: 18px; }
-                .header h1 .school-name { color: #D4A017; }
-                .header p { color: #666; font-size: 10px; }
-                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 10px; }
-                .summary-box .item { text-align: center; padding: 6px; background: #f8f9fc; border-radius: 6px; border: 1px solid #e8ecf1; }
-                .summary-box .item .num { font-size: 16px; font-weight: 700; }
-                .summary-box .item .label { font-size: 7px; color: #666; }
-                .summary-box .item .num.gold { color: #D4A017; }
-                .summary-box .item .num.green { color: #28a745; }
-                .summary-box .item .num.orange { color: #d4a017; }
-                .summary-box .item .num.red { color: #dc3545; }
-                .summary-box .item .num.blue { color: #17a2b8; }
-                table { width: 100%; border-collapse: collapse; font-size: 7px; }
-                table th { background: #0A1628; color: white; padding: 4px 6px; text-align: left; font-size: 6px; }
-                table td { padding: 3px 6px; border-bottom: 1px solid #e8ecf1; }
-                table tr:nth-child(even) { background: #fafbfc; }
-                .footer { text-align: center; margin-top: 10px; padding-top: 6px; border-top: 1px solid #ddd; color: #999; font-size: 6px; }
-                @media print { body { padding: 5px; } }
-                @page { margin: 4mm; size: A4 landscape; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                <p>${typeNames[type] || 'Fee Report'}</p>
-                <p style="font-size:7px;color:#999;">Generated on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</p>
-            </div>
-            
-            <div class="summary-box">
-                <div class="item"><div class="num gold">${totalStudents}</div><div class="label">Total Students</div></div>
-                <div class="item"><div class="num green">${paidCount}</div><div class="label">✅ Paid</div></div>
-                <div class="item"><div class="num orange">${partialCount}</div><div class="label">⏳ Partial</div></div>
-                <div class="item"><div class="num red">${unpaidCount}</div><div class="label">❌ Unpaid</div></div>
-                <div class="item"><div class="num blue">KES ${totalFees.toLocaleString()}</div><div class="label">Total Fees</div></div>
-                <div class="item"><div class="num" style="color:#D4A017;">KES ${totalBalance.toLocaleString()}</div><div class="label">Total Balance</div></div>
-            </div>
-            
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align:center;">#</th>
-                            <th>Student Name</th>
-                            <th style="text-align:center;">ID</th>
-                            <th style="text-align:center;">Grade</th>
-                            <th style="text-align:center;">Type</th>
-                            <th style="text-align:right;">Total Fees</th>
-                            <th style="text-align:right;">Paid</th>
-                            <th style="text-align:right;">Balance</th>
-                            <th style="text-align:center;">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml}
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="footer">
-                <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-            </div>
-        </body>
-        </html>
-    `;
-}
 
 // ============================================
 // 1. GET ALL STUDENT FEES
@@ -3642,120 +3435,119 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
 });
 
 // ============================================
-// 10. GENERATE FEES STRUCTURE PDF
+// 10. GENERATE FEE REPORT HTML HELPER
 // ============================================
-app.get('/api/clerk/reports/fees-structure', async (req, res) => {
-    try {
-        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        
-        let html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Fees Structure</title>
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 1000px; margin: 0 auto; }
-                    .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
-                    .header h1 { color: #0A1628; font-size: 24px; }
-                    .header h1 .school-name { color: #D4A017; }
-                    .header p { color: #666; font-size: 14px; }
-                    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                    table th { background: #0A1628; color: white; padding: 10px; text-align: left; }
-                    table td { padding: 8px 12px; border-bottom: 1px solid #e8ecf1; }
-                    table tr:nth-child(even) { background: #fafbfc; }
-                    .amount { font-weight: bold; color: #D4A017; }
-                    .section-title { font-size: 18px; color: #0A1628; margin-top: 20px; border-bottom: 2px solid #D4A017; padding-bottom: 5px; }
-                    .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
-                    @media print { body { padding: 10px; } }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                    <p>Fees Structure - ${new Date().getFullYear()}</p>
-                    <p style="font-size:12px;color:#999;">Generated on ${new Date().toLocaleDateString()}</p>
-                </div>
-                
-                <h2 class="section-title">📖 Day Scholar Fees</h2>
-                <table>
-                    <thead><tr><th>Grade</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr></thead>
-                    <tbody>
+function generateFeeReportHTML(students, type) {
+    const now = new Date();
+    const totalStudents = students.length;
+    const totalFees = students.reduce((sum, s) => sum + s.totalFees, 0);
+    const totalPaid = students.reduce((sum, s) => sum + s.paid, 0);
+    const totalBalance = students.reduce((sum, s) => sum + s.balance, 0);
+    const paidCount = students.filter(s => s.status === 'Paid').length;
+    const partialCount = students.filter(s => s.status === 'Partial').length;
+    const unpaidCount = students.filter(s => s.status === 'Unpaid').length;
+    
+    const typeNames = {
+        'summary': 'Summary Report',
+        'detailed': 'Detailed Fee Report',
+        'payment': 'Payment Report'
+    };
+    
+    let rowsHtml = students.map((student, index) => {
+        const statusColor = student.status === 'Paid' ? '#28a745' : student.status === 'Partial' ? '#ffc107' : '#dc3545';
+        return `
+            <tr>
+                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
+                <td style="padding:4px 8px;border:1px solid #ddd;">${student.name}</td>
+                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.id}</td>
+                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.grade}</td>
+                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.studentType}</td>
+                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;">KES ${student.totalFees.toLocaleString()}</td>
+                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;color:#28a745;">KES ${student.paid.toLocaleString()}</td>
+                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;color:#dc3545;">KES ${student.balance.toLocaleString()}</td>
+                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">
+                    <span style="background:${statusColor};color:white;padding:2px 10px;border-radius:50px;font-weight:700;font-size:10px;">${student.status}</span>
+                </td>
+            </tr>
         `;
-        
-        grades.forEach(grade => {
-            const fees = getFeeStructure(grade, 'Day Scholar');
-            html += `<tr>
-                <td><strong>${grade}</strong></td>
-                <td>KES ${fees.term1.toLocaleString()}</td>
-                <td>KES ${fees.term2.toLocaleString()}</td>
-                <td>KES ${fees.term3.toLocaleString()}</td>
-                <td class="amount">KES ${fees.total.toLocaleString()}</td>
-            </tr>`;
-        });
-        
-        html += `
-                    </tbody>
-                </table>
-                
-                <h2 class="section-title">🏠 Boarding Fees (Grades 3-6)</h2>
-                <table>
-                    <thead><tr><th>Grade</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr></thead>
-                    <tbody>
-        `;
-        
-        const boardingGrades = ['Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        boardingGrades.forEach(grade => {
-            const fees = getFeeStructure(grade, 'Boarder');
-            html += `<tr>
-                <td><strong>${grade}</strong></td>
-                <td>KES ${fees.term1.toLocaleString()}</td>
-                <td>KES ${fees.term2.toLocaleString()}</td>
-                <td>KES ${fees.term3.toLocaleString()}</td>
-                <td class="amount">KES ${fees.total.toLocaleString()}</td>
-            </tr>`;
-        });
-        
-        html += `
-                    </tbody>
-                </table>
-                
-                <div class="footer">
-                    <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-                    <p style="color:#c51616;font-weight:bold;">N/B: NO CASH IS ALLOWED IN SCHOOL</p>
-                </div>
-            </body>
-            </html>
-        `;
-        
-        const options = {
-            format: 'A4',
-            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' },
-            printBackground: true,
-            landscape: true,
-            type: 'pdf',
-            timeout: 30000,
-            quality: '100'
-        };
-        
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
+    }).join('');
+    
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Fee Report - ${type}</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 10px; max-width: 1200px; margin: 0 auto; font-size: 8px; }
+                .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 8px; margin-bottom: 10px; }
+                .header h1 { color: #0A1628; font-size: 18px; }
+                .header h1 .school-name { color: #D4A017; }
+                .header p { color: #666; font-size: 10px; }
+                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 10px; }
+                .summary-box .item { text-align: center; padding: 6px; background: #f8f9fc; border-radius: 6px; border: 1px solid #e8ecf1; }
+                .summary-box .item .num { font-size: 16px; font-weight: 700; }
+                .summary-box .item .label { font-size: 7px; color: #666; }
+                .summary-box .item .num.gold { color: #D4A017; }
+                .summary-box .item .num.green { color: #28a745; }
+                .summary-box .item .num.orange { color: #d4a017; }
+                .summary-box .item .num.red { color: #dc3545; }
+                .summary-box .item .num.blue { color: #17a2b8; }
+                table { width: 100%; border-collapse: collapse; font-size: 7px; }
+                table th { background: #0A1628; color: white; padding: 4px 6px; text-align: left; font-size: 6px; }
+                table td { padding: 3px 6px; border-bottom: 1px solid #e8ecf1; }
+                table tr:nth-child(even) { background: #fafbfc; }
+                .footer { text-align: center; margin-top: 10px; padding-top: 6px; border-top: 1px solid #ddd; color: #999; font-size: 6px; }
+                @media print { body { padding: 5px; } }
+                @page { margin: 4mm; size: A4 landscape; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
+                <p>${typeNames[type] || 'Fee Report'}</p>
+                <p style="font-size:7px;color:#999;">Generated on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</p>
+            </div>
             
-            const filename = `fees_structure_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
-    } catch (error) {
-        console.error('Error generating fees structure PDF:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
+            <div class="summary-box">
+                <div class="item"><div class="num gold">${totalStudents}</div><div class="label">Total Students</div></div>
+                <div class="item"><div class="num green">${paidCount}</div><div class="label">✅ Paid</div></div>
+                <div class="item"><div class="num orange">${partialCount}</div><div class="label">⏳ Partial</div></div>
+                <div class="item"><div class="num red">${unpaidCount}</div><div class="label">❌ Unpaid</div></div>
+                <div class="item"><div class="num blue">KES ${totalFees.toLocaleString()}</div><div class="label">Total Fees</div></div>
+                <div class="item"><div class="num" style="color:#D4A017;">KES ${totalBalance.toLocaleString()}</div><div class="label">Total Balance</div></div>
+            </div>
+            
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">#</th>
+                            <th>Student Name</th>
+                            <th style="text-align:center;">ID</th>
+                            <th style="text-align:center;">Grade</th>
+                            <th style="text-align:center;">Type</th>
+                            <th style="text-align:right;">Total Fees</th>
+                            <th style="text-align:right;">Paid</th>
+                            <th style="text-align:right;">Balance</th>
+                            <th style="text-align:center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="footer">
+                <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+            </div>
+        </body>
+        </html>
+    `;
+}
+
 // ============================================
 // 11. GENERATE FEES STRUCTURE PDF
 // ============================================
@@ -3871,550 +3663,69 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // ============================================
-// 6. DELETE PAYMENT
+// FIX PAST RECORDS - MANUAL API
 // ============================================
-app.delete('/api/clerk/payments/:paymentId', async (req, res) => {
+
+app.post('/api/fix-past-times', async (req, res) => {
     try {
-        const { paymentId } = req.params;
-        
-        const payment = await Payment.findById(paymentId);
-        if (!payment) {
-            return res.status(404).json({ success: false, message: 'Payment not found' });
+        await fixPastRecords();
+        res.json({ success: true, message: '✅ Past records time fixed successfully!' });
+    } catch (error) {
+        console.error('Error fixing records:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.post('/api/upload', upload.single('file'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' });
         }
-        
-        // Subtract amount from student's paid balance
-        const student = await Student.findOne({ studentId: payment.studentId });
-        if (student) {
-            student.paid = Math.max(0, (student.paid || 0) - payment.amount);
-            await student.save();
+        let fileType = 'image';
+        let icon = '🖼️';
+        if (req.file.mimetype.startsWith('video/')) {
+            fileType = 'video';
+            icon = '🎬';
+        } else if (req.file.mimetype.startsWith('audio/')) {
+            fileType = 'audio';
+            icon = '🎵';
         }
-        
-        await Payment.findByIdAndDelete(paymentId);
-        
-        res.json({ success: true, message: 'Payment deleted successfully!' });
+        res.json({ success: true, message: 'File uploaded successfully!', file: { filename: req.file.filename, originalname: req.file.originalname, path: `/${req.file.path.replace(/\\/g, '/')}`, size: req.file.size, type: fileType, icon: icon, mimetype: req.file.mimetype } });
     } catch (error) {
-        console.error('Error deleting payment:', error);
+        console.error('Upload error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
+app.use('/uploads', express.static('uploads'));
+
 // ============================================
-// 7. GET FEES STRUCTURE
+// TEST ROUTE
 // ============================================
-app.get('/api/clerk/fees/structure', async (req, res) => {
-    try {
-        // This returns the fee structure from the helper function
-        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        const feeStructure = {};
-        
-        grades.forEach(grade => {
-            const dayFees = getFeeStructure(grade, 'Day Scholar');
-            const boardingFees = getFeeStructure(grade, 'Boarder');
-            feeStructure[grade] = dayFees;
-            feeStructure[grade + '_boarding'] = boardingFees;
-        });
-        
-        res.json({ success: true, fees: feeStructure });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+
+app.get('/api/test', (req, res) => {
+    const kenyaNow = getKenyaTime();
+    res.json({ success: true, message: '🎉 Changara Star Academy is running!', data: { server: 'Online', kenyaTime: kenyaNow.toLocaleString(), kenyaTimeFormatted: formatKenyaFullTime(kenyaNow), timestamp: new Date().toISOString() } });
 });
 
 // ============================================
-// 8. UPDATE FEES STRUCTURE
+// SERVE STATIC FILES
 // ============================================
-app.post('/api/clerk/fees/update', async (req, res) => {
-    try {
-        const { fees, type } = req.body;
-        
-        // Store fees in a global variable or database
-        // For now, we'll store in memory (consider using a database for persistence)
-        if (!global.feesStructure) {
-            global.feesStructure = {};
-        }
-        
-        if (type === 'boarding') {
-            global.feesStructure.boarding = fees;
-        } else {
-            global.feesStructure.day = fees;
-        }
-        
-        res.json({ success: true, message: 'Fees structure updated successfully!' });
-    } catch (error) {
-        console.error('Error updating fees:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
+
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // ============================================
-// 9. GET BOARDING FEES
-// ============================================
-app.get('/api/clerk/fees/boarding', async (req, res) => {
-    try {
-        const boardingFees = global.feesStructure?.boarding || {
-            'Full Boarding': { term1: 8000, term2: 8000, term3: 8000, total: 24000 }
-        };
-        res.json({ success: true, fees: boardingFees });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// 10. GENERATE FEE REPORT PDF
-// ============================================
-app.get('/api/clerk/reports/fee/:type', async (req, res) => {
-    try {
-        const { type } = req.params;
-        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
-        
-        const studentFees = students.map(student => {
-            const feeData = getFeeStructure(student.grade, student.type);
-            const paid = student.paid || 0;
-            const totalFees = feeData.total || 0;
-            const balance = totalFees - paid;
-            
-            return {
-                id: student.studentId,
-                name: student.name,
-                grade: student.grade,
-                gender: student.gender,
-                studentType: student.type,
-                totalFees: totalFees,
-                paid: paid,
-                balance: balance,
-                status: balance === 0 ? 'Paid' : balance < totalFees ? 'Partial' : 'Unpaid'
-            };
-        });
-        
-        // Generate HTML report
-        const html = generateFeeReportHTML(studentFees, type);
-        
-        const options = {
-            format: 'A4',
-            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' },
-            printBackground: true,
-            landscape: true,
-            type: 'pdf',
-            timeout: 30000,
-            quality: '100'
-        };
-        
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            
-            const filename = `fee_report_${type}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
-    } catch (error) {
-        console.error('Error generating fee report:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// 11. GENERATE FEE REPORT HTML
-// ============================================
-function generateFeeReportHTML(students, type) {
-    const now = new Date();
-    const totalStudents = students.length;
-    const totalFees = students.reduce((sum, s) => sum + s.totalFees, 0);
-    const totalPaid = students.reduce((sum, s) => sum + s.paid, 0);
-    const totalBalance = students.reduce((sum, s) => sum + s.balance, 0);
-    const paidCount = students.filter(s => s.status === 'Paid').length;
-    const partialCount = students.filter(s => s.status === 'Partial').length;
-    const unpaidCount = students.filter(s => s.status === 'Unpaid').length;
-    
-    const typeNames = {
-        'summary': 'Summary Report',
-        'detailed': 'Detailed Fee Report',
-        'payment': 'Payment Report'
-    };
-    
-    let rowsHtml = students.map((student, index) => {
-        const statusColor = student.status === 'Paid' ? '#28a745' : student.status === 'Partial' ? '#ffc107' : '#dc3545';
-        return `
-            <tr>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;">${student.name}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.id}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.grade}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.studentType}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;">KES ${student.totalFees.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;color:#28a745;">KES ${student.paid.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;color:#dc3545;">KES ${student.balance.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">
-                    <span style="background:${statusColor};color:white;padding:2px 10px;border-radius:50px;font-weight:700;font-size:10px;">${student.status}</span>
-                </td>
-            </tr>
-        `;
-    }).join('');
-    
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Fee Report - ${type}</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 10px; max-width: 1200px; margin: 0 auto; font-size: 8px; }
-                .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 8px; margin-bottom: 10px; }
-                .header h1 { color: #0A1628; font-size: 18px; }
-                .header h1 .school-name { color: #D4A017; }
-                .header p { color: #666; font-size: 10px; }
-                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 10px; }
-                .summary-box .item { text-align: center; padding: 6px; background: #f8f9fc; border-radius: 6px; border: 1px solid #e8ecf1; }
-                .summary-box .item .num { font-size: 16px; font-weight: 700; }
-                .summary-box .item .label { font-size: 7px; color: #666; }
-                .summary-box .item .num.gold { color: #D4A017; }
-                .summary-box .item .num.green { color: #28a745; }
-                .summary-box .item .num.orange { color: #d4a017; }
-                .summary-box .item .num.red { color: #dc3545; }
-                .summary-box .item .num.blue { color: #17a2b8; }
-                table { width: 100%; border-collapse: collapse; font-size: 7px; }
-                table th { background: #0A1628; color: white; padding: 4px 6px; text-align: left; font-size: 6px; }
-                table td { padding: 3px 6px; border-bottom: 1px solid #e8ecf1; }
-                table tr:nth-child(even) { background: #fafbfc; }
-                .footer { text-align: center; margin-top: 10px; padding-top: 6px; border-top: 1px solid #ddd; color: #999; font-size: 6px; }
-                @media print { body { padding: 5px; } }
-                @page { margin: 4mm; size: A4 landscape; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                <p>${typeNames[type] || 'Fee Report'}</p>
-                <p style="font-size:7px;color:#999;">Generated on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</p>
-            </div>
-            
-            <div class="summary-box">
-                <div class="item"><div class="num gold">${totalStudents}</div><div class="label">Total Students</div></div>
-                <div class="item"><div class="num green">${paidCount}</div><div class="label">✅ Paid</div></div>
-                <div class="item"><div class="num orange">${partialCount}</div><div class="label">⏳ Partial</div></div>
-                <div class="item"><div class="num red">${unpaidCount}</div><div class="label">❌ Unpaid</div></div>
-                <div class="item"><div class="num blue">KES ${totalFees.toLocaleString()}</div><div class="label">Total Fees</div></div>
-                <div class="item"><div class="num" style="color:#D4A017;">KES ${totalBalance.toLocaleString()}</div><div class="label">Total Balance</div></div>
-            </div>
-            
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align:center;">#</th>
-                            <th>Student Name</th>
-                            <th style="text-align:center;">ID</th>
-                            <th style="text-align:center;">Grade</th>
-                            <th style="text-align:center;">Type</th>
-                            <th style="text-align:right;">Total Fees</th>
-                            <th style="text-align:right;">Paid</th>
-                            <th style="text-align:right;">Balance</th>
-                            <th style="text-align:center;">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml}
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="footer">
-                <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-            </div>
-        </body>
-        </html>
-    `;
-}
-// ============================================
-// CLERK DASHBOARD - PDF REPORT ROUTES
+// 404 HANDLER
 // ============================================
 
-// 1. GENERATE FEE REPORT PDF
-app.get('/api/clerk/reports/fee/:type', async (req, res) => {
-    try {
-        const { type } = req.params;
-        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
-        
-        const studentFees = students.map(student => {
-            const feeData = getFeeStructure(student.grade, student.type);
-            const paid = student.paid || 0;
-            const totalFees = feeData.total || 0;
-            const balance = totalFees - paid;
-            
-            return {
-                id: student.studentId,
-                name: student.name,
-                grade: student.grade,
-                gender: student.gender,
-                studentType: student.type,
-                totalFees: totalFees,
-                paid: paid,
-                balance: balance,
-                status: balance === 0 ? 'Paid' : balance < totalFees ? 'Partial' : 'Unpaid'
-            };
-        });
-        
-        const html = generateFeeReportHTML(studentFees, type);
-        
-        const options = {
-            format: 'A4',
-            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' },
-            printBackground: true,
-            landscape: true,
-            type: 'pdf',
-            timeout: 30000,
-            quality: '100'
-        };
-        
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            
-            const filename = `fee_report_${type}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
-    } catch (error) {
-        console.error('Error generating fee report:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// 2. GENERATE FEE REPORT HTML HELPER
-function generateFeeReportHTML(students, type) {
-    const now = new Date();
-    const totalStudents = students.length;
-    const totalFees = students.reduce((sum, s) => sum + s.totalFees, 0);
-    const totalPaid = students.reduce((sum, s) => sum + s.paid, 0);
-    const totalBalance = students.reduce((sum, s) => sum + s.balance, 0);
-    const paidCount = students.filter(s => s.status === 'Paid').length;
-    const partialCount = students.filter(s => s.status === 'Partial').length;
-    const unpaidCount = students.filter(s => s.status === 'Unpaid').length;
-    
-    const typeNames = {
-        'summary': 'Summary Report',
-        'detailed': 'Detailed Fee Report',
-        'payment': 'Payment Report'
-    };
-    
-    let rowsHtml = students.map((student, index) => {
-        const statusColor = student.status === 'Paid' ? '#28a745' : student.status === 'Partial' ? '#ffc107' : '#dc3545';
-        return `
-            <tr>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;">${student.name}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.id}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.grade}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.studentType}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;">KES ${student.totalFees.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;color:#28a745;">KES ${student.paid.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;color:#dc3545;">KES ${student.balance.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">
-                    <span style="background:${statusColor};color:white;padding:2px 10px;border-radius:50px;font-weight:700;font-size:10px;">${student.status}</span>
-                </td>
-            </tr>
-        `;
-    }).join('');
-    
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Fee Report - ${type}</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 10px; max-width: 1200px; margin: 0 auto; font-size: 8px; }
-                .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 8px; margin-bottom: 10px; }
-                .header h1 { color: #0A1628; font-size: 18px; }
-                .header h1 .school-name { color: #D4A017; }
-                .header p { color: #666; font-size: 10px; }
-                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 10px; }
-                .summary-box .item { text-align: center; padding: 6px; background: #f8f9fc; border-radius: 6px; border: 1px solid #e8ecf1; }
-                .summary-box .item .num { font-size: 16px; font-weight: 700; }
-                .summary-box .item .label { font-size: 7px; color: #666; }
-                .summary-box .item .num.gold { color: #D4A017; }
-                .summary-box .item .num.green { color: #28a745; }
-                .summary-box .item .num.orange { color: #d4a017; }
-                .summary-box .item .num.red { color: #dc3545; }
-                .summary-box .item .num.blue { color: #17a2b8; }
-                table { width: 100%; border-collapse: collapse; font-size: 7px; }
-                table th { background: #0A1628; color: white; padding: 4px 6px; text-align: left; font-size: 6px; }
-                table td { padding: 3px 6px; border-bottom: 1px solid #e8ecf1; }
-                table tr:nth-child(even) { background: #fafbfc; }
-                .footer { text-align: center; margin-top: 10px; padding-top: 6px; border-top: 1px solid #ddd; color: #999; font-size: 6px; }
-                @media print { body { padding: 5px; } }
-                @page { margin: 4mm; size: A4 landscape; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                <p>${typeNames[type] || 'Fee Report'}</p>
-                <p style="font-size:7px;color:#999;">Generated on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</p>
-            </div>
-            
-            <div class="summary-box">
-                <div class="item"><div class="num gold">${totalStudents}</div><div class="label">Total Students</div></div>
-                <div class="item"><div class="num green">${paidCount}</div><div class="label">✅ Paid</div></div>
-                <div class="item"><div class="num orange">${partialCount}</div><div class="label">⏳ Partial</div></div>
-                <div class="item"><div class="num red">${unpaidCount}</div><div class="label">❌ Unpaid</div></div>
-                <div class="item"><div class="num blue">KES ${totalFees.toLocaleString()}</div><div class="label">Total Fees</div></div>
-                <div class="item"><div class="num" style="color:#D4A017;">KES ${totalBalance.toLocaleString()}</div><div class="label">Total Balance</div></div>
-            </div>
-            
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align:center;">#</th>
-                            <th>Student Name</th>
-                            <th style="text-align:center;">ID</th>
-                            <th style="text-align:center;">Grade</th>
-                            <th style="text-align:center;">Type</th>
-                            <th style="text-align:right;">Total Fees</th>
-                            <th style="text-align:right;">Paid</th>
-                            <th style="text-align:right;">Balance</th>
-                            <th style="text-align:center;">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml}
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="footer">
-                <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-            </div>
-        </body>
-        </html>
-    `;
-}
-
-// 3. GENERATE FEES STRUCTURE PDF
-app.get('/api/clerk/reports/fees-structure', async (req, res) => {
-    try {
-        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        
-        let html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Fees Structure</title>
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 1000px; margin: 0 auto; }
-                    .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
-                    .header h1 { color: #0A1628; font-size: 24px; }
-                    .header h1 .school-name { color: #D4A017; }
-                    .header p { color: #666; font-size: 14px; }
-                    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                    table th { background: #0A1628; color: white; padding: 10px; text-align: left; }
-                    table td { padding: 8px 12px; border-bottom: 1px solid #e8ecf1; }
-                    table tr:nth-child(even) { background: #fafbfc; }
-                    .amount { font-weight: bold; color: #D4A017; }
-                    .section-title { font-size: 18px; color: #0A1628; margin-top: 20px; border-bottom: 2px solid #D4A017; padding-bottom: 5px; }
-                    .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
-                    @media print { body { padding: 10px; } }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                    <p>Fees Structure - ${new Date().getFullYear()}</p>
-                    <p style="font-size:12px;color:#999;">Generated on ${new Date().toLocaleDateString()}</p>
-                </div>
-                
-                <h2 class="section-title">📖 Day Scholar Fees</h2>
-                <table>
-                    <thead><tr><th>Grade</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr></thead>
-                    <tbody>
-        `;
-        
-        grades.forEach(grade => {
-            const fees = getFeeStructure(grade, 'Day Scholar');
-            html += `<tr>
-                <td><strong>${grade}</strong></td>
-                <td>KES ${fees.term1.toLocaleString()}</td>
-                <td>KES ${fees.term2.toLocaleString()}</td>
-                <td>KES ${fees.term3.toLocaleString()}</td>
-                <td class="amount">KES ${fees.total.toLocaleString()}</td>
-            </tr>`;
-        });
-        
-        html += `
-                    </tbody>
-                </table>
-                
-                <h2 class="section-title">🏠 Boarding Fees (Grades 3-6)</h2>
-                <table>
-                    <thead><tr><th>Grade</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr></thead>
-                    <tbody>
-        `;
-        
-        const boardingGrades = ['Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        boardingGrades.forEach(grade => {
-            const fees = getFeeStructure(grade, 'Boarder');
-            html += `<tr>
-                <td><strong>${grade}</strong></td>
-                <td>KES ${fees.term1.toLocaleString()}</td>
-                <td>KES ${fees.term2.toLocaleString()}</td>
-                <td>KES ${fees.term3.toLocaleString()}</td>
-                <td class="amount">KES ${fees.total.toLocaleString()}</td>
-            </tr>`;
-        });
-        
-        html += `
-                    </tbody>
-                </table>
-                
-                <div class="footer">
-                    <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-                    <p style="color:#c51616;font-weight:bold;">N/B: NO CASH IS ALLOWED IN SCHOOL</p>
-                </div>
-            </body>
-            </html>
-        `;
-        
-        const options = {
-            format: 'A4',
-            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' },
-            printBackground: true,
-            landscape: true,
-            type: 'pdf',
-            timeout: 30000,
-            quality: '100'
-        };
-        
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            
-            const filename = `fees_structure_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
-    } catch (error) {
-        console.error('Error generating fees structure PDF:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: 'Route not found' });
 });
 // ============================================
 // START THE SERVER
