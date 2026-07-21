@@ -640,24 +640,82 @@ const studentAssessmentSchema = new mongoose.Schema({
 const StudentAssessment = mongoose.model('StudentAssessment', studentAssessmentSchema);
 
 // ============================================
-// HELPER FUNCTIONS
+// CALCULATE PERFORMANCE LEVEL - CBC RUBRIC
 // ============================================
-
 function calculatePerformanceLevel(assessments) {
     if (!assessments || assessments.length === 0) return 'Approaching Expectation';
+    
     let totalPercentage = 0;
     let validCount = 0;
+    
     assessments.forEach(a => {
         if (a.maxScore > 0) {
             totalPercentage += (a.score / a.maxScore) * 100;
             validCount++;
         }
     });
+    
     const avgPercentage = validCount > 0 ? totalPercentage / validCount : 0;
-    if (avgPercentage >= 80) return 'Exceeding Expectation';
-    if (avgPercentage >= 60) return 'Meeting Expectation';
-    if (avgPercentage >= 40) return 'Approaching Expectation';
+    
+    // CBC RUBRIC-BASED PERFORMANCE LEVELS
+    if (avgPercentage >= 75) return 'Exceeding Expectation';
+    if (avgPercentage >= 50) return 'Meeting Expectation';
+    if (avgPercentage >= 26) return 'Approaching Expectation';
     return 'Below Expectation';
+}
+
+// ============================================
+// GET PERFORMANCE RATING (1-4) - CBC RUBRIC
+// ============================================
+function getPerformanceRating(level) {
+    const ratings = {
+        'Exceeding Expectation': 4,
+        'Meeting Expectation': 3,
+        'Approaching Expectation': 2,
+        'Below Expectation': 1
+    };
+    return ratings[level] || 2;
+}
+
+// ============================================
+// GET PERFORMANCE DESCRIPTOR - CBC RUBRIC
+// ============================================
+function getPerformanceDescriptor(level) {
+    const descriptors = {
+        'Exceeding Expectation': {
+            short: 'EE',
+            full: 'Exceeding Expectation',
+            description: 'Learner achieves all learning outcomes all the time and demonstrates Exemplary performance',
+            rating: 4,
+            color: '#28a745',
+            range: '75-100%'
+        },
+        'Meeting Expectation': {
+            short: 'ME',
+            full: 'Meeting Expectation',
+            description: 'Learner achieves all learning outcomes most of the time and demonstrates Proficient performance',
+            rating: 3,
+            color: '#17a2b8',
+            range: '50-74%'
+        },
+        'Approaching Expectation': {
+            short: 'AE',
+            full: 'Approaching Expectation',
+            description: 'Learner achieves all learning outcomes most of the time and demonstrates Adequate performance',
+            rating: 2,
+            color: '#d4a017',
+            range: '26-49%'
+        },
+        'Below Expectation': {
+            short: 'BE',
+            full: 'Below Expectation',
+            description: 'Learner achieves some outcomes all the time and demonstrates Limited performance',
+            rating: 1,
+            color: '#dc3545',
+            range: '0-25%'
+        }
+    };
+    return descriptors[level] || descriptors['Approaching Expectation'];
 }
 
 function calculateTotals(assessments) {
@@ -668,6 +726,25 @@ function calculateTotals(assessments) {
         totalMax += a.maxScore || 0;
     });
     return { totalScore, totalMax };
+}
+function getDefaultSubjects(grade, type) {
+    const configs = {
+        'weekly': {
+            // ... existing weekly configs ...
+        },
+        'monthly': {
+            // ... existing monthly configs ...
+        },
+        'term': {
+            // ... existing term configs ...
+        }
+    };
+    const fallback = [{ name: 'MATHEMATICS', max: 50 }, { name: 'ENGLISH', max: 50 }, { name: 'KISWAHILI', max: 50 }, { name: 'SCIENCE', max: 50 }];
+    try {
+        return configs[type]?.[grade] || configs['weekly']['Grade 1'] || fallback;
+    } catch {
+        return fallback;
+    }
 }
 
 function getDefaultSubjects(grade, type) {
