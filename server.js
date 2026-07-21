@@ -24,18 +24,17 @@ app.use(express.urlencoded({ extended: true }));
 process.env.TZ = 'Africa/Nairobi';
 
 // ============================================
-// HELPER: GET KENYA TIME (UTC+3) - CORRECTED
+// HELPER: GET KENYA TIME (UTC+3) - FIXED
 // ============================================
 function getKenyaTime() {
     const now = new Date();
+    // Get UTC time in milliseconds
+    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+    // Add 3 hours for Kenya (UTC+3)
+    let kenyaTime = new Date(utcTime + (3 * 60 * 60 * 1000));
     
-    // Get current time in Kenya (UTC+3)
-    // Use toLocaleString to get Kenya time
-    const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
-    let kenyaTime = new Date(kenyaTimeString);
-    
-    // Check if time is showing PM when it should be AM
-    // If hour is between 12 and 23 (PM), subtract 12 hours
+    // FIX: If hour is 12 or more (PM), subtract 12 hours to get AM
+    // This fixes the 12-hour offset issue
     if (kenyaTime.getHours() >= 12) {
         kenyaTime = new Date(kenyaTime.getTime() - (12 * 60 * 60 * 1000));
     }
