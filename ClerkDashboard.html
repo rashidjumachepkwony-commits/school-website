@@ -330,7 +330,6 @@ th, td { padding: 6px 8px; }
 <button class="btn btn-primary btn-sm" onclick="downloadReport('summary')">Summary</button>
 <button class="btn btn-success btn-sm" onclick="downloadReport('detailed')">Detailed</button>
 <button class="btn btn-warning btn-sm" onclick="downloadReport('payment')">Payments</button>
-<button class="btn btn-danger btn-sm" onclick="downloadFeesStructurePDF()">📄 Fees Structure</button>
 </div>
 
 <div class="card">
@@ -367,6 +366,9 @@ th, td { padding: 6px 8px; }
 <tbody id="boardingFeesTable"><tr><td colspan="5" style="text-align:center;color:#999;">Loading...</td></tr></tbody>
 </table>
 </div>
+</div>
+<div class="download-section">
+<button class="btn btn-danger btn-sm" onclick="downloadFeesStructurePDF()">📄 Download Full Fees Structure PDF</button>
 </div>
 </div>
 
@@ -420,7 +422,7 @@ th, td { padding: 6px 8px; }
 <div id="historyStats" class="history-stats"></div>
 <div class="table-container">
 <table>
-<thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Method</th><th>Reference</th><th>Actions</th></tr></thead>
+<thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Method</th><th>Reference</th><th>Action</th></tr></thead>
 <tbody id="historyPaymentsTable"><tr><td colspan="6" style="text-align:center;color:#999;">Select a student and click "View Selected" or "All Students with Payments"</td></tr></tbody>
 </table>
 </div>
@@ -483,7 +485,7 @@ th, td { padding: 6px 8px; }
 <div class="modal-content">
 <h2>✏️ Edit Payment</h2>
 <p style="color:#666;text-align:center;margin-bottom:15px;">Update payment record below</p>
-<input type="hidden" id="editPaymentId">
+<input type="hidden" id="editPaymentRow">
 <label>👤 Student:</label>
 <input type="text" id="editPaymentStudent" readonly style="background:#f0f0f0;">
 <label>📂 Category:</label>
@@ -519,6 +521,16 @@ th, td { padding: 6px 8px; }
 </div>
 </div>
 
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receiptModal">
+<div class="modal-content" style="max-width: 550px;">
+<div id="receiptContent"></div>
+<div class="modal-actions">
+<button class="btn-primary" onclick="printReceipt()">🖨️ PRINT</button>
+<button class="btn-secondary" onclick="closeReceiptModal()">❌ CLOSE</button>
+</div>
+</div>
+</div>
 <!-- VIEW PAYMENT MODAL -->
 <div class="modal-overlay" id="viewPaymentModal">
 <div class="modal-content" style="max-width: 550px;">
@@ -531,24 +543,13 @@ th, td { padding: 6px 8px; }
 </div>
 </div>
 
-<!-- RECEIPT MODAL -->
-<div class="modal-overlay" id="receiptModal">
-<div class="modal-content" style="max-width: 550px;">
-<div id="receiptContent"></div>
-<div class="modal-actions">
-<button class="btn-primary" onclick="printReceipt()">🖨️ PRINT</button>
-<button class="btn-secondary" onclick="closeReceiptModal()">❌ CLOSE</button>
-</div>
-</div>
-</div>
-
 <!-- ==================== JAVASCRIPT ==================== -->
 <script>
 // =====================================================
 // GLOBAL VARIABLES
 // =====================================================
 const CLERK_PIN = "1010";
-const API_BASE = '';
+const API_BASE = 'http://localhost:5000';
 
 let allStudents = [];
 let allPayments = [];
@@ -558,7 +559,7 @@ let currentHistoryStudentId = null;
 let receiptData = null;
 let isLoading = false;
 let currentTab = 'students';
-let editingPaymentId = null;
+let editingPaymentRow = null;
 
 // =====================================================
 // GO HOME FUNCTION
@@ -683,7 +684,36 @@ async function loadStudentFeeList() {
     document.getElementById('studentFeeTable').innerHTML = '<tr><td colspan="10" style="text-align:center;color:#0b5394;">Loading students...</td></tr>';
     
     try {
-        const data = await fetchAPI('/api/clerk/students/fees');
+        // Try the clerk API first
+        let data = await fetchAPI('/api/clerk/students/fees');
+        
+        // If clerk API fails, fallback to regular student API
+        if (!data.success) {
+            console.log('⚠️ Clerk API failed, trying regular student API...');
+            data = await fetchAPI('/api/students');
+            if (data.success) {
+                // Transform regular student data to match clerk format
+                const students = data.students.map(s => ({
+                    id: s.studentId,
+                    name: s.name,
+                    grade: s.grade,
+                    gender: s.gender,
+                    studentType: s.type || 'Day Scholar',
+                    isBoarding: (s.type || 'Day Scholar') === 'Boarder',
+                    totalFees: 0,
+                    paid: s.paid || 0,
+                    balance: 0,
+                    status: 'unpaid'
+                }));
+                allStudents = students;
+                document.getElementById('totalStudents').textContent = allStudents.length;
+                renderStudentTable(allStudents);
+                filteredHistoryStudents = allStudents.slice();
+                populateHistoryStudentSelect();
+                return;
+            }
+        }
+        
         if (data.success) {
             allStudents = data.students || [];
             document.getElementById('totalStudents').textContent = allStudents.length;
@@ -702,7 +732,6 @@ async function loadStudentFeeList() {
     }
     isLoading = false;
 }
-
 // =====================================================
 // RENDER STUDENT TABLE
 // =====================================================
@@ -926,7 +955,7 @@ async function viewStudentPayments(studentId) {
             
             document.getElementById('historyStudentInfo').innerHTML =
                 '<p style="margin:0;font-size:16px;font-weight:bold;color:#001f5c;">📋 ' + (studentData.name || student.name) + ' (' + (studentData.id || studentId) + ')</p>' +
-                '<p style="margin:0;"><strong>Grade:</strong> ' + (studentData.grade || 'N/A') + ' | <strong>Type:</strong> ' + (studentData.studentType || 'N/A') + '</p>' +
+                '<p style="margin:0;"><strong>Grade:</strong> ' + (studentData.grade || 'N/A') + ' | <strong>Type:</strong> ' + (data.studentType || 'N/A') + '</p>' +
                 '<p style="margin:0;font-weight:bold;color:#0b5394;">Total Fees: KES ' + (data.fees?.total || 0).toLocaleString() + 
                 ' | Total Paid: KES ' + (data.fees?.paid || 0).toLocaleString() +
                 ' | Balance: KES ' + (data.fees?.balance || 0).toLocaleString() + '</p>' +
@@ -965,10 +994,10 @@ async function viewStudentPayments(studentId) {
                     '<td>' + (p.method || '-') + '</td>' +
                     '<td>' + (p.reference || '-') + '</td>' +
                     '<td>' +
-                    '<button class="btn btn-xs btn-warning" onclick="openEditPaymentModal(\'' + p._id + '\',\'' + studentId + '\',\'' + student.name + '\',\'' + (p.amount || 0) + '\',\'' + (p.category || 'School Fees') + '\',\'' + (p.method || '') + '\',\'' + (p.reference || '') + '\',\'' + (p.notes || '') + '\')">✏️ Edit</button> ' +
-                    '<button class="btn btn-xs btn-info" onclick="viewPaymentDetails(\'' + p._id + '\',\'' + studentId + '\',\'' + student.name + '\',\'' + (p.amount || 0) + '\',\'' + (p.category || 'School Fees') + '\',\'' + (p.method || '') + '\',\'' + (p.reference || '') + '\',\'' + (p.notes || '') + '\',\'' + (p.date || '') + '\')">👁️ View</button> ' +
-                    '<button class="btn btn-xs btn-danger" onclick="deletePayment(\'' + p._id + '\',\'' + studentId + '\')">🗑️ Delete</button>' +
-                    '</td>' +
+'<button class="btn btn-xs btn-warning" onclick="openEditPaymentModal(\'' + p._id + '\',\'' + studentId + '\',\'' + student.name + '\',\'' + (p.amount || 0) + '\',\'' + (p.category || 'School Fees') + '\',\'' + (p.method || '') + '\',\'' + (p.reference || '') + '\',\'' + (p.notes || '') + '\')">✏️ Edit</button> ' +
+'<button class="btn btn-xs btn-info" onclick="viewPaymentDetails(\'' + p._id + '\',\'' + studentId + '\',\'' + student.name + '\',\'' + (p.amount || 0) + '\',\'' + (p.category || 'School Fees') + '\',\'' + (p.method || '') + '\',\'' + (p.reference || '') + '\',\'' + (p.notes || '') + '\',\'' + (p.date || '') + '\')">👁️ View</button> ' +
+'<button class="btn btn-xs btn-danger" onclick="deletePayment(\'' + p._id + '\',\'' + studentId + '\')">🗑️ Delete</button>' +
+'</td>' +
                     '</tr>';
             });
             document.getElementById('historyPaymentsTable').innerHTML = tableHtml;
@@ -1117,7 +1146,58 @@ async function saveMultiPayment() {
 }
 
 // =====================================================
-// VIEW PAYMENT DETAILS
+// RECEIPT FUNCTIONS
+// =====================================================
+function generateReceipt(data) {
+    var categoriesHtml = '';
+    if (data.categories && data.categories.length > 0) {
+        data.categories.forEach(function(cat) {
+            categoriesHtml += '<div class="row"><span class="label">' + cat.category + ':</span><span class="value">KES ' + cat.amount.toLocaleString() + '</span></div>';
+        });
+    }
+    var now = new Date();
+    var dateStr = now.toLocaleDateString('en-GB');
+    var timeStr = now.toLocaleTimeString('en-GB');
+    var receiptNo = Math.floor(Math.random() * 90000) + 10000;
+    var receiptHTML = '<div class="receipt-container"><div class="receipt-header"><h2>🏫 Changara Star Academy</h2><p>Official Payment Receipt</p><p style="font-size:12px;color:#999;">Receipt No: ' + receiptNo + '</p></div><div class="receipt-details"><div class="row"><span class="label">Student Name:</span><span class="value">' + data.studentName + '</span></div><div class="row"><span class="label">Student ID:</span><span class="value">' + data.studentId + '</span></div><div class="row"><span class="label">Grade:</span><span class="value">' + (data.grade || 'N/A') + '</span></div><div class="row"><span class="label">Student Type:</span><span class="value">' + data.studentType + '</span></div><div class="row"><span class="label">Payment Date:</span><span class="value">' + dateStr + '</span></div><div class="row"><span class="label">Payment Method:</span><span class="value">' + data.method + '</span></div>' + (data.reference ? '<div class="row"><span class="label">Reference:</span><span class="value">' + data.reference + '</span></div>' : '') + '</div><div style="margin:10px 0;padding:10px;background:#f8f9fa;border-radius:8px;border:1px solid #e0e0e0;"><h5 style="margin:0 0 10px 0;color:#001f5c;">Payment Breakdown:</h5>' + categoriesHtml + '</div><div class="receipt-amount"><div style="font-size:14px;color:#666;">Total Amount Paid</div><div class="amount">KES ' + data.totalAmount.toLocaleString() + '</div></div><div style="text-align:center;padding:10px 0;"><p style="font-size:13px;color:#0b8f34;font-weight:bold;">✅ Payment Confirmed</p><p style="font-size:12px;color:#666;">"This is a computer-generated receipt"</p></div><div class="receipt-footer"><div class="stamp">📌 SCHOOL STAMP</div><p>Printed on: ' + dateStr + ' at ' + timeStr + '</p><p>Thank you for your payment!</p><p style="color:#c51616;font-weight:bold;font-size:11px;">N/B: NO CASH IS ALLOWED IN SCHOOL</p></div></div>';
+    document.getElementById('receiptContent').innerHTML = receiptHTML;
+    document.getElementById('receiptModal').classList.add('show');
+}
+
+function closeReceiptModal() { document.getElementById('receiptModal').classList.remove('show'); }
+
+function printReceipt() {
+    var content = document.getElementById('receiptContent').innerHTML;
+    if (!content || content.trim() === '') { showMessage('❌ No receipt to print', 'error'); return; }
+    var printWindow = window.open('', '_blank', 'width=600,height=800');
+    if (!printWindow) { showMessage('❌ Please allow popups for this site', 'error'); return; }
+    printWindow.document.write('<!DOCTYPE html><html><head><title>Payment Receipt</title><style>body{font-family:Arial,sans-serif;margin:0;padding:20px;background:white;}.receipt-container{max-width:500px;margin:0 auto;padding:20px;background:white;border:2px solid #001f5c;border-radius:10px;font-family:"Courier New",monospace;}.receipt-header{text-align:center;border-bottom:2px dashed #001f5c;padding-bottom:15px;margin-bottom:15px;}.receipt-header h2{color:#001f5c;margin:0;font-size:24px;}.receipt-header p{color:#666;margin:5px 0;font-size:14px;}.receipt-details{margin:15px 0;}.receipt-details .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted #ddd;font-size:14px;}.receipt-details .row .label{font-weight:bold;color:#001f5c;}.receipt-details .row .value{color:#333;}.receipt-amount{text-align:center;padding:15px;margin:15px 0;background:#e8f5e9;border-radius:10px;border:2px solid #0b8f34;}.receipt-amount .amount{font-size:32px;font-weight:bold;color:#0b8f34;}.receipt-footer{text-align:center;margin-top:20px;padding-top:15px;border-top:2px dashed #001f5c;font-size:12px;color:#999;}.receipt-footer .stamp{color:#001f5c;font-weight:bold;font-size:16px;}@media print{body{padding:10px;}}</style></head><body>' + content + '<script>window.onload=function(){setTimeout(function(){window.print();},500);}<\/script></body></html>');
+    printWindow.document.close();
+}
+
+// =====================================================
+// VIEW SINGLE RECEIPT
+// =====================================================
+function viewSingleReceipt(row, studentId, studentName, amount, category, method, reference, date) {
+    var student = allStudents.find(function(s) { return s.id === studentId; });
+    var grade = student ? student.grade : 'N/A';
+    var studentType = student ? student.studentType : 'N/A';
+    var data = {
+        studentId: studentId,
+        studentName: studentName || (student ? student.name : 'N/A'),
+        studentType: studentType,
+        grade: grade,
+        totalAmount: amount,
+        categories: [{ category: category || 'School Fees', amount: amount }],
+        method: method,
+        reference: reference,
+        date: date
+    };
+    receiptData = data;
+    generateReceipt(data);
+}
+// =====================================================
+// VIEW PAYMENT DETAILS - NEW
 // =====================================================
 function viewPaymentDetails(paymentId, studentId, studentName, amount, category, method, reference, notes, date) {
     var dateStr = date ? new Date(date).toLocaleString() : 'N/A';
@@ -1176,7 +1256,7 @@ function printViewReceipt() {
 }
 
 // =====================================================
-// DELETE PAYMENT
+// DELETE PAYMENT - NEW
 // =====================================================
 async function deletePayment(paymentId, studentId) {
     if (!confirm('⚠️ Are you sure you want to delete this payment record? This cannot be undone!')) return;
@@ -1203,41 +1283,11 @@ async function deletePayment(paymentId, studentId) {
 }
 
 // =====================================================
-// RECEIPT FUNCTIONS
-// =====================================================
-function generateReceipt(data) {
-    var categoriesHtml = '';
-    if (data.categories && data.categories.length > 0) {
-        data.categories.forEach(function(cat) {
-            categoriesHtml += '<div class="row"><span class="label">' + cat.category + ':</span><span class="value">KES ' + cat.amount.toLocaleString() + '</span></div>';
-        });
-    }
-    var now = new Date();
-    var dateStr = now.toLocaleDateString('en-GB');
-    var timeStr = now.toLocaleTimeString('en-GB');
-    var receiptNo = Math.floor(Math.random() * 90000) + 10000;
-    var receiptHTML = '<div class="receipt-container"><div class="receipt-header"><h2>🏫 Changara Star Academy</h2><p>Official Payment Receipt</p><p style="font-size:12px;color:#999;">Receipt No: ' + receiptNo + '</p></div><div class="receipt-details"><div class="row"><span class="label">Student Name:</span><span class="value">' + data.studentName + '</span></div><div class="row"><span class="label">Student ID:</span><span class="value">' + data.studentId + '</span></div><div class="row"><span class="label">Grade:</span><span class="value">' + (data.grade || 'N/A') + '</span></div><div class="row"><span class="label">Student Type:</span><span class="value">' + data.studentType + '</span></div><div class="row"><span class="label">Payment Date:</span><span class="value">' + dateStr + '</span></div><div class="row"><span class="label">Payment Method:</span><span class="value">' + data.method + '</span></div>' + (data.reference ? '<div class="row"><span class="label">Reference:</span><span class="value">' + data.reference + '</span></div>' : '') + '</div><div style="margin:10px 0;padding:10px;background:#f8f9fa;border-radius:8px;border:1px solid #e0e0e0;"><h5 style="margin:0 0 10px 0;color:#001f5c;">Payment Breakdown:</h5>' + categoriesHtml + '</div><div class="receipt-amount"><div style="font-size:14px;color:#666;">Total Amount Paid</div><div class="amount">KES ' + data.totalAmount.toLocaleString() + '</div></div><div style="text-align:center;padding:10px 0;"><p style="font-size:13px;color:#0b8f34;font-weight:bold;">✅ Payment Confirmed</p><p style="font-size:12px;color:#666;">"This is a computer-generated receipt"</p></div><div class="receipt-footer"><div class="stamp">📌 SCHOOL STAMP</div><p>Printed on: ' + dateStr + ' at ' + timeStr + '</p><p>Thank you for your payment!</p><p style="color:#c51616;font-weight:bold;font-size:11px;">N/B: NO CASH IS ALLOWED IN SCHOOL</p></div></div>';
-    document.getElementById('receiptContent').innerHTML = receiptHTML;
-    document.getElementById('receiptModal').classList.add('show');
-}
-
-function closeReceiptModal() { document.getElementById('receiptModal').classList.remove('show'); }
-
-function printReceipt() {
-    var content = document.getElementById('receiptContent').innerHTML;
-    if (!content || content.trim() === '') { showMessage('❌ No receipt to print', 'error'); return; }
-    var printWindow = window.open('', '_blank', 'width=600,height=800');
-    if (!printWindow) { showMessage('❌ Please allow popups for this site', 'error'); return; }
-    printWindow.document.write('<!DOCTYPE html><html><head><title>Payment Receipt</title><style>body{font-family:Arial,sans-serif;margin:0;padding:20px;background:white;}.receipt-container{max-width:500px;margin:0 auto;padding:20px;background:white;border:2px solid #001f5c;border-radius:10px;font-family:"Courier New",monospace;}.receipt-header{text-align:center;border-bottom:2px dashed #001f5c;padding-bottom:15px;margin-bottom:15px;}.receipt-header h2{color:#001f5c;margin:0;font-size:24px;}.receipt-header p{color:#666;margin:5px 0;font-size:14px;}.receipt-details{margin:15px 0;}.receipt-details .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted #ddd;font-size:14px;}.receipt-details .row .label{font-weight:bold;color:#001f5c;}.receipt-details .row .value{color:#333;}.receipt-amount{text-align:center;padding:15px;margin:15px 0;background:#e8f5e9;border-radius:10px;border:2px solid #0b8f34;}.receipt-amount .amount{font-size:32px;font-weight:bold;color:#0b8f34;}.receipt-footer{text-align:center;margin-top:20px;padding-top:15px;border-top:2px dashed #001f5c;font-size:12px;color:#999;}.receipt-footer .stamp{color:#001f5c;font-weight:bold;font-size:16px;}@media print{body{padding:10px;}}</style></head><body>' + content + '<script>window.onload=function(){setTimeout(function(){window.print();},500);}<\/script></body></html>');
-    printWindow.document.close();
-}
-
-// =====================================================
 // EDIT PAYMENT FUNCTIONS
 // =====================================================
-function openEditPaymentModal(paymentId, studentId, studentName, amount, category, method, reference, notes) {
-    editingPaymentId = paymentId;
-    document.getElementById('editPaymentId').value = paymentId;
+function openEditPaymentModal(paymentRow, studentId, studentName, amount, category, method, reference, notes) {
+    editingPaymentRow = paymentRow;
+    document.getElementById('editPaymentRow').value = paymentRow;
     document.getElementById('editPaymentStudent').value = studentId + ' - ' + studentName;
     document.getElementById('editPaymentAmount').value = amount || '';
     document.getElementById('editPaymentCategory').value = category || 'School Fees';
@@ -1251,7 +1301,7 @@ function openEditPaymentModal(paymentId, studentId, studentName, amount, categor
 
 function closeEditPaymentModal() {
     document.getElementById('editPaymentModal').classList.remove('show');
-    editingPaymentId = null;
+    editingPaymentRow = null;
 }
 
 function showEditPaymentResult(msg, type) {
@@ -1264,7 +1314,7 @@ function showEditPaymentResult(msg, type) {
 }
 
 async function saveEditPaymentRecord() {
-    var paymentId = document.getElementById('editPaymentId').value;
+    var paymentId = document.getElementById('editPaymentRow').value;
     if (!paymentId) { showEditPaymentResult('❌ No payment selected', 'error'); return; }
     
     var amount = parseFloat(document.getElementById('editPaymentAmount').value);
@@ -1300,7 +1350,7 @@ async function saveEditPaymentRecord() {
 }
 
 async function deleteEditedPayment() {
-    var paymentId = document.getElementById('editPaymentId').value;
+    var paymentId = document.getElementById('editPaymentRow').value;
     if (!paymentId) { showEditPaymentResult('❌ No payment selected', 'error'); return; }
     if (!confirm('⚠️ Are you sure you want to delete this payment record?')) { return; }
     
@@ -1471,8 +1521,10 @@ function downloadFeesStructurePDF() {
 // =====================================================
 // INITIALIZATION
 // =====================================================
+// Pre-load fee data for edit modal
 window._feesData = {};
 
+// Override loadFeesStructure to store data globally
 var originalLoadFees = loadFeesStructure;
 loadFeesStructure = async function() {
     try {
@@ -1487,6 +1539,7 @@ loadFeesStructure = async function() {
     }
 };
 
+// Auto-load on page ready
 console.log('✅ Clerk Dashboard loaded successfully');
 </script>
 </body>
