@@ -19,12 +19,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================
+// SET TIME ZONE TO KENYA
+// ============================================
+process.env.TZ = 'Africa/Nairobi';
+
+// ============================================
 // HELPER: GET KENYA TIME (UTC+3) - RELIABLE
 // ============================================
 function getKenyaTime() {
-    const now = new Date();
-    const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
-    return new Date(kenyaTimeString);
+    return new Date();
 }
 
 function getKenyaDate() {
@@ -41,16 +44,15 @@ function getKenyaHour() {
 function formatKenyaTime(date) {
     if (!date) return '-';
     const d = new Date(date);
-    // Add 3 hours if the time is in UTC
-    const kenyaOffset = 3 * 60 * 60 * 1000;
-    const kenyaTime = new Date(d.getTime() + kenyaOffset);
-    return kenyaTime.toLocaleTimeString('en-KE', {
+    return d.toLocaleTimeString('en-KE', {
+        timeZone: 'Africa/Nairobi',
         hour12: true,
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
     });
 }
+
 function formatKenyaFullTime(date) {
     if (!date) return '-';
     const d = new Date(date);
@@ -73,7 +75,6 @@ function formatKenyaDate(date) {
         day: 'numeric'
     });
 }
-
 // ============================================
 // REPORT HTML GENERATORS
 // ============================================
