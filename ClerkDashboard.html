@@ -330,6 +330,7 @@ th, td { padding: 6px 8px; }
 <button class="btn btn-primary btn-sm" onclick="downloadReport('summary')">Summary</button>
 <button class="btn btn-success btn-sm" onclick="downloadReport('detailed')">Detailed</button>
 <button class="btn btn-warning btn-sm" onclick="downloadReport('payment')">Payments</button>
+<button class="btn btn-danger btn-sm" onclick="downloadFeesStructurePDF()">📄 Fees Structure</button>
 </div>
 
 <div class="card">
@@ -366,9 +367,6 @@ th, td { padding: 6px 8px; }
 <tbody id="boardingFeesTable"><tr><td colspan="5" style="text-align:center;color:#999;">Loading...</td></tr></tbody>
 </table>
 </div>
-</div>
-<div class="download-section">
-<button class="btn btn-danger btn-sm" onclick="downloadFeesStructurePDF()">📄 Download Full Fees Structure PDF</button>
 </div>
 </div>
 
@@ -422,7 +420,7 @@ th, td { padding: 6px 8px; }
 <div id="historyStats" class="history-stats"></div>
 <div class="table-container">
 <table>
-<thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Method</th><th>Reference</th><th>Action</th></tr></thead>
+<thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Method</th><th>Reference</th><th>Actions</th></tr></thead>
 <tbody id="historyPaymentsTable"><tr><td colspan="6" style="text-align:center;color:#999;">Select a student and click "View Selected" or "All Students with Payments"</td></tr></tbody>
 </table>
 </div>
@@ -485,7 +483,7 @@ th, td { padding: 6px 8px; }
 <div class="modal-content">
 <h2>✏️ Edit Payment</h2>
 <p style="color:#666;text-align:center;margin-bottom:15px;">Update payment record below</p>
-<input type="hidden" id="editPaymentRow">
+<input type="hidden" id="editPaymentId">
 <label>👤 Student:</label>
 <input type="text" id="editPaymentStudent" readonly style="background:#f0f0f0;">
 <label>📂 Category:</label>
@@ -521,16 +519,6 @@ th, td { padding: 6px 8px; }
 </div>
 </div>
 
-<!-- RECEIPT MODAL -->
-<div class="modal-overlay" id="receiptModal">
-<div class="modal-content" style="max-width: 550px;">
-<div id="receiptContent"></div>
-<div class="modal-actions">
-<button class="btn-primary" onclick="printReceipt()">🖨️ PRINT</button>
-<button class="btn-secondary" onclick="closeReceiptModal()">❌ CLOSE</button>
-</div>
-</div>
-</div>
 <!-- VIEW PAYMENT MODAL -->
 <div class="modal-overlay" id="viewPaymentModal">
 <div class="modal-content" style="max-width: 550px;">
@@ -543,13 +531,24 @@ th, td { padding: 6px 8px; }
 </div>
 </div>
 
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receiptModal">
+<div class="modal-content" style="max-width: 550px;">
+<div id="receiptContent"></div>
+<div class="modal-actions">
+<button class="btn-primary" onclick="printReceipt()">🖨️ PRINT</button>
+<button class="btn-secondary" onclick="closeReceiptModal()">❌ CLOSE</button>
+</div>
+</div>
+</div>
+
 <!-- ==================== JAVASCRIPT ==================== -->
 <script>
 // =====================================================
 // GLOBAL VARIABLES
 // =====================================================
 const CLERK_PIN = "1010";
-const API_BASE = 'http://localhost:5000';
+const API_BASE = '';
 
 let allStudents = [];
 let allPayments = [];
@@ -559,7 +558,7 @@ let currentHistoryStudentId = null;
 let receiptData = null;
 let isLoading = false;
 let currentTab = 'students';
-let editingPaymentRow = null;
+let editingPaymentId = null;
 
 // =====================================================
 // GO HOME FUNCTION
@@ -684,36 +683,7 @@ async function loadStudentFeeList() {
     document.getElementById('studentFeeTable').innerHTML = '<tr><td colspan="10" style="text-align:center;color:#0b5394;">Loading students...</td></tr>';
     
     try {
-        // Try the clerk API first
-        let data = await fetchAPI('/api/clerk/students/fees');
-        
-        // If clerk API fails, fallback to regular student API
-        if (!data.success) {
-            console.log('⚠️ Clerk API failed, trying regular student API...');
-            data = await fetchAPI('/api/students');
-            if (data.success) {
-                // Transform regular student data to match clerk format
-                const students = data.students.map(s => ({
-                    id: s.studentId,
-                    name: s.name,
-                    grade: s.grade,
-                    gender: s.gender,
-                    studentType: s.type || 'Day Scholar',
-                    isBoarding: (s.type || 'Day Scholar') === 'Boarder',
-                    totalFees: 0,
-                    paid: s.paid || 0,
-                    balance: 0,
-                    status: 'unpaid'
-                }));
-                allStudents = students;
-                document.getElementById('totalStudents').textContent = allStudents.length;
-                renderStudentTable(allStudents);
-                filteredHistoryStudents = allStudents.slice();
-                populateHistoryStudentSelect();
-                return;
-            }
-        }
-        
+        const data = await fetchAPI('/api/clerk/students/fees');
         if (data.success) {
             allStudents = data.students || [];
             document.getElementById('totalStudents').textContent = allStudents.length;
@@ -732,6 +702,7 @@ async function loadStudentFeeList() {
     }
     isLoading = false;
 }
+
 // =====================================================
 // RENDER STUDENT TABLE
 // =====================================================
@@ -955,7 +926,7 @@ async function viewStudentPayments(studentId) {
             
             document.getElementById('historyStudentInfo').innerHTML =
                 '<p style="margin:0;font-size:16px;font-weight:bold;color:#001f5c;">📋 ' + (studentData.name || student.name) + ' (' + (studentData.id || studentId) + ')</p>' +
-                '<p style="margin:0;"><strong>Grade:</strong> ' + (studentData.grade || 'N/A') + ' | <strong>Type:</strong> ' + (data.studentType || 'N/A') + '</p>' +
+                '<p style="margin:0;"><strong>Grade:</strong> ' + (studentData.grade || 'N/A') + ' | <strong>Type:</strong> ' + (studentData.studentType || 'N/A') + '</p>' +
                 '<p style="margin:0;font-weight:bold;color:#0b5394;">Total Fees: KES ' + (data.fees?.total || 0).toLocaleString() + 
                 ' | Total Paid: KES ' + (data.fees?.paid || 0).toLocaleString() +
                 ' | Balance: KES ' + (data.fees?.balance || 0).toLocaleString() + '</p>' +
@@ -995,7 +966,8 @@ async function viewStudentPayments(studentId) {
                     '<td>' + (p.reference || '-') + '</td>' +
                     '<td>' +
                     '<button class="btn btn-xs btn-warning" onclick="openEditPaymentModal(\'' + p._id + '\',\'' + studentId + '\',\'' + student.name + '\',\'' + (p.amount || 0) + '\',\'' + (p.category || 'School Fees') + '\',\'' + (p.method || '') + '\',\'' + (p.reference || '') + '\',\'' + (p.notes || '') + '\')">✏️ Edit</button> ' +
-                    '<button class="btn btn-xs btn-info" onclick="viewSingleReceipt(\'' + p._id + '\',\'' + studentId + '\',\'' + student.name + '\',\'' + (p.amount || 0) + '\',\'' + (p.category || 'School Fees') + '\',\'' + (p.method || '') + '\',\'' + (p.reference || '') + '\',\'' + (p.date || '') + '\')">🧾 Receipt</button>' +
+                    '<button class="btn btn-xs btn-info" onclick="viewPaymentDetails(\'' + p._id + '\',\'' + studentId + '\',\'' + student.name + '\',\'' + (p.amount || 0) + '\',\'' + (p.category || 'School Fees') + '\',\'' + (p.method || '') + '\',\'' + (p.reference || '') + '\',\'' + (p.notes || '') + '\',\'' + (p.date || '') + '\')">👁️ View</button> ' +
+                    '<button class="btn btn-xs btn-danger" onclick="deletePayment(\'' + p._id + '\',\'' + studentId + '\')">🗑️ Delete</button>' +
                     '</td>' +
                     '</tr>';
             });
@@ -1145,6 +1117,92 @@ async function saveMultiPayment() {
 }
 
 // =====================================================
+// VIEW PAYMENT DETAILS
+// =====================================================
+function viewPaymentDetails(paymentId, studentId, studentName, amount, category, method, reference, notes, date) {
+    var dateStr = date ? new Date(date).toLocaleString() : 'N/A';
+    
+    var html = `
+        <div style="padding:10px 0;">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                <span style="font-weight:bold;color:#001f5c;">Student:</span>
+                <span>${studentName} (${studentId})</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                <span style="font-weight:bold;color:#001f5c;">Amount:</span>
+                <span style="font-weight:bold;color:#0b8f34;font-size:20px;">KES ${amount.toLocaleString()}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                <span style="font-weight:bold;color:#001f5c;">Category:</span>
+                <span>${category}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                <span style="font-weight:bold;color:#001f5c;">Payment Method:</span>
+                <span>${method || 'N/A'}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                <span style="font-weight:bold;color:#001f5c;">Reference:</span>
+                <span>${reference || 'N/A'}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                <span style="font-weight:bold;color:#001f5c;">Date:</span>
+                <span>${dateStr}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;">
+                <span style="font-weight:bold;color:#001f5c;">Notes:</span>
+                <span>${notes || 'N/A'}</span>
+            </div>
+            <div style="text-align:center;margin-top:15px;padding:10px;background:#e8f5e9;border-radius:8px;">
+                <span style="font-weight:bold;color:#0b8f34;">✅ Payment Confirmed</span>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('viewPaymentContent').innerHTML = html;
+    document.getElementById('viewPaymentModal').classList.add('show');
+}
+
+function closeViewPaymentModal() {
+    document.getElementById('viewPaymentModal').classList.remove('show');
+}
+
+function printViewReceipt() {
+    var content = document.getElementById('viewPaymentContent').innerHTML;
+    if (!content || content.trim() === '') { showMessage('❌ No content to print', 'error'); return; }
+    var printWindow = window.open('', '_blank', 'width=600,height=800');
+    if (!printWindow) { showMessage('❌ Please allow popups for this site', 'error'); return; }
+    printWindow.document.write('<!DOCTYPE html><html><head><title>Payment Details</title><style>body{font-family:Arial,sans-serif;padding:20px;background:white;}.details{max-width:500px;margin:0 auto;padding:20px;border:2px solid #001f5c;border-radius:10px;}.details .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;}.details .label{font-weight:bold;color:#001f5c;}.details .amount{font-weight:bold;color:#0b8f34;font-size:20px;}.header{text-align:center;border-bottom:2px solid #d4a017;padding-bottom:10px;margin-bottom:15px;}.header h2{color:#001f5c;margin:0;}.footer{text-align:center;margin-top:15px;padding-top:10px;border-top:1px solid #ddd;color:#999;font-size:12px;}@media print{body{padding:10px;}}</style></head><body><div class="header"><h2>🏫 Changara Star Academy</h2><p>Payment Details</p></div><div class="details">' + content + '</div><div class="footer"><p>Printed on: ' + new Date().toLocaleString() + '</p></div><script>window.onload=function(){setTimeout(function(){window.print();},500);}<\/script></body></html>');
+    printWindow.document.close();
+}
+
+// =====================================================
+// DELETE PAYMENT
+// =====================================================
+async function deletePayment(paymentId, studentId) {
+    if (!confirm('⚠️ Are you sure you want to delete this payment record? This cannot be undone!')) return;
+    
+    showMessage('⏳ Deleting payment...', 'info');
+    
+    try {
+        const data = await fetchAPI('/api/clerk/payments/' + paymentId, {
+            method: 'DELETE'
+        });
+        if (data.success) {
+            showMessage('✅ Payment deleted successfully!', 'success');
+            setTimeout(function() {
+                viewStudentPayments(studentId);
+                loadStudentFeeList();
+                loadPayments();
+            }, 500);
+        } else {
+            showMessage('❌ ' + data.message, 'error');
+        }
+    } catch (error) {
+        showMessage('❌ Error: ' + error.message, 'error');
+    }
+}
+
+// =====================================================
 // RECEIPT FUNCTIONS
 // =====================================================
 function generateReceipt(data) {
@@ -1175,33 +1233,11 @@ function printReceipt() {
 }
 
 // =====================================================
-// VIEW SINGLE RECEIPT
-// =====================================================
-function viewSingleReceipt(row, studentId, studentName, amount, category, method, reference, date) {
-    var student = allStudents.find(function(s) { return s.id === studentId; });
-    var grade = student ? student.grade : 'N/A';
-    var studentType = student ? student.studentType : 'N/A';
-    var data = {
-        studentId: studentId,
-        studentName: studentName || (student ? student.name : 'N/A'),
-        studentType: studentType,
-        grade: grade,
-        totalAmount: amount,
-        categories: [{ category: category || 'School Fees', amount: amount }],
-        method: method,
-        reference: reference,
-        date: date
-    };
-    receiptData = data;
-    generateReceipt(data);
-}
-
-// =====================================================
 // EDIT PAYMENT FUNCTIONS
 // =====================================================
-function openEditPaymentModal(paymentRow, studentId, studentName, amount, category, method, reference, notes) {
-    editingPaymentRow = paymentRow;
-    document.getElementById('editPaymentRow').value = paymentRow;
+function openEditPaymentModal(paymentId, studentId, studentName, amount, category, method, reference, notes) {
+    editingPaymentId = paymentId;
+    document.getElementById('editPaymentId').value = paymentId;
     document.getElementById('editPaymentStudent').value = studentId + ' - ' + studentName;
     document.getElementById('editPaymentAmount').value = amount || '';
     document.getElementById('editPaymentCategory').value = category || 'School Fees';
@@ -1215,7 +1251,7 @@ function openEditPaymentModal(paymentRow, studentId, studentName, amount, catego
 
 function closeEditPaymentModal() {
     document.getElementById('editPaymentModal').classList.remove('show');
-    editingPaymentRow = null;
+    editingPaymentId = null;
 }
 
 function showEditPaymentResult(msg, type) {
@@ -1228,7 +1264,7 @@ function showEditPaymentResult(msg, type) {
 }
 
 async function saveEditPaymentRecord() {
-    var paymentId = document.getElementById('editPaymentRow').value;
+    var paymentId = document.getElementById('editPaymentId').value;
     if (!paymentId) { showEditPaymentResult('❌ No payment selected', 'error'); return; }
     
     var amount = parseFloat(document.getElementById('editPaymentAmount').value);
@@ -1264,7 +1300,7 @@ async function saveEditPaymentRecord() {
 }
 
 async function deleteEditedPayment() {
-    var paymentId = document.getElementById('editPaymentRow').value;
+    var paymentId = document.getElementById('editPaymentId').value;
     if (!paymentId) { showEditPaymentResult('❌ No payment selected', 'error'); return; }
     if (!confirm('⚠️ Are you sure you want to delete this payment record?')) { return; }
     
@@ -1435,10 +1471,8 @@ function downloadFeesStructurePDF() {
 // =====================================================
 // INITIALIZATION
 // =====================================================
-// Pre-load fee data for edit modal
 window._feesData = {};
 
-// Override loadFeesStructure to store data globally
 var originalLoadFees = loadFeesStructure;
 loadFeesStructure = async function() {
     try {
@@ -1453,7 +1487,6 @@ loadFeesStructure = async function() {
     }
 };
 
-// Auto-load on page ready
 console.log('✅ Clerk Dashboard loaded successfully');
 </script>
 </body>
