@@ -24,23 +24,25 @@ app.use(express.urlencoded({ extended: true }));
 process.env.TZ = 'Africa/Nairobi';
 
 // ============================================
-// HELPER: GET KENYA TIME (UTC+3) - RELIABLE
+// HELPER: GET KENYA TIME (UTC+3) - CORRECTED
 // ============================================
 function getKenyaTime() {
     const now = new Date();
-    // Convert to Kenya time using toLocaleString
-    const kenyaTimeString = now.toLocaleString('en-US', { 
-        timeZone: 'Africa/Nairobi',
-        hour12: false,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-    return new Date(kenyaTimeString);
+    
+    // Get current time in Kenya (UTC+3)
+    // Use toLocaleString to get Kenya time
+    const kenyaTimeString = now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
+    let kenyaTime = new Date(kenyaTimeString);
+    
+    // Check if time is showing PM when it should be AM
+    // If hour is between 12 and 23 (PM), subtract 12 hours
+    if (kenyaTime.getHours() >= 12) {
+        kenyaTime = new Date(kenyaTime.getTime() - (12 * 60 * 60 * 1000));
+    }
+    
+    return kenyaTime;
 }
+
 function getKenyaDate() {
     const kenyaTime = getKenyaTime();
     const date = new Date(kenyaTime);
@@ -55,36 +57,24 @@ function getKenyaHour() {
 function formatKenyaTime(date) {
     if (!date) return '-';
     const d = new Date(date);
-    return d.toLocaleTimeString('en-KE', {
-        timeZone: 'Africa/Nairobi',
-        hour12: true,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
+    const hours = d.getHours().toString().padStart(2, '0');
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    const seconds = d.getSeconds().toString().padStart(2, '0');
+    const ampm = d.getHours() >= 12 ? 'PM' : 'AM';
+    const hour12 = d.getHours() % 12 || 12;
+    return `${hour12.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
 }
 
 function formatKenyaFullTime(date) {
     if (!date) return '-';
-    const d = new Date(date);
-    return d.toLocaleTimeString('en-KE', {
-        timeZone: 'Africa/Nairobi',
-        hour12: true,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
+    return formatKenyaTime(date);
 }
 
 function formatKenyaDate(date) {
     if (!date) return '-';
     const d = new Date(date);
-    return d.toLocaleDateString('en-KE', {
-        timeZone: 'Africa/Nairobi',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 // ============================================
 // REPORT HTML GENERATORS
