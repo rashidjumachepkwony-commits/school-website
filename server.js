@@ -3727,24 +3727,6 @@ app.get('/', (req, res) => {
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
 });
-// ============================================
-// HOLIDAY ASSIGNMENTS SCHEMA
-// ============================================
-const holidayAssignmentSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    grade: { type: String, required: true },
-    subject: { type: String, default: '' },
-    description: { type: String, default: '' },
-    fileName: { type: String, required: true },
-    fileUrl: { type: String, required: true },
-    fileType: { type: String, default: 'pdf' },
-    fileSize: { type: Number, default: 0 },
-    uploadedBy: { type: String, default: 'Admin' },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
-});
-
-const HolidayAssignment = mongoose.model('HolidayAssignment', holidayAssignmentSchema);
 
 // ============================================
 // HOLIDAY ASSIGNMENTS SCHEMA
