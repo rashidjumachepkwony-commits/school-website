@@ -26,22 +26,17 @@ process.env.TZ = 'Africa/Nairobi';
 // ============================================
 // HELPER: GET KENYA TIME (UTC+3) - FIXED
 // ============================================
+// ============================================
+// HELPER: GET KENYA TIME (UTC+3) - FIXED
+// ============================================
 function getKenyaTime() {
     const now = new Date();
-    // Get UTC time in milliseconds
+    // Get UTC time
     const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
     // Add 3 hours for Kenya (UTC+3)
-    let kenyaTime = new Date(utcTime + (3 * 60 * 60 * 1000));
-    
-    // FIX: If hour is 12 or more (PM), subtract 12 hours to get AM
-    // This fixes the 12-hour offset issue
-    if (kenyaTime.getHours() >= 12) {
-        kenyaTime = new Date(kenyaTime.getTime() - (12 * 60 * 60 * 1000));
-    }
-    
+    const kenyaTime = new Date(utcTime + (3 * 60 * 60 * 1000));
     return kenyaTime;
 }
-
 function getKenyaDate() {
     const kenyaTime = getKenyaTime();
     const date = new Date(kenyaTime);
@@ -1223,9 +1218,13 @@ app.post('/api/teacher/checkout', async (req, res) => {
             return res.status(400).json({ success: false, message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut) });
         }
         
-        if (kenyaHour < 15) {
-            return res.status(400).json({ success: false, message: '⏰ Check-out is only allowed after 3:00 PM. Please continue working.' });
-        }
+        // Check if already checked out
+if (todayAttendance.checkOut) {
+    return res.status(400).json({ success: false, message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut) });
+}
+
+// REMOVED: The 3:00 PM restriction
+// Staff can now check out anytime after check-in
         
         todayAttendance.checkOut = kenyaNow;
         todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
