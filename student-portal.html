@@ -190,6 +190,43 @@
         }
         .btn-attendance:hover { transform: scale(1.02); }
 
+        /* === NEW: Fee Download Buttons === */
+        .download-fee-section {
+            background: #f8f9fc;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 2px solid #D4A017;
+        }
+        .download-fee-section h4 {
+            color: #001f5c;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .download-fee-section h4 i { color: #D4A017; margin-right: 8px; }
+        .fee-download-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .btn-fee-download {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-fee-download:hover { transform: scale(1.03); }
+        .btn-fee-statement { background: #0b5394; color: white; }
+        .btn-fee-structure { background: #d4a017; color: #001f5c; }
+        .btn-fee-print { background: #0b8f34; color: white; }
+
         #msg {
             font-size: 24px;
             font-weight: bold;
@@ -312,6 +349,7 @@
             .student-info-grid { grid-template-columns: 1fr; }
             .actions-row { grid-template-columns: 1fr; }
             .fee-summary { grid-template-columns: 1fr 1fr; }
+            .fee-download-buttons { grid-template-columns: 1fr; }
             .payment-history-table { font-size: 12px; }
             .payment-history-table th, .payment-history-table td { padding: 6px 8px; }
         }
@@ -367,6 +405,23 @@
             </table>
         </div>
 
+        <!-- ===== NEW: DOWNLOAD FEE SECTION ===== -->
+        <div class="download-fee-section">
+            <h4><i class="fas fa-download"></i> 📄 Download Fee Information</h4>
+            <p style="color:#666;font-size:14px;margin-bottom:12px;">Download your personal fee statement or the school's full fee structure</p>
+            <div class="fee-download-buttons">
+                <button class="btn-fee-download btn-fee-statement" onclick="downloadFeeStatement()">
+                    <i class="fas fa-file-pdf"></i> My Fee Statement
+                </button>
+                <button class="btn-fee-download btn-fee-structure" onclick="downloadFeesStructure()">
+                    <i class="fas fa-file-pdf"></i> School Fees Structure
+                </button>
+                <button class="btn-fee-download btn-fee-print" onclick="printFeeStatement()" style="grid-column: 1 / -1;">
+                    <i class="fas fa-print"></i> Print Fee Statement
+                </button>
+            </div>
+        </div>
+
         <!-- Actions -->
         <div class="actions-row">
             <button class="btn-download" onclick="downloadStudentReport()">📄 Download My Report</button>
@@ -377,6 +432,9 @@
         <button class="btn-logout" onclick="logoutStudent()">🚪 Logout</button>
     </div>
 </div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <script>
     // ============================================
@@ -396,6 +454,7 @@
     // ============================================
     let studentData = null;
     let studentPayments = [];
+    let studentFeeDetails = null;
 
     // ============================================
     // SHOW MESSAGE
@@ -449,11 +508,14 @@
                 if (studentDataResult.success) {
                     const student = studentDataResult.student;
                     
-                    // Get fee details
-                    const feeResponse = await fetch('/api/students/fees/' + id);
+                    // Get fee details from clerk API
+                    const feeResponse = await fetch('/api/clerk/students/fees/' + id);
                     const feeData = await feeResponse.json();
 
                     if (feeData.success) {
+                        studentFeeDetails = feeData;
+                        studentPayments = feeData.payments || [];
+                        
                         studentData = {
                             id: student.studentId,
                             name: student.name,
@@ -464,16 +526,30 @@
                             totalFees: feeData.fees.total || 0,
                             paid: feeData.fees.paid || 0,
                             balance: feeData.fees.balance || 0,
-                            feeBreakdown: feeData.feeBreakdown || {}
+                            feeBreakdown: feeData.feeBreakdown || {},
+                            payments: feeData.payments || []
                         };
-                        
-                        // Set payments (use empty array for now since we don't have payment history yet)
-                        studentPayments = [];
 
                         showDashboard(studentData);
                         showMessage('✅ Login successful! Welcome ' + studentData.name, 'success');
                     } else {
-                        showMessage('❌ Error loading fee details: ' + feeData.message, 'error');
+                        // Fallback: Use student's own paid amount
+                        studentData = {
+                            id: student.studentId,
+                            name: student.name,
+                            grade: student.grade,
+                            gender: student.gender,
+                            type: student.type,
+                            guardian: student.guardian,
+                            totalFees: student.totalFees || 0,
+                            paid: student.paid || 0,
+                            balance: (student.totalFees || 0) - (student.paid || 0),
+                            feeBreakdown: {},
+                            payments: []
+                        };
+                        studentFeeDetails = studentData;
+                        showDashboard(studentData);
+                        showMessage('✅ Login successful! Welcome ' + studentData.name, 'success');
                     }
                 } else {
                     showMessage('❌ Error loading student data: ' + studentDataResult.message, 'error');
@@ -501,6 +577,9 @@
             '<span class="badge-boarder">🏠 Boarder</span>' :
             '<span class="badge-day">📖 Day Scholar</span>';
 
+        const statusClass = student.balance === 0 ? 'status-paid' : student.balance < student.totalFees ? 'status-partial' : 'status-unpaid';
+        const statusText = student.balance === 0 ? '✅ Fully Paid' : student.balance < student.totalFees ? '⏳ Partial Payment' : '❌ Unpaid';
+
         document.getElementById('studentInfo').innerHTML = `
             <div class="student-info-grid">
                 <div class="info-item"><div class="label">Student ID</div><div class="value">${student.id}</div></div>
@@ -509,7 +588,7 @@
                 <div class="info-item"><div class="label">Gender</div><div class="value">${student.gender}</div></div>
                 <div class="info-item"><div class="label">Student Type</div><div class="value">${typeBadge}</div></div>
                 <div class="info-item"><div class="label">Guardian</div><div class="value">${student.guardian || 'N/A'}</div></div>
-                <div class="info-item"><div class="label">Fee Status</div><div class="value ${student.balance === 0 ? 'status-paid' : student.balance < student.totalFees ? 'status-partial' : 'status-unpaid'}">${student.balance === 0 ? '✅ Fully Paid' : student.balance < student.totalFees ? '⏳ Partial Payment' : '❌ Unpaid'}</div></div>
+                <div class="info-item"><div class="label">Fee Status</div><div class="value ${statusClass}">${statusText}</div></div>
             </div>
         `;
 
@@ -517,37 +596,21 @@
         document.getElementById('totalFees').textContent = 'KES ' + student.totalFees.toLocaleString();
         document.getElementById('totalPaid').textContent = 'KES ' + student.paid.toLocaleString();
         document.getElementById('totalBalance').textContent = 'KES ' + student.balance.toLocaleString();
-        
-        // Show fee breakdown if available
-        let paymentCount = 0;
-        if (student.feeBreakdown) {
-            // Count non-zero term payments
-            if (student.feeBreakdown.term1) paymentCount++;
-            if (student.feeBreakdown.term2) paymentCount++;
-            if (student.feeBreakdown.term3) paymentCount++;
-        }
-        document.getElementById('paymentCount').textContent = paymentCount || 0;
+        document.getElementById('paymentCount').textContent = student.payments ? student.payments.length : 0;
 
-        // Payment History (for now, show fee breakdown)
+        // Payment History
         const tbody = document.getElementById('paymentHistoryBody');
-        if (student.feeBreakdown && (student.feeBreakdown.term1 || student.feeBreakdown.term2 || student.feeBreakdown.term3)) {
+        if (student.payments && student.payments.length > 0) {
             let html = '';
-            const terms = [
-                { name: 'Term 1', amount: student.feeBreakdown.term1 || 0 },
-                { name: 'Term 2', amount: student.feeBreakdown.term2 || 0 },
-                { name: 'Term 3', amount: student.feeBreakdown.term3 || 0 }
-            ];
-            terms.forEach(term => {
-                if (term.amount > 0) {
-                    const paidStatus = term.amount <= student.paid ? '✅ Paid' : '⏳ Partial';
-                    html += `<tr>
-                        <td>2026</td>
-                        <td>${term.name}</td>
-                        <td style="font-weight:bold;color:#0b8f34;">KES ${term.amount.toLocaleString()}</td>
-                        <td>School Fees</td>
-                        <td>${paidStatus}</td>
-                    </tr>`;
-                }
+            student.payments.forEach(p => {
+                const date = p.date ? new Date(p.date).toLocaleDateString() : 'N/A';
+                html += `<tr>
+                    <td>${date}</td>
+                    <td>${p.category || 'School Fees'}</td>
+                    <td style="font-weight:bold;color:#0b8f34;">KES ${(p.amount || 0).toLocaleString()}</td>
+                    <td>${p.method || 'N/A'}</td>
+                    <td>${p.reference || 'N/A'}</td>
+                </tr>`;
             });
             tbody.innerHTML = html;
         } else {
@@ -564,13 +627,183 @@
             return;
         }
         showMessage('⏳ Generating your report...', 'info');
-        
-        // Open report in new window
         window.open('/api/assessments/student-report/' + studentData.id, '_blank');
-        
         setTimeout(() => {
             showMessage('📄 Your report is being generated.', 'success');
         }, 1000);
+    }
+
+    // ============================================
+    // DOWNLOAD FEE STATEMENT - NEW
+    // ============================================
+    function downloadFeeStatement() {
+        if (!studentData) {
+            showMessage('❌ Please login first', 'error');
+            return;
+        }
+        showMessage('⏳ Generating fee statement...', 'info');
+        window.location.href = '/api/student/fee-statement/' + studentData.id;
+        setTimeout(() => {
+            showMessage('📥 Fee statement download started!', 'success');
+        }, 1500);
+    }
+
+    // ============================================
+    // DOWNLOAD FEES STRUCTURE - NEW
+    // ============================================
+    function downloadFeesStructure() {
+        showMessage('⏳ Generating school fees structure...', 'info');
+        window.location.href = '/api/clerk/reports/fees-structure';
+        setTimeout(() => {
+            showMessage('📥 Fees structure download started!', 'success');
+        }, 1500);
+    }
+
+    // ============================================
+    // PRINT FEE STATEMENT - NEW
+    // ============================================
+    function printFeeStatement() {
+        if (!studentData) {
+            showMessage('❌ Please login first', 'error');
+            return;
+        }
+
+        const printWindow = window.open('', '_blank', 'width=800,height=600');
+        if (!printWindow) {
+            showMessage('❌ Please allow popups for this site', 'error');
+            return;
+        }
+
+        const now = new Date();
+        const student = studentData;
+        const fees = studentFeeDetails?.fees || { total: student.totalFees, paid: student.paid, balance: student.balance };
+        const payments = student.payments || [];
+
+        let paymentsHtml = '';
+        if (payments.length > 0) {
+            payments.forEach(p => {
+                const date = p.date ? new Date(p.date).toLocaleDateString() : 'N/A';
+                paymentsHtml += `
+                    <tr>
+                        <td style="padding:6px 10px;border:1px solid #ddd;">${date}</td>
+                        <td style="padding:6px 10px;border:1px solid #ddd;">${p.category || 'School Fees'}</td>
+                        <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">KES ${(p.amount || 0).toLocaleString()}</td>
+                        <td style="padding:6px 10px;border:1px solid #ddd;">${p.method || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            paymentsHtml = '<tr><td colspan="4" style="padding:10px;text-align:center;color:#999;">No payment records found</td></tr>';
+        }
+
+        // Fee breakdown
+        const breakdown = student.feeBreakdown || {};
+        let breakdownHtml = '';
+        const terms = [
+            { key: 'term1', label: 'Term 1' },
+            { key: 'term2', label: 'Term 2' },
+            { key: 'term3', label: 'Term 3' }
+        ];
+        terms.forEach(term => {
+            const amount = breakdown[term.key] || 0;
+            if (amount > 0) {
+                breakdownHtml += `
+                    <tr>
+                        <td style="padding:6px 10px;border:1px solid #ddd;">${term.label}</td>
+                        <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">KES ${amount.toLocaleString()}</td>
+                    </tr>
+                `;
+            }
+        });
+
+        if (!breakdownHtml) {
+            breakdownHtml = '<tr><td colspan="2" style="padding:10px;text-align:center;color:#999;">No fee breakdown available</td></tr>';
+        }
+
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Fee Statement - ${student.name}</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+                    .header { text-align: center; border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
+                    .header h1 { color: #0A1628; font-size: 24px; }
+                    .header h1 .school-name { color: #D4A017; }
+                    .header p { color: #666; margin: 3px 0; }
+                    .student-info { background: #f8f9fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e8ecf1; }
+                    .student-info table { width: 100%; font-size: 14px; }
+                    .student-info td { padding: 4px 8px; }
+                    .student-info .label { font-weight: 600; color: #555; width: 120px; }
+                    .fee-summary { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+                    .fee-summary .item { flex: 1; min-width: 120px; text-align: center; padding: 12px; background: #f8f9fc; border-radius: 8px; border: 1px solid #e8ecf1; }
+                    .fee-summary .item .num { font-size: 20px; font-weight: 700; }
+                    .fee-summary .item .num.green { color: #28a745; }
+                    .fee-summary .item .num.red { color: #dc3545; }
+                    .fee-summary .item .num.gold { color: #D4A017; }
+                    .fee-summary .item .label { font-size: 12px; color: #666; }
+                    table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+                    table th { background: #0A1628; color: white; padding: 8px 12px; text-align: left; }
+                    table td { padding: 6px 12px; border-bottom: 1px solid #e8ecf1; }
+                    table tr:nth-child(even) { background: #fafbfc; }
+                    .footer { text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 11px; }
+                    .section-title { color: #0A1628; margin: 15px 0 10px 0; font-size: 16px; border-bottom: 2px solid #D4A017; padding-bottom: 5px; }
+                    .status-badge { display: inline-block; padding: 4px 16px; border-radius: 50px; font-weight: 700; font-size: 14px; color: white; background: ${student.balance === 0 ? '#28a745' : student.balance < student.totalFees ? '#d4a017' : '#dc3545'}; }
+                    @media print { body { padding: 10px; } }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
+                    <p>Student Fee Statement</p>
+                    <p style="font-size:12px;color:#999;">Generated on ${now.toLocaleString()}</p>
+                </div>
+
+                <div class="student-info">
+                    <table>
+                        <tr><td class="label">Student Name:</td><td><strong>${student.name}</strong></td></tr>
+                        <tr><td class="label">Student ID:</td><td>${student.id}</td></tr>
+                        <tr><td class="label">Grade:</td><td>${student.grade}</td></tr>
+                        <tr><td class="label">Student Type:</td><td>${student.type || 'Day Scholar'}</td></tr>
+                        <tr><td class="label">Guardian:</td><td>${student.guardian || 'N/A'}</td></tr>
+                    </table>
+                </div>
+
+                <div class="fee-summary">
+                    <div class="item"><div class="num gold">KES ${(fees.total || 0).toLocaleString()}</div><div class="label">Total Fees</div></div>
+                    <div class="item"><div class="num green">KES ${(fees.paid || 0).toLocaleString()}</div><div class="label">Amount Paid</div></div>
+                    <div class="item"><div class="num red">KES ${(fees.balance || 0).toLocaleString()}</div><div class="label">Balance</div></div>
+                    <div class="item"><span class="status-badge">${student.balance === 0 ? '✅ Paid' : student.balance < student.totalFees ? '⏳ Partial' : '❌ Unpaid'}</span><div class="label">Status</div></div>
+                </div>
+
+                <h4 class="section-title">📊 Fee Breakdown</h4>
+                <table>
+                    <thead><tr><th>Term</th><th style="text-align:right;">Amount</th></tr></thead>
+                    <tbody>${breakdownHtml}</tbody>
+                </table>
+
+                <h4 class="section-title">📜 Payment History</h4>
+                <table>
+                    <thead><tr><th>Date</th><th>Category</th><th style="text-align:right;">Amount</th><th>Method</th></tr></thead>
+                    <tbody>${paymentsHtml}</tbody>
+                </table>
+
+                <div class="footer">
+                    <p>© ${now.getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                    <p style="color:#c51616;font-weight:bold;">N/B: NO CASH IS ALLOWED IN SCHOOL</p>
+                    <p>This is a computer-generated document</p>
+                </div>
+                <div style="text-align:center;margin-top:15px;">
+                    <button onclick="window.print()" style="padding:10px 25px;background:#D4A017;color:#0A1628;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">🖨️ Print</button>
+                    <button onclick="window.close()" style="padding:10px 25px;background:#6c757d;color:white;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;margin-left:10px;">✖ Close</button>
+                </div>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        showMessage('📄 Fee statement opened for printing', 'success');
     }
 
     // ============================================
@@ -603,6 +836,7 @@
     function logoutStudent() {
         studentData = null;
         studentPayments = [];
+        studentFeeDetails = null;
         document.getElementById('loginSection').style.display = 'block';
         document.getElementById('dashboardSection').style.display = 'none';
         document.getElementById('studentId').value = '';
