@@ -3767,6 +3767,8 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
 // POST - Upload new assignment
 app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
     console.log('📥 POST /api/holiday-assignments received');
+    console.log('Body:', req.body);
+    console.log('File:', req.file);
     
     try {
         const { title, grade, subject, description } = req.body;
@@ -3779,11 +3781,14 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             return res.status(400).json({ success: false, message: 'Please upload a file' });
         }
         
-        // FIX: Use simple path with filename
+        // FIX: Use correct file path
         const fileUrl = `/uploads/${req.file.filename}`;
         const fileName = req.file.originalname;
         const fileType = fileName.split('.').pop().toLowerCase();
         const fileSize = req.file.size;
+        
+        console.log('📁 File URL:', fileUrl);
+        console.log('📄 File Name:', fileName);
         
         const assignment = new HolidayAssignment({
             title,
@@ -3802,6 +3807,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         await assignment.save();
         
         console.log('✅ Assignment saved:', assignment._id);
+        console.log('✅ File URL saved:', assignment.fileUrl);
         
         res.status(201).json({
             success: true,
@@ -3812,47 +3818,6 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         console.error('❌ Upload error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
-});
-// DELETE - Delete assignment
-app.delete('/api/holiday-assignments/:id', async (req, res) => {
-    try {
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
-        }
-        
-        const filePath = path.join(__dirname, assignment.fileUrl);
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-        }
-        
-        await HolidayAssignment.findByIdAndDelete(req.params.id);
-        
-        res.json({ success: true, message: 'Assignment deleted successfully!' });
-    } catch (error) {
-        console.error('Error deleting assignment:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-// ============================================
-// SERVE UPLOADS DIRECTORY
-// ============================================
-app.use('/uploads', express.static('uploads'));
-// ============================================
-// SERVE STATIC FILES
-// ============================================
-
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-// ============================================
-// 404 HANDLER
-// ============================================
-
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Route not found' });
 });
 
 // ============================================

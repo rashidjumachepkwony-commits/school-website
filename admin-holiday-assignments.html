@@ -315,7 +315,6 @@
                 body: formData
             });
 
-            // Check if response is JSON
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
                 const text = await response.text();
@@ -355,7 +354,6 @@
             const url = grade ? `/api/holiday-assignments/${encodeURIComponent(grade)}` : '/api/holiday-assignments/all';
             const response = await fetch(url);
             
-            // Check if response is JSON
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
                 throw new Error('Server returned HTML instead of JSON');
@@ -383,7 +381,6 @@
                                      a.fileType === 'doc' || a.fileType === 'docx' ? '#2b5797' :
                                      a.fileType === 'xls' || a.fileType === 'xlsx' ? '#217346' : '#17a2b8';
 
-                    // Use fileUrl from the database
                     const fileUrl = a.fileUrl || '';
 
                     html += `
@@ -393,7 +390,7 @@
                             <td><span class="badge-grade">${a.grade}</span></td>
                             <td>${a.subject || '-'}</td>
                             <td>
-                                ${fileUrl ? `<a href="${fileUrl}" download style="color:${fileColor};text-decoration:none;font-weight:600;">
+                                ${fileUrl ? `<a href="${fileUrl}" download="${a.fileName}" style="color:${fileColor};text-decoration:none;font-weight:600;">
                                     <i class="fas ${fileIcon}"></i> ${a.fileName}
                                 </a>` : `<span style="color:#999;">No file</span>`}
                             </td>
