@@ -326,27 +326,31 @@ function generateVisitorReportHTML(report, title, periodInfo) {
 }
 
 // ============================================
-// FIX PAST RECORDS
+// FIX PAST RECORDS - CORRECTED
 // ============================================
 async function fixPastRecords() {
     try {
         console.log('🔄 Fixing past records time...');
         let totalFixed = 0;
 
+        // Fix Teacher Attendance
         const teachers = await Teacher.find({});
         for (const teacher of teachers) {
             let changed = false;
             for (const record of teacher.attendance) {
+                // Fix checkIn time
                 if (record.checkIn) {
                     const original = new Date(record.checkIn);
-                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
-                    record.checkIn = kenyaTime;
+                    // The old code added 3 hours incorrectly, so we need to subtract 3 hours
+                    const correctedTime = new Date(original.getTime() - (3 * 60 * 60 * 1000));
+                    record.checkIn = correctedTime;
                     changed = true;
                 }
+                // Fix checkOut time
                 if (record.checkOut) {
                     const original = new Date(record.checkOut);
-                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
-                    record.checkOut = kenyaTime;
+                    const correctedTime = new Date(original.getTime() - (3 * 60 * 60 * 1000));
+                    record.checkOut = correctedTime;
                     changed = true;
                 }
             }
@@ -356,17 +360,18 @@ async function fixPastRecords() {
             }
         }
 
+        // Fix Visitor Records
         const visitors = await Visitor.find({});
         for (const visitor of visitors) {
             let changed = false;
             if (visitor.checkIn) {
                 const original = new Date(visitor.checkIn);
-                visitor.checkIn = new Date(original.getTime() + (3 * 60 * 60 * 1000));
+                visitor.checkIn = new Date(original.getTime() - (3 * 60 * 60 * 1000));
                 changed = true;
             }
             if (visitor.checkOut) {
                 const original = new Date(visitor.checkOut);
-                visitor.checkOut = new Date(original.getTime() + (3 * 60 * 60 * 1000));
+                visitor.checkOut = new Date(original.getTime() - (3 * 60 * 60 * 1000));
                 changed = true;
             }
             if (changed) {
@@ -380,7 +385,6 @@ async function fixPastRecords() {
         console.error('❌ Error fixing records:', error);
     }
 }
-
 // ============================================
 // CONNECT TO MONGODB
 // ============================================
