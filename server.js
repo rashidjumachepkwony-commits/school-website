@@ -3779,7 +3779,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             return res.status(400).json({ success: false, message: 'Please upload a file' });
         }
         
-        const fileUrl = `/${req.file.path.replace(/\\/g, '/')}`;
+        const fileUrl = `/uploads/${req.file.filename}`;
         const fileName = req.file.originalname;
         const fileType = fileName.split('.').pop().toLowerCase();
         const fileSize = req.file.size;
