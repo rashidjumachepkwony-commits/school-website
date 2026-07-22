@@ -3728,6 +3728,151 @@ app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
 });
 // ============================================
+// HOLIDAY ASSIGNMENTS SCHEMA
+// ============================================
+const holidayAssignmentSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    grade: { type: String, required: true },
+    subject: { type: String, default: '' },
+    description: { type: String, default: '' },
+    fileName: { type: String, required: true },
+    fileUrl: { type: String, required: true },
+    fileType: { type: String, default: 'pdf' },
+    fileSize: { type: Number, default: 0 },
+    uploadedBy: { type: String, default: 'Admin' },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+});
+
+const HolidayAssignment = mongoose.model('HolidayAssignment', holidayAssignmentSchema);
+
+// ============================================
+// HOLIDAY ASSIGNMENTS ROUTES
+// ============================================
+
+// GET all assignments (with optional grade filter)
+app.get('/api/holiday-assignments/:grade?', async (req, res) => {
+    try {
+        const grade = req.params.grade;
+        let filter = {};
+        if (grade && grade !== 'all') {
+            filter.grade = grade;
+        }
+        const assignments = await HolidayAssignment.find(filter).sort({ createdAt: -1 });
+        res.json({ success: true, assignments });
+    } catch (error) {
+        console.error('Error fetching assignments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET single assignment by ID
+app.get('/api/holiday-assignments/:id', async (req, res) => {
+    try {
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        res.json({ success: true, assignment });
+    } catch (error) {
+        console.error('Error fetching assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// POST - Upload new assignment
+app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
+    try {
+        const { title, grade, subject, description } = req.body;
+        
+        if (!title || !grade) {
+            return res.status(400).json({ success: false, message: 'Title and Grade are required' });
+        }
+        
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Please upload a file' });
+        }
+        
+        const fileUrl = `/${req.file.path.replace(/\\/g, '/')}`;
+        const fileName = req.file.originalname;
+        const fileType = fileName.split('.').pop().toLowerCase();
+        const fileSize = req.file.size;
+        
+        const assignment = new HolidayAssignment({
+            title,
+            grade,
+            subject: subject || '',
+            description: description || '',
+            fileName,
+            fileUrl,
+            fileType,
+            fileSize,
+            uploadedBy: req.body.uploadedBy || 'Admin',
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+        
+        await assignment.save();
+        
+        res.status(201).json({
+            success: true,
+            message: 'Assignment uploaded successfully!',
+            assignment
+        });
+    } catch (error) {
+        console.error('Error uploading assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// PUT - Update assignment
+app.put('/api/holiday-assignments/:id', async (req, res) => {
+    try {
+        const { title, grade, subject, description } = req.body;
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        
+        assignment.title = title || assignment.title;
+        assignment.grade = grade || assignment.grade;
+        assignment.subject = subject || assignment.subject;
+        assignment.description = description || assignment.description;
+        assignment.updatedAt = new Date();
+        
+        await assignment.save();
+        
+        res.json({ success: true, message: 'Assignment updated successfully!', assignment });
+    } catch (error) {
+        console.error('Error updating assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// DELETE - Delete assignment
+app.delete('/api/holiday-assignments/:id', async (req, res) => {
+    try {
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        
+        // Delete the file from server
+        const filePath = path.join(__dirname, assignment.fileUrl);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+        
+        await HolidayAssignment.findByIdAndDelete(req.params.id);
+        
+        res.json({ success: true, message: 'Assignment deleted successfully!' });
+    } catch (error) {
+        console.error('Error deleting assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+// ============================================
 // START THE SERVER
 // ============================================
 

@@ -740,7 +740,48 @@
             color: #999;
             font-size: 14px;
         }
+<!-- ========================================
+HOLIDAY ASSIGNMENTS SECTION
+======================================== -->
+<section class="section section-alt" id="holidayAssignments" data-aos="fade-up">
+    <div class="container">
+        <h2 class="section-title">📝 <span class="highlight">Holiday Assignments</span></h2>
+        <p class="section-subtitle">
+            Download holiday assignments for your grade. Assignments are available for all classes from Playgroup to Grade 6.
+        </p>
 
+        <!-- Grade Filter -->
+        <div style="max-width:600px;margin:0 auto 25px;">
+            <div class="search-box" style="justify-content:center;">
+                <select id="assignmentGradeFilter" style="min-width:200px;padding:12px 16px;border:2px solid #e8ecf1;border-radius:8px;font-size:15px;background:white;font-family:inherit;">
+                    <option value="">-- Select Grade --</option>
+                    <option value="Playgroup">Playgroup</option>
+                    <option value="PP1">PP1</option>
+                    <option value="PP2">PP2</option>
+                    <option value="Grade 1">Grade 1</option>
+                    <option value="Grade 2">Grade 2</option>
+                    <option value="Grade 3">Grade 3</option>
+                    <option value="Grade 4">Grade 4</option>
+                    <option value="Grade 5">Grade 5</option>
+                    <option value="Grade 6">Grade 6</option>
+                    <option value="all">📚 All Grades</option>
+                </select>
+                <button class="btn" onclick="loadHolidayAssignments()" style="padding:12px 25px;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;background:linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));color:var(--kenya-black);font-family:inherit;">
+                    <i class="fas fa-search"></i> View Assignments
+                </button>
+            </div>
+        </div>
+
+        <!-- Assignments List -->
+        <div id="assignmentsContainer">
+            <div style="text-align:center;padding:40px;background:#f8f9fc;border-radius:16px;border:2px dashed #e8ecf1;">
+                <i class="fas fa-file-alt" style="font-size:48px;color:#ddd;display:block;margin-bottom:15px;"></i>
+                <h3 style="color:#666;font-size:18px;">Select a grade to view assignments</h3>
+                <p style="color:#999;font-size:14px;">Holiday assignments will appear here once uploaded by the admin.</p>
+            </div>
+        </div>
+    </div>
+</section>
         /* ========================================
            BACK TO HOME
            ======================================== */
@@ -1169,6 +1210,9 @@
                     <a href="academics.html">📚 Academics</a>
                     <a href="portal.html">🔐 Portal</a>
                     <a href="contact.html">📞 Contact</a>
+                    <a href="academics.html#holidayAssignments" class="quick-link">
+    <i class="fas fa-file-alt"></i> Holiday Assignments
+</a>
                 </div>
                 <div class="footer-links">
                     <h4>Resources</h4>
@@ -1707,6 +1751,221 @@ async function loadAllAssessments() {
                 }, 500);
             }
         });
+        // ============================================
+// HOLIDAY ASSIGNMENTS FUNCTIONS
+// ============================================
+
+// Load holiday assignments
+async function loadHolidayAssignments() {
+    const grade = document.getElementById('assignmentGradeFilter').value;
+    const container = document.getElementById('assignmentsContainer');
+    
+    if (!grade) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:40px;background:#f8f9fc;border-radius:16px;border:2px dashed #e8ecf1;">
+                <i class="fas fa-hand-pointer" style="font-size:48px;color:#ddd;display:block;margin-bottom:15px;"></i>
+                <h3 style="color:#666;font-size:18px;">Please select a grade</h3>
+                <p style="color:#999;font-size:14px;">Choose your grade from the dropdown above to view assignments.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <div style="text-align:center;padding:40px;">
+            <div style="display:inline-block;width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #D4A017;border-radius:50%;animation:spin 1s linear infinite;"></div>
+            <p style="margin-top:10px;color:#666;">Loading assignments...</p>
+        </div>
+    `;
+
+    try {
+        const url = grade === 'all' 
+            ? '/api/holiday-assignments/all' 
+            : `/api/holiday-assignments/${encodeURIComponent(grade)}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.success && data.assignments && data.assignments.length > 0) {
+            let html = `
+                <div style="background:#f8f9fc;padding:10px 16px;border-radius:8px;margin-bottom:15px;color:#666;font-size:13px;border:1px solid #e8ecf1;">
+                    <i class="fas fa-file-alt" style="color:#D4A017;"></i> 
+                    Found <strong>${data.assignments.length}</strong> assignment(s) for ${grade === 'all' ? 'All Grades' : grade}
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+            `;
+
+            data.assignments.forEach(assignment => {
+                const date = new Date(assignment.createdAt).toLocaleDateString();
+                const fileIcon = assignment.fileType === 'pdf' ? 'fa-file-pdf' : 
+                               assignment.fileType === 'doc' ? 'fa-file-word' :
+                               assignment.fileType === 'docx' ? 'fa-file-word' :
+                               assignment.fileType === 'xls' ? 'fa-file-excel' :
+                               assignment.fileType === 'xlsx' ? 'fa-file-excel' :
+                               assignment.fileType === 'jpg' || assignment.fileType === 'jpeg' || assignment.fileType === 'png' ? 'fa-file-image' :
+                               'fa-file-alt';
+                
+                const fileColor = assignment.fileType === 'pdf' ? '#dc3545' :
+                                 assignment.fileType === 'doc' || assignment.fileType === 'docx' ? '#2b5797' :
+                                 assignment.fileType === 'xls' || assignment.fileType === 'xlsx' ? '#217346' :
+                                 assignment.fileType === 'jpg' || assignment.fileType === 'jpeg' || assignment.fileType === 'png' ? '#28a745' :
+                                 '#17a2b8';
+
+                html += `
+                    <div style="background:white;border-radius:16px;padding:20px;border:2px solid #e8ecf1;transition:all 0.3s ease;box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+                        <div style="display:flex;align-items:start;gap:12px;margin-bottom:10px;">
+                            <div style="width:50px;height:50px;border-radius:12px;background:${fileColor}15;display:flex;align-items:center;justify-content:center;font-size:28px;color:${fileColor};">
+                                <i class="fas ${fileIcon}"></i>
+                            </div>
+                            <div style="flex:1;">
+                                <h4 style="color:#0A1628;font-size:16px;font-weight:700;margin-bottom:4px;">${assignment.title}</h4>
+                                <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:12px;color:#666;">
+                                    <span><i class="fas fa-graduation-cap"></i> ${assignment.grade}</span>
+                                    <span><i class="far fa-calendar-alt"></i> ${date}</span>
+                                    ${assignment.subject ? `<span><i class="fas fa-book"></i> ${assignment.subject}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ${assignment.description ? `<p style="color:#666;font-size:13px;margin:8px 0;line-height:1.5;">${assignment.description}</p>` : ''}
+                        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                            <a href="${assignment.fileUrl}" download class="btn" style="flex:1;padding:10px 20px;background:linear-gradient(135deg, #0b5394, #1a6fb5);color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s;">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                            <button onclick="viewAssignment('${assignment._id}')" class="btn" style="padding:10px 20px;background:#f8f9fc;color:#0A1628;border:2px solid #e8ecf1;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.3s;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `
+                <div style="text-align:center;padding:40px;background:#f8f9fc;border-radius:16px;border:2px dashed #e8ecf1;">
+                    <i class="fas fa-folder-open" style="font-size:48px;color:#ddd;display:block;margin-bottom:15px;"></i>
+                    <h3 style="color:#666;font-size:18px;">No assignments available for ${grade}</h3>
+                    <p style="color:#999;font-size:14px;">Check back later or contact the school administration.</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading assignments:', error);
+        container.innerHTML = `
+            <div style="text-align:center;padding:40px;background:#f8f9fc;border-radius:16px;border:2px solid #dc3545;">
+                <i class="fas fa-exclamation-triangle" style="font-size:48px;color:#dc3545;display:block;margin-bottom:15px;"></i>
+                <h3 style="color:#dc3545;font-size:18px;">Error loading assignments</h3>
+                <p style="color:#999;font-size:14px;">${error.message || 'Please try again later'}</p>
+            </div>
+        `;
+    }
+}
+
+// View assignment details
+async function viewAssignment(assignmentId) {
+    try {
+        const response = await fetch(`/api/holiday-assignments/${assignmentId}`);
+        const data = await response.json();
+        
+        if (data.success && data.assignment) {
+            const a = data.assignment;
+            const date = new Date(a.createdAt).toLocaleDateString();
+            
+            // Open in new window or show modal
+            const viewWindow = window.open('', '_blank', 'width=600,height=400');
+            if (!viewWindow) {
+                showAlert('❌ Please allow popups for this site', 'error');
+                return;
+            }
+            
+            viewWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${a.title}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; max-width: 600px; margin: 0 auto; }
+                        .header { border-bottom: 3px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
+                        .header h1 { color: #0A1628; font-size: 24px; margin: 0; }
+                        .header .grade { color: #D4A017; font-weight: 700; }
+                        .info { background: #f8f9fc; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #e8ecf1; }
+                        .info .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; }
+                        .info .row:last-child { border-bottom: none; }
+                        .info .label { font-weight: 600; color: #555; }
+                        .info .value { color: #0A1628; }
+                        .description { background: #f8f9fc; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #D4A017; }
+                        .btn { display: inline-block; padding: 12px 30px; background: #0b5394; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 15px; border: none; cursor: pointer; }
+                        .btn:hover { background: #1a6fb5; }
+                        .btn-download { background: #28a745; }
+                        .btn-download:hover { background: #1e7e34; }
+                        .footer { margin-top: 20px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #ddd; padding-top: 15px; }
+                        .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📝 ${a.title}</h1>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+            <span class="grade">🎓 ${a.grade}</span>
+            ${a.subject ? `<span style="background:#e8ecf1;padding:2px 12px;border-radius:50px;font-size:12px;">📚 ${a.subject}</span>` : ''}
+            <span style="color:#999;font-size:12px;">📅 ${date}</span>
+        </div>
+    </div>
+    
+    ${a.description ? `
+    <div class="description">
+        <h4 style="margin-bottom:8px;">📋 Description</h4>
+        <p style="color:#555;line-height:1.6;font-size:14px;">${a.description}</p>
+    </div>
+    ` : ''}
+    
+    <div class="info">
+        <div class="row"><span class="label">📄 File:</span><span class="value">${a.fileName}</span></div>
+        <div class="row"><span class="label">📊 File Type:</span><span class="value">${a.fileType ? a.fileType.toUpperCase() : 'N/A'}</span></div>
+        <div class="row"><span class="label">📏 File Size:</span><span class="value">${a.fileSize ? (a.fileSize / 1024).toFixed(1) + ' KB' : 'N/A'}</span></div>
+        <div class="row"><span class="label">📅 Uploaded:</span><span class="value">${date}</span></div>
+    </div>
+    
+    <div class="actions">
+        <a href="${a.fileUrl}" download class="btn btn-download"><i class="fas fa-download"></i> Download File</a>
+        <button onclick="window.close()" class="btn" style="background:#6c757d;">✖ Close</button>
+    </div>
+    
+    <div class="footer">
+        <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais</p>
+    </div>
+    <script>
+        // Add Font Awesome
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+        document.head.appendChild(link);
+    <\/script>
+</body>
+</html>
+`);
+viewWindow.document.close();
+}
+} catch (error) {
+console.error('Error viewing assignment:', error);
+showAlert('❌ Error loading assignment details', 'error');
+}
+}
+
+// Auto-load assignments when page loads with grade from URL
+document.addEventListener('DOMContentLoaded', function() {
+// ... existing code ...
+
+// Check if grade parameter is in URL
+const urlParams = new URLSearchParams(window.location.search);
+const assignmentGrade = urlParams.get('assignment');
+if (assignmentGrade) {
+document.getElementById('assignmentGradeFilter').value = assignmentGrade;
+setTimeout(loadHolidayAssignments, 800);
+}
+});
     </script>
 </body>
 </html>

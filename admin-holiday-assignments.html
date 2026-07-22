@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Assignments - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #D4A017;
+        }
+        .header h1 { color: #0A1628; font-size: 28px; }
+        .header h1 i { color: #D4A017; margin-right: 10px; }
+        .header .btn-home {
+            padding: 10px 25px;
+            background: #0A1628;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .header .btn-home:hover { background: #1a2a4a; transform: scale(1.02); }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+            font-weight: 600;
+        }
+        .alert.success { display: block; background: #d4edda; color: #155724; border: 2px solid #0b8f34; }
+        .alert.error { display: block; background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
+        .alert.info { display: block; background: #d1ecf1; color: #0c5460; border: 2px solid #0b5394; }
+
+        .form-section {
+            background: #f8f9fc;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e8ecf1;
+            margin-bottom: 25px;
+        }
+        .form-section h3 { color: #0A1628; margin-bottom: 15px; font-size: 20px; }
+        .form-section h3 i { color: #28a745; margin-right: 8px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #D4A017;
+            outline: none;
+        }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .form-group .file-input-wrapper {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        .form-group .file-input-wrapper:hover { border-color: #28a745; background: #fafffe; }
+        .form-group .file-input-wrapper .icon { font-size: 32px; display: block; }
+        .form-group .file-input-wrapper input[type="file"] { display: none; }
+        .form-group .file-input-wrapper .file-name { color: #0b5394; font-weight: 600; margin-top: 5px; }
+
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .btn:hover { transform: scale(1.02); }
+        .btn-primary { background: #D4A017; color: #0A1628; }
+        .btn-primary:hover { background: #f5c842; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-sm { padding: 4px 12px; font-size: 12px; }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table th { background: #0A1628; color: white; padding: 10px 12px; text-align: left; }
+        table td { padding: 8px 12px; border-bottom: 1px solid #e8ecf1; }
+        table tr:nth-child(even) { background: #fafbfc; }
+        table tr:hover { background: #f0f4ff; }
+        .no-records { text-align: center; padding: 30px; color: #999; }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e8ecf1;
+            border-top: 3px solid #D4A017;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .badge-grade {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #D4A017;
+            color: #0A1628;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 10px; text-align: center; }
+            table { font-size: 11px; }
+            table th, table td { padding: 6px 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-file-alt"></i> Holiday Assignments</h1>
+        <a href="admin-dashboard.html" class="btn-home"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <!-- Upload Form -->
+    <div class="form-section">
+        <h3><i class="fas fa-upload"></i> Upload New Assignment</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>📝 Assignment Title *</label>
+                <input type="text" id="assignmentTitle" placeholder="e.g., Holiday Assignment - Term 2">
+            </div>
+            <div class="form-group">
+                <label>🎓 Grade *</label>
+                <select id="assignmentGrade">
+                    <option value="Playgroup">Playgroup</option>
+                    <option value="PP1">PP1</option>
+                    <option value="PP2">PP2</option>
+                    <option value="Grade 1">Grade 1</option>
+                    <option value="Grade 2">Grade 2</option>
+                    <option value="Grade 3">Grade 3</option>
+                    <option value="Grade 4" selected>Grade 4</option>
+                    <option value="Grade 5">Grade 5</option>
+                    <option value="Grade 6">Grade 6</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📚 Subject (Optional)</label>
+                <input type="text" id="assignmentSubject" placeholder="e.g., Mathematics, English">
+            </div>
+            <div class="form-group">
+                <label>📄 Upload File *</label>
+                <div class="file-input-wrapper" onclick="document.getElementById('fileInput').click()">
+                    <span class="icon">📂</span>
+                    <p><strong>Click to select file</strong></p>
+                    <p style="font-size:12px;color:#666;">PDF, Word, Excel, Images accepted</p>
+                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" onchange="handleFileSelect(event)">
+                    <div class="file-name" id="fileName">No file selected</div>
+                </div>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>📋 Description (Optional)</label>
+                <textarea id="assignmentDescription" placeholder="Brief description of the assignment..."></textarea>
+            </div>
+        </div>
+        <button class="btn btn-success" onclick="uploadAssignment()" style="padding:12px 35px;font-size:16px;margin-top:10px;">
+            <i class="fas fa-upload"></i> Upload Assignment
+        </button>
+    </div>
+
+    <!-- Assignments List -->
+    <h3 style="color:#0A1628;margin:20px 0 10px;"><i class="fas fa-list"></i> Uploaded Assignments</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;">
+        <select id="filterGrade" onchange="loadAssignments()" style="padding:8px 14px;border:2px solid #e0e0e0;border-radius:8px;">
+            <option value="">All Grades</option>
+            <option value="Playgroup">Playgroup</option>
+            <option value="PP1">PP1</option>
+            <option value="PP2">PP2</option>
+            <option value="Grade 1">Grade 1</option>
+            <option value="Grade 2">Grade 2</option>
+            <option value="Grade 3">Grade 3</option>
+            <option value="Grade 4">Grade 4</option>
+            <option value="Grade 5">Grade 5</option>
+            <option value="Grade 6">Grade 6</option>
+        </select>
+        <button class="btn btn-primary" onclick="loadAssignments()"><i class="fas fa-sync"></i> Refresh</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Grade</th>
+                    <th>Subject</th>
+                    <th>File</th>
+                    <th>Uploaded</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="assignmentsBody">
+                <tr><td colspan="7" class="no-records"><span class="loading-spinner"></span> Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let selectedFile = null;
+    let allAssignments = [];
+
+    function showAlert(message, type) {
+        const el = document.getElementById('alert');
+        el.className = 'alert ' + type;
+        el.textContent = message;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            selectedFile = file;
+            document.getElementById('fileName').textContent = '📄 ' + file.name + ' (' + (file.size / 1024).toFixed(2) + ' KB)';
+        }
+    }
+
+    async function uploadAssignment() {
+        const title = document.getElementById('assignmentTitle').value.trim();
+        const grade = document.getElementById('assignmentGrade').value;
+        const subject = document.getElementById('assignmentSubject').value.trim();
+        const description = document.getElementById('assignmentDescription').value.trim();
+
+        if (!title) { showAlert('❌ Please enter a title', 'error'); return; }
+        if (!selectedFile) { showAlert('❌ Please select a file to upload', 'error'); return; }
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('grade', grade);
+        formData.append('subject', subject);
+        formData.append('description', description);
+        formData.append('file', selectedFile);
+
+        const uploadBtn = document.querySelector('.btn-success');
+        const originalText = uploadBtn.innerHTML;
+        uploadBtn.innerHTML = '<span class="loading-spinner"></span> Uploading...';
+        uploadBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/holiday-assignments', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showAlert('✅ Assignment uploaded successfully!', 'success');
+                document.getElementById('assignmentTitle').value = '';
+                document.getElementById('assignmentSubject').value = '';
+                document.getElementById('assignmentDescription').value = '';
+                document.getElementById('fileName').textContent = 'No file selected';
+                selectedFile = null;
+                document.getElementById('fileInput').value = '';
+                loadAssignments();
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            showAlert('❌ Error uploading: ' + error.message, 'error');
+        } finally {
+            uploadBtn.innerHTML = originalText;
+            uploadBtn.disabled = false;
+        }
+    }
+
+    async function loadAssignments() {
+        const grade = document.getElementById('filterGrade').value;
+        const tbody = document.getElementById('assignmentsBody');
+        tbody.innerHTML = '<tr><td colspan="7" class="no-records"><span class="loading-spinner"></span> Loading...</td></tr>';
+
+        try {
+            const url = grade ? `/api/holiday-assignments/${encodeURIComponent(grade)}` : '/api/holiday-assignments/all';
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.success) {
+                allAssignments = data.assignments || [];
+                if (allAssignments.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="no-records">📭 No assignments found</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                allAssignments.forEach((a, index) => {
+                    const date = new Date(a.createdAt).toLocaleDateString();
+                    const fileIcon = a.fileType === 'pdf' ? 'fa-file-pdf' :
+                                   a.fileType === 'doc' ? 'fa-file-word' :
+                                   a.fileType === 'docx' ? 'fa-file-word' :
+                                   a.fileType === 'xls' ? 'fa-file-excel' :
+                                   a.fileType === 'xlsx' ? 'fa-file-excel' :
+                                   'fa-file-alt';
+                    const fileColor = a.fileType === 'pdf' ? '#dc3545' :
+                                     a.fileType === 'doc' || a.fileType === 'docx' ? '#2b5797' :
+                                     a.fileType === 'xls' || a.fileType === 'xlsx' ? '#217346' : '#17a2b8';
+
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${a.title}</strong></td>
+                            <td><span class="badge-grade">${a.grade}</span></td>
+                            <td>${a.subject || '-'}</td>
+                            <td>
+                                <a href="${a.fileUrl}" download style="color:${fileColor};text-decoration:none;font-weight:600;">
+                                    <i class="fas ${fileIcon}"></i> ${a.fileName}
+                                </a>
+                            </td>
+                            <td style="font-size:12px;color:#666;">${date}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="deleteAssignment('${a._id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" class="no-records">❌ Error loading assignments</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            tbody.innerHTML = '<tr><td colspan="7" class="no-records">❌ Error loading assignments</td></tr>';
+        }
+    }
+
+    async function deleteAssignment(id) {
+        if (!confirm('⚠️ Are you sure you want to delete this assignment?')) return;
+
+        try {
+            const response = await fetch(`/api/holiday-assignments/${id}`, { method: 'DELETE' });
+            const data = await response.json();
+            if (data.success) {
+                showAlert('✅ Assignment deleted successfully!', 'success');
+                loadAssignments();
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            showAlert('❌ Error deleting: ' + error.message, 'error');
+        }
+    }
+
+    // Load on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAssignments();
+    });
+</script>
+</body>
+</html>
