@@ -3699,8 +3699,6 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     }
 });
 
-app.use('/uploads', express.static('uploads'));
-
 // ============================================
 // TEST ROUTE
 // ============================================
@@ -3768,6 +3766,8 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
 
 // POST - Upload new assignment
 app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
+    console.log('📥 POST /api/holiday-assignments received');
+    
     try {
         const { title, grade, subject, description } = req.body;
         
@@ -3779,6 +3779,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             return res.status(400).json({ success: false, message: 'Please upload a file' });
         }
         
+        // FIX: Use simple path with filename
         const fileUrl = `/uploads/${req.file.filename}`;
         const fileName = req.file.originalname;
         const fileType = fileName.split('.').pop().toLowerCase();
@@ -3800,17 +3801,18 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         
         await assignment.save();
         
+        console.log('✅ Assignment saved:', assignment._id);
+        
         res.status(201).json({
             success: true,
             message: 'Assignment uploaded successfully!',
             assignment
         });
     } catch (error) {
-        console.error('Error uploading assignment:', error);
+        console.error('❌ Upload error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
 // DELETE - Delete assignment
 app.delete('/api/holiday-assignments/:id', async (req, res) => {
     try {
@@ -3832,6 +3834,10 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+// ============================================
+// SERVE UPLOADS DIRECTORY
+// ============================================
+app.use('/uploads', express.static('uploads'));
 // ============================================
 // SERVE STATIC FILES
 // ============================================
