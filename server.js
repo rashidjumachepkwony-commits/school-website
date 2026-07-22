@@ -3721,14 +3721,6 @@ app.get('/', (req, res) => {
 });
 
 // ============================================
-// 404 HANDLER
-// ============================================
-
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Route not found' });
-});
-
-// ============================================
 // HOLIDAY ASSIGNMENTS SCHEMA & ROUTES
 // ============================================
 const holidayAssignmentSchema = new mongoose.Schema({
@@ -3849,6 +3841,13 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
         console.error('Error deleting assignment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
+});
+// ============================================
+// 404 HANDLER
+// ============================================
+
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: 'Route not found' });
 });
 
 // ============================================
