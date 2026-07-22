@@ -3711,16 +3711,6 @@ app.get('/api/test', (req, res) => {
 });
 
 // ============================================
-// SERVE STATIC FILES
-// ============================================
-
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// ============================================
 // HOLIDAY ASSIGNMENTS SCHEMA & ROUTES
 // ============================================
 const holidayAssignmentSchema = new mongoose.Schema({
@@ -3841,6 +3831,15 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
         console.error('Error deleting assignment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
+});
+// ============================================
+// SERVE STATIC FILES
+// ============================================
+
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 // ============================================
 // 404 HANDLER
