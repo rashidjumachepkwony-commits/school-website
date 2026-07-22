@@ -3729,7 +3729,7 @@ app.use((req, res) => {
 });
 
 // ============================================
-// HOLIDAY ASSIGNMENTS SCHEMA
+// HOLIDAY ASSIGNMENTS SCHEMA & ROUTES
 // ============================================
 const holidayAssignmentSchema = new mongoose.Schema({
     title: { type: String, required: true },
@@ -3747,11 +3747,7 @@ const holidayAssignmentSchema = new mongoose.Schema({
 
 const HolidayAssignment = mongoose.model('HolidayAssignment', holidayAssignmentSchema);
 
-// ============================================
-// HOLIDAY ASSIGNMENTS ROUTES - FIXED
-// ============================================
-
-// GET all assignments (no filter)
+// GET all assignments
 app.get('/api/holiday-assignments/all', async (req, res) => {
     try {
         const assignments = await HolidayAssignment.find({}).sort({ createdAt: -1 });
@@ -3833,31 +3829,6 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
     }
 });
 
-// PUT - Update assignment
-app.put('/api/holiday-assignments/:id', async (req, res) => {
-    try {
-        const { title, grade, subject, description } = req.body;
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
-        }
-        
-        assignment.title = title || assignment.title;
-        assignment.grade = grade || assignment.grade;
-        assignment.subject = subject || assignment.subject;
-        assignment.description = description || assignment.description;
-        assignment.updatedAt = new Date();
-        
-        await assignment.save();
-        
-        res.json({ success: true, message: 'Assignment updated successfully!', assignment });
-    } catch (error) {
-        console.error('Error updating assignment:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
 // DELETE - Delete assignment
 app.delete('/api/holiday-assignments/:id', async (req, res) => {
     try {
@@ -3866,7 +3837,6 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Assignment not found' });
         }
         
-        // Delete the file from server
         const filePath = path.join(__dirname, assignment.fileUrl);
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
@@ -3880,6 +3850,7 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // ============================================
 // START THE SERVER
 // ============================================
