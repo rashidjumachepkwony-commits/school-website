@@ -314,6 +314,15 @@
                 method: 'POST',
                 body: formData
             });
+
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Response was not JSON:', text.substring(0, 200));
+                throw new Error('Server returned HTML instead of JSON. Please try again.');
+            }
+
             const data = await response.json();
 
             if (data.success) {
@@ -345,6 +354,13 @@
         try {
             const url = grade ? `/api/holiday-assignments/${encodeURIComponent(grade)}` : '/api/holiday-assignments/all';
             const response = await fetch(url);
+            
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Server returned HTML instead of JSON');
+            }
+            
             const data = await response.json();
 
             if (data.success) {
@@ -367,6 +383,9 @@
                                      a.fileType === 'doc' || a.fileType === 'docx' ? '#2b5797' :
                                      a.fileType === 'xls' || a.fileType === 'xlsx' ? '#217346' : '#17a2b8';
 
+                    // Use fileUrl from the database
+                    const fileUrl = a.fileUrl || '';
+
                     html += `
                         <tr>
                             <td>${index + 1}</td>
@@ -374,9 +393,9 @@
                             <td><span class="badge-grade">${a.grade}</span></td>
                             <td>${a.subject || '-'}</td>
                             <td>
-                                <a href="${a.fileUrl}" download style="color:${fileColor};text-decoration:none;font-weight:600;">
+                                ${fileUrl ? `<a href="${fileUrl}" download style="color:${fileColor};text-decoration:none;font-weight:600;">
                                     <i class="fas ${fileIcon}"></i> ${a.fileName}
-                                </a>
+                                </a>` : `<span style="color:#999;">No file</span>`}
                             </td>
                             <td style="font-size:12px;color:#666;">${date}</td>
                             <td>
@@ -393,7 +412,7 @@
             }
         } catch (error) {
             console.error('Error:', error);
-            tbody.innerHTML = '<tr><td colspan="7" class="no-records">❌ Error loading assignments</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="no-records">❌ Error loading assignments: ' + error.message + '</td></tr>';
         }
     }
 
@@ -402,6 +421,12 @@
 
         try {
             const response = await fetch(`/api/holiday-assignments/${id}`, { method: 'DELETE' });
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Server returned HTML instead of JSON');
+            }
+            
             const data = await response.json();
             if (data.success) {
                 showAlert('✅ Assignment deleted successfully!', 'success');
