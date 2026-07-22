@@ -3747,18 +3747,44 @@ const holidayAssignmentSchema = new mongoose.Schema({
 const HolidayAssignment = mongoose.model('HolidayAssignment', holidayAssignmentSchema);
 
 // ============================================
-// HOLIDAY ASSIGNMENTS ROUTES
+// HOLIDAY ASSIGNMENTS SCHEMA
+// ============================================
+const holidayAssignmentSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    grade: { type: String, required: true },
+    subject: { type: String, default: '' },
+    description: { type: String, default: '' },
+    fileName: { type: String, required: true },
+    fileUrl: { type: String, required: true },
+    fileType: { type: String, default: 'pdf' },
+    fileSize: { type: Number, default: 0 },
+    uploadedBy: { type: String, default: 'Admin' },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+});
+
+const HolidayAssignment = mongoose.model('HolidayAssignment', holidayAssignmentSchema);
+
+// ============================================
+// HOLIDAY ASSIGNMENTS ROUTES - FIXED
 // ============================================
 
-// GET all assignments (with optional grade filter)
-app.get('/api/holiday-assignments/:grade?', async (req, res) => {
+// GET all assignments (no filter)
+app.get('/api/holiday-assignments/all', async (req, res) => {
+    try {
+        const assignments = await HolidayAssignment.find({}).sort({ createdAt: -1 });
+        res.json({ success: true, assignments });
+    } catch (error) {
+        console.error('Error fetching assignments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET assignments by grade
+app.get('/api/holiday-assignments/:grade', async (req, res) => {
     try {
         const grade = req.params.grade;
-        let filter = {};
-        if (grade && grade !== 'all') {
-            filter.grade = grade;
-        }
-        const assignments = await HolidayAssignment.find(filter).sort({ createdAt: -1 });
+        const assignments = await HolidayAssignment.find({ grade: grade }).sort({ createdAt: -1 });
         res.json({ success: true, assignments });
     } catch (error) {
         console.error('Error fetching assignments:', error);
@@ -3767,7 +3793,7 @@ app.get('/api/holiday-assignments/:grade?', async (req, res) => {
 });
 
 // GET single assignment by ID
-app.get('/api/holiday-assignments/:id', async (req, res) => {
+app.get('/api/holiday-assignments/id/:id', async (req, res) => {
     try {
         const assignment = await HolidayAssignment.findById(req.params.id);
         if (!assignment) {
