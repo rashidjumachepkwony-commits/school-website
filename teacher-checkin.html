@@ -207,88 +207,24 @@
         const kenyanTimeEl = document.getElementById('kenyanTime');
 
         // ============================================
-        // KENYAN TIME HELPERS (EAT - UTC+3)
+        // UPDATE KENYAN TIME - FROM SERVER
         // ============================================
-        function getKenyanTime() {
-            const now = new Date();
-            const nairobiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
-            return nairobiTime;
-        }
-
-        function formatKenyanTime(date) {
-            if (!date) return '--:--:--';
-            const d = new Date(date);
-            return d.toLocaleTimeString('en-KE', {
-                timeZone: 'Africa/Nairobi',
-                hour12: true,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-        }
-
-        function formatKenyanTimeShort(date) {
-            if (!date) return '--:--';
-            const d = new Date(date);
-            return d.toLocaleTimeString('en-KE', {
-                timeZone: 'Africa/Nairobi',
-                hour12: true,
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function getKenyanDate() {
-            const kenyanTime = getKenyanTime();
-            return kenyanTime.toLocaleDateString('en-KE', {
-                timeZone: 'Africa/Nairobi',
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        }
-
-        function getKenyanDayOfWeek() {
-            const kenyanTime = getKenyanTime();
-            return kenyanTime.getDay();
-        }
-
-        function updateKenyanTime() {
-            const kenyanTime = getKenyanTime();
-            const options = { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit',
-                hour12: true
-            };
-            kenyanTimeEl.textContent = '🕐 Kenya Time: ' + kenyanTime.toLocaleTimeString('en-KE', options);
-        }
-
-        // Update time every second
-        setInterval(updateKenyanTime, 1000);
-
-        // ============================================
-        // CHECK DAY (Kenyan Time)
-        // ============================================
-        function updateDayUI() {
-            const kenyanTime = getKenyanTime();
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const dayOfWeek = kenyanTime.getDay();
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-            
-            dayInfo.textContent = `${days[dayOfWeek]}, ${kenyanTime.toLocaleDateString('en-KE', { timeZone: 'Africa/Nairobi', year: 'numeric', month: 'long', day: 'numeric' })}`;
-            
-            if (isWeekend) {
-                weekendMessage.style.display = 'block';
-                checkinBtn.disabled = true;
-                checkoutBtn.disabled = true;
-            } else {
-                weekendMessage.style.display = 'none';
-                checkinBtn.disabled = false;
-                checkoutBtn.disabled = false;
+        async function updateKenyanTime() {
+            try {
+                const response = await fetch('/api/server-time');
+                const data = await response.json();
+                if (data.success) {
+                    const timeStr = data.time;
+                    kenyanTimeEl.textContent = '🕐 Kenya Time: ' + timeStr;
+                }
+            } catch (error) {
+                // Fallback: just show a message
+                kenyanTimeEl.textContent = '🕐 Kenya Time: Loading...';
             }
         }
+
+        // Update time every 30 seconds (don't overload the server)
+        setInterval(updateKenyanTime, 30000);
 
         // ============================================
         // SHOW ALERT
@@ -345,12 +281,6 @@
         // HANDLE CHECK IN / CHECK OUT
         // ============================================
         async function handleAction(action) {
-            const dayOfWeek = getKenyanDayOfWeek();
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                showAlert('📅 Check-in/out is only available on weekdays (Monday-Friday)', 'error');
-                return;
-            }
-            
             const employeeId = employeeIdInput.value.trim();
             const pin = pinInput.value.trim();
             
@@ -376,7 +306,7 @@
                     return;
                 }
                 if (status.checkedOut) {
-                    showAlert(`⚠️ You already checked out today at ${status.checkOutTimeFormatted || formatKenyanTime(status.checkOutTime)}`, 'error');
+                    showAlert(`⚠️ You already checked out today`, 'error');
                     return;
                 }
             }
@@ -384,7 +314,7 @@
             // If trying to check in but already checked in
             if (action === 'checkin') {
                 if (status && status.checkedIn) {
-                    showAlert(`⚠️ You already checked in today at ${status.checkInTimeFormatted || formatKenyanTime(status.checkInTime)}`, 'error');
+                    showAlert(`⚠️ You already checked in today`, 'error');
                     return;
                 }
                 if (status && status.checkedOut) {
@@ -407,7 +337,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         employeeId: employeeId, 
-                        location: 'School',
                         pin: pin 
                     })
                 });
@@ -417,21 +346,21 @@
                 if (result.success) {
                     showAlert(result.message, 'success');
                     
-                    // Update status card with Kenya time
+                    // Update status card with SERVER time (from the result)
                     statusCard.style.display = 'block';
                     
                     if (action === 'checkin') {
-                        const checkInTime = result.checkInTimeFormatted || formatKenyanTime(result.checkInTime);
+                        const checkInTime = result.checkInTimeFormatted || 'N/A';
                         statusText.textContent = result.isLate ? '⚠️ Checked In (LATE)' : '✅ Checked In';
                         statusText.className = result.isLate ? 'status-text late' : 'status-text checked-in';
                         statusTime.textContent = `Time: ${checkInTime}`;
                         statusHours.textContent = '';
                     } else {
-                        const checkOutTime = result.checkOutTimeFormatted || formatKenyanTime(result.checkOutTime);
+                        const checkOutTime = result.checkOutTimeFormatted || 'N/A';
                         statusText.textContent = '🚪 Checked Out';
                         statusText.className = 'status-text checked-out';
                         statusTime.textContent = `Time: ${checkOutTime}`;
-                        statusHours.textContent = `Hours Worked: ${result.hoursWorked}`;
+                        statusHours.textContent = `Hours Worked: ${result.hoursWorked || 0}`;
                     }
                     
                     // Clear the form for next user
@@ -466,11 +395,9 @@
         // INIT
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            updateDayUI();
             updateKenyanTime();
-            
-            // Update time every second
-            setInterval(updateKenyanTime, 1000);
+            // Update time every 30 seconds
+            setInterval(updateKenyanTime, 30000);
         });
     </script>
 </body>
