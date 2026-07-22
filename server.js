@@ -1198,10 +1198,8 @@ app.post('/api/teacher/checkout', async (req, res) => {
         
         const kenyaNow = getKenyaTime();
         const kenyaToday = getKenyaDate();
-        const kenyaHour = getKenyaHour();
         
         console.log('📍 Check-out at (Kenya time):', kenyaNow.toString());
-        console.log('🕐 Hour (Kenya time):', kenyaHour);
         console.log('🕐 Formatted:', formatKenyaTime(kenyaNow));
         
         const todayAttendance = teacher.attendance.find(a => {
@@ -1218,13 +1216,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
             return res.status(400).json({ success: false, message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut) });
         }
         
-        // Check if already checked out
-if (todayAttendance.checkOut) {
-    return res.status(400).json({ success: false, message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut) });
-}
-
-// REMOVED: The 3:00 PM restriction
-// Staff can now check out anytime after check-in
+        // REMOVED: The 3:00 PM restriction
         
         todayAttendance.checkOut = kenyaNow;
         todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
