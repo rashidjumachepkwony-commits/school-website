@@ -326,31 +326,27 @@ function generateVisitorReportHTML(report, title, periodInfo) {
 }
 
 // ============================================
-// FIX PAST RECORDS - CORRECTED
+// FIX PAST RECORDS
 // ============================================
 async function fixPastRecords() {
     try {
         console.log('🔄 Fixing past records time...');
         let totalFixed = 0;
 
-        // Fix Teacher Attendance
         const teachers = await Teacher.find({});
         for (const teacher of teachers) {
             let changed = false;
             for (const record of teacher.attendance) {
-                // Fix checkIn time
                 if (record.checkIn) {
                     const original = new Date(record.checkIn);
-                    // The old code added 3 hours incorrectly, so we need to subtract 3 hours
-                    const correctedTime = new Date(original.getTime() - (3 * 60 * 60 * 1000));
-                    record.checkIn = correctedTime;
+                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
+                    record.checkIn = kenyaTime;
                     changed = true;
                 }
-                // Fix checkOut time
                 if (record.checkOut) {
                     const original = new Date(record.checkOut);
-                    const correctedTime = new Date(original.getTime() - (3 * 60 * 60 * 1000));
-                    record.checkOut = correctedTime;
+                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
+                    record.checkOut = kenyaTime;
                     changed = true;
                 }
             }
@@ -360,18 +356,17 @@ async function fixPastRecords() {
             }
         }
 
-        // Fix Visitor Records
         const visitors = await Visitor.find({});
         for (const visitor of visitors) {
             let changed = false;
             if (visitor.checkIn) {
                 const original = new Date(visitor.checkIn);
-                visitor.checkIn = new Date(original.getTime() - (3 * 60 * 60 * 1000));
+                visitor.checkIn = new Date(original.getTime() + (3 * 60 * 60 * 1000));
                 changed = true;
             }
             if (visitor.checkOut) {
                 const original = new Date(visitor.checkOut);
-                visitor.checkOut = new Date(original.getTime() - (3 * 60 * 60 * 1000));
+                visitor.checkOut = new Date(original.getTime() + (3 * 60 * 60 * 1000));
                 changed = true;
             }
             if (changed) {
@@ -385,6 +380,7 @@ async function fixPastRecords() {
         console.error('❌ Error fixing records:', error);
     }
 }
+
 // ============================================
 // CONNECT TO MONGODB
 // ============================================
@@ -3848,6 +3844,58 @@ app.get('/', (req, res) => {
 
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
+});
+// ============================================
+// FIX ALL TIMES - ADD 3 HOURS
+// ============================================
+app.post('/api/fix-times-add-3', async (req, res) => {
+    try {
+        console.log('🔄 Adding 3 hours to all attendance times...');
+        let totalFixed = 0;
+
+        const teachers = await Teacher.find({});
+        for (const teacher of teachers) {
+            let changed = false;
+            for (const record of teacher.attendance) {
+                if (record.checkIn) {
+                    const date = new Date(record.checkIn);
+                    date.setHours(date.getHours() + 3);
+                    record.checkIn = date;
+                    changed = true;
+                }
+                if (record.checkOut) {
+                    const date = new Date(record.checkOut);
+                    date.setHours(date.getHours() + 3);
+                    record.checkOut = date;
+                    changed = true;
+                }
+                if (record.checkIn) {
+                    const hours = record.checkIn.getHours();
+                    const minutes = record.checkIn.getMinutes();
+                    record.isLate = (hours > 7 || (hours === 7 && minutes > 0));
+                    record.status = record.isLate ? 'Late' : 'Present';
+                }
+                if (record.checkIn && record.checkOut) {
+                    const diff = (record.checkOut - record.checkIn) / (1000 * 60 * 60);
+                    record.hoursWorked = parseFloat(Math.max(0, diff).toFixed(2));
+                }
+            }
+            if (changed) {
+                await teacher.save();
+                totalFixed++;
+                console.log(`✅ Fixed ${teacher.firstName} ${teacher.lastName}`);
+            }
+        }
+
+        res.json({ 
+            success: true, 
+            message: `Added 3 hours to ${totalFixed} teachers' records`,
+            fixed: totalFixed
+        });
+    } catch (error) {
+        console.error('❌ Error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 });
 
 // ============================================
