@@ -427,18 +427,29 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = [
+        // Images
         'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+        // Videos
         'video/mp4', 'video/mpeg', 'video/quicktime', 'video/webm', 'video/ogg',
-        'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm'
+        // Audio
+        'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm',
+        // Documents
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'text/plain'
     ];
     
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('Only images, videos, and audio files are allowed'), false);
+        cb(new Error('File type not allowed. Please upload PDF, Word, Excel, Images, or Text files.'), false);
     }
 };
-
 const upload = multer({ 
     storage: storage,
     fileFilter: fileFilter,
@@ -3766,8 +3777,6 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
 
 // POST - Upload new assignment
 app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
-    console.log('📥 POST /api/holiday-assignments received');
-    
     try {
         const { title, grade, subject, description } = req.body;
         
@@ -3779,7 +3788,6 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             return res.status(400).json({ success: false, message: 'Please upload a file' });
         }
         
-        // FIX: Use simple path with filename
         const fileUrl = `/uploads/${req.file.filename}`;
         const fileName = req.file.originalname;
         const fileType = fileName.split('.').pop().toLowerCase();
@@ -3801,18 +3809,17 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         
         await assignment.save();
         
-        console.log('✅ Assignment saved:', assignment._id);
-        
         res.status(201).json({
             success: true,
             message: 'Assignment uploaded successfully!',
             assignment
         });
     } catch (error) {
-        console.error('❌ Upload error:', error);
+        console.error('Error uploading assignment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // DELETE - Delete assignment
 app.delete('/api/holiday-assignments/:id', async (req, res) => {
     try {
@@ -3834,9 +3841,6 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-// ============================================
-// SERVE UPLOADS DIRECTORY
-// ============================================
 app.use('/uploads', express.static('uploads'));
 // ============================================
 // SERVE STATIC FILES
