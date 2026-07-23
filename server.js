@@ -5,13 +5,6 @@ const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const fs = require('fs');
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const path = require('path');
-const mongoose = require('mongoose');
-const multer = require('multer');
-const fs = require('fs');
 
 // ============================================
 // FIX PHANTOMJS PATH FOR RENDER/LINUX
