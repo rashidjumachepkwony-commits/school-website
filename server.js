@@ -2255,9 +2255,8 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
         const allAssessments = await StudentAssessment.find({ studentName: student.studentName }).sort({ createdAt: 1 });
         const html = generateStudentReportHTML(student, allAssessments);
         
-        const browser = await puppeteer.launch({
+       const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
     headless: true
 });
         const page = await browser.newPage();
@@ -2559,7 +2558,6 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
     headless: true
 });
         const page = await browser.newPage();
@@ -2637,7 +2635,6 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
     headless: true
 });
         const page = await browser.newPage();
@@ -2698,9 +2695,8 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
         
         const html = generateClassReportHTML(students, grade, type, term, year, period);
         
-        const browser = await puppeteer.launch({
+       const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
     headless: true
 });
         const page = await browser.newPage();
@@ -3129,7 +3125,6 @@ app.post('/api/assessments/generate-comprehensive-pdf', async (req, res) => {
         
        const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
     headless: true
 });
         const page = await browser.newPage();
@@ -3482,7 +3477,6 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
     headless: true
 });
         const page = await browser.newPage();
@@ -3713,7 +3707,6 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
     headless: true
 });
         const page = await browser.newPage();
