@@ -5,25 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const fs = require('fs');
-const pdf = require('html-pdf');
-
-// ============================================
-// FIX PHANTOMJS PATH FOR RENDER/LINUX
-// ============================================
-try {
-    const phantomjs = require('phantomjs-prebuilt');
-    const originalCreate = pdf.create;
-    pdf.create = function(html, options) {
-        if (!options) options = {};
-        if (!options.phantomPath) {
-            options.phantomPath = phantomjs.path;
-        }
-        return originalCreate.call(this, html, options);
-    };
-    console.log('✅ PhantomJS path configured:', phantomjs.path);
-} catch (err) {
-    console.warn('⚠️ PhantomJS not found, using default path');
-}
+const PDFDocument = require('pdfkit');
 
 // Load environment variables
 dotenv.config();
@@ -50,6 +32,7 @@ function getKenyaTime() {
     const kenyaTime = new Date(utcTime + (3 * 60 * 60 * 1000));
     return kenyaTime;
 }
+
 function getKenyaDate() {
     const kenyaTime = getKenyaTime();
     const date = new Date(kenyaTime);
@@ -85,258 +68,177 @@ function formatKenyaDate(date) {
 }
 
 // ============================================
-// REPORT HTML GENERATORS
+// PDF GENERATION HELPERS
 // ============================================
 
-// STAFF REPORT HTML GENERATOR - SINGLE PAGE
-function generateStaffReportHTML(report, title, periodInfo) {
-    const now = getKenyaTime();
-    
-    let rowsHtml = report.map((staff, index) => {
-        const rate = staff.totalDays > 0 ? ((staff.onTime / staff.totalDays) * 100).toFixed(1) : 0;
-        return `
-            <tr>
-                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-size:7px;">${index + 1}</td>
-                <td style="padding:3px 4px;border:1px solid #ddd;font-weight:600;font-size:7px;">${staff.name}</td>
-                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-size:7px;">${staff.employeeId || '-'}</td>
-                <td style="padding:3px 4px;border:1px solid #ddd;font-size:7px;">${staff.department || '-'}</td>
-                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-size:7px;">${staff.totalDays || 0}</td>
-                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;color:#28a745;font-weight:600;font-size:7px;">${staff.onTime || 0}</td>
-                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;color:#d4a017;font-weight:600;font-size:7px;">${staff.late || 0}</td>
-                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;color:#dc3545;font-weight:600;font-size:7px;">${staff.absent || 0}</td>
-                <td style="padding:3px 4px;border:1px solid #ddd;text-align:center;font-weight:700;font-size:7px;">${rate}%</td>
-            </tr>
-        `;
-    }).join('');
-
-    let totalStaff = report.length;
-    let totalOnTime = 0;
-    let totalLate = 0;
-    let totalAbsent = 0;
-    let totalDays = 0;
-    
-    report.forEach(staff => {
-        totalOnTime += staff.onTime || 0;
-        totalLate += staff.late || 0;
-        totalAbsent += staff.absent || 0;
-        totalDays += staff.totalDays || 0;
+// Generate a simple PDF from text
+function generateTextPDF(text, title = 'Document') {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 50 });
+            const chunks = [];
+            
+            doc.on('data', (chunk) => chunks.push(chunk));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+            
+            // Header
+            doc.fontSize(20)
+               .font('Helvetica-Bold')
+               .text(title, { align: 'center' })
+               .moveDown();
+            
+            // Line
+            doc.strokeColor('#D4A017')
+               .lineWidth(2)
+               .moveTo(50, doc.y)
+               .lineTo(550, doc.y)
+               .stroke()
+               .moveDown();
+            
+            // Content
+            doc.fontSize(12)
+               .font('Helvetica')
+               .text(text, { align: 'left' });
+            
+            // Footer
+            doc.moveDown(2);
+            doc.fontSize(10)
+               .fillColor('#666')
+               .text(`Generated on: ${formatKenyaFullTime(new Date())}`, { align: 'center' })
+               .text('© Changara Star Academy - P.O Box 7, Cheptais', { align: 'center' });
+            
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
     });
-    
-    const attendanceRate = totalDays > 0 ? ((totalOnTime / totalDays) * 100).toFixed(1) : 0;
-
-    const topPerformers = [...report].sort((a, b) => {
-        const rateA = a.totalDays > 0 ? (a.onTime / a.totalDays) : 0;
-        const rateB = b.totalDays > 0 ? (b.onTime / b.totalDays) : 0;
-        return rateB - rateA;
-    }).slice(0, 3);
-
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Staff Attendance Report</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 8px; max-width: 1100px; margin: 0 auto; font-size: 8px; line-height: 1.2; }
-                .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 4px; margin-bottom: 6px; }
-                .header h1 { color: #0A1628; font-size: 14px; margin: 0; }
-                .header h1 .school-name { color: #D4A017; }
-                .header p { color: #666; margin: 1px 0; font-size: 8px; }
-                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 6px; }
-                .summary-box .item { text-align: center; padding: 3px 4px; background: #f8f9fc; border-radius: 4px; border: 1px solid #e8ecf1; }
-                .summary-box .item .num { font-size: 14px; font-weight: 700; }
-                .summary-box .item .label { font-size: 6px; color: #666; }
-                .summary-box .item .num.gold { color: #D4A017; }
-                .summary-box .item .num.green { color: #28a745; }
-                .summary-box .item .num.orange { color: #d4a017; }
-                .summary-box .item .num.red { color: #dc3545; }
-                .summary-box .item .num.blue { color: #17a2b8; }
-                .table-wrap { overflow-x: auto; }
-                table { width: 100%; border-collapse: collapse; font-size: 7px; }
-                table th { background: #0A1628; color: white; padding: 4px 4px; text-align: left; font-size: 6px; }
-                table td { padding: 3px 4px; border-bottom: 1px solid #e8ecf1; }
-                table tr:nth-child(even) { background: #fafbfc; }
-                .footer { text-align: center; margin-top: 6px; padding-top: 4px; border-top: 1px solid #ddd; color: #999; font-size: 6px; }
-                .top-performers { display: flex; justify-content: center; gap: 12px; margin: 4px 0; flex-wrap: wrap; }
-                .top-performers .performer { text-align: center; padding: 2px 8px; background: #e8f5e9; border-radius: 4px; }
-                .top-performers .performer .name { font-weight: 600; font-size: 7px; }
-                .top-performers .performer .rate { color: #28a745; font-weight: 700; font-size: 8px; }
-                @media print { body { padding: 4px; } }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                <p>${title}</p>
-                <p style="font-size:6px;color:#999;">${periodInfo}</p>
-            </div>
-            <div class="summary-box">
-                <div class="item"><div class="num gold">${totalStaff}</div><div class="label">Total Staff</div></div>
-                <div class="item"><div class="num green">${totalOnTime}</div><div class="label">✅ On Time</div></div>
-                <div class="item"><div class="num orange">${totalLate}</div><div class="label">⚠️ Late</div></div>
-                <div class="item"><div class="num red">${totalAbsent}</div><div class="label">❌ Absent</div></div>
-                <div class="item"><div class="num blue">${attendanceRate}%</div><div class="label">📈 Attendance</div></div>
-                <div class="item"><div class="num" style="color:#0A1628;">${totalDays}</div><div class="label">📅 Total Days</div></div>
-            </div>
-            ${topPerformers.length > 0 ? `
-            <div class="top-performers">
-                <span style="font-weight:600;font-size:7px;">🏆 Top Performers:</span>
-                ${topPerformers.map((p, i) => {
-                    const rate = p.totalDays > 0 ? ((p.onTime / p.totalDays) * 100).toFixed(1) : 0;
-                    return `<div class="performer"><span class="name">${i+1}. ${p.name}</span> <span class="rate">${rate}%</span></div>`;
-                }).join('')}
-            </div>
-            ` : ''}
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align:center;">#</th>
-                            <th>Staff Name</th>
-                            <th style="text-align:center;">ID</th>
-                            <th>Department</th>
-                            <th style="text-align:center;">Days</th>
-                            <th style="text-align:center;">On Time</th>
-                            <th style="text-align:center;">Late</th>
-                            <th style="text-align:center;">Absent</th>
-                            <th style="text-align:center;">Rate</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml}
-                    </tbody>
-                </table>
-            </div>
-            <div class="footer">
-                <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-                <p>Generated on ${formatKenyaFullTime(now)}</p>
-            </div>
-        </body>
-        </html>
-    `;
 }
 
-// VISITOR REPORT HTML GENERATOR - SINGLE PAGE
-function generateVisitorReportHTML(report, title, periodInfo) {
-    const now = getKenyaTime();
-    
-    let rowsHtml = report.map((visitor, index) => {
-        const duration = visitor.duration || 0;
-        return `
-            <tr>
-                <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">${index + 1}</td>
-                <td style="padding:2px 3px;border:1px solid #ddd;font-weight:600;font-size:6px;">${visitor.fullName || visitor.firstName + ' ' + visitor.lastName}</td>
-                <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">${visitor.badgeNumber || '-'}</td>
-                <td style="padding:2px 3px;border:1px solid #ddd;font-size:6px;">${visitor.purpose || '-'}</td>
-                <td style="padding:2px 3px;border:1px solid #ddd;font-size:6px;">${visitor.personToVisit || '-'}</td>
-                <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">${visitor.checkInTime || '-'}</td>
-                <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">${visitor.checkOutTime || '-'}</td>
-                <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">
-                    <span style="display:inline-block;padding:1px 6px;border-radius:50px;font-size:5px;font-weight:700;color:white;background:${visitor.status === 'Checked In' ? '#28a745' : '#6c757d'};">${visitor.status || '-'}</span>
-                </td>
-                <td style="padding:2px 3px;border:1px solid #ddd;text-align:center;font-size:6px;">${duration > 0 ? duration + 'm' : '-'}</td>
-            </tr>
-        `;
-    }).join('');
-
-    let totalVisitors = report.length;
-    let active = report.filter(v => v.status === 'Checked In').length;
-    let completed = report.filter(v => v.status === 'Checked Out').length;
-    let totalDuration = 0;
-    let purposeCount = {};
-    report.forEach(v => { 
-        totalDuration += v.duration || 0;
-        const p = v.purpose || 'Other';
-        purposeCount[p] = (purposeCount[p] || 0) + 1;
+// Generate a student report PDF
+function generateStudentReportPDF(student) {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ 
+                margin: 50,
+                size: 'A4'
+            });
+            const chunks = [];
+            
+            doc.on('data', (chunk) => chunks.push(chunk));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+            
+            // Header
+            doc.fontSize(18)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text('🏫 Changara Star Academy', { align: 'center' })
+               .moveDown(0.5);
+            
+            doc.fontSize(10)
+               .font('Helvetica')
+               .fillColor('#666')
+               .text('"Assurance to Excellence"', { align: 'center' })
+               .moveDown();
+            
+            // Decorative line
+            doc.strokeColor('#D4A017')
+               .lineWidth(2)
+               .moveTo(50, doc.y)
+               .lineTo(550, doc.y)
+               .stroke()
+               .moveDown();
+            
+            // Student Info
+            doc.fontSize(14)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text('STUDENT ASSESSMENT REPORT', { align: 'center' })
+               .moveDown();
+            
+            doc.fontSize(11)
+               .font('Helvetica')
+               .fillColor('#333');
+            
+            // Info table
+            const infoY = doc.y;
+            doc.text(`Student Name: ${student.studentName || 'N/A'}`, 50, infoY);
+            doc.text(`Grade: ${student.grade || 'N/A'}`, 50, infoY + 20);
+            doc.text(`Type: ${student.type || 'Monthly'}`, 50, infoY + 40);
+            doc.text(`Period: ${student.period || 'N/A'}`, 50, infoY + 60);
+            
+            doc.text(`Total Score: ${student.totalScore || 0}`, 350, infoY);
+            doc.text(`Average: ${student.averageScore ? student.averageScore.toFixed(1) : '0'}`, 350, infoY + 20);
+            doc.text(`Performance: ${student.performanceLevel || 'N/A'}`, 350, infoY + 40);
+            
+            doc.moveDown(2);
+            
+            // Subjects Table
+            if (student.assessments && student.assessments.length > 0) {
+                doc.fontSize(12)
+                   .font('Helvetica-Bold')
+                   .fillColor('#0A1628')
+                   .text('SUBJECT SCORES', { underline: true })
+                   .moveDown(0.5);
+                
+                // Table headers
+                const tableTop = doc.y;
+                doc.fontSize(10)
+                   .font('Helvetica-Bold')
+                   .fillColor('white');
+                
+                // Header background
+                doc.rect(50, tableTop, 500, 25)
+                   .fillColor('#0A1628')
+                   .fill();
+                
+                doc.fillColor('white')
+                   .text('Subject', 60, tableTop + 5)
+                   .text('Max', 200, tableTop + 5, { width: 50, align: 'center' })
+                   .text('Score', 280, tableTop + 5, { width: 50, align: 'center' })
+                   .text('%', 360, tableTop + 5, { width: 50, align: 'center' })
+                   .text('Performance', 430, tableTop + 5);
+                
+                let rowY = tableTop + 25;
+                student.assessments.forEach((a, index) => {
+                    const percentage = a.maxScore > 0 ? ((a.score / a.maxScore) * 100) : 0;
+                    let perfColor = '#28a745';
+                    let perfText = 'Exceeding';
+                    if (percentage < 40) { perfColor = '#dc3545'; perfText = 'Below'; }
+                    else if (percentage < 60) { perfColor = '#d4a017'; perfText = 'Approaching'; }
+                    else if (percentage < 75) { perfColor = '#17a2b8'; perfText = 'Meeting'; }
+                    
+                    doc.fillColor(index % 2 === 0 ? '#f8f9fc' : 'white')
+                       .rect(50, rowY, 500, 20)
+                       .fill();
+                    
+                    doc.fillColor('#0A1628')
+                       .fontSize(9)
+                       .font('Helvetica')
+                       .text(a.subject, 60, rowY + 4)
+                       .text(a.maxScore.toString(), 200, rowY + 4, { width: 50, align: 'center' })
+                       .text(a.score.toString(), 280, rowY + 4, { width: 50, align: 'center' })
+                       .text(percentage.toFixed(1) + '%', 360, rowY + 4, { width: 50, align: 'center' })
+                       .fillColor(perfColor)
+                       .text(perfText, 430, rowY + 4);
+                    
+                    rowY += 20;
+                });
+            }
+            
+            // Footer
+            doc.moveDown(2);
+            doc.fillColor('#999')
+               .fontSize(8)
+               .text(`Generated on: ${formatKenyaFullTime(new Date())}`, { align: 'center' })
+               .text('© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com', { align: 'center' });
+            
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
     });
-    const avgDuration = totalVisitors > 0 ? Math.round(totalDuration / totalVisitors) : 0;
-    
-    const topPurposes = Object.entries(purposeCount)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3);
-
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Visitor Report</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 6px; max-width: 1100px; margin: 0 auto; font-size: 7px; line-height: 1.1; }
-                .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 3px; margin-bottom: 4px; }
-                .header h1 { color: #0A1628; font-size: 13px; margin: 0; }
-                .header h1 .school-name { color: #D4A017; }
-                .header p { color: #666; margin: 1px 0; font-size: 7px; }
-                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; margin-bottom: 4px; }
-                .summary-box .item { text-align: center; padding: 2px 3px; background: #f8f9fc; border-radius: 3px; border: 1px solid #e8ecf1; }
-                .summary-box .item .num { font-size: 12px; font-weight: 700; }
-                .summary-box .item .label { font-size: 5px; color: #666; }
-                .summary-box .item .num.gold { color: #D4A017; }
-                .summary-box .item .num.blue { color: #17a2b8; }
-                .summary-box .item .num.green { color: #28a745; }
-                .summary-box .item .num.orange { color: #d4a017; }
-                .summary-box .item .num.purple { color: #6f42c1; }
-                .table-wrap { overflow-x: auto; }
-                table { width: 100%; border-collapse: collapse; font-size: 6px; }
-                table th { background: #0A1628; color: white; padding: 3px 3px; text-align: left; font-size: 5.5px; }
-                table td { padding: 2px 3px; border-bottom: 1px solid #e8ecf1; }
-                table tr:nth-child(even) { background: #fafbfc; }
-                .footer { text-align: center; margin-top: 4px; padding-top: 3px; border-top: 1px solid #ddd; color: #999; font-size: 5px; }
-                .purpose-tags { display: flex; justify-content: center; gap: 8px; margin: 3px 0; flex-wrap: wrap; }
-                .purpose-tags .tag { padding: 1px 6px; background: #e8ecf1; border-radius: 3px; font-size: 6px; }
-                .purpose-tags .tag .count { font-weight: 700; }
-                @media print { body { padding: 3px; } }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                <p>${title}</p>
-                <p style="font-size:5px;color:#999;">${periodInfo}</p>
-            </div>
-            <div class="summary-box">
-                <div class="item"><div class="num gold">${totalVisitors}</div><div class="label">Total Visitors</div></div>
-                <div class="item"><div class="num blue">${active}</div><div class="label">✅ Checked In</div></div>
-                <div class="item"><div class="num green">${completed}</div><div class="label">✅ Checked Out</div></div>
-                <div class="item"><div class="num orange">${avgDuration}m</div><div class="label">⏱️ Avg Duration</div></div>
-                <div class="item"><div class="num purple">${Object.keys(purposeCount).length}</div><div class="label">📋 Purposes</div></div>
-            </div>
-            ${topPurposes.length > 0 ? `
-            <div class="purpose-tags">
-                ${topPurposes.map(([purpose, count]) => 
-                    `<span class="tag">${purpose}: <span class="count">${count}</span></span>`
-                ).join('')}
-            </div>
-            ` : ''}
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align:center;">#</th>
-                            <th>Visitor</th>
-                            <th style="text-align:center;">Badge</th>
-                            <th>Purpose</th>
-                            <th>Person</th>
-                            <th style="text-align:center;">Check In</th>
-                            <th style="text-align:center;">Check Out</th>
-                            <th style="text-align:center;">Status</th>
-                            <th style="text-align:center;">Duration</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml || `<tr><td colspan="9" style="text-align:center;padding:10px;color:#999;">No visitors found</td></tr>`}
-                    </tbody>
-                </table>
-            </div>
-            <div class="footer">
-                <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-                <p>Generated on ${formatKenyaFullTime(now)}</p>
-            </div>
-        </body>
-        </html>
-    `;
 }
 
 // ============================================
@@ -346,7 +248,6 @@ async function fixPastRecords() {
     try {
         console.log('🔄 Fixing past records time...');
         let totalFixed = 0;
-
         const teachers = await Teacher.find({});
         for (const teacher of teachers) {
             let changed = false;
@@ -369,7 +270,6 @@ async function fixPastRecords() {
                 totalFixed++;
             }
         }
-
         const visitors = await Visitor.find({});
         for (const visitor of visitors) {
             let changed = false;
@@ -388,7 +288,6 @@ async function fixPastRecords() {
                 totalFixed++;
             }
         }
-
         console.log(`✅ Time fix completed! Fixed ${totalFixed} records.`);
     } catch (error) {
         console.error('❌ Error fixing records:', error);
@@ -439,8 +338,7 @@ const fileFilter = (req, file, cb) => {
         'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
         'video/mp4', 'video/mpeg', 'video/quicktime', 'video/webm', 'video/ogg',
         'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm',
-        'application/pdf',
-        'application/msword',
+        'application/pdf', 'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -448,11 +346,10 @@ const fileFilter = (req, file, cb) => {
         'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         'text/plain'
     ];
-    
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('File type not allowed. Please upload PDF, Word, Excel, Images, or Text files.'), false);
+        cb(new Error('File type not allowed.'), false);
     }
 };
 const upload = multer({ 
@@ -723,22 +620,18 @@ function calculateStudentOverall(assessments) {
     if (!assessments || assessments.length === 0) {
         return { totalScore: 0, averageScore: 0, performanceLevel: 'Approaching Expectation', overallRating: 2 };
     }
-    
     let totalScore = 0;
     let totalMax = 0;
     let validCount = 0;
-    
     assessments.forEach(a => {
         totalScore += a.score || 0;
         totalMax += a.maxScore || 0;
         validCount++;
     });
-    
     const totalScoreValue = totalScore;
     const avgScore = validCount > 0 ? totalScore / validCount : 0;
     const avgPercentage = totalMax > 0 ? (totalScore / totalMax) * 100 : 0;
     const performanceLevel = calculatePerformanceLevel(avgPercentage);
-    
     return {
         totalScore: totalScoreValue,
         averageScore: parseFloat(avgScore.toFixed(1)),
@@ -750,42 +643,18 @@ function calculateStudentOverall(assessments) {
 function getDefaultSubjects(grade, type) {
     const configs = {
         'weekly': {
-            'Play Group': [{ name: 'MATH', max: 10 }, { name: 'LANG', max: 10 }, { name: 'LIT', max: 10 }, { name: 'KUS', max: 10 }, { name: 'ENVI/CRE', max: 10 }, { name: 'C/A', max: 10 }],
-            'PP1': [{ name: 'MATH', max: 10 }, { name: 'LANG', max: 10 }, { name: 'LIT', max: 10 }, { name: 'KIS', max: 10 }, { name: 'KUS', max: 10 }, { name: 'ENV', max: 10 }, { name: 'CRE/I.R.E', max: 10 }, { name: 'C/A', max: 10 }],
-            'PP2': [{ name: 'MATH', max: 10 }, { name: 'LANG', max: 10 }, { name: 'LIT', max: 10 }, { name: 'KIS', max: 10 }, { name: 'KUS', max: 10 }, { name: 'ENV', max: 10 }, { name: 'CRE/I.R.E', max: 10 }, { name: 'C/A', max: 10 }],
-            'Grade 1': [{ name: 'MATH', max: 30 }, { name: 'LIST/SPEAKING', max: 20 }, { name: 'READING', max: 20 }, { name: 'GRAMMAR', max: 20 }, { name: 'KUSOMA', max: 20 }, { name: 'SARUFI', max: 20 }, { name: 'ENV', max: 30 }, { name: 'C.R.E', max: 20 }, { name: 'CREATIVE ARTS', max: 20 }],
-            'Grade 2': [{ name: 'LIST & SPEAKING', max: 20 }, { name: 'READING ALOUD', max: 20 }, { name: 'GRAMMAR', max: 20 }, { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 20 }, { name: 'KUSOMA KWA SAUTI', max: 20 }, { name: 'LUGHA', max: 20 }, { name: 'MATH', max: 30 }, { name: 'ENVIRONMENTAL', max: 30 }, { name: 'C/A', max: 20 }, { name: 'RE', max: 20 }],
-            'Grade 3': [{ name: 'LIST & SPEAKING', max: 20 }, { name: 'READING ALOUD', max: 20 }, { name: 'GRAMMAR', max: 20 }, { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 20 }, { name: 'KUSOMA KWA SAUTI', max: 20 }, { name: 'SARUFI', max: 20 }, { name: 'MATHS', max: 30 }, { name: 'ENVIRONMENTAL', max: 30 }, { name: 'C.R.E', max: 20 }, { name: 'I.R.E', max: 20 }, { name: 'C/A', max: 20 }],
-            'Grade 4': [{ name: 'MATHS ACTIVITIES', max: 30 }, { name: 'ENGLISH ACTIVITIES', max: 50 }, { name: 'SCI & TECH', max: 30 }, { name: 'KISW LUGHA', max: 50 }, { name: 'SST', max: 30 }, { name: 'RELIGIOUS EDUCATION', max: 20 }, { name: 'AGRICULTURE', max: 20 }, { name: 'CREATIVE ART', max: 35 }],
-            'Grade 5': [{ name: 'MATHS ACTIVITIES', max: 30 }, { name: 'ENGLISH ACTIVITIES', max: 50 }, { name: 'SCI & TECH', max: 30 }, { name: 'KISW LUGHA', max: 50 }, { name: 'SST', max: 30 }, { name: 'RELIGIOUS EDUCATION', max: 20 }, { name: 'AGRICULTURE', max: 20 }, { name: 'CREATIVE ART', max: 35 }],
-            'Grade 6': [{ name: 'MATHS ACTIVITIES', max: 30 }, { name: 'ENGLISH ACTIVITIES', max: 50 }, { name: 'SCI & TECH', max: 30 }, { name: 'KISW LUGHA', max: 50 }, { name: 'SST', max: 30 }, { name: 'RELIGIOUS EDUCATION', max: 20 }, { name: 'AGRICULTURE', max: 20 }, { name: 'CREATIVE ART', max: 35 }]
+            'Grade 4': [{ name: 'MATHS ACTIVITIES', max: 30 }, { name: 'ENGLISH ACTIVITIES', max: 50 }, { name: 'SCI & TECH', max: 30 }, { name: 'KISW LUGHA', max: 50 }, { name: 'SST', max: 30 }, { name: 'RELIGIOUS EDUCATION', max: 20 }, { name: 'AGRICULTURE', max: 20 }, { name: 'CREATIVE ART', max: 35 }]
         },
         'monthly': {
-            'Play Group': [{ name: 'MATH', max: 20 }, { name: 'LANG', max: 20 }, { name: 'LIT', max: 20 }, { name: 'KUS', max: 20 }, { name: 'ENVI/CRE', max: 20 }, { name: 'C/A', max: 20 }],
-            'PP1': [{ name: 'MATH', max: 20 }, { name: 'LANG', max: 20 }, { name: 'LIT', max: 20 }, { name: 'KIS', max: 20 }, { name: 'KUS', max: 20 }, { name: 'ENV', max: 20 }, { name: 'CRE/I.R.E', max: 20 }, { name: 'C/A', max: 20 }],
-            'PP2': [{ name: 'MATH', max: 20 }, { name: 'LANG', max: 20 }, { name: 'LIT', max: 20 }, { name: 'KIS', max: 20 }, { name: 'KUS', max: 20 }, { name: 'ENV', max: 20 }, { name: 'CRE/I.R.E', max: 20 }, { name: 'C/A', max: 20 }],
-            'Grade 1': [{ name: 'MATH', max: 50 }, { name: 'LIST/SPEAKING', max: 30 }, { name: 'READING', max: 30 }, { name: 'GRAMMAR', max: 30 }, { name: 'KUSOMA', max: 30 }, { name: 'SARUFI', max: 30 }, { name: 'ENV', max: 50 }, { name: 'C.R.E', max: 30 }, { name: 'CREATIVE ARTS', max: 30 }],
-            'Grade 2': [{ name: 'LIST & SPEAKING', max: 40 }, { name: 'READING ALOUD', max: 40 }, { name: 'GRAMMAR', max: 40 }, { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 40 }, { name: 'KUSOMA KWA SAUTI', max: 40 }, { name: 'LUGHA', max: 40 }, { name: 'MATH', max: 50 }, { name: 'ENVIRONMENTAL', max: 50 }, { name: 'C/A', max: 40 }, { name: 'RE', max: 40 }],
-            'Grade 3': [{ name: 'LIST & SPEAKING', max: 40 }, { name: 'READING ALOUD', max: 40 }, { name: 'GRAMMAR', max: 40 }, { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 40 }, { name: 'KUSOMA KWA SAUTI', max: 40 }, { name: 'SARUFI', max: 40 }, { name: 'MATHS', max: 50 }, { name: 'ENVIRONMENTAL', max: 50 }, { name: 'C.R.E', max: 40 }, { name: 'I.R.E', max: 40 }, { name: 'C/A', max: 40 }],
-            'Grade 4': [{ name: 'MATHS ACTIVITIES', max: 60 }, { name: 'ENGLISH ACTIVITIES', max: 80 }, { name: 'SCI & TECH', max: 60 }, { name: 'KISW LUGHA', max: 80 }, { name: 'SST', max: 60 }, { name: 'RELIGIOUS EDUCATION', max: 40 }, { name: 'AGRICULTURE', max: 40 }, { name: 'CREATIVE ART', max: 50 }],
-            'Grade 5': [{ name: 'MATHS ACTIVITIES', max: 60 }, { name: 'ENGLISH ACTIVITIES', max: 80 }, { name: 'SCI & TECH', max: 60 }, { name: 'KISW LUGHA', max: 80 }, { name: 'SST', max: 60 }, { name: 'RELIGIOUS EDUCATION', max: 40 }, { name: 'AGRICULTURE', max: 40 }, { name: 'CREATIVE ART', max: 50 }],
-            'Grade 6': [{ name: 'MATHS ACTIVITIES', max: 60 }, { name: 'ENGLISH ACTIVITIES', max: 80 }, { name: 'SCI & TECH', max: 60 }, { name: 'KISW LUGHA', max: 80 }, { name: 'SST', max: 60 }, { name: 'RELIGIOUS EDUCATION', max: 40 }, { name: 'AGRICULTURE', max: 40 }, { name: 'CREATIVE ART', max: 50 }]
+            'Grade 4': [{ name: 'MATHS ACTIVITIES', max: 60 }, { name: 'ENGLISH ACTIVITIES', max: 80 }, { name: 'SCI & TECH', max: 60 }, { name: 'KISW LUGHA', max: 80 }, { name: 'SST', max: 60 }, { name: 'RELIGIOUS EDUCATION', max: 40 }, { name: 'AGRICULTURE', max: 40 }, { name: 'CREATIVE ART', max: 50 }]
         },
         'term': {
-            'Play Group': [{ name: 'MATH', max: 30 }, { name: 'LANG', max: 30 }, { name: 'LIT', max: 30 }, { name: 'KUS', max: 30 }, { name: 'ENVI/CRE', max: 30 }, { name: 'C/A', max: 30 }],
-            'PP1': [{ name: 'MATH', max: 30 }, { name: 'LANG', max: 30 }, { name: 'LIT', max: 30 }, { name: 'KIS', max: 30 }, { name: 'KUS', max: 30 }, { name: 'ENV', max: 30 }, { name: 'CRE/I.R.E', max: 30 }, { name: 'C/A', max: 30 }],
-            'PP2': [{ name: 'MATH', max: 30 }, { name: 'LANG', max: 30 }, { name: 'LIT', max: 30 }, { name: 'KIS', max: 30 }, { name: 'KUS', max: 30 }, { name: 'ENV', max: 30 }, { name: 'CRE/I.R.E', max: 30 }, { name: 'C/A', max: 30 }],
-            'Grade 1': [{ name: 'MATH', max: 70 }, { name: 'LIST/SPEAKING', max: 50 }, { name: 'READING', max: 50 }, { name: 'GRAMMAR', max: 50 }, { name: 'KUSOMA', max: 50 }, { name: 'SARUFI', max: 50 }, { name: 'ENV', max: 70 }, { name: 'C.R.E', max: 50 }, { name: 'CREATIVE ARTS', max: 50 }],
-            'Grade 2': [{ name: 'LIST & SPEAKING', max: 60 }, { name: 'READING ALOUD', max: 60 }, { name: 'GRAMMAR', max: 60 }, { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 60 }, { name: 'KUSOMA KWA SAUTI', max: 60 }, { name: 'LUGHA', max: 60 }, { name: 'MATH', max: 70 }, { name: 'ENVIRONMENTAL', max: 70 }, { name: 'C/A', max: 60 }, { name: 'RE', max: 60 }],
-            'Grade 3': [{ name: 'LIST & SPEAKING', max: 60 }, { name: 'READING ALOUD', max: 60 }, { name: 'GRAMMAR', max: 60 }, { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 60 }, { name: 'KUSOMA KWA SAUTI', max: 60 }, { name: 'SARUFI', max: 60 }, { name: 'MATHS', max: 70 }, { name: 'ENVIRONMENTAL', max: 70 }, { name: 'C.R.E', max: 60 }, { name: 'I.R.E', max: 60 }, { name: 'C/A', max: 60 }],
-            'Grade 4': [{ name: 'MATHS ACTIVITIES', max: 80 }, { name: 'ENGLISH ACTIVITIES', max: 100 }, { name: 'SCI & TECH', max: 80 }, { name: 'KISW LUGHA', max: 100 }, { name: 'SST', max: 80 }, { name: 'RELIGIOUS EDUCATION', max: 60 }, { name: 'AGRICULTURE', max: 60 }, { name: 'CREATIVE ART', max: 70 }],
-            'Grade 5': [{ name: 'MATHS ACTIVITIES', max: 80 }, { name: 'ENGLISH ACTIVITIES', max: 100 }, { name: 'SCI & TECH', max: 80 }, { name: 'KISW LUGHA', max: 100 }, { name: 'SST', max: 80 }, { name: 'RELIGIOUS EDUCATION', max: 60 }, { name: 'AGRICULTURE', max: 60 }, { name: 'CREATIVE ART', max: 70 }],
-            'Grade 6': [{ name: 'MATHS ACTIVITIES', max: 80 }, { name: 'ENGLISH ACTIVITIES', max: 100 }, { name: 'SCI & TECH', max: 80 }, { name: 'KISW LUGHA', max: 100 }, { name: 'SST', max: 80 }, { name: 'RELIGIOUS EDUCATION', max: 60 }, { name: 'AGRICULTURE', max: 60 }, { name: 'CREATIVE ART', max: 70 }]
+            'Grade 4': [{ name: 'MATHS ACTIVITIES', max: 80 }, { name: 'ENGLISH ACTIVITIES', max: 100 }, { name: 'SCI & TECH', max: 80 }, { name: 'KISW LUGHA', max: 100 }, { name: 'SST', max: 80 }, { name: 'RELIGIOUS EDUCATION', max: 60 }, { name: 'AGRICULTURE', max: 60 }, { name: 'CREATIVE ART', max: 70 }]
         }
     };
     const fallback = [{ name: 'MATHEMATICS', max: 50 }, { name: 'ENGLISH', max: 50 }, { name: 'KISWAHILI', max: 50 }, { name: 'SCIENCE', max: 50 }];
     try {
-        return configs[type]?.[grade] || configs['weekly']['Grade 1'] || fallback;
+        return configs[type]?.[grade] || configs['weekly']['Grade 4'] || fallback;
     } catch {
         return fallback;
     }
@@ -807,159 +676,6 @@ async function generateStudentId() {
         console.error('Error generating student ID:', error);
         return 'ST001';
     }
-}
-
-// ============================================
-// STUDENT REPORT HTML GENERATOR
-// ============================================
-function generateStudentReportHTML(student, allAssessments = null) {
-    const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
-    let assessments = student.assessments || [];
-    if (assessments && typeof assessments === 'object' && !Array.isArray(assessments)) {
-        assessments = Object.values(assessments);
-    }
-    if ((!assessments || assessments.length === 0) && student.subjects) {
-        assessments = student.subjects;
-    }
-    if ((!assessments || assessments.length === 0) && student.marks) {
-        assessments = student.marks;
-    }
-    const validAssessments = assessments.filter(a => a && typeof a === 'object');
-    if (validAssessments.length === 0) {
-        return `<html><body><h2>No Subject Data Found</h2><p>This student has no subject scores recorded yet.</p></body></html>`;
-    }
-
-    const subjectsWithPerf = validAssessments.map(a => {
-        const subjectName = a.subject || a.name || a.subjectName || a.subj || 'Unknown Subject';
-        const maxScore = a.maxScore || a.max || a.maximum || 100;
-        const score = a.score || a.marks || a.value || 0;
-        const perf = calculateAssessmentPerformance(score, maxScore);
-        return { subject: subjectName, maxScore, score, percentage: perf.percentage, level: perf.level, color: perf.color, short: perf.short, rating: perf.rating };
-    });
-
-    const strengths = subjectsWithPerf.filter(s => s.percentage >= 50);
-    const weaknesses = subjectsWithPerf.filter(s => s.percentage < 50);
-    const avgPercentage = subjectsWithPerf.length > 0 ? subjectsWithPerf.reduce((sum, s) => sum + s.percentage, 0) / subjectsWithPerf.length : 0;
-    const overallLevel = calculatePerformanceLevel(avgPercentage);
-    const overallColor = getPerformanceColor(overallLevel);
-    const overallShort = getPerformanceShort(overallLevel);
-    const overallRating = getPerformanceRating(overallLevel);
-
-    const totalScore = subjectsWithPerf.reduce((sum, s) => sum + s.score, 0);
-    const exceedingCount = subjectsWithPerf.filter(s => s.percentage >= 75).length;
-    const meetingCount = subjectsWithPerf.filter(s => s.percentage >= 50 && s.percentage < 75).length;
-    const approachingCount = subjectsWithPerf.filter(s => s.percentage >= 26 && s.percentage < 50).length;
-    const belowCount = subjectsWithPerf.filter(s => s.percentage < 26).length;
-
-    const subjectsHtml = subjectsWithPerf.map(a => `
-        <tr>
-            <td style="padding:4px 8px;border:1px solid #ddd;font-weight:600;">${a.subject}</td>
-            <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${a.maxScore}</td>
-            <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;font-weight:bold;color:#0A1628;">${a.score}</td>
-            <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;font-weight:bold;">${a.percentage.toFixed(1)}%</td>
-            <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">
-                <span style="background:${a.color};color:white;padding:2px 10px;border-radius:50px;font-size:9px;font-weight:700;">${a.short} (${a.rating})</span>
-            </td>
-        </tr>
-    `).join('');
-
-    const strengthsHtml = strengths.length > 0 ? 
-        strengths.map(s => `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;"><span>${s.subject}</span><span style="color:#28a745;font-weight:700;">${s.percentage.toFixed(1)}%</span></div>`).join('') :
-        '<p style="color:#999;">No subjects meeting expectation yet.</p>';
-
-    const weaknessesHtml = weaknesses.length > 0 ?
-        weaknesses.map(s => `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;"><span>${s.subject}</span><span style="color:#dc3545;font-weight:700;">${s.percentage.toFixed(1)}%</span></div>`).join('') :
-        '<p style="color:#28a745;font-weight:600;">🎉 All subjects are meeting expectations!</p>';
-
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Student Report - ${student.studentName}</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 15px; max-width: 100%; margin: 0 auto; background: white; }
-                .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 8px; margin-bottom: 10px; }
-                .header h1 { color: #0A1628; font-size: 18px; }
-                .header h1 .school-name { color: #D4A017; }
-                .header p { color: #666; margin: 3px 0; font-size: 13px; }
-                .student-info { background: #f8f9fc; padding: 8px 14px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e8ecf1; }
-                .student-info table { width: 100%; font-size: 11px; }
-                .student-info td { padding: 3px 8px; }
-                .student-info .label { font-weight: 600; color: #555; width: 120px; }
-                .student-info .value { font-weight: 600; color: #0A1628; }
-                .performance-box { text-align: center; padding: 8px 16px; border-radius: 6px; margin-bottom: 10px; }
-                .performance-box .level { font-size: 22px; font-weight: 700; }
-                .performance-box .score { font-size: 13px; color: #555; }
-                .performance-box .badges { margin-top: 4px; display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
-                .badge { display: inline-block; padding: 2px 12px; border-radius: 50px; font-size: 9px; font-weight: 700; color: white; }
-                .badge-exceeding { background: #28a745; }
-                .badge-meeting { background: #17a2b8; }
-                .badge-approaching { background: #d4a017; }
-                .badge-below { background: #dc3545; }
-                table { width: 100%; border-collapse: collapse; font-size: 10px; margin: 8px 0; }
-                table th { background: #0A1628; color: white; padding: 6px 10px; text-align: left; }
-                table td { padding: 4px 10px; border-bottom: 1px solid #e8ecf1; }
-                table tr:nth-child(even) { background: #fafbfc; }
-                .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
-                .analysis-box { background: #f8f9fc; padding: 8px 14px; border-radius: 6px; border-left: 3px solid #28a745; }
-                .analysis-box.weakness { border-left-color: #dc3545; }
-                .analysis-box h4 { font-size: 13px; margin-bottom: 2px; }
-                .summary-box { margin-top: 8px; padding: 8px 14px; background: #f8f9fc; border-radius: 6px; border: 1px solid #e8ecf1; }
-                .summary-box p { font-size: 11px; color: #555; line-height: 1.6; }
-                .summary-box p strong { color: #0A1628; }
-                .footer { text-align: center; margin-top: 12px; padding-top: 8px; border-top: 1px solid #ddd; color: #999; font-size: 9px; }
-                .no-print { display: none; }
-                @media print { body { padding: 10px; } .no-print { display: none !important; } }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                <p>Student Assessment Report - CBC Performance Analysis</p>
-            </div>
-            <div class="student-info">
-                <table>
-                    <tr><td class="label">Student Name:</td><td class="value">${student.studentName || 'N/A'}</td></tr>
-                    ${student.admissionNumber ? `<tr><td class="label">Admission Number:</td><td class="value">${student.admissionNumber}</td></tr>` : ''}
-                    <tr><td class="label">Grade:</td><td class="value">${student.grade || 'N/A'}</td></tr>
-                    <tr><td class="label">Assessment Type:</td><td class="value">${typeNames[student.type] || student.type || 'Monthly'}</td></tr>
-                    <tr><td class="label">Period:</td><td>${student.period || 'N/A'}</td></tr>
-                    <tr><td class="label">Term:</td><td>${student.term || 'N/A'}</td></tr>
-                    <tr><td class="label">Report Date:</td><td>${formatKenyaFullTime(new Date())}</td></tr>
-                </table>
-            </div>
-            <div class="performance-box" style="background: ${overallColor}15; border: 2px solid ${overallColor};">
-                <div class="level" style="color: ${overallColor};">${overallLevel} (${overallShort})</div>
-                <div class="score">Total Score: ${totalScore} | Average: ${avgPercentage.toFixed(1)}% | Rating: ${overallRating}</div>
-                <div class="badges">
-                    <span class="badge badge-exceeding">✅ EE (4): ${exceedingCount}</span>
-                    <span class="badge badge-meeting">📘 ME (3): ${meetingCount}</span>
-                    <span class="badge badge-approaching">📗 AE (2): ${approachingCount}</span>
-                    <span class="badge badge-below">📕 BE (1): ${belowCount}</span>
-                </div>
-            </div>
-            <table>
-                <thead><tr><th>Subject</th><th style="text-align:center;">Max</th><th style="text-align:center;">Score</th><th style="text-align:center;">%</th><th style="text-align:center;">Performance</th></tr></thead>
-                <tbody>${subjectsHtml}</tbody>
-            </table>
-            <div class="analysis-grid">
-                <div class="analysis-box"><h4 style="color:#28a745;">🏆 Strengths</h4>${strengthsHtml}</div>
-                <div class="analysis-box weakness"><h4 style="color:#dc3545;">📚 Needs Improvement</h4>${weaknessesHtml}</div>
-            </div>
-            <div class="summary-box">
-                <p><strong>Overall:</strong> ${student.studentName || 'The student'} is currently <strong style="color:${overallColor};">${overallLevel.toLowerCase()} (${overallShort})</strong> with an average of <strong>${avgPercentage.toFixed(1)}%</strong> (Rating: ${overallRating}/4).</p>
-            </div>
-            <div class="footer">
-                <p>© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-            </div>
-            <div class="no-print" style="text-align:center;margin-top:10px;">
-                <button onclick="window.print()" style="padding:8px 20px;background:#D4A017;color:#0A1628;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:12px;">🖨️ Print / Save as PDF</button>
-            </div>
-        </body>
-        </html>
-    `;
 }
 
 // ============================================
@@ -1112,36 +828,26 @@ app.post('/api/teacher/checkin', async (req, res) => {
         if (teacher.password !== pin) {
             return res.status(401).json({ success: false, message: '❌ Invalid PIN. Please try again.' });
         }
-        
         const kenyaNow = getKenyaTime();
         const kenyaToday = getKenyaDate();
         const kenyaHour = getKenyaHour();
         const dayOfWeek = kenyaNow.getDay();
-        
-        console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
-        console.log('🕐 Hour (Kenya time):', kenyaHour);
-        
         if (dayOfWeek === 0 || dayOfWeek === 6) {
             return res.status(400).json({ success: false, message: '📅 Weekend! Check-in is only available on weekdays (Monday-Friday).' });
         }
-        
         const existingAttendance = teacher.attendance.find(a => {
             const aDate = new Date(a.date);
             aDate.setHours(0, 0, 0, 0);
             return aDate.getTime() === kenyaToday.getTime();
         });
-        
         if (existingAttendance) {
             return res.status(400).json({ success: false, message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn) });
         }
-        
         if (kenyaHour >= 17) {
             return res.status(400).json({ success: false, message: '⏰ Check-in is not allowed after 5:00 PM. Please try again tomorrow.' });
         }
-        
         const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
         const status = isLate ? 'Late' : 'Present';
-        
         teacher.attendance.push({
             date: kenyaToday,
             checkIn: kenyaNow,
@@ -1150,12 +856,9 @@ app.post('/api/teacher/checkin', async (req, res) => {
             isLate: isLate,
             notes: isLate ? 'Late check-in' : 'On-time check-in'
         });
-        
         await teacher.save();
-        
         const message = isLate ? '⚠️ Check-in successful! (You are LATE - after 7:00 AM)' : '✅ Check-in successful! (On time)';
         const formattedTime = formatKenyaTime(kenyaNow);
-        
         res.json({
             success: true,
             message: message,
@@ -1181,33 +884,26 @@ app.post('/api/teacher/checkout', async (req, res) => {
         if (teacher.password !== pin) {
             return res.status(401).json({ success: false, message: '❌ Invalid PIN. Please try again.' });
         }
-        
         const kenyaNow = getKenyaTime();
         const kenyaToday = getKenyaDate();
-        
         const todayAttendance = teacher.attendance.find(a => {
             const aDate = new Date(a.date);
             aDate.setHours(0, 0, 0, 0);
             return aDate.getTime() === kenyaToday.getTime();
         });
-        
         if (!todayAttendance) {
             return res.status(400).json({ success: false, message: '❌ No check-in found for today. Please check in first.' });
         }
-        
         if (todayAttendance.checkOut) {
             return res.status(400).json({ success: false, message: '⚠️ You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut) });
         }
-        
         todayAttendance.checkOut = kenyaNow;
         todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
         const checkInTime = new Date(todayAttendance.checkIn);
         const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
         todayAttendance.hoursWorked = parseFloat(hoursWorked);
         todayAttendance.status = todayAttendance.isLate ? 'Late' : 'Present';
-        
         await teacher.save();
-        
         res.json({
             success: true,
             message: '✅ Check-out successful!',
@@ -2116,21 +1812,15 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        const allAssessments = await StudentAssessment.find({ studentName: student.studentName }).sort({ createdAt: 1 });
-        const html = generateStudentReportHTML(student, allAssessments);
-        const options = { format: 'A4', border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }, printBackground: true, landscape: false, type: 'pdf', timeout: 30000, quality: '100' };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
+        const pdfBuffer = await generateStudentReportPDF(student);
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('PDF generation error:', error);
+        res.status(500).json({ success: false, message: 'Error generating PDF: ' + error.message });
     }
 });
 
@@ -2140,11 +1830,17 @@ app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        const allAssessments = await StudentAssessment.find({ studentName: student.studentName }).sort({ createdAt: 1 });
-        const html = generateStudentReportHTML(student, allAssessments);
-        res.json({ success: true, html });
+        // For now, just return a simple text report
+        const text = `Student Report\n\nName: ${student.studentName}\nGrade: ${student.grade}\nTotal Score: ${student.totalScore || 0}\nAverage: ${student.averageScore ? student.averageScore.toFixed(1) : '0'}\nPerformance: ${student.performanceLevel || 'N/A'}`;
+        const pdfBuffer = await generateTextPDF(text, 'Student Assessment Report');
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('PDF generation error:', error);
+        res.status(500).json({ success: false, message: 'Error generating PDF: ' + error.message });
     }
 });
 
@@ -2156,10 +1852,15 @@ app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) =
             return res.status(404).json({ success: false, message: 'No assessments found' });
         }
         const latest = allAssessments[allAssessments.length - 1];
-        const html = generateStudentReportHTML(latest, allAssessments);
-        res.json({ success: true, html });
+        const pdfBuffer = await generateStudentReportPDF(latest);
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="comprehensive_report_${studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('PDF generation error:', error);
+        res.status(500).json({ success: false, message: 'Error generating PDF: ' + error.message });
     }
 });
 
@@ -2400,20 +2101,14 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
             });
             return { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId || 'N/A', department: teacher.department || 'N/A', totalDays, onTime, late, absent };
         });
-        const title = 'Staff Attendance Report';
-        const html = generateStaffReportHTML(report, title, periodLabel);
-        const options = { format: 'A4', border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }, printBackground: true, landscape: true, type: 'pdf', timeout: 30000, quality: '100' };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            const filename = `staff_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
+        const text = `Staff Attendance Report\n\nPeriod: ${periodLabel}\nTotal Staff: ${report.length}\n\n` + report.map((s, i) => `${i+1}. ${s.name} (${s.employeeId}) - On Time: ${s.onTime}, Late: ${s.late}, Absent: ${s.absent}`).join('\n');
+        const pdfBuffer = await generateTextPDF(text, 'Staff Attendance Report');
+        
+        const filename = `staff_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error downloading staff report:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -2463,22 +2158,16 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
         const visitors = await Visitor.find(filter);
         const report = visitors.map(visitor => {
             const duration = visitor.checkOut ? Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
-            return { fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`, firstName: visitor.firstName, lastName: visitor.lastName, badgeNumber: visitor.badgeNumber || 'N/A', purpose: visitor.purpose || 'N/A', personToVisit: visitor.personToVisit || 'N/A', checkIn: visitor.checkIn, checkOut: visitor.checkOut || null, checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-', checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-', status: visitor.status || 'Checked In', duration: duration };
+            return { fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`, purpose: visitor.purpose || 'N/A', personToVisit: visitor.personToVisit || 'N/A', checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-', checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-', status: visitor.status || 'Checked In', duration: duration };
         });
-        const title = 'Visitor Report';
-        const html = generateVisitorReportHTML(report, title, periodLabel);
-        const options = { format: 'A4', border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }, printBackground: true, landscape: true, type: 'pdf', timeout: 30000, quality: '100' };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            const filename = `visitor_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
+        const text = `Visitor Report\n\nPeriod: ${periodLabel}\nTotal Visitors: ${report.length}\n\n` + report.map((v, i) => `${i+1}. ${v.fullName} - ${v.purpose} (${v.personToVisit}) - ${v.checkInTime} to ${v.checkOutTime}`).join('\n');
+        const pdfBuffer = await generateTextPDF(text, 'Visitor Report');
+        
+        const filename = `visitor_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error downloading visitor report:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -2491,19 +2180,15 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
 app.get('/api/assessments/download-class-pdf', async (req, res) => {
     try {
         const { grade, type, term, year, period } = req.query;
-        
         if (!grade) {
             return res.status(400).json({ success: false, message: 'Grade is required' });
         }
-        
         const filter = { grade: grade };
         if (type) filter.type = type;
         if (term) filter.term = term;
         if (year) filter.year = year;
         if (period) filter.period = period;
-        
         const allStudents = await StudentAssessment.find(filter).sort({ studentName: 1, createdAt: -1 });
-        
         const uniqueStudents = {};
         allStudents.forEach(student => {
             const key = student.studentName;
@@ -2511,38 +2196,20 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
                 uniqueStudents[key] = student;
             }
         });
-        
         const students = Object.values(uniqueStudents).sort((a, b) => a.studentName.localeCompare(b.studentName));
-        
         if (students.length === 0) {
             return res.status(404).json({ success: false, message: 'No students found for this grade' });
         }
+        let text = `Class Report\n\nGrade: ${grade}\nType: ${type || 'Monthly'}\nTerm: ${term || 'N/A'}\nYear: ${year || '2026'}\nPeriod: ${period || 'N/A'}\nTotal Students: ${students.length}\n\n`;
+        text += students.map((s, i) => `${i+1}. ${s.studentName} - Total: ${s.totalScore || 0}, Avg: ${s.averageScore ? s.averageScore.toFixed(1) : '0'}, Level: ${s.performanceLevel || 'N/A'}`).join('\n');
+        const pdfBuffer = await generateTextPDF(text, `Grade ${grade} Assessment Report`);
         
-        const html = generateClassReportHTML(students, grade, type, term, year, period);
-        
-        const options = { 
-            format: 'A4', 
-            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }, 
-            printBackground: true, 
-            landscape: true, 
-            type: 'pdf', 
-            timeout: 30000, 
-            quality: '100' 
-        };
-        
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            
-            const periodLabel = period ? `_${period}` : '';
-            const filename = `grade_report_${grade}_${type || 'monthly'}_${term || 'all'}_${year || '2026'}${periodLabel}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
+        const periodLabel = period ? `_${period}` : '';
+        const filename = `grade_report_${grade}_${type || 'monthly'}_${term || 'all'}_${year || '2026'}${periodLabel}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error generating class PDF:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -2550,428 +2217,23 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
 });
 
 // ============================================
-// GENERATE CLASS REPORT HTML - WITH RUBRIC
-// ============================================
-function generateClassReportHTML(students, grade, type, term, year, period) {
-    const now = getKenyaTime();
-    const typeNames = { 'weekly': 'Weekly', 'monthly': 'Monthly', 'term': 'End of Term' };
-    const periodLabel = period ? ` - ${period}` : '';
-    
-    function shortenSubject(name) {
-        const shortMap = {
-            'MATHS ACTIVITIES': 'Maths',
-            'ENGLISH ACTIVITIES': 'English',
-            'SCI & TECH': 'Sci/Tech',
-            'KISW LUGHA': 'Kisw',
-            'RELIGIOUS EDUCATION': 'RE',
-            'AGRICULTURE': 'Agric',
-            'CREATIVE ART': 'C.Art',
-            'MATHEMATICS': 'Maths',
-            'KISWAHILI': 'Kisw',
-            'SCIENCE': 'Science',
-            'SOCIAL STUDIES': 'SST',
-            'CREATIVE ARTS': 'C.Arts',
-            'LIST/SPEAKING': 'Listening',
-            'READING': 'Reading',
-            'GRAMMAR': 'Grammar',
-            'KUSOMA': 'Kusoma',
-            'SARUFI': 'Sarufi',
-            'ENVIRONMENTAL': 'Env',
-            'C.R.E': 'CRE',
-            'I.R.E': 'IRE',
-            'LITERACY': 'Literacy',
-            'NUMERACY': 'Numeracy',
-            'PSYCHOMOTOR': 'Psychomotor',
-            'LANGUAGE': 'Language',
-            'LIST & SPEAKING': 'Listen/Speak',
-            'READING ALOUD': 'Read Aloud',
-            'KUSIKILIZA NA KUZUNGUMZA': 'Kusikiliza',
-            'KUSOMA KWA SAUTI': 'Soma Sauti',
-            'LUGHA': 'Lugha'
-        };
-        for (const [key, value] of Object.entries(shortMap)) {
-            if (name.includes(key) || name === key) {
-                return value;
-            }
-        }
-        if (name.length > 12) {
-            return name.substring(0, 10) + '...';
-        }
-        return name;
-    }
-    
-    let totalStudents = students.length;
-    let totalScoreSum = 0;
-    let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
-    let allSubjects = [];
-    
-    students.forEach(student => {
-        totalScoreSum += student.totalScore || 0;
-        const level = student.performanceLevel || 'Approaching Expectation';
-        if (level === 'Exceeding Expectation') exceedingCount++;
-        else if (level === 'Meeting Expectation') meetingCount++;
-        else if (level === 'Approaching Expectation') approachingCount++;
-        else belowCount++;
-        
-        if (student.assessments && student.assessments.length > 0) {
-            student.assessments.forEach(a => {
-                if (!allSubjects.includes(a.subject)) {
-                    allSubjects.push(a.subject);
-                }
-            });
-        }
-    });
-    
-    allSubjects.sort();
-    const avgClassScore = totalStudents > 0 ? (totalScoreSum / totalStudents).toFixed(1) : 0;
-    const sortedStudents = [...students].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-    
-    const subjectHeaders = allSubjects.map(subject => {
-        const shortName = shortenSubject(subject);
-        return `<th style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:5.5px;background:#0A1628;color:white;font-weight:700;min-width:30px;max-width:42px;word-wrap:break-word;">${shortName}</th>`;
-    }).join('');
-    
-    const maxScoresRow = allSubjects.map(subject => {
-        let maxScore = 0;
-        for (const student of students) {
-            if (student.assessments) {
-                const found = student.assessments.find(a => a.subject === subject);
-                if (found) {
-                    maxScore = found.maxScore;
-                    break;
-                }
-            }
-        }
-        return `<td style="padding:1px 1px;border:1px solid #ddd;text-align:center;font-size:4.5px;color:#999;background:#f8f9fc;font-weight:600;">${maxScore}</td>`;
-    }).join('');
-    
-    let rowsHtml = sortedStudents.map((student, index) => {
-        const rank = index + 1;
-        const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
-        const level = student.performanceLevel || 'Approaching Expectation';
-        const levelColor = getPerformanceColor(level);
-        const shortLabel = getPerformanceShort(level);
-        const rating = getPerformanceRating(level);
-        
-        let rankDisplay = rank;
-        if (rank === 1) rankDisplay = '🥇 1';
-        else if (rank === 2) rankDisplay = '🥈 2';
-        else if (rank === 3) rankDisplay = '🥉 3';
-        else rankDisplay = rank;
-        
-        let subjectScores = '';
-        allSubjects.forEach(subject => {
-            const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
-            if (assessment) {
-                const percentage = assessment.percentage || (assessment.maxScore > 0 ? ((assessment.score / assessment.maxScore) * 100) : 0);
-                let scoreColor = '#0A1628';
-                if (percentage >= 75) scoreColor = '#28a745';
-                else if (percentage >= 50) scoreColor = '#17a2b8';
-                else if (percentage >= 26) scoreColor = '#d4a017';
-                else scoreColor = '#dc3545';
-                
-                subjectScores += `
-                    <td style="padding:1px 1px;border:1px solid #ddd;text-align:center;font-size:6.5px;font-weight:700;color:${scoreColor};">
-                        ${assessment.score}
-                        <span style="display:block;font-size:4.5px;font-weight:400;color:#999;">/${assessment.maxScore}</span>
-                    </td>
-                `;
-            } else {
-                subjectScores += `
-                    <td style="padding:1px 1px;border:1px solid #ddd;text-align:center;font-size:6px;color:#ddd;">-</td>
-                `;
-            }
-        });
-        
-        return `
-            <tr style="${index % 2 === 0 ? 'background:#fafbfc;' : 'background:white;'}">
-                <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:6.5px;font-weight:700;color:${rank <= 3 ? '#D4A017' : '#666'};">
-                    ${rankDisplay}
-                </td>
-                <td style="padding:2px 3px;border:1px solid #ddd;font-weight:600;font-size:6.5px;color:#0A1628;white-space:nowrap;">${student.studentName}</td>
-                ${subjectScores}
-                <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:7px;font-weight:700;color:#D4A017;">${student.totalScore || 0}</td>
-                <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;font-size:6.5px;font-weight:700;color:#17a2b8;">${avgScore}</td>
-                <td style="padding:2px 2px;border:1px solid #ddd;text-align:center;">
-                    <span style="background:${levelColor};color:white;padding:1px 4px;border-radius:50px;font-weight:700;font-size:5.5px;display:inline-block;white-space:nowrap;min-width:42px;">
-                        ${shortLabel} (${rating})
-                    </span>
-                </td>
-            </tr>
-        `;
-    }).join('');
-    
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>${grade} - Assessment Report</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            padding: 3px; 
-            max-width: 1100px; 
-            margin: 0 auto; 
-            font-size: 6px; 
-            background: white;
-        }
-        .report-container {
-            border: 2px solid #0A1628;
-            border-radius: 4px;
-            padding: 5px;
-            background: white;
-        }
-        .header { 
-            text-align: center; 
-            border-bottom: 2px solid #D4A017; 
-            padding-bottom: 3px; 
-            margin-bottom: 4px; 
-        }
-        .header .school-name { 
-            font-size: 14px; 
-            font-weight: 900; 
-            color: #0A1628;
-            font-family: 'Georgia', serif;
-            letter-spacing: 1px;
-        }
-        .header .school-name .gold { color: #D4A017; }
-        .header .motto {
-            color: #888;
-            font-size: 6px;
-            font-style: italic;
-            letter-spacing: 1px;
-        }
-        .header .report-title {
-            font-size: 9px;
-            font-weight: 700;
-            color: #0A1628;
-        }
-        .header .report-info { 
-            font-size: 5px; 
-            color: #999; 
-        }
-        .header .flag-strip {
-            display: flex;
-            height: 2.5px;
-            width: 60px;
-            margin: 2px auto 0;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .header .flag-strip span { flex: 1; height: 100%; }
-        .header .flag-strip .b { background: #000000; }
-        .header .flag-strip .r { background: #BB0000; }
-        .header .flag-strip .g { background: #006600; }
-        .header .flag-strip .w { background: #FFFFFF; }
-        
-        .stats-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1px;
-            background: #0A1628;
-            border-radius: 4px;
-            padding: 3px 6px;
-            margin-bottom: 4px;
-            justify-content: center;
-            align-items: center;
-        }
-        .stats-bar .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            padding: 2px 8px;
-            border-right: 1px solid rgba(255,255,255,0.08);
-            color: white;
-        }
-        .stats-bar .stat-item:last-child { border-right: none; }
-        .stats-bar .stat-item .num {
-            font-size: 12px;
-            font-weight: 700;
-            color: #D4A017;
-        }
-        .stats-bar .stat-item .num.green { color: #28a745; }
-        .stats-bar .stat-item .num.blue { color: #17a2b8; }
-        .stats-bar .stat-item .num.orange { color: #d4a017; }
-        .stats-bar .stat-item .num.red { color: #dc3545; }
-        .stats-bar .stat-item .num.purple { color: #6f42c1; }
-        .stats-bar .stat-item .num.gold { color: #D4A017; }
-        .stats-bar .stat-item .num.cyan { color: #17a2b8; }
-        .stats-bar .stat-item .label {
-            font-size: 5px;
-            color: rgba(255,255,255,0.5);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        
-        .table-wrap { overflow-x: auto; margin-top: 2px; }
-        table { width: 100%; border-collapse: collapse; font-size: 5.5px; border: 1px solid #ddd; }
-        table th { 
-            background: #0A1628; color: white; padding: 2px 2px; text-align: center; 
-            font-size: 5px; font-weight: 700; white-space: nowrap; border: 1px solid #1a2a4a;
-        }
-        table td { padding: 1px 2px; border: 1px solid #ddd; }
-        .header-row td { background: #f8f9fc !important; font-weight: 600; color: #555; font-size: 4.5px; }
-        
-        .footer { 
-            display: flex; justify-content: space-between; align-items: center;
-            margin-top: 3px; padding-top: 3px; border-top: 1px solid #ddd;
-            color: #999; font-size: 4.5px; 
-        }
-        .footer .left { text-align: left; }
-        .footer .right { text-align: right; }
-        .footer .contact { color: #ccc; }
-        .footer .signature { display: flex; gap: 15px; margin-top: 1px; }
-        .footer .signature .sig-line { display: inline-block; width: 60px; border-bottom: 1px solid #999; margin-top: 1px; }
-        .footer .signature .sig-label { font-size: 4px; color: #999; }
-        
-        @media print { 
-            body { padding: 2px; } 
-            .stats-bar .stat-item { padding: 1px 5px; }
-            .stats-bar .stat-item .num { font-size: 10px; }
-            table th { font-size: 4.5px; padding: 1px 1px; }
-            table td { padding: 1px 1px; font-size: 4.5px; }
-            .report-container { border: 1px solid #ddd; padding: 3px; }
-            .header .school-name { font-size: 12px; }
-            .header .report-title { font-size: 8px; }
-        }
-        @page { margin: 3mm; size: A4 landscape; }
-        .watermark {
-            position: fixed; opacity: 0.012; font-size: 30px;
-            top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
-            pointer-events: none; z-index: 0; color: #0A1628;
-            font-weight: 900; letter-spacing: 4px; white-space: nowrap;
-        }
-        .legend {
-            display: flex; gap: 6px; justify-content: center; margin-top: 2px; font-size: 4.5px; flex-wrap: wrap;
-        }
-        .legend .item { display: flex; align-items: center; gap: 2px; }
-        .legend .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; }
-        .legend .dot.exceeding { background: #28a745; }
-        .legend .dot.meeting { background: #17a2b8; }
-        .legend .dot.approaching { background: #d4a017; }
-        .legend .dot.below { background: #dc3545; }
-        .legend .rubric-label { font-weight: 600; font-size: 5px; }
-        .legend .rubric-label.ee { color: #28a745; }
-        .legend .rubric-label.me { color: #17a2b8; }
-        .legend .rubric-label.ae { color: #d4a017; }
-        .legend .rubric-label.be { color: #dc3545; }
-    </style>
-</head>
-<body>
-    <div class="watermark">CHANGARA STAR ACADEMY</div>
-    
-    <div class="report-container">
-        <div class="header">
-            <div class="school-name">🏫 <span class="gold">Changara</span> Star Academy</div>
-            <div class="motto">"Assurance to Excellence"</div>
-            <div class="flag-strip">
-                <span class="b"></span><span class="r"></span>
-                <span class="g"></span><span class="w"></span>
-                <span class="b"></span><span class="r"></span>
-                <span class="g"></span><span class="w"></span>
-            </div>
-            <div class="report-title">${grade} - ${typeNames[type] || type || 'Monthly'} Assessment Results</div>
-            <div class="report-info">
-                ${term ? term + ' | ' : ''} ${year || '2026'} ${periodLabel} | ${formatKenyaDate(now)}
-            </div>
-        </div>
-        
-        <div class="stats-bar">
-            <div class="stat-item"><span class="num gold">${totalStudents}</span><span class="label">Students</span></div>
-            <div class="stat-item"><span class="num green">${exceedingCount}</span><span class="label">EE (4)</span></div>
-            <div class="stat-item"><span class="num blue">${meetingCount}</span><span class="label">ME (3)</span></div>
-            <div class="stat-item"><span class="num orange">${approachingCount}</span><span class="label">AE (2)</span></div>
-            <div class="stat-item"><span class="num red">${belowCount}</span><span class="label">BE (1)</span></div>
-            <div class="stat-item"><span class="num purple">${avgClassScore}</span><span class="label">Class Avg</span></div>
-            <div class="stat-item"><span class="num cyan">${allSubjects.length}</span><span class="label">Subjects</span></div>
-        </div>
-        
-        <div class="legend">
-            <span class="item"><span class="dot exceeding"></span> <span class="rubric-label ee">EE: Exceeding (75-100%)</span></span>
-            <span class="item"><span class="dot meeting"></span> <span class="rubric-label me">ME: Meeting (50-74%)</span></span>
-            <span class="item"><span class="dot approaching"></span> <span class="rubric-label ae">AE: Approaching (26-49%)</span></span>
-            <span class="item"><span class="dot below"></span> <span class="rubric-label be">BE: Below (0-25%)</span></span>
-            <span class="item" style="color:#D4A017;font-weight:700;">🏆 Rank: 1st 🥇, 2nd 🥈, 3rd 🥉</span>
-        </div>
-        
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:20px;">Rank</th>
-                        <th style="min-width:60px;text-align:left;">Student</th>
-                        ${subjectHeaders}
-                        <th style="width:26px;">Total</th>
-                        <th style="width:22px;">Avg</th>
-                        <th style="width:50px;">Level</th>
-                    </tr>
-                    <tr class="header-row">
-                        <td colspan="2" style="text-align:right;color:#0A1628;font-weight:700;">Max:</td>
-                        ${maxScoresRow}
-                        <td colspan="3" style="background:#f8f9fc;border:1px solid #ddd;"></td>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rowsHtml}
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="footer">
-            <div class="left">
-                <span class="contact">📞 +254 721 556 252 | 📧 starchangara@gmail.com</span>
-            </div>
-            <div class="right">
-                <span>© ${new Date().getFullYear()} Changara Star Academy</span>
-                <span style="color:#D4A017;font-weight:700;margin-left:4px;">🇰🇪</span>
-                <div class="signature">
-                    <div><div class="sig-line"></div><div class="sig-label">Principal's Signature</div></div>
-                    <div><div class="sig-line"></div><div class="sig-label">Date</div></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
-    `;
-}
-
-// ============================================
 // COMPREHENSIVE PDF GENERATION ENDPOINT - ALL GRADES
 // ============================================
 app.post('/api/assessments/generate-comprehensive-pdf', async (req, res) => {
     try {
         const { html, filename } = req.body;
-        
         if (!html) {
             return res.status(400).json({ success: false, message: 'HTML content is required' });
         }
+        // For now, generate a simple text PDF
+        const text = `Comprehensive Report\n\n${html.replace(/<[^>]*>/g, ' ').slice(0, 5000)}`;
+        const pdfBuffer = await generateTextPDF(text, 'Comprehensive Report');
         
-        const options = {
-            format: 'A4',
-            border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' },
-            printBackground: true,
-            landscape: true,
-            type: 'pdf',
-            timeout: 60000,
-            quality: '100'
-        };
-        
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            
-            const downloadFilename = filename || `comprehensive_report_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${downloadFilename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
+        const downloadFilename = filename || `comprehensive_report_${new Date().toISOString().split('T')[0]}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${downloadFilename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Comprehensive PDF generation error:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -2987,9 +2249,7 @@ app.get('/api/assessments/all-grades', async (req, res) => {
         if (term) filter.term = term;
         if (year) filter.year = year;
         if (period) filter.period = period;
-        
         const students = await StudentAssessment.find(filter).sort({ grade: 1, studentName: 1 });
-        
         const groupedByGrade = {};
         students.forEach(student => {
             if (!groupedByGrade[student.grade]) {
@@ -2997,14 +2257,7 @@ app.get('/api/assessments/all-grades', async (req, res) => {
             }
             groupedByGrade[student.grade].push(student);
         });
-        
-        res.json({ 
-            success: true, 
-            total: students.length,
-            grades: Object.keys(groupedByGrade),
-            byGrade: groupedByGrade,
-            students: students
-        });
+        res.json({ success: true, total: students.length, grades: Object.keys(groupedByGrade), byGrade: groupedByGrade, students: students });
     } catch (error) {
         console.error('Error fetching all grades:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -3057,15 +2310,7 @@ app.get('/api/clerk/students/fees', async (req, res) => {
         const totalBoarders = studentFees.filter(s => s.studentType === 'Boarder').length;
         const totalPaid = studentFees.reduce((sum, s) => sum + s.paid, 0);
         const totalBalance = studentFees.reduce((sum, s) => sum + s.balance, 0);
-        res.json({
-            success: true,
-            students: studentFees,
-            totalStudents,
-            totalDayScholars,
-            totalBoarders,
-            totalPaid,
-            totalBalance
-        });
+        res.json({ success: true, students: studentFees, totalStudents, totalDayScholars, totalBoarders, totalPaid, totalBalance });
     } catch (error) {
         console.error('Error fetching student fees:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -3084,25 +2329,7 @@ app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
         const totalFees = feeData.total || 0;
         const balance = totalFees - paid;
         const payments = await Payment.find({ studentId: student.studentId }).sort({ date: -1 });
-        res.json({
-            success: true,
-            student: {
-                id: student.studentId,
-                name: student.name,
-                grade: student.grade,
-                gender: student.gender,
-                studentType: student.type,
-                isBoarding: student.type === 'Boarder'
-            },
-            fees: {
-                total: totalFees,
-                paid: paid,
-                balance: balance,
-                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
-            },
-            feeBreakdown: feeData,
-            payments: payments
-        });
+        res.json({ success: true, student: { id: student.studentId, name: student.name, grade: student.grade, gender: student.gender, studentType: student.type, isBoarding: student.type === 'Boarder' }, fees: { total: totalFees, paid: paid, balance: balance, status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid' }, feeBreakdown: feeData, payments: payments });
     } catch (error) {
         console.error('Error fetching student fee details:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -3145,13 +2372,7 @@ app.post('/api/clerk/payments/record', async (req, res) => {
             date: new Date()
         });
         await payment.save();
-        res.json({
-            success: true,
-            message: `Payment of KES ${totalAmount.toLocaleString()} recorded for ${student.name}`,
-            totalAmount: totalAmount,
-            categories: categoryList,
-            date: payment.date
-        });
+        res.json({ success: true, message: `Payment of KES ${totalAmount.toLocaleString()} recorded for ${student.name}`, totalAmount: totalAmount, categories: categoryList, date: payment.date });
     } catch (error) {
         console.error('Error recording payment:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -3280,236 +2501,44 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
                 status: balance === 0 ? 'Paid' : balance < totalFees ? 'Partial' : 'Unpaid'
             };
         });
-        const html = generateFeeReportHTML(studentFees, type);
-        const options = {
-            format: 'A4',
-            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' },
-            printBackground: true,
-            landscape: true,
-            type: 'pdf',
-            timeout: 30000,
-            quality: '100'
-        };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            const filename = `fee_report_${type}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
+        let text = `Fee Report\n\nType: ${type}\nTotal Students: ${studentFees.length}\nTotal Fees: KES ${studentFees.reduce((s, i) => s + i.totalFees, 0).toLocaleString()}\nTotal Paid: KES ${studentFees.reduce((s, i) => s + i.paid, 0).toLocaleString()}\nTotal Balance: KES ${studentFees.reduce((s, i) => s + i.balance, 0).toLocaleString()}\n\n`;
+        text += studentFees.map((s, i) => `${i+1}. ${s.name} (${s.id}) - ${s.grade} - ${s.studentType} - Total: KES ${s.totalFees.toLocaleString()}, Paid: KES ${s.paid.toLocaleString()}, Balance: KES ${s.balance.toLocaleString()}`).join('\n');
+        const pdfBuffer = await generateTextPDF(text, `Fee Report - ${type}`);
+        
+        const filename = `fee_report_${type}_${new Date().toISOString().split('T')[0]}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error generating fee report:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// 10. GENERATE FEE REPORT HTML HELPER
-function generateFeeReportHTML(students, type) {
-    const now = new Date();
-    const totalStudents = students.length;
-    const totalFees = students.reduce((sum, s) => sum + s.totalFees, 0);
-    const totalPaid = students.reduce((sum, s) => sum + s.paid, 0);
-    const totalBalance = students.reduce((sum, s) => sum + s.balance, 0);
-    const paidCount = students.filter(s => s.status === 'Paid').length;
-    const partialCount = students.filter(s => s.status === 'Partial').length;
-    const unpaidCount = students.filter(s => s.status === 'Unpaid').length;
-    const typeNames = {
-        'summary': 'Summary Report',
-        'detailed': 'Detailed Fee Report',
-        'payment': 'Payment Report'
-    };
-    let rowsHtml = students.map((student, index) => {
-        const statusColor = student.status === 'Paid' ? '#28a745' : student.status === 'Partial' ? '#ffc107' : '#dc3545';
-        return `
-            <tr>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;">${student.name}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.id}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.grade}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">${student.studentType}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;">KES ${student.totalFees.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;color:#28a745;">KES ${student.paid.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;color:#dc3545;">KES ${student.balance.toLocaleString()}</td>
-                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;">
-                    <span style="background:${statusColor};color:white;padding:2px 10px;border-radius:50px;font-weight:700;font-size:10px;">${student.status}</span>
-                </td>
-            </tr>
-        `;
-    }).join('');
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Fee Report - ${type}</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 10px; max-width: 1200px; margin: 0 auto; font-size: 8px; }
-                .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 8px; margin-bottom: 10px; }
-                .header h1 { color: #0A1628; font-size: 18px; }
-                .header h1 .school-name { color: #D4A017; }
-                .header p { color: #666; font-size: 10px; }
-                .summary-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 10px; }
-                .summary-box .item { text-align: center; padding: 6px; background: #f8f9fc; border-radius: 6px; border: 1px solid #e8ecf1; }
-                .summary-box .item .num { font-size: 16px; font-weight: 700; }
-                .summary-box .item .label { font-size: 7px; color: #666; }
-                .summary-box .item .num.gold { color: #D4A017; }
-                .summary-box .item .num.green { color: #28a745; }
-                .summary-box .item .num.orange { color: #d4a017; }
-                .summary-box .item .num.red { color: #dc3545; }
-                .summary-box .item .num.blue { color: #17a2b8; }
-                table { width: 100%; border-collapse: collapse; font-size: 7px; }
-                table th { background: #0A1628; color: white; padding: 4px 6px; text-align: left; font-size: 6px; }
-                table td { padding: 3px 6px; border-bottom: 1px solid #e8ecf1; }
-                table tr:nth-child(even) { background: #fafbfc; }
-                .footer { text-align: center; margin-top: 10px; padding-top: 6px; border-top: 1px solid #ddd; color: #999; font-size: 6px; }
-                @media print { body { padding: 5px; } }
-                @page { margin: 4mm; size: A4 landscape; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                <p>${typeNames[type] || 'Fee Report'}</p>
-                <p style="font-size:7px;color:#999;">Generated on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</p>
-            </div>
-            <div class="summary-box">
-                <div class="item"><div class="num gold">${totalStudents}</div><div class="label">Total Students</div></div>
-                <div class="item"><div class="num green">${paidCount}</div><div class="label">✅ Paid</div></div>
-                <div class="item"><div class="num orange">${partialCount}</div><div class="label">⏳ Partial</div></div>
-                <div class="item"><div class="num red">${unpaidCount}</div><div class="label">❌ Unpaid</div></div>
-                <div class="item"><div class="num blue">KES ${totalFees.toLocaleString()}</div><div class="label">Total Fees</div></div>
-                <div class="item"><div class="num" style="color:#D4A017;">KES ${totalBalance.toLocaleString()}</div><div class="label">Total Balance</div></div>
-            </div>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align:center;">#</th>
-                            <th>Student Name</th>
-                            <th style="text-align:center;">ID</th>
-                            <th style="text-align:center;">Grade</th>
-                            <th style="text-align:center;">Type</th>
-                            <th style="text-align:right;">Total Fees</th>
-                            <th style="text-align:right;">Paid</th>
-                            <th style="text-align:right;">Balance</th>
-                            <th style="text-align:center;">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml}
-                    </tbody>
-                </table>
-            </div>
-            <div class="footer">
-                <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-            </div>
-        </body>
-        </html>
-    `;
-}
-
-// 11. GENERATE FEES STRUCTURE PDF
+// 10. GENERATE FEES STRUCTURE PDF
 app.get('/api/clerk/reports/fees-structure', async (req, res) => {
     try {
         const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        let html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Fees Structure</title>
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 1000px; margin: 0 auto; }
-                    .header { text-align: center; border-bottom: 2px solid #D4A017; padding-bottom: 15px; margin-bottom: 20px; }
-                    .header h1 { color: #0A1628; font-size: 24px; }
-                    .header h1 .school-name { color: #D4A017; }
-                    .header p { color: #666; font-size: 14px; }
-                    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                    table th { background: #0A1628; color: white; padding: 10px; text-align: left; }
-                    table td { padding: 8px 12px; border-bottom: 1px solid #e8ecf1; }
-                    table tr:nth-child(even) { background: #fafbfc; }
-                    .amount { font-weight: bold; color: #D4A017; }
-                    .section-title { font-size: 18px; color: #0A1628; margin-top: 20px; border-bottom: 2px solid #D4A017; padding-bottom: 5px; }
-                    .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #999; font-size: 12px; }
-                    @media print { body { padding: 10px; } }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h1>🏫 <span class="school-name">Changara Star Academy</span></h1>
-                    <p>Fees Structure - ${new Date().getFullYear()}</p>
-                    <p style="font-size:12px;color:#999;">Generated on ${new Date().toLocaleDateString()}</p>
-                </div>
-                <h2 class="section-title">📖 Day Scholar Fees</h2>
-                <table>
-                    <thead><tr><th>Grade</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr></thead>
-                    <tbody>
-        `;
+        let text = `Fees Structure - ${new Date().getFullYear()}\n\nDAY SCHOLAR FEES\n${'='.repeat(50)}\n`;
         grades.forEach(grade => {
             const fees = getFeeStructure(grade, 'Day Scholar');
-            html += `<tr>
-                <td><strong>${grade}</strong></td>
-                <td>KES ${fees.term1.toLocaleString()}</td>
-                <td>KES ${fees.term2.toLocaleString()}</td>
-                <td>KES ${fees.term3.toLocaleString()}</td>
-                <td class="amount">KES ${fees.total.toLocaleString()}</td>
-            </tr>`;
+            text += `${grade}: Term 1: KES ${fees.term1.toLocaleString()} | Term 2: KES ${fees.term2.toLocaleString()} | Term 3: KES ${fees.term3.toLocaleString()} | Total: KES ${fees.total.toLocaleString()}\n`;
         });
-        html += `
-                    </tbody>
-                </table>
-                <h2 class="section-title">🏠 Boarding Fees (Grades 3-6)</h2>
-                <table>
-                    <thead><tr><th>Grade</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr></thead>
-                    <tbody>
-        `;
+        text += `\nBOARDING FEES (Grades 3-6)\n${'='.repeat(50)}\n`;
         const boardingGrades = ['Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
         boardingGrades.forEach(grade => {
             const fees = getFeeStructure(grade, 'Boarder');
-            html += `<tr>
-                <td><strong>${grade}</strong></td>
-                <td>KES ${fees.term1.toLocaleString()}</td>
-                <td>KES ${fees.term2.toLocaleString()}</td>
-                <td>KES ${fees.term3.toLocaleString()}</td>
-                <td class="amount">KES ${fees.total.toLocaleString()}</td>
-            </tr>`;
+            text += `${grade}: Term 1: KES ${fees.term1.toLocaleString()} | Term 2: KES ${fees.term2.toLocaleString()} | Term 3: KES ${fees.term3.toLocaleString()} | Total: KES ${fees.total.toLocaleString()}\n`;
         });
-        html += `
-                    </tbody>
-                </table>
-                <div class="footer">
-                    <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-                    <p style="color:#c51616;font-weight:bold;">N/B: NO CASH IS ALLOWED IN SCHOOL</p>
-                </div>
-            </body>
-            </html>
-        `;
-        const options = {
-            format: 'A4',
-            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' },
-            printBackground: true,
-            landscape: true,
-            type: 'pdf',
-            timeout: 30000,
-            quality: '100'
-        };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            const filename = `fees_structure_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
-        });
+        text += `\nN/B: NO CASH IS ALLOWED IN SCHOOL`;
+        const pdfBuffer = await generateTextPDF(text, 'Fees Structure');
+        
+        const filename = `fees_structure_${new Date().toISOString().split('T')[0]}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error generating fees structure PDF:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -3642,11 +2671,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             updatedAt: new Date()
         });
         await assignment.save();
-        res.status(201).json({
-            success: true,
-            message: 'Assignment uploaded successfully!',
-            assignment
-        });
+        res.status(201).json({ success: true, message: 'Assignment uploaded successfully!', assignment });
     } catch (error) {
         console.error('Error uploading assignment:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -3730,11 +2755,7 @@ app.post('/api/fix-times-add-3', async (req, res) => {
                 console.log(`✅ Fixed ${teacher.firstName} ${teacher.lastName}`);
             }
         }
-        res.json({ 
-            success: true, 
-            message: `Added 3 hours to ${totalFixed} teachers' records`,
-            fixed: totalFixed
-        });
+        res.json({ success: true, message: `Added 3 hours to ${totalFixed} teachers' records`, fixed: totalFixed });
     } catch (error) {
         console.error('❌ Error:', error);
         res.status(500).json({ success: false, message: error.message });
