@@ -7,6 +7,24 @@ const multer = require('multer');
 const fs = require('fs');
 const pdf = require('html-pdf');
 
+// ============================================
+// FIX PHANTOMJS PATH FOR RENDER/LINUX
+// ============================================
+try {
+    const phantomjs = require('phantomjs-prebuilt');
+    const originalCreate = pdf.create;
+    pdf.create = function(html, options) {
+        if (!options) options = {};
+        if (!options.phantomPath) {
+            options.phantomPath = phantomjs.path;
+        }
+        return originalCreate.call(this, html, options);
+    };
+    console.log('✅ PhantomJS path configured:', phantomjs.path);
+} catch (err) {
+    console.warn('⚠️ PhantomJS not found, using default path');
+}
+
 // Load environment variables
 dotenv.config();
 
@@ -24,16 +42,11 @@ app.use(express.urlencoded({ extended: true }));
 process.env.TZ = 'Africa/Nairobi';
 
 // ============================================
-// HELPER: GET KENYA TIME (UTC+3) - FIXED
-// ============================================
-// ============================================
-// HELPER: GET KENYA TIME (UTC+3) - FIXED
+// HELPER: GET KENYA TIME (UTC+3)
 // ============================================
 function getKenyaTime() {
     const now = new Date();
-    // Get UTC time
     const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    // Add 3 hours for Kenya (UTC+3)
     const kenyaTime = new Date(utcTime + (3 * 60 * 60 * 1000));
     return kenyaTime;
 }
@@ -70,6 +83,7 @@ function formatKenyaDate(date) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
+
 // ============================================
 // REPORT HTML GENERATORS
 // ============================================
@@ -422,13 +436,9 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = [
-        // Images
         'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-        // Videos
         'video/mp4', 'video/mpeg', 'video/quicktime', 'video/webm', 'video/ogg',
-        // Audio
         'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm',
-        // Documents
         'application/pdf',
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -626,8 +636,6 @@ const subjectConfigSchema = new mongoose.Schema({
 
 const SubjectConfig = mongoose.model('SubjectConfig', subjectConfigSchema);
 
-// NO INDEX - DO NOT add any index
-
 // Student Assessment Schema
 const studentAssessmentSchema = new mongoose.Schema({
     studentName: { type: String, required: true },
@@ -661,7 +669,6 @@ const StudentAssessment = mongoose.model('StudentAssessment', studentAssessmentS
 // HELPER FUNCTIONS - CBC RUBRIC
 // ============================================
 
-// Calculate performance level based on percentage using CBC Rubric
 function calculatePerformanceLevel(percentage) {
     if (percentage >= 75) return 'Exceeding Expectation';
     if (percentage >= 50) return 'Meeting Expectation';
@@ -669,7 +676,6 @@ function calculatePerformanceLevel(percentage) {
     return 'Below Expectation';
 }
 
-// Get rating (1-4) based on performance level
 function getPerformanceRating(level) {
     const ratings = {
         'Exceeding Expectation': 4,
@@ -680,7 +686,6 @@ function getPerformanceRating(level) {
     return ratings[level] || 2;
 }
 
-// Get short label (EE, ME, AE, BE)
 function getPerformanceShort(level) {
     const shorts = {
         'Exceeding Expectation': 'EE',
@@ -691,7 +696,6 @@ function getPerformanceShort(level) {
     return shorts[level] || 'AE';
 }
 
-// Get color for performance level
 function getPerformanceColor(level) {
     const colors = {
         'Exceeding Expectation': '#28a745',
@@ -702,7 +706,6 @@ function getPerformanceColor(level) {
     return colors[level] || '#d4a017';
 }
 
-// Calculate performance for a single assessment
 function calculateAssessmentPerformance(score, maxScore) {
     if (maxScore <= 0) return { percentage: 0, level: 'Approaching Expectation', rating: 2 };
     const percentage = (score / maxScore) * 100;
@@ -716,7 +719,6 @@ function calculateAssessmentPerformance(score, maxScore) {
     };
 }
 
-// Calculate overall performance for a student
 function calculateStudentOverall(assessments) {
     if (!assessments || assessments.length === 0) {
         return { totalScore: 0, averageScore: 0, performanceLevel: 'Approaching Expectation', overallRating: 2 };
@@ -743,16 +745,6 @@ function calculateStudentOverall(assessments) {
         performanceLevel: performanceLevel,
         overallRating: getPerformanceRating(performanceLevel)
     };
-}
-
-function calculateTotals(assessments) {
-    let totalScore = 0;
-    let totalMax = 0;
-    assessments.forEach(a => {
-        totalScore += a.score || 0;
-        totalMax += a.maxScore || 0;
-    });
-    return { totalScore, totalMax };
 }
 
 function getDefaultSubjects(grade, type) {
@@ -1129,12 +1121,10 @@ app.post('/api/teacher/checkin', async (req, res) => {
         console.log('📍 Check-in at (Kenya time):', kenyaNow.toString());
         console.log('🕐 Hour (Kenya time):', kenyaHour);
         
-        // Check if it's weekend
         if (dayOfWeek === 0 || dayOfWeek === 6) {
             return res.status(400).json({ success: false, message: '📅 Weekend! Check-in is only available on weekdays (Monday-Friday).' });
         }
         
-        // Check if already checked in today
         const existingAttendance = teacher.attendance.find(a => {
             const aDate = new Date(a.date);
             aDate.setHours(0, 0, 0, 0);
@@ -1145,22 +1135,17 @@ app.post('/api/teacher/checkin', async (req, res) => {
             return res.status(400).json({ success: false, message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn) });
         }
         
-        // Check if it's too late to check in
         if (kenyaHour >= 17) {
             return res.status(400).json({ success: false, message: '⏰ Check-in is not allowed after 5:00 PM. Please try again tomorrow.' });
         }
         
-        // ============================================
-        // DEFINE STATUS HERE BEFORE USING IT
-        // ============================================
         const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
         const status = isLate ? 'Late' : 'Present';
         
-        // Add attendance record with the defined status
         teacher.attendance.push({
             date: kenyaToday,
             checkIn: kenyaNow,
-            status: status,  // status is now defined
+            status: status,
             location: 'School',
             isLate: isLate,
             notes: isLate ? 'Late check-in' : 'On-time check-in'
@@ -1177,7 +1162,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
             checkInTime: kenyaNow,
             checkInTimeFormatted: formattedTime,
             isLate: isLate,
-            status: status,  // status is defined here too
+            status: status,
             teacher: { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId }
         });
     } catch (error) {
@@ -1185,6 +1170,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 app.post('/api/teacher/checkout', async (req, res) => {
     try {
         const { employeeId, pin } = req.body;
@@ -1218,7 +1204,6 @@ app.post('/api/teacher/checkout', async (req, res) => {
         const checkInTime = new Date(todayAttendance.checkIn);
         const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
         todayAttendance.hoursWorked = parseFloat(hoursWorked);
-        // FIX: Don't use 'Checked Out', keep as 'Present' or 'Late'
         todayAttendance.status = todayAttendance.isLate ? 'Late' : 'Present';
         
         await teacher.save();
@@ -1236,6 +1221,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 app.get('/api/teacher/attendance/today', async (req, res) => {
     try {
         const kenyaToday = getKenyaDate();
@@ -1279,6 +1265,7 @@ app.get('/api/teacher/attendance/today', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 app.get('/api/teacher/attendance/:employeeId', async (req, res) => {
     try {
         const teacher = await Teacher.findOne({ employeeId: req.params.employeeId });
@@ -1492,7 +1479,6 @@ app.get('/api/visitors/today', async (req, res) => {
 // STUDENT MANAGEMENT API ROUTES
 // ============================================
 
-// GET ALL STUDENTS
 app.get('/api/students', async (req, res) => {
     try {
         const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
@@ -1503,7 +1489,6 @@ app.get('/api/students', async (req, res) => {
     }
 });
 
-// GET SINGLE STUDENT
 app.get('/api/students/:id', async (req, res) => {
     try {
         const student = await Student.findOne({ studentId: req.params.id });
@@ -1516,20 +1501,13 @@ app.get('/api/students/:id', async (req, res) => {
     }
 });
 
-// ADD STUDENT (Auto-generates ID)
 app.post('/api/students', async (req, res) => {
     try {
         const { name, grade, gender, type, guardian, pin } = req.body;
-
         if (!name || !grade || !gender) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Name, Grade, and Gender are required' 
-            });
+            return res.status(400).json({ success: false, message: 'Name, Grade, and Gender are required' });
         }
-
         const studentId = await generateStudentId();
-
         const student = new Student({
             studentId,
             name,
@@ -1541,31 +1519,25 @@ app.post('/api/students', async (req, res) => {
             paid: 0,
             isActive: true
         });
-
         await student.save();
-
         res.status(201).json({
             success: true,
             message: `✅ Student ${studentId} added successfully!`,
             student
         });
-
     } catch (error) {
         console.error('Error adding student:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// UPDATE STUDENT
 app.put('/api/students/:id', async (req, res) => {
     try {
         const { name, grade, gender, type, guardian, pin } = req.body;
         const student = await Student.findOne({ studentId: req.params.id });
-
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-
         if (name) student.name = name;
         if (grade) student.grade = grade;
         if (gender) student.gender = gender;
@@ -1573,45 +1545,36 @@ app.put('/api/students/:id', async (req, res) => {
         if (guardian) student.guardian = guardian;
         if (pin) student.pin = pin;
         student.updatedAt = new Date();
-
         await student.save();
-
         res.json({
             success: true,
             message: `✅ Student ${student.studentId} updated successfully!`,
             student
         });
-
     } catch (error) {
         console.error('Error updating student:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// DELETE STUDENT (Soft delete)
 app.delete('/api/students/:id', async (req, res) => {
     try {
         const student = await Student.findOne({ studentId: req.params.id });
-
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-
         student.isActive = false;
         await student.save();
-
         res.json({
             success: true,
             message: `✅ Student ${student.studentId} deleted successfully!`
         });
-
     } catch (error) {
         console.error('Error deleting student:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// CLEAR ALL STUDENTS
 app.delete('/api/students/clear', async (req, res) => {
     try {
         await Student.deleteMany({});
@@ -1621,34 +1584,28 @@ app.delete('/api/students/clear', async (req, res) => {
     }
 });
 
-// STUDENT LOGIN
 app.post('/api/student/login', async (req, res) => {
     try {
         const { studentId, pin } = req.body;
-
         if (!studentId || !pin) {
             return res.status(400).json({
                 success: false,
                 message: 'Student ID and PIN are required'
             });
         }
-
         const student = await Student.findOne({ studentId, isActive: true });
-
         if (!student) {
             return res.status(404).json({
                 success: false,
                 message: 'Student not found'
             });
         }
-
         if (student.pin !== pin) {
             return res.status(401).json({
                 success: false,
                 message: 'Invalid PIN'
             });
         }
-
         res.json({
             success: true,
             message: 'Login successful',
@@ -1661,7 +1618,6 @@ app.post('/api/student/login', async (req, res) => {
                 guardian: student.guardian
             }
         });
-
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -1671,17 +1627,14 @@ app.post('/api/student/login', async (req, res) => {
 // STUDENT FEE MANAGEMENT ROUTES
 // ============================================
 
-// Get all students with fee details
 app.get('/api/students/fees', async (req, res) => {
     try {
         const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
-        
         const studentFees = students.map(student => {
             const feeData = getFeeStructure(student.grade, student.type);
             const paid = student.paid || 0;
             const totalFees = feeData.total || 0;
             const balance = totalFees - paid;
-            
             return {
                 id: student.studentId,
                 name: student.name,
@@ -1695,13 +1648,11 @@ app.get('/api/students/fees', async (req, res) => {
                 status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
             };
         });
-        
         const totalStudents = studentFees.length;
         const totalDayScholars = studentFees.filter(s => s.studentType === 'Day Scholar').length;
         const totalBoarders = studentFees.filter(s => s.studentType === 'Boarder').length;
         const totalPaid = studentFees.reduce((sum, s) => sum + s.paid, 0);
         const totalBalance = studentFees.reduce((sum, s) => sum + s.balance, 0);
-        
         res.json({
             success: true,
             students: studentFees,
@@ -1717,19 +1668,16 @@ app.get('/api/students/fees', async (req, res) => {
     }
 });
 
-// Get single student fee details
 app.get('/api/students/fees/:studentId', async (req, res) => {
     try {
         const student = await Student.findOne({ studentId: req.params.studentId, isActive: true });
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        
         const feeData = getFeeStructure(student.grade, student.type);
         const paid = student.paid || 0;
         const totalFees = feeData.total || 0;
         const balance = totalFees - paid;
-        
         res.json({
             success: true,
             student: {
@@ -1753,24 +1701,19 @@ app.get('/api/students/fees/:studentId', async (req, res) => {
     }
 });
 
-// Record payment for student
 app.post('/api/students/payment', async (req, res) => {
     try {
         const { studentId, amount, category, method, reference, notes } = req.body;
-        
         if (!studentId || !amount || amount <= 0) {
             return res.status(400).json({ success: false, message: 'Student ID and valid amount are required' });
         }
-        
         const student = await Student.findOne({ studentId, isActive: true });
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        
         student.paid = (student.paid || 0) + amount;
         student.updatedAt = new Date();
         await student.save();
-        
         res.json({
             success: true,
             message: `✅ Payment of KES ${amount.toLocaleString()} recorded for ${student.name}`,
@@ -1802,18 +1745,15 @@ function getFeeStructure(grade, type) {
         'Grade 5': { term1: 4500, term2: 4500, term3: 4500, total: 13500 },
         'Grade 6': { term1: 4500, term2: 4500, term3: 4500, total: 13500 }
     };
-    
     const boardingFees = {
         'Grade 3': { term1: 8000, term2: 8000, term3: 8000, total: 24000 },
         'Grade 4': { term1: 8000, term2: 8000, term3: 8000, total: 24000 },
         'Grade 5': { term1: 8500, term2: 8500, term3: 8500, total: 25500 },
         'Grade 6': { term1: 8500, term2: 8500, term3: 8500, total: 25500 }
     };
-    
     if (type === 'Boarder' && boardingFees[grade]) {
         return boardingFees[grade];
     }
-    
     return dayFees[grade] || { term1: 0, term2: 0, term3: 0, total: 0 };
 }
 
@@ -1821,15 +1761,10 @@ function getFeeStructure(grade, type) {
 // STUDENT ASSESSMENT ROUTES
 // ============================================
 
-// Get students for assessment by grade
 app.get('/api/assessments/students/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
-        const students = await Student.find({ 
-            grade: grade,
-            isActive: true 
-        }).sort({ studentId: 1 });
-        
+        const students = await Student.find({ grade: grade, isActive: true }).sort({ studentId: 1 });
         res.json({
             success: true,
             students: students.map(s => ({
@@ -1845,16 +1780,13 @@ app.get('/api/assessments/students/:grade', async (req, res) => {
     }
 });
 
-// Get student assessment by ID
 app.get('/api/assessments/student/:studentId', async (req, res) => {
     try {
         const { studentId } = req.params;
         const assessment = await StudentAssessment.findOne({ studentId });
-        
         if (!assessment) {
             return res.status(404).json({ success: false, message: 'Assessment not found for this student' });
         }
-        
         res.json({ success: true, assessment });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1865,19 +1797,13 @@ app.get('/api/assessments/student/:studentId', async (req, res) => {
 // SUBJECT CONFIG ROUTES - WITH PERIOD SUPPORT
 // ============================================
 
-// GET subject config (with optional period)
 app.get('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const grade = req.params.grade;
         const type = req.query.type || 'monthly';
         const period = req.query.period || '';
-        
-        console.log('📖 GET config for:', grade, type, 'period:', period);
-        
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
-        
-        // Try to find with period first, then fallback to without period
         let config = await collection.findOne({ grade: grade, type: type, period: period });
         if (!config && period) {
             config = await collection.findOne({ grade: grade, type: type, period: '' });
@@ -1908,54 +1834,30 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
     }
 });
 
-// DELETE subject config
 app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const grade = req.params.grade;
         const { type, period } = req.query;
-        
-        console.log('🗑️ DELETE config for:', grade, type, 'period:', period);
-        
         if (!type) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Type is required' 
-            });
+            return res.status(400).json({ success: false, message: 'Type is required' });
         }
-        
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
         const query = { grade: grade, type: type };
         if (period) query.period = period;
-        
         const result = await collection.deleteMany(query);
         console.log(`✅ Deleted ${result.deletedCount} configs for ${grade} (${type})`);
-        
-        res.json({ 
-            success: true, 
-            message: `Deleted config for ${grade} (${type})`,
-            deleted: result.deletedCount
-        });
+        res.json({ success: true, message: `Deleted config for ${grade} (${type})`, deleted: result.deletedCount });
     } catch (error) {
         console.log('Delete error:', error);
-        res.json({ 
-            success: true, 
-            message: `Config for ${grade} cleared`,
-            deleted: 0
-        });
+        res.json({ success: true, message: `Config for ${grade} cleared`, deleted: 0 });
     }
 });
 
-// PUT (Create/Update) subject config - with period support
 app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
         const grade = req.params.grade;
         const { type, period, subjects, rankLevels, rubric } = req.body;
-        
-        console.log('📥 SAVE config for:', grade, type, 'period:', period);
-        console.log('   Subjects:', JSON.stringify(subjects));
-        
-        // Validate
         if (!grade) {
             return res.status(400).json({ success: false, message: 'Grade is required' });
         }
@@ -1965,7 +1867,6 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
             return res.status(400).json({ success: false, message: 'Subjects array is required' });
         }
-        
         for (const s of subjects) {
             if (!s.name || typeof s.name !== 'string' || s.name.trim() === '') {
                 return res.status(400).json({ success: false, message: 'Each subject must have a name' });
@@ -1974,26 +1875,15 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
                 return res.status(400).json({ success: false, message: 'Each subject must have a max score > 0' });
             }
         }
-        
-        // Clean subjects
         const cleanedSubjects = subjects.map(s => ({
             name: s.name.trim(),
             max: s.max
         }));
-        
-        // Use new collection
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
-        
-        // Build query
         const query = { grade: grade, type: type };
         if (period) query.period = period;
-        
-        // Delete existing
         await collection.deleteMany(query);
-        console.log(`✅ Deleted existing config for ${grade} (${type}) ${period ? 'period: '+period : ''}`);
-        
-        // Insert new
         const newConfig = {
             grade: grade,
             type: type,
@@ -2010,11 +1900,8 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
         };
         await collection.insertOne(newConfig);
         console.log(`✅ Inserted new config for ${grade} (${type}) ${period ? 'period: '+period : ''}`);
-        
-        // Update existing assessments with new max scores and rubric
         const filter = { grade: grade, type: type };
         if (period) filter.period = period;
-        
         const students = await StudentAssessment.find(filter);
         for (const student of students) {
             let updated = false;
@@ -2024,7 +1911,6 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
                     assessment.maxScore = subjectConfig.max;
                     updated = true;
                 }
-                // Recalculate percentage and performance for each assessment
                 const perf = calculateAssessmentPerformance(assessment.score, assessment.maxScore);
                 assessment.percentage = perf.percentage;
                 assessment.performanceLevel = perf.level;
@@ -2040,18 +1926,10 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
                 await student.save();
             }
         }
-        
-        res.json({ 
-            success: true, 
-            message: 'Subject configuration saved successfully!', 
-            config: newConfig
-        });
+        res.json({ success: true, message: 'Subject configuration saved successfully!', config: newConfig });
     } catch (error) {
         console.error('❌ Save error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error saving subjects: ' + error.message 
-        });
+        res.status(500).json({ success: false, message: 'Error saving subjects: ' + error.message });
     }
 });
 
@@ -2069,14 +1947,11 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
         if (month) filter.month = month;
         if (year) filter.year = year;
         if (term) filter.term = term;
-        
         const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
-        
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
         const configFilter = { grade: grade, type: type || 'monthly' };
         if (period) configFilter.period = period;
-        
         let config = await collection.findOne(configFilter);
         if (!config) {
             const defaultSubjects = getDefaultSubjects(grade, type || 'monthly');
@@ -2103,12 +1978,9 @@ app.get('/api/assessments/student/:id', async (req, res) => {
 app.post('/api/assessments', async (req, res) => {
     try {
         const { studentName, studentId, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
-        
         if (!studentName || !grade || !assessments || !Array.isArray(assessments) || assessments.length === 0) {
             return res.status(400).json({ success: false, message: 'Invalid data. Need studentName, grade, and assessments array.' });
         }
-        
-        // Calculate rubric for each assessment
         const assessmentsWithRubric = assessments.map(a => {
             const perf = calculateAssessmentPerformance(a.score, a.maxScore);
             return {
@@ -2120,26 +1992,23 @@ app.post('/api/assessments', async (req, res) => {
                 rating: perf.rating
             };
         });
-        
         const overall = calculateStudentOverall(assessmentsWithRubric);
-        
-        const student = new StudentAssessment({ 
-            studentName, 
+        const student = new StudentAssessment({
+            studentName,
             studentId: studentId || '',
-            admissionNumber: admissionNumber || '', 
-            grade, 
-            type: type || 'monthly', 
-            period: period || '', 
-            month: month || '', 
-            year: year || '', 
-            term: term || '', 
-            assessments: assessmentsWithRubric, 
-            totalScore: overall.totalScore, 
-            averageScore: overall.averageScore, 
+            admissionNumber: admissionNumber || '',
+            grade,
+            type: type || 'monthly',
+            period: period || '',
+            month: month || '',
+            year: year || '',
+            term: term || '',
+            assessments: assessmentsWithRubric,
+            totalScore: overall.totalScore,
+            averageScore: overall.averageScore,
             performanceLevel: overall.performanceLevel,
             overallRating: overall.overallRating
         });
-        
         await student.save();
         res.status(201).json({ success: true, message: 'Student assessment created successfully!', student });
     } catch (error) {
@@ -2155,7 +2024,6 @@ app.put('/api/assessments/:id', async (req, res) => {
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        
         if (studentName) student.studentName = studentName;
         if (studentId) student.studentId = studentId;
         if (admissionNumber) student.admissionNumber = admissionNumber;
@@ -2165,9 +2033,7 @@ app.put('/api/assessments/:id', async (req, res) => {
         if (month) student.month = month;
         if (year) student.year = year;
         if (term) student.term = term;
-        
         if (assessments && Array.isArray(assessments) && assessments.length > 0) {
-            // Calculate rubric for each assessment
             const assessmentsWithRubric = assessments.map(a => {
                 const perf = calculateAssessmentPerformance(a.score, a.maxScore);
                 return {
@@ -2180,14 +2046,12 @@ app.put('/api/assessments/:id', async (req, res) => {
                 };
             });
             student.assessments = assessmentsWithRubric;
-            
             const overall = calculateStudentOverall(assessmentsWithRubric);
             student.totalScore = overall.totalScore;
             student.averageScore = overall.averageScore;
             student.performanceLevel = overall.performanceLevel;
             student.overallRating = overall.overallRating;
         }
-        
         student.updatedAt = new Date();
         await student.save();
         res.json({ success: true, message: 'Student assessment updated successfully!', student });
@@ -2222,7 +2086,6 @@ app.get('/api/assessments/search', async (req, res) => {
     try {
         const { name, grade, type } = req.query;
         let filter = {};
-        
         if (name && name.trim() !== '') {
             filter.studentName = { $regex: name.trim(), $options: 'i' };
         }
@@ -2232,12 +2095,10 @@ app.get('/api/assessments/search', async (req, res) => {
         if (type && type.trim() !== '') {
             filter.type = type.trim();
         }
-        
         if (Object.keys(filter).length === 0) {
             const allStudents = await StudentAssessment.find().sort({ studentName: 1 });
             return res.json({ success: true, students: allStudents, count: allStudents.length });
         }
-        
         const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
         res.json({ success: true, students: students, count: students.length });
     } catch (error) {
@@ -2246,6 +2107,9 @@ app.get('/api/assessments/search', async (req, res) => {
     }
 });
 
+// ============================================
+// DOWNLOAD STUDENT REPORT - PDF
+// ============================================
 app.get('/api/assessments/download-report/:studentId', async (req, res) => {
     try {
         const student = await StudentAssessment.findById(req.params.studentId);
@@ -2254,32 +2118,22 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
         }
         const allAssessments = await StudentAssessment.find({ studentName: student.studentName }).sort({ createdAt: 1 });
         const html = generateStudentReportHTML(student, allAssessments);
-        
-       const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true
-});
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            landscape: false,
-            margin: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }
+        const options = { format: 'A4', border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }, printBackground: true, landscape: false, type: 'pdf', timeout: 30000, quality: '100' };
+        pdf.create(html, options).toBuffer((err, buffer) => {
+            if (err) {
+                console.error('PDF generation error:', err);
+                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
+            }
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
+            res.setHeader('Content-Length', buffer.length);
+            res.send(buffer);
         });
-        
-        await browser.close();
-        
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
-        res.send(pdfBuffer);
     } catch (error) {
-        console.error('PDF generation error:', error);
-        res.status(500).json({ success: false, message: 'Error generating PDF: ' + error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 });
+
 app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
     try {
         const student = await StudentAssessment.findById(req.params.studentId);
@@ -2322,12 +2176,10 @@ app.post('/api/assessments/copy', async (req, res) => {
         if (sourceStudents.length === 0) {
             return res.json({ success: true, message: 'No students found to copy', count: 0 });
         }
-        
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
         const configFilter = { grade: toGrade, type: toType || 'monthly' };
         if (toPeriod) configFilter.period = toPeriod;
-        
         let config = await collection.findOne(configFilter);
         if (!config) {
             const defaultSubjects = getDefaultSubjects(toGrade, toType || 'monthly');
@@ -2338,36 +2190,33 @@ app.post('/api/assessments/copy', async (req, res) => {
             const existingFilter = { studentName: source.studentName, grade: toGrade, type: toType || 'monthly', period: toPeriod, month: toMonth, year: toYear, term: toTerm };
             const existing = await StudentAssessment.findOne(existingFilter);
             if (existing) continue;
-            
             const newAssessments = config.subjects.map(subj => {
                 const sourceAssessment = source.assessments.find(a => a.subject === subj.name);
                 const score = sourceAssessment ? Math.min(sourceAssessment.score, subj.max) : 0;
                 const perf = calculateAssessmentPerformance(score, subj.max);
-                return { 
-                    subject: subj.name, 
-                    maxScore: subj.max, 
+                return {
+                    subject: subj.name,
+                    maxScore: subj.max,
                     score: score,
                     percentage: perf.percentage,
                     performanceLevel: perf.level,
                     rating: perf.rating
                 };
             });
-            
             const overall = calculateStudentOverall(newAssessments);
-            
-            const newStudent = new StudentAssessment({ 
-                studentName: source.studentName, 
+            const newStudent = new StudentAssessment({
+                studentName: source.studentName,
                 studentId: source.studentId || '',
-                admissionNumber: source.admissionNumber || '', 
-                grade: toGrade, 
-                type: toType || 'monthly', 
-                period: toPeriod || '', 
-                month: toMonth, 
-                year: toYear, 
-                term: toTerm, 
-                assessments: newAssessments, 
-                totalScore: overall.totalScore, 
-                averageScore: overall.averageScore, 
+                admissionNumber: source.admissionNumber || '',
+                grade: toGrade,
+                type: toType || 'monthly',
+                period: toPeriod || '',
+                month: toMonth,
+                year: toYear,
+                term: toTerm,
+                assessments: newAssessments,
+                totalScore: overall.totalScore,
+                averageScore: overall.averageScore,
                 performanceLevel: overall.performanceLevel,
                 overallRating: overall.overallRating
             });
@@ -2491,7 +2340,6 @@ app.get('/api/reports/visitors', async (req, res) => {
 // ============================================
 // DOWNLOAD STAFF REPORT - PDF
 // ============================================
-
 app.get('/api/reports/staff/download-pdf', async (req, res) => {
     try {
         const { period, date, department } = req.query;
@@ -2554,29 +2402,18 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
         });
         const title = 'Staff Attendance Report';
         const html = generateStaffReportHTML(report, title, periodLabel);
-        
-        // REPLACE THIS SECTION:
-        const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true
-});
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            landscape: true,
-            margin: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }
+        const options = { format: 'A4', border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }, printBackground: true, landscape: true, type: 'pdf', timeout: 30000, quality: '100' };
+        pdf.create(html, options).toBuffer((err, buffer) => {
+            if (err) {
+                console.error('PDF generation error:', err);
+                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
+            }
+            const filename = `staff_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Length', buffer.length);
+            res.send(buffer);
         });
-        
-        await browser.close();
-        
-        const filename = `staff_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
-        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error downloading staff report:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -2586,7 +2423,6 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
 // ============================================
 // DOWNLOAD VISITOR REPORT - PDF
 // ============================================
-
 app.get('/api/reports/visitors/download-pdf', async (req, res) => {
     try {
         const { period, date, purpose } = req.query;
@@ -2631,29 +2467,18 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
         });
         const title = 'Visitor Report';
         const html = generateVisitorReportHTML(report, title, periodLabel);
-        
-        // REPLACE THIS SECTION:
-        const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true
-});
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            landscape: true,
-            margin: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }
+        const options = { format: 'A4', border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }, printBackground: true, landscape: true, type: 'pdf', timeout: 30000, quality: '100' };
+        pdf.create(html, options).toBuffer((err, buffer) => {
+            if (err) {
+                console.error('PDF generation error:', err);
+                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
+            }
+            const filename = `visitor_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Length', buffer.length);
+            res.send(buffer);
         });
-        
-        await browser.close();
-        
-        const filename = `visitor_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
-        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error downloading visitor report:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -2695,33 +2520,35 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
         
         const html = generateClassReportHTML(students, grade, type, term, year, period);
         
-       const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true
-});
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
+        const options = { 
+            format: 'A4', 
+            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }, 
+            printBackground: true, 
+            landscape: true, 
+            type: 'pdf', 
+            timeout: 30000, 
+            quality: '100' 
+        };
         
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            landscape: true,
-            margin: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }
+        pdf.create(html, options).toBuffer((err, buffer) => {
+            if (err) {
+                console.error('PDF generation error:', err);
+                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
+            }
+            
+            const periodLabel = period ? `_${period}` : '';
+            const filename = `grade_report_${grade}_${type || 'monthly'}_${term || 'all'}_${year || '2026'}${periodLabel}.pdf`;
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Length', buffer.length);
+            res.send(buffer);
         });
-        
-        await browser.close();
-        
-        const periodLabel = period ? `_${period}` : '';
-        const filename = `grade_report_${grade}_${type || 'monthly'}_${term || 'all'}_${year || '2026'}${periodLabel}.pdf`;
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
-        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error generating class PDF:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // ============================================
 // GENERATE CLASS REPORT HTML - WITH RUBRIC
 // ============================================
@@ -3111,10 +2938,10 @@ function generateClassReportHTML(students, grade, type, term, year, period) {
 </html>
     `;
 }
+
 // ============================================
 // COMPREHENSIVE PDF GENERATION ENDPOINT - ALL GRADES
 // ============================================
-
 app.post('/api/assessments/generate-comprehensive-pdf', async (req, res) => {
     try {
         const { html, filename } = req.body;
@@ -3123,41 +2950,72 @@ app.post('/api/assessments/generate-comprehensive-pdf', async (req, res) => {
             return res.status(400).json({ success: false, message: 'HTML content is required' });
         }
         
-       const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true
-});
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        
-        const pdfBuffer = await page.pdf({
+        const options = {
             format: 'A4',
+            border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' },
             printBackground: true,
             landscape: true,
-            margin: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }
+            type: 'pdf',
+            timeout: 60000,
+            quality: '100'
+        };
+        
+        pdf.create(html, options).toBuffer((err, buffer) => {
+            if (err) {
+                console.error('PDF generation error:', err);
+                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
+            }
+            
+            const downloadFilename = filename || `comprehensive_report_${new Date().toISOString().split('T')[0]}.pdf`;
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${downloadFilename}"`);
+            res.setHeader('Content-Length', buffer.length);
+            res.send(buffer);
         });
-        
-        await browser.close();
-        
-        const downloadFilename = filename || `comprehensive_report_${new Date().toISOString().split('T')[0]}.pdf`;
-        
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${downloadFilename}"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
-        res.send(pdfBuffer);
-        
     } catch (error) {
         console.error('Comprehensive PDF generation error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+// GET all assessments across all grades
+app.get('/api/assessments/all-grades', async (req, res) => {
+    try {
+        const { type, term, year, period } = req.query;
+        const filter = {};
+        if (type) filter.type = type;
+        if (term) filter.term = term;
+        if (year) filter.year = year;
+        if (period) filter.period = period;
+        
+        const students = await StudentAssessment.find(filter).sort({ grade: 1, studentName: 1 });
+        
+        const groupedByGrade = {};
+        students.forEach(student => {
+            if (!groupedByGrade[student.grade]) {
+                groupedByGrade[student.grade] = [];
+            }
+            groupedByGrade[student.grade].push(student);
+        });
+        
+        res.json({ 
+            success: true, 
+            total: students.length,
+            grades: Object.keys(groupedByGrade),
+            byGrade: groupedByGrade,
+            students: students
+        });
+    } catch (error) {
+        console.error('Error fetching all grades:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // ============================================
 // CLERK DASHBOARD API ROUTES
 // ============================================
 
-// ============================================
 // DEFINE PAYMENT SCHEMA FIRST
-// ============================================
 const paymentSchema = new mongoose.Schema({
     studentId: { type: String, required: true },
     studentName: { type: String, required: true },
@@ -3172,19 +3030,15 @@ const paymentSchema = new mongoose.Schema({
 
 const Payment = mongoose.model('Payment', paymentSchema);
 
-// ============================================
 // 1. GET ALL STUDENT FEES
-// ============================================
 app.get('/api/clerk/students/fees', async (req, res) => {
     try {
         const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
-        
         const studentFees = students.map(student => {
             const feeData = getFeeStructure(student.grade, student.type);
             const paid = student.paid || 0;
             const totalFees = feeData.total || 0;
             const balance = totalFees - paid;
-            
             return {
                 id: student.studentId,
                 name: student.name,
@@ -3198,21 +3052,19 @@ app.get('/api/clerk/students/fees', async (req, res) => {
                 status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
             };
         });
-        
         const totalStudents = studentFees.length;
         const totalDayScholars = studentFees.filter(s => s.studentType === 'Day Scholar').length;
         const totalBoarders = studentFees.filter(s => s.studentType === 'Boarder').length;
         const totalPaid = studentFees.reduce((sum, s) => sum + s.paid, 0);
         const totalBalance = studentFees.reduce((sum, s) => sum + s.balance, 0);
-        
         res.json({
             success: true,
             students: studentFees,
-            totalStudents: totalStudents,
-            totalDayScholars: totalDayScholars,
-            totalBoarders: totalBoarders,
-            totalPaid: totalPaid,
-            totalBalance: totalBalance
+            totalStudents,
+            totalDayScholars,
+            totalBoarders,
+            totalPaid,
+            totalBalance
         });
     } catch (error) {
         console.error('Error fetching student fees:', error);
@@ -3220,23 +3072,18 @@ app.get('/api/clerk/students/fees', async (req, res) => {
     }
 });
 
-// ============================================
 // 2. GET SINGLE STUDENT FEE DETAILS
-// ============================================
 app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
     try {
         const student = await Student.findOne({ studentId: req.params.studentId, isActive: true });
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        
         const feeData = getFeeStructure(student.grade, student.type);
         const paid = student.paid || 0;
         const totalFees = feeData.total || 0;
         const balance = totalFees - paid;
-        
         const payments = await Payment.find({ studentId: student.studentId }).sort({ date: -1 });
-        
         res.json({
             success: true,
             student: {
@@ -3262,22 +3109,17 @@ app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
     }
 });
 
-// ============================================
 // 3. RECORD MULTI-PAYMENT
-// ============================================
 app.post('/api/clerk/payments/record', async (req, res) => {
     try {
         const { studentId, payments, method, reference, notes } = req.body;
-        
         if (!studentId) {
             return res.status(400).json({ success: false, message: 'Student ID is required' });
         }
-        
         const student = await Student.findOne({ studentId, isActive: true });
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        
         let totalAmount = 0;
         const categoryList = [];
         for (const [category, amount] of Object.entries(payments)) {
@@ -3286,14 +3128,11 @@ app.post('/api/clerk/payments/record', async (req, res) => {
                 categoryList.push({ category, amount });
             }
         }
-        
         if (totalAmount === 0) {
             return res.status(400).json({ success: false, message: 'Please enter at least one payment amount' });
         }
-        
         student.paid = (student.paid || 0) + totalAmount;
         await student.save();
-        
         const payment = new Payment({
             studentId: student.studentId,
             studentName: student.name,
@@ -3306,7 +3145,6 @@ app.post('/api/clerk/payments/record', async (req, res) => {
             date: new Date()
         });
         await payment.save();
-        
         res.json({
             success: true,
             message: `Payment of KES ${totalAmount.toLocaleString()} recorded for ${student.name}`,
@@ -3320,9 +3158,7 @@ app.post('/api/clerk/payments/record', async (req, res) => {
     }
 });
 
-// ============================================
 // 4. GET ALL PAYMENTS
-// ============================================
 app.get('/api/clerk/payments/all', async (req, res) => {
     try {
         const payments = await Payment.find().sort({ date: -1 });
@@ -3333,29 +3169,23 @@ app.get('/api/clerk/payments/all', async (req, res) => {
     }
 });
 
-// ============================================
 // 5. EDIT PAYMENT
-// ============================================
 app.put('/api/clerk/payments/:paymentId', async (req, res) => {
     try {
         const { paymentId } = req.params;
         const { amount, category, method, reference, notes } = req.body;
-        
         const payment = await Payment.findById(paymentId);
         if (!payment) {
             return res.status(404).json({ success: false, message: 'Payment not found' });
         }
-        
         const oldAmount = payment.amount;
         const amountDiff = amount - oldAmount;
-        
         payment.amount = amount || payment.amount;
         payment.category = category || payment.category;
         payment.method = method || payment.method;
         payment.reference = reference || payment.reference;
         payment.notes = notes || payment.notes;
         await payment.save();
-        
         if (amountDiff !== 0) {
             const student = await Student.findOne({ studentId: payment.studentId });
             if (student) {
@@ -3363,7 +3193,6 @@ app.put('/api/clerk/payments/:paymentId', async (req, res) => {
                 await student.save();
             }
         }
-        
         res.json({ success: true, message: 'Payment updated successfully!' });
     } catch (error) {
         console.error('Error updating payment:', error);
@@ -3371,26 +3200,20 @@ app.put('/api/clerk/payments/:paymentId', async (req, res) => {
     }
 });
 
-// ============================================
 // 6. DELETE PAYMENT
-// ============================================
 app.delete('/api/clerk/payments/:paymentId', async (req, res) => {
     try {
         const { paymentId } = req.params;
-        
         const payment = await Payment.findById(paymentId);
         if (!payment) {
             return res.status(404).json({ success: false, message: 'Payment not found' });
         }
-        
         const student = await Student.findOne({ studentId: payment.studentId });
         if (student) {
             student.paid = Math.max(0, (student.paid || 0) - payment.amount);
             await student.save();
         }
-        
         await Payment.findByIdAndDelete(paymentId);
-        
         res.json({ success: true, message: 'Payment deleted successfully!' });
     } catch (error) {
         console.error('Error deleting payment:', error);
@@ -3398,22 +3221,17 @@ app.delete('/api/clerk/payments/:paymentId', async (req, res) => {
     }
 });
 
-// ============================================
 // 7. GET FEES STRUCTURE
-// ============================================
 app.get('/api/clerk/fees/structure', async (req, res) => {
     try {
         const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
         const feeStructure = {};
-        
         grades.forEach(grade => {
             feeStructure[grade] = getFeeStructure(grade, 'Day Scholar');
         });
-        
         feeStructure['boarding'] = {
             'Full Boarding': { term1: 8000, term2: 8000, term3: 8000, total: 24000 }
         };
-        
         res.json({ success: true, fees: feeStructure });
     } catch (error) {
         console.error('Error fetching fees structure:', error);
@@ -3421,23 +3239,18 @@ app.get('/api/clerk/fees/structure', async (req, res) => {
     }
 });
 
-// ============================================
 // 8. UPDATE FEES STRUCTURE
-// ============================================
 app.post('/api/clerk/fees/update', async (req, res) => {
     try {
         const { fees, type } = req.body;
-        
         if (!global.feesStructure) {
             global.feesStructure = {};
         }
-        
         if (type === 'boarding') {
             global.feesStructure.boarding = fees;
         } else {
             global.feesStructure.day = fees;
         }
-        
         res.json({ success: true, message: 'Fees structure updated successfully!' });
     } catch (error) {
         console.error('Error updating fees:', error);
@@ -3445,20 +3258,16 @@ app.post('/api/clerk/fees/update', async (req, res) => {
     }
 });
 
-// ============================================
 // 9. GENERATE FEE REPORT PDF
-// ============================================
 app.get('/api/clerk/reports/fee/:type', async (req, res) => {
     try {
         const { type } = req.params;
         const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
-        
         const studentFees = students.map(student => {
             const feeData = getFeeStructure(student.grade, student.type);
             const paid = student.paid || 0;
             const totalFees = feeData.total || 0;
             const balance = totalFees - paid;
-            
             return {
                 id: student.studentId,
                 name: student.name,
@@ -3471,40 +3280,34 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
                 status: balance === 0 ? 'Paid' : balance < totalFees ? 'Partial' : 'Unpaid'
             };
         });
-        
         const html = generateFeeReportHTML(studentFees, type);
-        
-        // REPLACE THIS SECTION:
-        const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true
-});
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        
-        const pdfBuffer = await page.pdf({
+        const options = {
             format: 'A4',
+            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' },
             printBackground: true,
             landscape: true,
-            margin: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }
+            type: 'pdf',
+            timeout: 30000,
+            quality: '100'
+        };
+        pdf.create(html, options).toBuffer((err, buffer) => {
+            if (err) {
+                console.error('PDF generation error:', err);
+                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
+            }
+            const filename = `fee_report_${type}_${new Date().toISOString().split('T')[0]}.pdf`;
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Length', buffer.length);
+            res.send(buffer);
         });
-        
-        await browser.close();
-        
-        const filename = `fee_report_${type}_${new Date().toISOString().split('T')[0]}.pdf`;
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
-        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error generating fee report:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// ============================================
 // 10. GENERATE FEE REPORT HTML HELPER
-// ============================================
 function generateFeeReportHTML(students, type) {
     const now = new Date();
     const totalStudents = students.length;
@@ -3514,13 +3317,11 @@ function generateFeeReportHTML(students, type) {
     const paidCount = students.filter(s => s.status === 'Paid').length;
     const partialCount = students.filter(s => s.status === 'Partial').length;
     const unpaidCount = students.filter(s => s.status === 'Unpaid').length;
-    
     const typeNames = {
         'summary': 'Summary Report',
         'detailed': 'Detailed Fee Report',
         'payment': 'Payment Report'
     };
-    
     let rowsHtml = students.map((student, index) => {
         const statusColor = student.status === 'Paid' ? '#28a745' : student.status === 'Partial' ? '#ffc107' : '#dc3545';
         return `
@@ -3539,7 +3340,6 @@ function generateFeeReportHTML(students, type) {
             </tr>
         `;
     }).join('');
-    
     return `
         <!DOCTYPE html>
         <html>
@@ -3577,7 +3377,6 @@ function generateFeeReportHTML(students, type) {
                 <p>${typeNames[type] || 'Fee Report'}</p>
                 <p style="font-size:7px;color:#999;">Generated on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</p>
             </div>
-            
             <div class="summary-box">
                 <div class="item"><div class="num gold">${totalStudents}</div><div class="label">Total Students</div></div>
                 <div class="item"><div class="num green">${paidCount}</div><div class="label">✅ Paid</div></div>
@@ -3586,7 +3385,6 @@ function generateFeeReportHTML(students, type) {
                 <div class="item"><div class="num blue">KES ${totalFees.toLocaleString()}</div><div class="label">Total Fees</div></div>
                 <div class="item"><div class="num" style="color:#D4A017;">KES ${totalBalance.toLocaleString()}</div><div class="label">Total Balance</div></div>
             </div>
-            
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -3607,7 +3405,6 @@ function generateFeeReportHTML(students, type) {
                     </tbody>
                 </table>
             </div>
-            
             <div class="footer">
                 <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
             </div>
@@ -3616,13 +3413,10 @@ function generateFeeReportHTML(students, type) {
     `;
 }
 
-// ============================================
 // 11. GENERATE FEES STRUCTURE PDF
-// ============================================
 app.get('/api/clerk/reports/fees-structure', async (req, res) => {
     try {
         const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        
         let html = `
             <!DOCTYPE html>
             <html>
@@ -3652,13 +3446,11 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
                     <p>Fees Structure - ${new Date().getFullYear()}</p>
                     <p style="font-size:12px;color:#999;">Generated on ${new Date().toLocaleDateString()}</p>
                 </div>
-                
                 <h2 class="section-title">📖 Day Scholar Fees</h2>
                 <table>
                     <thead><tr><th>Grade</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr></thead>
                     <tbody>
         `;
-        
         grades.forEach(grade => {
             const fees = getFeeStructure(grade, 'Day Scholar');
             html += `<tr>
@@ -3669,17 +3461,14 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
                 <td class="amount">KES ${fees.total.toLocaleString()}</td>
             </tr>`;
         });
-        
         html += `
                     </tbody>
                 </table>
-                
                 <h2 class="section-title">🏠 Boarding Fees (Grades 3-6)</h2>
                 <table>
                     <thead><tr><th>Grade</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Total</th></tr></thead>
                     <tbody>
         `;
-        
         const boardingGrades = ['Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
         boardingGrades.forEach(grade => {
             const fees = getFeeStructure(grade, 'Boarder');
@@ -3691,11 +3480,9 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
                 <td class="amount">KES ${fees.total.toLocaleString()}</td>
             </tr>`;
         });
-        
         html += `
                     </tbody>
                 </table>
-                
                 <div class="footer">
                     <p>© ${new Date().getFullYear()} Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
                     <p style="color:#c51616;font-weight:bold;">N/B: NO CASH IS ALLOWED IN SCHOOL</p>
@@ -3703,29 +3490,26 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
             </body>
             </html>
         `;
-        
-        // REPLACE THIS SECTION:
-        const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true
-});
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        
-        const pdfBuffer = await page.pdf({
+        const options = {
             format: 'A4',
+            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' },
             printBackground: true,
             landscape: true,
-            margin: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }
+            type: 'pdf',
+            timeout: 30000,
+            quality: '100'
+        };
+        pdf.create(html, options).toBuffer((err, buffer) => {
+            if (err) {
+                console.error('PDF generation error:', err);
+                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
+            }
+            const filename = `fees_structure_${new Date().toISOString().split('T')[0]}.pdf`;
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Length', buffer.length);
+            res.send(buffer);
         });
-        
-        await browser.close();
-        
-        const filename = `fees_structure_${new Date().toISOString().split('T')[0]}.pdf`;
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
-        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error generating fees structure PDF:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -3735,7 +3519,6 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
 // ============================================
 // FIX PAST RECORDS - MANUAL API
 // ============================================
-
 app.post('/api/fix-past-times', async (req, res) => {
     try {
         await fixPastRecords();
@@ -3770,7 +3553,6 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 // ============================================
 // TEST ROUTE
 // ============================================
-
 app.get('/api/test', (req, res) => {
     const kenyaNow = getKenyaTime();
     res.json({ success: true, message: '🎉 Changara Star Academy is running!', data: { server: 'Online', kenyaTime: kenyaNow.toLocaleString(), kenyaTimeFormatted: formatKenyaFullTime(kenyaNow), timestamp: new Date().toISOString() } });
@@ -3836,20 +3618,16 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
 app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
     try {
         const { title, grade, subject, description } = req.body;
-        
         if (!title || !grade) {
             return res.status(400).json({ success: false, message: 'Title and Grade are required' });
         }
-        
         if (!req.file) {
             return res.status(400).json({ success: false, message: 'Please upload a file' });
         }
-        
         const fileUrl = `/uploads/${req.file.filename}`;
         const fileName = req.file.originalname;
         const fileType = fileName.split('.').pop().toLowerCase();
         const fileSize = req.file.size;
-        
         const assignment = new HolidayAssignment({
             title,
             grade,
@@ -3863,9 +3641,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             createdAt: new Date(),
             updatedAt: new Date()
         });
-        
         await assignment.save();
-        
         res.status(201).json({
             success: true,
             message: 'Assignment uploaded successfully!',
@@ -3884,37 +3660,36 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
         if (!assignment) {
             return res.status(404).json({ success: false, message: 'Assignment not found' });
         }
-        
         const filePath = path.join(__dirname, assignment.fileUrl);
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
-        
         await HolidayAssignment.findByIdAndDelete(req.params.id);
-        
         res.json({ success: true, message: 'Assignment deleted successfully!' });
     } catch (error) {
         console.error('Error deleting assignment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 app.use('/uploads', express.static('uploads'));
+
 // ============================================
 // SERVE STATIC FILES
 // ============================================
-
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
+
 // ============================================
 // 404 HANDLER
 // ============================================
-
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
 });
+
 // ============================================
 // FIX ALL TIMES - ADD 3 HOURS
 // ============================================
@@ -3922,7 +3697,6 @@ app.post('/api/fix-times-add-3', async (req, res) => {
     try {
         console.log('🔄 Adding 3 hours to all attendance times...');
         let totalFixed = 0;
-
         const teachers = await Teacher.find({});
         for (const teacher of teachers) {
             let changed = false;
@@ -3956,7 +3730,6 @@ app.post('/api/fix-times-add-3', async (req, res) => {
                 console.log(`✅ Fixed ${teacher.firstName} ${teacher.lastName}`);
             }
         }
-
         res.json({ 
             success: true, 
             message: `Added 3 hours to ${totalFixed} teachers' records`,
@@ -3971,7 +3744,6 @@ app.post('/api/fix-times-add-3', async (req, res) => {
 // ============================================
 // START THE SERVER
 // ============================================
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     const kenyaNow = getKenyaTime();
