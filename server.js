@@ -57,7 +57,6 @@ function formatKenyaDate(date) {
     return d.toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-// CBC Rubric Helpers
 function calculatePerformanceLevel(percentage) {
     if (percentage >= 75) return 'Exceeding Expectation';
     if (percentage >= 50) return 'Meeting Expectation';
@@ -133,44 +132,39 @@ function calculateStudentOverall(assessments) {
 }
 
 // ============================================
-// PROFESSIONAL STUDENT REPORT PDF
+// PROFESSIONAL STUDENT REPORT - LANDSCAPE, BOLD FONTS
 // ============================================
 function generateStudentReportPDF(student) {
     return new Promise((resolve, reject) => {
         try {
-            const doc = new PDFDocument({ margin: 50, size: 'A4' });
+            const doc = new PDFDocument({ 
+                margin: 40, 
+                size: 'A4',
+                layout: 'landscape'
+            });
             const chunks = [];
             
             doc.on('data', (chunk) => chunks.push(chunk));
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
             
-            // Header
-            doc.rect(0, 0, 595, 6).fillColor('#D4A017').fill();
-            const flagColors = ['#000000', '#BB0000', '#006600', '#FFFFFF', '#006600', '#BB0000', '#000000'];
-            const flagWidth = 595 / flagColors.length;
-            flagColors.forEach((color, i) => {
-                doc.rect(i * flagWidth, 6, flagWidth, 3).fillColor(color).fill();
-            });
-            
-            doc.moveDown(1.5);
-            
-            doc.fontSize(20)
+            // Header - School Name
+            doc.fontSize(24)
                .font('Helvetica-Bold')
                .fillColor('#0A1628')
                .text('CHANGARA STAR ACADEMY', { align: 'center' });
             
-            doc.fontSize(10)
+            doc.fontSize(12)
                .font('Helvetica')
                .fillColor('#D4A017')
                .text('"Assurance to Excellence"', { align: 'center' })
                .moveDown(0.5);
             
-            doc.fontSize(14)
+            doc.fontSize(16)
                .font('Helvetica-Bold')
                .fillColor('#0A1628')
                .text('Student Assessment Report - CBC Performance Analysis', { align: 'center' })
-               .moveDown(1);
+               .moveDown(0.5);
             
             // Student Info Table
             const infoY = doc.y;
@@ -179,57 +173,65 @@ function generateStudentReportPDF(student) {
             const short = getPerformanceShort(level);
             const rating = getPerformanceRating(level);
             
-            doc.fontSize(9)
-               .font('Helvetica')
-               .fillColor('#333');
-            
-            // Left column - labels
-            const labels = ['Student Name:', 'Grade:', 'Assessment Type:', 'Period:', 'Term:', 'Report Date:'];
-            const values = [
-                student.studentName || 'N/A',
-                student.grade || 'N/A',
-                student.type || 'Monthly',
-                student.period || 'N/A',
-                student.term || 'N/A',
-                formatKenyaFullTime(new Date())
+            // Student info in a table format
+            const infoData = [
+                ['Student Name:', student.studentName || 'N/A'],
+                ['Grade:', student.grade || 'N/A'],
+                ['Assessment Type:', student.type || 'Monthly'],
+                ['Period:', student.period || 'N/A'],
+                ['Term:', student.term || 'N/A'],
+                ['Report Date:', formatKenyaFullTime(new Date())]
             ];
             
-            labels.forEach((label, i) => {
-                doc.text(label, 50, infoY + (i * 18));
+            // Draw info table
+            let rowY = infoY;
+            const col1Width = 120;
+            const col2Width = 200;
+            const spacing = 25;
+            const colsPerRow = 3;
+            
+            infoData.forEach((item, i) => {
+                const col = i % colsPerRow;
+                const row = Math.floor(i / colsPerRow);
+                const x = 50 + (col * (col1Width + col2Width + spacing));
+                const y = rowY + (row * 20);
+                
+                doc.fontSize(10)
+                   .font('Helvetica-Bold')
+                   .fillColor('#333')
+                   .text(item[0], x, y);
+                
+                doc.font('Helvetica')
+                   .fillColor('#0A1628')
+                   .text(item[1], x + col1Width, y);
             });
             
-            // Right column - values
-            doc.font('Helvetica-Bold');
-            values.forEach((value, i) => {
-                doc.text(value, 170, infoY + (i * 18));
-            });
+            doc.moveDown(3);
             
-            doc.moveDown(labels.length + 1);
-            
-            // Performance Box
+            // Performance Summary Box - BIG AND BOLD
             const perfY = doc.y;
-            doc.roundedRect(50, perfY, 495, 40, 6)
+            doc.roundedRect(50, perfY, 750, 50, 8)
                .fillColor(levelColor + '15')
                .fill()
                .strokeColor(levelColor)
-               .lineWidth(2)
-               .roundedRect(50, perfY, 495, 40, 6)
+               .lineWidth(3)
+               .roundedRect(50, perfY, 750, 50, 8)
                .stroke();
             
-            doc.fontSize(18)
+            doc.fontSize(28)
                .font('Helvetica-Bold')
                .fillColor(levelColor)
                .text(level, 65, perfY + 8);
             
-            doc.fontSize(11)
+            doc.fontSize(14)
                .font('Helvetica')
                .fillColor('#333')
-               .text(`Total Score: ${student.totalScore || 0}  |  Average: ${student.averageScore ? student.averageScore.toFixed(1) : '0'}%  |  Rating: ${rating}/4`, 65, perfY + 26);
+               .text(`Total Score: ${student.totalScore || 0}  |  Average: ${student.averageScore ? student.averageScore.toFixed(1) : '0'}%  |  Rating: ${rating}/4`, 65, perfY + 32);
             
             doc.moveDown(2);
             
-            // Subject Scores Table
-            doc.fontSize(11)
+            // Subject Scores Table - BOLD AND CLEAR
+            doc.fontSize(14)
                .font('Helvetica-Bold')
                .fillColor('#0A1628')
                .text('Subject Scores', { underline: true })
@@ -237,23 +239,23 @@ function generateStudentReportPDF(student) {
             
             if (student.assessments && student.assessments.length > 0) {
                 const tableTop = doc.y;
-                const tableWidth = 495;
+                const tableWidth = 750;
                 
-                // Table header
-                doc.rect(50, tableTop, tableWidth, 22)
+                // Table header - DARK BACKGROUND
+                doc.rect(50, tableTop, tableWidth, 28)
                    .fillColor('#0A1628')
                    .fill();
                 
-                doc.fontSize(8)
+                doc.fontSize(11)
                    .font('Helvetica-Bold')
                    .fillColor('white')
-                   .text('Subject', 60, tableTop + 6)
-                   .text('Max', 200, tableTop + 6, { width: 50, align: 'center' })
-                   .text('Score', 250, tableTop + 6, { width: 50, align: 'center' })
-                   .text('Percentage', 300, tableTop + 6, { width: 65, align: 'center' })
-                   .text('Performance', 375, tableTop + 6, { width: 130, align: 'center' });
+                   .text('Subject', 60, tableTop + 8)
+                   .text('Max', 250, tableTop + 8, { width: 60, align: 'center' })
+                   .text('Score', 310, tableTop + 8, { width: 60, align: 'center' })
+                   .text('Percentage', 370, tableTop + 8, { width: 80, align: 'center' })
+                   .text('Performance', 460, tableTop + 8, { width: 280, align: 'center' });
                 
-                let rowY = tableTop + 22;
+                let rowY = tableTop + 28;
                 let rowIndex = 0;
                 let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
                 
@@ -275,33 +277,38 @@ function generateStudentReportPDF(student) {
                     else if (level === 'Approaching Expectation') approachingCount++;
                     else belowCount++;
                     
-                    doc.rect(50, rowY, tableWidth, 18)
+                    // Row background - alternating
+                    doc.rect(50, rowY, tableWidth, 24)
                        .fillColor(rowIndex % 2 === 0 ? '#f8f9fa' : 'white')
                        .fill();
                     
-                    doc.fontSize(8)
-                       .font('Helvetica')
+                    doc.fontSize(11)
+                       .font('Helvetica-Bold')
                        .fillColor('#0A1628')
-                       .text(a.subject, 60, rowY + 4)
-                       .text(a.maxScore.toString(), 200, rowY + 4, { width: 50, align: 'center' })
-                       .text(a.score.toString(), 250, rowY + 4, { width: 50, align: 'center' })
-                       .text(percentage.toFixed(0) + '%', 300, rowY + 4, { width: 65, align: 'center' })
-                       .fillColor(levelColor)
-                       .text(level, 375, rowY + 4, { width: 130, align: 'center' });
+                       .text(a.subject, 60, rowY + 5);
                     
-                    rowY += 18;
+                    doc.font('Helvetica')
+                       .text(a.maxScore.toString(), 250, rowY + 5, { width: 60, align: 'center' })
+                       .text(a.score.toString(), 310, rowY + 5, { width: 60, align: 'center' })
+                       .text(percentage.toFixed(0) + '%', 370, rowY + 5, { width: 80, align: 'center' })
+                       .fillColor(levelColor)
+                       .font('Helvetica-Bold')
+                       .text(level, 460, rowY + 5, { width: 280, align: 'center' });
+                    
+                    rowY += 24;
                     rowIndex++;
                 });
                 
-                doc.moveDown(1);
+                doc.moveDown(1.5);
                 
-                // Performance Summary Box
-                doc.fontSize(10)
+                // Performance Summary - BOLD AND CLEAR
+                doc.fontSize(14)
                    .font('Helvetica-Bold')
                    .fillColor('#0A1628')
                    .text('Performance Summary', { underline: true })
-                   .moveDown(0.3);
+                   .moveDown(0.5);
                 
+                // Create a summary box with counts
                 const summaryY = doc.y;
                 const summaryData = [
                     { label: 'Exceeding Expectation', count: exceedingCount, color: '#1a8a3f' },
@@ -310,32 +317,113 @@ function generateStudentReportPDF(student) {
                     { label: 'Below Expectation', count: belowCount, color: '#dc3545' }
                 ];
                 
-                summaryData.forEach((item) => {
+                // Draw summary in a grid
+                const summaryCols = 4;
+                const summaryWidth = 180;
+                summaryData.forEach((item, i) => {
+                    const x = 50 + (i * (summaryWidth + 10));
+                    doc.roundedRect(x, summaryY, summaryWidth, 40, 6)
+                       .fillColor('#f8f9fa')
+                       .fill()
+                       .strokeColor(item.color)
+                       .lineWidth(2)
+                       .roundedRect(x, summaryY, summaryWidth, 40, 6)
+                       .stroke();
+                    
+                    doc.fontSize(22)
+                       .font('Helvetica-Bold')
+                       .fillColor(item.color)
+                       .text(item.count.toString(), x + 10, summaryY + 5);
+                    
                     doc.fontSize(8)
                        .font('Helvetica')
                        .fillColor('#333')
-                       .text(`${item.label}: ${item.count}`, 55, doc.y + 2);
-                    
-                    // Color bar
-                    const total = sortedAssessments.length || 1;
-                    const barWidth = (item.count / total) * 350;
-                    doc.rect(220, doc.y - 1, Math.max(barWidth, 3), 10)
-                       .fillColor(item.color)
-                       .fill()
-                       .roundedRect(220, doc.y - 1, Math.max(barWidth, 3), 10, 3)
-                       .fill();
-                    
-                    doc.moveDown(0.5);
+                       .text(item.label, x + 10, summaryY + 27);
                 });
-                doc.moveDown(0.5);
+                
+                doc.moveDown(3);
+                
+                // Strengths and Weaknesses - BOLD AND CLEAR
+                const swY = doc.y;
+                
+                // Strengths
+                doc.roundedRect(50, swY, 360, 100, 6)
+                   .fillColor('#e8f5e9')
+                   .fill()
+                   .strokeColor('#1a8a3f')
+                   .lineWidth(2)
+                   .roundedRect(50, swY, 360, 100, 6)
+                   .stroke();
+                
+                doc.fontSize(14)
+                   .font('Helvetica-Bold')
+                   .fillColor('#1a8a3f')
+                   .text('Strengths', 65, swY + 8);
+                
+                let strengthsY = swY + 30;
+                const strengths = (student.assessments || [])
+                    .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
+                    .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100));
+                
+                if (strengths.length > 0) {
+                    strengths.slice(0, 4).forEach((s) => {
+                        const pct = ((s.score / s.maxScore) * 100).toFixed(0);
+                        doc.fontSize(11)
+                           .font('Helvetica-Bold')
+                           .fillColor('#1a8a3f')
+                           .text(s.subject + ': ' + pct + '%', 65, strengthsY);
+                        strengthsY += 18;
+                    });
+                } else {
+                    doc.fontSize(11)
+                       .font('Helvetica')
+                       .fillColor('#999')
+                       .text('No subjects meeting expectation yet.', 65, strengthsY);
+                }
+                
+                // Weaknesses
+                doc.roundedRect(440, swY, 360, 100, 6)
+                   .fillColor('#fbe9e7')
+                   .fill()
+                   .strokeColor('#dc3545')
+                   .lineWidth(2)
+                   .roundedRect(440, swY, 360, 100, 6)
+                   .stroke();
+                
+                doc.fontSize(14)
+                   .font('Helvetica-Bold')
+                   .fillColor('#dc3545')
+                   .text('Needs Improvement', 455, swY + 8);
+                
+                let weaknessesY = swY + 30;
+                const weaknesses = (student.assessments || [])
+                    .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 50)
+                    .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100));
+                
+                if (weaknesses.length > 0) {
+                    weaknesses.slice(0, 4).forEach((s) => {
+                        const pct = ((s.score / s.maxScore) * 100).toFixed(0);
+                        doc.fontSize(11)
+                           .font('Helvetica-Bold')
+                           .fillColor('#dc3545')
+                           .text(s.subject + ': ' + pct + '%', 455, weaknessesY);
+                        weaknessesY += 18;
+                    });
+                } else {
+                    doc.fontSize(11)
+                       .font('Helvetica')
+                       .fillColor('#28a745')
+                       .text('All subjects meeting expectations!', 455, weaknessesY);
+                }
             }
             
-            // Footer
-            doc.fontSize(7)
-               .font('Helvetica')
+            // Footer - BOLD AND CLEAR
+            doc.moveDown(3);
+            doc.fontSize(10)
+               .font('Helvetica-Bold')
                .fillColor('#6c757d')
-               .text(`Generated: ${formatKenyaFullTime(new Date())}`, 50, 780, { align: 'left' })
-               .text('© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com', 50, 792, { align: 'center' });
+               .text(`Generated: ${formatKenyaFullTime(new Date())}`, 50, 540, { align: 'left' })
+               .text('© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com', 50, 555, { align: 'center' });
             
             doc.end();
         } catch (error) {
@@ -345,12 +433,16 @@ function generateStudentReportPDF(student) {
 }
 
 // ============================================
-// PROFESSIONAL CLASS REPORT PDF
+// PROFESSIONAL CLASS REPORT - LANDSCAPE, BOLD FONTS
 // ============================================
 function generateClassReportPDF(students, grade, type, term, year, period) {
     return new Promise((resolve, reject) => {
         try {
-            const doc = new PDFDocument({ margin: 30, size: 'A4', landscape: true });
+            const doc = new PDFDocument({ 
+                margin: 30, 
+                size: 'A4',
+                landscape: true
+            });
             const chunks = [];
             
             doc.on('data', (chunk) => chunks.push(chunk));
@@ -358,45 +450,29 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             doc.on('error', reject);
             
             // Header
-            doc.rect(0, 0, 842, 6).fillColor('#D4A017').fill();
-            const flagColors = ['#000000', '#BB0000', '#006600', '#FFFFFF', '#006600', '#BB0000', '#000000'];
-            const flagWidth = 842 / flagColors.length;
-            flagColors.forEach((color, i) => {
-                doc.rect(i * flagWidth, 6, flagWidth, 2).fillColor(color).fill();
-            });
-            
-            doc.moveDown(1);
-            
-            doc.fontSize(16)
+            doc.fontSize(20)
                .font('Helvetica-Bold')
                .fillColor('#0A1628')
                .text('CHANGARA STAR ACADEMY', { align: 'center' });
             
-            doc.fontSize(9)
+            doc.fontSize(10)
                .font('Helvetica')
                .fillColor('#D4A017')
                .text('"Assurance to Excellence"', { align: 'center' })
                .moveDown(0.3);
             
-            doc.strokeColor('#D4A017')
-               .lineWidth(1)
-               .moveTo(100, doc.y)
-               .lineTo(742, doc.y)
-               .stroke()
-               .moveDown(0.3);
-            
-            doc.fontSize(13)
+            doc.fontSize(14)
                .font('Helvetica-Bold')
                .fillColor('#0A1628')
                .text(`${grade} - ${type || 'Monthly'} Assessment Results`, { align: 'center' });
             
-            doc.fontSize(8)
+            doc.fontSize(9)
                .font('Helvetica')
                .fillColor('#6c757d')
                .text(`${term || ''} ${year || ''} ${period ? '- ' + period : ''}`, { align: 'center' })
-               .moveDown(1);
+               .moveDown(0.5);
             
-            // Statistics
+            // Statistics - BOLD AND CLEAR
             const totalStudents = students.length;
             let exceeding = 0, meeting = 0, approaching = 0, below = 0;
             let totalAvg = 0;
@@ -422,35 +498,35 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             ];
             
             const statsY = doc.y;
-            const boxWidth = 130;
+            const boxWidth = 120;
             stats.forEach((stat, i) => {
-                const x = 45 + (i * (boxWidth + 5));
-                doc.roundedRect(x, statsY, boxWidth, 30, 4)
+                const x = 45 + (i * (boxWidth + 8));
+                doc.roundedRect(x, statsY, boxWidth, 35, 6)
                    .fillColor('#f8f9fa')
                    .fill()
                    .strokeColor('#dee2e6')
-                   .lineWidth(0.5)
-                   .roundedRect(x, statsY, boxWidth, 30, 4)
+                   .lineWidth(1)
+                   .roundedRect(x, statsY, boxWidth, 35, 6)
                    .stroke();
                 
-                doc.fontSize(14)
+                doc.fontSize(18)
                    .font('Helvetica-Bold')
                    .fillColor(stat.color)
-                   .text(stat.value.toString(), x + 5, statsY + 3, { width: boxWidth - 10, align: 'center' });
+                   .text(stat.value.toString(), x + 5, statsY + 4, { width: boxWidth - 10, align: 'center' });
                 
-                doc.fontSize(6)
-                   .font('Helvetica')
+                doc.fontSize(7)
+                   .font('Helvetica-Bold')
                    .fillColor('#6c757d')
-                   .text(stat.label, x + 5, statsY + 20, { width: boxWidth - 10, align: 'center' });
+                   .text(stat.label, x + 5, statsY + 22, { width: boxWidth - 10, align: 'center' });
             });
             
             doc.moveDown(2);
             
-            // Legend
-            doc.fontSize(7)
-               .font('Helvetica')
+            // Legend - BOLD
+            doc.fontSize(8)
+               .font('Helvetica-Bold')
                .fillColor('#6c757d')
-               .text('EE: Exceeding (75-100%)   ME: Meeting (50-74%)   AE: Approaching (26-49%)   BE: Below (0-25%)   🏆 Rank: 1st, 2nd, 3rd', 45, doc.y);
+               .text('EE: Exceeding (75-100%)   ME: Meeting (50-74%)   AE: Approaching (26-49%)   BE: Below (0-25%)   Rank: 1st, 2nd, 3rd', 45, doc.y);
             doc.moveDown(1);
             
             // Get all subjects
@@ -466,57 +542,57 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             });
             allSubjects.sort();
             
-            // Student Table
-            const nameColWidth = 85;
-            const rankColWidth = 30;
-            const totalColWidth = 45;
-            const avgColWidth = 40;
+            // Student Table - BOLD FONTS
+            const nameColWidth = 90;
+            const rankColWidth = 35;
+            const totalColWidth = 50;
+            const avgColWidth = 45;
             const levelColWidth = 55;
-            const subjectColWidth = Math.min(32, (780 - nameColWidth - rankColWidth - totalColWidth - avgColWidth - levelColWidth) / Math.max(1, allSubjects.length));
+            const subjectColWidth = Math.min(35, (780 - nameColWidth - rankColWidth - totalColWidth - avgColWidth - levelColWidth) / Math.max(1, allSubjects.length));
             const tableWidth = nameColWidth + rankColWidth + (allSubjects.length * subjectColWidth) + totalColWidth + avgColWidth + levelColWidth;
             
             // Table header
             const tableTop = doc.y;
-            doc.rect(30, tableTop, tableWidth, 20)
+            doc.rect(30, tableTop, tableWidth, 24)
                .fillColor('#0A1628')
                .fill();
             
             let headerX = 30;
-            doc.fontSize(5.5)
+            doc.fontSize(8)
                .font('Helvetica-Bold')
                .fillColor('white');
             
-            doc.text('Rank', headerX + 3, tableTop + 5, { width: rankColWidth - 6, align: 'center' });
+            doc.text('Rank', headerX + 3, tableTop + 7, { width: rankColWidth - 6, align: 'center' });
             headerX += rankColWidth;
             
-            doc.text('Student', headerX + 3, tableTop + 5, { width: nameColWidth - 6 });
+            doc.text('Student', headerX + 3, tableTop + 7, { width: nameColWidth - 6 });
             headerX += nameColWidth;
             
             allSubjects.forEach(subject => {
                 const shortName = subject.length > 8 ? subject.substring(0, 6) + '..' : subject;
-                doc.text(shortName, headerX + 2, tableTop + 5, { width: subjectColWidth - 4, align: 'center' });
+                doc.text(shortName, headerX + 2, tableTop + 7, { width: subjectColWidth - 4, align: 'center' });
                 headerX += subjectColWidth;
             });
             
-            doc.text('Total', headerX + 3, tableTop + 5, { width: totalColWidth - 6, align: 'center' });
+            doc.text('Total', headerX + 3, tableTop + 7, { width: totalColWidth - 6, align: 'center' });
             headerX += totalColWidth;
             
-            doc.text('Avg', headerX + 3, tableTop + 5, { width: avgColWidth - 6, align: 'center' });
+            doc.text('Avg', headerX + 3, tableTop + 7, { width: avgColWidth - 6, align: 'center' });
             headerX += avgColWidth;
             
-            doc.text('Level', headerX + 3, tableTop + 5, { width: levelColWidth - 6, align: 'center' });
+            doc.text('Level', headerX + 3, tableTop + 7, { width: levelColWidth - 6, align: 'center' });
             
             // Max scores row
-            const maxRowY = tableTop + 20;
-            doc.rect(30, maxRowY, tableWidth, 16)
+            const maxRowY = tableTop + 24;
+            doc.rect(30, maxRowY, tableWidth, 18)
                .fillColor('#f8f9fa')
                .fill();
             
             let maxX = 30;
-            doc.fontSize(5)
+            doc.fontSize(6)
                .font('Helvetica-Bold')
                .fillColor('#6c757d')
-               .text('Max:', maxX + 3, maxRowY + 4);
+               .text('Max:', maxX + 3, maxRowY + 5);
             maxX += rankColWidth;
             maxX += nameColWidth;
             
@@ -530,46 +606,46 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                         }
                     }
                 });
-                doc.text(maxScore.toString(), maxX + 2, maxRowY + 4, { width: subjectColWidth - 4, align: 'center' });
+                doc.text(maxScore.toString(), maxX + 2, maxRowY + 5, { width: subjectColWidth - 4, align: 'center' });
                 maxX += subjectColWidth;
             });
             
-            // Sort students by total score (highest first)
+            // Sort students by total score
             const sortedStudents = [...students].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-            let rowY = maxRowY + 16;
+            let rowY = maxRowY + 18;
             let rowIndex = 0;
             
             sortedStudents.forEach((student) => {
-                if (rowY > 520) {
+                if (rowY > 490) {
                     doc.addPage();
                     // Re-draw header
-                    doc.rect(30, 30, tableWidth, 20)
+                    doc.rect(30, 30, tableWidth, 24)
                        .fillColor('#0A1628')
                        .fill();
                     
                     headerX = 30;
-                    doc.fontSize(5.5)
+                    doc.fontSize(8)
                        .font('Helvetica-Bold')
                        .fillColor('white');
                     
-                    doc.text('Rank', headerX + 3, 35, { width: rankColWidth - 6, align: 'center' });
+                    doc.text('Rank', headerX + 3, 37, { width: rankColWidth - 6, align: 'center' });
                     headerX += rankColWidth;
-                    doc.text('Student', headerX + 3, 35, { width: nameColWidth - 6 });
+                    doc.text('Student', headerX + 3, 37, { width: nameColWidth - 6 });
                     headerX += nameColWidth;
                     allSubjects.forEach(subject => {
                         const shortName = subject.length > 8 ? subject.substring(0, 6) + '..' : subject;
-                        doc.text(shortName, headerX + 2, 35, { width: subjectColWidth - 4, align: 'center' });
+                        doc.text(shortName, headerX + 2, 37, { width: subjectColWidth - 4, align: 'center' });
                         headerX += subjectColWidth;
                     });
-                    doc.text('Total', headerX + 3, 35, { width: totalColWidth - 6, align: 'center' });
+                    doc.text('Total', headerX + 3, 37, { width: totalColWidth - 6, align: 'center' });
                     headerX += totalColWidth;
-                    doc.text('Avg', headerX + 3, 35, { width: avgColWidth - 6, align: 'center' });
+                    doc.text('Avg', headerX + 3, 37, { width: avgColWidth - 6, align: 'center' });
                     headerX += avgColWidth;
-                    doc.text('Level', headerX + 3, 35, { width: levelColWidth - 6, align: 'center' });
-                    rowY = 50;
+                    doc.text('Level', headerX + 3, 37, { width: levelColWidth - 6, align: 'center' });
+                    rowY = 54;
                 }
                 
-                doc.rect(30, rowY, tableWidth, 16)
+                doc.rect(30, rowY, tableWidth, 20)
                    .fillColor(rowIndex % 2 === 0 ? '#fafafa' : 'white')
                    .fill();
                 
@@ -581,14 +657,14 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
                 const rank = rowIndex + 1;
                 
-                doc.fontSize(6)
-                   .font('Helvetica')
+                doc.fontSize(8)
+                   .font('Helvetica-Bold')
                    .fillColor(rank <= 3 ? '#D4A017' : '#6c757d')
-                   .text(rank <= 3 ? ['🏆', '🥈', '🥉'][rank - 1] : rank.toString(), x + 3, rowY + 3, { width: rankColWidth - 6, align: 'center' });
+                   .text(rank <= 3 ? ['🏆', '🥈', '🥉'][rank - 1] : rank.toString(), x + 3, rowY + 5, { width: rankColWidth - 6, align: 'center' });
                 x += rankColWidth;
                 
                 doc.fillColor('#0A1628')
-                   .text(student.studentName || 'N/A', x + 3, rowY + 3, { width: nameColWidth - 6 });
+                   .text(student.studentName || 'N/A', x + 3, rowY + 5, { width: nameColWidth - 6 });
                 x += nameColWidth;
                 
                 allSubjects.forEach(subject => {
@@ -600,37 +676,38 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                         else if (percentage < 50) color = '#e6a800';
                         else if (percentage < 75) color = '#0d6efd';
                         doc.fillColor(color)
-                           .text(assessment.score.toString(), x + 2, rowY + 3, { width: subjectColWidth - 4, align: 'center' });
+                           .font('Helvetica-Bold')
+                           .text(assessment.score.toString(), x + 2, rowY + 5, { width: subjectColWidth - 4, align: 'center' });
                     } else {
                         doc.fillColor('#dee2e6')
-                           .text('-', x + 2, rowY + 3, { width: subjectColWidth - 4, align: 'center' });
+                           .text('-', x + 2, rowY + 5, { width: subjectColWidth - 4, align: 'center' });
                     }
                     x += subjectColWidth;
                 });
                 
                 doc.fillColor('#D4A017')
                    .font('Helvetica-Bold')
-                   .text((student.totalScore || 0).toString(), x + 3, rowY + 3, { width: totalColWidth - 6, align: 'center' });
+                   .text((student.totalScore || 0).toString(), x + 3, rowY + 5, { width: totalColWidth - 6, align: 'center' });
                 x += totalColWidth;
                 
                 doc.fillColor('#0d6efd')
-                   .text(avgScore, x + 3, rowY + 3, { width: avgColWidth - 6, align: 'center' });
+                   .text(avgScore, x + 3, rowY + 5, { width: avgColWidth - 6, align: 'center' });
                 x += avgColWidth;
                 
                 doc.fillColor(levelColor)
-                   .text(`${short} (${rating})`, x + 3, rowY + 3, { width: levelColWidth - 6, align: 'center' });
+                   .text(`${short} (${rating})`, x + 3, rowY + 5, { width: levelColWidth - 6, align: 'center' });
                 
-                rowY += 16;
+                rowY += 20;
                 rowIndex++;
             });
             
-            // Footer
-            doc.moveDown(2);
-            doc.fontSize(6)
-               .font('Helvetica')
+            // Footer - BOLD
+            doc.moveDown(1);
+            doc.fontSize(8)
+               .font('Helvetica-Bold')
                .fillColor('#6c757d')
-               .text(`Generated: ${formatKenyaFullTime(new Date())}`, 30, 565, { align: 'left' })
-               .text('© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com', 30, 575, { align: 'center' });
+               .text(`Generated: ${formatKenyaFullTime(new Date())}`, 30, 545, { align: 'left' })
+               .text('© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com', 30, 558, { align: 'center' });
             
             doc.end();
         } catch (error) {
@@ -640,25 +717,44 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
 }
 
 // ============================================
-// STAFF REPORT PDF
+// STAFF REPORT PDF - LANDSCAPE, BOLD
 // ============================================
 function generateStaffReportPDF(report, periodLabel) {
     return new Promise((resolve, reject) => {
         try {
-            const doc = new PDFDocument({ margin: 40, size: 'A4' });
+            const doc = new PDFDocument({ 
+                margin: 40, 
+                size: 'A4',
+                landscape: true
+            });
             const chunks = [];
             
             doc.on('data', (chunk) => chunks.push(chunk));
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
             
-            doc.rect(0, 0, 595, 5).fillColor('#D4A017').fill();
-            doc.moveDown(1);
-            doc.fontSize(18).font('Helvetica-Bold').fillColor('#0A1628').text('CHANGARA STAR ACADEMY', { align: 'center' });
-            doc.fontSize(9).font('Helvetica').fillColor('#D4A017').text('"Assurance to Excellence"', { align: 'center' }).moveDown();
-            doc.strokeColor('#D4A017').lineWidth(1).moveTo(100, doc.y).lineTo(495, doc.y).stroke().moveDown();
-            doc.fontSize(13).font('Helvetica-Bold').fillColor('#0A1628').text('STAFF ATTENDANCE REPORT', { align: 'center' }).moveDown();
-            doc.fontSize(9).font('Helvetica').fillColor('#6c757d').text(periodLabel || 'Attendance Report', { align: 'center' }).moveDown(0.5);
+            doc.fontSize(20)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text('CHANGARA STAR ACADEMY', { align: 'center' });
+            
+            doc.fontSize(10)
+               .font('Helvetica')
+               .fillColor('#D4A017')
+               .text('"Assurance to Excellence"', { align: 'center' })
+               .moveDown(0.3);
+            
+            doc.fontSize(14)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text('STAFF ATTENDANCE REPORT', { align: 'center' })
+               .moveDown(0.3);
+            
+            doc.fontSize(10)
+               .font('Helvetica')
+               .fillColor('#6c757d')
+               .text(periodLabel || 'Attendance Report', { align: 'center' })
+               .moveDown(0.5);
             
             const totalStaff = report.length;
             let totalOnTime = 0, totalLate = 0, totalAbsent = 0, totalDays = 0;
@@ -673,32 +769,78 @@ function generateStaffReportPDF(report, periodLabel) {
             ];
             
             const statsY = doc.y;
-            const boxWidth = 500 / statsData.length;
+            const boxWidth = 140;
             statsData.forEach((stat, i) => {
-                const x = 50 + (i * boxWidth);
-                doc.rect(x, statsY, boxWidth - 4, 36).fillColor('#f8f9fa').fill().strokeColor('#dee2e6').lineWidth(0.5).rect(x, statsY, boxWidth - 4, 36).stroke();
-                doc.fontSize(14).font('Helvetica-Bold').fillColor(stat.color).text(stat.value.toString(), x + 5, statsY + 4, { width: boxWidth - 10, align: 'center' });
-                doc.fontSize(6).font('Helvetica').fillColor('#6c757d').text(stat.label, x + 5, statsY + 24, { width: boxWidth - 10, align: 'center' });
+                const x = 45 + (i * (boxWidth + 10));
+                doc.roundedRect(x, statsY, boxWidth, 40, 6)
+                   .fillColor('#f8f9fa')
+                   .fill()
+                   .strokeColor('#dee2e6')
+                   .lineWidth(1)
+                   .roundedRect(x, statsY, boxWidth, 40, 6)
+                   .stroke();
+                
+                doc.fontSize(18)
+                   .font('Helvetica-Bold')
+                   .fillColor(stat.color)
+                   .text(stat.value.toString(), x + 5, statsY + 5, { width: boxWidth - 10, align: 'center' });
+                
+                doc.fontSize(8)
+                   .font('Helvetica-Bold')
+                   .fillColor('#6c757d')
+                   .text(stat.label, x + 5, statsY + 25, { width: boxWidth - 10, align: 'center' });
             });
+            
             doc.moveDown(2.5);
             
             const tableTop = doc.y;
-            const colWidths = [20, 150, 50, 50, 50, 50];
-            const tableWidth = 370;
+            const colWidths = [25, 160, 60, 60, 60, 60];
+            const tableWidth = 425;
             
-            doc.rect(50, tableTop, tableWidth, 18).fillColor('#0A1628').fill();
-            doc.fontSize(7).font('Helvetica-Bold').fillColor('white').text('#', 55, tableTop + 4).text('Staff Name', 75, tableTop + 4).text('Days', 225, tableTop + 4, { width: 35, align: 'center' }).text('On Time', 260, tableTop + 4, { width: 35, align: 'center' }).text('Late', 295, tableTop + 4, { width: 35, align: 'center' }).text('Absent', 330, tableTop + 4, { width: 35, align: 'center' });
+            doc.rect(45, tableTop, tableWidth, 22)
+               .fillColor('#0A1628')
+               .fill();
             
-            let rowY = tableTop + 18;
+            doc.fontSize(9)
+               .font('Helvetica-Bold')
+               .fillColor('white')
+               .text('#', 50, tableTop + 5)
+               .text('Staff Name', 75, tableTop + 5)
+               .text('Days', 235, tableTop + 5, { width: 45, align: 'center' })
+               .text('On Time', 280, tableTop + 5, { width: 45, align: 'center' })
+               .text('Late', 325, tableTop + 5, { width: 45, align: 'center' })
+               .text('Absent', 370, tableTop + 5, { width: 45, align: 'center' });
+            
+            let rowY = tableTop + 22;
             report.forEach((s, index) => {
-                if (rowY > 720) { doc.addPage(); rowY = 50; }
-                doc.rect(50, rowY, tableWidth, 16).fillColor(index % 2 === 0 ? '#f8f9fa' : 'white').fill();
-                doc.fontSize(7).font('Helvetica').fillColor('#0A1628').text((index + 1).toString(), 55, rowY + 3).text(s.name || 'N/A', 75, rowY + 3).text((s.totalDays || 0).toString(), 225, rowY + 3, { width: 35, align: 'center' }).fillColor('#1a8a3f').text((s.onTime || 0).toString(), 260, rowY + 3, { width: 35, align: 'center' }).fillColor('#e6a800').text((s.late || 0).toString(), 295, rowY + 3, { width: 35, align: 'center' }).fillColor('#dc3545').text((s.absent || 0).toString(), 330, rowY + 3, { width: 35, align: 'center' });
-                rowY += 16;
+                if (rowY > 530) { doc.addPage(); rowY = 50; }
+                doc.rect(45, rowY, tableWidth, 20)
+                   .fillColor(index % 2 === 0 ? '#f8f9fa' : 'white')
+                   .fill();
+                
+                doc.fontSize(9)
+                   .font('Helvetica-Bold')
+                   .fillColor('#0A1628')
+                   .text((index + 1).toString(), 50, rowY + 5)
+                   .text(s.name || 'N/A', 75, rowY + 5)
+                   .text((s.totalDays || 0).toString(), 235, rowY + 5, { width: 45, align: 'center' })
+                   .fillColor('#1a8a3f')
+                   .text((s.onTime || 0).toString(), 280, rowY + 5, { width: 45, align: 'center' })
+                   .fillColor('#e6a800')
+                   .text((s.late || 0).toString(), 325, rowY + 5, { width: 45, align: 'center' })
+                   .fillColor('#dc3545')
+                   .text((s.absent || 0).toString(), 370, rowY + 5, { width: 45, align: 'center' });
+                
+                rowY += 20;
             });
             
             doc.moveDown(2);
-            doc.fontSize(7).font('Helvetica').fillColor('#6c757d').text(`Report Date: ${formatKenyaFullTime(new Date())}`, { align: 'center' }).text('CHANGARA STAR ACADEMY | P.O Box 7, Cheptais | 📞 +254 721 556 252', { align: 'center' });
+            doc.fontSize(8)
+               .font('Helvetica-Bold')
+               .fillColor('#6c757d')
+               .text(`Generated: ${formatKenyaFullTime(new Date())}`, 45, 550, { align: 'left' })
+               .text('CHANGARA STAR ACADEMY | P.O Box 7, Cheptais | 📞 +254 721 556 252', 45, 565, { align: 'center' });
+            
             doc.end();
         } catch (error) {
             reject(error);
@@ -2208,7 +2350,7 @@ app.get('/api/assessments/search', async (req, res) => {
 });
 
 // ============================================
-// DOWNLOAD STUDENT REPORT - Professional
+// DOWNLOAD STUDENT REPORT - PROFESSIONAL
 // ============================================
 app.get('/api/assessments/download-report/:studentId', async (req, res) => {
     try {
@@ -2333,7 +2475,7 @@ app.post('/api/assessments/copy', async (req, res) => {
 });
 
 // ============================================
-// DOWNLOAD CLASS REPORT - Professional
+// DOWNLOAD CLASS REPORT - PROFESSIONAL
 // ============================================
 app.get('/api/assessments/download-class-pdf', async (req, res) => {
     try {
@@ -2373,312 +2515,7 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
 });
 
 // ============================================
-// COMPREHENSIVE PDF GENERATION - ALL GRADES
-// ============================================
-app.post('/api/assessments/generate-comprehensive-pdf', async (req, res) => {
-    try {
-        const { grades, type, term, year, period } = req.body;
-        res.status(501).json({ success: false, message: 'Comprehensive PDF generation coming soon' });
-    } catch (error) {
-        console.error('Comprehensive PDF generation error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/assessments/all-grades', async (req, res) => {
-    try {
-        const { type, term, year, period } = req.query;
-        const filter = {};
-        if (type) filter.type = type;
-        if (term) filter.term = term;
-        if (year) filter.year = year;
-        if (period) filter.period = period;
-        const students = await StudentAssessment.find(filter).sort({ grade: 1, studentName: 1 });
-        const groupedByGrade = {};
-        students.forEach(student => {
-            if (!groupedByGrade[student.grade]) {
-                groupedByGrade[student.grade] = [];
-            }
-            groupedByGrade[student.grade].push(student);
-        });
-        res.json({ success: true, total: students.length, grades: Object.keys(groupedByGrade), byGrade: groupedByGrade, students: students });
-    } catch (error) {
-        console.error('Error fetching all grades:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// REPORT ROUTES
-// ============================================
-
-app.get('/api/reports/staff/attendance', async (req, res) => {
-    try {
-        const { period, date, department } = req.query;
-        let startDate, endDate;
-        const selectedDate = date ? new Date(date) : getKenyaDate();
-        if (period === 'daily') {
-            startDate = new Date(selectedDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-        } else if (period === 'weekly') {
-            const day = selectedDate.getDay();
-            const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-            startDate = new Date(selectedDate);
-            startDate.setDate(diff);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 7);
-        } else if (period === 'monthly') {
-            startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + 1);
-        } else {
-            startDate = getKenyaDate();
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-        }
-        let filter = {};
-        if (department) {
-            filter.department = department;
-        }
-        const teachers = await Teacher.find(filter);
-        const report = teachers.map(teacher => {
-            let totalDays = 0;
-            let onTime = 0;
-            let late = 0;
-            let absent = 0;
-            teacher.attendance.forEach(record => {
-                const recordDate = new Date(record.date);
-                if (recordDate >= startDate && recordDate < endDate) {
-                    totalDays++;
-                    if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
-                        if (record.isLate) {
-                            late++;
-                        } else {
-                            onTime++;
-                        }
-                    } else {
-                        absent++;
-                    }
-                }
-            });
-            return { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId || 'N/A', department: teacher.department || 'N/A', totalDays, onTime, late, absent };
-        });
-        res.json({ success: true, report });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/reports/visitors', async (req, res) => {
-    try {
-        const { period, date, purpose } = req.query;
-        let startDate, endDate;
-        const selectedDate = date ? new Date(date) : getKenyaDate();
-        if (period === 'daily') {
-            startDate = new Date(selectedDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-        } else if (period === 'weekly') {
-            const day = selectedDate.getDay();
-            const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-            startDate = new Date(selectedDate);
-            startDate.setDate(diff);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 7);
-        } else if (period === 'monthly') {
-            startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + 1);
-        } else {
-            startDate = getKenyaDate();
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-        }
-        let filter = { checkIn: { $gte: startDate, $lt: endDate } };
-        if (purpose) {
-            filter.purpose = purpose;
-        }
-        const visitors = await Visitor.find(filter);
-        const report = visitors.map(visitor => {
-            const duration = visitor.checkOut ? Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
-            return { fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`, purpose: visitor.purpose || 'N/A', personToVisit: visitor.personToVisit || 'N/A', checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-', checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-', status: visitor.status || 'Checked In', duration: duration };
-        });
-        res.json({ success: true, report });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// DOWNLOAD STAFF REPORT - PDF
-// ============================================
-app.get('/api/reports/staff/download-pdf', async (req, res) => {
-    try {
-        const { period, date, department } = req.query;
-        let startDate, endDate;
-        const selectedDate = date ? new Date(date) : getKenyaDate();
-        let periodLabel = '';
-        if (period === 'daily') {
-            startDate = new Date(selectedDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-            periodLabel = `Daily Report - ${formatKenyaDate(selectedDate)}`;
-        } else if (period === 'weekly') {
-            const day = selectedDate.getDay();
-            const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-            startDate = new Date(selectedDate);
-            startDate.setDate(diff);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 7);
-            periodLabel = `Weekly Report - ${formatKenyaDate(startDate)} to ${formatKenyaDate(endDate)}`;
-        } else if (period === 'monthly') {
-            startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + 1);
-            periodLabel = `Monthly Report - ${selectedDate.toLocaleString('en-KE', { month: 'long', year: 'numeric' })}`;
-        } else {
-            startDate = getKenyaDate();
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-            periodLabel = `Daily Report - ${formatKenyaDate(startDate)}`;
-        }
-        let filter = {};
-        if (department) {
-            filter.department = department;
-        }
-        const teachers = await Teacher.find(filter);
-        const report = teachers.map(teacher => {
-            let totalDays = 0;
-            let onTime = 0;
-            let late = 0;
-            let absent = 0;
-            teacher.attendance.forEach(record => {
-                const recordDate = new Date(record.date);
-                if (recordDate >= startDate && recordDate < endDate) {
-                    totalDays++;
-                    if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
-                        if (record.isLate) {
-                            late++;
-                        } else {
-                            onTime++;
-                        }
-                    } else {
-                        absent++;
-                    }
-                }
-            });
-            return { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId || 'N/A', department: teacher.department || 'N/A', totalDays, onTime, late, absent };
-        });
-        const pdfBuffer = await generateStaffReportPDF(report, periodLabel);
-        
-        const filename = `staff_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
-        res.send(pdfBuffer);
-    } catch (error) {
-        console.error('Error downloading staff report:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// DOWNLOAD VISITOR REPORT - PDF
-// ============================================
-app.get('/api/reports/visitors/download-pdf', async (req, res) => {
-    try {
-        const { period, date, purpose } = req.query;
-        let startDate, endDate;
-        const selectedDate = date ? new Date(date) : getKenyaDate();
-        let periodLabel = '';
-        if (period === 'daily') {
-            startDate = new Date(selectedDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-            periodLabel = `Daily Report - ${formatKenyaDate(selectedDate)}`;
-        } else if (period === 'weekly') {
-            const day = selectedDate.getDay();
-            const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-            startDate = new Date(selectedDate);
-            startDate.setDate(diff);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 7);
-            periodLabel = `Weekly Report - ${formatKenyaDate(startDate)} to ${formatKenyaDate(endDate)}`;
-        } else if (period === 'monthly') {
-            startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + 1);
-            periodLabel = `Monthly Report - ${selectedDate.toLocaleString('en-KE', { month: 'long', year: 'numeric' })}`;
-        } else {
-            startDate = getKenyaDate();
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-            periodLabel = `Daily Report - ${formatKenyaDate(startDate)}`;
-        }
-        let filter = { checkIn: { $gte: startDate, $lt: endDate } };
-        if (purpose) {
-            filter.purpose = purpose;
-        }
-        const visitors = await Visitor.find(filter);
-        const report = visitors.map(visitor => {
-            const duration = visitor.checkOut ? Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
-            return { fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`, purpose: visitor.purpose || 'N/A', personToVisit: visitor.personToVisit || 'N/A', checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-', checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-', status: visitor.status || 'Checked In', duration: duration };
-        });
-        // Simple PDF for visitors
-        const doc = new PDFDocument({ margin: 40, size: 'A4' });
-        const chunks = [];
-        doc.on('data', (chunk) => chunks.push(chunk));
-        doc.on('end', () => {
-            const pdfBuffer = Buffer.concat(chunks);
-            const filename = `visitor_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', pdfBuffer.length);
-            res.send(pdfBuffer);
-        });
-        doc.on('error', (err) => {
-            console.error('PDF error:', err);
-            res.status(500).json({ success: false, message: 'Error generating PDF' });
-        });
-        
-        doc.rect(0, 0, 595, 5).fillColor('#D4A017').fill();
-        doc.moveDown(1);
-        doc.fontSize(18).font('Helvetica-Bold').fillColor('#0A1628').text('CHANGARA STAR ACADEMY', { align: 'center' });
-        doc.fontSize(9).font('Helvetica').fillColor('#D4A017').text('"Assurance to Excellence"', { align: 'center' }).moveDown();
-        doc.strokeColor('#D4A017').lineWidth(1).moveTo(100, doc.y).lineTo(495, doc.y).stroke().moveDown();
-        doc.fontSize(14).font('Helvetica-Bold').fillColor('#0A1628').text('VISITOR REPORT', { align: 'center' }).moveDown();
-        doc.fontSize(9).font('Helvetica').fillColor('#6c757d').text(periodLabel, { align: 'center' }).moveDown(1);
-        doc.fontSize(9).font('Helvetica').fillColor('#333').text(`Total Visitors: ${report.length}`, { align: 'center' }).moveDown(0.5);
-        
-        report.forEach((v, i) => {
-            if (doc.y > 700) { doc.addPage(); }
-            doc.fontSize(8).font('Helvetica').fillColor('#333').text(`${i+1}. ${v.fullName} - ${v.purpose} (${v.personToVisit}) - ${v.checkInTime} to ${v.checkOutTime}`);
-            doc.moveDown(0.2);
-        });
-        doc.moveDown(2);
-        doc.fontSize(7).font('Helvetica').fillColor('#6c757d').text(`Report Date: ${formatKenyaFullTime(new Date())}`, { align: 'center' }).text('CHANGARA STAR ACADEMY | P.O Box 7, Cheptais | 📞 +254 721 556 252', { align: 'center' });
-        doc.end();
-    } catch (error) {
-        console.error('Error downloading visitor report:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// HOLIDAY ASSIGNMENTS - FIXED ROUTES
+// HOLIDAY ASSIGNMENTS - FIXED
 // ============================================
 
 // GET all assignments
@@ -2795,410 +2632,6 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
         res.json({ success: true, message: 'Assignment deleted successfully!' });
     } catch (error) {
         console.error('Error deleting assignment:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// CLERK DASHBOARD API ROUTES
-// ============================================
-
-app.get('/api/clerk/students/fees', async (req, res) => {
-    try {
-        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
-        const studentFees = students.map(student => {
-            const feeData = getFeeStructure(student.grade, student.type);
-            const paid = student.paid || 0;
-            const totalFees = feeData.total || 0;
-            const balance = totalFees - paid;
-            return {
-                id: student.studentId,
-                name: student.name,
-                grade: student.grade,
-                gender: student.gender,
-                studentType: student.type,
-                isBoarding: student.type === 'Boarder',
-                totalFees: totalFees,
-                paid: paid,
-                balance: balance,
-                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
-            };
-        });
-        const totalStudents = studentFees.length;
-        const totalDayScholars = studentFees.filter(s => s.studentType === 'Day Scholar').length;
-        const totalBoarders = studentFees.filter(s => s.studentType === 'Boarder').length;
-        const totalPaid = studentFees.reduce((sum, s) => sum + s.paid, 0);
-        const totalBalance = studentFees.reduce((sum, s) => sum + s.balance, 0);
-        res.json({ success: true, students: studentFees, totalStudents, totalDayScholars, totalBoarders, totalPaid, totalBalance });
-    } catch (error) {
-        console.error('Error fetching student fees:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
-    try {
-        const student = await Student.findOne({ studentId: req.params.studentId, isActive: true });
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
-        }
-        const feeData = getFeeStructure(student.grade, student.type);
-        const paid = student.paid || 0;
-        const totalFees = feeData.total || 0;
-        const balance = totalFees - paid;
-        const payments = await Payment.find({ studentId: student.studentId }).sort({ date: -1 });
-        res.json({ success: true, student: { id: student.studentId, name: student.name, grade: student.grade, gender: student.gender, studentType: student.type, isBoarding: student.type === 'Boarder' }, fees: { total: totalFees, paid: paid, balance: balance, status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid' }, feeBreakdown: feeData, payments: payments });
-    } catch (error) {
-        console.error('Error fetching student fee details:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.post('/api/clerk/payments/record', async (req, res) => {
-    try {
-        const { studentId, payments, method, reference, notes } = req.body;
-        if (!studentId) {
-            return res.status(400).json({ success: false, message: 'Student ID is required' });
-        }
-        const student = await Student.findOne({ studentId, isActive: true });
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
-        }
-        let totalAmount = 0;
-        const categoryList = [];
-        for (const [category, amount] of Object.entries(payments)) {
-            if (amount > 0) {
-                totalAmount += amount;
-                categoryList.push({ category, amount });
-            }
-        }
-        if (totalAmount === 0) {
-            return res.status(400).json({ success: false, message: 'Please enter at least one payment amount' });
-        }
-        student.paid = (student.paid || 0) + totalAmount;
-        await student.save();
-        const payment = new Payment({
-            studentId: student.studentId,
-            studentName: student.name,
-            amount: totalAmount,
-            category: 'Multiple Categories',
-            method: method || 'MPESA',
-            reference: reference || '',
-            notes: notes || '',
-            categories: payments,
-            date: new Date()
-        });
-        await payment.save();
-        res.json({ success: true, message: `Payment of KES ${totalAmount.toLocaleString()} recorded for ${student.name}`, totalAmount: totalAmount, categories: categoryList, date: payment.date });
-    } catch (error) {
-        console.error('Error recording payment:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/clerk/payments/all', async (req, res) => {
-    try {
-        const payments = await Payment.find().sort({ date: -1 });
-        res.json({ success: true, payments: payments });
-    } catch (error) {
-        console.error('Error fetching payments:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.put('/api/clerk/payments/:paymentId', async (req, res) => {
-    try {
-        const { paymentId } = req.params;
-        const { amount, category, method, reference, notes } = req.body;
-        const payment = await Payment.findById(paymentId);
-        if (!payment) {
-            return res.status(404).json({ success: false, message: 'Payment not found' });
-        }
-        const oldAmount = payment.amount;
-        const amountDiff = amount - oldAmount;
-        payment.amount = amount || payment.amount;
-        payment.category = category || payment.category;
-        payment.method = method || payment.method;
-        payment.reference = reference || payment.reference;
-        payment.notes = notes || payment.notes;
-        await payment.save();
-        if (amountDiff !== 0) {
-            const student = await Student.findOne({ studentId: payment.studentId });
-            if (student) {
-                student.paid = (student.paid || 0) + amountDiff;
-                await student.save();
-            }
-        }
-        res.json({ success: true, message: 'Payment updated successfully!' });
-    } catch (error) {
-        console.error('Error updating payment:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.delete('/api/clerk/payments/:paymentId', async (req, res) => {
-    try {
-        const { paymentId } = req.params;
-        const payment = await Payment.findById(paymentId);
-        if (!payment) {
-            return res.status(404).json({ success: false, message: 'Payment not found' });
-        }
-        const student = await Student.findOne({ studentId: payment.studentId });
-        if (student) {
-            student.paid = Math.max(0, (student.paid || 0) - payment.amount);
-            await student.save();
-        }
-        await Payment.findByIdAndDelete(paymentId);
-        res.json({ success: true, message: 'Payment deleted successfully!' });
-    } catch (error) {
-        console.error('Error deleting payment:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/clerk/fees/structure', async (req, res) => {
-    try {
-        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        const feeStructure = {};
-        grades.forEach(grade => {
-            feeStructure[grade] = getFeeStructure(grade, 'Day Scholar');
-        });
-        feeStructure['boarding'] = {
-            'Full Boarding': { term1: 8000, term2: 8000, term3: 8000, total: 24000 }
-        };
-        res.json({ success: true, fees: feeStructure });
-    } catch (error) {
-        console.error('Error fetching fees structure:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.post('/api/clerk/fees/update', async (req, res) => {
-    try {
-        const { fees, type } = req.body;
-        if (!global.feesStructure) {
-            global.feesStructure = {};
-        }
-        if (type === 'boarding') {
-            global.feesStructure.boarding = fees;
-        } else {
-            global.feesStructure.day = fees;
-        }
-        res.json({ success: true, message: 'Fees structure updated successfully!' });
-    } catch (error) {
-        console.error('Error updating fees:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/clerk/reports/fees-structure', async (req, res) => {
-    try {
-        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        const doc = new PDFDocument({ margin: 40, size: 'A4' });
-        const chunks = [];
-        doc.on('data', (chunk) => chunks.push(chunk));
-        doc.on('end', () => {
-            const pdfBuffer = Buffer.concat(chunks);
-            const filename = `fees_structure_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', pdfBuffer.length);
-            res.send(pdfBuffer);
-        });
-        doc.on('error', (err) => {
-            console.error('PDF error:', err);
-            res.status(500).json({ success: false, message: 'Error generating PDF' });
-        });
-        
-        doc.rect(0, 0, 595, 5).fillColor('#D4A017').fill();
-        doc.moveDown(1);
-        doc.fontSize(18).font('Helvetica-Bold').fillColor('#0A1628').text('CHANGARA STAR ACADEMY', { align: 'center' });
-        doc.fontSize(9).font('Helvetica').fillColor('#D4A017').text('"Assurance to Excellence"', { align: 'center' }).moveDown();
-        doc.fontSize(14).font('Helvetica-Bold').fillColor('#0A1628').text('FEES STRUCTURE', { align: 'center' }).moveDown();
-        doc.fontSize(9).font('Helvetica').fillColor('#333').text(`Academic Year ${new Date().getFullYear()}`, { align: 'center' }).moveDown(1);
-        doc.fontSize(10).font('Helvetica-Bold').fillColor('#0A1628').text('DAY SCHOLAR FEES', { underline: true }).moveDown(0.3);
-        grades.forEach(grade => {
-            const fees = getFeeStructure(grade, 'Day Scholar');
-            doc.fontSize(8).font('Helvetica').fillColor('#333').text(`${grade}: Term 1: KES ${fees.term1.toLocaleString()} | Term 2: KES ${fees.term2.toLocaleString()} | Term 3: KES ${fees.term3.toLocaleString()} | Total: KES ${fees.total.toLocaleString()}`);
-            doc.moveDown(0.2);
-        });
-        doc.moveDown(1);
-        doc.fontSize(10).font('Helvetica-Bold').fillColor('#0A1628').text('BOARDING FEES (Grades 3-6)', { underline: true }).moveDown(0.3);
-        const boardingGrades = ['Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        boardingGrades.forEach(grade => {
-            const fees = getFeeStructure(grade, 'Boarder');
-            doc.fontSize(8).font('Helvetica').fillColor('#333').text(`${grade}: Term 1: KES ${fees.term1.toLocaleString()} | Term 2: KES ${fees.term2.toLocaleString()} | Term 3: KES ${fees.term3.toLocaleString()} | Total: KES ${fees.total.toLocaleString()}`);
-            doc.moveDown(0.2);
-        });
-        doc.moveDown(2);
-        doc.fontSize(8).font('Helvetica-Bold').fillColor('#dc3545').text('N/B: NO CASH IS ALLOWED IN SCHOOL', { align: 'center' });
-        doc.moveDown(1);
-        doc.fontSize(7).font('Helvetica').fillColor('#6c757d').text(`Generated: ${formatKenyaFullTime(new Date())}`, { align: 'center' });
-        doc.end();
-    } catch (error) {
-        console.error('Error generating fees structure PDF:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/clerk/reports/fee/:type', async (req, res) => {
-    try {
-        const { type } = req.params;
-        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
-        const studentFees = students.map(student => {
-            const feeData = getFeeStructure(student.grade, student.type);
-            const paid = student.paid || 0;
-            const totalFees = feeData.total || 0;
-            const balance = totalFees - paid;
-            return {
-                id: student.studentId,
-                name: student.name,
-                grade: student.grade,
-                gender: student.gender,
-                studentType: student.type,
-                totalFees: totalFees,
-                paid: paid,
-                balance: balance,
-                status: balance === 0 ? 'Paid' : balance < totalFees ? 'Partial' : 'Unpaid'
-            };
-        });
-        const doc = new PDFDocument({ margin: 40, size: 'A4' });
-        const chunks = [];
-        doc.on('data', (chunk) => chunks.push(chunk));
-        doc.on('end', () => {
-            const pdfBuffer = Buffer.concat(chunks);
-            const filename = `fee_report_${type}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', pdfBuffer.length);
-            res.send(pdfBuffer);
-        });
-        doc.on('error', (err) => {
-            console.error('PDF error:', err);
-            res.status(500).json({ success: false, message: 'Error generating PDF' });
-        });
-        
-        doc.rect(0, 0, 595, 5).fillColor('#D4A017').fill();
-        doc.moveDown(1);
-        doc.fontSize(18).font('Helvetica-Bold').fillColor('#0A1628').text('CHANGARA STAR ACADEMY', { align: 'center' });
-        doc.fontSize(9).font('Helvetica').fillColor('#D4A017').text('"Assurance to Excellence"', { align: 'center' }).moveDown();
-        doc.fontSize(14).font('Helvetica-Bold').fillColor('#0A1628').text('FEE REPORT', { align: 'center' }).moveDown();
-        doc.fontSize(9).font('Helvetica').fillColor('#6c757d').text(`Type: ${type}`, { align: 'center' }).moveDown(0.3);
-        doc.fontSize(8).font('Helvetica').fillColor('#333').text(`Total Students: ${studentFees.length}`, { align: 'center' });
-        doc.fontSize(8).font('Helvetica').fillColor('#333').text(`Total Fees: KES ${studentFees.reduce((s, i) => s + i.totalFees, 0).toLocaleString()}`, { align: 'center' });
-        doc.fontSize(8).font('Helvetica').fillColor('#333').text(`Total Paid: KES ${studentFees.reduce((s, i) => s + i.paid, 0).toLocaleString()}`, { align: 'center' });
-        doc.fontSize(8).font('Helvetica').fillColor('#333').text(`Total Balance: KES ${studentFees.reduce((s, i) => s + i.balance, 0).toLocaleString()}`, { align: 'center' }).moveDown(0.5);
-        
-        studentFees.forEach((s, i) => {
-            if (doc.y > 700) { doc.addPage(); }
-            doc.fontSize(7).font('Helvetica').fillColor('#333').text(`${i+1}. ${s.name} (${s.id}) - ${s.grade} - ${s.studentType} - Total: KES ${s.totalFees.toLocaleString()}, Paid: KES ${s.paid.toLocaleString()}, Balance: KES ${s.balance.toLocaleString()}`);
-            doc.moveDown(0.15);
-        });
-        doc.moveDown(2);
-        doc.fontSize(7).font('Helvetica').fillColor('#6c757d').text(`Report Date: ${formatKenyaFullTime(new Date())}`, { align: 'center' }).text('CHANGARA STAR ACADEMY | P.O Box 7, Cheptais | 📞 +254 721 556 252', { align: 'center' });
-        doc.end();
-    } catch (error) {
-        console.error('Error generating fee report:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// FIX PAST RECORDS - MANUAL API
-// ============================================
-app.post('/api/fix-past-times', async (req, res) => {
-    try {
-        await fixPastRecords();
-        res.json({ success: true, message: 'Past records time fixed successfully!' });
-    } catch (error) {
-        console.error('Error fixing records:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'No file uploaded' });
-        }
-        let fileType = 'image';
-        let icon = '🖼️';
-        if (req.file.mimetype.startsWith('video/')) {
-            fileType = 'video';
-            icon = '🎬';
-        } else if (req.file.mimetype.startsWith('audio/')) {
-            fileType = 'audio';
-            icon = '🎵';
-        }
-        res.json({ success: true, message: 'File uploaded successfully!', file: { filename: req.file.filename, originalname: req.file.originalname, path: `/${req.file.path.replace(/\\/g, '/')}`, size: req.file.size, type: fileType, icon: icon, mimetype: req.file.mimetype } });
-    } catch (error) {
-        console.error('Upload error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// TEST ROUTE
-// ============================================
-app.get('/api/test', (req, res) => {
-    const kenyaNow = getKenyaTime();
-    res.json({ success: true, message: 'Changara Star Academy is running!', data: { server: 'Online', kenyaTime: kenyaNow.toLocaleString(), kenyaTimeFormatted: formatKenyaFullTime(kenyaNow), timestamp: new Date().toISOString() } });
-});
-
-app.use('/uploads', express.static('uploads'));
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Route not found' });
-});
-
-// ============================================
-// FIX ALL TIMES - ADD 3 HOURS
-// ============================================
-app.post('/api/fix-times-add-3', async (req, res) => {
-    try {
-        console.log('Adding 3 hours to all attendance times...');
-        let totalFixed = 0;
-        const teachers = await Teacher.find({});
-        for (const teacher of teachers) {
-            let changed = false;
-            for (const record of teacher.attendance) {
-                if (record.checkIn) {
-                    const date = new Date(record.checkIn);
-                    date.setHours(date.getHours() + 3);
-                    record.checkIn = date;
-                    changed = true;
-                }
-                if (record.checkOut) {
-                    const date = new Date(record.checkOut);
-                    date.setHours(date.getHours() + 3);
-                    record.checkOut = date;
-                    changed = true;
-                }
-                if (record.checkIn) {
-                    const hours = record.checkIn.getHours();
-                    const minutes = record.checkIn.getMinutes();
-                    record.isLate = (hours > 7 || (hours === 7 && minutes > 0));
-                    record.status = record.isLate ? 'Late' : 'Present';
-                }
-                if (record.checkIn && record.checkOut) {
-                    const diff = (record.checkOut - record.checkIn) / (1000 * 60 * 60);
-                    record.hoursWorked = parseFloat(Math.max(0, diff).toFixed(2));
-                }
-            }
-            if (changed) {
-                await teacher.save();
-                totalFixed++;
-                console.log(`Fixed ${teacher.firstName} ${teacher.lastName}`);
-            }
-        }
-        res.json({ success: true, message: `Added 3 hours to ${totalFixed} teachers' records`, fixed: totalFixed });
-    } catch (error) {
-        console.error('Error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
