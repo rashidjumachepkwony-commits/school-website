@@ -5,7 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const fs = require('fs');
-const pdf = require('html-pdf');
+const puppeteer = require('puppeteer');
 
 // Load environment variables
 dotenv.config();
@@ -2254,22 +2254,32 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
         }
         const allAssessments = await StudentAssessment.find({ studentName: student.studentName }).sort({ createdAt: 1 });
         const html = generateStudentReportHTML(student, allAssessments);
-        const options = { format: 'A4', border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }, printBackground: true, landscape: false, type: 'pdf', timeout: 30000, quality: '100' };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
+        
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true
         });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            landscape: false,
+            margin: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }
+        });
+        
+        await browser.close();
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('PDF generation error:', error);
+        res.status(500).json({ success: false, message: 'Error generating PDF: ' + error.message });
     }
 });
-
 app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
     try {
         const student = await StudentAssessment.findById(req.params.studentId);
@@ -2663,35 +2673,33 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
         
         const html = generateClassReportHTML(students, grade, type, term, year, period);
         
-        const options = { 
-            format: 'A4', 
-            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }, 
-            printBackground: true, 
-            landscape: true, 
-            type: 'pdf', 
-            timeout: 30000, 
-            quality: '100' 
-        };
-        
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            
-            const periodLabel = period ? `_${period}` : '';
-            const filename = `grade_report_${grade}_${type || 'monthly'}_${term || 'all'}_${year || '2026'}${periodLabel}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true
         });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            landscape: true,
+            margin: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }
+        });
+        
+        await browser.close();
+        
+        const periodLabel = period ? `_${period}` : '';
+        const filename = `grade_report_${grade}_${type || 'monthly'}_${term || 'all'}_${year || '2026'}${periodLabel}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error generating class PDF:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
 // ============================================
 // GENERATE CLASS REPORT HTML - WITH RUBRIC
 // ============================================
@@ -3093,22 +3101,21 @@ app.post('/api/assessments/generate-comprehensive-pdf', async (req, res) => {
             return res.status(400).json({ success: false, message: 'HTML content is required' });
         }
         
-        const options = {
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true
+        });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        
+        const pdfBuffer = await page.pdf({
             format: 'A4',
-            border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' },
             printBackground: true,
             landscape: true,
-            type: 'pdf',
-            timeout: 60000,
-            quality: '100'
-        };
-        
-        const pdfBuffer = await new Promise((resolve, reject) => {
-            pdf.create(html, options).toBuffer((err, buffer) => {
-                if (err) reject(err);
-                else resolve(buffer);
-            });
+            margin: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }
         });
+        
+        await browser.close();
         
         const downloadFilename = filename || `comprehensive_report_${new Date().toISOString().split('T')[0]}.pdf`;
         
@@ -3119,39 +3126,6 @@ app.post('/api/assessments/generate-comprehensive-pdf', async (req, res) => {
         
     } catch (error) {
         console.error('Comprehensive PDF generation error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// GET all assessments across all grades
-app.get('/api/assessments/all-grades', async (req, res) => {
-    try {
-        const { type, term, year, period } = req.query;
-        const filter = {};
-        if (type) filter.type = type;
-        if (term) filter.term = term;
-        if (year) filter.year = year;
-        if (period) filter.period = period;
-        
-        const students = await StudentAssessment.find(filter).sort({ grade: 1, studentName: 1 });
-        
-        const groupedByGrade = {};
-        students.forEach(student => {
-            if (!groupedByGrade[student.grade]) {
-                groupedByGrade[student.grade] = [];
-            }
-            groupedByGrade[student.grade].push(student);
-        });
-        
-        res.json({ 
-            success: true, 
-            total: students.length,
-            grades: Object.keys(groupedByGrade),
-            byGrade: groupedByGrade,
-            students: students
-        });
-    } catch (error) {
-        console.error('Error fetching all grades:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
