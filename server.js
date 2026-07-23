@@ -2555,18 +2555,29 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
         });
         const title = 'Staff Attendance Report';
         const html = generateStaffReportHTML(report, title, periodLabel);
-        const options = { format: 'A4', border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }, printBackground: true, landscape: true, type: 'pdf', timeout: 30000, quality: '100' };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            const filename = `staff_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
+        
+        // REPLACE THIS SECTION:
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true
         });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            landscape: true,
+            margin: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }
+        });
+        
+        await browser.close();
+        
+        const filename = `staff_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error downloading staff report:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -2621,18 +2632,29 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
         });
         const title = 'Visitor Report';
         const html = generateVisitorReportHTML(report, title, periodLabel);
-        const options = { format: 'A4', border: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }, printBackground: true, landscape: true, type: 'pdf', timeout: 30000, quality: '100' };
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            const filename = `visitor_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
+        
+        // REPLACE THIS SECTION:
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true
         });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            landscape: true,
+            margin: { top: '0.3cm', right: '0.3cm', bottom: '0.3cm', left: '0.3cm' }
+        });
+        
+        await browser.close();
+        
+        const filename = `visitor_attendance_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error downloading visitor report:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -3453,28 +3475,28 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
         
         const html = generateFeeReportHTML(studentFees, type);
         
-        const options = {
+        // REPLACE THIS SECTION:
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true
+        });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        
+        const pdfBuffer = await page.pdf({
             format: 'A4',
-            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' },
             printBackground: true,
             landscape: true,
-            type: 'pdf',
-            timeout: 30000,
-            quality: '100'
-        };
-        
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            
-            const filename = `fee_report_${type}_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
+            margin: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }
         });
+        
+        await browser.close();
+        
+        const filename = `fee_report_${type}_${new Date().toISOString().split('T')[0]}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error generating fee report:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -3683,28 +3705,28 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
             </html>
         `;
         
-        const options = {
+        // REPLACE THIS SECTION:
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true
+        });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        
+        const pdfBuffer = await page.pdf({
             format: 'A4',
-            border: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' },
             printBackground: true,
             landscape: true,
-            type: 'pdf',
-            timeout: 30000,
-            quality: '100'
-        };
-        
-        pdf.create(html, options).toBuffer((err, buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return res.status(500).json({ success: false, message: 'Error generating PDF: ' + err.message });
-            }
-            
-            const filename = `fees_structure_${new Date().toISOString().split('T')[0]}.pdf`;
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', buffer.length);
-            res.send(buffer);
+            margin: { top: '0.5cm', right: '0.5cm', bottom: '0.5cm', left: '0.5cm' }
         });
+        
+        await browser.close();
+        
+        const filename = `fees_structure_${new Date().toISOString().split('T')[0]}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Error generating fees structure PDF:', error);
         res.status(500).json({ success: false, message: error.message });
