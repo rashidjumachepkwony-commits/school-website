@@ -10,7 +10,6 @@ const PDFDocument = require('pdfkit');
 // Load environment variables
 dotenv.config();
 
-// Create Express app
 const app = express();
 
 // Middleware
@@ -24,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 process.env.TZ = 'Africa/Nairobi';
 
 // ============================================
-// HELPER: GET KENYA TIME (UTC+3)
+// HELPER FUNCTIONS
 // ============================================
 function getKenyaTime() {
     const now = new Date();
@@ -38,10 +37,6 @@ function getKenyaDate() {
     const date = new Date(kenyaTime);
     date.setHours(0, 0, 0, 0);
     return date;
-}
-
-function getKenyaHour() {
-    return getKenyaTime().getHours();
 }
 
 function formatKenyaTime(date) {
@@ -62,9 +57,7 @@ function formatKenyaDate(date) {
     return d.toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-// ============================================
-// CBC RUBRIC HELPERS
-// ============================================
+// CBC Rubric Helpers
 function calculatePerformanceLevel(percentage) {
     if (percentage >= 75) return 'Exceeding Expectation';
     if (percentage >= 50) return 'Meeting Expectation';
@@ -72,14 +65,14 @@ function calculatePerformanceLevel(percentage) {
     return 'Below Expectation';
 }
 
-function getPerformanceRating(level) {
-    const ratings = {
-        'Exceeding Expectation': 4,
-        'Meeting Expectation': 3,
-        'Approaching Expectation': 2,
-        'Below Expectation': 1
+function getPerformanceColor(level) {
+    const colors = {
+        'Exceeding Expectation': '#1a8a3f',
+        'Meeting Expectation': '#0d6efd',
+        'Approaching Expectation': '#e6a800',
+        'Below Expectation': '#dc3545'
     };
-    return ratings[level] || 2;
+    return colors[level] || '#6c757d';
 }
 
 function getPerformanceShort(level) {
@@ -92,14 +85,14 @@ function getPerformanceShort(level) {
     return shorts[level] || 'AE';
 }
 
-function getPerformanceColor(level) {
-    const colors = {
-        'Exceeding Expectation': '#1a8a3f',
-        'Meeting Expectation': '#0d6efd',
-        'Approaching Expectation': '#e6a800',
-        'Below Expectation': '#dc3545'
+function getPerformanceRating(level) {
+    const ratings = {
+        'Exceeding Expectation': 4,
+        'Meeting Expectation': 3,
+        'Approaching Expectation': 2,
+        'Below Expectation': 1
     };
-    return colors[level] || '#6c757d';
+    return ratings[level] || 2;
 }
 
 function calculateAssessmentPerformance(score, maxScore) {
@@ -159,53 +152,111 @@ function generateStudentReportPDF(student) {
             flagColors.forEach((color, i) => {
                 doc.rect(i * flagWidth, 6, flagWidth, 3).fillColor(color).fill();
             });
+            
             doc.moveDown(1.5);
             
-            doc.fontSize(20).font('Helvetica-Bold').fillColor('#0A1628').text('CHANGARA STAR ACADEMY', { align: 'center' });
-            doc.fontSize(10).font('Helvetica').fillColor('#D4A017').text('"Assurance to Excellence"', { align: 'center' }).moveDown(0.3);
-            doc.strokeColor('#D4A017').lineWidth(1.5).moveTo(80, doc.y).lineTo(515, doc.y).stroke().moveDown(0.5);
-            doc.fontSize(14).font('Helvetica-Bold').fillColor('#0A1628').text('STUDENT ASSESSMENT REPORT', { align: 'center' }).moveDown(0.5);
+            doc.fontSize(20)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text('CHANGARA STAR ACADEMY', { align: 'center' });
             
-            // Student Info
+            doc.fontSize(10)
+               .font('Helvetica')
+               .fillColor('#D4A017')
+               .text('"Assurance to Excellence"', { align: 'center' })
+               .moveDown(0.5);
+            
+            doc.fontSize(14)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text('Student Assessment Report - CBC Performance Analysis', { align: 'center' })
+               .moveDown(1);
+            
+            // Student Info Table
             const infoY = doc.y;
             const level = student.performanceLevel || 'Approaching Expectation';
             const levelColor = getPerformanceColor(level);
             const short = getPerformanceShort(level);
             const rating = getPerformanceRating(level);
             
-            const cardData = [
-                { label: 'Student Name', value: student.studentName || 'N/A' },
-                { label: 'Grade', value: student.grade || 'N/A' },
-                { label: 'Assessment Type', value: student.type || 'Monthly' },
-                { label: 'Period', value: student.period || 'N/A' },
-                { label: 'Term', value: student.term || 'N/A' },
-                { label: 'Year', value: student.year || new Date().getFullYear().toString() }
+            doc.fontSize(9)
+               .font('Helvetica')
+               .fillColor('#333');
+            
+            // Left column - labels
+            const labels = ['Student Name:', 'Grade:', 'Assessment Type:', 'Period:', 'Term:', 'Report Date:'];
+            const values = [
+                student.studentName || 'N/A',
+                student.grade || 'N/A',
+                student.type || 'Monthly',
+                student.period || 'N/A',
+                student.term || 'N/A',
+                formatKenyaFullTime(new Date())
             ];
             
-            const cardWidth = 160, cardHeight = 36, cardsPerRow = 3;
-            cardData.forEach((item, i) => {
-                const col = i % cardsPerRow, row = Math.floor(i / cardsPerRow);
-                const x = 50 + (col * (cardWidth + 10)), y = infoY + (row * (cardHeight + 6));
-                doc.roundedRect(x, y, cardWidth, cardHeight, 4).fillColor('#f8f9fa').fill().strokeColor('#dee2e6').lineWidth(0.5).roundedRect(x, y, cardWidth, cardHeight, 4).stroke();
-                doc.fontSize(7).font('Helvetica').fillColor('#6c757d').text(item.label, x + 10, y + 4);
-                doc.fontSize(10).font('Helvetica-Bold').fillColor('#0A1628').text(item.value, x + 10, y + 18);
+            labels.forEach((label, i) => {
+                doc.text(label, 50, infoY + (i * 18));
             });
             
-            const perfY = infoY + (Math.ceil(cardData.length / cardsPerRow) * (cardHeight + 6)) + 8;
-            doc.roundedRect(50, perfY, 495, 36, 6).fillColor(levelColor + '15').fill().strokeColor(levelColor).lineWidth(1.5).roundedRect(50, perfY, 495, 36, 6).stroke();
-            doc.fontSize(13).font('Helvetica-Bold').fillColor(levelColor).text(`${short} - ${level} (Rating: ${rating}/4)`, 65, perfY + 8);
-            doc.fontSize(10).font('Helvetica').fillColor('#333').text(`Total Score: ${student.totalScore || 0}  |  Average: ${student.averageScore ? student.averageScore.toFixed(1) : '0'}%  |  Subjects: ${(student.assessments || []).length}`, 65, perfY + 23);
-            doc.moveDown(1.5);
+            // Right column - values
+            doc.font('Helvetica-Bold');
+            values.forEach((value, i) => {
+                doc.text(value, 170, infoY + (i * 18));
+            });
+            
+            doc.moveDown(labels.length + 1);
+            
+            // Performance Box
+            const perfY = doc.y;
+            doc.roundedRect(50, perfY, 495, 40, 6)
+               .fillColor(levelColor + '15')
+               .fill()
+               .strokeColor(levelColor)
+               .lineWidth(2)
+               .roundedRect(50, perfY, 495, 40, 6)
+               .stroke();
+            
+            doc.fontSize(18)
+               .font('Helvetica-Bold')
+               .fillColor(levelColor)
+               .text(level, 65, perfY + 8);
+            
+            doc.fontSize(11)
+               .font('Helvetica')
+               .fillColor('#333')
+               .text(`Total Score: ${student.totalScore || 0}  |  Average: ${student.averageScore ? student.averageScore.toFixed(1) : '0'}%  |  Rating: ${rating}/4`, 65, perfY + 26);
+            
+            doc.moveDown(2);
             
             // Subject Scores Table
-            doc.fontSize(11).font('Helvetica-Bold').fillColor('#0A1628').text('SUBJECT SCORES', { underline: true }).moveDown(0.4);
+            doc.fontSize(11)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text('Subject Scores', { underline: true })
+               .moveDown(0.3);
             
             if (student.assessments && student.assessments.length > 0) {
-                const tableTop = doc.y, tableWidth = 495;
-                doc.rect(50, tableTop, tableWidth, 22).fillColor('#0A1628').fill();
-                doc.fontSize(7).font('Helvetica-Bold').fillColor('white').text('Subject', 60, tableTop + 6).text('Max', 200, tableTop + 6, { width: 40, align: 'center' }).text('Score', 240, tableTop + 6, { width: 40, align: 'center' }).text('Percentage', 280, tableTop + 6, { width: 65, align: 'center' }).text('Performance Level', 355, tableTop + 6, { width: 140, align: 'center' });
+                const tableTop = doc.y;
+                const tableWidth = 495;
                 
-                let rowY = tableTop + 22, rowIndex = 0;
+                // Table header
+                doc.rect(50, tableTop, tableWidth, 22)
+                   .fillColor('#0A1628')
+                   .fill();
+                
+                doc.fontSize(8)
+                   .font('Helvetica-Bold')
+                   .fillColor('white')
+                   .text('Subject', 60, tableTop + 6)
+                   .text('Max', 200, tableTop + 6, { width: 50, align: 'center' })
+                   .text('Score', 250, tableTop + 6, { width: 50, align: 'center' })
+                   .text('Percentage', 300, tableTop + 6, { width: 65, align: 'center' })
+                   .text('Performance', 375, tableTop + 6, { width: 130, align: 'center' });
+                
+                let rowY = tableTop + 22;
+                let rowIndex = 0;
+                let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
+                
                 const sortedAssessments = [...student.assessments].sort((a, b) => {
                     const pA = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
                     const pB = b.maxScore > 0 ? (b.score / b.maxScore) * 100 : 0;
@@ -219,73 +270,73 @@ function generateStudentReportPDF(student) {
                     const short = getPerformanceShort(level);
                     const rating = getPerformanceRating(level);
                     
-                    doc.rect(50, rowY, tableWidth, 17).fillColor(rowIndex % 2 === 0 ? '#f8f9fa' : 'white').fill();
-                    doc.fontSize(7).font('Helvetica').fillColor('#0A1628').text(a.subject, 60, rowY + 4).text(a.maxScore.toString(), 200, rowY + 4, { width: 40, align: 'center' }).text(a.score.toString(), 240, rowY + 4, { width: 40, align: 'center' }).text(percentage.toFixed(1) + '%', 280, rowY + 4, { width: 65, align: 'center' }).fillColor(levelColor).text(`${short} (${rating})`, 355, rowY + 4, { width: 140, align: 'center' });
-                    rowY += 17; rowIndex++;
+                    if (level === 'Exceeding Expectation') exceedingCount++;
+                    else if (level === 'Meeting Expectation') meetingCount++;
+                    else if (level === 'Approaching Expectation') approachingCount++;
+                    else belowCount++;
+                    
+                    doc.rect(50, rowY, tableWidth, 18)
+                       .fillColor(rowIndex % 2 === 0 ? '#f8f9fa' : 'white')
+                       .fill();
+                    
+                    doc.fontSize(8)
+                       .font('Helvetica')
+                       .fillColor('#0A1628')
+                       .text(a.subject, 60, rowY + 4)
+                       .text(a.maxScore.toString(), 200, rowY + 4, { width: 50, align: 'center' })
+                       .text(a.score.toString(), 250, rowY + 4, { width: 50, align: 'center' })
+                       .text(percentage.toFixed(0) + '%', 300, rowY + 4, { width: 65, align: 'center' })
+                       .fillColor(levelColor)
+                       .text(level, 375, rowY + 4, { width: 130, align: 'center' });
+                    
+                    rowY += 18;
+                    rowIndex++;
                 });
-                doc.moveDown(1);
-            } else {
-                doc.fontSize(9).font('Helvetica').fillColor('#6c757d').text('No subjects recorded', 50, doc.y);
-                doc.moveDown(1);
-            }
-            
-            // Performance Distribution
-            const totalAssessments = (student.assessments || []).length;
-            if (totalAssessments > 0) {
-                const exceedingCount = (student.assessments || []).filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 75).length;
-                const meetingCount = (student.assessments || []).filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50 && ((a.score / a.maxScore) * 100) < 75).length;
-                const approachingCount = (student.assessments || []).filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 26 && ((a.score / a.maxScore) * 100) < 50).length;
-                const belowCount = (student.assessments || []).filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 26).length;
                 
-                doc.fontSize(11).font('Helvetica-Bold').fillColor('#0A1628').text('PERFORMANCE DISTRIBUTION', { underline: true }).moveDown(0.3);
+                doc.moveDown(1);
                 
-                const barData = [
-                    { label: 'Exceeding (EE)', count: exceedingCount, color: '#1a8a3f' },
-                    { label: 'Meeting (ME)', count: meetingCount, color: '#0d6efd' },
-                    { label: 'Approaching (AE)', count: approachingCount, color: '#e6a800' },
-                    { label: 'Below (BE)', count: belowCount, color: '#dc3545' }
+                // Performance Summary Box
+                doc.fontSize(10)
+                   .font('Helvetica-Bold')
+                   .fillColor('#0A1628')
+                   .text('Performance Summary', { underline: true })
+                   .moveDown(0.3);
+                
+                const summaryY = doc.y;
+                const summaryData = [
+                    { label: 'Exceeding Expectation', count: exceedingCount, color: '#1a8a3f' },
+                    { label: 'Meeting Expectation', count: meetingCount, color: '#0d6efd' },
+                    { label: 'Approaching Expectation', count: approachingCount, color: '#e6a800' },
+                    { label: 'Below Expectation', count: belowCount, color: '#dc3545' }
                 ];
                 
-                barData.forEach((item) => {
-                    const barWidth = totalAssessments > 0 ? (item.count / totalAssessments) * 280 : 0;
-                    doc.fontSize(8).font('Helvetica').fillColor('#333').text(`${item.label}: ${item.count}`, 55, doc.y + 2);
-                    doc.rect(215, doc.y - 1, Math.max(barWidth, 3), 12).fillColor(item.color).fill().roundedRect(215, doc.y - 1, Math.max(barWidth, 3), 12, 3).fill();
-                    if (barWidth > 30) {
-                        doc.fontSize(6).font('Helvetica-Bold').fillColor('white').text(`${totalAssessments > 0 ? ((item.count / totalAssessments) * 100).toFixed(0) : 0}%`, 225, doc.y + 1);
-                    }
-                    doc.moveDown(0.6);
+                summaryData.forEach((item) => {
+                    doc.fontSize(8)
+                       .font('Helvetica')
+                       .fillColor('#333')
+                       .text(`${item.label}: ${item.count}`, 55, doc.y + 2);
+                    
+                    // Color bar
+                    const total = sortedAssessments.length || 1;
+                    const barWidth = (item.count / total) * 350;
+                    doc.rect(220, doc.y - 1, Math.max(barWidth, 3), 10)
+                       .fillColor(item.color)
+                       .fill()
+                       .roundedRect(220, doc.y - 1, Math.max(barWidth, 3), 10, 3)
+                       .fill();
+                    
+                    doc.moveDown(0.5);
                 });
                 doc.moveDown(0.5);
             }
             
-            // Recommendations
-            const avgPercentage = student.averageScore || 0;
-            let recommendations = [], recColor = '#1a8a3f', recTitle = 'Recommendations';
-            if (avgPercentage >= 75) {
-                recommendations = ['Continue maintaining high performance across all subjects.', 'Take on leadership roles in academic activities.', 'Support peers who need improvement.'];
-                recColor = '#1a8a3f'; recTitle = 'Recommendations for Excellence';
-            } else if (avgPercentage >= 50) {
-                recommendations = ['Focus on improving weaker subjects to reach exceeding level.', 'Practice more exercises in areas that need improvement.', 'Seek clarification from teachers on challenging topics.'];
-                recColor = '#0d6efd'; recTitle = 'Recommendations for Improvement';
-            } else if (avgPercentage >= 26) {
-                recommendations = ['Develop a study schedule to dedicate more time to learning.', 'Attend remedial classes for subjects where performance is low.', 'Work closely with teachers to understand difficult concepts.'];
-                recColor = '#e6a800'; recTitle = 'Immediate Recommendations';
-            } else {
-                recommendations = ['Immediate intervention needed for all subjects.', 'Parent-teacher conference recommended to discuss progress.', 'Extra one-on-one tutoring sessions required.'];
-                recColor = '#dc3545'; recTitle = 'Critical Recommendations';
-            }
-            
-            doc.fontSize(11).font('Helvetica-Bold').fillColor('#0A1628').text(recTitle, { underline: true }).moveDown(0.3);
-            doc.roundedRect(50, doc.y, 495, 10 + (recommendations.length * 16), 6).fillColor('#f8f9fa').fill().strokeColor(recColor).lineWidth(1).roundedRect(50, doc.y, 495, 10 + (recommendations.length * 16), 6).stroke();
-            const recStartY = doc.y + 8;
-            recommendations.forEach((rec, i) => {
-                doc.fontSize(8).font('Helvetica').fillColor('#333').text(`${i + 1}. ${rec}`, 65, recStartY + (i * 16));
-            });
-            doc.moveDown(2 + recommendations.length);
-            
             // Footer
-            doc.fontSize(7).font('Helvetica').fillColor('#6c757d').text(`Report Date: ${formatKenyaFullTime(new Date())}`, 50, 780, { align: 'left' }).text('CHANGARA STAR ACADEMY', 200, 780, { align: 'center' }).text('Page 1 of 1', 495, 780, { align: 'right' });
-            doc.fontSize(6).fillColor('#adb5bd').text('P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com', 50, 792, { align: 'center' }).text('🇰🇪 Proudly Kenyan', 495, 792, { align: 'right' });
+            doc.fontSize(7)
+               .font('Helvetica')
+               .fillColor('#6c757d')
+               .text(`Generated: ${formatKenyaFullTime(new Date())}`, 50, 780, { align: 'left' })
+               .text('© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com', 50, 792, { align: 'center' });
+            
             doc.end();
         } catch (error) {
             reject(error);
@@ -313,17 +364,43 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             flagColors.forEach((color, i) => {
                 doc.rect(i * flagWidth, 6, flagWidth, 2).fillColor(color).fill();
             });
+            
             doc.moveDown(1);
             
-            doc.fontSize(16).font('Helvetica-Bold').fillColor('#0A1628').text('CHANGARA STAR ACADEMY', { align: 'center' });
-            doc.fontSize(9).font('Helvetica').fillColor('#D4A017').text('"Assurance to Excellence"', { align: 'center' }).moveDown(0.2);
-            doc.strokeColor('#D4A017').lineWidth(1).moveTo(100, doc.y).lineTo(742, doc.y).stroke().moveDown(0.2);
-            doc.fontSize(13).font('Helvetica-Bold').fillColor('#0A1628').text(`${grade} - ${type || 'Monthly'} Assessment Report`, { align: 'center' });
-            doc.fontSize(8).font('Helvetica').fillColor('#6c757d').text(`${term || ''} ${year || ''} ${period ? '- ' + period : ''}`, { align: 'center' }).moveDown(0.3);
+            doc.fontSize(16)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text('CHANGARA STAR ACADEMY', { align: 'center' });
+            
+            doc.fontSize(9)
+               .font('Helvetica')
+               .fillColor('#D4A017')
+               .text('"Assurance to Excellence"', { align: 'center' })
+               .moveDown(0.3);
+            
+            doc.strokeColor('#D4A017')
+               .lineWidth(1)
+               .moveTo(100, doc.y)
+               .lineTo(742, doc.y)
+               .stroke()
+               .moveDown(0.3);
+            
+            doc.fontSize(13)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text(`${grade} - ${type || 'Monthly'} Assessment Results`, { align: 'center' });
+            
+            doc.fontSize(8)
+               .font('Helvetica')
+               .fillColor('#6c757d')
+               .text(`${term || ''} ${year || ''} ${period ? '- ' + period : ''}`, { align: 'center' })
+               .moveDown(1);
             
             // Statistics
             const totalStudents = students.length;
-            let exceeding = 0, meeting = 0, approaching = 0, below = 0, totalAvg = 0;
+            let exceeding = 0, meeting = 0, approaching = 0, below = 0;
+            let totalAvg = 0;
+            
             students.forEach(s => {
                 const level = s.performanceLevel || 'Approaching Expectation';
                 if (level === 'Exceeding Expectation') exceeding++;
@@ -332,26 +409,49 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 else below++;
                 totalAvg += s.averageScore || 0;
             });
+            
             const avgClass = totalStudents > 0 ? (totalAvg / totalStudents).toFixed(1) : 0;
             
             const stats = [
-                { label: 'Students', value: totalStudents, color: '#0A1628' },
-                { label: 'EE', value: exceeding, color: '#1a8a3f', desc: 'Exceeding' },
-                { label: 'ME', value: meeting, color: '#0d6efd', desc: 'Meeting' },
-                { label: 'AE', value: approaching, color: '#e6a800', desc: 'Approaching' },
-                { label: 'BE', value: below, color: '#dc3545', desc: 'Below' },
-                { label: 'Class Avg', value: avgClass + '%', color: '#6f42c1' }
+                { label: 'STUDENTS', value: totalStudents, color: '#0A1628' },
+                { label: 'EE (4)', value: exceeding, color: '#1a8a3f' },
+                { label: 'ME (3)', value: meeting, color: '#0d6efd' },
+                { label: 'AE (2)', value: approaching, color: '#e6a800' },
+                { label: 'BE (1)', value: below, color: '#dc3545' },
+                { label: 'CLASS AVG', value: avgClass + '%', color: '#6f42c1' }
             ];
             
             const statsY = doc.y;
             const boxWidth = 130;
             stats.forEach((stat, i) => {
                 const x = 45 + (i * (boxWidth + 5));
-                doc.roundedRect(x, statsY, boxWidth, 32, 4).fillColor('#f8f9fa').fill().strokeColor('#dee2e6').lineWidth(0.5).roundedRect(x, statsY, boxWidth, 32, 4).stroke();
-                doc.fontSize(14).font('Helvetica-Bold').fillColor(stat.color).text(stat.value.toString(), x + 5, statsY + 3, { width: boxWidth - 10, align: 'center' });
-                doc.fontSize(6).font('Helvetica').fillColor('#6c757d').text(stat.label, x + 5, statsY + 22, { width: boxWidth - 10, align: 'center' });
+                doc.roundedRect(x, statsY, boxWidth, 30, 4)
+                   .fillColor('#f8f9fa')
+                   .fill()
+                   .strokeColor('#dee2e6')
+                   .lineWidth(0.5)
+                   .roundedRect(x, statsY, boxWidth, 30, 4)
+                   .stroke();
+                
+                doc.fontSize(14)
+                   .font('Helvetica-Bold')
+                   .fillColor(stat.color)
+                   .text(stat.value.toString(), x + 5, statsY + 3, { width: boxWidth - 10, align: 'center' });
+                
+                doc.fontSize(6)
+                   .font('Helvetica')
+                   .fillColor('#6c757d')
+                   .text(stat.label, x + 5, statsY + 20, { width: boxWidth - 10, align: 'center' });
             });
+            
             doc.moveDown(2);
+            
+            // Legend
+            doc.fontSize(7)
+               .font('Helvetica')
+               .fillColor('#6c757d')
+               .text('EE: Exceeding (75-100%)   ME: Meeting (50-74%)   AE: Approaching (26-49%)   BE: Below (0-25%)   🏆 Rank: 1st, 2nd, 3rd', 45, doc.y);
+            doc.moveDown(1);
             
             // Get all subjects
             let allSubjects = [];
@@ -367,59 +467,112 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             allSubjects.sort();
             
             // Student Table
-            const nameColWidth = 95, rankColWidth = 25, totalColWidth = 40, avgColWidth = 40, levelColWidth = 50;
-            const subjectColWidth = Math.min(34, (780 - nameColWidth - rankColWidth - totalColWidth - avgColWidth - levelColWidth) / Math.max(1, allSubjects.length));
+            const nameColWidth = 85;
+            const rankColWidth = 30;
+            const totalColWidth = 45;
+            const avgColWidth = 40;
+            const levelColWidth = 55;
+            const subjectColWidth = Math.min(32, (780 - nameColWidth - rankColWidth - totalColWidth - avgColWidth - levelColWidth) / Math.max(1, allSubjects.length));
             const tableWidth = nameColWidth + rankColWidth + (allSubjects.length * subjectColWidth) + totalColWidth + avgColWidth + levelColWidth;
             
+            // Table header
             const tableTop = doc.y;
-            doc.rect(30, tableTop, tableWidth, 20).fillColor('#0A1628').fill();
+            doc.rect(30, tableTop, tableWidth, 20)
+               .fillColor('#0A1628')
+               .fill();
             
             let headerX = 30;
-            doc.fontSize(5.5).font('Helvetica-Bold').fillColor('white');
-            doc.text('#', headerX + 3, tableTop + 5, { width: rankColWidth - 6, align: 'center' });
+            doc.fontSize(5.5)
+               .font('Helvetica-Bold')
+               .fillColor('white');
+            
+            doc.text('Rank', headerX + 3, tableTop + 5, { width: rankColWidth - 6, align: 'center' });
             headerX += rankColWidth;
+            
             doc.text('Student', headerX + 3, tableTop + 5, { width: nameColWidth - 6 });
             headerX += nameColWidth;
             
             allSubjects.forEach(subject => {
-                const shortName = subject.length > 10 ? subject.substring(0, 8) + '..' : subject;
+                const shortName = subject.length > 8 ? subject.substring(0, 6) + '..' : subject;
                 doc.text(shortName, headerX + 2, tableTop + 5, { width: subjectColWidth - 4, align: 'center' });
                 headerX += subjectColWidth;
             });
             
             doc.text('Total', headerX + 3, tableTop + 5, { width: totalColWidth - 6, align: 'center' });
             headerX += totalColWidth;
-            doc.text('Avg%', headerX + 3, tableTop + 5, { width: avgColWidth - 6, align: 'center' });
+            
+            doc.text('Avg', headerX + 3, tableTop + 5, { width: avgColWidth - 6, align: 'center' });
             headerX += avgColWidth;
+            
             doc.text('Level', headerX + 3, tableTop + 5, { width: levelColWidth - 6, align: 'center' });
             
+            // Max scores row
+            const maxRowY = tableTop + 20;
+            doc.rect(30, maxRowY, tableWidth, 16)
+               .fillColor('#f8f9fa')
+               .fill();
+            
+            let maxX = 30;
+            doc.fontSize(5)
+               .font('Helvetica-Bold')
+               .fillColor('#6c757d')
+               .text('Max:', maxX + 3, maxRowY + 4);
+            maxX += rankColWidth;
+            maxX += nameColWidth;
+            
+            allSubjects.forEach(subject => {
+                let maxScore = 0;
+                students.forEach(s => {
+                    if (s.assessments) {
+                        const found = s.assessments.find(a => a.subject === subject);
+                        if (found && found.maxScore > maxScore) {
+                            maxScore = found.maxScore;
+                        }
+                    }
+                });
+                doc.text(maxScore.toString(), maxX + 2, maxRowY + 4, { width: subjectColWidth - 4, align: 'center' });
+                maxX += subjectColWidth;
+            });
+            
+            // Sort students by total score (highest first)
             const sortedStudents = [...students].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-            let rowY = tableTop + 20, rowIndex = 0;
+            let rowY = maxRowY + 16;
+            let rowIndex = 0;
             
             sortedStudents.forEach((student) => {
-                if (rowY > 500) {
+                if (rowY > 520) {
                     doc.addPage();
-                    doc.rect(30, 30, tableWidth, 20).fillColor('#0A1628').fill();
+                    // Re-draw header
+                    doc.rect(30, 30, tableWidth, 20)
+                       .fillColor('#0A1628')
+                       .fill();
+                    
                     headerX = 30;
-                    doc.fontSize(5.5).font('Helvetica-Bold').fillColor('white');
-                    doc.text('#', headerX + 3, 35, { width: rankColWidth - 6, align: 'center' });
+                    doc.fontSize(5.5)
+                       .font('Helvetica-Bold')
+                       .fillColor('white');
+                    
+                    doc.text('Rank', headerX + 3, 35, { width: rankColWidth - 6, align: 'center' });
                     headerX += rankColWidth;
                     doc.text('Student', headerX + 3, 35, { width: nameColWidth - 6 });
                     headerX += nameColWidth;
                     allSubjects.forEach(subject => {
-                        const shortName = subject.length > 10 ? subject.substring(0, 8) + '..' : subject;
+                        const shortName = subject.length > 8 ? subject.substring(0, 6) + '..' : subject;
                         doc.text(shortName, headerX + 2, 35, { width: subjectColWidth - 4, align: 'center' });
                         headerX += subjectColWidth;
                     });
                     doc.text('Total', headerX + 3, 35, { width: totalColWidth - 6, align: 'center' });
                     headerX += totalColWidth;
-                    doc.text('Avg%', headerX + 3, 35, { width: avgColWidth - 6, align: 'center' });
+                    doc.text('Avg', headerX + 3, 35, { width: avgColWidth - 6, align: 'center' });
                     headerX += avgColWidth;
                     doc.text('Level', headerX + 3, 35, { width: levelColWidth - 6, align: 'center' });
                     rowY = 50;
                 }
                 
-                doc.rect(30, rowY, tableWidth, 16).fillColor(rowIndex % 2 === 0 ? '#f8f9fa' : 'white').fill();
+                doc.rect(30, rowY, tableWidth, 16)
+                   .fillColor(rowIndex % 2 === 0 ? '#fafafa' : 'white')
+                   .fill();
+                
                 let x = 30;
                 const level = student.performanceLevel || 'Approaching Expectation';
                 const levelColor = getPerformanceColor(level);
@@ -428,9 +581,14 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
                 const rank = rowIndex + 1;
                 
-                doc.fontSize(6).font('Helvetica').fillColor(rank <= 3 ? '#D4A017' : '#6c757d').text(rank <= 3 ? ['🏆', '🥈', '🥉'][rank - 1] : rank.toString(), x + 3, rowY + 3, { width: rankColWidth - 6, align: 'center' });
+                doc.fontSize(6)
+                   .font('Helvetica')
+                   .fillColor(rank <= 3 ? '#D4A017' : '#6c757d')
+                   .text(rank <= 3 ? ['🏆', '🥈', '🥉'][rank - 1] : rank.toString(), x + 3, rowY + 3, { width: rankColWidth - 6, align: 'center' });
                 x += rankColWidth;
-                doc.fillColor('#0A1628').text(student.studentName || 'N/A', x + 3, rowY + 3, { width: nameColWidth - 6 });
+                
+                doc.fillColor('#0A1628')
+                   .text(student.studentName || 'N/A', x + 3, rowY + 3, { width: nameColWidth - 6 });
                 x += nameColWidth;
                 
                 allSubjects.forEach(subject => {
@@ -441,18 +599,26 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                         if (percentage < 26) color = '#dc3545';
                         else if (percentage < 50) color = '#e6a800';
                         else if (percentage < 75) color = '#0d6efd';
-                        doc.fillColor(color).text(assessment.score.toString(), x + 2, rowY + 3, { width: subjectColWidth - 4, align: 'center' });
+                        doc.fillColor(color)
+                           .text(assessment.score.toString(), x + 2, rowY + 3, { width: subjectColWidth - 4, align: 'center' });
                     } else {
-                        doc.fillColor('#dee2e6').text('-', x + 2, rowY + 3, { width: subjectColWidth - 4, align: 'center' });
+                        doc.fillColor('#dee2e6')
+                           .text('-', x + 2, rowY + 3, { width: subjectColWidth - 4, align: 'center' });
                     }
                     x += subjectColWidth;
                 });
                 
-                doc.fillColor('#D4A017').font('Helvetica-Bold').text((student.totalScore || 0).toString(), x + 3, rowY + 3, { width: totalColWidth - 6, align: 'center' });
+                doc.fillColor('#D4A017')
+                   .font('Helvetica-Bold')
+                   .text((student.totalScore || 0).toString(), x + 3, rowY + 3, { width: totalColWidth - 6, align: 'center' });
                 x += totalColWidth;
-                doc.fillColor('#0d6efd').text(avgScore, x + 3, rowY + 3, { width: avgColWidth - 6, align: 'center' });
+                
+                doc.fillColor('#0d6efd')
+                   .text(avgScore, x + 3, rowY + 3, { width: avgColWidth - 6, align: 'center' });
                 x += avgColWidth;
-                doc.fillColor(levelColor).text(`${short}(${rating})`, x + 3, rowY + 3, { width: levelColWidth - 6, align: 'center' });
+                
+                doc.fillColor(levelColor)
+                   .text(`${short} (${rating})`, x + 3, rowY + 3, { width: levelColWidth - 6, align: 'center' });
                 
                 rowY += 16;
                 rowIndex++;
@@ -460,8 +626,12 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             
             // Footer
             doc.moveDown(2);
-            doc.fontSize(6).font('Helvetica').fillColor('#6c757d').text(`Report Date: ${formatKenyaFullTime(new Date())}`, 30, 565, { align: 'left' }).text('CHANGARA STAR ACADEMY', 370, 565, { align: 'center' }).text('Page 1 of 1', 730, 565, { align: 'right' });
-            doc.fontSize(5).fillColor('#adb5bd').text('P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com', 30, 575, { align: 'center' });
+            doc.fontSize(6)
+               .font('Helvetica')
+               .fillColor('#6c757d')
+               .text(`Generated: ${formatKenyaFullTime(new Date())}`, 30, 565, { align: 'left' })
+               .text('© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com', 30, 575, { align: 'center' });
+            
             doc.end();
         } catch (error) {
             reject(error);
@@ -664,7 +834,7 @@ const upload = multer({
 // Content Schema
 const contentSchema = new mongoose.Schema({
     heroTitle: { type: String, default: 'Welcome to Changara Star Academy' },
-    heroSubtitle: { type: String, default: 'Your trusted partner in quality education and school management' },
+    heroSubtitle: { type: String, default: 'Your trusted partner in quality education' },
     heroButtonText: { type: String, default: 'Learn More' },
     heroButtonLink: { type: String, default: '/about.html' },
     heroVideo: { type: String, default: '' },
@@ -673,8 +843,8 @@ const contentSchema = new mongoose.Schema({
     homeStats: [{ number: { type: String, default: '500+' }, label: { type: String, default: 'Students' } }],
     homeNews: [{ title: { type: String, default: 'Latest News' }, content: { type: String, default: 'Stay updated with our latest announcements.' }, date: { type: Date, default: Date.now } }],
     aboutMission: { type: String, default: 'To provide quality education that nurtures talent, builds character, and prepares students for a successful future.' },
-    aboutVision: { type: String, default: 'To be a center of excellence in education, producing well-rounded individuals who contribute positively to society.' },
-    aboutValues: { type: String, default: 'Excellence, Integrity, Respect, Innovation, Community Engagement' },
+    aboutVision: { type: String, default: 'To be a center of excellence in education.' },
+    aboutValues: { type: String, default: 'Excellence, Integrity, Respect, Innovation' },
     aboutHistory: { type: String, default: 'Changara Star Academy was founded with a vision to provide quality education to the community.' },
     aboutMotto: { type: String, default: 'Excellence in Education' },
     aboutWhy: { type: String, default: 'Holistic education, qualified teachers, modern facilities.' },
@@ -714,8 +884,8 @@ const contentSchema = new mongoose.Schema({
     contactMap: { type: String, default: '' },
     footerText: { type: String, default: 'Committed to providing quality education and fostering excellence.' },
     seoTitle: { type: String, default: 'Changara Star Academy - Excellence in Education' },
-    seoDescription: { type: String, default: 'Changara Star Academy - Excellence in Education. School management system for students, staff, and parents.' },
-    seoKeywords: { type: String, default: 'school, education, academy, Nairobi, Kenya' },
+    seoDescription: { type: String, default: 'Changara Star Academy - Excellence in Education.' },
+    seoKeywords: { type: String, default: 'school, education, academy, Kenya' },
     noticeAlert: { type: String, default: '' },
     noticeType: { type: String, default: '' },
     noticeDate: { type: Date },
@@ -817,9 +987,7 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model('Student', studentSchema);
 
-// ============================================
-// SUBJECT CONFIG SCHEMA - NO INDEXES, NEW COLLECTION
-// ============================================
+// Subject Config Schema
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
@@ -861,9 +1029,7 @@ const studentAssessmentSchema = new mongoose.Schema({
 
 const StudentAssessment = mongoose.model('StudentAssessment', studentAssessmentSchema);
 
-// ============================================
-// HOLIDAY ASSIGNMENT SCHEMA
-// ============================================
+// Holiday Assignment Schema
 const holidayAssignmentSchema = new mongoose.Schema({
     title: { type: String, required: true },
     grade: { type: String, required: true },
@@ -880,9 +1046,7 @@ const holidayAssignmentSchema = new mongoose.Schema({
 
 const HolidayAssignment = mongoose.model('HolidayAssignment', holidayAssignmentSchema);
 
-// ============================================
-// PAYMENT SCHEMA
-// ============================================
+// Payment Schema
 const paymentSchema = new mongoose.Schema({
     studentId: { type: String, required: true },
     studentName: { type: String, required: true },
@@ -2554,7 +2718,7 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
     }
 });
 
-// DOWNLOAD assignment file - FIXED (proper file download, not JSON)
+// DOWNLOAD assignment file - FIXED
 app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     try {
         const assignment = await HolidayAssignment.findById(req.params.id);
@@ -2569,7 +2733,6 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
         
         const fileName = assignment.fileName || 'assignment.pdf';
         
-        // Set headers for file download
         res.setHeader('Content-Type', 'application/octet-stream');
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
         res.setHeader('Content-Length', fs.statSync(filePath).size);
