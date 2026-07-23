@@ -2558,9 +2558,10 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
         
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            headless: true
-        });
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true,
+    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+});
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         
@@ -2635,9 +2636,10 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
         
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            headless: true
-        });
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true,
+    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+});
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         
@@ -2697,9 +2699,10 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
         const html = generateClassReportHTML(students, grade, type, term, year, period);
         
         const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            headless: true
-        });
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true,
+    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+});
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         
@@ -3124,10 +3127,11 @@ app.post('/api/assessments/generate-comprehensive-pdf', async (req, res) => {
             return res.status(400).json({ success: false, message: 'HTML content is required' });
         }
         
-        const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            headless: true
-        });
+       const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true,
+    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+});
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         
@@ -3477,9 +3481,10 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
         
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            headless: true
-        });
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true,
+    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+});
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         
@@ -3707,9 +3712,10 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
         
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            headless: true
-        });
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true,
+    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+});
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         
