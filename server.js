@@ -5,7 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const fs = require('fs');
-const puppeteer = require('puppeteer-core');
+const pdf = require('html-pdf');
 
 // Load environment variables
 dotenv.config();
