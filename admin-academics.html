@@ -1213,13 +1213,30 @@
         }
     }
 
-    function downloadViewReport() { if (viewStudentId) downloadStudentReport(viewStudentId); }
+    function downloadViewReport() {
+    const studentId = document.getElementById('editAssessmentId')?.value || viewStudentId;
+    if (!studentId) {
+        showAlert('❌ No student selected', 'error');
+        return;
+    }
+    downloadStudentReport(studentId);
+}
     function closeViewModal() { document.getElementById('viewModal').classList.remove('active'); }
     
-    function downloadStudentReport(studentId) { 
-        window.open(`/api/assessments/download-report/${studentId}`, '_blank'); 
-        showAlert('📄 Student report is downloading...', 'info'); 
+    function downloadStudentReport(studentId) {
+    if (!studentId) {
+        showAlert('❌ No student selected', 'error');
+        return;
     }
+    
+    const url = `/api/assessments/download-report/${studentId}`;
+    const newWindow = window.open(url, '_blank');
+    if (!newWindow) {
+        showAlert('⚠️ Please allow popups for this site to download.', 'error');
+        return;
+    }
+    showAlert('📄 Student report is downloading...', 'info');
+}
     
     // ============================================
     // DOWNLOAD GRADE PDF
@@ -1638,10 +1655,21 @@ function downloadGradeReportPDF(grade) {
     const year = document.getElementById('yearFilter').value || '2026';
     const period = document.getElementById('periodFilter').value || '';
     
+    if (!gradeToUse) {
+        showAlert('❌ Please select a grade first', 'error');
+        return;
+    }
+    
     let url = `/api/assessments/download-class-pdf?grade=${encodeURIComponent(gradeToUse)}&type=${type}&term=${term}&year=${year}`;
     if (period) url += `&period=${encodeURIComponent(period)}`;
     
-    window.open(url, '_blank');
+    // Open in new tab to trigger download
+    const newWindow = window.open(url, '_blank');
+    if (!newWindow) {
+        showAlert('⚠️ Please allow popups for this site to download.', 'error');
+        return;
+    }
+    
     showAlert(`📄 ${gradeToUse} report is downloading...`, 'info');
 }
 </script>
