@@ -2256,9 +2256,10 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
         const html = generateStudentReportHTML(student, allAssessments);
         
         const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            headless: true
-        });
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true,
+    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+});
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         
