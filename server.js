@@ -5,7 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const fs = require('fs');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 
 // Load environment variables
 dotenv.config();
@@ -2257,8 +2257,8 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
         
         const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true,
-    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
+    headless: true
 });
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -2559,8 +2559,8 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true,
-    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
+    headless: true
 });
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -2637,8 +2637,8 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true,
-    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
+    headless: true
 });
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -2700,8 +2700,8 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
         
         const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true,
-    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
+    headless: true
 });
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -3129,8 +3129,8 @@ app.post('/api/assessments/generate-comprehensive-pdf', async (req, res) => {
         
        const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true,
-    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
+    headless: true
 });
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -3482,8 +3482,8 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true,
-    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
+    headless: true
 });
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -3713,8 +3713,8 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
         // REPLACE THIS SECTION:
         const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true,
-    executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome' // Add this line
+    executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
+    headless: true
 });
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
