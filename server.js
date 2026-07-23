@@ -5,6 +5,47 @@ const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const fs = require('fs');
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const path = require('path');
+const mongoose = require('mongoose');
+const multer = require('multer');
+const fs = require('fs');
+
+// ============================================
+// FIX PHANTOMJS PATH FOR RENDER/LINUX
+// ============================================
+const phantomjs = require('phantomjs-prebuilt');
+process.env.PHANTOMJS_BIN = phantomjs.path;
+console.log('✅ PhantomJS path set to:', phantomjs.path);
+
+// Now require html-pdf AFTER setting the path
+const pdf = require('html-pdf');
+
+// Override pdf.create to ensure phantomPath is always set
+const originalCreate = pdf.create;
+pdf.create = function(html, options) {
+    if (!options) options = {};
+    if (!options.phantomPath) {
+        options.phantomPath = phantomjs.path;
+    }
+    if (!options.phantomArgs) {
+        options.phantomArgs = ['--local-storage-path=/tmp', '--disk-cache-path=/tmp'];
+    }
+    return originalCreate.call(this, html, options);
+};
+
+// Load environment variables
+dotenv.config();
+
+// Create Express app
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 const pdf = require('html-pdf');
 
 // ============================================
