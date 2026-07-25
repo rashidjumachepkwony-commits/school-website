@@ -1528,10 +1528,7 @@
             }
         }
 
-        function downloadStudentReport(studentId) {
-            window.open(`/api/assessments/download-report/${studentId}`, '_blank');
-            showAlert('📄 Student report is downloading...', 'info');
-        }
+        
 
         function downloadClassResultsPDF() {
             const grade = document.getElementById('classGradeFilter').value;

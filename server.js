@@ -38,10 +38,9 @@ process.env.TZ = 'Africa/Nairobi';
 // HELPER FUNCTIONS
 // ============================================
 function getKenyaTime() {
-    const now = new Date();
-    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const kenyaTime = new Date(utcTime + (3 * 60 * 60 * 1000));
-    return kenyaTime;
+    // A Date is an absolute point in time. Adding three hours here stores an
+    // incorrect timestamp and caused every attendance/visitor record to drift.
+    return new Date();
 }
 
 function getKenyaDate() {
@@ -58,19 +57,19 @@ function getKenyaHour() {
 function formatKenyaTime(date) {
     if (!date) return '-';
     const d = new Date(date);
-    return d.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    return d.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 }
 
 function formatKenyaFullTime(date) {
     if (!date) return '-';
     const d = new Date(date);
-    return d.toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + formatKenyaTime(date);
+    return d.toLocaleDateString('en-KE', { timeZone: 'Africa/Nairobi', year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + formatKenyaTime(date);
 }
 
 function formatKenyaDate(date) {
     if (!date) return '-';
     const d = new Date(date);
-    return d.toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' });
+    return d.toLocaleDateString('en-KE', { timeZone: 'Africa/Nairobi', year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function calculatePerformanceLevel(percentage) {
@@ -858,6 +857,10 @@ function generateStaffReportPDF(report, periodLabel) {
 // FIX PAST RECORDS
 // ============================================
 async function fixPastRecords() {
+    // Kept as a no-op for backward compatibility with old clients. Timestamps
+    // are stored as UTC instants and must never be shifted in bulk.
+    return { fixed: 0 };
+
     try {
         console.log('🔄 Fixing past records time...');
         let totalFixed = 0;
@@ -1736,13 +1739,17 @@ app.get('/api/admin/attendance/summary', async (req, res) => {
 
 app.post('/api/visitor/checkin', async (req, res) => {
     try {
-        const { firstName, lastName, phoneNumber, idNumber, purpose, personToVisit, hostName } = req.body;
+        const { firstName, lastName, phoneNumber, idNumber, email, purpose, purposeDetails, personToVisit, department, hostName, notes } = req.body;
         if (!firstName || !lastName || !phoneNumber || !idNumber || !purpose || !personToVisit) {
             return res.status(400).json({ success: false, message: 'Please provide all required fields' });
         }
-        const badgeNumber = 'V' + Date.now().toString().slice(-6);
+        const badgeNumber = `V${Date.now().toString().slice(-6)}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
         const kenyaNow = getKenyaTime();
-        const visitor = new Visitor({ firstName, lastName, phoneNumber, idNumber, purpose, personToVisit, hostName: hostName || '', badgeNumber, checkIn: kenyaNow, status: 'Checked In' });
+        const visitor = new Visitor({
+            firstName: firstName.trim(), lastName: lastName.trim(), phoneNumber: phoneNumber.trim(), idNumber: idNumber.trim(),
+            email: email || '', purpose, purposeDetails: purposeDetails || '', personToVisit: personToVisit.trim(),
+            department: department || '', hostName: hostName || '', notes: notes || '', badgeNumber, checkIn: kenyaNow, status: 'Checked In'
+        });
         await visitor.save();
         res.status(201).json({ success: true, message: 'Visitor checked in successfully!', visitor: { id: visitor._id, fullName: visitor.fullName, badgeNumber: visitor.badgeNumber, checkIn: visitor.checkIn, checkInTime: formatKenyaTime(visitor.checkIn) } });
     } catch (error) {
@@ -3063,13 +3070,7 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
 // FIX PAST RECORDS - MANUAL API
 // ============================================
 app.post('/api/fix-past-times', async (req, res) => {
-    try {
-        await fixPastRecords();
-        res.json({ success: true, message: 'Past records time fixed successfully!' });
-    } catch (error) {
-        console.error('Error fixing records:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
+    res.status(410).json({ success: false, message: 'Bulk time shifting has been retired to protect record accuracy.' });
 });
 
 app.post('/api/upload', upload.single('file'), (req, res) => {
@@ -3101,21 +3102,12 @@ app.get('/api/test', (req, res) => {
     res.json({ success: true, message: 'Changara Star Academy is running!', data: { server: 'Online', kenyaTime: kenyaNow.toLocaleString(), kenyaTimeFormatted: formatKenyaFullTime(kenyaNow), timestamp: new Date().toISOString() } });
 });
 
-app.use('/uploads', express.static('uploads'));
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Route not found' });
-});
-
 // ============================================
 // FIX ALL TIMES - ADD 3 HOURS
 // ============================================
 app.post('/api/fix-times-add-3', async (req, res) => {
+    return res.status(410).json({ success: false, message: 'Bulk time shifting has been retired to protect record accuracy.' });
+
     try {
         console.log('Adding 3 hours to all attendance times...');
         let totalFixed = 0;
@@ -3157,6 +3149,66 @@ app.post('/api/fix-times-add-3', async (req, res) => {
         console.error('Error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
+});
+
+// Visitor register views used by the receptionist and administrator pages.
+app.get('/api/visitors', async (req, res) => {
+    try {
+        const visitors = await Visitor.find({}).sort({ checkIn: -1 });
+        res.json({ success: true, count: visitors.length, visitors });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/visitors/weekly', async (req, res) => {
+    try {
+        const today = getKenyaDate();
+        const start = new Date(today);
+        start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+        const end = new Date(start);
+        end.setDate(end.getDate() + 7);
+        const visitors = await Visitor.find({ checkIn: { $gte: start, $lt: end } }).sort({ checkIn: -1 });
+        res.json({ success: true, count: visitors.length, visitors });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/visitors/monthly', async (req, res) => {
+    try {
+        const start = getKenyaDate();
+        start.setDate(1);
+        const end = new Date(start);
+        end.setMonth(end.getMonth() + 1);
+        const visitors = await Visitor.find({ checkIn: { $gte: start, $lt: end } }).sort({ checkIn: -1 });
+        res.json({ success: true, count: visitors.length, visitors });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.delete('/api/visitors/:id', async (req, res) => {
+    try {
+        const visitor = await Visitor.findByIdAndDelete(req.params.id);
+        if (!visitor) return res.status(404).json({ success: false, message: 'Visitor record not found' });
+        res.json({ success: true, message: 'Visitor record deleted' });
+    } catch (error) {
+        res.status(400).json({ success: false, message: 'Invalid visitor record ID' });
+    }
+});
+
+// Register static files and the fallback after all API routes so they cannot
+// intercept valid API requests.
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: 'Route not found' });
 });
 
 // ============================================

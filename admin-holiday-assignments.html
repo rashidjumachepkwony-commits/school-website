@@ -392,11 +392,11 @@
                             <td><strong>${a.title}</strong></td>
                             <td><span class="badge-grade">${a.grade}</span></td>
                             <td>${a.subject || '-'}</td>
-                            <td>
-                                ${fileUrl ? `<a href="${a.fileUrl}" download style="color:${fileColor};text-decoration:none;font-weight:600;">
-    <i class="fas ${fileIcon}"></i> ${a.fileName}
-</a>` : `<span style="color:#999;">No file</span>`}
-                            </td>
+                           <td>
+    ${a._id ? `<a href="/api/holiday-assignments/download/${a._id}" style="color:${fileColor};text-decoration:none;font-weight:600;">
+        <i class="fas ${fileIcon}"></i> ${a.fileName}
+    </a>` : `<span style="color:#999;">No file</span>`}
+</td>
                             <td style="font-size:12px;color:#666;">${date}</td>
                             <td>
                                 <button class="btn btn-danger btn-sm" onclick="deleteAssignment('${a._id}')">
