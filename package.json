@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:full": "powershell -ExecutionPolicy Bypass -File start-app.ps1",
     "dev": "nodemon server.js",
     "build": "npm install --ignore-scripts",
     "test": "echo \"No automated tests yet\"",

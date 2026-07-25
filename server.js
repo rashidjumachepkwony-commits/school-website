@@ -910,19 +910,31 @@ async function fixPastRecords() {
 // ============================================
 // CONNECT TO MONGODB
 // ============================================
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB', {
-    serverSelectionTimeoutMS: 5000
-})
-.then(() => {
-    console.log('✅ MongoDB Connected');
-    if (process.env.AUTO_FIX_PAST_RECORDS !== 'false') {
-        setTimeout(fixPastRecords, 2000);
+async function connectToMongoDB(attempt = 1) {
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB';
+    try {
+        await mongoose.connect(mongoUri, {
+            serverSelectionTimeoutMS: 5000,
+            retryWrites: true
+        });
+        console.log('✅ MongoDB Connected');
+        if (process.env.AUTO_FIX_PAST_RECORDS !== 'false') {
+            setTimeout(fixPastRecords, 2000);
+        }
+    } catch (err) {
+        const maxAttempts = 8;
+        console.error(`❌ MongoDB connection attempt ${attempt}/${maxAttempts} failed: ${err.message}`);
+        if (attempt < maxAttempts) {
+            const delayMs = Math.min(10000, 1000 * attempt);
+            console.log(`Retrying MongoDB connection in ${delayMs / 1000}s...`);
+            setTimeout(() => connectToMongoDB(attempt + 1), delayMs);
+        } else {
+            console.error('Server will continue without MongoDB until a connection is available.');
+        }
     }
-})
-.catch(err => {
-    console.error('❌ MongoDB Error:', err.message);
-    console.error('Server will continue without MongoDB until a connection is available.');
-});
+}
+
+connectToMongoDB();
 
 // ============================================
 // FILE UPLOAD SETUP
@@ -1003,6 +1015,7 @@ const contentSchema = new mongoose.Schema({
     heroButtonLink: { type: String, default: '/about.html' },
     heroVideo: { type: String, default: '' },
     applyButtonText: { type: String, default: 'Apply Now' },
+    homeCarousel: [{ badge: { type: String, default: 'Featured' }, title: { type: String, default: 'Welcome to our school' }, body: { type: String, default: 'Explore the latest updates from Changara Star Academy.' }, link: { type: String, default: '' } }],
     homeFeatures: [{ icon: { type: String, default: '📚' }, title: { type: String, default: 'Quality Education' }, description: { type: String, default: 'Holistic education that nurtures talent.' } }],
     homeStats: [{ number: { type: String, default: '500+' }, label: { type: String, default: 'Students' } }],
     homeNews: [{ title: { type: String, default: 'Latest News' }, content: { type: String, default: 'Stay updated with our latest announcements.' }, date: { type: Date, default: Date.now } }],
@@ -1290,7 +1303,9 @@ app.put('/api/content', async (req, res) => {
     try {
         const content = await Content.getContent();
         Object.keys(req.body).forEach(key => {
-            if (key === 'homeFeatures' && Array.isArray(req.body.homeFeatures)) {
+            if (key === 'homeCarousel' && Array.isArray(req.body.homeCarousel)) {
+                content.homeCarousel = req.body.homeCarousel;
+            } else if (key === 'homeFeatures' && Array.isArray(req.body.homeFeatures)) {
                 content.homeFeatures = req.body.homeFeatures;
             } else if (key === 'homeStats' && Array.isArray(req.body.homeStats)) {
                 content.homeStats = req.body.homeStats;

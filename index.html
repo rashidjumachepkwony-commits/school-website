@@ -2364,20 +2364,32 @@
             if (!carousel || !dotsContainer) return;
 
             const items = [];
+            const carouselItems = Array.isArray(content?.homeCarousel) ? content.homeCarousel.filter(Boolean) : [];
             const newsItems = Array.isArray(content?.homeNews) ? content.homeNews.filter(Boolean) : [];
             const eventItems = Array.isArray(content?.events) ? content.events.filter(Boolean) : [];
-            const sourceItems = newsItems.length ? newsItems : eventItems;
 
-            sourceItems.slice(0, 3).forEach((item) => {
-                const title = item.title || 'School Update';
-                const body = item.content || item.description || 'More details will appear here as the admin CMS is updated.';
-                const badge = item.category ? item.category.toUpperCase() : 'UPDATE';
-                items.push({
-                    title,
-                    body,
-                    badge
+            if (carouselItems.length) {
+                carouselItems.slice(0, 3).forEach((item) => {
+                    items.push({
+                        title: item.title || 'School Update',
+                        body: item.body || item.content || item.description || 'More details will appear here as the admin CMS is updated.',
+                        badge: item.badge || 'FEATURED'
+                    });
                 });
-            });
+            } else {
+                const sourceItems = newsItems.length ? newsItems : eventItems;
+
+                sourceItems.slice(0, 3).forEach((item) => {
+                    const title = item.title || 'School Update';
+                    const body = item.content || item.description || 'More details will appear here as the admin CMS is updated.';
+                    const badge = item.category ? item.category.toUpperCase() : 'UPDATE';
+                    items.push({
+                        title,
+                        body,
+                        badge
+                    });
+                });
+            }
 
             if (!items.length) {
                 items.push(
