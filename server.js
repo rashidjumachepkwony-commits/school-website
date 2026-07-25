@@ -2646,33 +2646,15 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Assignment not found' });
         }
         
-        // Extract just the filename from the URL
-        let filename = path.basename(assignment.fileUrl);
-        
-        // Build the correct file path
-        const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
-        
-        console.log('📁 Looking for file:', filePath);
-        
-        // Check if file exists
-        if (!fs.existsSync(filePath)) {
-            console.error('❌ File not found at:', filePath);
-            return res.status(404).json({ success: false, message: 'File not found: ' + filename });
-        }
-        
-        // Send the file
-        const fileStream = fs.createReadStream(filePath);
-        res.setHeader('Content-Type', 'application/octet-stream');
-        res.setHeader('Content-Disposition', `attachment; filename="${assignment.fileName}"`);
-        res.setHeader('Content-Length', fs.statSync(filePath).size);
-        fileStream.pipe(res);
+        // Just redirect to the static file
+        const fileUrl = assignment.fileUrl.startsWith('/') ? assignment.fileUrl : '/' + assignment.fileUrl;
+        res.redirect(fileUrl);
         
     } catch (error) {
         console.error('Error downloading assignment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
 // POST - Upload new assignment
 app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
     try {
