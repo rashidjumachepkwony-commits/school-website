@@ -57,6 +57,76 @@
         .header p { font-size: 22px; margin: 5px 0; color: #d4a017; font-weight: bold; }
         .header .subtitle { font-size: 16px; color: rgba(255,255,255,0.7); margin-top: 5px; }
 
+        .portal-hero {
+            background: linear-gradient(135deg, #ffffff 0%, #f4f8ff 100%);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 18px;
+            border: 2px solid rgba(11, 83, 148, 0.16);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            text-align: left;
+        }
+
+        .portal-hero h2 {
+            margin: 0 0 8px;
+            color: #001f5c;
+            font-size: 26px;
+        }
+
+        .portal-hero p {
+            color: #55606f;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .portal-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .portal-pill {
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: #f8f9fc;
+            color: #001f5c;
+            font-weight: 700;
+            font-size: 13px;
+            border: 1px solid #dfe7f2;
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+        }
+
+        .portal-card {
+            background: white;
+            border: 1px solid #e8ecf1;
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+        }
+
+        .portal-card .icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .portal-card strong {
+            display: block;
+            color: #001f5c;
+            margin-bottom: 4px;
+        }
+
+        .portal-card span {
+            color: #667085;
+            font-size: 13px;
+        }
+
         .login-section, .dashboard-section {
             background: white;
             border-radius: 25px;
@@ -349,6 +419,7 @@
             .student-info-grid { grid-template-columns: 1fr; }
             .actions-row { grid-template-columns: 1fr; }
             .fee-summary { grid-template-columns: 1fr 1fr; }
+            .portal-grid { grid-template-columns: 1fr 1fr; }
             .fee-download-buttons { grid-template-columns: 1fr; }
             .payment-history-table { font-size: 12px; }
             .payment-history-table th, .payment-history-table td { padding: 6px 8px; }
@@ -368,6 +439,38 @@
     </div>
 
     <div id="msg" class="hidden"></div>
+
+    <div class="portal-hero">
+        <h2>Welcome to the Student Portal</h2>
+        <p>Access your academic records, fee information, attendance updates, and downloadable reports from one secure place.</p>
+        <div class="portal-pills">
+            <span class="portal-pill">📄 Fee Statements</span>
+            <span class="portal-pill">📊 Attendance</span>
+            <span class="portal-pill">📝 Reports</span>
+        </div>
+        <div class="portal-grid">
+            <div class="portal-card">
+                <span class="icon">🎓</span>
+                <strong>Student Access</strong>
+                <span>Secure login for learners and guardians.</span>
+            </div>
+            <div class="portal-card">
+                <span class="icon">💰</span>
+                <strong>Fee Updates</strong>
+                <span>View balances and download statements quickly.</span>
+            </div>
+            <div class="portal-card">
+                <span class="icon">✅</span>
+                <strong>Attendance</strong>
+                <span>Stay updated on school attendance records.</span>
+            </div>
+            <div class="portal-card">
+                <span class="icon">📚</span>
+                <strong>Reports</strong>
+                <span>Download academic reports whenever needed.</span>
+            </div>
+        </div>
+    </div>
 
     <!-- ===== LOGIN SECTION ===== -->
     <div class="login-section" id="loginSection">

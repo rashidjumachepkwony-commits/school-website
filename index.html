@@ -673,6 +673,86 @@
             animation: fadeInUp 1.6s ease forwards;
         }
 
+        .banner-carousel-section {
+            padding: 24px 0 0;
+            background: linear-gradient(180deg, #f5f7fb 0%, #eef3f9 100%);
+        }
+
+        .banner-carousel {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+            min-height: 220px;
+            background: #001f5c;
+        }
+
+        .banner-slide {
+            display: none;
+            padding: 30px 28px;
+            min-height: 220px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: linear-gradient(135deg, rgba(10, 22, 40, 0.98) 0%, rgba(11, 83, 148, 0.96) 100%);
+            color: white;
+        }
+
+        .banner-slide.active {
+            display: flex;
+        }
+
+        .banner-slide .banner-copy {
+            max-width: 560px;
+        }
+
+        .banner-slide .banner-copy h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #ffeb99;
+        }
+
+        .banner-slide .banner-copy p {
+            margin: 0;
+            line-height: 1.6;
+            color: #e9f2ff;
+        }
+
+        .banner-slide .banner-badge {
+            display: inline-block;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(212, 160, 23, 0.24);
+            color: #ffeb99;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .banner-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .banner-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(0, 31, 92, 0.2);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .banner-dot.active {
+            background: #d4a017;
+            transform: scale(1.15);
+        }
+
         /* ===== SCROLL DOWN BUTTON ===== */
         .btn-scroll-down {
             display: inline-flex;
@@ -1833,6 +1913,45 @@
     </section>
 
     <!-- ======================================== -->
+    <!-- HOME BANNER CAROUSEL -->
+    <!-- ======================================== -->
+    <section class="banner-carousel-section">
+        <div class="container">
+            <div class="banner-carousel">
+                <div class="banner-slide active">
+                    <div class="banner-copy">
+                        <span class="banner-badge">New Term</span>
+                        <h3>Term 3 is now open with fresh learning opportunities.</h3>
+                        <p>Students are settling into an exciting academic journey focused on growth, creativity, and excellence.</p>
+                    </div>
+                    <span class="banner-badge">📚 Learn More</span>
+                </div>
+                <div class="banner-slide">
+                    <div class="banner-copy">
+                        <span class="banner-badge">Student Portal</span>
+                        <h3>Parents and learners can access school updates with ease.</h3>
+                        <p>Visit the student portal for fees, attendance, and important reports in one dashboard.</p>
+                    </div>
+                    <span class="banner-badge">🎓 Open Portal</span>
+                </div>
+                <div class="banner-slide">
+                    <div class="banner-copy">
+                        <span class="banner-badge">Community</span>
+                        <h3>Events and activities continue to bring our school family together.</h3>
+                        <p>Keep track of upcoming parent meetings, co-curricular programs, and celebration days.</p>
+                    </div>
+                    <span class="banner-badge">🗓️ View Events</span>
+                </div>
+            </div>
+            <div class="banner-dots" aria-label="Carousel navigation">
+                <button class="banner-dot active" data-index="0" aria-label="Show slide 1"></button>
+                <button class="banner-dot" data-index="1" aria-label="Show slide 2"></button>
+                <button class="banner-dot" data-index="2" aria-label="Show slide 3"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
     <!-- VIDEO MODAL -->
     <!-- ======================================== -->
     <div class="video-modal" id="videoModal">
@@ -2211,6 +2330,36 @@
             offset: 60,
             easing: 'ease-in-out'
         });
+
+        // ============================================
+        // HOMEPAGE BANNER CAROUSEL
+        // ============================================
+        let currentBannerIndex = 0;
+        const bannerSlides = document.querySelectorAll('.banner-slide');
+        const bannerDots = document.querySelectorAll('.banner-dot');
+
+        function showBannerSlide(index) {
+            if (!bannerSlides.length) return;
+            currentBannerIndex = (index + bannerSlides.length) % bannerSlides.length;
+            bannerSlides.forEach((slide, slideIndex) => {
+                slide.classList.toggle('active', slideIndex === currentBannerIndex);
+            });
+            bannerDots.forEach((dot, dotIndex) => {
+                dot.classList.toggle('active', dotIndex === currentBannerIndex);
+            });
+        }
+
+        function nextBannerSlide() {
+            showBannerSlide(currentBannerIndex + 1);
+        }
+
+        bannerDots.forEach(dot => {
+            dot.addEventListener('click', () => showBannerSlide(Number(dot.dataset.index)));
+        });
+
+        if (bannerSlides.length) {
+            setInterval(nextBannerSlide, 5500);
+        }
 
         // ============================================
         // SCROLL TO CONTENT (for Scroll Down button)

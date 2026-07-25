@@ -289,6 +289,95 @@ main {
     background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
 }
 
+.gallery-hero,
+.event-hero {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.gallery-hero .hero-panel,
+.event-hero .hero-panel {
+    background: linear-gradient(135deg, #001f5c 0%, #0b5394 100%);
+    color: white;
+    border-radius: 22px;
+    padding: 30px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
+}
+
+.gallery-hero .hero-panel h1,
+.event-hero .hero-panel h1 {
+    color: #ffeb99;
+    margin-bottom: 12px;
+}
+
+.gallery-hero .hero-panel p,
+.event-hero .hero-panel p {
+    color: #e8f2ff;
+    margin-bottom: 14px;
+}
+
+.gallery-hero .spotlight-card,
+.event-hero .spotlight-card {
+    background: white;
+    border-radius: 22px;
+    border: 1px solid #e6ecf4;
+    padding: 24px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.gallery-hero .spotlight-card .pill,
+.event-hero .spotlight-card .pill {
+    display: inline-block;
+    background: rgba(212, 160, 23, 0.16);
+    color: #001f5c;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.gallery-grid,
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-top: 24px;
+}
+
+.gallery-grid .info-card,
+.event-grid .info-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e6ecf4;
+    padding: 20px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+}
+
+.gallery-grid .info-card h3,
+.event-grid .info-card h3 {
+    color: #001f5c;
+    margin-bottom: 8px;
+}
+
+.gallery-grid .info-card p,
+.event-grid .info-card p {
+    color: #667085;
+    font-size: 14px;
+}
+
+.event-date {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #d4a017;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
 .page-shell h1 {
     color: #001f5c;
     font-size: 36px;
@@ -539,6 +628,11 @@ main {
 
     .page-shell h1 {
         font-size: 28px;
+    }
+
+    .gallery-hero,
+    .event-hero {
+        grid-template-columns: 1fr;
     }
 
     .page-intro {
