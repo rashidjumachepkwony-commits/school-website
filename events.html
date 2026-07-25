@@ -49,7 +49,7 @@
                     </div>
                 </div>
 
-                <div class="event-grid">
+                <div class="event-grid" id="eventsContent">
                     <article class="info-card">
                         <span class="event-date">Sep 2026</span>
                         <h3>Academic Calendar</h3>
@@ -95,5 +95,46 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script>
+        function escapeHtml(value = '') {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        async function loadEventsContent() {
+            try {
+                const response = await fetch('/api/content');
+                const data = await response.json();
+                const content = data?.content || {};
+                const items = Array.isArray(content.events) ? content.events.filter(Boolean) : [];
+                const container = document.getElementById('eventsContent');
+                if (!container) return;
+
+                if (!items.length) {
+                    container.innerHTML = '<article class="info-card"><span class="event-date">No updates</span><h3>No event cards yet</h3><p>Create events in the admin CMS to populate this section.</p></article>';
+                    return;
+                }
+
+                container.innerHTML = items.slice(0, 8).map((item) => {
+                    const date = item.date ? new Date(item.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Upcoming';
+                    return `
+                        <article class="info-card">
+                            <span class="event-date">${escapeHtml(date)}</span>
+                            <h3>${escapeHtml(item.title || 'School Event')}</h3>
+                            <p>${escapeHtml(item.content || 'More details will be added from the admin backend.')}</p>
+                        </article>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load events content', error);
+            }
+        }
+
+        loadEventsContent();
+    </script>
 </body>
 </html>

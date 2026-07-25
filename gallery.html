@@ -49,7 +49,7 @@
                     </div>
                 </div>
 
-                <div class="gallery-grid">
+                <div class="gallery-grid" id="galleryContent">
                     <article class="info-card">
                         <span class="feature-icon">📚</span>
                         <h3>Classroom Learning</h3>
@@ -95,5 +95,53 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script>
+        function escapeHtml(value = '') {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        async function loadGalleryContent() {
+            try {
+                const response = await fetch('/api/content');
+                const data = await response.json();
+                const content = data?.content || {};
+                const items = Array.isArray(content.gallery) ? content.gallery.filter(Boolean) : [];
+                const container = document.getElementById('galleryContent');
+                if (!container) return;
+
+                if (!items.length) {
+                    container.innerHTML = '<article class="info-card"><span class="feature-icon">📝</span><h3>No gallery items yet</h3><p>Upload images from the admin CMS to populate this gallery.</p></article>';
+                    return;
+                }
+
+                container.innerHTML = items.slice(0, 8).map((item) => {
+                    const category = item.category || 'General';
+                    const iconMap = {
+                        'Academics': '📚',
+                        'Sports': '⚽',
+                        'Events': '🎉',
+                        'Facilities': '🏫',
+                        'General': '🌿'
+                    };
+                    return `
+                        <article class="info-card">
+                            <span class="feature-icon">${iconMap[category] || '🖼️'}</span>
+                            <h3>${escapeHtml(item.title || 'School Activity')}</h3>
+                            <p>${escapeHtml(item.description || 'More details will be added from the admin backend.')}</p>
+                        </article>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load gallery content', error);
+            }
+        }
+
+        loadGalleryContent();
+    </script>
 </body>
 </html>

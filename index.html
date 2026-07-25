@@ -1917,7 +1917,7 @@
     <!-- ======================================== -->
     <section class="banner-carousel-section">
         <div class="container">
-            <div class="banner-carousel">
+            <div class="banner-carousel" id="bannerCarousel">
                 <div class="banner-slide active">
                     <div class="banner-copy">
                         <span class="banner-badge">New Term</span>
@@ -1943,7 +1943,7 @@
                     <span class="banner-badge">🗓️ View Events</span>
                 </div>
             </div>
-            <div class="banner-dots" aria-label="Carousel navigation">
+            <div class="banner-dots" id="bannerDots" aria-label="Carousel navigation">
                 <button class="banner-dot active" data-index="0" aria-label="Show slide 1"></button>
                 <button class="banner-dot" data-index="1" aria-label="Show slide 2"></button>
                 <button class="banner-dot" data-index="2" aria-label="Show slide 3"></button>
@@ -2335,8 +2335,17 @@
         // HOMEPAGE BANNER CAROUSEL
         // ============================================
         let currentBannerIndex = 0;
-        const bannerSlides = document.querySelectorAll('.banner-slide');
-        const bannerDots = document.querySelectorAll('.banner-dot');
+        let bannerSlides = [];
+        let bannerDots = [];
+
+        function escapeHtml(value = '') {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         function showBannerSlide(index) {
             if (!bannerSlides.length) return;
@@ -2349,13 +2358,61 @@
             });
         }
 
+        function renderBannerCarousel(content) {
+            const carousel = document.getElementById('bannerCarousel');
+            const dotsContainer = document.getElementById('bannerDots');
+            if (!carousel || !dotsContainer) return;
+
+            const items = [];
+            const newsItems = Array.isArray(content?.homeNews) ? content.homeNews.filter(Boolean) : [];
+            const eventItems = Array.isArray(content?.events) ? content.events.filter(Boolean) : [];
+            const sourceItems = newsItems.length ? newsItems : eventItems;
+
+            sourceItems.slice(0, 3).forEach((item) => {
+                const title = item.title || 'School Update';
+                const body = item.content || item.description || 'More details will appear here as the admin CMS is updated.';
+                const badge = item.category ? item.category.toUpperCase() : 'UPDATE';
+                items.push({
+                    title,
+                    body,
+                    badge
+                });
+            });
+
+            if (!items.length) {
+                items.push(
+                    { title: content?.heroTitle || 'Welcome to Changara Star Academy', body: content?.heroSubtitle || 'A trusted place for quality education and growth.', badge: 'WELCOME' },
+                    { title: 'Student Portal', body: 'Parents and learners can access school updates from one secure place.', badge: 'PORTAL' },
+                    { title: 'Community Events', body: 'Stay connected with school activities, parent meetings, and celebrations.', badge: 'EVENTS' }
+                );
+            }
+
+            carousel.innerHTML = items.map((item, index) => `
+                <div class="banner-slide ${index === 0 ? 'active' : ''}">
+                    <div class="banner-copy">
+                        <span class="banner-badge">${escapeHtml(item.badge)}</span>
+                        <h3>${escapeHtml(item.title)}</h3>
+                        <p>${escapeHtml(item.body)}</p>
+                    </div>
+                    <span class="banner-badge">${index === 0 ? '📚 Featured' : index === 1 ? '🎓 Portal' : '🗓️ Events'}</span>
+                </div>
+            `).join('');
+
+            dotsContainer.innerHTML = items.map((_, index) => `
+                <button class="banner-dot ${index === 0 ? 'active' : ''}" data-index="${index}" aria-label="Show slide ${index + 1}"></button>
+            `).join('');
+
+            bannerSlides = Array.from(document.querySelectorAll('.banner-slide'));
+            bannerDots = Array.from(document.querySelectorAll('.banner-dot'));
+            bannerDots.forEach(dot => {
+                dot.addEventListener('click', () => showBannerSlide(Number(dot.dataset.index)));
+            });
+            showBannerSlide(0);
+        }
+
         function nextBannerSlide() {
             showBannerSlide(currentBannerIndex + 1);
         }
-
-        bannerDots.forEach(dot => {
-            dot.addEventListener('click', () => showBannerSlide(Number(dot.dataset.index)));
-        });
 
         if (bannerSlides.length) {
             setInterval(nextBannerSlide, 5500);
@@ -2544,6 +2601,8 @@
                     if (c.heroSubtitle) {
                         document.getElementById('heroSubtitle').textContent = c.heroSubtitle;
                     }
+
+                    renderBannerCarousel(c);
 
                     const cardIds = [
                         'displayPerformance', 'displayParents', 'displayDownloads', 'displayFees'
