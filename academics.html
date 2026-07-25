@@ -1130,24 +1130,6 @@
             </div>
         </div>
     </section>
-    <div class="search-box">
-    <input type="text" id="studentSearch" placeholder="Enter student name..." onkeypress="if(event.key==='Enter') searchStudentAssessment()">
-    <select id="gradeFilter">
-        <option value="">All Grades</option>
-        <!-- ... options ... -->
-    </select>
-    <select id="assessmentTypeFilter">
-        <option value="">All Types</option>
-        <!-- ... options ... -->
-    </select>
-    <button class="btn" onclick="searchStudentAssessment()">
-        <i class="fas fa-search"></i> Search
-    </button>
-    <!-- ADD THIS NEW BUTTON -->
-    <button class="btn" onclick="downloadBulkAssessmentResults()" style="background:linear-gradient(135deg, #dc3545, #c82333);color:white;white-space:nowrap;">
-        <i class="fas fa-file-pdf"></i> Download All
-    </button>
-</div>
 
     <!-- ========================================
     HOLIDAY ASSIGNMENTS SECTION
@@ -1813,7 +1795,7 @@
                                 </div>
                                 ${assignment.description ? `<p style="color:#666;font-size:13px;margin:8px 0;line-height:1.5;">${assignment.description}</p>` : ''}
                                 <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-                                    <a href="${assignment.fileUrl}" download class="btn" style="flex:1;padding:10px 20px;background:linear-gradient(135deg, #0b5394, #1a6fb5);color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s;">
+                                    <a href="/api/holiday-assignments/download/${assignment._id}" class="btn" style="flex:1;padding:10px 20px;background:linear-gradient(135deg, #0b5394, #1a6fb5);color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s;">
                                         <i class="fas fa-download"></i> Download
                                     </a>
                                     <button onclick="viewAssignment('${assignment._id}')" class="btn" style="padding:10px 20px;background:#f8f9fc;color:#0A1628;border:2px solid #e8ecf1;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.3s;">
@@ -1914,7 +1896,7 @@
                             </div>
                             
                             <div class="actions">
-                                <a href="${a.fileUrl}" download class="btn btn-download"><i class="fas fa-download"></i> Download File</a>
+                                <a href="/api/holiday-assignments/download/${a._id}" class="btn btn-download"><i class="fas fa-download"></i> Download File</a>
                                 <button onclick="window.close()" class="btn" style="background:#6c757d;">✖ Close</button>
                             </div>
                             
