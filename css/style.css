@@ -283,10 +283,90 @@ main {
     display: block;
 }
 
-/* ===== ABOUT PAGE ===== */
-.about-section {
+/* ===== ABOUT / CONTACT / PORTAL PAGE SHARED STYLES ===== */
+.page-shell {
     padding: 60px 0;
+    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.page-shell h1 {
+    color: #001f5c;
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.page-intro {
+    font-size: 18px;
+    color: #667085;
+    margin-bottom: 30px;
+    max-width: 760px;
+}
+
+.page-highlight-card,
+.info-highlight-card {
+    background: linear-gradient(135deg, #001f5c 0%, #0b5394 100%);
+    border-radius: 18px;
+    padding: 36px;
+    color: white;
+    text-align: center;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+}
+
+.page-highlight-card .icon,
+.info-highlight-card .icon {
+    font-size: 72px;
+    margin-bottom: 16px;
+}
+
+.page-highlight-card h2,
+.info-highlight-card h2 {
+    color: #ffeb99;
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.page-highlight-card p,
+.info-highlight-card p {
+    color: #d8e5f5;
+    margin-top: 10px;
+}
+
+.quick-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 30px;
+}
+
+.quick-link-card {
     background: white;
+    border: 1px solid #e6ecf4;
+    border-radius: 14px;
+    padding: 18px;
+    text-decoration: none;
+    color: #001f5c;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.quick-link-card:hover {
+    transform: translateY(-4px);
+    border-color: #d4a017;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+}
+
+.quick-link-card strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.quick-link-card span {
+    color: #667085;
+    font-size: 13px;
 }
 
 .notice-banner {
@@ -451,6 +531,18 @@ main {
 @media (max-width: 768px) {
     .mobile-menu-btn {
         display: block;
+    }
+
+    .page-shell {
+        padding: 40px 0;
+    }
+
+    .page-shell h1 {
+        font-size: 28px;
+    }
+
+    .page-intro {
+        font-size: 16px;
     }
 
     .nav-links {
