@@ -2642,6 +2642,7 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
 // ============================================
 
 // DOWNLOAD assignment file
+// DOWNLOAD assignment file
 app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     try {
         const assignment = await HolidayAssignment.findById(req.params.id);
@@ -2649,28 +2650,17 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Assignment not found' });
         }
         
-        // Build the file path - extract filename from the stored URL
+        // Extract filename from the URL (now it includes assignments/ folder)
         const filename = path.basename(assignment.fileUrl);
         const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
         
-        console.log('📁 Downloading:', filename);
-        console.log('📁 From path:', filePath);
+        console.log('📁 Looking for:', filePath);
         
-        // Check if file exists
         if (!fs.existsSync(filePath)) {
-            console.error('❌ File not found at:', filePath);
-            return res.status(404).json({ success: false, message: 'File not found: ' + filename });
+            return res.status(404).json({ success: false, message: 'File not found' });
         }
         
-        // Send the file for download
-        res.download(filePath, assignment.fileName || filename, (err) => {
-            if (err) {
-                console.error('Error sending file:', err);
-                if (!res.headersSent) {
-                    res.status(500).json({ success: false, message: 'Error downloading file' });
-                }
-            }
-        });
+        res.download(filePath, assignment.fileName || filename);
         
     } catch (error) {
         console.error('Error downloading assignment:', error);

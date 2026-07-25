@@ -3775,7 +3775,8 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             return res.status(400).json({ success: false, message: 'Please upload a file' });
         }
         
-        const fileUrl = `/uploads/${req.file.filename}`;
+        // FIXED: Include the assignments folder in the path
+        const fileUrl = `/uploads/assignments/${req.file.filename}`;
         const fileName = req.file.originalname;
         const fileType = fileName.split('.').pop().toLowerCase();
         const fileSize = req.file.size;
@@ -3806,7 +3807,6 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
 // DELETE - Delete assignment
 app.delete('/api/holiday-assignments/:id', async (req, res) => {
     try {
