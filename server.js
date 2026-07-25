@@ -2708,6 +2708,46 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+// ============================================
+// HOLIDAY ASSIGNMENTS - DOWNLOAD ROUTE
+// ============================================
+
+// DOWNLOAD assignment file
+app.get('/api/holiday-assignments/download/:id', async (req, res) => {
+    try {
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        
+        // Build the file path - extract filename from the stored URL
+        const filename = path.basename(assignment.fileUrl);
+        const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
+        
+        console.log('📁 Downloading:', filename);
+        console.log('📁 From path:', filePath);
+        
+        // Check if file exists
+        if (!fs.existsSync(filePath)) {
+            console.error('❌ File not found at:', filePath);
+            return res.status(404).json({ success: false, message: 'File not found: ' + filename });
+        }
+        
+        // Send the file for download
+        res.download(filePath, assignment.fileName || filename, (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                if (!res.headersSent) {
+                    res.status(500).json({ success: false, message: 'Error downloading file' });
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error downloading assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 // ============================================
 // CLERK DASHBOARD API ROUTES
