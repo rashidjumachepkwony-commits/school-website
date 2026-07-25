@@ -2712,19 +2712,12 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
         console.log('📄 Assignment found:', assignment.title);
         console.log('📁 File URL:', assignment.fileUrl);
         
-        const filename = path.basename(assignment.fileUrl || '');
-        const assignmentDirs = [
-            path.join(__dirname, 'uploads', 'assignments'),
-            path.join(__dirname, 'uploads', 'holiday-assignments'),
-            path.join(__dirname, 'uploads')
-        ];
-        const filePath = assignmentDirs
-            .map(dir => path.join(dir, filename))
-            .find(candidate => fs.existsSync(candidate));
+        const filename = path.basename(assignment.fileUrl);
+        const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
         
         console.log('📁 Looking for file at:', filePath);
         
-        if (!filePath) {
+        if (!fs.existsSync(filePath)) {
             console.error('❌ File not found at:', filePath);
             return res.status(404).json({ success: false, message: 'File not found: ' + filename });
         }
