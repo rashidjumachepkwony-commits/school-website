@@ -2598,7 +2598,7 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
 });
 
 // ============================================
-// HOLIDAY ASSIGNMENTS - FIXED
+// HOLIDAY ASSIGNMENTS - COMPLETE WORKING CODE
 // ============================================
 
 // GET all assignments
@@ -2637,33 +2637,112 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-// ============================================
-// HOLIDAY ASSIGNMENTS - DOWNLOAD ROUTE
-// ============================================
+
+// POST - Upload new assignment
+app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
+    try {
+        console.log('📤 Upload request received');
+        console.log('Body:', req.body);
+        console.log('File:', req.file);
+        
+        const { title, grade, subject, description } = req.body;
+        
+        if (!title || !grade) {
+            return res.status(400).json({ success: false, message: 'Title and Grade are required' });
+        }
+        
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Please upload a file' });
+        }
+        
+        const fileUrl = `/uploads/assignments/${req.file.filename}`;
+        const fileName = req.file.originalname;
+        const fileType = fileName.split('.').pop().toLowerCase();
+        const fileSize = req.file.size;
+        
+        console.log('📁 Saving to:', fileUrl);
+        
+        const assignment = new HolidayAssignment({
+            title,
+            grade,
+            subject: subject || '',
+            description: description || '',
+            fileName,
+            fileUrl,
+            fileType,
+            fileSize,
+            uploadedBy: req.body.uploadedBy || 'Admin',
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+        
+        await assignment.save();
+        
+        console.log('✅ Assignment saved:', assignment._id);
+        
+        res.status(201).json({
+            success: true,
+            message: 'Assignment uploaded successfully!',
+            assignment
+        });
+    } catch (error) {
+        console.error('❌ Error uploading assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 // DOWNLOAD assignment file
-// DOWNLOAD assignment file
 app.get('/api/holiday-assignments/download/:id', async (req, res) => {
+    try {
+        console.log('📥 Download request for:', req.params.id);
+        
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        
+        console.log('📄 Assignment found:', assignment.title);
+        console.log('📁 File URL:', assignment.fileUrl);
+        
+        const filename = path.basename(assignment.fileUrl);
+        const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
+        
+        console.log('📁 Looking for file at:', filePath);
+        
+        if (!fs.existsSync(filePath)) {
+            console.error('❌ File not found at:', filePath);
+            return res.status(404).json({ success: false, message: 'File not found: ' + filename });
+        }
+        
+        console.log('✅ File found, sending download...');
+        res.download(filePath, assignment.fileName || filename);
+        
+    } catch (error) {
+        console.error('❌ Error downloading assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// DELETE - Delete assignment
+app.delete('/api/holiday-assignments/:id', async (req, res) => {
     try {
         const assignment = await HolidayAssignment.findById(req.params.id);
         if (!assignment) {
             return res.status(404).json({ success: false, message: 'Assignment not found' });
         }
         
-        // Extract filename from the URL (now it includes assignments/ folder)
         const filename = path.basename(assignment.fileUrl);
         const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
         
-        console.log('📁 Looking for:', filePath);
-        
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({ success: false, message: 'File not found' });
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log('🗑️ File deleted:', filePath);
         }
         
-        res.download(filePath, assignment.fileName || filename);
-        
+        await HolidayAssignment.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'Assignment deleted successfully!' });
     } catch (error) {
-        console.error('Error downloading assignment:', error);
+        console.error('Error deleting assignment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
