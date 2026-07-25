@@ -2606,15 +2606,18 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Assignment not found' });
         }
         
-        const filePath = path.join(__dirname, assignment.fileUrl);
+        // Just use the filename from the URL
+        const filename = path.basename(assignment.fileUrl);
+        const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
+        
+        console.log('File path:', filePath); // Debug
+        
         if (!fs.existsSync(filePath)) {
             return res.status(404).json({ success: false, message: 'File not found' });
         }
         
-        const fileName = assignment.fileName || 'assignment.pdf';
-        
         res.setHeader('Content-Type', 'application/octet-stream');
-        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.setHeader('Content-Disposition', `attachment; filename="${assignment.fileName}"`);
         res.setHeader('Content-Length', fs.statSync(filePath).size);
         
         const fileStream = fs.createReadStream(filePath);
