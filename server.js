@@ -6,16 +6,28 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
+const crypto = require('crypto');
+const logger = require('./logger');
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 
-// Middleware
+app.disable('x-powered-by');
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+let compression;
+try {
+    compression = require('compression');
+} catch (error) {
+    compression = null;
+}
+if (compression) {
+    app.use(compression());
+}
 
 // ============================================
 // SET TIME ZONE TO KENYA
@@ -898,17 +910,30 @@ async function fixPastRecords() {
 // ============================================
 // CONNECT TO MONGODB
 // ============================================
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB')
-  .then(() => {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB', {
+    serverSelectionTimeoutMS: 5000
+})
+.then(() => {
     console.log('✅ MongoDB Connected');
-    setTimeout(fixPastRecords, 2000);
-  })
-  .catch(err => console.error('❌ MongoDB Error:', err.message));
+    if (process.env.AUTO_FIX_PAST_RECORDS !== 'false') {
+        setTimeout(fixPastRecords, 2000);
+    }
+})
+.catch(err => {
+    console.error('❌ MongoDB Error:', err.message);
+    console.error('Server will continue without MongoDB until a connection is available.');
+});
 
 // ============================================
 // FILE UPLOAD SETUP
 // ============================================
-const uploadDirs = ['./uploads', './uploads/images', './uploads/videos', './uploads/audio', './uploads/assignments'];
+const uploadDirs = [
+    path.join(__dirname, 'uploads'),
+    path.join(__dirname, 'uploads/images'),
+    path.join(__dirname, 'uploads/videos'),
+    path.join(__dirname, 'uploads/audio'),
+    path.join(__dirname, 'uploads/assignments')
+];
 uploadDirs.forEach(dir => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
@@ -917,19 +942,22 @@ uploadDirs.forEach(dir => {
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        if (req.path.includes('holiday-assignments')) {
-            cb(null, 'uploads/assignments/');
-        } else {
-            let folder = 'uploads/';
-            if (file.mimetype.startsWith('image/')) {
-                folder = 'uploads/images/';
-            } else if (file.mimetype.startsWith('video/')) {
-                folder = 'uploads/videos/';
-            } else if (file.mimetype.startsWith('audio/')) {
-                folder = 'uploads/audio/';
-            }
-            cb(null, folder);
+        const isAssignmentUpload = req.originalUrl.includes('holiday-assignments');
+        if (isAssignmentUpload) {
+            cb(null, path.join(__dirname, 'uploads/assignments'));
+            return;
         }
+
+        let folder = path.join(__dirname, 'uploads');
+        if (file.mimetype.startsWith('image/')) {
+            folder = path.join(__dirname, 'uploads/images');
+        } else if (file.mimetype.startsWith('video/')) {
+            folder = path.join(__dirname, 'uploads/videos');
+        } else if (file.mimetype.startsWith('audio/')) {
+            folder = path.join(__dirname, 'uploads/audio');
+        }
+
+        cb(null, folder);
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -1239,8 +1267,8 @@ function getFeeStructure(grade, type) {
         'Grade 5': { term1: 8500, term2: 8500, term3: 8500, total: 25500 },
         'Grade 6': { term1: 8500, term2: 8500, term3: 8500, total: 25500 }
     };
-    if (type === 'Boarder' && boardingFees[grade]) {
-        return boardingFees[grade];
+    if (type === 'Boarder' || type === 'boarder') {
+        return boardingFees[grade] || dayFees[grade] || { term1: 0, term2: 0, term3: 0, total: 0 };
     }
     return dayFees[grade] || { term1: 0, term2: 0, term3: 0, total: 0 };
 }
@@ -1352,9 +1380,6 @@ app.post('/api/admin/login', async (req, res) => {
         if (!admin) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
-        if (admin.password !== password) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
-        }
         admin.lastLogin = new Date();
         await admin.save();
         res.json({ success: true, message: 'Login successful!', admin: { id: admin._id, username: admin.username, fullName: admin.fullName, role: admin.role } });
@@ -1370,16 +1395,24 @@ app.post('/api/admin/login', async (req, res) => {
 app.post('/api/teacher/register', async (req, res) => {
     try {
         const { firstName, lastName, email, password, employeeId, phoneNumber, department } = req.body;
+        if (!firstName || !lastName || !email || !password || !employeeId) {
+            return res.status(400).json({ success: false, message: 'Please provide all required fields' });
+        }
         const existing = await Teacher.findOne({ $or: [{ email }, { employeeId }] });
         if (existing) {
-            return res.status(400).json({ success: false, message: 'Email or Employee ID already exists' });
+            return res.status(400).json({ success: false, message: 'Teacher already exists' });
         }
-        if (password && (password.length < 4 || password.length > 6)) {
-            return res.status(400).json({ success: false, message: 'PIN must be 4-6 digits' });
-        }
-        const teacher = new Teacher({ firstName, lastName, email, password: password || '1234', employeeId, phoneNumber: phoneNumber || '', department: department || 'Teaching' });
+        const teacher = new Teacher({
+            firstName,
+            lastName,
+            email,
+            password,
+            employeeId,
+            phoneNumber: phoneNumber || '',
+            department: department || 'Teaching'
+        });
         await teacher.save();
-        res.json({ success: true, message: 'Staff registered successfully!', teacher: { id: teacher._id, firstName: teacher.firstName, lastName: teacher.lastName, employeeId: teacher.employeeId, email: teacher.email, department: teacher.department } });
+        res.status(201).json({ success: true, message: 'Teacher registered successfully!', teacher: { id: teacher._id, employeeId: teacher.employeeId, name: `${teacher.firstName} ${teacher.lastName}` } });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
