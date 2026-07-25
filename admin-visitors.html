@@ -318,7 +318,7 @@
             const today = new Date();
             
             if (currentReport === 'daily') {
-                endpoint = '/api/visitors';
+                endpoint = '/api/visitors?period=daily';
                 title = '📅 Daily Visitor Report - ' + today.toLocaleDateString();
                 dateLabel = 'Today';
             } else if (currentReport === 'weekly') {
@@ -334,7 +334,7 @@
                 const datePicker = document.getElementById('datePicker');
                 if (datePicker.value) {
                     const selectedDate = new Date(datePicker.value + 'T00:00:00');
-                    endpoint = '/api/visitors';
+                    endpoint = '/api/visitors?date=' + encodeURIComponent(datePicker.value);
                     title = '📅 Visitor Report - ' + selectedDate.toLocaleDateString();
                     dateLabel = selectedDate.toLocaleDateString();
                 } else {

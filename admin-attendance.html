@@ -642,7 +642,7 @@
                     else if (s === 'Late') late++;
                 });
 
-                const rate = total > 0 ? ((present / total) * 100).toFixed(0) : 0;
+                const rate = total > 0 ? (((present + late) / total) * 100).toFixed(0) : 0;
                 let overallStatus = 'Absent', statusClass = 'red';
                 if (present > 0) { overallStatus = 'Present'; statusClass = 'green'; }
                 if (late > 0 && present === 0) { overallStatus = 'Late'; statusClass = 'orange'; }
@@ -688,7 +688,7 @@
                     else if (record.status === 'Present') present++;
                 });
 
-                const rate = totalDays > 0 ? ((present / totalDays) * 100).toFixed(0) : 0;
+                const rate = totalDays > 0 ? (((present + late) / totalDays) * 100).toFixed(0) : 0;
                 let overallStatus = 'Absent', statusClass = 'red';
                 if (present > 0) { overallStatus = 'Present'; statusClass = 'green'; }
                 if (late > 0 && present === 0) { overallStatus = 'Late'; statusClass = 'orange'; }
@@ -727,15 +727,15 @@
         function updateSummary(data) {
             let total = data.length, present = 0, late = 0, absent = 0;
             data.forEach(item => {
-                if (item.status.includes('Present')) present++;
-                else if (item.status.includes('Late')) late++;
+                if (item.status.includes('Late')) late++;
+                else if (item.status.includes('Present') || item.status === 'Checked In' || item.status === 'Checked Out') present++;
                 else absent++;
             });
             document.getElementById('reportTotal').textContent = total;
             document.getElementById('reportPresent').textContent = present;
             document.getElementById('reportLate').textContent = late;
             document.getElementById('reportAbsent').textContent = absent;
-            document.getElementById('reportRate').textContent = total > 0 ? ((present / total) * 100).toFixed(1) + '%' : '0%';
+            document.getElementById('reportRate').textContent = total > 0 ? (((present + late) / total) * 100).toFixed(1) + '%' : '0%';
         }
 
         function renderTable(data) {
@@ -820,11 +820,11 @@
 
             let total = data.length, present = 0, late = 0, absent = 0;
             data.forEach(item => {
-                if (item.status.includes('Present')) present++;
-                else if (item.status.includes('Late')) late++;
+                if (item.status.includes('Late')) late++;
+                else if (item.status.includes('Present') || item.status === 'Checked In' || item.status === 'Checked Out') present++;
                 else absent++;
             });
-            const rate = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+            const rate = total > 0 ? (((present + late) / total) * 100).toFixed(1) : 0;
 
             const sorted = [...data].sort((a, b) => b.attendanceRate - a.attendanceRate);
             const top = sorted.slice(0, 10);

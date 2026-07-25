@@ -1727,7 +1727,8 @@ app.get('/api/admin/attendance/summary', async (req, res) => {
                 totalAbsent++;
             }
         });
-        res.json({ success: true, today: { date: kenyaToday, total: totalTeachers, present: totalPresent, late: totalLate, absent: totalAbsent, attendanceRate: totalTeachers > 0 ? ((totalPresent / totalTeachers) * 100).toFixed(2) : 0 } });
+        const attended = totalPresent + totalLate;
+        res.json({ success: true, today: { date: kenyaToday, total: totalTeachers, present: totalPresent, late: totalLate, absent: totalAbsent, attendanceRate: totalTeachers > 0 ? ((attended / totalTeachers) * 100).toFixed(2) : 0 } });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -3154,7 +3155,20 @@ app.post('/api/fix-times-add-3', async (req, res) => {
 // Visitor register views used by the receptionist and administrator pages.
 app.get('/api/visitors', async (req, res) => {
     try {
-        const visitors = await Visitor.find({}).sort({ checkIn: -1 });
+        let query = {};
+        if (req.query.date) {
+            const start = new Date(`${req.query.date}T00:00:00`);
+            if (Number.isNaN(start.getTime())) return res.status(400).json({ success: false, message: 'Date must use YYYY-MM-DD format' });
+            const end = new Date(start);
+            end.setDate(end.getDate() + 1);
+            query = { checkIn: { $gte: start, $lt: end } };
+        } else if (req.query.period === 'daily') {
+            const start = getKenyaDate();
+            const end = new Date(start);
+            end.setDate(end.getDate() + 1);
+            query = { checkIn: { $gte: start, $lt: end } };
+        }
+        const visitors = await Visitor.find(query).sort({ checkIn: -1 });
         res.json({ success: true, count: visitors.length, visitors });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
