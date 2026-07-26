@@ -3953,7 +3953,445 @@ app.get('/api/holiday-assignments/test', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+// ============================================
+// STAFF & VISITOR REPORTS - COMPLETE
+// ============================================
 
+// ============================================
+// STAFF ATTENDANCE REPORTS
+// ============================================
+app.get('/api/reports/staff/attendance', async (req, res) => {
+    try {
+        console.log('📡 GET /api/reports/staff/attendance');
+        const { period, date, department } = req.query;
+        
+        console.log(`   Period: ${period}, Date: ${date}, Department: ${department}`);
+        
+        const query = { isActive: true };
+        if (department) query.department = department;
+        
+        const teachers = await Teacher.find(query);
+        console.log(`   Found ${teachers.length} teachers`);
+        
+        const report = [];
+        let targetDate = null;
+        
+        if (date) {
+            targetDate = new Date(date);
+            targetDate.setHours(0, 0, 0, 0);
+        } else {
+            targetDate = getKenyaDate();
+        }
+        
+        console.log(`   Target date: ${targetDate}`);
+        
+        // Calculate week start and end
+        let weekStart = null;
+        let weekEnd = null;
+        let monthStart = null;
+        let monthEnd = null;
+        
+        if (period === 'weekly') {
+            weekStart = new Date(targetDate);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 7);
+            console.log(`   Week: ${weekStart} to ${weekEnd}`);
+        } else if (period === 'monthly') {
+            monthStart = new Date(targetDate);
+            monthStart.setDate(1);
+            monthStart.setHours(0, 0, 0, 0);
+            monthEnd = new Date(monthStart);
+            monthEnd.setMonth(monthEnd.getMonth() + 1);
+            console.log(`   Month: ${monthStart} to ${monthEnd}`);
+        }
+        
+        for (const teacher of teachers) {
+            let attendance = teacher.attendance || [];
+            
+            // Filter by date
+            if (period === 'daily' && targetDate) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    aDate.setHours(0, 0, 0, 0);
+                    return aDate.getTime() === targetDate.getTime();
+                });
+            } else if (period === 'weekly' && weekStart) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= weekStart && aDate < weekEnd;
+                });
+            } else if (period === 'monthly' && monthStart) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= monthStart && aDate < monthEnd;
+                });
+            }
+            
+            const totalDays = attendance.length;
+            const onTime = attendance.filter(a => a.isLate === false).length;
+            const late = attendance.filter(a => a.isLate === true).length;
+            
+            // Calculate absent days (if daily, check if they were present)
+            let absent = 0;
+            if (period === 'daily' && targetDate) {
+                absent = totalDays === 0 ? 1 : 0;
+            }
+            
+            report.push({
+                name: `${teacher.firstName} ${teacher.lastName}`,
+                employeeId: teacher.employeeId,
+                department: teacher.department || 'Teaching',
+                totalDays: totalDays || 0,
+                onTime: onTime || 0,
+                late: late || 0,
+                absent: absent || 0
+            });
+        }
+        
+        console.log(`📊 Report generated with ${report.length} entries`);
+        res.json({ success: true, report });
+    } catch (error) {
+        console.error('Error generating staff report:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET staff report PDF download
+app.get('/api/reports/staff/download-pdf', async (req, res) => {
+    try {
+        const { period, date, department } = req.query;
+        
+        const query = { isActive: true };
+        if (department) query.department = department;
+        
+        const teachers = await Teacher.find(query);
+        const report = [];
+        let targetDate = null;
+        
+        if (date) {
+            targetDate = new Date(date);
+            targetDate.setHours(0, 0, 0, 0);
+        } else {
+            targetDate = getKenyaDate();
+        }
+        
+        let weekStart = null, weekEnd = null, monthStart = null, monthEnd = null;
+        
+        if (period === 'weekly') {
+            weekStart = new Date(targetDate);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 7);
+        } else if (period === 'monthly') {
+            monthStart = new Date(targetDate);
+            monthStart.setDate(1);
+            monthStart.setHours(0, 0, 0, 0);
+            monthEnd = new Date(monthStart);
+            monthEnd.setMonth(monthEnd.getMonth() + 1);
+        }
+        
+        for (const teacher of teachers) {
+            let attendance = teacher.attendance || [];
+            
+            if (period === 'daily' && targetDate) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    aDate.setHours(0, 0, 0, 0);
+                    return aDate.getTime() === targetDate.getTime();
+                });
+            } else if (period === 'weekly' && weekStart) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= weekStart && aDate < weekEnd;
+                });
+            } else if (period === 'monthly' && monthStart) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= monthStart && aDate < monthEnd;
+                });
+            }
+            
+            const totalDays = attendance.length;
+            const onTime = attendance.filter(a => a.isLate === false).length;
+            const late = attendance.filter(a => a.isLate === true).length;
+            
+            let absent = 0;
+            if (period === 'daily' && targetDate) {
+                absent = totalDays === 0 ? 1 : 0;
+            }
+            
+            report.push({
+                name: `${teacher.firstName} ${teacher.lastName}`,
+                employeeId: teacher.employeeId,
+                department: teacher.department || 'Teaching',
+                totalDays: totalDays || 0,
+                onTime: onTime || 0,
+                late: late || 0,
+                absent: absent || 0
+            });
+        }
+        
+        const periodLabel = period === 'daily' ? 'Daily' : period === 'weekly' ? 'Weekly' : 'Monthly';
+        const pdfBuffer = await generateStaffReportPDF(report, `${periodLabel} Staff Attendance Report - ${date || 'Today'}`);
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="staff_attendance_report_${period}_${date || 'today'}.pdf"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generating staff PDF:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// VISITOR REPORTS
+// ============================================
+app.get('/api/reports/visitors', async (req, res) => {
+    try {
+        console.log('📡 GET /api/reports/visitors');
+        const { period, date, purpose } = req.query;
+        
+        console.log(`   Period: ${period}, Date: ${date}, Purpose: ${purpose}`);
+        
+        let query = {};
+        let targetDate = null;
+        
+        if (date) {
+            targetDate = new Date(date);
+            targetDate.setHours(0, 0, 0, 0);
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            query.checkIn = { $gte: targetDate, $lt: nextDay };
+        } else {
+            targetDate = getKenyaDate();
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            query.checkIn = { $gte: targetDate, $lt: nextDay };
+        }
+        
+        if (purpose) query.purpose = purpose;
+        
+        let visitors = await Visitor.find(query).sort({ checkIn: -1 });
+        console.log(`   Found ${visitors.length} visitors for date`);
+        
+        // Filter by period (weekly/monthly)
+        if (period === 'weekly' && targetDate) {
+            const weekStart = new Date(targetDate);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            visitors = visitors.filter(v => v.checkIn >= weekStart);
+            console.log(`   Filtered to ${visitors.length} for week`);
+        } else if (period === 'monthly' && targetDate) {
+            const monthStart = new Date(targetDate);
+            monthStart.setDate(1);
+            monthStart.setHours(0, 0, 0, 0);
+            visitors = visitors.filter(v => v.checkIn >= monthStart);
+            console.log(`   Filtered to ${visitors.length} for month`);
+        }
+        
+        const report = visitors.map(v => ({
+            fullName: `${v.firstName} ${v.lastName}`,
+            firstName: v.firstName,
+            lastName: v.lastName,
+            badgeNumber: v.badgeNumber,
+            purpose: v.purpose,
+            personToVisit: v.personToVisit,
+            checkIn: v.checkIn,
+            checkOut: v.checkOut,
+            status: v.status,
+            duration: v.checkOut ? Math.round((v.checkOut - v.checkIn) / 1000 / 60) : 0,
+            checkInTime: formatKenyaTime(v.checkIn),
+            checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
+        }));
+        
+        console.log(`📊 Visitor report generated with ${report.length} entries`);
+        res.json({ success: true, report });
+    } catch (error) {
+        console.error('Error generating visitor report:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET visitor report PDF download
+app.get('/api/reports/visitors/download-pdf', async (req, res) => {
+    try {
+        const { period, date, purpose } = req.query;
+        
+        let query = {};
+        let targetDate = null;
+        
+        if (date) {
+            targetDate = new Date(date);
+            targetDate.setHours(0, 0, 0, 0);
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            query.checkIn = { $gte: targetDate, $lt: nextDay };
+        } else {
+            targetDate = getKenyaDate();
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            query.checkIn = { $gte: targetDate, $lt: nextDay };
+        }
+        
+        if (purpose) query.purpose = purpose;
+        
+        let visitors = await Visitor.find(query).sort({ checkIn: -1 });
+        
+        if (period === 'weekly' && targetDate) {
+            const weekStart = new Date(targetDate);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            visitors = visitors.filter(v => v.checkIn >= weekStart);
+        } else if (period === 'monthly' && targetDate) {
+            const monthStart = new Date(targetDate);
+            monthStart.setDate(1);
+            monthStart.setHours(0, 0, 0, 0);
+            visitors = visitors.filter(v => v.checkIn >= monthStart);
+        }
+        
+        const report = visitors.map(v => ({
+            fullName: `${v.firstName} ${v.lastName}`,
+            firstName: v.firstName,
+            lastName: v.lastName,
+            badgeNumber: v.badgeNumber,
+            purpose: v.purpose,
+            personToVisit: v.personToVisit,
+            checkIn: v.checkIn,
+            checkOut: v.checkOut,
+            status: v.status,
+            duration: v.checkOut ? Math.round((v.checkOut - v.checkIn) / 1000 / 60) : 0,
+            checkInTime: formatKenyaTime(v.checkIn),
+            checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
+        }));
+        
+        // Generate PDF using visitor report function
+        const doc = new PDFDocument({ margin: 40, size: 'A4', landscape: true });
+        const chunks = [];
+        
+        doc.on('data', (chunk) => chunks.push(chunk));
+        doc.on('end', () => {
+            const pdfBuffer = Buffer.concat(chunks);
+            const periodLabel = period === 'daily' ? 'Daily' : period === 'weekly' ? 'Weekly' : 'Monthly';
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="visitor_report_${period}_${date || 'today'}.pdf"`);
+            res.setHeader('Content-Length', pdfBuffer.length);
+            res.send(pdfBuffer);
+        });
+        doc.on('error', (err) => {
+            console.error('PDF error:', err);
+            res.status(500).json({ success: false, message: 'Error generating PDF' });
+        });
+        
+        // Header
+        doc.fontSize(20)
+           .font('Helvetica-Bold')
+           .fillColor('#0A1628')
+           .text('CHANGARA STAR ACADEMY', { align: 'center' });
+        
+        doc.fontSize(12)
+           .font('Helvetica-Oblique')
+           .fillColor('#D4A017')
+           .text('"Assurance to Excellence"', { align: 'center' })
+           .moveDown(0.5);
+        
+        const periodLabel = period === 'daily' ? 'Daily' : period === 'weekly' ? 'Weekly' : 'Monthly';
+        doc.fontSize(14)
+           .font('Helvetica-Bold')
+           .fillColor('#0A1628')
+           .text(`VISITOR REPORT - ${periodLabel.toUpperCase()}`, { align: 'center' });
+        
+        doc.fontSize(10)
+           .font('Helvetica')
+           .fillColor('#6c757d')
+           .text(`Date: ${date || formatKenyaDate(new Date())}`, { align: 'center' })
+           .moveDown(1);
+        
+        // Table
+        const tableTop = doc.y;
+        const colWidths = [25, 130, 60, 80, 80, 70, 70, 60];
+        const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+        
+        doc.rect(40, tableTop, tableWidth, 22)
+           .fillColor('#0A1628')
+           .fill();
+        
+        const headers = ['#', 'Visitor', 'Badge', 'Purpose', 'Person', 'Check In', 'Check Out', 'Duration'];
+        let headerX = 45;
+        doc.fontSize(8)
+           .font('Helvetica-Bold')
+           .fillColor('white');
+        
+        headers.forEach((h, i) => {
+            const align = i === 0 || i === headers.length - 1 ? 'center' : 'left';
+            doc.text(h, headerX, tableTop + 5, { width: colWidths[i] - 5, align: align });
+            headerX += colWidths[i];
+        });
+        
+        let rowY = tableTop + 22;
+        report.slice(0, 20).forEach((v, index) => {
+            if (rowY > 500) { doc.addPage(); rowY = 50; }
+            
+            doc.rect(40, rowY, tableWidth, 18)
+               .fillColor(index % 2 === 0 ? '#f8f9fa' : 'white')
+               .fill();
+            
+            let xPos = 45;
+            doc.fontSize(7)
+               .font('Helvetica')
+               .fillColor('#0A1628');
+            
+            doc.text((index + 1).toString(), xPos, rowY + 3, { width: colWidths[0] - 5, align: 'center' });
+            xPos += colWidths[0];
+            
+            doc.text(v.fullName || 'Unknown', xPos, rowY + 3, { width: colWidths[1] - 5 });
+            xPos += colWidths[1];
+            
+            doc.text(v.badgeNumber || '-', xPos, rowY + 3, { width: colWidths[2] - 5 });
+            xPos += colWidths[2];
+            
+            doc.text(v.purpose || '-', xPos, rowY + 3, { width: colWidths[3] - 5 });
+            xPos += colWidths[3];
+            
+            doc.text(v.personToVisit || '-', xPos, rowY + 3, { width: colWidths[4] - 5 });
+            xPos += colWidths[4];
+            
+            doc.text(v.checkInTime || '-', xPos, rowY + 3, { width: colWidths[5] - 5 });
+            xPos += colWidths[5];
+            
+            doc.text(v.checkOutTime || '-', xPos, rowY + 3, { width: colWidths[6] - 5 });
+            xPos += colWidths[6];
+            
+            doc.text(v.duration > 0 ? v.duration + 'm' : '-', xPos, rowY + 3, { width: colWidths[7] - 5, align: 'center' });
+            
+            rowY += 18;
+        });
+        
+        // Summary
+        const totalVisitors = report.length;
+        const active = report.filter(v => v.status === 'Checked In').length;
+        const completed = report.filter(v => v.status === 'Checked Out').length;
+        const totalDuration = report.reduce((sum, v) => sum + (v.duration || 0), 0);
+        const avgDuration = totalVisitors > 0 ? Math.round(totalDuration / totalVisitors) : 0;
+        
+        doc.moveDown(1);
+        doc.fontSize(9)
+           .font('Helvetica-Bold')
+           .fillColor('#0A1628')
+           .text(`Total Visitors: ${totalVisitors}`, 40, rowY + 5)
+           .text(`Active: ${active}`, 200, rowY + 5)
+           .text(`Completed: ${completed}`, 350, rowY + 5)
+           .text(`Avg Duration: ${avgDuration} min`, 500, rowY + 5);
+        
+        doc.end();
+    } catch (error) {
+        console.error('Error generating visitor PDF:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 // ============================================
 // REGISTER STATIC FILES
 // ============================================
