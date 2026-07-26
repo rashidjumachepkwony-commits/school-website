@@ -164,6 +164,18 @@
             background: #D4A017;
             color: #0A1628;
         }
+        
+        .debug-info {
+            background: #1a1a2e;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 11px;
+            margin-top: 10px;
+            max-height: 100px;
+            overflow: auto;
+        }
 
         @media (max-width: 768px) {
             .container { padding: 15px; }
@@ -246,6 +258,7 @@
             <option value="Grade 6">Grade 6</option>
         </select>
         <button class="btn btn-primary" onclick="loadAssignments()"><i class="fas fa-sync"></i> Refresh</button>
+        <button class="btn btn-info" onclick="checkDatabase()"><i class="fas fa-database"></i> Check DB</button>
     </div>
 
     <div class="table-wrapper">
@@ -266,6 +279,9 @@
             </tbody>
         </table>
     </div>
+    
+    <!-- Debug Info -->
+    <div id="debugInfo" class="debug-info" style="display:none;"></div>
 </div>
 
 <script>
@@ -277,7 +293,7 @@
         el.className = 'alert ' + type;
         el.textContent = message;
         el.style.display = 'block';
-        setTimeout(() => { el.style.display = 'none'; }, 5000);
+        setTimeout(() => { el.style.display = 'none'; }, 8000);
     }
 
     function handleFileSelect(event) {
@@ -315,7 +331,6 @@
                 body: formData
             });
 
-            // Check if response is JSON
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
                 const text = await response.text();
@@ -326,14 +341,16 @@
             const data = await response.json();
 
             if (data.success) {
-                showAlert('✅ Assignment uploaded successfully!', 'success');
+                showAlert('✅ Assignment uploaded successfully! File stored at: ' + (data.assignment?.fileUrl || 'Cloudinary'), 'success');
                 document.getElementById('assignmentTitle').value = '';
                 document.getElementById('assignmentSubject').value = '';
                 document.getElementById('assignmentDescription').value = '';
                 document.getElementById('fileName').textContent = 'No file selected';
                 selectedFile = null;
                 document.getElementById('fileInput').value = '';
-                loadAssignments();
+                
+                // Wait a moment then reload
+                setTimeout(() => loadAssignments(), 1000);
             } else {
                 showAlert('❌ Error: ' + data.message, 'error');
             }
@@ -353,26 +370,32 @@
 
         try {
             const url = grade ? `/api/holiday-assignments/${encodeURIComponent(grade)}` : '/api/holiday-assignments/all';
+            console.log('📡 Fetching:', url);
+            
             const response = await fetch(url);
             
-            // Check if response is JSON
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Response was not JSON:', text.substring(0, 200));
                 throw new Error('Server returned HTML instead of JSON');
             }
             
             const data = await response.json();
+            console.log('📚 Data received:', data);
 
             if (data.success) {
                 allAssignments = data.assignments || [];
+                console.log('📚 Total assignments:', allAssignments.length);
+                
                 if (allAssignments.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="no-records">📭 No assignments found</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="no-records">📭 No assignments found. Upload one above!</td></tr>';
                     return;
                 }
 
                 let html = '';
                 allAssignments.forEach((a, index) => {
-                    const date = new Date(a.createdAt).toLocaleDateString();
+                    const date = a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'Unknown';
                     const fileIcon = a.fileType === 'pdf' ? 'fa-file-pdf' :
                                    a.fileType === 'doc' ? 'fa-file-word' :
                                    a.fileType === 'docx' ? 'fa-file-word' :
@@ -383,8 +406,9 @@
                                      a.fileType === 'doc' || a.fileType === 'docx' ? '#2b5797' :
                                      a.fileType === 'xls' || a.fileType === 'xlsx' ? '#217346' : '#17a2b8';
 
-                    // Use fileUrl from the database
                     const fileUrl = a.fileUrl || '';
+                    const isCloudinary = fileUrl.includes('cloudinary.com');
+                    const fileLabel = isCloudinary ? '☁️ ' + (a.fileName || 'File') : (a.fileName || 'File');
 
                     html += `
                         <tr>
@@ -392,11 +416,12 @@
                             <td><strong>${a.title}</strong></td>
                             <td><span class="badge-grade">${a.grade}</span></td>
                             <td>${a.subject || '-'}</td>
-                           <td>
-    ${a._id ? `<a href="/api/holiday-assignments/download/${a._id}" style="color:${fileColor};text-decoration:none;font-weight:600;">
-        <i class="fas ${fileIcon}"></i> ${a.fileName}
-    </a>` : `<span style="color:#999;">No file</span>`}
-</td>
+                            <td>
+                                ${a._id ? `<a href="/api/holiday-assignments/download/${a._id}" style="color:${fileColor};text-decoration:none;font-weight:600;" target="_blank">
+                                    <i class="fas ${fileIcon}"></i> ${fileLabel}
+                                    ${isCloudinary ? '<span style="font-size:10px;color:#0b5394;">☁️</span>' : ''}
+                                </a>` : `<span style="color:#999;">No file</span>`}
+                            </td>
                             <td style="font-size:12px;color:#666;">${date}</td>
                             <td>
                                 <button class="btn btn-danger btn-sm" onclick="deleteAssignment('${a._id}')">
@@ -408,7 +433,7 @@
                 });
                 tbody.innerHTML = html;
             } else {
-                tbody.innerHTML = '<tr><td colspan="7" class="no-records">❌ Error loading assignments</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="no-records">❌ Error loading assignments: ' + (data.message || 'Unknown error') + '</td></tr>';
             }
         } catch (error) {
             console.error('Error:', error);
@@ -439,9 +464,48 @@
         }
     }
 
+    async function checkDatabase() {
+        try {
+            const response = await fetch('/api/holiday-assignments/all');
+            const data = await response.json();
+            
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML = `
+                <strong>📊 Database Check:</strong><br>
+                Total assignments: ${data.assignments ? data.assignments.length : 0}<br>
+                Response: ${JSON.stringify(data, null, 2).substring(0, 500)}
+            `;
+            
+            showAlert('📊 Database has ' + (data.assignments ? data.assignments.length : 0) + ' assignments', 'info');
+        } catch (error) {
+            showAlert('❌ Error checking database: ' + error.message, 'error');
+        }
+    }
+
+    // Auto-refresh every 30 seconds to check if assignments disappear
+    let autoRefreshInterval;
+
+    function startAutoRefresh() {
+        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+        autoRefreshInterval = setInterval(() => {
+            console.log('🔄 Auto-refreshing assignments...');
+            loadAssignments();
+        }, 30000);
+    }
+
     // Load on page load
     document.addEventListener('DOMContentLoaded', function() {
         loadAssignments();
+        startAutoRefresh();
+        
+        // Also check on visibility change (when user comes back to tab)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                console.log('👁️ Tab visible, refreshing...');
+                loadAssignments();
+            }
+        });
     });
 </script>
 </body>
