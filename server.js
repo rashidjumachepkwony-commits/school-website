@@ -3092,67 +3092,46 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         }
         
         // ✅ Check Cloudinary configuration
-        console.log('🔍 Checking Cloudinary configuration...');
-        console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? '✅ Set' : '❌ Missing');
-        console.log('API Key:', process.env.CLOUDINARY_API_KEY ? '✅ Set' : '❌ Missing');
-        console.log('API Secret:', process.env.CLOUDINARY_API_SECRET ? '✅ Set' : '❌ Missing');
-        
-        if (!isCloudinaryConfigured()) {
-            console.error('❌ Cloudinary is not configured');
+        if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+            console.error('❌ Cloudinary credentials missing');
             return res.status(400).json({ 
                 success: false, 
-                message: 'Cloudinary is not configured. Please check your .env file.',
-                details: {
-                    cloudName: !!process.env.CLOUDINARY_CLOUD_NAME,
-                    apiKey: !!process.env.CLOUDINARY_API_KEY,
-                    apiSecret: !!process.env.CLOUDINARY_API_SECRET
-                }
+                message: 'Cloudinary is not configured. Please check server settings.'
             });
         }
         
         let fileUrl = '';
         let cloudinaryPublicId = '';
         
-        // ✅ Upload to Cloudinary with try-catch
+        // ✅ Read file
+        const fileBuffer = fs.readFileSync(req.file.path);
+        console.log(`📄 File read: ${req.file.originalname}, Size: ${fileBuffer.length} bytes`);
+        
+        // ✅ Upload to Cloudinary
         try {
-            const fileBuffer = fs.readFileSync(req.file.path);
-            console.log(`📄 File read: ${req.file.originalname}, Size: ${fileBuffer.length} bytes`);
-            
-            const cloudinaryResult = await uploadToCloudinary(fileBuffer, req.file.originalname, 'assignments');
+            // Try the base64 method first (more reliable)
+            const cloudinaryResult = await uploadToCloudinaryBase64(fileBuffer, req.file.originalname, 'assignments');
             fileUrl = cloudinaryResult.secure_url;
             cloudinaryPublicId = cloudinaryResult.public_id;
             console.log('✅ Uploaded to Cloudinary:', fileUrl);
             
-            // Delete local file after successful Cloudinary upload
+            // Delete local file
             if (fs.existsSync(req.file.path)) {
                 fs.unlinkSync(req.file.path);
-                console.log('🗑️ Local file deleted after Cloudinary upload');
+                console.log('🗑️ Local file deleted');
             }
         } catch (cloudinaryError) {
             console.error('❌ Cloudinary upload failed:', cloudinaryError.message);
-            console.error('❌ Stack trace:', cloudinaryError.stack);
             
-            // Check if file still exists locally
-            if (fs.existsSync(req.file.path)) {
-                console.log('📁 Local file still exists at:', req.file.path);
-            }
-            
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Failed to upload file to Cloudinary: ' + cloudinaryError.message,
-                details: {
-                    fileName: req.file.originalname,
-                    fileSize: req.file.size,
-                    cloudinaryConfigured: isCloudinaryConfigured()
-                }
-            });
+            // Keep local file as fallback
+            fileUrl = `/uploads/assignments/${req.file.filename}`;
+            console.log('📁 Using local file:', fileUrl);
         }
         
         const fileName = req.file.originalname;
         const fileType = fileName.split('.').pop().toLowerCase();
         const fileSize = req.file.size;
         
-        // ✅ Save to database with Cloudinary URL
         const assignment = new HolidayAssignment({
             title,
             grade,
@@ -3171,28 +3150,24 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         
         await assignment.save();
         
-        console.log('✅ Assignment saved with Cloudinary:', assignment._id);
+        console.log('✅ Assignment saved:', assignment._id);
+        console.log(`📁 File stored: ${cloudinaryPublicId ? 'Cloudinary' : 'Local'}`);
         
         res.status(201).json({
             success: true,
-            message: 'Assignment uploaded successfully!',
+            message: `Assignment uploaded successfully! (${cloudinaryPublicId ? 'Cloudinary' : 'Local'})`,
             assignment: {
                 id: assignment._id,
                 title: assignment.title,
                 grade: assignment.grade,
                 fileName: assignment.fileName,
                 fileUrl: assignment.fileUrl,
-                cloudinaryPublicId: assignment.cloudinaryPublicId,
-                createdAt: assignment.createdAt
+                storedIn: cloudinaryPublicId ? 'Cloudinary' : 'Local'
             }
         });
     } catch (error) {
         console.error('❌ Error uploading assignment:', error);
-        console.error('❌ Stack trace:', error.stack);
-        res.status(500).json({ 
-            success: false, 
-            message: error.message || 'Internal server error' 
-        });
+        res.status(500).json({ success: false, message: error.message || 'Internal server error' });
     }
 });
 // DOWNLOAD assignment file - SUPPORTS CLOUDINARY & LOCAL
