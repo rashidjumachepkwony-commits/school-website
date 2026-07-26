@@ -9,7 +9,14 @@ services:
         value: 5000
       - key: MONGODB_URI
         value: mongodb+srv://rashidjumachepkwony_db_user:78VGp5cxssNEgNDb@school-cluster.rwq5xx8.mongodb.net/schoolDB
-    disk:
-      name: uploads
-      mountPath: /opt/render/project/src/uploads
-      sizeGB: 1
+      - key: CLOUDINARY_CLOUD_NAME
+        value: your_cloud_name
+      - key: CLOUDINARY_API_KEY
+        value: your_api_key
+      - key: CLOUDINARY_API_SECRET
+        value: your_api_secret
+    # Remove the disk section - you don't need it anymore!
+    # disk:
+    #   name: uploads
+    #   mountPath: /opt/render/project/src/uploads
+    #   sizeGB: 1

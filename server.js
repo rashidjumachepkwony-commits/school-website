@@ -9,6 +9,19 @@ const PDFDocument = require('pdfkit');
 const crypto = require('crypto');
 const logger = require('./logger');
 
+// ============================================
+// CLOUDINARY CONFIGURATION
+// ============================================
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+console.log('✅ Cloudinary configured');
+
 // Load environment variables
 dotenv.config();
 
@@ -38,8 +51,6 @@ process.env.TZ = 'Africa/Nairobi';
 // HELPER FUNCTIONS
 // ============================================
 function getKenyaTime() {
-    // A Date is an absolute point in time. Adding three hours here stores an
-    // incorrect timestamp and caused every attendance/visitor record to drift.
     return new Date();
 }
 
@@ -144,6 +155,42 @@ function calculateStudentOverall(assessments) {
         performanceLevel: performanceLevel,
         overallRating: getPerformanceRating(performanceLevel)
     };
+}
+
+// ============================================
+// CLOUDINARY UPLOAD HELPER
+// ============================================
+async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: folder,
+                resource_type: 'auto',
+                public_id: `${Date.now()}_${filename.replace(/\.[^.]+$/, '')}`,
+                use_filename: true,
+                unique_filename: true
+            },
+            (error, result) => {
+                if (error) {
+                    console.error('Cloudinary upload error:', error);
+                    reject(error);
+                } else {
+                    console.log('✅ Cloudinary upload success:', result.secure_url);
+                    resolve(result);
+                }
+            }
+        );
+        uploadStream.end(fileBuffer);
+    });
+}
+
+// ============================================
+// FUNCTION TO CHECK IF CLOUDINARY IS CONFIGURED
+// ============================================
+function isCloudinaryConfigured() {
+    return process.env.CLOUDINARY_CLOUD_NAME && 
+           process.env.CLOUDINARY_API_KEY && 
+           process.env.CLOUDINARY_API_SECRET;
 }
 
 // ============================================
@@ -860,54 +907,6 @@ async function fixPastRecords() {
     // Kept as a no-op for backward compatibility with old clients. Timestamps
     // are stored as UTC instants and must never be shifted in bulk.
     return { fixed: 0 };
-
-    try {
-        console.log('🔄 Fixing past records time...');
-        let totalFixed = 0;
-        const teachers = await Teacher.find({});
-        for (const teacher of teachers) {
-            let changed = false;
-            for (const record of teacher.attendance) {
-                if (record.checkIn) {
-                    const original = new Date(record.checkIn);
-                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
-                    record.checkIn = kenyaTime;
-                    changed = true;
-                }
-                if (record.checkOut) {
-                    const original = new Date(record.checkOut);
-                    const kenyaTime = new Date(original.getTime() + (3 * 60 * 60 * 1000));
-                    record.checkOut = kenyaTime;
-                    changed = true;
-                }
-            }
-            if (changed) {
-                await teacher.save();
-                totalFixed++;
-            }
-        }
-        const visitors = await Visitor.find({});
-        for (const visitor of visitors) {
-            let changed = false;
-            if (visitor.checkIn) {
-                const original = new Date(visitor.checkIn);
-                visitor.checkIn = new Date(original.getTime() + (3 * 60 * 60 * 1000));
-                changed = true;
-            }
-            if (visitor.checkOut) {
-                const original = new Date(visitor.checkOut);
-                visitor.checkOut = new Date(original.getTime() + (3 * 60 * 60 * 1000));
-                changed = true;
-            }
-            if (changed) {
-                await visitor.save();
-                totalFixed++;
-            }
-        }
-        console.log(`✅ Time fix completed! Fixed ${totalFixed} records.`);
-    } catch (error) {
-        console.error('❌ Error fixing records:', error);
-    }
 }
 
 // ============================================
@@ -1220,6 +1219,7 @@ const holidayAssignmentSchema = new mongoose.Schema({
     fileType: { type: String, default: 'pdf' },
     fileSize: { type: Number, default: 0 },
     uploadedBy: { type: String, default: 'Admin' },
+    cloudinaryPublicId: { type: String, default: '' },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
@@ -2399,46 +2399,6 @@ app.get('/api/assessments/search', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-// ONE-TIME FIX: Fix assignment file paths
-app.get('/api/fix-assignment-paths', async (req, res) => {
-    try {
-        const assignments = await HolidayAssignment.find({});
-        let fixed = 0;
-        let missing = 0;
-        
-        for (const a of assignments) {
-            // Extract just the filename from the URL
-            const filename = path.basename(a.fileUrl);
-            
-            // Check if file exists in uploads/assignments/
-            const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
-            
-            if (fs.existsSync(filePath)) {
-                // File exists, update the URL to be correct
-                const newUrl = '/uploads/assignments/' + filename;
-                if (a.fileUrl !== newUrl) {
-                    a.fileUrl = newUrl;
-                    await a.save();
-                    fixed++;
-                    console.log(`✅ Fixed: ${a.title} -> ${newUrl}`);
-                }
-            } else {
-                missing++;
-                console.log(`❌ File missing: ${a.title} - ${filename}`);
-            }
-        }
-        
-        res.json({ 
-            success: true, 
-            message: `Fixed ${fixed} assignments, ${missing} files missing`,
-            fixed: fixed,
-            missing: missing,
-            total: assignments.length
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
 
 // ============================================
 // DOWNLOAD STUDENT REPORT
@@ -2606,7 +2566,7 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
 });
 
 // ============================================
-// HOLIDAY ASSIGNMENTS - COMPLETE WORKING CODE
+// HOLIDAY ASSIGNMENTS WITH CLOUDINARY SUPPORT
 // ============================================
 
 // GET all assignments
@@ -2646,7 +2606,7 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
     }
 });
 
-// POST - Upload new assignment
+// POST - Upload new assignment with Cloudinary or local storage
 app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
     try {
         console.log('📤 Upload request received');
@@ -2663,12 +2623,33 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             return res.status(400).json({ success: false, message: 'Please upload a file' });
         }
         
-        const fileUrl = `/uploads/assignments/${req.file.filename}`;
+        let fileUrl = `/uploads/assignments/${req.file.filename}`;
+        let cloudinaryPublicId = '';
+        
+        // Try Cloudinary upload if configured
+        if (isCloudinaryConfigured()) {
+            try {
+                const fileBuffer = fs.readFileSync(req.file.path);
+                const cloudinaryResult = await uploadToCloudinary(fileBuffer, req.file.originalname, 'assignments');
+                fileUrl = cloudinaryResult.secure_url;
+                cloudinaryPublicId = cloudinaryResult.public_id;
+                console.log('✅ Uploaded to Cloudinary:', fileUrl);
+                
+                // Delete local file after Cloudinary upload
+                if (fs.existsSync(req.file.path)) {
+                    fs.unlinkSync(req.file.path);
+                }
+            } catch (cloudinaryError) {
+                console.error('Cloudinary upload failed, using local file:', cloudinaryError.message);
+                // Keep local file as fallback
+            }
+        }
+        
         const fileName = req.file.originalname;
         const fileType = fileName.split('.').pop().toLowerCase();
         const fileSize = req.file.size;
         
-        console.log('📁 Saving to:', fileUrl);
+        console.log('📁 File URL:', fileUrl);
         
         const assignment = new HolidayAssignment({
             title,
@@ -2680,6 +2661,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             fileType,
             fileSize,
             uploadedBy: req.body.uploadedBy || 'Admin',
+            cloudinaryPublicId,
             createdAt: new Date(),
             updatedAt: new Date()
         });
@@ -2699,7 +2681,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
     }
 });
 
-// DOWNLOAD assignment file
+// DOWNLOAD assignment file (supports both Cloudinary and local)
 app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     try {
         console.log('📥 Download request for:', req.params.id);
@@ -2712,6 +2694,13 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
         console.log('📄 Assignment found:', assignment.title);
         console.log('📁 File URL:', assignment.fileUrl);
         
+        // Check if it's a Cloudinary URL
+        if (assignment.fileUrl && assignment.fileUrl.includes('cloudinary.com')) {
+            console.log('📁 Redirecting to Cloudinary URL');
+            return res.redirect(assignment.fileUrl);
+        }
+        
+        // Local file download
         const filename = path.basename(assignment.fileUrl);
         const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
         
@@ -2731,7 +2720,7 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     }
 });
 
-// DELETE - Delete assignment
+// DELETE - Delete assignment (removes from Cloudinary if applicable)
 app.delete('/api/holiday-assignments/:id', async (req, res) => {
     try {
         const assignment = await HolidayAssignment.findById(req.params.id);
@@ -2739,12 +2728,23 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Assignment not found' });
         }
         
+        // Delete from Cloudinary if it was uploaded there
+        if (assignment.cloudinaryPublicId && isCloudinaryConfigured()) {
+            try {
+                await cloudinary.uploader.destroy(assignment.cloudinaryPublicId);
+                console.log('🗑️ Deleted from Cloudinary:', assignment.cloudinaryPublicId);
+            } catch (cloudinaryError) {
+                console.error('Cloudinary delete error:', cloudinaryError);
+            }
+        }
+        
+        // Delete local file if it exists
         const filename = path.basename(assignment.fileUrl);
         const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
         
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
-            console.log('🗑️ File deleted:', filePath);
+            console.log('🗑️ Local file deleted:', filePath);
         }
         
         await HolidayAssignment.findByIdAndDelete(req.params.id);
@@ -3100,7 +3100,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 // ============================================
 app.get('/api/test', (req, res) => {
     const kenyaNow = getKenyaTime();
-    res.json({ success: true, message: 'Changara Star Academy is running!', data: { server: 'Online', kenyaTime: kenyaNow.toLocaleString(), kenyaTimeFormatted: formatKenyaFullTime(kenyaNow), timestamp: new Date().toISOString() } });
+    res.json({ success: true, message: 'Changara Star Academy is running!', data: { server: 'Online', kenyaTime: kenyaNow.toLocaleString(), kenyaTimeFormatted: formatKenyaFullTime(kenyaNow), timestamp: new Date().toISOString(), cloudinaryConfigured: isCloudinaryConfigured() } });
 });
 
 // ============================================
@@ -3108,48 +3108,6 @@ app.get('/api/test', (req, res) => {
 // ============================================
 app.post('/api/fix-times-add-3', async (req, res) => {
     return res.status(410).json({ success: false, message: 'Bulk time shifting has been retired to protect record accuracy.' });
-
-    try {
-        console.log('Adding 3 hours to all attendance times...');
-        let totalFixed = 0;
-        const teachers = await Teacher.find({});
-        for (const teacher of teachers) {
-            let changed = false;
-            for (const record of teacher.attendance) {
-                if (record.checkIn) {
-                    const date = new Date(record.checkIn);
-                    date.setHours(date.getHours() + 3);
-                    record.checkIn = date;
-                    changed = true;
-                }
-                if (record.checkOut) {
-                    const date = new Date(record.checkOut);
-                    date.setHours(date.getHours() + 3);
-                    record.checkOut = date;
-                    changed = true;
-                }
-                if (record.checkIn) {
-                    const hours = record.checkIn.getHours();
-                    const minutes = record.checkIn.getMinutes();
-                    record.isLate = (hours > 7 || (hours === 7 && minutes > 0));
-                    record.status = record.isLate ? 'Late' : 'Present';
-                }
-                if (record.checkIn && record.checkOut) {
-                    const diff = (record.checkOut - record.checkIn) / (1000 * 60 * 60);
-                    record.hoursWorked = parseFloat(Math.max(0, diff).toFixed(2));
-                }
-            }
-            if (changed) {
-                await teacher.save();
-                totalFixed++;
-                console.log(`Fixed ${teacher.firstName} ${teacher.lastName}`);
-            }
-        }
-        res.json({ success: true, message: `Added 3 hours to ${totalFixed} teachers' records`, fixed: totalFixed });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
 });
 
 // Visitor register views used by the receptionist and administrator pages.
@@ -3212,6 +3170,110 @@ app.delete('/api/visitors/:id', async (req, res) => {
     }
 });
 
+// ============================================
+// FIX ASSIGNMENT PATHS (ONE-TIME MIGRATION)
+// ============================================
+app.get('/api/fix-assignment-paths', async (req, res) => {
+    try {
+        const assignments = await HolidayAssignment.find({});
+        let fixed = 0;
+        let missing = 0;
+        
+        for (const a of assignments) {
+            // Check if it's a Cloudinary URL - skip if it is
+            if (a.fileUrl && a.fileUrl.includes('cloudinary.com')) {
+                continue;
+            }
+            
+            // Extract just the filename from the URL
+            const filename = path.basename(a.fileUrl);
+            
+            // Check if file exists in uploads/assignments/
+            const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
+            
+            if (fs.existsSync(filePath)) {
+                // File exists, update the URL to be correct
+                const newUrl = '/uploads/assignments/' + filename;
+                if (a.fileUrl !== newUrl) {
+                    a.fileUrl = newUrl;
+                    await a.save();
+                    fixed++;
+                    console.log(`✅ Fixed: ${a.title} -> ${newUrl}`);
+                }
+            } else {
+                missing++;
+                console.log(`❌ File missing: ${a.title} - ${filename}`);
+            }
+        }
+        
+        res.json({ 
+            success: true, 
+            message: `Fixed ${fixed} assignments, ${missing} files missing`,
+            fixed: fixed,
+            missing: missing,
+            total: assignments.length
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// MIGRATE LOCAL ASSIGNMENTS TO CLOUDINARY
+// ============================================
+app.post('/api/migrate-to-cloudinary', async (req, res) => {
+    try {
+        if (!isCloudinaryConfigured()) {
+            return res.status(400).json({ success: false, message: 'Cloudinary is not configured' });
+        }
+        
+        const assignments = await HolidayAssignment.find({
+            $or: [
+                { fileUrl: { $not: { $regex: /cloudinary\.com/ } } },
+                { cloudinaryPublicId: { $exists: false } }
+            ]
+        });
+        
+        let migrated = 0;
+        let failed = 0;
+        
+        for (const a of assignments) {
+            try {
+                const filename = path.basename(a.fileUrl);
+                const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
+                
+                if (fs.existsSync(filePath)) {
+                    const fileBuffer = fs.readFileSync(filePath);
+                    const cloudinaryResult = await uploadToCloudinary(fileBuffer, a.fileName || filename, 'assignments');
+                    
+                    a.fileUrl = cloudinaryResult.secure_url;
+                    a.cloudinaryPublicId = cloudinaryResult.public_id;
+                    await a.save();
+                    
+                    migrated++;
+                    console.log(`✅ Migrated: ${a.title} -> ${a.fileUrl}`);
+                } else {
+                    failed++;
+                    console.log(`❌ File not found: ${a.title} - ${filename}`);
+                }
+            } catch (error) {
+                failed++;
+                console.error(`❌ Migration failed for ${a.title}:`, error.message);
+            }
+        }
+        
+        res.json({
+            success: true,
+            message: `Migrated ${migrated} assignments to Cloudinary, ${failed} failed`,
+            migrated: migrated,
+            failed: failed,
+            total: assignments.length
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // Register static files and the fallback after all API routes so they cannot
 // intercept valid API requests.
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -3237,6 +3299,7 @@ app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log(`Kenya Time: ${kenyaNow.toLocaleString()}`);
     console.log(`Test API: http://localhost:${PORT}/api/test`);
+    console.log(`Cloudinary: ${isCloudinaryConfigured() ? '✅ Configured' : '❌ Not configured'}`);
     console.log('='.repeat(50));
     console.log('Server started successfully!');
 });
