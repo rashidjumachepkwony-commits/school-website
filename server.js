@@ -90,6 +90,21 @@ function calculatePerformanceLevel(percentage) {
     return 'Below Expectation';
 }
 
+// ============================================
+// PERFORMANCE RUBRIC - UPDATED
+// ============================================
+// Exceeding Expectations (EE): 75-100%
+// Meeting Expectations (ME): 41-74%
+// Approaching Expectations (AE): 21-40%
+// Below Expectations (BE): 0-20%
+
+function calculatePerformanceLevel(percentage) {
+    if (percentage >= 75) return 'Exceeding Expectation';
+    if (percentage >= 41) return 'Meeting Expectation';
+    if (percentage >= 21) return 'Approaching Expectation';
+    return 'Below Expectation';
+}
+
 function getPerformanceColor(level) {
     const colors = {
         'Exceeding Expectation': '#1a8a3f',
@@ -132,7 +147,6 @@ function calculateAssessmentPerformance(score, maxScore) {
         color: getPerformanceColor(level)
     };
 }
-
 function calculateStudentOverall(assessments) {
     if (!assessments || assessments.length === 0) {
         return { totalScore: 0, averageScore: 0, performanceLevel: 'Approaching Expectation', overallRating: 2 };
