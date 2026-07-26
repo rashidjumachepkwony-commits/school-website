@@ -2703,6 +2703,55 @@ app.get('/api/holiday-assignments/stats', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+// PUT - Update assignment
+app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) => {
+    try {
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+
+        const { title, grade, subject, description, isActive } = req.body;
+        
+        if (title) assignment.title = title;
+        if (grade) assignment.grade = grade;
+        if (subject !== undefined) assignment.subject = subject;
+        if (description !== undefined) assignment.description = description;
+        if (isActive !== undefined) assignment.isActive = isActive === 'true';
+
+        // Handle file upload
+        if (req.file) {
+            // Delete old file from Cloudinary if exists
+            if (assignment.cloudinaryPublicId && isCloudinaryConfigured()) {
+                try {
+                    await cloudinary.uploader.destroy(assignment.cloudinaryPublicId);
+                } catch (e) {}
+            }
+            
+            // Upload new file
+            const fileBuffer = fs.readFileSync(req.file.path);
+            const cloudinaryResult = await uploadToCloudinary(fileBuffer, req.file.originalname, 'assignments');
+            
+            assignment.fileUrl = cloudinaryResult.secure_url;
+            assignment.cloudinaryPublicId = cloudinaryResult.public_id;
+            assignment.fileName = req.file.originalname;
+            assignment.fileType = req.file.originalname.split('.').pop().toLowerCase();
+            assignment.fileSize = req.file.size;
+            
+            if (fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+            }
+        }
+
+        assignment.updatedAt = new Date();
+        await assignment.save();
+
+        res.json({ success: true, message: 'Assignment updated successfully!', assignment });
+    } catch (error) {
+        console.error('Error updating assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 // ============================================
 // CLERK DASHBOARD API ROUTES

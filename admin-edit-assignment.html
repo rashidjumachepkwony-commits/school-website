@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Assignments - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #D4A017;
+        }
+        .header h1 { color: #0A1628; font-size: 28px; }
+        .header h1 i { color: #D4A017; margin-right: 10px; }
+        .header .btn-home {
+            padding: 10px 25px;
+            background: #0A1628;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .header .btn-home:hover { background: #1a2a4a; transform: scale(1.02); }
+        .header .btn-upload {
+            padding: 10px 25px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .header .btn-upload:hover { background: #1e7e34; transform: scale(1.02); }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+            font-weight: 600;
+        }
+        .alert.success { display: block; background: #d4edda; color: #155724; border: 2px solid #0b8f34; }
+        .alert.error { display: block; background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
+        .alert.info { display: block; background: #d1ecf1; color: #0c5460; border: 2px solid #0b5394; }
+
+        .search-section {
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #e8ecf1;
+            margin-bottom: 25px;
+        }
+        .search-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+        .search-grid .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .search-grid select, .search-grid input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            font-family: inherit;
+        }
+        .search-grid select:focus, .search-grid input:focus {
+            border-color: #D4A017;
+            outline: none;
+        }
+
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .btn:hover { transform: scale(1.02); }
+        .btn-primary { background: #D4A017; color: #0A1628; }
+        .btn-primary:hover { background: #f5c842; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-warning { background: #ffc107; color: #0A1628; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-sm { padding: 4px 12px; font-size: 12px; }
+        .btn-lg { padding: 12px 35px; font-size: 16px; }
+
+        .table-wrapper { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table th { background: #0A1628; color: white; padding: 10px 12px; text-align: left; }
+        table td { padding: 8px 12px; border-bottom: 1px solid #e8ecf1; }
+        table tr:nth-child(even) { background: #fafbfc; }
+        table tr:hover { background: #f0f4ff; }
+        .no-records { text-align: center; padding: 30px; color: #999; }
+
+        .badge-grade {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #D4A017;
+            color: #0A1628;
+        }
+        .badge-active {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            background: #28a745;
+            color: white;
+        }
+        .badge-inactive {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            background: #dc3545;
+            color: white;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e8ecf1;
+            border-top: 3px solid #D4A017;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            overflow: auto;
+            padding: 20px;
+        }
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            max-width: 700px;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #D4A017;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 { color: #0A1628; }
+        .modal-header .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+            background: none;
+            border: none;
+        }
+        .modal-header .close:hover { color: #dc3545; }
+
+        .modal-body .form-group {
+            margin-bottom: 15px;
+        }
+        .modal-body .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .modal-body .form-group input,
+        .modal-body .form-group select,
+        .modal-body .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            font-family: inherit;
+        }
+        .modal-body .form-group input:focus,
+        .modal-body .form-group select:focus,
+        .modal-body .form-group textarea:focus {
+            border-color: #D4A017;
+            outline: none;
+        }
+        .modal-body .form-group textarea { resize: vertical; min-height: 60px; }
+        .modal-body .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #e8ecf1;
+            margin-top: 20px;
+        }
+
+        .file-info {
+            background: #f8f9fc;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #e8ecf1;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+        .file-info i { margin-right: 5px; }
+        .file-info a { color: #0d6efd; text-decoration: none; }
+        .file-info a:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .search-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 10px; text-align: center; }
+            .modal-content { margin: 20px 10px; padding: 20px; }
+            .modal-body .form-row { grid-template-columns: 1fr; }
+            table { font-size: 11px; }
+            table th, table td { padding: 6px 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-file-alt"></i> Holiday Assignments</h1>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="admin-dashboard.html" class="btn-home"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            <a href="admin-holiday-assignments.html" class="btn-upload"><i class="fas fa-upload"></i> Upload New</a>
+        </div>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <h3><i class="fas fa-search"></i> Filter Assignments</h3>
+        <div class="search-grid">
+            <div class="form-group">
+                <label>🎓 Grade</label>
+                <select id="filterGrade" onchange="loadAssignments()">
+                    <option value="">All Grades</option>
+                    <option value="Playgroup">Playgroup</option>
+                    <option value="PP1">PP1</option>
+                    <option value="PP2">PP2</option>
+                    <option value="Grade 1">Grade 1</option>
+                    <option value="Grade 2">Grade 2</option>
+                    <option value="Grade 3">Grade 3</option>
+                    <option value="Grade 4">Grade 4</option>
+                    <option value="Grade 5">Grade 5</option>
+                    <option value="Grade 6">Grade 6</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📝 Search Title</label>
+                <input type="text" id="filterTitle" placeholder="Search by title..." onkeyup="loadAssignments()">
+            </div>
+            <div class="form-group">
+                <label>📊 Status</label>
+                <select id="filterStatus" onchange="loadAssignments()">
+                    <option value="">All</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive (Trash)</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="loadAssignments()"><i class="fas fa-sync"></i> Refresh</button>
+        </div>
+    </div>
+
+    <!-- Assignments Table -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Grade</th>
+                    <th>Subject</th>
+                    <th>File</th>
+                    <th>Status</th>
+                    <th>Uploaded</th>
+                    <th style="text-align:center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="assignmentsBody">
+                <tr><td colspan="8" class="no-records"><span class="loading-spinner"></span> Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- VIEW MODAL -->
+<!-- ============================================ -->
+<div id="viewModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-eye" style="color:#17a2b8;"></i> Assignment Details</h2>
+            <button class="close" onclick="closeModal('viewModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="viewModalBody">
+            <div style="text-align:center;padding:20px;"><span class="loading-spinner"></span> Loading...</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('viewModal')">Close</button>
+            <button class="btn btn-primary" onclick="editFromView()"><i class="fas fa-edit"></i> Edit</button>
+            <button class="btn btn-danger" onclick="deleteFromView()"><i class="fas fa-trash"></i> Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- EDIT MODAL -->
+<!-- ============================================ -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-edit" style="color:#D4A017;"></i> Edit Assignment</h2>
+            <button class="close" onclick="closeModal('editModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>📝 Title *</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>🎓 Grade *</label>
+                        <select id="editGrade">
+                            <option value="Playgroup">Playgroup</option>
+                            <option value="PP1">PP1</option>
+                            <option value="PP2">PP2</option>
+                            <option value="Grade 1">Grade 1</option>
+                            <option value="Grade 2">Grade 2</option>
+                            <option value="Grade 3">Grade 3</option>
+                            <option value="Grade 4">Grade 4</option>
+                            <option value="Grade 5">Grade 5</option>
+                            <option value="Grade 6">Grade 6</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>📚 Subject</label>
+                        <input type="text" id="editSubject" placeholder="e.g., Mathematics">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>📋 Description</label>
+                    <textarea id="editDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>📄 File</label>
+                    <div class="file-info" id="editFileInfo">
+                        <i class="fas fa-file-alt"></i> Current file: <span id="editFileName">None</span>
+                        <br>
+                        <a href="#" id="editFileLink" target="_blank"><i class="fas fa-download"></i> Download current file</a>
+                    </div>
+                    <div style="margin-top:10px;padding:15px;border:2px dashed #ccc;border-radius:8px;text-align:center;">
+                        <p><i class="fas fa-upload" style="font-size:24px;color:#28a745;"></i></p>
+                        <p style="font-size:12px;color:#666;">Upload a new file to replace the current one (optional)</p>
+                        <input type="file" id="editFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>📊 Status</label>
+                    <select id="editStatus">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive (Trash)</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+            <button class="btn btn-success" onclick="saveAssignment()"><i class="fas fa-save"></i> Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentViewId = null;
+    let currentEditId = null;
+    let allAssignments = [];
+
+    // ============================================
+    // ALERT FUNCTIONS
+    // ============================================
+    function showAlert(message, type) {
+        const el = document.getElementById('alert');
+        el.className = 'alert ' + type;
+        el.textContent = message;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 6000);
+    }
+
+    // ============================================
+    // MODAL FUNCTIONS
+    // ============================================
+    function openModal(id) {
+        document.getElementById(id).style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    // ============================================
+    // LOAD ASSIGNMENTS
+    // ============================================
+    async function loadAssignments() {
+        const grade = document.getElementById('filterGrade').value;
+        const title = document.getElementById('filterTitle').value.toLowerCase().trim();
+        const status = document.getElementById('filterStatus').value;
+        const tbody = document.getElementById('assignmentsBody');
+        tbody.innerHTML = '<tr><td colspan="8" class="no-records"><span class="loading-spinner"></span> Loading...</td></tr>';
+
+        try {
+            const url = grade ? `/api/holiday-assignments/${encodeURIComponent(grade)}` : '/api/holiday-assignments/all';
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.success) {
+                allAssignments = data.assignments || [];
+                
+                // Filter by title
+                if (title) {
+                    allAssignments = allAssignments.filter(a => 
+                        a.title.toLowerCase().includes(title)
+                    );
+                }
+                
+                // Filter by status
+                if (status === 'active') {
+                    allAssignments = allAssignments.filter(a => a.isActive !== false);
+                } else if (status === 'inactive') {
+                    allAssignments = allAssignments.filter(a => a.isActive === false);
+                }
+
+                if (allAssignments.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="no-records">📭 No assignments found</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                allAssignments.forEach((a, index) => {
+                    const date = a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'Unknown';
+                    const isActive = a.isActive !== false;
+                    const fileIcon = a.fileType === 'pdf' ? 'fa-file-pdf' :
+                                   a.fileType === 'doc' ? 'fa-file-word' :
+                                   a.fileType === 'docx' ? 'fa-file-word' :
+                                   a.fileType === 'xls' ? 'fa-file-excel' :
+                                   a.fileType === 'xlsx' ? 'fa-file-excel' :
+                                   'fa-file-alt';
+                    const fileColor = a.fileType === 'pdf' ? '#dc3545' :
+                                     a.fileType === 'doc' || a.fileType === 'docx' ? '#2b5797' :
+                                     a.fileType === 'xls' || a.fileType === 'xlsx' ? '#217346' : '#17a2b8';
+
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${a.title}</strong></td>
+                            <td><span class="badge-grade">${a.grade}</span></td>
+                            <td>${a.subject || '-'}</td>
+                            <td>
+                                <a href="/api/holiday-assignments/download/${a._id}" style="color:${fileColor};text-decoration:none;font-weight:600;" target="_blank">
+                                    <i class="fas ${fileIcon}"></i> ${a.fileName}
+                                </a>
+                            </td>
+                            <td>
+                                <span class="${isActive ? 'badge-active' : 'badge-inactive'}">
+                                    ${isActive ? '✅ Active' : '🗑️ Trash'}
+                                </span>
+                            </td>
+                            <td style="font-size:12px;color:#666;">${date}</td>
+                            <td style="text-align:center;white-space:nowrap;">
+                                <button class="btn btn-info btn-sm" onclick="viewAssignment('${a._id}')" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-warning btn-sm" onclick="editAssignment('${a._id}')" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteAssignment('${a._id}')" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } else {
+                tbody.innerHTML = '<tr><td colspan="8" class="no-records">❌ Error loading assignments</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            tbody.innerHTML = '<tr><td colspan="8" class="no-records">❌ Error: ' + error.message + '</td></tr>';
+        }
+    }
+
+    // ============================================
+    // VIEW ASSIGNMENT
+    // ============================================
+    async function viewAssignment(id) {
+        currentViewId = id;
+        const body = document.getElementById('viewModalBody');
+        body.innerHTML = '<div style="text-align:center;padding:20px;"><span class="loading-spinner"></span> Loading...</div>';
+        openModal('viewModal');
+
+        try {
+            const response = await fetch(`/api/holiday-assignments/id/${id}`);
+            const data = await response.json();
+
+            if (data.success) {
+                const a = data.assignment;
+                const date = a.createdAt ? new Date(a.createdAt).toLocaleString() : 'Unknown';
+                const isActive = a.isActive !== false;
+                const fileIcon = a.fileType === 'pdf' ? 'fa-file-pdf' : 'fa-file-alt';
+                const fileColor = a.fileType === 'pdf' ? '#dc3545' : '#17a2b8';
+
+                body.innerHTML = `
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                        <div><strong>Title:</strong> ${a.title}</div>
+                        <div><strong>Grade:</strong> <span class="badge-grade">${a.grade}</span></div>
+                        <div><strong>Subject:</strong> ${a.subject || 'N/A'}</div>
+                        <div><strong>Status:</strong> <span class="${isActive ? 'badge-active' : 'badge-inactive'}">${isActive ? 'Active' : 'Inactive'}</span></div>
+                        <div><strong>File Name:</strong> ${a.fileName}</div>
+                        <div><strong>File Type:</strong> ${a.fileType || 'N/A'}</div>
+                        <div><strong>File Size:</strong> ${a.fileSize ? (a.fileSize / 1024).toFixed(2) + ' KB' : 'N/A'}</div>
+                        <div><strong>Uploaded By:</strong> ${a.uploadedBy || 'Admin'}</div>
+                        <div><strong>Created:</strong> ${date}</div>
+                        <div><strong>Cloudinary:</strong> ${a.cloudinaryPublicId ? '✅ Yes' : '❌ No'}</div>
+                        <div style="grid-column:1/-1;">
+                            <strong>Description:</strong><br>
+                            ${a.description || 'No description provided.'}
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <strong>File:</strong><br>
+                            <a href="/api/holiday-assignments/download/${a._id}" style="color:${fileColor};font-weight:600;" target="_blank">
+                                <i class="fas ${fileIcon}"></i> Download ${a.fileName}
+                            </a>
+                            ${a.cloudinaryPublicId ? `<br><small style="color:#666;">☁️ Stored in Cloudinary</small>` : ''}
+                        </div>
+                    </div>
+                    <div style="margin-top:15px;padding:10px;background:#f8f9fc;border-radius:8px;border:1px solid #e8ecf1;font-size:12px;color:#666;">
+                        <strong>ID:</strong> ${a._id}
+                    </div>
+                `;
+            } else {
+                body.innerHTML = '<div style="text-align:center;padding:20px;color:#dc3545;">❌ Error loading assignment details</div>';
+            }
+        } catch (error) {
+            body.innerHTML = `<div style="text-align:center;padding:20px;color:#dc3545;">❌ Error: ${error.message}</div>`;
+        }
+    }
+
+    // ============================================
+    // EDIT ASSIGNMENT
+    // ============================================
+    async function editAssignment(id) {
+        currentEditId = id;
+        openModal('editModal');
+
+        try {
+            const response = await fetch(`/api/holiday-assignments/id/${id}`);
+            const data = await response.json();
+
+            if (data.success) {
+                const a = data.assignment;
+                document.getElementById('editId').value = a._id;
+                document.getElementById('editTitle').value = a.title || '';
+                document.getElementById('editGrade').value = a.grade || '';
+                document.getElementById('editSubject').value = a.subject || '';
+                document.getElementById('editDescription').value = a.description || '';
+                document.getElementById('editFileName').textContent = a.fileName || 'None';
+                document.getElementById('editFileLink').href = `/api/holiday-assignments/download/${a._id}`;
+                document.getElementById('editStatus').value = a.isActive !== false ? 'true' : 'false';
+                document.getElementById('editFile').value = '';
+            } else {
+                showAlert('Error loading assignment for editing', 'error');
+                closeModal('editModal');
+            }
+        } catch (error) {
+            showAlert('Error: ' + error.message, 'error');
+            closeModal('editModal');
+        }
+    }
+
+    // ============================================
+    // SAVE ASSIGNMENT (Update)
+    // ============================================
+    async function saveAssignment() {
+        const id = document.getElementById('editId').value;
+        const title = document.getElementById('editTitle').value.trim();
+        const grade = document.getElementById('editGrade').value;
+        const subject = document.getElementById('editSubject').value.trim();
+        const description = document.getElementById('editDescription').value.trim();
+        const isActive = document.getElementById('editStatus').value === 'true';
+        const fileInput = document.getElementById('editFile');
+
+        if (!title) {
+            showAlert('❌ Title is required', 'error');
+            return;
+        }
+        if (!grade) {
+            showAlert('❌ Grade is required', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('grade', grade);
+        formData.append('subject', subject);
+        formData.append('description', description);
+        formData.append('isActive', isActive ? 'true' : 'false');
+        if (fileInput.files.length > 0) {
+            formData.append('file', fileInput.files[0]);
+        }
+
+        const saveBtn = document.querySelector('#editModal .btn-success');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
+        saveBtn.disabled = true;
+
+        try {
+            const response = await fetch(`/api/holiday-assignments/${id}`, {
+                method: 'PUT',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showAlert('✅ Assignment updated successfully!', 'success');
+                closeModal('editModal');
+                loadAssignments();
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            showAlert('❌ Error: ' + error.message, 'error');
+        } finally {
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
+        }
+    }
+
+    // ============================================
+    // DELETE ASSIGNMENT
+    // ============================================
+    async function deleteAssignment(id) {
+        const confirmed = confirm('⚠️ Are you sure you want to delete this assignment?\n\nThis action cannot be undone!');
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch(`/api/holiday-assignments/${id}?confirm=yes`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showAlert('✅ Assignment deleted successfully!', 'success');
+                loadAssignments();
+                if (document.getElementById('viewModal').style.display === 'block') {
+                    closeModal('viewModal');
+                }
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            showAlert('❌ Error: ' + error.message, 'error');
+        }
+    }
+
+    // ============================================
+    // HELPER FUNCTIONS FOR MODAL BUTTONS
+    // ============================================
+    function editFromView() {
+        if (currentViewId) {
+            closeModal('viewModal');
+            setTimeout(() => editAssignment(currentViewId), 300);
+        }
+    }
+
+    function deleteFromView() {
+        if (currentViewId) {
+            closeModal('viewModal');
+            setTimeout(() => deleteAssignment(currentViewId), 300);
+        }
+    }
+
+    // ============================================
+    // LOAD ON PAGE LOAD
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAssignments();
+        
+        // Auto-refresh every 60 seconds
+        setInterval(loadAssignments, 60000);
+    });
+</script>
+</body>
+</html>
