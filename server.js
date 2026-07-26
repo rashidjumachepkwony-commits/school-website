@@ -223,46 +223,6 @@ async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') 
 }
 
 // ============================================
-// CLOUDINARY UPLOAD USING BASE64 - ADDED
-// ============================================
-async function uploadToCloudinaryBase64(fileBuffer, filename, folder = 'assignments') {
-    try {
-        const base64File = fileBuffer.toString('base64');
-        const dataUri = `data:application/octet-stream;base64,${base64File}`;
-        
-        console.log(`📤 Uploading to Cloudinary (base64): ${filename}`);
-        
-        const result = await new Promise((resolve, reject) => {
-            cloudinary.uploader.upload(
-                dataUri,
-                {
-                    folder: folder,
-                    resource_type: 'auto',
-                    public_id: `${Date.now()}_${filename.replace(/\.[^.]+$/, '')}`,
-                    use_filename: true,
-                    unique_filename: true,
-                    timeout: 60000
-                },
-                (error, result) => {
-                    if (error) {
-                        console.error('❌ Cloudinary upload error:', error);
-                        reject(error);
-                    } else {
-                        console.log('✅ Cloudinary upload success:', result.secure_url);
-                        resolve(result);
-                    }
-                }
-            );
-        });
-        
-        return result;
-    } catch (error) {
-        console.error('❌ Cloudinary upload failed:', error.message);
-        throw error;
-    }
-}
-
-// ============================================
 // FUNCTION TO CHECK IF CLOUDINARY IS CONFIGURED
 // ============================================
 function isCloudinaryConfigured() {
@@ -1496,20 +1456,17 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model('Student', studentSchema);
 
-// Subject Config Schema - UPDATED RUBRIC
+// ============================================
+// SUBJECT CONFIG SCHEMA - FIXED
+// ============================================
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
     period: { type: String, default: '' },
     subjects: [{ name: { type: String, required: true }, max: { type: Number, required: true } }],
     rankLevels: { type: [String], default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] },
-    // ✅ UPDATED RUBRIC VALUES
-    rubric: {
-        exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
-        meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
-        approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
-        below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
-    },
+    // ✅ FIXED: Use Mixed type for rubric
+    rubric: { type: mongoose.Schema.Types.Mixed, default: {} },
     updatedAt: { type: Date, default: Date.now }
 }, { autoIndex: false, collection: 'subjectconfigs_new' });
 
@@ -1777,654 +1734,149 @@ app.post('/api/teacher/register', async (req, res) => {
     }
 });
 
-app.post('/api/teacher/checkin', async (req, res) => {
-    try {
-        const { employeeId, pin } = req.body;
-        const teacher = await Teacher.findOne({ employeeId });
-        if (!teacher) {
-            return res.status(404).json({ success: false, message: 'Staff not found. Please contact admin.' });
-        }
-        if (teacher.password !== pin) {
-            return res.status(401).json({ success: false, message: 'Invalid PIN. Please try again.' });
-        }
-        const kenyaNow = getKenyaTime();
-        const kenyaToday = getKenyaDate();
-        const kenyaHour = getKenyaHour();
-        const dayOfWeek = kenyaNow.getDay();
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-            return res.status(400).json({ success: false, message: 'Weekend! Check-in is only available on weekdays (Monday-Friday).' });
-        }
-        const existingAttendance = teacher.attendance.find(a => {
-            const aDate = new Date(a.date);
-            aDate.setHours(0, 0, 0, 0);
-            return aDate.getTime() === kenyaToday.getTime();
-        });
-        if (existingAttendance) {
-            return res.status(400).json({ success: false, message: 'You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn) });
-        }
-        if (kenyaHour >= 17) {
-            return res.status(400).json({ success: false, message: 'Check-in is not allowed after 5:00 PM. Please try again tomorrow.' });
-        }
-        const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
-        const status = isLate ? 'Late' : 'Present';
-        teacher.attendance.push({
-            date: kenyaToday,
-            checkIn: kenyaNow,
-            status: status,
-            location: 'School',
-            isLate: isLate,
-            notes: isLate ? 'Late check-in' : 'On-time check-in'
-        });
-        await teacher.save();
-        const message = isLate ? 'Check-in successful! (You are LATE - after 7:00 AM)' : 'Check-in successful! (On time)';
-        const formattedTime = formatKenyaTime(kenyaNow);
-        res.json({
-            success: true,
-            message: message,
-            checkInTime: kenyaNow,
-            checkInTimeFormatted: formattedTime,
-            isLate: isLate,
-            status: status,
-            teacher: { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId }
-        });
-    } catch (error) {
-        console.error('Check-in error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
+// ============================================
+// SUBJECT CONFIG ROUTES - FIXED RUBRIC VALUES
+// ============================================
 
-app.post('/api/teacher/checkout', async (req, res) => {
+app.get('/api/assessments/subjects/:grade', async (req, res) => {
     try {
-        const { employeeId, pin } = req.body;
-        const teacher = await Teacher.findOne({ employeeId });
-        if (!teacher) {
-            return res.status(404).json({ success: false, message: 'Staff not found. Please contact admin.' });
+        const grade = req.params.grade;
+        const type = req.query.type || 'monthly';
+        const period = req.query.period || '';
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        let config = await collection.findOne({ grade: grade, type: type, period: period });
+        if (!config && period) {
+            config = await collection.findOne({ grade: grade, type: type, period: '' });
         }
-        if (teacher.password !== pin) {
-            return res.status(401).json({ success: false, message: 'Invalid PIN. Please try again.' });
-        }
-        const kenyaNow = getKenyaTime();
-        const kenyaToday = getKenyaDate();
-        const todayAttendance = teacher.attendance.find(a => {
-            const aDate = new Date(a.date);
-            aDate.setHours(0, 0, 0, 0);
-            return aDate.getTime() === kenyaToday.getTime();
-        });
-        if (!todayAttendance) {
-            return res.status(400).json({ success: false, message: 'No check-in found for today. Please check in first.' });
-        }
-        if (todayAttendance.checkOut) {
-            return res.status(400).json({ success: false, message: 'You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut) });
-        }
-        todayAttendance.checkOut = kenyaNow;
-        todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
-        const checkInTime = new Date(todayAttendance.checkIn);
-        const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
-        todayAttendance.hoursWorked = parseFloat(hoursWorked);
-        todayAttendance.status = todayAttendance.isLate ? 'Late' : 'Present';
-        await teacher.save();
-        res.json({
-            success: true,
-            message: 'Check-out successful!',
-            checkOutTime: kenyaNow,
-            checkOutTimeFormatted: formatKenyaTime(kenyaNow),
-            hoursWorked: hoursWorked,
-            teacher: { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId }
-        });
-    } catch (error) {
-        console.error('Check-out error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/teacher/attendance/today', async (req, res) => {
-    try {
-        const kenyaToday = getKenyaDate();
-        const teachers = await Teacher.find({ isActive: true });
-        const todayAttendance = teachers.map(teacher => {
-            const todayRecord = teacher.attendance.find(a => {
-                const aDate = new Date(a.date);
-                aDate.setHours(0, 0, 0, 0);
-                return aDate.getTime() === kenyaToday.getTime();
-            });
-            let status = 'Absent';
-            let checkInFormatted = null;
-            let checkOutFormatted = null;
-            if (todayRecord) {
-                if (todayRecord.checkOut) {
-                    status = 'Checked Out';
-                    checkOutFormatted = formatKenyaTime(todayRecord.checkOut);
-                } else {
-                    status = 'Checked In';
-                }
-                if (todayRecord.checkIn) {
-                    checkInFormatted = formatKenyaTime(todayRecord.checkIn);
-                }
-            }
-            return {
-                name: `${teacher.firstName} ${teacher.lastName}`,
-                employeeId: teacher.employeeId,
-                department: teacher.department,
-                status: status,
-                checkIn: todayRecord ? todayRecord.checkIn : null,
-                checkOut: todayRecord ? todayRecord.checkOut : null,
-                checkInTime: checkInFormatted,
-                checkOutTime: checkOutFormatted,
-                isLate: todayRecord ? todayRecord.isLate : false,
-                hoursWorked: todayRecord ? todayRecord.hoursWorked : 0
+        if (!config) {
+            const defaultSubjects = getDefaultSubjects(grade, type);
+            config = {
+                grade: grade,
+                type: type,
+                period: period || '',
+                subjects: defaultSubjects,
+                rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+                // ✅ UPDATED RUBRIC VALUES
+                rubric: {
+                    exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
+                    meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
+                    approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
+                    below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+                },
+                updatedAt: new Date()
             };
-        });
-        res.json({ success: true, date: kenyaToday, total: todayAttendance.length, attendance: todayAttendance });
+            await collection.insertOne(config);
+            console.log('Created default config for:', grade, type, period);
+        }
+        res.json({ success: true, config });
     } catch (error) {
-        console.error('Error loading attendance:', error);
+        console.error('GET error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-app.get('/api/teacher/attendance/:employeeId', async (req, res) => {
+app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     try {
-        const teacher = await Teacher.findOne({ employeeId: req.params.employeeId });
-        if (!teacher) {
-            return res.status(404).json({ success: false, message: 'Teacher not found' });
+        const grade = req.params.grade;
+        const { type, period } = req.query;
+        if (!type) {
+            return res.status(400).json({ success: false, message: 'Type is required' });
         }
-        const totalDays = teacher.attendance.length;
-        const presentDays = teacher.attendance.filter(a => a.status === 'Present' || a.status === 'Late').length;
-        const lateDays = teacher.attendance.filter(a => a.isLate === true).length;
-        const absentDays = teacher.attendance.filter(a => a.status === 'Absent').length;
-        res.json({
-            success: true,
-            teacher: { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId, department: teacher.department },
-            stats: { totalDays, presentDays, lateDays, absentDays, attendanceRate: totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : 0 },
-            attendance: teacher.attendance.sort((a, b) => b.date - a.date)
-        });
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        const query = { grade: grade, type: type };
+        if (period) query.period = period;
+        const result = await collection.deleteMany(query);
+        console.log(`Deleted ${result.deletedCount} configs for ${grade} (${type})`);
+        res.json({ success: true, message: `Deleted config for ${grade} (${type})`, deleted: result.deletedCount });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.log('Delete error:', error);
+        res.json({ success: true, message: `Config for ${grade} cleared`, deleted: 0 });
     }
 });
 
-// ============================================
-// ADMIN TEACHER MANAGEMENT
-// ============================================
-
-app.get('/api/teachers', async (req, res) => {
+app.put('/api/assessments/subjects/:grade', async (req, res) => {
     try {
-        const teachers = await Teacher.find({ isActive: true }).select('-password');
-        res.json({ success: true, count: teachers.length, teachers });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/teachers/:id', async (req, res) => {
-    try {
-        const teacher = await Teacher.findById(req.params.id).select('-password');
-        if (!teacher) {
-            return res.status(404).json({ success: false, message: 'Teacher not found' });
+        const grade = req.params.grade;
+        const { type, period, subjects, rankLevels, rubric } = req.body;
+        if (!grade) {
+            return res.status(400).json({ success: false, message: 'Grade is required' });
         }
-        res.json({ success: true, teacher });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.put('/api/teachers/:id', async (req, res) => {
-    try {
-        const { firstName, lastName, email, employeeId, phoneNumber, department } = req.body;
-        const teacher = await Teacher.findById(req.params.id);
-        if (!teacher) {
-            return res.status(404).json({ success: false, message: 'Teacher not found' });
+        if (!type) {
+            return res.status(400).json({ success: false, message: 'Type is required' });
         }
-        const existing = await Teacher.findOne({ _id: { $ne: req.params.id }, $or: [{ email }, { employeeId }] });
-        if (existing) {
-            return res.status(400).json({ success: false, message: 'Email or Employee ID already in use by another teacher' });
+        if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
+            return res.status(400).json({ success: false, message: 'Subjects array is required' });
         }
-        teacher.firstName = firstName || teacher.firstName;
-        teacher.lastName = lastName || teacher.lastName;
-        teacher.email = email || teacher.email;
-        teacher.employeeId = employeeId || teacher.employeeId;
-        teacher.phoneNumber = phoneNumber || teacher.phoneNumber;
-        teacher.department = department || teacher.department;
-        await teacher.save();
-        res.json({ success: true, message: 'Teacher updated successfully!', teacher: { id: teacher._id, firstName: teacher.firstName, lastName: teacher.lastName, employeeId: teacher.employeeId, email: teacher.email, department: teacher.department } });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.delete('/api/teachers/:id', async (req, res) => {
-    try {
-        const teacher = await Teacher.findByIdAndDelete(req.params.id);
-        if (!teacher) {
-            return res.status(404).json({ success: false, message: 'Teacher not found' });
+        for (const s of subjects) {
+            if (!s.name || typeof s.name !== 'string' || s.name.trim() === '') {
+                return res.status(400).json({ success: false, message: 'Each subject must have a name' });
+            }
+            if (typeof s.max !== 'number' || s.max < 1) {
+                return res.status(400).json({ success: false, message: 'Each subject must have a max score > 0' });
+            }
         }
-        res.json({ success: true, message: 'Teacher deleted successfully!' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.post('/api/teachers/:id/reset-pin', async (req, res) => {
-    try {
-        const { pin } = req.body;
-        const teacher = await Teacher.findById(req.params.id);
-        if (!teacher) {
-            return res.status(404).json({ success: false, message: 'Teacher not found' });
-        }
-        if (!pin || pin.length < 4 || pin.length > 6) {
-            return res.status(400).json({ success: false, message: 'PIN must be 4-6 digits' });
-        }
-        teacher.password = pin;
-        await teacher.save();
-        res.json({ success: true, message: 'PIN reset successfully!' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// ADMIN ATTENDANCE ROUTES
-// ============================================
-
-app.get('/api/admin/attendance/all', async (req, res) => {
-    try {
-        const teachers = await Teacher.find({ isActive: true });
-        const allAttendance = teachers.map(teacher => ({
-            id: teacher._id,
-            name: `${teacher.firstName} ${teacher.lastName}`,
-            employeeId: teacher.employeeId,
-            department: teacher.department,
-            email: teacher.email,
-            phoneNumber: teacher.phoneNumber,
-            totalDays: teacher.attendance.length,
-            attendance: teacher.attendance.sort((a, b) => b.date - a.date)
+        const cleanedSubjects = subjects.map(s => ({
+            name: s.name.trim(),
+            max: s.max
         }));
-        res.json({ success: true, count: allAttendance.length, teachers: allAttendance });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/admin/attendance/summary', async (req, res) => {
-    try {
-        const teachers = await Teacher.find({ isActive: true });
-        const kenyaToday = getKenyaDate();
-        let totalTeachers = teachers.length;
-        let totalPresent = 0;
-        let totalLate = 0;
-        let totalAbsent = 0;
-        teachers.forEach(teacher => {
-            const todayRecord = teacher.attendance.find(a => {
-                const aDate = new Date(a.date);
-                aDate.setHours(0, 0, 0, 0);
-                return aDate.getTime() === kenyaToday.getTime();
-            });
-            if (todayRecord) {
-                if (todayRecord.isLate) {
-                    totalLate++;
-                } else {
-                    totalPresent++;
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        const query = { grade: grade, type: type };
+        if (period) query.period = period;
+        await collection.deleteMany(query);
+        const newConfig = {
+            grade: grade,
+            type: type,
+            period: period || '',
+            subjects: cleanedSubjects,
+            rankLevels: rankLevels || ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+            // ✅ UPDATED RUBRIC VALUES
+            rubric: rubric || {
+                exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
+                meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
+                approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
+                below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+            },
+            updatedAt: new Date()
+        };
+        await collection.insertOne(newConfig);
+        console.log(`Inserted new config for ${grade} (${type}) ${period ? 'period: '+period : ''}`);
+        
+        const filter = { grade: grade, type: type };
+        if (period) filter.period = period;
+        const students = await StudentAssessment.find(filter);
+        for (const student of students) {
+            let updated = false;
+            for (const assessment of student.assessments) {
+                const subjectConfig = cleanedSubjects.find(s => s.name === assessment.subject);
+                if (subjectConfig && assessment.maxScore !== subjectConfig.max) {
+                    assessment.maxScore = subjectConfig.max;
+                    updated = true;
                 }
-            } else {
-                totalAbsent++;
+                const perf = calculateAssessmentPerformance(assessment.score, assessment.maxScore);
+                assessment.percentage = perf.percentage;
+                assessment.performanceLevel = perf.level;
+                assessment.rating = perf.rating;
+                updated = true;
             }
-        });
-        const attended = totalPresent + totalLate;
-        res.json({ success: true, today: { date: kenyaToday, total: totalTeachers, present: totalPresent, late: totalLate, absent: totalAbsent, attendanceRate: totalTeachers > 0 ? ((attended / totalTeachers) * 100).toFixed(2) : 0 } });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// VISITOR ROUTES
-// ============================================
-
-app.post('/api/visitor/checkin', async (req, res) => {
-    try {
-        const { firstName, lastName, phoneNumber, idNumber, email, purpose, purposeDetails, personToVisit, department, hostName, notes } = req.body;
-        if (!firstName || !lastName || !phoneNumber || !idNumber || !purpose || !personToVisit) {
-            return res.status(400).json({ success: false, message: 'Please provide all required fields' });
-        }
-        const badgeNumber = `V${Date.now().toString().slice(-6)}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
-        const kenyaNow = getKenyaTime();
-        const visitor = new Visitor({
-            firstName: firstName.trim(), lastName: lastName.trim(), phoneNumber: phoneNumber.trim(), idNumber: idNumber.trim(),
-            email: email || '', purpose, purposeDetails: purposeDetails || '', personToVisit: personToVisit.trim(),
-            department: department || '', hostName: hostName || '', notes: notes || '', badgeNumber, checkIn: kenyaNow, status: 'Checked In'
-        });
-        await visitor.save();
-        res.status(201).json({ success: true, message: 'Visitor checked in successfully!', visitor: { id: visitor._id, fullName: visitor.fullName, badgeNumber: visitor.badgeNumber, checkIn: visitor.checkIn, checkInTime: formatKenyaTime(visitor.checkIn) } });
-    } catch (error) {
-        console.error('Visitor check-in error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
-    try {
-        const visitor = await Visitor.findOne({ badgeNumber: req.params.badgeNumber });
-        if (!visitor) {
-            return res.status(404).json({ success: false, message: 'Visitor not found' });
-        }
-        if (visitor.status === 'Checked Out') {
-            return res.status(400).json({ success: false, message: 'Visitor already checked out' });
-        }
-        const kenyaNow = getKenyaTime();
-        visitor.checkOut = kenyaNow;
-        visitor.status = 'Checked Out';
-        await visitor.save();
-        const duration = ((visitor.checkOut - visitor.checkIn) / 1000 / 60).toFixed(0);
-        res.json({ success: true, message: 'Visitor checked out successfully!', visitor: { id: visitor._id, fullName: visitor.fullName, badgeNumber: visitor.badgeNumber, checkOut: visitor.checkOut, checkOutTime: formatKenyaTime(visitor.checkOut), duration: duration + ' minutes' } });
-    } catch (error) {
-        console.error('Visitor check-out error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/visitors/today', async (req, res) => {
-    try {
-        const kenyaToday = getKenyaDate();
-        const tomorrow = new Date(kenyaToday);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const visitors = await Visitor.find({ checkIn: { $gte: kenyaToday, $lt: tomorrow } }).sort({ checkIn: -1 });
-        const active = visitors.filter(v => v.status === 'Checked In');
-        const completed = visitors.filter(v => v.status === 'Checked Out');
-        res.json({ success: true, date: kenyaToday, total: visitors.length, active: active.length, completed: completed.length, visitors: visitors.map(v => ({ ...v.toObject(), checkInTime: formatKenyaTime(v.checkIn), checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null })) });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// STUDENT MANAGEMENT API ROUTES
-// ============================================
-
-app.get('/api/students', async (req, res) => {
-    try {
-        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
-        res.json({ success: true, students });
-    } catch (error) {
-        console.error('Error fetching students:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/students/:id', async (req, res) => {
-    try {
-        const student = await Student.findOne({ studentId: req.params.id });
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
-        }
-        res.json({ success: true, student });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.post('/api/students', async (req, res) => {
-    try {
-        const { name, grade, gender, type, guardian, pin } = req.body;
-        if (!name || !grade || !gender) {
-            return res.status(400).json({ success: false, message: 'Name, Grade, and Gender are required' });
-        }
-        const studentId = await generateStudentId();
-        const student = new Student({
-            studentId,
-            name,
-            grade,
-            gender,
-            type: type || 'Day Scholar',
-            guardian: guardian || '',
-            pin: pin || '1234',
-            paid: 0,
-            isActive: true
-        });
-        await student.save();
-        res.status(201).json({
-            success: true,
-            message: `Student ${studentId} added successfully!`,
-            student
-        });
-    } catch (error) {
-        console.error('Error adding student:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.put('/api/students/:id', async (req, res) => {
-    try {
-        const { name, grade, gender, type, guardian, pin } = req.body;
-        const student = await Student.findOne({ studentId: req.params.id });
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
-        }
-        if (name) student.name = name;
-        if (grade) student.grade = grade;
-        if (gender) student.gender = gender;
-        if (type) student.type = type;
-        if (guardian) student.guardian = guardian;
-        if (pin) student.pin = pin;
-        student.updatedAt = new Date();
-        await student.save();
-        res.json({
-            success: true,
-            message: `Student ${student.studentId} updated successfully!`,
-            student
-        });
-    } catch (error) {
-        console.error('Error updating student:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.delete('/api/students/:id', async (req, res) => {
-    try {
-        const student = await Student.findOne({ studentId: req.params.id });
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
-        }
-        student.isActive = false;
-        await student.save();
-        res.json({
-            success: true,
-            message: `Student ${student.studentId} deleted successfully!`
-        });
-    } catch (error) {
-        console.error('Error deleting student:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.delete('/api/students/clear', async (req, res) => {
-    try {
-        await Student.deleteMany({});
-        res.json({ success: true, message: 'All students cleared successfully!' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.post('/api/student/login', async (req, res) => {
-    try {
-        const { studentId, pin } = req.body;
-        if (!studentId || !pin) {
-            return res.status(400).json({
-                success: false,
-                message: 'Student ID and PIN are required'
-            });
-        }
-        const student = await Student.findOne({ studentId, isActive: true });
-        if (!student) {
-            return res.status(404).json({
-                success: false,
-                message: 'Student not found'
-            });
-        }
-        if (student.pin !== pin) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid PIN'
-            });
-        }
-        res.json({
-            success: true,
-            message: 'Login successful',
-            student: {
-                studentId: student.studentId,
-                name: student.name,
-                grade: student.grade,
-                gender: student.gender,
-                type: student.type,
-                guardian: student.guardian
+            if (updated) {
+                const overall = calculateStudentOverall(student.assessments);
+                student.totalScore = overall.totalScore;
+                student.averageScore = overall.averageScore;
+                student.performanceLevel = overall.performanceLevel;
+                student.overallRating = overall.overallRating;
+                await student.save();
             }
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// STUDENT FEE MANAGEMENT ROUTES
-// ============================================
-
-app.get('/api/students/fees', async (req, res) => {
-    try {
-        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
-        const studentFees = students.map(student => {
-            const feeData = getFeeStructure(student.grade, student.type);
-            const paid = student.paid || 0;
-            const totalFees = feeData.total || 0;
-            const balance = totalFees - paid;
-            return {
-                id: student.studentId,
-                name: student.name,
-                grade: student.grade,
-                gender: student.gender,
-                studentType: student.type,
-                isBoarding: student.type === 'Boarder',
-                totalFees: totalFees,
-                paid: paid,
-                balance: balance,
-                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
-            };
-        });
-        const totalStudents = studentFees.length;
-        const totalDayScholars = studentFees.filter(s => s.studentType === 'Day Scholar').length;
-        const totalBoarders = studentFees.filter(s => s.studentType === 'Boarder').length;
-        const totalPaid = studentFees.reduce((sum, s) => sum + s.paid, 0);
-        const totalBalance = studentFees.reduce((sum, s) => sum + s.balance, 0);
-        res.json({
-            success: true,
-            students: studentFees,
-            totalStudents,
-            totalDayScholars,
-            totalBoarders,
-            totalPaid,
-            totalBalance
-        });
-    } catch (error) {
-        console.error('Error fetching student fees:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/students/fees/:studentId', async (req, res) => {
-    try {
-        const student = await Student.findOne({ studentId: req.params.studentId, isActive: true });
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        const feeData = getFeeStructure(student.grade, student.type);
-        const paid = student.paid || 0;
-        const totalFees = feeData.total || 0;
-        const balance = totalFees - paid;
-        res.json({
-            success: true,
-            student: {
-                id: student.studentId,
-                name: student.name,
-                grade: student.grade,
-                gender: student.gender,
-                studentType: student.type,
-                isBoarding: student.type === 'Boarder'
-            },
-            fees: {
-                total: totalFees,
-                paid: paid,
-                balance: balance,
-                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
-            },
-            feeBreakdown: feeData
-        });
+        res.json({ success: true, message: 'Subject configuration saved successfully!', config: newConfig });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('Save error:', error);
+        res.status(500).json({ success: false, message: 'Error saving subjects: ' + error.message });
     }
 });
 
-app.post('/api/students/payment', async (req, res) => {
-    try {
-        const { studentId, amount, category, method, reference, notes } = req.body;
-        if (!studentId || !amount || amount <= 0) {
-            return res.status(400).json({ success: false, message: 'Student ID and valid amount are required' });
-        }
-        const student = await Student.findOne({ studentId, isActive: true });
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
-        }
-        student.paid = (student.paid || 0) + amount;
-        student.updatedAt = new Date();
-        await student.save();
-        res.json({
-            success: true,
-            message: `Payment of KES ${amount.toLocaleString()} recorded for ${student.name}`,
-            student: {
-                id: student.studentId,
-                name: student.name,
-                paid: student.paid,
-                balance: getFeeStructure(student.grade, student.type).total - student.paid
-            }
-        });
-    } catch (error) {
-        console.error('Error recording payment:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// STUDENT ASSESSMENT ROUTES
-// ============================================
-
-app.get('/api/assessments/students/:grade', async (req, res) => {
-    try {
-        const { grade } = req.params;
-        const students = await Student.find({ grade: grade, isActive: true }).sort({ studentId: 1 });
-        res.json({
-            success: true,
-            students: students.map(s => ({
-                studentId: s.studentId,
-                name: s.name,
-                grade: s.grade,
-                gender: s.gender,
-                type: s.type
-            }))
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.get('/api/assessments/student/:studentId', async (req, res) => {
-    try {
-        const { studentId } = req.params;
-        const assessment = await StudentAssessment.findOne({ studentId });
-        if (!assessment) {
-            return res.status(404).json({ success: false, message: 'Assessment not found for this student' });
-        }
-        res.json({ success: true, assessment });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
 // ============================================
 // ASSESSMENT ROUTES
 // ============================================
