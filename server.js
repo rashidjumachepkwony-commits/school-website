@@ -158,32 +158,50 @@ function calculateStudentOverall(assessments) {
 }
 
 // ============================================
-// CLOUDINARY UPLOAD HELPER
+// CLOUDINARY UPLOAD HELPER - FIXED
 // ============================================
 async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') {
     return new Promise((resolve, reject) => {
+        // Log the upload attempt
+        console.log(`📤 Uploading to Cloudinary: ${filename}`);
+        console.log(`📁 Folder: ${folder}`);
+        console.log(`📦 File size: ${fileBuffer.length} bytes`);
+        
         const uploadStream = cloudinary.uploader.upload_stream(
             {
                 folder: folder,
                 resource_type: 'auto',
                 public_id: `${Date.now()}_${filename.replace(/\.[^.]+$/, '')}`,
                 use_filename: true,
-                unique_filename: true
+                unique_filename: true,
+                timeout: 60000 // 60 seconds timeout
             },
             (error, result) => {
                 if (error) {
-                    console.error('Cloudinary upload error:', error);
-                    reject(error);
+                    console.error('❌ Cloudinary upload error details:', {
+                        message: error.message,
+                        code: error.code,
+                        http_code: error.http_code,
+                        name: error.name
+                    });
+                    reject(new Error(`Cloudinary upload failed: ${error.message || 'Unknown error'}`));
                 } else {
                     console.log('✅ Cloudinary upload success:', result.secure_url);
                     resolve(result);
                 }
             }
         );
+        
+        // Handle stream errors
+        uploadStream.on('error', (streamError) => {
+            console.error('❌ Upload stream error:', streamError.message);
+            reject(new Error(`Upload stream error: ${streamError.message}`));
+        });
+        
+        // Send the file buffer
         uploadStream.end(fileBuffer);
     });
 }
-
 // ============================================
 // FUNCTION TO CHECK IF CLOUDINARY IS CONFIGURED
 // ============================================
@@ -3074,19 +3092,32 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         }
         
         // ✅ Check Cloudinary configuration
+        console.log('🔍 Checking Cloudinary configuration...');
+        console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? '✅ Set' : '❌ Missing');
+        console.log('API Key:', process.env.CLOUDINARY_API_KEY ? '✅ Set' : '❌ Missing');
+        console.log('API Secret:', process.env.CLOUDINARY_API_SECRET ? '✅ Set' : '❌ Missing');
+        
         if (!isCloudinaryConfigured()) {
+            console.error('❌ Cloudinary is not configured');
             return res.status(400).json({ 
                 success: false, 
-                message: 'Cloudinary is not configured. Please contact administrator.' 
+                message: 'Cloudinary is not configured. Please check your .env file.',
+                details: {
+                    cloudName: !!process.env.CLOUDINARY_CLOUD_NAME,
+                    apiKey: !!process.env.CLOUDINARY_API_KEY,
+                    apiSecret: !!process.env.CLOUDINARY_API_SECRET
+                }
             });
         }
         
         let fileUrl = '';
         let cloudinaryPublicId = '';
         
-        // ✅ Upload to Cloudinary
+        // ✅ Upload to Cloudinary with try-catch
         try {
             const fileBuffer = fs.readFileSync(req.file.path);
+            console.log(`📄 File read: ${req.file.originalname}, Size: ${fileBuffer.length} bytes`);
+            
             const cloudinaryResult = await uploadToCloudinary(fileBuffer, req.file.originalname, 'assignments');
             fileUrl = cloudinaryResult.secure_url;
             cloudinaryPublicId = cloudinaryResult.public_id;
@@ -3099,9 +3130,21 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             }
         } catch (cloudinaryError) {
             console.error('❌ Cloudinary upload failed:', cloudinaryError.message);
+            console.error('❌ Stack trace:', cloudinaryError.stack);
+            
+            // Check if file still exists locally
+            if (fs.existsSync(req.file.path)) {
+                console.log('📁 Local file still exists at:', req.file.path);
+            }
+            
             return res.status(500).json({ 
                 success: false, 
-                message: 'Failed to upload file to Cloudinary: ' + cloudinaryError.message 
+                message: 'Failed to upload file to Cloudinary: ' + cloudinaryError.message,
+                details: {
+                    fileName: req.file.originalname,
+                    fileSize: req.file.size,
+                    cloudinaryConfigured: isCloudinaryConfigured()
+                }
             });
         }
         
@@ -3116,11 +3159,12 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             subject: subject || '',
             description: description || '',
             fileName,
-            fileUrl,  // ✅ Cloudinary URL
+            fileUrl,
             fileType,
             fileSize,
             uploadedBy: req.body.uploadedBy || 'Admin',
-            cloudinaryPublicId,  // ✅ Cloudinary Public ID
+            cloudinaryPublicId,
+            isActive: true,
             createdAt: new Date(),
             updatedAt: new Date()
         });
@@ -3138,15 +3182,19 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
                 grade: assignment.grade,
                 fileName: assignment.fileName,
                 fileUrl: assignment.fileUrl,
+                cloudinaryPublicId: assignment.cloudinaryPublicId,
                 createdAt: assignment.createdAt
             }
         });
     } catch (error) {
         console.error('❌ Error uploading assignment:', error);
-        res.status(500).json({ success: false, message: error.message });
+        console.error('❌ Stack trace:', error.stack);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message || 'Internal server error' 
+        });
     }
 });
-
 // DOWNLOAD assignment file - SUPPORTS CLOUDINARY & LOCAL
 app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     try {
