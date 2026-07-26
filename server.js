@@ -1515,7 +1515,7 @@ const studentAssessmentSchema = new mongoose.Schema({
 
 const StudentAssessment = mongoose.model('StudentAssessment', studentAssessmentSchema);
 
-// Holiday Assignment Schema - ADD THIS FIELD
+// Holiday Assignment Schema
 const holidayAssignmentSchema = new mongoose.Schema({
     title: { type: String, required: true },
     grade: { type: String, required: true },
@@ -1527,8 +1527,7 @@ const holidayAssignmentSchema = new mongoose.Schema({
     fileSize: { type: Number, default: 0 },
     uploadedBy: { type: String, default: 'Admin' },
     cloudinaryPublicId: { type: String, default: '' },
-    // ✅ ADD THIS - Store file data in database
-    fileData: { type: String, default: '' },  // Base64 encoded file
+    fileData: { type: String, default: '' },  // ✅ ADD THIS FIELD
     isActive: { type: Boolean, default: true },
     deletedAt: { type: Date, default: null },
     deletedBy: { type: String, default: '' },
@@ -3893,6 +3892,66 @@ app.post('/api/migrate-to-cloudinary', async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
+});
+// ============================================
+// HOLIDAY ASSIGNMENTS - GET ROUTES (ADD THIS)
+// ============================================
+
+// GET all assignments
+app.get('/api/holiday-assignments/all', async (req, res) => {
+    try {
+        console.log('📡 GET /api/holiday-assignments/all');
+        const assignments = await HolidayAssignment.find({}).sort({ createdAt: -1 });
+        console.log(`📚 Found ${assignments.length} assignments`);
+        res.json({ success: true, assignments });
+    } catch (error) {
+        console.error('Error fetching assignments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET assignments by grade
+app.get('/api/holiday-assignments/:grade', async (req, res) => {
+    try {
+        const grade = req.params.grade;
+        console.log(`📡 GET /api/holiday-assignments/${grade}`);
+        
+        // Handle 'all' as a special case
+        if (grade === 'all') {
+            const assignments = await HolidayAssignment.find({}).sort({ createdAt: -1 });
+            return res.json({ success: true, assignments });
+        }
+        
+        const assignments = await HolidayAssignment.find({ grade: grade }).sort({ createdAt: -1 });
+        console.log(`📚 Found ${assignments.length} assignments for grade ${grade}`);
+        res.json({ success: true, assignments });
+    } catch (error) {
+        console.error('Error fetching assignments by grade:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET single assignment by ID
+app.get('/api/holiday-assignments/id/:id', async (req, res) => {
+    try {
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        res.json({ success: true, assignment });
+    } catch (error) {
+        console.error('Error fetching assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ✅ Test route to verify holiday routes are working
+app.get('/api/holiday-assignments/test', (req, res) => {
+    res.json({ 
+        success: true, 
+        message: 'Holiday assignment routes are working!',
+        timestamp: new Date().toISOString()
+    });
 });
 
 // ============================================
