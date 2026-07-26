@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Holiday Assignments - Admin</title>
+    <title>Manage Holiday Assignments</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -134,7 +134,6 @@
         .btn-warning { background: #ffc107; color: #0A1628; }
         .btn-warning:hover { background: #e0a800; }
         .btn-sm { padding: 4px 12px; font-size: 12px; }
-        .btn-lg { padding: 12px 35px; font-size: 16px; }
 
         .table-wrapper { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -298,7 +297,7 @@
 
 <div class="container">
     <div class="header">
-        <h1><i class="fas fa-file-alt"></i> Holiday Assignments</h1>
+        <h1><i class="fas fa-edit"></i> Manage Holiday Assignments</h1>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <a href="admin-dashboard.html" class="btn-home"><i class="fas fa-arrow-left"></i> Dashboard</a>
             <a href="admin-holiday-assignments.html" class="btn-upload"><i class="fas fa-upload"></i> Upload New</a>
@@ -458,9 +457,6 @@
     let currentEditId = null;
     let allAssignments = [];
 
-    // ============================================
-    // ALERT FUNCTIONS
-    // ============================================
     function showAlert(message, type) {
         const el = document.getElementById('alert');
         el.className = 'alert ' + type;
@@ -469,9 +465,6 @@
         setTimeout(() => { el.style.display = 'none'; }, 6000);
     }
 
-    // ============================================
-    // MODAL FUNCTIONS
-    // ============================================
     function openModal(id) {
         document.getElementById(id).style.display = 'block';
         document.body.style.overflow = 'hidden';
@@ -482,7 +475,6 @@
         document.body.style.overflow = 'auto';
     }
 
-    // Close modal when clicking outside
     window.onclick = function(event) {
         if (event.target.classList.contains('modal')) {
             event.target.style.display = 'none';
@@ -490,9 +482,6 @@
         }
     }
 
-    // ============================================
-    // LOAD ASSIGNMENTS
-    // ============================================
     async function loadAssignments() {
         const grade = document.getElementById('filterGrade').value;
         const title = document.getElementById('filterTitle').value.toLowerCase().trim();
@@ -508,14 +497,12 @@
             if (data.success) {
                 allAssignments = data.assignments || [];
                 
-                // Filter by title
                 if (title) {
                     allAssignments = allAssignments.filter(a => 
                         a.title.toLowerCase().includes(title)
                     );
                 }
                 
-                // Filter by status
                 if (status === 'active') {
                     allAssignments = allAssignments.filter(a => a.isActive !== false);
                 } else if (status === 'inactive') {
@@ -582,9 +569,6 @@
         }
     }
 
-    // ============================================
-    // VIEW ASSIGNMENT
-    // ============================================
     async function viewAssignment(id) {
         currentViewId = id;
         const body = document.getElementById('viewModalBody');
@@ -638,9 +622,6 @@
         }
     }
 
-    // ============================================
-    // EDIT ASSIGNMENT
-    // ============================================
     async function editAssignment(id) {
         currentEditId = id;
         openModal('editModal');
@@ -670,9 +651,6 @@
         }
     }
 
-    // ============================================
-    // SAVE ASSIGNMENT (Update)
-    // ============================================
     async function saveAssignment() {
         const id = document.getElementById('editId').value;
         const title = document.getElementById('editTitle').value.trim();
@@ -729,9 +707,6 @@
         }
     }
 
-    // ============================================
-    // DELETE ASSIGNMENT
-    // ============================================
     async function deleteAssignment(id) {
         const confirmed = confirm('⚠️ Are you sure you want to delete this assignment?\n\nThis action cannot be undone!');
         if (!confirmed) return;
@@ -757,9 +732,6 @@
         }
     }
 
-    // ============================================
-    // HELPER FUNCTIONS FOR MODAL BUTTONS
-    // ============================================
     function editFromView() {
         if (currentViewId) {
             closeModal('viewModal');
@@ -774,13 +746,8 @@
         }
     }
 
-    // ============================================
-    // LOAD ON PAGE LOAD
-    // ============================================
     document.addEventListener('DOMContentLoaded', function() {
         loadAssignments();
-        
-        // Auto-refresh every 60 seconds
         setInterval(loadAssignments, 60000);
     });
 </script>

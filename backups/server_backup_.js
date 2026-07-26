@@ -2371,109 +2371,90 @@ app.post('/api/assessments/copy', async (req, res) => {
 });
 
 // ============================================
-// REPORT ROUTES
+// STAFF ATTENDANCE REPORTS - ADD TO server.js
 // ============================================
 
+// GET staff attendance report
 app.get('/api/reports/staff/attendance', async (req, res) => {
     try {
         const { period, date, department } = req.query;
-        let startDate, endDate;
-        const selectedDate = date ? new Date(date) : getKenyaDate();
-        if (period === 'daily') {
-            startDate = new Date(selectedDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-        } else if (period === 'weekly') {
-            const day = selectedDate.getDay();
-            const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-            startDate = new Date(selectedDate);
-            startDate.setDate(diff);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 7);
-        } else if (period === 'monthly') {
-            startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + 1);
-        } else {
-            startDate = getKenyaDate();
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-        }
-        let filter = {};
-        if (department) {
-            filter.department = department;
-        }
-        const teachers = await Teacher.find(filter);
-        const report = teachers.map(teacher => {
-            let totalDays = 0;
-            let onTime = 0;
-            let late = 0;
-            let absent = 0;
-            teacher.attendance.forEach(record => {
-                const recordDate = new Date(record.date);
-                if (recordDate >= startDate && recordDate < endDate) {
-                    totalDays++;
-                    if (record.status === 'Present' || record.status === 'Checked In' || record.status === 'Checked Out') {
-                        if (record.isLate) {
-                            late++;
-                        } else {
-                            onTime++;
-                        }
-                    } else {
-                        absent++;
-                    }
-                }
+        
+        // Get all teachers
+        const teachers = await Teacher.find({ isActive: true });
+        const report = [];
+        
+        for (const teacher of teachers) {
+            // Filter attendance based on period
+            let attendance = teacher.attendance || [];
+            
+            if (date) {
+                const targetDate = new Date(date);
+                targetDate.setHours(0, 0, 0, 0);
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    aDate.setHours(0, 0, 0, 0);
+                    return aDate.getTime() === targetDate.getTime();
+                });
+            }
+            
+            let totalDays = attendance.length;
+            let onTime = attendance.filter(a => a.isLate === false).length;
+            let late = attendance.filter(a => a.isLate === true).length;
+            let absent = 0; // Calculate absent days
+            
+            report.push({
+                name: `${teacher.firstName} ${teacher.lastName}`,
+                employeeId: teacher.employeeId,
+                department: teacher.department || 'Teaching',
+                totalDays: totalDays,
+                onTime: onTime,
+                late: late,
+                absent: absent
             });
-            return { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId || 'N/A', department: teacher.department || 'N/A', totalDays, onTime, late, absent };
-        });
+        }
+        
         res.json({ success: true, report });
     } catch (error) {
+        console.error('Error generating staff report:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
+// GET visitor report
 app.get('/api/reports/visitors', async (req, res) => {
     try {
         const { period, date, purpose } = req.query;
-        let startDate, endDate;
-        const selectedDate = date ? new Date(date) : getKenyaDate();
-        if (period === 'daily') {
-            startDate = new Date(selectedDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-        } else if (period === 'weekly') {
-            const day = selectedDate.getDay();
-            const diff = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
-            startDate = new Date(selectedDate);
-            startDate.setDate(diff);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 7);
-        } else if (period === 'monthly') {
-            startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-            startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + 1);
-        } else {
-            startDate = getKenyaDate();
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
+        
+        let query = {};
+        if (date) {
+            const start = new Date(date);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(start);
+            end.setDate(end.getDate() + 1);
+            query.checkIn = { $gte: start, $lt: end };
         }
-        let filter = { checkIn: { $gte: startDate, $lt: endDate } };
-        if (purpose) {
-            filter.purpose = purpose;
-        }
-        const visitors = await Visitor.find(filter);
-        const report = visitors.map(visitor => {
-            const duration = visitor.checkOut ? Math.round((visitor.checkOut - visitor.checkIn) / 1000 / 60) : 0;
-            return { fullName: visitor.fullName || `${visitor.firstName} ${visitor.lastName}`, firstName: visitor.firstName, lastName: visitor.lastName, badgeNumber: visitor.badgeNumber || 'N/A', purpose: visitor.purpose || 'N/A', personToVisit: visitor.personToVisit || 'N/A', checkIn: visitor.checkIn, checkOut: visitor.checkOut || null, checkInTime: visitor.checkIn ? formatKenyaTime(visitor.checkIn) : '-', checkOutTime: visitor.checkOut ? formatKenyaTime(visitor.checkOut) : '-', status: visitor.status || 'Checked In', duration: duration };
-        });
+        if (purpose) query.purpose = purpose;
+        
+        const visitors = await Visitor.find(query).sort({ checkIn: -1 });
+        
+        const report = visitors.map(v => ({
+            fullName: `${v.firstName} ${v.lastName}`,
+            firstName: v.firstName,
+            lastName: v.lastName,
+            badgeNumber: v.badgeNumber,
+            purpose: v.purpose,
+            personToVisit: v.personToVisit,
+            checkIn: v.checkIn,
+            checkOut: v.checkOut,
+            status: v.status,
+            duration: v.checkOut ? Math.round((v.checkOut - v.checkIn) / 1000 / 60) : 0,
+            checkInTime: formatKenyaTime(v.checkIn),
+            checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
+        }));
+        
         res.json({ success: true, report });
     } catch (error) {
+        console.error('Error generating visitor report:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
