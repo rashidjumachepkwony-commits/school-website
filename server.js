@@ -180,6 +180,7 @@ function calculateStudentOverall(assessments) {
         totalMaxScore += a.maxScore || 0;
     });
     
+    // ✅ CORRECT: Average as percentage of total possible
     const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     const performanceLevel = calculatePerformanceLevel(avgPercentage);
     
@@ -190,7 +191,6 @@ function calculateStudentOverall(assessments) {
         overallRating: getPerformanceRating(performanceLevel)
     };
 }
-
 // ============================================
 // CLOUDINARY UPLOAD HELPER - FIXED
 // ============================================
