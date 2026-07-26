@@ -9,3 +9,7 @@ services:
         value: 5000
       - key: MONGODB_URI
         value: mongodb+srv://rashidjumachepkwony_db_user:78VGp5cxssNEgNDb@school-cluster.rwq5xx8.mongodb.net/schoolDB
+    disk:
+      name: uploads
+      mountPath: /opt/render/project/src/uploads
+      sizeGB: 1
