@@ -194,15 +194,15 @@ function isCloudinaryConfigured() {
 }
 
 // ============================================
-// PROFESSIONAL STUDENT REPORT - REDESIGNED
+// PROFESSIONAL CBC STUDENT REPORT - ONE PAGE
 // ============================================
 function generateStudentReportPDF(student) {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({
-                margin: 30,
+                margin: 25,
                 size: 'A4',
-                layout: 'landscape'
+                layout: 'portrait'  // Portrait for better readability
             });
             const chunks = [];
 
@@ -210,10 +210,11 @@ function generateStudentReportPDF(student) {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
 
-            // Colors
+            // Professional Colors
             const colors = {
                 primary: '#0A1628',
                 gold: '#C9A84C',
+                goldDark: '#B8942A',
                 goldLight: '#F5ECD7',
                 success: '#1a8a3f',
                 successLight: '#E8F5E9',
@@ -225,168 +226,224 @@ function generateStudentReportPDF(student) {
                 dangerLight: '#FBE9E7',
                 gray: '#6c757d',
                 grayLight: '#f8f9fa',
-                border: '#dee2e6'
+                border: '#dee2e6',
+                white: '#ffffff',
+                black: '#1a1a1a'
             };
 
             // ============================================
-            // HEADER WITH LOGO
+            // HEADER WITH LOGO - Centered
             // ============================================
             const logoPath = path.join(__dirname, 'images', 'logo.jpg');
             const hasLogo = fs.existsSync(logoPath);
 
-            // Top decorative line
-            doc.rect(0, 0, 800, 6).fillColor(colors.gold).fill();
+            // Top decorative border
+            doc.rect(0, 0, 595, 8).fillColor(colors.gold).fill();
 
-            // Logo and Header
-            let headerY = 20;
+            // Logo - Centered
+            let logoY = 18;
             if (hasLogo) {
                 try {
-                    doc.image(logoPath, 35, 18, { width: 60, height: 60 });
-                    headerY = 20;
+                    const logoWidth = 65;
+                    const logoHeight = 65;
+                    const logoX = (595 - logoWidth) / 2;
+                    doc.image(logoPath, logoX, 12, { width: logoWidth, height: logoHeight });
+                    logoY = 80;
                 } catch (e) {
                     console.log('Logo placement error:', e.message);
+                    logoY = 30;
                 }
             }
 
-            // School Name
-            doc.fontSize(22)
+            // School Name - Centered
+            doc.fontSize(24)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
-                .text('CHANGARA STAR ACADEMY', hasLogo ? 110 : 35, 22, { width: 400 });
+                .text('CHANGARA STAR ACADEMY', 0, logoY, { align: 'center' });
 
-            doc.fontSize(10)
+            doc.fontSize(12)
                 .font('Helvetica-Oblique')
                 .fillColor(colors.gold)
-                .text('"Assurance to Excellence"', hasLogo ? 110 : 35, 48, { width: 400 });
+                .text('"Assurance to Excellence"', 0, logoY + 28, { align: 'center' });
 
-            // School Contact
-            doc.fontSize(7)
+            // School Contact - Centered
+            doc.fontSize(8)
                 .font('Helvetica')
                 .fillColor(colors.gray)
-                .text('P.O Box 7, Cheptais • Tel: +254 721 556 252 • Email: starchangara@gmail.com', 
-                      hasLogo ? 110 : 35, 62, { width: 400 });
+                .text('P.O Box 7, Cheptais  •  Tel: +254 721 556 252  •  Email: starchangara@gmail.com', 0, logoY + 46, { align: 'center' });
 
-            // Divider
-            doc.moveTo(30, 82)
-                .lineTo(770, 82)
+            // Decorative line
+            const lineY = logoY + 62;
+            doc.moveTo(40, lineY)
+                .lineTo(555, lineY)
                 .strokeColor(colors.gold)
                 .lineWidth(2)
                 .stroke();
 
+            // Subtitle
+            doc.fontSize(11)
+                .font('Helvetica-Bold')
+                .fillColor(colors.primary)
+                .text('STUDENT PROGRESS REPORT - CBC', 0, lineY + 10, { align: 'center' });
+
             // ============================================
-            // STUDENT INFO - Professional Cards
+            // STUDENT INFORMATION - Centered Cards
             // ============================================
-            const infoY = 95;
+            const infoY = lineY + 32;
             
             // Info card background
-            doc.roundedRect(30, infoY, 740, 42, 6)
+            doc.roundedRect(35, infoY, 525, 50, 6)
                 .fillColor(colors.grayLight)
                 .fill()
                 .strokeColor(colors.border)
                 .lineWidth(1)
-                .roundedRect(30, infoY, 740, 42, 6)
+                .roundedRect(35, infoY, 525, 50, 6)
                 .stroke();
 
             const infoData = [
-                ['Student Name', student.studentName || 'N/A'],
-                ['Grade', student.grade || 'N/A'],
-                ['Assessment Type', student.type || 'Monthly'],
-                ['Term', student.term || 'N/A'],
-                ['Period', student.period || 'N/A'],
-                ['Report Date', formatKenyaFullTime(new Date())]
+                ['Student Name:', student.studentName || 'N/A'],
+                ['Grade/Level:', student.grade || 'N/A'],
+                ['Admission No.:', student.studentId || 'N/A'],
+                ['Assessment Type:', student.type || 'Monthly'],
+                ['Term/Year:', student.term || 'N/A'],
+                ['Report Date:', formatKenyaFullTime(new Date())]
             ];
 
-            const infoColWidth = 240;
-            const infoXStart = 45;
+            const infoColWidth = 260;
+            const infoXStart = 50;
 
             infoData.forEach((item, i) => {
-                const col = i % 3;
-                const row = Math.floor(i / 3);
+                const col = i % 2;
+                const row = Math.floor(i / 2);
                 const x = infoXStart + (col * infoColWidth);
-                const y = infoY + 6 + (row * 18);
-
-                doc.fontSize(7)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.gray)
-                    .text(item[0] + ':', x, y);
+                const y = infoY + 8 + (row * 17);
 
                 doc.fontSize(8)
                     .font('Helvetica-Bold')
+                    .fillColor(colors.gray)
+                    .text(item[0], x, y);
+
+                doc.fontSize(9)
+                    .font('Helvetica-Bold')
                     .fillColor(colors.primary)
-                    .text(item[1], x + 75, y);
+                    .text(item[1], x + 85, y);
             });
 
             // ============================================
-            // PERFORMANCE SUMMARY - Professional Box
+            // PERFORMANCE RUBRIC / GRADING SCALE
+            // ============================================
+            const rubricY = infoY + 60;
+            
+            doc.fontSize(8)
+                .font('Helvetica-Bold')
+                .fillColor(colors.primary)
+                .text('PERFORMANCE RUBRIC', 35, rubricY);
+
+            doc.fontSize(7)
+                .font('Helvetica')
+                .fillColor(colors.gray)
+                .text('4-Point Proficiency Scale', 35, rubricY + 12);
+
+            // Rubric boxes
+            const rubricData = [
+                { label: 'Exceeding Expectations', range: '75-100%', color: colors.success, bg: colors.successLight },
+                { label: 'Meeting Expectations', range: '50-74%', color: colors.info, bg: colors.infoLight },
+                { label: 'Approaching Expectations', range: '26-49%', color: colors.warning, bg: colors.warningLight },
+                { label: 'Below Expectations', range: '0-25%', color: colors.danger, bg: colors.dangerLight }
+            ];
+
+            let rubricX = 35;
+            rubricData.forEach((item) => {
+                doc.roundedRect(rubricX, rubricY + 20, 127, 28, 4)
+                    .fillColor(item.bg)
+                    .fill()
+                    .strokeColor(item.color)
+                    .lineWidth(1.5)
+                    .roundedRect(rubricX, rubricY + 20, 127, 28, 4)
+                    .stroke();
+
+                doc.fontSize(7)
+                    .font('Helvetica-Bold')
+                    .fillColor(item.color)
+                    .text(item.label, rubricX + 5, rubricY + 23, { width: 117, align: 'center' });
+
+                doc.fontSize(6)
+                    .font('Helvetica')
+                    .fillColor(colors.gray)
+                    .text(item.range, rubricX + 5, rubricY + 36, { width: 117, align: 'center' });
+
+                rubricX += 132;
+            });
+
+            // ============================================
+            // PERFORMANCE SUMMARY - Large, Visible
             // ============================================
             const level = student.performanceLevel || 'Approaching Expectation';
-            const levelColor = getPerformanceColor(level);
             const levelColors = {
-                'Exceeding Expectation': { bg: '#E8F5E9', border: '#1a8a3f', text: '#1a8a3f' },
-                'Meeting Expectation': { bg: '#E3F2FD', border: '#0d6efd', text: '#0d6efd' },
-                'Approaching Expectation': { bg: '#FFF8E1', border: '#e6a800', text: '#e6a800' },
-                'Below Expectation': { bg: '#FBE9E7', border: '#dc3545', text: '#dc3545' }
+                'Exceeding Expectation': { bg: '#E8F5E9', border: '#1a8a3f', text: '#1a8a3f', icon: '🌟' },
+                'Meeting Expectation': { bg: '#E3F2FD', border: '#0d6efd', text: '#0d6efd', icon: '✅' },
+                'Approaching Expectation': { bg: '#FFF8E1', border: '#e6a800', text: '#e6a800', icon: '📌' },
+                'Below Expectation': { bg: '#FBE9E7', border: '#dc3545', text: '#dc3545', icon: '⚠️' }
             };
             const perfColors = levelColors[level] || levelColors['Approaching Expectation'];
 
-            const perfY = infoY + 55;
-            doc.roundedRect(30, perfY, 740, 44, 8)
+            const perfY = rubricY + 60;
+            doc.roundedRect(35, perfY, 525, 44, 8)
                 .fillColor(perfColors.bg)
                 .fill()
                 .strokeColor(perfColors.border)
-                .lineWidth(2)
-                .roundedRect(30, perfY, 740, 44, 8)
+                .lineWidth(2.5)
+                .roundedRect(35, perfY, 525, 44, 8)
                 .stroke();
 
-            // Performance Level - Large
-            doc.fontSize(22)
+            // Overall Performance - Large
+            doc.fontSize(20)
                 .font('Helvetica-Bold')
                 .fillColor(perfColors.text)
-                .text(level, 50, perfY + 10);
+                .text(`${perfColors.icon} ${level}`, 50, perfY + 10);
 
             // Stats
             const totalScore = student.totalScore || 0;
             const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
             const rating = getPerformanceRating(level);
 
-            doc.fontSize(10)
+            doc.fontSize(11)
                 .font('Helvetica')
                 .fillColor(colors.primary)
-                .text(`Total Score: ${totalScore}`, 380, perfY + 10)
-                .text(`Average: ${avgScore}%`, 380, perfY + 26);
+                .text(`Total Score: ${totalScore}  •  Average: ${avgScore}%  •  Rating: ${rating}/4`, 300, perfY + 14);
 
-            doc.fontSize(10)
+            // ============================================
+            // CORE COMPETENCIES ASSESSMENT TABLE
+            // ============================================
+            const tableY = perfY + 56;
+
+            doc.fontSize(9)
                 .font('Helvetica-Bold')
-                .fillColor(perfColors.text)
-                .text(`Rating: ${rating}/4`, 560, perfY + 18);
-
-            // ============================================
-            // SUBJECT TABLE - Clean Professional
-            // ============================================
-            const tableY = perfY + 58;
-            const tableWidth = 740;
+                .fillColor(colors.primary)
+                .text('CORE COMPETENCIES & SUBJECT ASSESSMENT', 35, tableY);
 
             // Table Header
-            doc.roundedRect(30, tableY, tableWidth, 24, 4)
+            const tableTop = tableY + 14;
+            doc.roundedRect(35, tableTop, 525, 20, 4)
                 .fillColor(colors.primary)
                 .fill();
 
-            const headers = ['#', 'Subject', 'Max Score', 'Score', 'Percentage', 'Performance Level'];
-            const colWidths = [25, 180, 90, 90, 90, 240];
-            let headerX = 40;
+            const headers = ['Subject', 'Score', 'Max', '%', 'Performance Level'];
+            const colWidths = [160, 70, 70, 70, 135];
+            let headerX = 45;
 
             doc.fontSize(8)
                 .font('Helvetica-Bold')
                 .fillColor('white');
 
             headers.forEach((h, i) => {
-                const align = i === 0 ? 'center' : (i < 2 ? 'left' : 'center');
-                doc.text(h, headerX, tableY + 7, { width: colWidths[i] - 5, align: align });
+                const align = i === 0 ? 'left' : 'center';
+                doc.text(h, headerX, tableTop + 5, { width: colWidths[i] - 5, align: align });
                 headerX += colWidths[i];
             });
 
             // Table Rows
-            let rowY = tableY + 24;
+            let rowY = tableTop + 20;
             let rowIndex = 0;
             let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
 
@@ -396,8 +453,8 @@ function generateStudentReportPDF(student) {
                 return pB - pA;
             });
 
-            // Show all subjects (max 12 to fit page)
-            const displayAssessments = sortedAssessments.slice(0, 12);
+            // Show all subjects (max 10 to fit page)
+            const displayAssessments = sortedAssessments.slice(0, 10);
 
             displayAssessments.forEach((a, index) => {
                 const percentage = a.maxScore > 0 ? ((a.score / a.maxScore) * 100) : 0;
@@ -411,189 +468,208 @@ function generateStudentReportPDF(student) {
 
                 // Alternate row background
                 const bgColor = rowIndex % 2 === 0 ? '#ffffff' : colors.grayLight;
-                doc.roundedRect(30, rowY, tableWidth, 20, 2)
+                doc.roundedRect(35, rowY, 525, 18, 2)
                     .fillColor(bgColor)
                     .fill()
                     .strokeColor(colors.border)
                     .lineWidth(0.5)
-                    .roundedRect(30, rowY, tableWidth, 20, 2)
+                    .roundedRect(35, rowY, 525, 18, 2)
                     .stroke();
 
-                let xPos = 40;
+                let xPos = 45;
                 doc.fontSize(8)
                     .font('Helvetica');
-
-                // Index
-                doc.fillColor(colors.gray)
-                    .text((index + 1).toString(), xPos, rowY + 5, { width: colWidths[0] - 5, align: 'center' });
-                xPos += colWidths[0];
 
                 // Subject
                 doc.fillColor(colors.primary)
                     .font('Helvetica-Bold')
-                    .text(a.subject, xPos, rowY + 5, { width: colWidths[1] - 5 });
+                    .text(a.subject, xPos, rowY + 4, { width: colWidths[0] - 5 });
+                xPos += colWidths[0];
+
+                // Score
+                doc.font('Helvetica')
+                    .fillColor(colors.primary)
+                    .text(a.score.toString(), xPos, rowY + 4, { width: colWidths[1] - 5, align: 'center' });
                 xPos += colWidths[1];
 
                 // Max Score
-                doc.font('Helvetica')
-                    .fillColor(colors.gray)
-                    .text(a.maxScore.toString(), xPos, rowY + 5, { width: colWidths[2] - 5, align: 'center' });
+                doc.fillColor(colors.gray)
+                    .text(a.maxScore.toString(), xPos, rowY + 4, { width: colWidths[2] - 5, align: 'center' });
                 xPos += colWidths[2];
-
-                // Score
-                doc.fillColor(colors.primary)
-                    .font('Helvetica-Bold')
-                    .text(a.score.toString(), xPos, rowY + 5, { width: colWidths[3] - 5, align: 'center' });
-                xPos += colWidths[3];
 
                 // Percentage
                 const pctColor = percentage >= 75 ? colors.success : (percentage >= 50 ? colors.info : (percentage >= 26 ? colors.warning : colors.danger));
                 doc.fillColor(pctColor)
                     .font('Helvetica-Bold')
-                    .text(percentage.toFixed(0) + '%', xPos, rowY + 5, { width: colWidths[4] - 5, align: 'center' });
-                xPos += colWidths[4];
+                    .text(percentage.toFixed(0) + '%', xPos, rowY + 4, { width: colWidths[3] - 5, align: 'center' });
+                xPos += colWidths[3];
 
                 // Performance Level
                 doc.fillColor(levelColor2)
                     .font('Helvetica-Bold')
-                    .text(level2, xPos, rowY + 5, { width: colWidths[5] - 5 });
+                    .text(level2, xPos, rowY + 4, { width: colWidths[4] - 5 });
 
-                rowY += 20;
+                rowY += 18;
                 rowIndex++;
             });
 
             // ============================================
-            // PERFORMANCE SUMMARY BADGES
+            // SCHOOL VALUES & CHARACTER ASSESSMENT
             // ============================================
-            const summaryY = rowY + 10;
-            
-            doc.fontSize(8)
-                .font('Helvetica-Bold')
-                .fillColor(colors.gray)
-                .text('Performance Summary:', 30, summaryY);
+            const valuesY = rowY + 10;
 
-            const badgeData = [
-                { label: 'Exceeding', count: exceedingCount, color: colors.success, bg: colors.successLight },
-                { label: 'Meeting', count: meetingCount, color: colors.info, bg: colors.infoLight },
-                { label: 'Approaching', count: approachingCount, color: colors.warning, bg: colors.warningLight },
-                { label: 'Below', count: belowCount, color: colors.danger, bg: colors.dangerLight }
-            ];
+            if (valuesY < 720) {
+                doc.fontSize(8)
+                    .font('Helvetica-Bold')
+                    .fillColor(colors.primary)
+                    .text('SCHOOL VALUES & CHARACTER ASSESSMENT', 35, valuesY);
 
-            let badgeX = 130;
-            badgeData.forEach((item) => {
-                if (item.count > 0 || item.label === 'Exceeding') {
-                    // Badge background
-                    doc.roundedRect(badgeX, summaryY - 2, 70, 20, 4)
-                        .fillColor(item.bg)
+                const values = [
+                    { name: 'Respect', icon: '🤝' },
+                    { name: 'Responsibility', icon: '💪' },
+                    { name: 'Integrity', icon: '⭐' },
+                    { name: 'Unity', icon: '🤗' },
+                    { name: 'Self-Efficacy', icon: '🌱' },
+                    { name: 'Digital Literacy', icon: '💻' }
+                ];
+
+                let valueX = 35;
+                values.forEach((v) => {
+                    doc.roundedRect(valueX, valuesY + 12, 82, 28, 4)
+                        .fillColor(colors.grayLight)
                         .fill()
-                        .strokeColor(item.color)
+                        .strokeColor(colors.border)
                         .lineWidth(1)
-                        .roundedRect(badgeX, summaryY - 2, 70, 20, 4)
+                        .roundedRect(valueX, valuesY + 12, 82, 28, 4)
                         .stroke();
 
-                    // Count
-                    doc.fontSize(10)
-                        .font('Helvetica-Bold')
-                        .fillColor(item.color)
-                        .text(item.count.toString(), badgeX + 8, summaryY + 1);
+                    doc.fontSize(14)
+                        .text(v.icon, valueX + 28, valuesY + 14);
 
-                    // Label
                     doc.fontSize(6)
-                        .font('Helvetica')
-                        .fillColor(colors.gray)
-                        .text(item.label, badgeX + 22, summaryY + 2);
+                        .font('Helvetica-Bold')
+                        .fillColor(colors.primary)
+                        .text(v.name, valueX + 5, valuesY + 32, { width: 72, align: 'center' });
 
-                    badgeX += 78;
-                }
-            });
+                    valueX += 87;
+                });
 
-            // ============================================
-            // STRENGTHS & WEAKNESSES - Professional Layout
-            // ============================================
-            const swY = summaryY + 32;
+                // ============================================
+                // STRENGTHS & AREAS FOR IMPROVEMENT
+                // ============================================
+                const swY = valuesY + 54;
 
-            if (swY < 430 && displayAssessments.length > 0) {
-                // Calculate strengths and weaknesses properly
-                const allAssessments = student.assessments || [];
-                const strengths = allAssessments
-                    .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
-                    .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100))
-                    .slice(0, 4);
+                if (swY < 720) {
+                    // Calculate strengths and weaknesses properly
+                    const allAssessments = student.assessments || [];
+                    const strengths = allAssessments
+                        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
+                        .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100))
+                        .slice(0, 4);
 
-                const weaknesses = allAssessments
-                    .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 50)
-                    .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100))
-                    .slice(0, 4);
+                    const weaknesses = allAssessments
+                        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 50)
+                        .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100))
+                        .slice(0, 4);
 
-                // Strengths Box
-                doc.roundedRect(30, swY, 355, 55, 6)
-                    .fillColor(colors.successLight)
-                    .fill()
-                    .strokeColor(colors.success)
-                    .lineWidth(1.5)
-                    .roundedRect(30, swY, 355, 55, 6)
-                    .stroke();
+                    // Strengths Box
+                    doc.roundedRect(35, swY, 255, 55, 6)
+                        .fillColor(colors.successLight)
+                        .fill()
+                        .strokeColor(colors.success)
+                        .lineWidth(1.5)
+                        .roundedRect(35, swY, 255, 55, 6)
+                        .stroke();
 
-                doc.fontSize(9)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.success)
-                    .text('✓ Strengths', 45, swY + 6);
-
-                let strengthsY = swY + 22;
-                if (strengths.length > 0) {
-                    strengths.forEach((s) => {
-                        const pct = ((s.score / s.maxScore) * 100).toFixed(0);
-                        doc.fontSize(8)
-                            .font('Helvetica')
-                            .fillColor(colors.primary)
-                            .text(`${s.subject}: ${pct}%`, 45, strengthsY);
-                        strengthsY += 14;
-                    });
-                } else {
-                    doc.fontSize(8)
-                        .font('Helvetica-Oblique')
-                        .fillColor(colors.gray)
-                        .text('No subjects meeting expectations yet.', 45, strengthsY);
-                }
-
-                // Weaknesses Box
-                doc.roundedRect(415, swY, 355, 55, 6)
-                    .fillColor(colors.dangerLight)
-                    .fill()
-                    .strokeColor(colors.danger)
-                    .lineWidth(1.5)
-                    .roundedRect(415, swY, 355, 55, 6)
-                    .stroke();
-
-                doc.fontSize(9)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.danger)
-                    .text('⚠ Areas for Improvement', 430, swY + 6);
-
-                let weaknessesY = swY + 22;
-                if (weaknesses.length > 0) {
-                    weaknesses.forEach((s) => {
-                        const pct = ((s.score / s.maxScore) * 100).toFixed(0);
-                        doc.fontSize(8)
-                            .font('Helvetica')
-                            .fillColor(colors.primary)
-                            .text(`${s.subject}: ${pct}%`, 430, weaknessesY);
-                        weaknessesY += 14;
-                    });
-                } else {
-                    doc.fontSize(8)
+                    doc.fontSize(9)
                         .font('Helvetica-Bold')
                         .fillColor(colors.success)
-                        .text('🎉 All subjects meeting expectations!', 430, weaknessesY);
+                        .text('🌟 Strengths', 45, swY + 6);
+
+                    let strengthsY = swY + 22;
+                    if (strengths.length > 0) {
+                        strengths.forEach((s) => {
+                            const pct = ((s.score / s.maxScore) * 100).toFixed(0);
+                            doc.fontSize(8)
+                                .font('Helvetica')
+                                .fillColor(colors.primary)
+                                .text(`✓ ${s.subject}: ${pct}%`, 45, strengthsY);
+                            strengthsY += 14;
+                        });
+                    } else {
+                        doc.fontSize(8)
+                            .font('Helvetica-Oblique')
+                            .fillColor(colors.gray)
+                            .text('No subjects meeting expectations yet.', 45, strengthsY);
+                    }
+
+                    // Areas for Improvement Box
+                    doc.roundedRect(305, swY, 255, 55, 6)
+                        .fillColor(colors.dangerLight)
+                        .fill()
+                        .strokeColor(colors.danger)
+                        .lineWidth(1.5)
+                        .roundedRect(305, swY, 255, 55, 6)
+                        .stroke();
+
+                    doc.fontSize(9)
+                        .font('Helvetica-Bold')
+                        .fillColor(colors.danger)
+                        .text('📌 Areas for Improvement', 315, swY + 6);
+
+                    let weaknessesY = swY + 22;
+                    if (weaknesses.length > 0) {
+                        weaknesses.forEach((s) => {
+                            const pct = ((s.score / s.maxScore) * 100).toFixed(0);
+                            doc.fontSize(8)
+                                .font('Helvetica')
+                                .fillColor(colors.primary)
+                                .text(`→ ${s.subject}: ${pct}%`, 315, weaknessesY);
+                            weaknessesY += 14;
+                        });
+                    } else {
+                        doc.fontSize(8)
+                            .font('Helvetica-Bold')
+                            .fillColor(colors.success)
+                            .text('🎉 All subjects meeting expectations!', 315, weaknessesY);
+                    }
                 }
+            }
+
+            // ============================================
+            // TEACHER NARRATIVE FEEDBACK
+            // ============================================
+            const feedbackY = rowY + 10 + (valuesY < 720 ? 140 : 0);
+
+            if (feedbackY < 730) {
+                doc.fontSize(8)
+                    .font('Helvetica-Bold')
+                    .fillColor(colors.primary)
+                    .text('TEACHER NARRATIVE FEEDBACK', 35, feedbackY);
+
+                // Feedback box
+                doc.roundedRect(35, feedbackY + 10, 525, 40, 6)
+                    .fillColor(colors.grayLight)
+                    .fill()
+                    .strokeColor(colors.border)
+                    .lineWidth(1)
+                    .roundedRect(35, feedbackY + 10, 525, 40, 6)
+                    .stroke();
+
+                const feedbackText = generateTeacherFeedback(student);
+                doc.fontSize(8)
+                    .font('Helvetica')
+                    .fillColor(colors.primary)
+                    .text(feedbackText, 45, feedbackY + 18, { width: 505, align: 'left' });
             }
 
             // ============================================
             // FOOTER - Professional
             // ============================================
             // Bottom decorative line
-            doc.moveTo(30, 545)
-                .lineTo(770, 545)
+            const footerY = 745;
+            doc.moveTo(35, footerY)
+                .lineTo(560, footerY)
                 .strokeColor(colors.gold)
                 .lineWidth(1.5)
                 .stroke();
@@ -601,14 +677,14 @@ function generateStudentReportPDF(student) {
             doc.fontSize(7)
                 .font('Helvetica')
                 .fillColor(colors.gray)
-                .text(`Generated: ${formatKenyaFullTime(new Date())}`, 30, 552, { align: 'left' })
-                .text('This is a system-generated assessment report.', 30, 562, { align: 'left' });
+                .text(`Generated: ${formatKenyaFullTime(new Date())}`, 35, footerY + 8, { align: 'left' })
+                .text('Parent Signature: ___________________', 35, footerY + 20, { align: 'left' });
 
             doc.fontSize(6)
                 .font('Helvetica-Oblique')
                 .fillColor(colors.gray)
                 .text(`© ${new Date().getFullYear()} Changara Star Academy • P.O Box 7, Cheptais • All Rights Reserved`, 
-                      30, 575, { align: 'center' });
+                      35, footerY + 34, { align: 'center' });
 
             doc.end();
         } catch (error) {
@@ -617,6 +693,54 @@ function generateStudentReportPDF(student) {
     });
 }
 
+// ============================================
+// HELPER: Generate Teacher Feedback
+// ============================================
+function generateTeacherFeedback(student) {
+    const level = student.performanceLevel || 'Approaching Expectation';
+    const totalScore = student.totalScore || 0;
+    const avgScore = student.averageScore || 0;
+    
+    let feedback = '';
+    
+    // Opening statement
+    if (level === 'Exceeding Expectation') {
+        feedback = `Excellent performance! ${student.studentName || 'The student'} is demonstrating outstanding mastery of the learning outcomes. `;
+    } else if (level === 'Meeting Expectation') {
+        feedback = `Good progress! ${student.studentName || 'The student'} is meeting the expected learning outcomes. `;
+    } else if (level === 'Approaching Expectation') {
+        feedback = `${student.studentName || 'The student'} is making progress and approaching the expected learning outcomes. `;
+    } else {
+        feedback = `${student.studentName || 'The student'} needs additional support to meet the expected learning outcomes. `;
+    }
+    
+    // Strengths
+    const strengths = (student.assessments || [])
+        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
+        .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100));
+    
+    if (strengths.length > 0) {
+        feedback += `Strong performance in ${strengths.slice(0, 3).map(s => s.subject).join(', ')}. `;
+    }
+    
+    // Areas for improvement
+    const weaknesses = (student.assessments || [])
+        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 50)
+        .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100));
+    
+    if (weaknesses.length > 0) {
+        feedback += `Areas for improvement: ${weaknesses.slice(0, 3).map(s => s.subject).join(', ')}. `;
+    }
+    
+    // Encouraging closing
+    if (level === 'Exceeding Expectation' || level === 'Meeting Expectation') {
+        feedback += `Continue the excellent work. We are proud of your progress!`;
+    } else {
+        feedback += `With continued effort and practice, we are confident you will achieve the expected learning outcomes.`;
+    }
+    
+    return feedback;
+}
 // ============================================
 // PROFESSIONAL CLASS REPORT - LANDSCAPE
 // ============================================
