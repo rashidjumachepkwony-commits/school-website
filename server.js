@@ -180,7 +180,6 @@ function calculateStudentOverall(assessments) {
         totalMaxScore += a.maxScore || 0;
     });
     
-    // ✅ CORRECT: Average as percentage of total possible
     const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     const performanceLevel = calculatePerformanceLevel(avgPercentage);
     
@@ -191,8 +190,9 @@ function calculateStudentOverall(assessments) {
         overallRating: getPerformanceRating(performanceLevel)
     };
 }
+
 // ============================================
-// CLOUDINARY UPLOAD HELPER - FIXED
+// CLOUDINARY UPLOAD HELPER
 // ============================================
 async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') {
     return new Promise((resolve, reject) => {
@@ -230,7 +230,6 @@ function isCloudinaryConfigured() {
            process.env.CLOUDINARY_API_KEY && 
            process.env.CLOUDINARY_API_SECRET;
 }
-
 // ============================================
 // PROFESSIONAL CBC STUDENT REPORT - ONE PAGE
 // ============================================
@@ -1227,7 +1226,6 @@ async function connectToMongoDB(attempt = 1) {
 }
 
 connectToMongoDB();
-
 // ============================================
 // FILE UPLOAD SETUP
 // ============================================
@@ -1456,9 +1454,7 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model('Student', studentSchema);
 
-// ============================================
-// SUBJECT CONFIG SCHEMA - FIXED
-// ============================================
+// Subject Config Schema - FIXED
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
@@ -1586,7 +1582,6 @@ function getFeeStructure(grade, type) {
     }
     return dayFees[grade] || { term1: 0, term2: 0, term3: 0, total: 0 };
 }
-
 // ============================================
 // API ROUTES - CONTENT
 // ============================================
@@ -1734,8 +1729,655 @@ app.post('/api/teacher/register', async (req, res) => {
     }
 });
 
+app.post('/api/teacher/checkin', async (req, res) => {
+    try {
+        const { employeeId, pin } = req.body;
+        const teacher = await Teacher.findOne({ employeeId });
+        if (!teacher) {
+            return res.status(404).json({ success: false, message: 'Staff not found. Please contact admin.' });
+        }
+        if (teacher.password !== pin) {
+            return res.status(401).json({ success: false, message: 'Invalid PIN. Please try again.' });
+        }
+        const kenyaNow = getKenyaTime();
+        const kenyaToday = getKenyaDate();
+        const kenyaHour = getKenyaHour();
+        const dayOfWeek = kenyaNow.getDay();
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            return res.status(400).json({ success: false, message: 'Weekend! Check-in is only available on weekdays (Monday-Friday).' });
+        }
+        const existingAttendance = teacher.attendance.find(a => {
+            const aDate = new Date(a.date);
+            aDate.setHours(0, 0, 0, 0);
+            return aDate.getTime() === kenyaToday.getTime();
+        });
+        if (existingAttendance) {
+            return res.status(400).json({ success: false, message: 'You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn) });
+        }
+        if (kenyaHour >= 17) {
+            return res.status(400).json({ success: false, message: 'Check-in is not allowed after 5:00 PM. Please try again tomorrow.' });
+        }
+        const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
+        const status = isLate ? 'Late' : 'Present';
+        teacher.attendance.push({
+            date: kenyaToday,
+            checkIn: kenyaNow,
+            status: status,
+            location: 'School',
+            isLate: isLate,
+            notes: isLate ? 'Late check-in' : 'On-time check-in'
+        });
+        await teacher.save();
+        const message = isLate ? 'Check-in successful! (You are LATE - after 7:00 AM)' : 'Check-in successful! (On time)';
+        const formattedTime = formatKenyaTime(kenyaNow);
+        res.json({
+            success: true,
+            message: message,
+            checkInTime: kenyaNow,
+            checkInTimeFormatted: formattedTime,
+            isLate: isLate,
+            status: status,
+            teacher: { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId }
+        });
+    } catch (error) {
+        console.error('Check-in error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.post('/api/teacher/checkout', async (req, res) => {
+    try {
+        const { employeeId, pin } = req.body;
+        const teacher = await Teacher.findOne({ employeeId });
+        if (!teacher) {
+            return res.status(404).json({ success: false, message: 'Staff not found. Please contact admin.' });
+        }
+        if (teacher.password !== pin) {
+            return res.status(401).json({ success: false, message: 'Invalid PIN. Please try again.' });
+        }
+        const kenyaNow = getKenyaTime();
+        const kenyaToday = getKenyaDate();
+        const todayAttendance = teacher.attendance.find(a => {
+            const aDate = new Date(a.date);
+            aDate.setHours(0, 0, 0, 0);
+            return aDate.getTime() === kenyaToday.getTime();
+        });
+        if (!todayAttendance) {
+            return res.status(400).json({ success: false, message: 'No check-in found for today. Please check in first.' });
+        }
+        if (todayAttendance.checkOut) {
+            return res.status(400).json({ success: false, message: 'You already checked out today at ' + formatKenyaTime(todayAttendance.checkOut) });
+        }
+        todayAttendance.checkOut = kenyaNow;
+        todayAttendance.notes = (todayAttendance.notes || '') + ' Checked out';
+        const checkInTime = new Date(todayAttendance.checkIn);
+        const hoursWorked = ((kenyaNow - checkInTime) / (1000 * 60 * 60)).toFixed(2);
+        todayAttendance.hoursWorked = parseFloat(hoursWorked);
+        todayAttendance.status = todayAttendance.isLate ? 'Late' : 'Present';
+        await teacher.save();
+        res.json({
+            success: true,
+            message: 'Check-out successful!',
+            checkOutTime: kenyaNow,
+            checkOutTimeFormatted: formatKenyaTime(kenyaNow),
+            hoursWorked: hoursWorked,
+            teacher: { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId }
+        });
+    } catch (error) {
+        console.error('Check-out error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/teacher/attendance/today', async (req, res) => {
+    try {
+        const kenyaToday = getKenyaDate();
+        const teachers = await Teacher.find({ isActive: true });
+        const todayAttendance = teachers.map(teacher => {
+            const todayRecord = teacher.attendance.find(a => {
+                const aDate = new Date(a.date);
+                aDate.setHours(0, 0, 0, 0);
+                return aDate.getTime() === kenyaToday.getTime();
+            });
+            let status = 'Absent';
+            let checkInFormatted = null;
+            let checkOutFormatted = null;
+            if (todayRecord) {
+                if (todayRecord.checkOut) {
+                    status = 'Checked Out';
+                    checkOutFormatted = formatKenyaTime(todayRecord.checkOut);
+                } else {
+                    status = 'Checked In';
+                }
+                if (todayRecord.checkIn) {
+                    checkInFormatted = formatKenyaTime(todayRecord.checkIn);
+                }
+            }
+            return {
+                name: `${teacher.firstName} ${teacher.lastName}`,
+                employeeId: teacher.employeeId,
+                department: teacher.department,
+                status: status,
+                checkIn: todayRecord ? todayRecord.checkIn : null,
+                checkOut: todayRecord ? todayRecord.checkOut : null,
+                checkInTime: checkInFormatted,
+                checkOutTime: checkOutFormatted,
+                isLate: todayRecord ? todayRecord.isLate : false,
+                hoursWorked: todayRecord ? todayRecord.hoursWorked : 0
+            };
+        });
+        res.json({ success: true, date: kenyaToday, total: todayAttendance.length, attendance: todayAttendance });
+    } catch (error) {
+        console.error('Error loading attendance:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/teacher/attendance/:employeeId', async (req, res) => {
+    try {
+        const teacher = await Teacher.findOne({ employeeId: req.params.employeeId });
+        if (!teacher) {
+            return res.status(404).json({ success: false, message: 'Teacher not found' });
+        }
+        const totalDays = teacher.attendance.length;
+        const presentDays = teacher.attendance.filter(a => a.status === 'Present' || a.status === 'Late').length;
+        const lateDays = teacher.attendance.filter(a => a.isLate === true).length;
+        const absentDays = teacher.attendance.filter(a => a.status === 'Absent').length;
+        res.json({
+            success: true,
+            teacher: { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId, department: teacher.department },
+            stats: { totalDays, presentDays, lateDays, absentDays, attendanceRate: totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : 0 },
+            attendance: teacher.attendance.sort((a, b) => b.date - a.date)
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // ============================================
-// SUBJECT CONFIG ROUTES - FIXED RUBRIC VALUES
+// ADMIN TEACHER MANAGEMENT
+// ============================================
+
+app.get('/api/teachers', async (req, res) => {
+    try {
+        const teachers = await Teacher.find({ isActive: true }).select('-password');
+        res.json({ success: true, count: teachers.length, teachers });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/teachers/:id', async (req, res) => {
+    try {
+        const teacher = await Teacher.findById(req.params.id).select('-password');
+        if (!teacher) {
+            return res.status(404).json({ success: false, message: 'Teacher not found' });
+        }
+        res.json({ success: true, teacher });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.put('/api/teachers/:id', async (req, res) => {
+    try {
+        const { firstName, lastName, email, employeeId, phoneNumber, department } = req.body;
+        const teacher = await Teacher.findById(req.params.id);
+        if (!teacher) {
+            return res.status(404).json({ success: false, message: 'Teacher not found' });
+        }
+        const existing = await Teacher.findOne({ _id: { $ne: req.params.id }, $or: [{ email }, { employeeId }] });
+        if (existing) {
+            return res.status(400).json({ success: false, message: 'Email or Employee ID already in use by another teacher' });
+        }
+        teacher.firstName = firstName || teacher.firstName;
+        teacher.lastName = lastName || teacher.lastName;
+        teacher.email = email || teacher.email;
+        teacher.employeeId = employeeId || teacher.employeeId;
+        teacher.phoneNumber = phoneNumber || teacher.phoneNumber;
+        teacher.department = department || teacher.department;
+        await teacher.save();
+        res.json({ success: true, message: 'Teacher updated successfully!', teacher: { id: teacher._id, firstName: teacher.firstName, lastName: teacher.lastName, employeeId: teacher.employeeId, email: teacher.email, department: teacher.department } });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.delete('/api/teachers/:id', async (req, res) => {
+    try {
+        const teacher = await Teacher.findByIdAndDelete(req.params.id);
+        if (!teacher) {
+            return res.status(404).json({ success: false, message: 'Teacher not found' });
+        }
+        res.json({ success: true, message: 'Teacher deleted successfully!' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.post('/api/teachers/:id/reset-pin', async (req, res) => {
+    try {
+        const { pin } = req.body;
+        const teacher = await Teacher.findById(req.params.id);
+        if (!teacher) {
+            return res.status(404).json({ success: false, message: 'Teacher not found' });
+        }
+        if (!pin || pin.length < 4 || pin.length > 6) {
+            return res.status(400).json({ success: false, message: 'PIN must be 4-6 digits' });
+        }
+        teacher.password = pin;
+        await teacher.save();
+        res.json({ success: true, message: 'PIN reset successfully!' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// ADMIN ATTENDANCE ROUTES
+// ============================================
+
+app.get('/api/admin/attendance/all', async (req, res) => {
+    try {
+        const teachers = await Teacher.find({ isActive: true });
+        const allAttendance = teachers.map(teacher => ({
+            id: teacher._id,
+            name: `${teacher.firstName} ${teacher.lastName}`,
+            employeeId: teacher.employeeId,
+            department: teacher.department,
+            email: teacher.email,
+            phoneNumber: teacher.phoneNumber,
+            totalDays: teacher.attendance.length,
+            attendance: teacher.attendance.sort((a, b) => b.date - a.date)
+        }));
+        res.json({ success: true, count: allAttendance.length, teachers: allAttendance });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/admin/attendance/summary', async (req, res) => {
+    try {
+        const teachers = await Teacher.find({ isActive: true });
+        const kenyaToday = getKenyaDate();
+        let totalTeachers = teachers.length;
+        let totalPresent = 0;
+        let totalLate = 0;
+        let totalAbsent = 0;
+        teachers.forEach(teacher => {
+            const todayRecord = teacher.attendance.find(a => {
+                const aDate = new Date(a.date);
+                aDate.setHours(0, 0, 0, 0);
+                return aDate.getTime() === kenyaToday.getTime();
+            });
+            if (todayRecord) {
+                if (todayRecord.isLate) {
+                    totalLate++;
+                } else {
+                    totalPresent++;
+                }
+            } else {
+                totalAbsent++;
+            }
+        });
+        const attended = totalPresent + totalLate;
+        res.json({ success: true, today: { date: kenyaToday, total: totalTeachers, present: totalPresent, late: totalLate, absent: totalAbsent, attendanceRate: totalTeachers > 0 ? ((attended / totalTeachers) * 100).toFixed(2) : 0 } });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+// ============================================
+// VISITOR ROUTES
+// ============================================
+
+app.post('/api/visitor/checkin', async (req, res) => {
+    try {
+        const { firstName, lastName, phoneNumber, idNumber, email, purpose, purposeDetails, personToVisit, department, hostName, notes } = req.body;
+        if (!firstName || !lastName || !phoneNumber || !idNumber || !purpose || !personToVisit) {
+            return res.status(400).json({ success: false, message: 'Please provide all required fields' });
+        }
+        const badgeNumber = `V${Date.now().toString().slice(-6)}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
+        const kenyaNow = getKenyaTime();
+        const visitor = new Visitor({
+            firstName: firstName.trim(), lastName: lastName.trim(), phoneNumber: phoneNumber.trim(), idNumber: idNumber.trim(),
+            email: email || '', purpose, purposeDetails: purposeDetails || '', personToVisit: personToVisit.trim(),
+            department: department || '', hostName: hostName || '', notes: notes || '', badgeNumber, checkIn: kenyaNow, status: 'Checked In'
+        });
+        await visitor.save();
+        res.status(201).json({ success: true, message: 'Visitor checked in successfully!', visitor: { id: visitor._id, fullName: visitor.fullName, badgeNumber: visitor.badgeNumber, checkIn: visitor.checkIn, checkInTime: formatKenyaTime(visitor.checkIn) } });
+    } catch (error) {
+        console.error('Visitor check-in error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.put('/api/visitor/checkout/:badgeNumber', async (req, res) => {
+    try {
+        const visitor = await Visitor.findOne({ badgeNumber: req.params.badgeNumber });
+        if (!visitor) {
+            return res.status(404).json({ success: false, message: 'Visitor not found' });
+        }
+        if (visitor.status === 'Checked Out') {
+            return res.status(400).json({ success: false, message: 'Visitor already checked out' });
+        }
+        const kenyaNow = getKenyaTime();
+        visitor.checkOut = kenyaNow;
+        visitor.status = 'Checked Out';
+        await visitor.save();
+        const duration = ((visitor.checkOut - visitor.checkIn) / 1000 / 60).toFixed(0);
+        res.json({ success: true, message: 'Visitor checked out successfully!', visitor: { id: visitor._id, fullName: visitor.fullName, badgeNumber: visitor.badgeNumber, checkOut: visitor.checkOut, checkOutTime: formatKenyaTime(visitor.checkOut), duration: duration + ' minutes' } });
+    } catch (error) {
+        console.error('Visitor check-out error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/visitors/today', async (req, res) => {
+    try {
+        const kenyaToday = getKenyaDate();
+        const tomorrow = new Date(kenyaToday);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const visitors = await Visitor.find({ checkIn: { $gte: kenyaToday, $lt: tomorrow } }).sort({ checkIn: -1 });
+        const active = visitors.filter(v => v.status === 'Checked In');
+        const completed = visitors.filter(v => v.status === 'Checked Out');
+        res.json({ success: true, date: kenyaToday, total: visitors.length, active: active.length, completed: completed.length, visitors: visitors.map(v => ({ ...v.toObject(), checkInTime: formatKenyaTime(v.checkIn), checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null })) });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// STUDENT MANAGEMENT API ROUTES
+// ============================================
+
+app.get('/api/students', async (req, res) => {
+    try {
+        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+        res.json({ success: true, students });
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/students/:id', async (req, res) => {
+    try {
+        const student = await Student.findOne({ studentId: req.params.id });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        res.json({ success: true, student });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.post('/api/students', async (req, res) => {
+    try {
+        const { name, grade, gender, type, guardian, pin } = req.body;
+        if (!name || !grade || !gender) {
+            return res.status(400).json({ success: false, message: 'Name, Grade, and Gender are required' });
+        }
+        const studentId = await generateStudentId();
+        const student = new Student({
+            studentId,
+            name,
+            grade,
+            gender,
+            type: type || 'Day Scholar',
+            guardian: guardian || '',
+            pin: pin || '1234',
+            paid: 0,
+            isActive: true
+        });
+        await student.save();
+        res.status(201).json({
+            success: true,
+            message: `Student ${studentId} added successfully!`,
+            student
+        });
+    } catch (error) {
+        console.error('Error adding student:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.put('/api/students/:id', async (req, res) => {
+    try {
+        const { name, grade, gender, type, guardian, pin } = req.body;
+        const student = await Student.findOne({ studentId: req.params.id });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        if (name) student.name = name;
+        if (grade) student.grade = grade;
+        if (gender) student.gender = gender;
+        if (type) student.type = type;
+        if (guardian) student.guardian = guardian;
+        if (pin) student.pin = pin;
+        student.updatedAt = new Date();
+        await student.save();
+        res.json({
+            success: true,
+            message: `Student ${student.studentId} updated successfully!`,
+            student
+        });
+    } catch (error) {
+        console.error('Error updating student:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.delete('/api/students/:id', async (req, res) => {
+    try {
+        const student = await Student.findOne({ studentId: req.params.id });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        student.isActive = false;
+        await student.save();
+        res.json({
+            success: true,
+            message: `Student ${student.studentId} deleted successfully!`
+        });
+    } catch (error) {
+        console.error('Error deleting student:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.delete('/api/students/clear', async (req, res) => {
+    try {
+        await Student.deleteMany({});
+        res.json({ success: true, message: 'All students cleared successfully!' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.post('/api/student/login', async (req, res) => {
+    try {
+        const { studentId, pin } = req.body;
+        if (!studentId || !pin) {
+            return res.status(400).json({
+                success: false,
+                message: 'Student ID and PIN are required'
+            });
+        }
+        const student = await Student.findOne({ studentId, isActive: true });
+        if (!student) {
+            return res.status(404).json({
+                success: false,
+                message: 'Student not found'
+            });
+        }
+        if (student.pin !== pin) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid PIN'
+            });
+        }
+        res.json({
+            success: true,
+            message: 'Login successful',
+            student: {
+                studentId: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                type: student.type,
+                guardian: student.guardian
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// STUDENT FEE MANAGEMENT ROUTES
+// ============================================
+
+app.get('/api/students/fees', async (req, res) => {
+    try {
+        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+        const studentFees = students.map(student => {
+            const feeData = getFeeStructure(student.grade, student.type);
+            const paid = student.paid || 0;
+            const totalFees = feeData.total || 0;
+            const balance = totalFees - paid;
+            return {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                studentType: student.type,
+                isBoarding: student.type === 'Boarder',
+                totalFees: totalFees,
+                paid: paid,
+                balance: balance,
+                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
+            };
+        });
+        const totalStudents = studentFees.length;
+        const totalDayScholars = studentFees.filter(s => s.studentType === 'Day Scholar').length;
+        const totalBoarders = studentFees.filter(s => s.studentType === 'Boarder').length;
+        const totalPaid = studentFees.reduce((sum, s) => sum + s.paid, 0);
+        const totalBalance = studentFees.reduce((sum, s) => sum + s.balance, 0);
+        res.json({
+            success: true,
+            students: studentFees,
+            totalStudents,
+            totalDayScholars,
+            totalBoarders,
+            totalPaid,
+            totalBalance
+        });
+    } catch (error) {
+        console.error('Error fetching student fees:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/students/fees/:studentId', async (req, res) => {
+    try {
+        const student = await Student.findOne({ studentId: req.params.studentId, isActive: true });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        const feeData = getFeeStructure(student.grade, student.type);
+        const paid = student.paid || 0;
+        const totalFees = feeData.total || 0;
+        const balance = totalFees - paid;
+        res.json({
+            success: true,
+            student: {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                studentType: student.type,
+                isBoarding: student.type === 'Boarder'
+            },
+            fees: {
+                total: totalFees,
+                paid: paid,
+                balance: balance,
+                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
+            },
+            feeBreakdown: feeData
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.post('/api/students/payment', async (req, res) => {
+    try {
+        const { studentId, amount, category, method, reference, notes } = req.body;
+        if (!studentId || !amount || amount <= 0) {
+            return res.status(400).json({ success: false, message: 'Student ID and valid amount are required' });
+        }
+        const student = await Student.findOne({ studentId, isActive: true });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        student.paid = (student.paid || 0) + amount;
+        student.updatedAt = new Date();
+        await student.save();
+        res.json({
+            success: true,
+            message: `Payment of KES ${amount.toLocaleString()} recorded for ${student.name}`,
+            student: {
+                id: student.studentId,
+                name: student.name,
+                paid: student.paid,
+                balance: getFeeStructure(student.grade, student.type).total - student.paid
+            }
+        });
+    } catch (error) {
+        console.error('Error recording payment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+// ============================================
+// STUDENT ASSESSMENT ROUTES
+// ============================================
+
+app.get('/api/assessments/students/:grade', async (req, res) => {
+    try {
+        const { grade } = req.params;
+        const students = await Student.find({ grade: grade, isActive: true }).sort({ studentId: 1 });
+        res.json({
+            success: true,
+            students: students.map(s => ({
+                studentId: s.studentId,
+                name: s.name,
+                grade: s.grade,
+                gender: s.gender,
+                type: s.type
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/assessments/student/:studentId', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const assessment = await StudentAssessment.findOne({ studentId });
+        if (!assessment) {
+            return res.status(404).json({ success: false, message: 'Assessment not found for this student' });
+        }
+        res.json({ success: true, assessment });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// SUBJECT CONFIG ROUTES
 // ============================================
 
 app.get('/api/assessments/subjects/:grade', async (req, res) => {
@@ -1757,7 +2399,6 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
                 period: period || '',
                 subjects: defaultSubjects,
                 rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
-                // ✅ UPDATED RUBRIC VALUES
                 rubric: {
                     exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
                     meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
@@ -1832,7 +2473,6 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             period: period || '',
             subjects: cleanedSubjects,
             rankLevels: rankLevels || ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
-            // ✅ UPDATED RUBRIC VALUES
             rubric: rubric || {
                 exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
                 meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
@@ -2217,7 +2857,6 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
 // ============================================
 // HOLIDAY ASSIGNMENTS - COMPLETE FIXED VERSION
 // ============================================
@@ -2370,7 +3009,90 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
     }
 });
 
-// DOWNLOAD assignment file - SUPPORTS CLOUDINARY & LOCAL
+// PUT - Update assignment
+app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) => {
+    try {
+        console.log('📝 Update request for:', req.params.id);
+        
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+
+        const { title, grade, subject, description, isActive } = req.body;
+        
+        // Update text fields
+        if (title) assignment.title = title;
+        if (grade) assignment.grade = grade;
+        if (subject !== undefined) assignment.subject = subject;
+        if (description !== undefined) assignment.description = description;
+        if (isActive !== undefined) assignment.isActive = isActive === 'true' || isActive === true;
+
+        // Handle file upload
+        if (req.file) {
+            console.log('📄 New file uploaded:', req.file.originalname);
+            
+            // Delete old file from Cloudinary if exists
+            if (assignment.cloudinaryPublicId && isCloudinaryConfigured()) {
+                try {
+                    await cloudinary.uploader.destroy(assignment.cloudinaryPublicId);
+                    console.log('🗑️ Deleted old file from Cloudinary');
+                } catch (e) {
+                    console.log('⚠️ Could not delete old file from Cloudinary:', e.message);
+                }
+            }
+            
+            // Delete old local file if exists
+            const oldFilename = path.basename(assignment.fileUrl);
+            const oldFilePath = path.join(__dirname, 'uploads', 'assignments', oldFilename);
+            if (fs.existsSync(oldFilePath) && !assignment.cloudinaryPublicId) {
+                fs.unlinkSync(oldFilePath);
+                console.log('🗑️ Deleted old local file');
+            }
+            
+            // Upload new file to Cloudinary
+            const fileBuffer = fs.readFileSync(req.file.path);
+            let fileUrl = '';
+            let cloudinaryPublicId = '';
+            
+            try {
+                const cloudinaryResult = await uploadToCloudinary(fileBuffer, req.file.originalname, 'assignments');
+                fileUrl = cloudinaryResult.secure_url;
+                cloudinaryPublicId = cloudinaryResult.public_id;
+                console.log('✅ Uploaded new file to Cloudinary:', fileUrl);
+            } catch (cloudinaryError) {
+                console.error('⚠️ Cloudinary upload failed, using local file:', cloudinaryError.message);
+                fileUrl = `/uploads/assignments/${req.file.filename}`;
+            }
+            
+            assignment.fileUrl = fileUrl;
+            assignment.cloudinaryPublicId = cloudinaryPublicId || '';
+            assignment.fileName = req.file.originalname;
+            assignment.fileType = req.file.originalname.split('.').pop().toLowerCase();
+            assignment.fileSize = req.file.size;
+            
+            // Delete temp file
+            if (fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+            }
+        }
+
+        assignment.updatedAt = new Date();
+        await assignment.save();
+
+        console.log('✅ Assignment updated successfully:', assignment._id);
+        res.json({ 
+            success: true, 
+            message: 'Assignment updated successfully!', 
+            assignment 
+        });
+    } catch (error) {
+        console.error('❌ Error updating assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// DOWNLOAD assignment file - ENHANCED VERSION
 app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     try {
         console.log('📥 Download request for:', req.params.id);
@@ -2384,15 +3106,16 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
         console.log('📁 File URL:', assignment.fileUrl);
         console.log('☁️ Cloudinary ID:', assignment.cloudinaryPublicId || 'None');
         
-        // ✅ METHOD 1: Check for Cloudinary URL
+        // METHOD 1: Check if it's a Cloudinary URL
         if (assignment.fileUrl && assignment.fileUrl.includes('cloudinary.com')) {
-            console.log('☁️ Redirecting to Cloudinary URL:', assignment.fileUrl);
+            console.log('☁️ Redirecting to Cloudinary URL');
             return res.redirect(assignment.fileUrl);
         }
         
-        // ✅ METHOD 2: Check for Cloudinary Public ID
+        // METHOD 2: Check if we have a Cloudinary Public ID
         if (assignment.cloudinaryPublicId) {
             try {
+                const cloudinary = require('cloudinary').v2;
                 const url = cloudinary.url(assignment.cloudinaryPublicId, {
                     resource_type: 'auto',
                     secure: true
@@ -2407,18 +3130,18 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
             }
         }
         
-        // ✅ METHOD 3: Try local file (fallback)
+        // METHOD 3: Try local file download
         const filename = path.basename(assignment.fileUrl);
         const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
         
-        console.log('📁 Looking for local file:', filePath);
+        console.log('📁 Looking for local file at:', filePath);
         
         if (fs.existsSync(filePath)) {
-            console.log('✅ Found local file, sending download...');
+            console.log('✅ Found local file');
             return res.download(filePath, assignment.fileName || filename);
         }
         
-        // ✅ METHOD 4: Try alternative paths
+        // METHOD 4: Try alternative paths
         const altPaths = [
             path.join(__dirname, 'uploads', assignment.fileName || filename),
             path.join(__dirname, 'uploads/assignments', assignment.fileName || filename),
@@ -2433,10 +3156,23 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
             }
         }
         
-        // ❌ File not found anywhere
+        // METHOD 5: File not found - try to recover by checking if the file was uploaded to Cloudinary
+        // but not properly saved in the database
+        if (assignment.fileUrl && !assignment.fileUrl.includes('cloudinary.com')) {
+            // Try to find the file in the uploads folder with a different name
+            const files = fs.readdirSync(path.join(__dirname, 'uploads', 'assignments'));
+            for (const file of files) {
+                // Check if the file is similar
+                if (file.includes(filename.split('.')[0]) || file.includes(assignment.fileName)) {
+                    const foundPath = path.join(__dirname, 'uploads', 'assignments', file);
+                    console.log('✅ Found matching file:', foundPath);
+                    return res.download(foundPath, assignment.fileName || file);
+                }
+            }
+        }
+        
         console.error('❌ File not found for assignment:', assignment.title);
         console.error('❌ Tried URL:', assignment.fileUrl);
-        console.error('❌ Tried Cloudinary ID:', assignment.cloudinaryPublicId || 'None');
         
         return res.status(404).json({ 
             success: false, 
@@ -2554,7 +3290,7 @@ app.post('/api/holiday-assignments/restore/:id', async (req, res) => {
     }
 });
 
-// RECOVER - Try to fix broken assignments
+// RECOVER - Try to recover a missing file
 app.post('/api/holiday-assignments/recover/:id', async (req, res) => {
     try {
         const assignment = await HolidayAssignment.findById(req.params.id);
@@ -2564,64 +3300,82 @@ app.post('/api/holiday-assignments/recover/:id', async (req, res) => {
         
         const results = {
             title: assignment.title,
-            cloudinaryUrl: null,
-            localFile: null,
             recovered: false,
-            message: ''
+            method: null,
+            fileUrl: null
         };
         
-        // ✅ Check if Cloudinary URL exists
-        if (assignment.cloudinaryPublicId) {
-            try {
-                const url = cloudinary.url(assignment.cloudinaryPublicId, { 
-                    resource_type: 'auto',
-                    secure: true 
-                });
-                results.cloudinaryUrl = url;
-                results.recovered = true;
-                results.message = 'Found on Cloudinary';
-                
-                // Update the fileUrl if different
-                if (assignment.fileUrl !== url) {
-                    assignment.fileUrl = url;
+        const filename = path.basename(assignment.fileUrl);
+        const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
+        
+        // Check if file exists locally
+        if (fs.existsSync(filePath)) {
+            results.recovered = true;
+            results.method = 'local file exists';
+            results.fileUrl = assignment.fileUrl;
+            console.log('✅ File exists locally:', filePath);
+            
+            // If it exists locally but not on Cloudinary, upload it
+            if (isCloudinaryConfigured()) {
+                try {
+                    console.log('📤 Uploading to Cloudinary...');
+                    const fileBuffer = fs.readFileSync(filePath);
+                    const cloudinaryResult = await uploadToCloudinary(fileBuffer, assignment.fileName || filename, 'assignments');
+                    
+                    assignment.fileUrl = cloudinaryResult.secure_url;
+                    assignment.cloudinaryPublicId = cloudinaryResult.public_id;
                     await assignment.save();
-                    results.message += ' - URL updated';
+                    
+                    results.recovered = true;
+                    results.method = 'migrated to Cloudinary';
+                    results.fileUrl = cloudinaryResult.secure_url;
+                    console.log('✅ Migrated to Cloudinary:', cloudinaryResult.secure_url);
+                } catch (e) {
+                    console.log('⚠️ Cloudinary migration failed:', e.message);
                 }
-                console.log('✅ Found on Cloudinary:', url);
-            } catch (e) {
-                console.log('❌ Cloudinary check failed:', e.message);
-                results.message = 'Cloudinary check failed: ' + e.message;
             }
-        }
-        
-        // ✅ Check if file exists locally
-        if (!results.recovered) {
-            const filename = path.basename(assignment.fileUrl);
-            const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
-            if (fs.existsSync(filePath)) {
-                results.localFile = filePath;
-                results.recovered = true;
-                results.message = 'Found locally';
-                console.log('✅ Found locally:', filePath);
-            }
-        }
-        
-        // ✅ If not recovered, try alternative paths
-        if (!results.recovered) {
-            const filename = path.basename(assignment.fileUrl);
+        } else {
+            // Try alternative paths
             const altPaths = [
-                path.join(__dirname, 'uploads', filename),
+                path.join(__dirname, 'uploads', assignment.fileName || filename),
                 path.join(__dirname, 'uploads/assignments', assignment.fileName || filename),
+                path.join(__dirname, 'public/uploads/assignments', filename),
             ];
+            
             for (const alt of altPaths) {
                 if (fs.existsSync(alt)) {
-                    results.localFile = alt;
                     results.recovered = true;
-                    results.message = 'Found at alternative path';
+                    results.method = 'found at alternative path';
+                    results.fileUrl = alt;
                     console.log('✅ Found at alternative path:', alt);
                     break;
                 }
             }
+        }
+        
+        // If still not recovered, check if the file exists in the uploads folder with a different name
+        if (!results.recovered) {
+            const uploadDir = path.join(__dirname, 'uploads', 'assignments');
+            if (fs.existsSync(uploadDir)) {
+                const files = fs.readdirSync(uploadDir);
+                for (const file of files) {
+                    if (file.includes(filename.split('.')[0]) || (assignment.fileName && file.includes(assignment.fileName.split('.')[0]))) {
+                        const foundPath = path.join(uploadDir, file);
+                        results.recovered = true;
+                        results.method = 'found matching file';
+                        results.fileUrl = `/uploads/assignments/${file}`;
+                        console.log('✅ Found matching file:', foundPath);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // If recovered by finding a matching file, update the database
+        if (results.recovered && results.fileUrl && results.fileUrl !== assignment.fileUrl) {
+            assignment.fileUrl = results.fileUrl;
+            await assignment.save();
+            console.log('✅ Updated database with new file URL:', results.fileUrl);
         }
         
         res.json({
@@ -2631,7 +3385,6 @@ app.post('/api/holiday-assignments/recover/:id', async (req, res) => {
                 title: assignment.title,
                 grade: assignment.grade,
                 fileUrl: assignment.fileUrl,
-                fileName: assignment.fileName,
                 cloudinaryPublicId: assignment.cloudinaryPublicId || 'None'
             },
             recovery: results
@@ -2703,56 +3456,6 @@ app.get('/api/holiday-assignments/stats', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-// PUT - Update assignment
-app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) => {
-    try {
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
-        }
-
-        const { title, grade, subject, description, isActive } = req.body;
-        
-        if (title) assignment.title = title;
-        if (grade) assignment.grade = grade;
-        if (subject !== undefined) assignment.subject = subject;
-        if (description !== undefined) assignment.description = description;
-        if (isActive !== undefined) assignment.isActive = isActive === 'true';
-
-        // Handle file upload
-        if (req.file) {
-            // Delete old file from Cloudinary if exists
-            if (assignment.cloudinaryPublicId && isCloudinaryConfigured()) {
-                try {
-                    await cloudinary.uploader.destroy(assignment.cloudinaryPublicId);
-                } catch (e) {}
-            }
-            
-            // Upload new file
-            const fileBuffer = fs.readFileSync(req.file.path);
-            const cloudinaryResult = await uploadToCloudinary(fileBuffer, req.file.originalname, 'assignments');
-            
-            assignment.fileUrl = cloudinaryResult.secure_url;
-            assignment.cloudinaryPublicId = cloudinaryResult.public_id;
-            assignment.fileName = req.file.originalname;
-            assignment.fileType = req.file.originalname.split('.').pop().toLowerCase();
-            assignment.fileSize = req.file.size;
-            
-            if (fs.existsSync(req.file.path)) {
-                fs.unlinkSync(req.file.path);
-            }
-        }
-
-        assignment.updatedAt = new Date();
-        await assignment.save();
-
-        res.json({ success: true, message: 'Assignment updated successfully!', assignment });
-    } catch (error) {
-        console.error('Error updating assignment:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
 // ============================================
 // CLERK DASHBOARD API ROUTES
 // ============================================
