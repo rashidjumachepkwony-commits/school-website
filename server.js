@@ -10,9 +10,19 @@ const crypto = require('crypto');
 const logger = require('./logger');
 
 // ============================================
+// LOAD ENVIRONMENT VARIABLES FIRST
+// ============================================
+dotenv.config();
+
+// ============================================
 // CLOUDINARY CONFIGURATION
 // ============================================
 const cloudinary = require('cloudinary').v2;
+
+console.log('🔍 Cloudinary Configuration Status:');
+console.log('  Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? '✅ Set' : '❌ Missing');
+console.log('  API Key:', process.env.CLOUDINARY_API_KEY ? '✅ Set' : '❌ Missing');
+console.log('  API Secret:', process.env.CLOUDINARY_API_SECRET ? '✅ Set' : '❌ Missing');
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -22,8 +32,16 @@ cloudinary.config({
 
 console.log('✅ Cloudinary configured');
 
-// Load environment variables
-dotenv.config();
+// Test Cloudinary connection
+(async function testCloudinary() {
+    try {
+        const result = await cloudinary.api.ping();
+        console.log('✅ Cloudinary connection test:', result.status || 'Success');
+    } catch (error) {
+        console.error('❌ Cloudinary connection failed:', error.message);
+        console.log('⚠️ Please check your Cloudinary credentials in .env file');
+    }
+})();
 
 const app = express();
 
@@ -83,13 +101,6 @@ function formatKenyaDate(date) {
     return d.toLocaleDateString('en-KE', { timeZone: 'Africa/Nairobi', year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function calculatePerformanceLevel(percentage) {
-    if (percentage >= 75) return 'Exceeding Expectation';
-    if (percentage >= 50) return 'Meeting Expectation';
-    if (percentage >= 26) return 'Approaching Expectation';
-    return 'Below Expectation';
-}
-
 // ============================================
 // PERFORMANCE RUBRIC - UPDATED
 // ============================================
@@ -147,6 +158,7 @@ function calculateAssessmentPerformance(score, maxScore) {
         color: getPerformanceColor(level)
     };
 }
+
 // ============================================
 // CALCULATE STUDENT OVERALL - FIXED
 // ============================================
@@ -162,28 +174,56 @@ function calculateStudentOverall(assessments) {
     
     let totalScore = 0;
     let totalMaxScore = 0;
-    let validCount = 0;
     
     assessments.forEach(a => {
         totalScore += a.score || 0;
         totalMaxScore += a.maxScore || 0;
-        validCount++;
     });
     
-    // ✅ Calculate average percentage correctly
     const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     const performanceLevel = calculatePerformanceLevel(avgPercentage);
     
     return {
         totalScore: totalScore,
-        averageScore: parseFloat(avgPercentage.toFixed(1)),  // ✅ Average as percentage
+        averageScore: parseFloat(avgPercentage.toFixed(1)),
         performanceLevel: performanceLevel,
         overallRating: getPerformanceRating(performanceLevel)
     };
 }
 
 // ============================================
-// CLOUDINARY UPLOAD USING BASE64 - ADD THIS FUNCTION
+// CLOUDINARY UPLOAD HELPER - FIXED
+// ============================================
+async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') {
+    return new Promise((resolve, reject) => {
+        console.log(`📤 Uploading to Cloudinary: ${filename}`);
+        console.log(`📁 Folder: ${folder}`);
+        console.log(`📦 File size: ${fileBuffer.length} bytes`);
+        
+        cloudinary.uploader.upload_stream(
+            {
+                folder: folder,
+                resource_type: 'auto',
+                public_id: `${Date.now()}_${filename.replace(/\.[^.]+$/, '')}`,
+                use_filename: true,
+                unique_filename: true,
+                timeout: 60000
+            },
+            (error, result) => {
+                if (error) {
+                    console.error('❌ Cloudinary upload error:', error);
+                    reject(new Error(error.message || 'Cloudinary upload failed'));
+                } else {
+                    console.log('✅ Cloudinary upload success:', result.secure_url);
+                    resolve(result);
+                }
+            }
+        ).end(fileBuffer);
+    });
+}
+
+// ============================================
+// CLOUDINARY UPLOAD USING BASE64 - ADDED
 // ============================================
 async function uploadToCloudinaryBase64(fileBuffer, filename, folder = 'assignments') {
     try {
@@ -221,6 +261,7 @@ async function uploadToCloudinaryBase64(fileBuffer, filename, folder = 'assignme
         throw error;
     }
 }
+
 // ============================================
 // FUNCTION TO CHECK IF CLOUDINARY IS CONFIGURED
 // ============================================
@@ -239,7 +280,7 @@ function generateStudentReportPDF(student) {
             const doc = new PDFDocument({
                 margin: 25,
                 size: 'A4',
-                layout: 'portrait'  // Portrait for better readability
+                layout: 'portrait'
             });
             const chunks = [];
 
@@ -367,7 +408,7 @@ function generateStudentReportPDF(student) {
             });
 
             // ============================================
-            // PERFORMANCE RUBRIC / GRADING SCALE
+            // PERFORMANCE RUBRIC / GRADING SCALE - UPDATED
             // ============================================
             const rubricY = infoY + 60;
             
@@ -381,12 +422,12 @@ function generateStudentReportPDF(student) {
                 .fillColor(colors.gray)
                 .text('4-Point Proficiency Scale', 35, rubricY + 12);
 
-            // Rubric boxes
+            // ✅ UPDATED RUBRIC VALUES
             const rubricData = [
                 { label: 'Exceeding Expectations', range: '75-100%', color: colors.success, bg: colors.successLight },
-                { label: 'Meeting Expectations', range: '50-74%', color: colors.info, bg: colors.infoLight },
-                { label: 'Approaching Expectations', range: '26-49%', color: colors.warning, bg: colors.warningLight },
-                { label: 'Below Expectations', range: '0-25%', color: colors.danger, bg: colors.dangerLight }
+                { label: 'Meeting Expectations', range: '41-74%', color: colors.info, bg: colors.infoLight },
+                { label: 'Approaching Expectations', range: '21-40%', color: colors.warning, bg: colors.warningLight },
+                { label: 'Below Expectations', range: '0-20%', color: colors.danger, bg: colors.dangerLight }
             ];
 
             let rubricX = 35;
@@ -413,7 +454,7 @@ function generateStudentReportPDF(student) {
             });
 
             // ============================================
-            // PERFORMANCE SUMMARY - Large, Visible
+            // PERFORMANCE SUMMARY - FIXED DISPLAY
             // ============================================
             const level = student.performanceLevel || 'Approaching Expectation';
             const levelColors = {
@@ -439,9 +480,9 @@ function generateStudentReportPDF(student) {
                 .fillColor(perfColors.text)
                 .text(`${perfColors.icon} ${level}`, 50, perfY + 10);
 
-            // Stats
+            // ✅ FIXED: Display total score and average correctly
             const totalScore = student.totalScore || 0;
-            const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
+            const avgScore = student.averageScore !== undefined && student.averageScore !== null ? student.averageScore.toFixed(1) : '0';
             const rating = getPerformanceRating(level);
 
             doc.fontSize(11)
@@ -534,8 +575,10 @@ function generateStudentReportPDF(student) {
                     .text(a.maxScore.toString(), xPos, rowY + 4, { width: colWidths[2] - 5, align: 'center' });
                 xPos += colWidths[2];
 
-                // Percentage
-                const pctColor = percentage >= 75 ? colors.success : (percentage >= 50 ? colors.info : (percentage >= 26 ? colors.warning : colors.danger));
+                // Percentage - UPDATED
+                const pctColor = percentage >= 75 ? colors.success : 
+                                 (percentage >= 41 ? colors.info : 
+                                 (percentage >= 21 ? colors.warning : colors.danger));
                 doc.fillColor(pctColor)
                     .font('Helvetica-Bold')
                     .text(percentage.toFixed(0) + '%', xPos, rowY + 4, { width: colWidths[3] - 5, align: 'center' });
@@ -592,20 +635,22 @@ function generateStudentReportPDF(student) {
                 });
 
                 // ============================================
-                // STRENGTHS & AREAS FOR IMPROVEMENT
+                // STRENGTHS & AREAS FOR IMPROVEMENT - UPDATED
                 // ============================================
                 const swY = valuesY + 54;
 
                 if (swY < 720) {
-                    // Calculate strengths and weaknesses properly
                     const allAssessments = student.assessments || [];
+                    
+                    // ✅ Strengths: >= 50%
                     const strengths = allAssessments
                         .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
                         .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100))
                         .slice(0, 4);
 
+                    // ✅ Weaknesses: < 41%
                     const weaknesses = allAssessments
-                        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 50)
+                        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 41)
                         .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100))
                         .slice(0, 4);
 
@@ -703,7 +748,6 @@ function generateStudentReportPDF(student) {
             // ============================================
             // FOOTER - Professional
             // ============================================
-            // Bottom decorative line
             const footerY = 745;
             doc.moveTo(35, footerY)
                 .lineTo(560, footerY)
@@ -731,27 +775,23 @@ function generateStudentReportPDF(student) {
 }
 
 // ============================================
-// HELPER: Generate Teacher Feedback
+// HELPER: Generate Teacher Feedback - UPDATED
 // ============================================
 function generateTeacherFeedback(student) {
     const level = student.performanceLevel || 'Approaching Expectation';
-    const totalScore = student.totalScore || 0;
-    const avgScore = student.averageScore || 0;
     
     let feedback = '';
     
-    // Opening statement
     if (level === 'Exceeding Expectation') {
-        feedback = `Excellent performance! ${student.studentName || 'The student'} is demonstrating outstanding mastery of the learning outcomes. `;
+        feedback = `Excellent performance! ${student.studentName || 'The student'} is demonstrating outstanding mastery of the learning outcomes (75-100%). `;
     } else if (level === 'Meeting Expectation') {
-        feedback = `Good progress! ${student.studentName || 'The student'} is meeting the expected learning outcomes. `;
+        feedback = `Good progress! ${student.studentName || 'The student'} is meeting the expected learning outcomes (41-74%). `;
     } else if (level === 'Approaching Expectation') {
-        feedback = `${student.studentName || 'The student'} is making progress and approaching the expected learning outcomes. `;
+        feedback = `${student.studentName || 'The student'} is making progress and approaching the expected learning outcomes (21-40%). `;
     } else {
-        feedback = `${student.studentName || 'The student'} needs additional support to meet the expected learning outcomes. `;
+        feedback = `${student.studentName || 'The student'} needs additional support to meet the expected learning outcomes (0-20%). `;
     }
     
-    // Strengths
     const strengths = (student.assessments || [])
         .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
         .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100));
@@ -760,16 +800,14 @@ function generateTeacherFeedback(student) {
         feedback += `Strong performance in ${strengths.slice(0, 3).map(s => s.subject).join(', ')}. `;
     }
     
-    // Areas for improvement
     const weaknesses = (student.assessments || [])
-        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 50)
+        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 41)
         .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100));
     
     if (weaknesses.length > 0) {
         feedback += `Areas for improvement: ${weaknesses.slice(0, 3).map(s => s.subject).join(', ')}. `;
     }
     
-    // Encouraging closing
     if (level === 'Exceeding Expectation' || level === 'Meeting Expectation') {
         feedback += `Continue the excellent work. We are proud of your progress!`;
     } else {
@@ -778,6 +816,7 @@ function generateTeacherFeedback(student) {
     
     return feedback;
 }
+
 // ============================================
 // PROFESSIONAL CLASS REPORT - LANDSCAPE
 // ============================================
@@ -868,11 +907,11 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             
             doc.moveDown(2);
             
-            // Legend
+            // ✅ UPDATED: Class report legend
             doc.fontSize(8)
                .font('Helvetica-Bold')
                .fillColor('#6c757d')
-               .text('EE: Exceeding (75-100%)   ME: Meeting (50-74%)   AE: Approaching (26-49%)   BE: Below (0-25%)   Rank: 1st, 2nd, 3rd', 45, doc.y);
+               .text('EE: Exceeding (75-100%)   ME: Meeting (41-74%)   AE: Approaching (21-40%)   BE: Below (0-20%)   Rank: 1st, 2nd, 3rd', 45, doc.y);
             doc.moveDown(1);
             
             // Get all subjects
@@ -1015,9 +1054,10 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                     const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
                     if (assessment) {
                         const percentage = assessment.maxScore > 0 ? ((assessment.score / assessment.maxScore) * 100) : 0;
+                        // ✅ UPDATED: Subject color logic
                         let color = '#28a745';
-                        if (percentage < 26) color = '#dc3545';
-                        else if (percentage < 50) color = '#e6a800';
+                        if (percentage < 21) color = '#dc3545';
+                        else if (percentage < 41) color = '#e6a800';
                         else if (percentage < 75) color = '#0d6efd';
                         doc.fillColor(color)
                            .font('Helvetica-Bold')
@@ -1196,8 +1236,6 @@ function generateStaffReportPDF(report, periodLabel) {
 // FIX PAST RECORDS
 // ============================================
 async function fixPastRecords() {
-    // Kept as a no-op for backward compatibility with old clients. Timestamps
-    // are stored as UTC instants and must never be shifted in bulk.
     return { fixed: 0 };
 }
 
@@ -1458,14 +1496,20 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model('Student', studentSchema);
 
-// Subject Config Schema
+// Subject Config Schema - UPDATED RUBRIC
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
     period: { type: String, default: '' },
     subjects: [{ name: { type: String, required: true }, max: { type: Number, required: true } }],
     rankLevels: { type: [String], default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] },
-    rubric: { type: mongoose.Schema.Types.Mixed, default: {} },
+    // ✅ UPDATED RUBRIC VALUES
+    rubric: {
+        exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
+        meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
+        approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
+        below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+    },
     updatedAt: { type: Date, default: Date.now }
 }, { autoIndex: false, collection: 'subjectconfigs_new' });
 
@@ -1500,219 +1544,44 @@ const studentAssessmentSchema = new mongoose.Schema({
 
 const StudentAssessment = mongoose.model('StudentAssessment', studentAssessmentSchema);
 
-// Holiday Assignment Schema - COMPLETE
+// Holiday Assignment Schema - Updated with soft delete
 const holidayAssignmentSchema = new mongoose.Schema({
-    // Required fields
-    title: { 
-        type: String, 
-        required: [true, 'Title is required'],
-        trim: true,
-        maxlength: [200, 'Title cannot exceed 200 characters']
-    },
-    grade: { 
-        type: String, 
-        required: [true, 'Grade is required'],
-        trim: true
-    },
-    fileName: { 
-        type: String, 
-        required: [true, 'File name is required'],
-        trim: true
-    },
-    fileUrl: { 
-        type: String, 
-        required: [true, 'File URL is required'],
-        trim: true
-    },
-    
-    // Optional fields
-    subject: { 
-        type: String, 
-        default: '',
-        trim: true,
-        maxlength: [100, 'Subject cannot exceed 100 characters']
-    },
-    description: { 
-        type: String, 
-        default: '',
-        trim: true,
-        maxlength: [500, 'Description cannot exceed 500 characters']
-    },
-    fileType: { 
-        type: String, 
-        default: 'pdf',
-        enum: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar']
-    },
-    fileSize: { 
-        type: Number, 
-        default: 0,
-        min: [0, 'File size cannot be negative']
-    },
-    uploadedBy: { 
-        type: String, 
-        default: 'Admin',
-        trim: true
-    },
-    cloudinaryPublicId: { 
-        type: String, 
-        default: '',
-        trim: true
-    },
-    
-    // ✅ Soft delete fields
-    isActive: { 
-        type: Boolean, 
-        default: true,
-        index: true
-    },
-    deletedAt: { 
-        type: Date, 
-        default: null 
-    },
-    deletedBy: { 
-        type: String, 
-        default: '',
-        trim: true
-    },
-    deletedReason: { 
-        type: String, 
-        default: '',
-        trim: true,
-        maxlength: [200, 'Reason cannot exceed 200 characters']
-    },
-    lastAccessed: { 
-        type: Date, 
-        default: null 
-    },
-    
-    // Timestamps
-    createdAt: { 
-        type: Date, 
-        default: Date.now,
-        index: true
-    },
-    updatedAt: { 
-        type: Date, 
-        default: Date.now 
-    }
-}, { 
-    collection: 'holidayassignments',
-    timestamps: true // This automatically manages createdAt and updatedAt
-});
-
-// ✅ Virtual field for file icon
-holidayAssignmentSchema.virtual('fileIcon').get(function() {
-    const icons = {
-        'pdf': 'fa-file-pdf',
-        'doc': 'fa-file-word',
-        'docx': 'fa-file-word',
-        'xls': 'fa-file-excel',
-        'xlsx': 'fa-file-excel',
-        'jpg': 'fa-file-image',
-        'jpeg': 'fa-file-image',
-        'png': 'fa-file-image',
-        'gif': 'fa-file-image',
-        'txt': 'fa-file-alt',
-        'zip': 'fa-file-archive',
-        'rar': 'fa-file-archive'
-    };
-    return icons[this.fileType] || 'fa-file-alt';
-});
-
-// ✅ Virtual field for file color
-holidayAssignmentSchema.virtual('fileColor').get(function() {
-    const colors = {
-        'pdf': '#dc3545',
-        'doc': '#2b5797',
-        'docx': '#2b5797',
-        'xls': '#217346',
-        'xlsx': '#217346',
-        'jpg': '#17a2b8',
-        'jpeg': '#17a2b8',
-        'png': '#17a2b8',
-        'gif': '#17a2b8',
-        'txt': '#6c757d',
-        'zip': '#ffc107',
-        'rar': '#ffc107'
-    };
-    return colors[this.fileType] || '#6c757d';
-});
-
-// ✅ Virtual for formatted file size
-holidayAssignmentSchema.virtual('formattedFileSize').get(function() {
-    if (this.fileSize < 1024) return this.fileSize + ' B';
-    if (this.fileSize < 1024 * 1024) return (this.fileSize / 1024).toFixed(2) + ' KB';
-    return (this.fileSize / (1024 * 1024)).toFixed(2) + ' MB';
-});
-
-// ✅ Virtual for isDeleted status
-holidayAssignmentSchema.virtual('isDeleted').get(function() {
-    return this.isActive === false;
-});
-
-// ✅ Set to include virtuals when converting to JSON
-holidayAssignmentSchema.set('toJSON', { virtuals: true });
-holidayAssignmentSchema.set('toObject', { virtuals: true });
-
-// ✅ Add indexes for better performance
-holidayAssignmentSchema.index({ grade: 1, isActive: 1 });
-holidayAssignmentSchema.index({ createdAt: -1 });
-holidayAssignmentSchema.index({ title: 'text', subject: 'text', description: 'text' });
-
-// ✅ Pre-save middleware to update updatedAt
-holidayAssignmentSchema.pre('save', function(next) {
-    this.updatedAt = new Date();
-    next();
-});
-
-// ✅ Pre-save middleware to ensure isActive is boolean
-holidayAssignmentSchema.pre('save', function(next) {
-    if (this.isActive === undefined) {
-        this.isActive = true;
-    }
-    next();
-});
-
-// ✅ Static method to get active assignments
-holidayAssignmentSchema.statics.findActive = function() {
-    return this.find({ isActive: true });
-};
-
-// ✅ Static method to get assignments by grade (active only)
-holidayAssignmentSchema.statics.findByGrade = function(grade) {
-    return this.find({ grade: grade, isActive: true });
-};
-
-// ✅ Static method to get deleted assignments (trash)
-holidayAssignmentSchema.statics.findDeleted = function() {
-    return this.find({ isActive: false });
-};
-
-// ✅ Method to soft delete
-holidayAssignmentSchema.methods.softDelete = function(deletedBy = 'Unknown', reason = '') {
-    this.isActive = false;
-    this.deletedAt = new Date();
-    this.deletedBy = deletedBy;
-    this.deletedReason = reason;
-    return this.save();
-};
-
-// ✅ Method to restore
-holidayAssignmentSchema.methods.restore = function() {
-    this.isActive = true;
-    this.deletedAt = null;
-    this.deletedBy = '';
-    this.deletedReason = '';
-    return this.save();
-};
-
-// ✅ Method to update last accessed
-holidayAssignmentSchema.methods.touch = function() {
-    this.lastAccessed = new Date();
-    return this.save();
-};
+    title: { type: String, required: true },
+    grade: { type: String, required: true },
+    subject: { type: String, default: '' },
+    description: { type: String, default: '' },
+    fileName: { type: String, required: true },
+    fileUrl: { type: String, required: true },
+    fileType: { type: String, default: 'pdf' },
+    fileSize: { type: Number, default: 0 },
+    uploadedBy: { type: String, default: 'Admin' },
+    cloudinaryPublicId: { type: String, default: '' },
+    isActive: { type: Boolean, default: true },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: String, default: '' },
+    deletedReason: { type: String, default: '' },
+    lastAccessed: { type: Date, default: null },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+}, { collection: 'holidayassignments' });
 
 const HolidayAssignment = mongoose.model('HolidayAssignment', holidayAssignmentSchema);
+
+// Payment Schema
+const paymentSchema = new mongoose.Schema({
+    studentId: { type: String, required: true },
+    studentName: { type: String, required: true },
+    amount: { type: Number, required: true },
+    category: { type: String, default: 'School Fees' },
+    method: { type: String, default: 'MPESA' },
+    reference: { type: String, default: '' },
+    notes: { type: String, default: '' },
+    date: { type: Date, default: Date.now },
+    categories: { type: Map, of: Number, default: {} }
+});
+
+const Payment = mongoose.model('Payment', paymentSchema);
+
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
@@ -2580,11 +2449,12 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
                 period: period || '',
                 subjects: defaultSubjects,
                 rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+                // ✅ UPDATED RUBRIC VALUES
                 rubric: {
                     exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
-                    meeting: { min: 50, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
-                    approaching: { min: 26, max: 49, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
-                    below: { min: 0, max: 25, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+                    meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
+                    approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
+                    below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
                 },
                 updatedAt: new Date()
             };
@@ -2654,11 +2524,12 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             period: period || '',
             subjects: cleanedSubjects,
             rankLevels: rankLevels || ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+            // ✅ UPDATED RUBRIC VALUES
             rubric: rubric || {
                 exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
-                meeting: { min: 50, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
-                approaching: { min: 26, max: 49, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
-                below: { min: 0, max: 25, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+                meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
+                approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
+                below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
             },
             updatedAt: new Date()
         };
@@ -2875,6 +2746,7 @@ app.get('/api/assessments/search', async (req, res) => {
 // ============================================
 // DOWNLOAD STUDENT REPORT
 // ============================================
+
 app.get('/api/assessments/download-report/:studentId', async (req, res) => {
     try {
         const student = await StudentAssessment.findById(req.params.studentId);
@@ -3000,6 +2872,7 @@ app.post('/api/assessments/copy', async (req, res) => {
 // ============================================
 // DOWNLOAD CLASS REPORT
 // ============================================
+
 app.get('/api/assessments/download-class-pdf', async (req, res) => {
     try {
         const { grade, type, term, year, period } = req.query;
@@ -3111,7 +2984,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         }
         
         // ✅ Check Cloudinary configuration
-        if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+        if (!isCloudinaryConfigured()) {
             console.error('❌ Cloudinary credentials missing');
             return res.status(400).json({ 
                 success: false, 
@@ -3128,7 +3001,6 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         
         // ✅ Upload to Cloudinary
         try {
-            // ✅ FIXED: Use uploadToCloudinary (NOT uploadToCloudinaryBase64)
             const cloudinaryResult = await uploadToCloudinary(fileBuffer, req.file.originalname, 'assignments');
             fileUrl = cloudinaryResult.secure_url;
             cloudinaryPublicId = cloudinaryResult.public_id;
@@ -3189,6 +3061,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         res.status(500).json({ success: false, message: error.message || 'Internal server error' });
     }
 });
+
 // DOWNLOAD assignment file - SUPPORTS CLOUDINARY & LOCAL
 app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     try {
@@ -3212,7 +3085,6 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
         // ✅ METHOD 2: Check for Cloudinary Public ID
         if (assignment.cloudinaryPublicId) {
             try {
-                const cloudinary = require('cloudinary').v2;
                 const url = cloudinary.url(assignment.cloudinaryPublicId, {
                     resource_type: 'auto',
                     secure: true
@@ -3301,7 +3173,6 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
         // ✅ Delete from Cloudinary if applicable
         if (assignment.cloudinaryPublicId && isCloudinaryConfigured()) {
             try {
-                const cloudinary = require('cloudinary').v2;
                 await cloudinary.uploader.destroy(assignment.cloudinaryPublicId);
                 console.log('🗑️ Deleted from Cloudinary:', assignment.cloudinaryPublicId);
             } catch (cloudinaryError) {
@@ -3394,7 +3265,6 @@ app.post('/api/holiday-assignments/recover/:id', async (req, res) => {
         // ✅ Check if Cloudinary URL exists
         if (assignment.cloudinaryPublicId) {
             try {
-                const cloudinary = require('cloudinary').v2;
                 const url = cloudinary.url(assignment.cloudinaryPublicId, { 
                     resource_type: 'auto',
                     secure: true 
@@ -3841,6 +3711,7 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
 // ============================================
 // FIX PAST RECORDS - MANUAL API
 // ============================================
+
 app.post('/api/fix-past-times', async (req, res) => {
     res.status(410).json({ success: false, message: 'Bulk time shifting has been retired to protect record accuracy.' });
 });
@@ -3869,6 +3740,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 // ============================================
 // TEST ROUTE
 // ============================================
+
 app.get('/api/test', (req, res) => {
     const kenyaNow = getKenyaTime();
     res.json({ success: true, message: 'Changara Star Academy is running!', data: { server: 'Online', kenyaTime: kenyaNow.toLocaleString(), kenyaTimeFormatted: formatKenyaFullTime(kenyaNow), timestamp: new Date().toISOString(), cloudinaryConfigured: isCloudinaryConfigured() } });
@@ -3877,11 +3749,15 @@ app.get('/api/test', (req, res) => {
 // ============================================
 // FIX ALL TIMES - ADD 3 HOURS
 // ============================================
+
 app.post('/api/fix-times-add-3', async (req, res) => {
     return res.status(410).json({ success: false, message: 'Bulk time shifting has been retired to protect record accuracy.' });
 });
 
-// Visitor register views used by the receptionist and administrator pages.
+// ============================================
+// VISITOR REGISTER VIEWS
+// ============================================
+
 app.get('/api/visitors', async (req, res) => {
     try {
         let query = {};
@@ -3944,6 +3820,7 @@ app.delete('/api/visitors/:id', async (req, res) => {
 // ============================================
 // FIX ASSIGNMENT PATHS (ONE-TIME MIGRATION)
 // ============================================
+
 app.get('/api/fix-assignment-paths', async (req, res) => {
     try {
         const assignments = await HolidayAssignment.find({});
@@ -3951,19 +3828,14 @@ app.get('/api/fix-assignment-paths', async (req, res) => {
         let missing = 0;
         
         for (const a of assignments) {
-            // Check if it's a Cloudinary URL - skip if it is
             if (a.fileUrl && a.fileUrl.includes('cloudinary.com')) {
                 continue;
             }
             
-            // Extract just the filename from the URL
             const filename = path.basename(a.fileUrl);
-            
-            // Check if file exists in uploads/assignments/
             const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
             
             if (fs.existsSync(filePath)) {
-                // File exists, update the URL to be correct
                 const newUrl = '/uploads/assignments/' + filename;
                 if (a.fileUrl !== newUrl) {
                     a.fileUrl = newUrl;
@@ -3992,6 +3864,7 @@ app.get('/api/fix-assignment-paths', async (req, res) => {
 // ============================================
 // MIGRATE LOCAL ASSIGNMENTS TO CLOUDINARY
 // ============================================
+
 app.post('/api/migrate-to-cloudinary', async (req, res) => {
     try {
         if (!isCloudinaryConfigured()) {
@@ -4045,8 +3918,10 @@ app.post('/api/migrate-to-cloudinary', async (req, res) => {
     }
 });
 
-// Register static files and the fallback after all API routes so they cannot
-// intercept valid API requests.
+// ============================================
+// REGISTER STATIC FILES
+// ============================================
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(__dirname));
 
@@ -4061,6 +3936,7 @@ app.use((req, res) => {
 // ============================================
 // START THE SERVER
 // ============================================
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     const kenyaNow = getKenyaTime();
