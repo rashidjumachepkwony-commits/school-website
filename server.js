@@ -2430,43 +2430,16 @@ app.get('/api/assessments/student/:studentId', async (req, res) => {
 // SUBJECT CONFIG ROUTES
 // ============================================
 
-app.get('/api/assessments/subjects/:grade', async (req, res) => {
-    try {
-        const grade = req.params.grade;
-        const type = req.query.type || 'monthly';
-        const period = req.query.period || '';
-        const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs_new');
-        let config = await collection.findOne({ grade: grade, type: type, period: period });
-        if (!config && period) {
-            config = await collection.findOne({ grade: grade, type: type, period: '' });
-        }
-        if (!config) {
-            const defaultSubjects = getDefaultSubjects(grade, type);
-            config = {
-                grade: grade,
-                type: type,
-                period: period || '',
-                subjects: defaultSubjects,
-                rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
-                // ✅ UPDATED RUBRIC VALUES
-                rubric: {
-                    exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
-                    meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
-                    approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
-                    below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
-                },
-                updatedAt: new Date()
-            };
-            await collection.insertOne(config);
-            console.log('Created default config for:', grade, type, period);
-        }
-        res.json({ success: true, config });
-    } catch (error) {
-        console.error('GET error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
+const subjectConfigSchema = new mongoose.Schema({
+    grade: { type: String, required: true },
+    type: { type: String, required: true, default: 'monthly' },
+    period: { type: String, default: '' },
+    subjects: [{ name: { type: String, required: true }, max: { type: Number, required: true } }],
+    rankLevels: { type: [String], default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] },
+    // ✅ Use Mixed type for rubric
+    rubric: { type: mongoose.Schema.Types.Mixed, default: {} },
+    updatedAt: { type: Date, default: Date.now }
+}, { autoIndex: false, collection: 'subjectconfigs_new' });
 
 app.delete('/api/assessments/subjects/:grade', async (req, res) => {
     try {
