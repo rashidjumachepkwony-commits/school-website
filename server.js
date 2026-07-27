@@ -1051,13 +1051,13 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
 }
 
 // ============================================
-// STAFF REPORT PDF
+// PROFESSIONAL CLASS REPORT - ONE PAGE WITH CORRECT RUBRIC
 // ============================================
-function generateStaffReportPDF(report, periodLabel) {
+function generateClassReportPDF(students, grade, type, term, year, period) {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ 
-                margin: 40, 
+                margin: 20, 
                 size: 'A4',
                 landscape: true
             });
@@ -1067,113 +1067,340 @@ function generateStaffReportPDF(report, periodLabel) {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
             
-            doc.fontSize(20)
-               .font('Helvetica-Bold')
-               .fillColor('#0A1628')
-               .text('CHANGARA STAR ACADEMY', { align: 'center' });
-            
-            doc.fontSize(10)
-               .font('Helvetica')
-               .fillColor('#D4A017')
-               .text('"Assurance to Excellence"', { align: 'center' })
-               .moveDown(0.3);
+            // ============================================
+            // HEADER WITH LOGO
+            // ============================================
+            // School Name with Logo Style
+            doc.fontSize(18)
+                .font('Helvetica-Bold')
+                .fillColor('#0A1628')
+                .text('CHANGARA', 30, 15, { align: 'left', width: 150 });
             
             doc.fontSize(14)
-               .font('Helvetica-Bold')
-               .fillColor('#0A1628')
-               .text('STAFF ATTENDANCE REPORT', { align: 'center' })
-               .moveDown(0.3);
+                .font('Helvetica-Bold')
+                .fillColor('#C9A84C')
+                .text('STAR', 30, 33, { align: 'left', width: 150 });
             
-            doc.fontSize(10)
-               .font('Helvetica')
-               .fillColor('#6c757d')
-               .text(periodLabel || 'Attendance Report', { align: 'center' })
-               .moveDown(0.5);
+            doc.fontSize(7)
+                .font('Helvetica-Bold')
+                .fillColor('#0A1628')
+                .text('ACADEMY', 30, 48, { align: 'left', width: 150 });
             
-            const totalStaff = report.length;
-            let totalOnTime = 0, totalLate = 0, totalAbsent = 0, totalDays = 0;
-            report.forEach(s => { totalOnTime += s.onTime || 0; totalLate += s.late || 0; totalAbsent += s.absent || 0; totalDays += s.totalDays || 0; });
+            doc.fontSize(5)
+                .font('Helvetica-Oblique')
+                .fillColor('#C9A84C')
+                .text('"Nurturing Stars, Building Futures"', 30, 57, { width: 150 });
+
+            // Title - Right side
+            doc.fontSize(12)
+                .font('Helvetica-Bold')
+                .fillColor('#0A1628')
+                .text(`${grade} - ${type || 'Monthly'} Assessment Results`, 190, 22, { align: 'center', width: 400 });
             
-            const statsData = [
-                { label: 'Total Staff', value: totalStaff, color: '#0A1628' },
-                { label: 'On Time', value: totalOnTime, color: '#1a8a3f' },
-                { label: 'Late', value: totalLate, color: '#e6a800' },
-                { label: 'Absent', value: totalAbsent, color: '#dc3545' },
-                { label: 'Attendance Rate', value: totalDays > 0 ? ((totalOnTime / totalDays) * 100).toFixed(1) + '%' : '0%', color: '#0d6efd' }
+            doc.fontSize(7)
+                .font('Helvetica')
+                .fillColor('#6c757d')
+                .text(`${term || ''} ${year || ''} ${period ? '- ' + period : ''}`, 190, 38, { align: 'center', width: 400 });
+
+            // Decorative line
+            doc.moveTo(30, 65)
+                .lineTo(770, 65)
+                .strokeColor('#C9A84C')
+                .lineWidth(1.5)
+                .stroke();
+
+            // ============================================
+            // STATISTICS CARDS - COMPACT
+            // ============================================
+            const totalStudents = students.length;
+            let exceeding = 0, meeting = 0, approaching = 0, below = 0;
+            let totalAvg = 0;
+            
+            // RECALCULATE with correct rubric
+            students.forEach(s => {
+                // Recalculate each student's performance
+                if (s.assessments) {
+                    let totalScore = 0;
+                    let totalMaxScore = 0;
+                    s.assessments.forEach(a => {
+                        totalScore += a.score || 0;
+                        totalMaxScore += a.maxScore || 0;
+                    });
+                    const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
+                    s.averageScore = parseFloat(avgPercentage.toFixed(1));
+                    
+                    // Use the correct rubric (75%+ = EE, 41-74% = ME, 21-40% = AE, 0-20% = BE)
+                    if (avgPercentage >= 75) s.performanceLevel = 'Exceeding Expectation';
+                    else if (avgPercentage >= 41) s.performanceLevel = 'Meeting Expectation';
+                    else if (avgPercentage >= 21) s.performanceLevel = 'Approaching Expectation';
+                    else s.performanceLevel = 'Below Expectation';
+                }
+                
+                const level = s.performanceLevel || 'Approaching Expectation';
+                if (level === 'Exceeding Expectation') exceeding++;
+                else if (level === 'Meeting Expectation') meeting++;
+                else if (level === 'Approaching Expectation') approaching++;
+                else below++;
+                totalAvg += s.averageScore || 0;
+            });
+            
+            const avgClass = totalStudents > 0 ? (totalAvg / totalStudents).toFixed(1) : 0;
+            
+            const stats = [
+                { label: 'STUDENTS', value: totalStudents, color: '#0A1628' },
+                { label: 'EE (4)', value: exceeding, color: '#1a8a3f' },
+                { label: 'ME (3)', value: meeting, color: '#0d6efd' },
+                { label: 'AE (2)', value: approaching, color: '#e6a800' },
+                { label: 'BE (1)', value: below, color: '#dc3545' },
+                { label: 'CLASS AVG', value: avgClass + '%', color: '#6f42c1' }
             ];
             
-            const statsY = doc.y;
-            const boxWidth = 140;
-            statsData.forEach((stat, i) => {
-                const x = 45 + (i * (boxWidth + 10));
-                doc.roundedRect(x, statsY, boxWidth, 40, 6)
+            const statsY = 72;
+            const boxWidth = 115;
+            stats.forEach((stat, i) => {
+                const x = 35 + (i * (boxWidth + 8));
+                doc.roundedRect(x, statsY, boxWidth, 30, 4)
                    .fillColor('#f8f9fa')
                    .fill()
                    .strokeColor('#dee2e6')
-                   .lineWidth(1)
-                   .roundedRect(x, statsY, boxWidth, 40, 6)
+                   .lineWidth(0.5)
+                   .roundedRect(x, statsY, boxWidth, 30, 4)
                    .stroke();
                 
-                doc.fontSize(18)
+                doc.fontSize(14)
                    .font('Helvetica-Bold')
                    .fillColor(stat.color)
-                   .text(stat.value.toString(), x + 5, statsY + 5, { width: boxWidth - 10, align: 'center' });
+                   .text(stat.value.toString(), x + 5, statsY + 3, { width: boxWidth - 10, align: 'center' });
                 
-                doc.fontSize(8)
+                doc.fontSize(5)
                    .font('Helvetica-Bold')
                    .fillColor('#6c757d')
-                   .text(stat.label, x + 5, statsY + 25, { width: boxWidth - 10, align: 'center' });
+                   .text(stat.label, x + 5, statsY + 20, { width: boxWidth - 10, align: 'center' });
+            });
+
+            // ============================================
+            // RUBRIC LEGEND
+            // ============================================
+            const legendY = statsY + 38;
+            doc.fontSize(6)
+               .font('Helvetica-Bold')
+               .fillColor('#6c757d')
+               .text('EE: Exceeding (75-100%)   ME: Meeting (41-74%)   AE: Approaching (21-40%)   BE: Below (0-20%)', 35, legendY);
+
+            // ============================================
+            // GET ALL SUBJECTS
+            // ============================================
+            let allSubjects = [];
+            students.forEach(s => {
+                if (s.assessments) {
+                    s.assessments.forEach(a => {
+                        if (!allSubjects.includes(a.subject)) {
+                            allSubjects.push(a.subject);
+                        }
+                    });
+                }
+            });
+            allSubjects.sort();
+            
+            // ============================================
+            // TABLE HEADER
+            // ============================================
+            const tableTop = legendY + 12;
+            const rankColWidth = 30;
+            const nameColWidth = 80;
+            const totalColWidth = 45;
+            const avgColWidth = 45;
+            const levelColWidth = 55;
+            const subjectColWidth = Math.min(32, (730 - rankColWidth - nameColWidth - totalColWidth - avgColWidth - levelColWidth) / Math.max(1, allSubjects.length));
+            
+            // Calculate max scores for each subject
+            const subjectMaxScores = {};
+            allSubjects.forEach(subject => {
+                let maxScore = 0;
+                students.forEach(s => {
+                    if (s.assessments) {
+                        const found = s.assessments.find(a => a.subject === subject);
+                        if (found && found.maxScore > maxScore) {
+                            maxScore = found.maxScore;
+                        }
+                    }
+                });
+                subjectMaxScores[subject] = maxScore;
             });
             
-            doc.moveDown(2.5);
-            
-            const tableTop = doc.y;
-            const colWidths = [25, 160, 60, 60, 60, 60];
-            const tableWidth = 425;
-            
-            doc.rect(45, tableTop, tableWidth, 22)
+            // Header background
+            doc.rect(30, tableTop, 740, 18)
                .fillColor('#0A1628')
                .fill();
             
-            doc.fontSize(9)
+            let headerX = 35;
+            doc.fontSize(6)
                .font('Helvetica-Bold')
-               .fillColor('white')
-               .text('#', 50, tableTop + 5)
-               .text('Staff Name', 75, tableTop + 5)
-               .text('Days', 235, tableTop + 5, { width: 45, align: 'center' })
-               .text('On Time', 280, tableTop + 5, { width: 45, align: 'center' })
-               .text('Late', 325, tableTop + 5, { width: 45, align: 'center' })
-               .text('Absent', 370, tableTop + 5, { width: 45, align: 'center' });
+               .fillColor('white');
             
-            let rowY = tableTop + 22;
-            report.forEach((s, index) => {
-                if (rowY > 530) { doc.addPage(); rowY = 50; }
-                doc.rect(45, rowY, tableWidth, 20)
-                   .fillColor(index % 2 === 0 ? '#f8f9fa' : 'white')
-                   .fill();
-                
-                doc.fontSize(9)
-                   .font('Helvetica-Bold')
-                   .fillColor('#0A1628')
-                   .text((index + 1).toString(), 50, rowY + 5)
-                   .text(s.name || 'N/A', 75, rowY + 5)
-                   .text((s.totalDays || 0).toString(), 235, rowY + 5, { width: 45, align: 'center' })
-                   .fillColor('#1a8a3f')
-                   .text((s.onTime || 0).toString(), 280, rowY + 5, { width: 45, align: 'center' })
-                   .fillColor('#e6a800')
-                   .text((s.late || 0).toString(), 325, rowY + 5, { width: 45, align: 'center' })
-                   .fillColor('#dc3545')
-                   .text((s.absent || 0).toString(), 370, rowY + 5, { width: 45, align: 'center' });
-                
-                rowY += 20;
+            // Rank
+            doc.text('Rank', headerX, tableTop + 4, { width: rankColWidth - 5, align: 'center' });
+            headerX += rankColWidth;
+            
+            // Student Name
+            doc.text('Student', headerX, tableTop + 4, { width: nameColWidth - 5 });
+            headerX += nameColWidth;
+            
+            // Subjects
+            allSubjects.forEach(subject => {
+                const shortName = subject.length > 6 ? subject.substring(0, 5) + '.' : subject;
+                doc.text(shortName, headerX + 2, tableTop + 4, { width: subjectColWidth - 4, align: 'center' });
+                headerX += subjectColWidth;
             });
             
-            doc.moveDown(2);
-            doc.fontSize(8)
+            // Total
+            doc.text('Total', headerX, tableTop + 4, { width: totalColWidth - 5, align: 'center' });
+            headerX += totalColWidth;
+            
+            // Avg
+            doc.text('Avg', headerX, tableTop + 4, { width: avgColWidth - 5, align: 'center' });
+            headerX += avgColWidth;
+            
+            // Level
+            doc.text('Level', headerX, tableTop + 4, { width: levelColWidth - 5, align: 'center' });
+
+            // ============================================
+            // MAX SCORES ROW
+            // ============================================
+            let maxRowY = tableTop + 18;
+            doc.rect(30, maxRowY, 740, 14)
+               .fillColor('#f8f9fa')
+               .fill();
+            
+            let maxX = 35;
+            doc.fontSize(5)
                .font('Helvetica-Bold')
-               .fillColor('#6c757d')
-               .text(`Generated: ${formatKenyaFullTime(new Date())}`, 45, 550, { align: 'left' })
-               .text('CHANGARA STAR ACADEMY | P.O Box 7, Cheptais | 📞 +254 721 556 252', 45, 565, { align: 'center' });
+               .fillColor('#6c757d');
+            
+            doc.text('Max', maxX, maxRowY + 3, { width: rankColWidth - 5, align: 'center' });
+            maxX += rankColWidth;
+            maxX += nameColWidth;
+            
+            allSubjects.forEach(subject => {
+                const maxScore = subjectMaxScores[subject] || 0;
+                doc.text(maxScore.toString(), maxX + 2, maxRowY + 3, { width: subjectColWidth - 4, align: 'center' });
+                maxX += subjectColWidth;
+            });
+            
+            doc.text('', maxX, maxRowY + 3, { width: totalColWidth - 5, align: 'center' });
+            maxX += totalColWidth;
+            doc.text('', maxX, maxRowY + 3, { width: avgColWidth - 5, align: 'center' });
+            maxX += avgColWidth;
+            doc.text('', maxX, maxRowY + 3, { width: levelColWidth - 5, align: 'center' });
+
+            // ============================================
+            // STUDENT DATA ROWS
+            // ============================================
+            const sortedStudents = [...students].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+            let rowY = maxRowY + 14;
+            let rowIndex = 0;
+            
+            // Calculate max rows that fit on one page (landscape A4 = ~30 rows)
+            const maxRows = 28;
+            const displayStudents = sortedStudents.slice(0, maxRows);
+            
+            displayStudents.forEach((student) => {
+                const bgColor = rowIndex % 2 === 0 ? '#fafafa' : 'white';
+                doc.rect(30, rowY, 740, 16)
+                   .fillColor(bgColor)
+                   .fill();
+                
+                let x = 35;
+                const level = student.performanceLevel || 'Approaching Expectation';
+                const levelColor = getPerformanceColor(level);
+                const short = getPerformanceShort(level);
+                const rating = getPerformanceRating(level);
+                const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
+                const rank = rowIndex + 1;
+                
+                // Rank
+                doc.fontSize(6)
+                   .font('Helvetica-Bold')
+                   .fillColor(rank <= 3 ? '#C9A84C' : '#6c757d')
+                   .text(rank <= 3 ? ['🏆', '🥈', '🥉'][rank - 1] : rank.toString(), x, rowY + 3, { width: rankColWidth - 5, align: 'center' });
+                x += rankColWidth;
+                
+                // Student Name
+                doc.fillColor('#0A1628')
+                   .font('Helvetica-Bold')
+                   .text(student.studentName || 'N/A', x, rowY + 3, { width: nameColWidth - 5 });
+                x += nameColWidth;
+                
+                // Subject scores
+                allSubjects.forEach(subject => {
+                    const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
+                    if (assessment) {
+                        const percentage = assessment.maxScore > 0 ? ((assessment.score / assessment.maxScore) * 100) : 0;
+                        let color = '#28a745';
+                        if (percentage < 21) color = '#dc3545';
+                        else if (percentage < 41) color = '#e6a800';
+                        else if (percentage < 75) color = '#0d6efd';
+                        doc.fillColor(color)
+                           .font('Helvetica-Bold')
+                           .text(assessment.score.toString(), x + 2, rowY + 3, { width: subjectColWidth - 4, align: 'center' });
+                    } else {
+                        doc.fillColor('#dee2e6')
+                           .text('-', x + 2, rowY + 3, { width: subjectColWidth - 4, align: 'center' });
+                    }
+                    x += subjectColWidth;
+                });
+                
+                // Total Score
+                doc.fillColor('#C9A84C')
+                   .font('Helvetica-Bold')
+                   .text((student.totalScore || 0).toString(), x, rowY + 3, { width: totalColWidth - 5, align: 'center' });
+                x += totalColWidth;
+                
+                // Average
+                doc.fillColor('#0d6efd')
+                   .text(avgScore + '%', x, rowY + 3, { width: avgColWidth - 5, align: 'center' });
+                x += avgColWidth;
+                
+                // Performance Level
+                const levelColors = {
+                    'Exceeding Expectation': '#28a745',
+                    'Meeting Expectation': '#0d6efd',
+                    'Approaching Expectation': '#e6a800',
+                    'Below Expectation': '#dc3545'
+                };
+                doc.fillColor(levelColors[level] || '#6c757d')
+                   .text(`${short} (${rating})`, x, rowY + 3, { width: levelColWidth - 5, align: 'center' });
+                
+                rowY += 16;
+                rowIndex++;
+            });
+
+            // If there are more students than fit, show count
+            if (sortedStudents.length > maxRows) {
+                doc.fontSize(6)
+                   .font('Helvetica-Oblique')
+                   .fillColor('#6c757d')
+                   .text(`... and ${sortedStudents.length - maxRows} more students`, 35, rowY + 4);
+                rowY += 20;
+            }
+
+            // ============================================
+            // FOOTER
+            // ============================================
+            const footerY = Math.max(rowY + 20, 550);
+            
+            doc.moveTo(30, footerY)
+                .lineTo(770, footerY)
+                .strokeColor('#C9A84C')
+                .lineWidth(1)
+                .stroke();
+
+            doc.fontSize(6)
+                .font('Helvetica')
+                .fillColor('#6c757d')
+                .text(`Generated: ${formatKenyaFullTime(new Date())}`, 35, footerY + 8, { align: 'left' })
+                .text('© 2026 Changara Star Academy • "Nurturing Stars, Building Futures" • P.O Box 7, Cheptais', 
+                      35, footerY + 18, { align: 'center' });
             
             doc.end();
         } catch (error) {
