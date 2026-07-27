@@ -403,13 +403,42 @@ function generateStaffReportPDF(report, periodLabel) {
 }
 
 // ============================================
-// PROFESSIONAL CBC STUDENT REPORT - ONE PAGE
+// PROFESSIONAL CBC STUDENT REPORT - FIXED
 // ============================================
 function generateStudentReportPDF(student) {
     return new Promise((resolve, reject) => {
         try {
-            // First, recalculate with CBC method
-            const cbcResult = calculateStudentOverall(student.assessments || []);
+            // ============================================
+            // RECALCULATE AND VALIDATE DATA
+            // ============================================
+            let validAssessments = [];
+            
+            if (student.assessments && student.assessments.length > 0) {
+                validAssessments = student.assessments.map(a => {
+                    // Ensure score doesn't exceed max
+                    const score = Math.min(a.score || 0, a.maxScore || 0);
+                    const maxScore = a.maxScore || 1;
+                    const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+                    const level = calculatePerformanceLevel(percentage);
+                    const rating = getPerformanceRating(level);
+                    
+                    return {
+                        subject: a.subject || 'Untitled',
+                        maxScore: maxScore,
+                        score: score,
+                        percentage: parseFloat(percentage.toFixed(1)),
+                        performanceLevel: level,
+                        rating: rating,
+                        short: getPerformanceShort(level)
+                    };
+                });
+            }
+            
+            // Calculate CBC overall
+            const cbcResult = calculateStudentOverall(validAssessments);
+            
+            // Update student object with validated data
+            student.assessments = validAssessments;
             student.totalScore = cbcResult.totalScore;
             student.averageScore = cbcResult.averageScore;
             student.performanceLevel = cbcResult.performanceLevel;
@@ -869,11 +898,11 @@ function generateStudentReportPDF(student) {
 
             doc.end();
         } catch (error) {
+            console.error('PDF generation error:', error);
             reject(error);
         }
     });
 }
-
 // ============================================
 // HELPER: Generate Teacher Feedback
 // ============================================
@@ -2767,9 +2796,8 @@ app.get('/api/assessments/search', async (req, res) => {
 });
 
 // ============================================
-// DOWNLOAD STUDENT REPORT
+// DOWNLOAD STUDENT REPORT - FIXED
 // ============================================
-
 app.get('/api/assessments/download-report/:studentId', async (req, res) => {
     try {
         const student = await StudentAssessment.findById(req.params.studentId);
@@ -2777,30 +2805,49 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
         
-        // ✅ RECALCULATE before generating PDF
-        if (student.assessments) {
-            student.assessments = student.assessments.map(a => {
-                const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+        // ============================================
+        // RECALCULATE AND VALIDATE DATA
+        // ============================================
+        let validAssessments = [];
+        
+        if (student.assessments && student.assessments.length > 0) {
+            validAssessments = student.assessments.map(a => {
+                // Ensure score doesn't exceed max
+                const score = Math.min(a.score || 0, a.maxScore || 0);
+                const maxScore = a.maxScore || 1;
+                const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+                const level = calculatePerformanceLevel(percentage);
+                const rating = getPerformanceRating(level);
+                
                 return {
-                    subject: a.subject,
-                    maxScore: a.maxScore,
-                    score: a.score,
-                    percentage: perf.percentage,
-                    performanceLevel: perf.level,
-                    rating: perf.rating
+                    subject: a.subject || 'Untitled',
+                    maxScore: maxScore,
+                    score: score,
+                    percentage: parseFloat(percentage.toFixed(1)),
+                    performanceLevel: level,
+                    rating: rating
                 };
             });
         }
-        const overall = calculateStudentOverall(student.assessments || []);
-        student.totalScore = overall.totalScore;
-        student.averageScore = overall.averageScore;
-        student.performanceLevel = overall.performanceLevel;
-        student.overallRating = overall.overallRating;
         
+        // Calculate CBC overall
+        const cbcResult = calculateStudentOverall(validAssessments);
+        
+        // Update student object with validated data
+        student.assessments = validAssessments;
+        student.totalScore = cbcResult.totalScore;
+        student.averageScore = cbcResult.averageScore;
+        student.performanceLevel = cbcResult.performanceLevel;
+        student.overallRating = cbcResult.overallRating;
+        student.levelDistribution = cbcResult.levelDistribution;
+        student.subjectCount = cbcResult.subjectCount;
+        
+        // Generate PDF
         const pdfBuffer = await generateStudentReportPDF(student);
         
+        const filename = `student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="student_report_${student.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf"`);
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Length', pdfBuffer.length);
         res.send(pdfBuffer);
     } catch (error) {
@@ -2808,7 +2855,6 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
         res.status(500).json({ success: false, message: 'Error generating PDF: ' + error.message });
     }
 });
-
 app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
     try {
         const student = await StudentAssessment.findById(req.params.studentId);
