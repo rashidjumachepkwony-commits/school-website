@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Class Assessment Results with CBC Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #D4A017;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #0A1628;
+        }
+
+        .header h1 span {
+            color: #D4A017;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #D4A017;
+            box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.1);
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #D4A017;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #b8890f;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #1a8a3f;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #136e32;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b02a37;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        .btn-outline:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0A1628;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card.exceeding .number { color: #1a8a3f; }
+        .stat-card.meeting .number { color: #0d6efd; }
+        .stat-card.approaching .number { color: #e6a800; }
+        .stat-card.below .number { color: #dc3545; }
+
+        /* CBC Analysis Section */
+        .cbc-analysis {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #D4A017;
+        }
+
+        .cbc-analysis h3 {
+            font-size: 16px;
+            color: #0A1628;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cbc-analysis h3 .badge {
+            background: #D4A017;
+            color: white;
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+
+        .cbc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .cbc-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .cbc-item .competency {
+            font-weight: 600;
+            font-size: 13px;
+            color: #0A1628;
+            margin-bottom: 8px;
+        }
+
+        .cbc-item .progress-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .cbc-item .progress-bar .fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        .cbc-item .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .cbc-item .stats .value {
+            font-weight: 600;
+            color: #0A1628;
+        }
+
+        /* Performance Distribution */
+        .distribution {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .distribution-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .distribution-item .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .distribution-item .dot.exceeding { background: #1a8a3f; }
+        .distribution-item .dot.meeting { background: #0d6efd; }
+        .distribution-item .dot.approaching { background: #e6a800; }
+        .distribution-item .dot.below { background: #dc3545; }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 800px;
+        }
+
+        table thead {
+            background: #0A1628;
+            color: white;
+        }
+
+        table thead th {
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        table tbody td {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        table tbody tr:nth-child(even):hover {
+            background: #f0f2f5;
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: #0A1628;
+        }
+
+        .student-id {
+            color: #6c757d;
+            font-size: 11px;
+        }
+
+        .score-cell {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .score-cell.high { color: #1a8a3f; }
+        .score-cell.medium { color: #0d6efd; }
+        .score-cell.low { color: #e6a800; }
+        .score-cell.fail { color: #dc3545; }
+
+        .performance-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .performance-badge.exceeding {
+            background: #d4edda;
+            color: #1a8a3f;
+        }
+
+        .performance-badge.meeting {
+            background: #cce5ff;
+            color: #0d6efd;
+        }
+
+        .performance-badge.approaching {
+            background: #fff3cd;
+            color: #e6a800;
+        }
+
+        .performance-badge.below {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            font-size: 18px;
+            text-align: center;
+            min-width: 30px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .loading .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #D4A017;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .header { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .filters { flex-direction: column; }
+            .filter-group { min-width: 100%; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .cbc-grid { grid-template-columns: 1fr; }
+            table { font-size: 12px; min-width: 600px; }
+            table thead th, table tbody td { padding: 6px 8px; }
+        }
+
+        @media print {
+            .btn, .filters .btn { display: none; }
+            .container { box-shadow: none; padding: 10px; }
+            table thead { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .performance-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .stat-card { border: 1px solid #ddd; }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0A1628;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 20;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state h4 {
+            color: #0A1628;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 <span>Class Assessment</span> Results with CBC Analysis</h1>
+            <div class="header-actions">
+                <button class="btn btn-success btn-sm" onclick="exportPDF()">📄 Export PDF</button>
+                <button class="btn btn-primary btn-sm" onclick="exportExcel()">📊 Export Excel</button>
+                <button class="btn btn-outline btn-sm" onclick="window.location.reload()">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>Grade / Class</label>
+                <select id="gradeFilter" onchange="loadData()">
+                    <option value="">All Grades</option>
+                    <option value="Playgroup">Playgroup</option>
+                    <option value="PP1">PP1</option>
+                    <option value="PP2">PP2</option>
+                    <option value="Grade 1">Grade 1</option>
+                    <option value="Grade 2">Grade 2</option>
+                    <option value="Grade 3">Grade 3</option>
+                    <option value="Grade 4">Grade 4</option>
+                    <option value="Grade 5">Grade 5</option>
+                    <option value="Grade 6">Grade 6</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Assessment Type</label>
+                <select id="typeFilter" onchange="loadData()">
+                    <option value="monthly">Monthly</option>
+                    <option value="termly">Termly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Term</label>
+                <select id="termFilter" onchange="loadData()">
+                    <option value="">All Terms</option>
+                    <option value="Term 1">Term 1</option>
+                    <option value="Term 2">Term 2</option>
+                    <option value="Term 3">Term 3</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Year</label>
+                <input type="number" id="yearFilter" value="2026" onchange="loadData()">
+            </div>
+            <div class="filter-group">
+                <label>Period</label>
+                <input type="text" id="periodFilter" placeholder="e.g. January" onchange="loadData()">
+            </div>
+            <div class="filter-group" style="flex: 0;">
+                <button class="btn btn-primary" onclick="loadData()">🔍 Load Results</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="number" id="totalStudents">-</div>
+                <div class="label">Total Students</div>
+            </div>
+            <div class="stat-card exceeding">
+                <div class="number" id="exceedingCount">-</div>
+                <div class="label">Exceeding (75-100%)</div>
+            </div>
+            <div class="stat-card meeting">
+                <div class="number" id="meetingCount">-</div>
+                <div class="label">Meeting (41-74%)</div>
+            </div>
+            <div class="stat-card approaching">
+                <div class="number" id="approachingCount">-</div>
+                <div class="label">Approaching (21-40%)</div>
+            </div>
+            <div class="stat-card below">
+                <div class="number" id="belowCount">-</div>
+                <div class="label">Below (0-20%)</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="classAverage">-</div>
+                <div class="label">Class Average</div>
+            </div>
+        </div>
+
+        <!-- CBC Analysis -->
+        <div class="cbc-analysis" id="cbcAnalysis" style="display:none;">
+            <h3>
+                🎯 CBC Competency-Based Analysis
+                <span class="badge">Competency Assessment</span>
+            </h3>
+            <div class="distribution" id="distributionLabels"></div>
+            <div class="cbc-grid" id="cbcGrid"></div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="table-wrapper" id="tableWrapper">
+            <div class="loading" id="loadingState">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Loading assessment results...</p>
+            </div>
+            <div id="tableContainer" style="display:none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th style="width:60px;">Rank</th>
+                            <th>Student</th>
+                            <th style="width:50px;">ID</th>
+                            <th>Grade</th>
+                            <th>Total</th>
+                            <th>Avg %</th>
+                            <th>Performance</th>
+                            <th>Rating</th>
+                            <th>Subjects</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <div class="icon">📭</div>
+            <h4>No Results Found</h4>
+            <p>Try adjusting your filters or load data for a different class.</p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE = window.location.origin;
+        let currentData = [];
+        let currentStats = null;
+
+        // ============================================
+        // LOAD DATA
+        // ============================================
+        async function loadData() {
+            const grade = document.getElementById('gradeFilter').value;
+            const type = document.getElementById('typeFilter').value;
+            const term = document.getElementById('termFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            const period = document.getElementById('periodFilter').value;
+
+            if (!grade) {
+                showEmptyState('Please select a grade to view results.');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                let url = `${API_BASE}/api/assessments/grade/${encodeURIComponent(grade)}?type=${type}`;
+                if (term) url += `&term=${encodeURIComponent(term)}`;
+                if (year) url += `&year=${encodeURIComponent(year)}`;
+                if (period) url += `&period=${encodeURIComponent(period)}`;
+
+                console.log('📡 Fetching:', url);
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to load data');
+                }
+
+                currentData = data.students || [];
+                renderData(currentData);
+
+            } catch (error) {
+                console.error('❌ Error loading data:', error);
+                showEmptyState('Error loading data: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // ============================================
+        // RENDER DATA
+        // ============================================
+        function renderData(students) {
+            if (!students || students.length === 0) {
+                showEmptyState('No students found for the selected criteria.');
+                return;
+            }
+
+            // Sort by average score descending
+            const sorted = [...students].sort((a, b) => (b.averageScore || 0) - (a.averageScore || 0));
+
+            // Calculate stats
+            const stats = calculateStats(sorted);
+            currentStats = stats;
+
+            // Update stats cards
+            document.getElementById('totalStudents').textContent = stats.total;
+            document.getElementById('exceedingCount').textContent = stats.exceeding;
+            document.getElementById('meetingCount').textContent = stats.meeting;
+            document.getElementById('approachingCount').textContent = stats.approaching;
+            document.getElementById('belowCount').textContent = stats.below;
+            document.getElementById('classAverage').textContent = stats.classAverage + '%';
+
+            // Render CBC Analysis
+            renderCBCAnalysis(sorted);
+
+            // Render table
+            renderTable(sorted);
+
+            // Show table, hide empty state
+            document.getElementById('tableContainer').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('cbcAnalysis').style.display = 'block';
+        }
+
+        // ============================================
+        // CALCULATE STATISTICS
+        // ============================================
+        function calculateStats(students) {
+            let total = students.length;
+            let exceeding = 0, meeting = 0, approaching = 0, below = 0;
+            let totalAvg = 0;
+
+            students.forEach(s => {
+                const level = s.performanceLevel || 'Approaching Expectation';
+                if (level === 'Exceeding Expectation') exceeding++;
+                else if (level === 'Meeting Expectation') meeting++;
+                else if (level === 'Approaching Expectation') approaching++;
+                else below++;
+                totalAvg += s.averageScore || 0;
+            });
+
+            const classAverage = total > 0 ? (totalAvg / total).toFixed(1) : 0;
+
+            return { total, exceeding, meeting, approaching, below, classAverage };
+        }
+
+        // ============================================
+        // RENDER CBC ANALYSIS
+        // ============================================
+        function renderCBCAnalysis(students) {
+            const grid = document.getElementById('cbcGrid');
+            const distLabels = document.getElementById('distributionLabels');
+
+            // Distribution labels
+            const levels = [
+                { key: 'exceeding', label: 'Exceeding (75-100%)', color: '#1a8a3f', count: currentStats.exceeding },
+                { key: 'meeting', label: 'Meeting (41-74%)', color: '#0d6efd', count: currentStats.meeting },
+                { key: 'approaching', label: 'Approaching (21-40%)', color: '#e6a800', count: currentStats.approaching },
+                { key: 'below', label: 'Below (0-20%)', color: '#dc3545', count: currentStats.below }
+            ];
+
+            distLabels.innerHTML = levels.map(l =>
+                `<span class="distribution-item">
+                    <span class="dot ${l.key}"></span>
+                    ${l.label}: <strong>${l.count}</strong> (${currentStats.total > 0 ? ((l.count/currentStats.total)*100).toFixed(1) : 0}%)
+                </span>`
+            ).join('');
+
+            // Competency analysis
+            // Collect all subjects across all students
+            const subjectMap = {};
+            students.forEach(s => {
+                if (s.assessments) {
+                    s.assessments.forEach(a => {
+                        if (!subjectMap[a.subject]) {
+                            subjectMap[a.subject] = { scores: [], maxScores: [], count: 0 };
+                        }
+                        subjectMap[a.subject].scores.push(a.score || 0);
+                        subjectMap[a.subject].maxScores.push(a.maxScore || 50);
+                        subjectMap[a.subject].count++;
+                    });
+                }
+            });
+
+            // Calculate competency metrics
+            const competencies = Object.keys(subjectMap).map(subject => {
+                const data = subjectMap[subject];
+                const avgScore = data.scores.reduce((sum, s) => sum + s, 0) / data.count;
+                const avgMax = data.maxScores.reduce((sum, s) => sum + s, 0) / data.count;
+                const percentage = avgMax > 0 ? (avgScore / avgMax) * 100 : 0;
+                const level = calculatePerformanceLevel(percentage);
+
+                // Count students at each level for this subject
+                let exceeding = 0, meeting = 0, approaching = 0, below = 0;
+                students.forEach(s => {
+                    if (s.assessments) {
+                        const a = s.assessments.find(a => a.subject === subject);
+                        if (a) {
+                            const p = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+                            const l = calculatePerformanceLevel(p);
+                            if (l === 'Exceeding Expectation') exceeding++;
+                            else if (l === 'Meeting Expectation') meeting++;
+                            else if (l === 'Approaching Expectation') approaching++;
+                            else below++;
+                        }
+                    }
+                });
+
+                return {
+                    subject,
+                    avgScore: avgScore.toFixed(1),
+                    avgMax: avgMax.toFixed(1),
+                    percentage: percentage.toFixed(1),
+                    level,
+                    exceeding,
+                    meeting,
+                    approaching,
+                    below,
+                    total: data.count,
+                    color: getPerformanceColor(level)
+                };
+            });
+
+            // Sort by percentage descending
+            competencies.sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage));
+
+            grid.innerHTML = competencies.map(c => {
+                const pct = parseFloat(c.percentage);
+                const barColor = pct >= 75 ? '#1a8a3f' : pct >= 41 ? '#0d6efd' : pct >= 21 ? '#e6a800' : '#dc3545';
+                return `
+                    <div class="cbc-item">
+                        <div class="competency">${c.subject}</div>
+                        <div class="progress-bar">
+                            <div class="fill" style="width:${Math.min(pct, 100)}%; background:${barColor};"></div>
+                        </div>
+                        <div class="stats">
+                            <span>Avg: <span class="value">${c.percentage}%</span></span>
+                            <span>Score: <span class="value">${c.avgScore}/${c.avgMax}</span></span>
+                            <span style="color:${c.color};">${c.level.replace(' Expectation', '')}</span>
+                        </div>
+                        <div style="margin-top:6px; font-size:11px; color:#6c757d; display:flex; gap:8px; flex-wrap:wrap;">
+                            <span>⬤ EE: ${c.exceeding}</span>
+                            <span>⬤ ME: ${c.meeting}</span>
+                            <span>⬤ AE: ${c.approaching}</span>
+                            <span>⬤ BE: ${c.below}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // RENDER TABLE
+        // ============================================
+        function renderTable(students) {
+            const tbody = document.getElementById('resultsBody');
+            const sorted = [...students].sort((a, b) => (b.averageScore || 0) - (a.averageScore || 0));
+
+            let html = '';
+            sorted.forEach((s, index) => {
+                const rank = index + 1;
+                const avgScore = s.averageScore ? s.averageScore.toFixed(1) : '0';
+                const level = s.performanceLevel || 'Approaching Expectation';
+                const short = getPerformanceShort(level);
+                const rating = getPerformanceRating(level);
+                const levelClass = getPerformanceClass(level);
+
+                // Subject count
+                const subjectCount = s.assessments ? s.assessments.length : 0;
+
+                // Subject scores tooltip
+                let subjectDetails = '';
+                if (s.assessments && s.assessments.length > 0) {
+                    subjectDetails = s.assessments.map(a =>
+                        `${a.subject}: ${a.score}/${a.maxScore} (${a.maxScore > 0 ? ((a.score/a.maxScore)*100).toFixed(0) : 0}%)`
+                    ).join(' | ');
+                }
+
+                const rankDisplay = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+
+                html += `
+                    <tr>
+                        <td>${rank}</td>
+                        <td><span class="rank-badge">${rankDisplay}</span></td>
+                        <td>
+                            <div class="student-name">${s.studentName || 'N/A'}</div>
+                            <div class="student-id">${s.studentId || s.admissionNumber || ''}</div>
+                        </td>
+                        <td>${s.studentId || '-'}</td>
+                        <td>${s.grade || '-'}</td>
+                        <td class="score-cell">${s.totalScore || 0}</td>
+                        <td class="score-cell ${getScoreClass(avgScore)}">${avgScore}%</td>
+                        <td><span class="performance-badge ${levelClass}">${short} - ${level}</span></td>
+                        <td>${rating}/4</td>
+                        <td>
+                            <span class="tooltip" data-tip="${subjectDetails}">
+                                ${subjectCount} subjects
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // ============================================
+        // HELPER FUNCTIONS
+        // ============================================
+        function calculatePerformanceLevel(percentage) {
+            if (percentage >= 75) return 'Exceeding Expectation';
+            if (percentage >= 41) return 'Meeting Expectation';
+            if (percentage >= 21) return 'Approaching Expectation';
+            return 'Below Expectation';
+        }
+
+        function getPerformanceColor(level) {
+            const colors = {
+                'Exceeding Expectation': '#1a8a3f',
+                'Meeting Expectation': '#0d6efd',
+                'Approaching Expectation': '#e6a800',
+                'Below Expectation': '#dc3545'
+            };
+            return colors[level] || '#6c757d';
+        }
+
+        function getPerformanceShort(level) {
+            const shorts = {
+                'Exceeding Expectation': 'EE',
+                'Meeting Expectation': 'ME',
+                'Approaching Expectation': 'AE',
+                'Below Expectation': 'BE'
+            };
+            return shorts[level] || 'AE';
+        }
+
+        function getPerformanceRating(level) {
+            const ratings = {
+                'Exceeding Expectation': 4,
+                'Meeting Expectation': 3,
+                'Approaching Expectation': 2,
+                'Below Expectation': 1
+            };
+            return ratings[level] || 2;
+        }
+
+        function getPerformanceClass(level) {
+            const classes = {
+                'Exceeding Expectation': 'exceeding',
+                'Meeting Expectation': 'meeting',
+                'Approaching Expectation': 'approaching',
+                'Below Expectation': 'below'
+            };
+            return classes[level] || 'approaching';
+        }
+
+        function getScoreClass(score) {
+            const p = parseFloat(score);
+            if (p >= 75) return 'high';
+            if (p >= 41) return 'medium';
+            if (p >= 21) return 'low';
+            return 'fail';
+        }
+
+        // ============================================
+        // UI HELPERS
+        // ============================================
+        function showLoading(show) {
+            document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+            document.getElementById('tableContainer').style.display = show ? 'none' : 'block';
+            document.getElementById('emptyState').style.display = 'none';
+        }
+
+        function showEmptyState(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'none';
+            document.getElementById('cbcAnalysis').style.display = 'none';
+            const empty = document.getElementById('emptyState');
+            empty.style.display = 'block';
+            empty.querySelector('p').textContent = message || 'No results found.';
+        }
+
+        // ============================================
+        // EXPORT FUNCTIONS
+        // ============================================
+        function exportPDF() {
+            window.print();
+        }
+
+        function exportExcel() {
+            if (!currentData || currentData.length === 0) {
+                alert('No data to export. Please load results first.');
+                return;
+            }
+
+            // Build CSV
+            let csv = 'Rank,Student Name,Student ID,Grade,Total Score,Average %,Performance Level,Rating';
+            const sorted = [...currentData].sort((a, b) => (b.averageScore || 0) - (a.averageScore || 0));
+
+            // Add subjects as columns
+            const allSubjects = new Set();
+            sorted.forEach(s => {
+                if (s.assessments) {
+                    s.assessments.forEach(a => allSubjects.add(a.subject));
+                }
+            });
+            const subjects = Array.from(allSubjects).sort();
+            subjects.forEach(sub => {
+                csv += `,${sub} Score,${sub} Max,${sub} %`;
+            });
+
+            csv += '\n';
+
+            sorted.forEach((s, index) => {
+                const rank = index + 1;
+                const avgScore = s.averageScore ? s.averageScore.toFixed(1) : '0';
+                const level = s.performanceLevel || 'Approaching Expectation';
+                const rating = getPerformanceRating(level);
+
+                csv += `${rank},"${s.studentName || 'N/A'}",${s.studentId || ''},${s.grade || ''},${s.totalScore || 0},${avgScore},"${level}",${rating}`;
+
+                // Subject scores
+                subjects.forEach(sub => {
+                    const a = s.assessments ? s.assessments.find(a => a.subject === sub) : null;
+                    if (a) {
+                        const pct = a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0;
+                        csv += `,${a.score || 0},${a.maxScore || 0},${pct}`;
+                    } else {
+                        csv += ',,,';
+                    }
+                });
+
+                csv += '\n';
+            });
+
+            // Add CBC summary
+            csv += '\n\nCBC Analysis Summary\n';
+            csv += `Total Students,${currentStats.total}\n`;
+            csv += `Exceeding (EE),${currentStats.exceeding}\n`;
+            csv += `Meeting (ME),${currentStats.meeting}\n`;
+            csv += `Approaching (AE),${currentStats.approaching}\n`;
+            csv += `Below (BE),${currentStats.below}\n`;
+            csv += `Class Average,${currentStats.classAverage}%\n`;
+
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `class_assessment_${document.getElementById('gradeFilter').value || 'all'}_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================
+        // AUTO-LOAD ON PAGE LOAD
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default grade if available
+            const gradeSelect = document.getElementById('gradeFilter');
+            if (gradeSelect.options.length > 1) {
+                gradeSelect.selectedIndex = 1;
+            }
+            // Auto-load after a short delay
+            setTimeout(loadData, 500);
+        });
+    </script>
+</body>
+</html>

@@ -2857,6 +2857,149 @@ app.get('/api/subject-config/stats', async (req, res) => {
 });
 
 // ============================================
+// CBC ANALYSIS ROUTE - COMPETENCY BASED ANALYSIS
+// ============================================
+
+// GET CBC analysis for a class
+app.get('/api/assessments/cbc-analysis/:grade', async (req, res) => {
+    try {
+        const { grade } = req.params;
+        const { type, period, term, year } = req.query;
+        
+        const filter = { grade };
+        if (type) filter.type = type;
+        if (period) filter.period = period;
+        if (term) filter.term = term;
+        if (year) filter.year = year;
+        
+        const students = await StudentAssessment.find(filter);
+        
+        if (!students || students.length === 0) {
+            return res.json({ 
+                success: true, 
+                students: [],
+                cbcAnalysis: {
+                    subjectCompetencies: [],
+                    classAverage: 0,
+                    performanceDistribution: { exceeding: 0, meeting: 0, approaching: 0, below: 0 }
+                }
+            });
+        }
+        
+        // Recalculate all students with current rubric
+        const updatedStudents = students.map(student => {
+            if (student.assessments) {
+                student.assessments = student.assessments.map(a => {
+                    const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+                    return {
+                        subject: a.subject,
+                        maxScore: a.maxScore,
+                        score: a.score,
+                        percentage: perf.percentage,
+                        performanceLevel: perf.level,
+                        rating: perf.rating
+                    };
+                });
+            }
+            const overall = calculateStudentOverall(student.assessments || []);
+            student.totalScore = overall.totalScore;
+            student.averageScore = overall.averageScore;
+            student.performanceLevel = overall.performanceLevel;
+            student.overallRating = overall.overallRating;
+            return student;
+        });
+        
+        // Calculate performance distribution
+        let exceeding = 0, meeting = 0, approaching = 0, below = 0;
+        let totalAvg = 0;
+        
+        updatedStudents.forEach(s => {
+            const level = s.performanceLevel || 'Approaching Expectation';
+            if (level === 'Exceeding Expectation') exceeding++;
+            else if (level === 'Meeting Expectation') meeting++;
+            else if (level === 'Approaching Expectation') approaching++;
+            else below++;
+            totalAvg += s.averageScore || 0;
+        });
+        
+        const classAverage = updatedStudents.length > 0 ? (totalAvg / updatedStudents.length).toFixed(1) : 0;
+        
+        // Calculate subject competencies
+        const subjectMap = {};
+        updatedStudents.forEach(s => {
+            if (s.assessments) {
+                s.assessments.forEach(a => {
+                    if (!subjectMap[a.subject]) {
+                        subjectMap[a.subject] = { 
+                            scores: [], 
+                            maxScores: [], 
+                            count: 0,
+                            exceeding: 0,
+                            meeting: 0,
+                            approaching: 0,
+                            below: 0
+                        };
+                    }
+                    subjectMap[a.subject].scores.push(a.score || 0);
+                    subjectMap[a.subject].maxScores.push(a.maxScore || 50);
+                    subjectMap[a.subject].count++;
+                    
+                    const level = a.performanceLevel || 'Approaching Expectation';
+                    if (level === 'Exceeding Expectation') subjectMap[a.subject].exceeding++;
+                    else if (level === 'Meeting Expectation') subjectMap[a.subject].meeting++;
+                    else if (level === 'Approaching Expectation') subjectMap[a.subject].approaching++;
+                    else subjectMap[a.subject].below++;
+                });
+            }
+        });
+        
+        const subjectCompetencies = Object.keys(subjectMap).map(subject => {
+            const data = subjectMap[subject];
+            const avgScore = data.scores.reduce((sum, s) => sum + s, 0) / data.count;
+            const avgMax = data.maxScores.reduce((sum, s) => sum + s, 0) / data.count;
+            const percentage = avgMax > 0 ? (avgScore / avgMax) * 100 : 0;
+            const level = calculatePerformanceLevel(percentage);
+            
+            return {
+                subject,
+                averageScore: parseFloat(avgScore.toFixed(1)),
+                maxScore: parseFloat(avgMax.toFixed(1)),
+                percentage: parseFloat(percentage.toFixed(1)),
+                performanceLevel: level,
+                color: getPerformanceColor(level),
+                short: getPerformanceShort(level),
+                rating: getPerformanceRating(level),
+                distribution: {
+                    exceeding: data.exceeding,
+                    meeting: data.meeting,
+                    approaching: data.approaching,
+                    below: data.below,
+                    total: data.count
+                }
+            };
+        });
+        
+        // Sort by percentage descending
+        subjectCompetencies.sort((a, b) => b.percentage - a.percentage);
+        
+        res.json({
+            success: true,
+            students: updatedStudents,
+            cbcAnalysis: {
+                subjectCompetencies,
+                classAverage: parseFloat(classAverage),
+                performanceDistribution: { exceeding, meeting, approaching, below, total: updatedStudents.length },
+                totalStudents: updatedStudents.length
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error in CBC analysis:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
 // DOWNLOAD STUDENT REPORT
 // ============================================
 
