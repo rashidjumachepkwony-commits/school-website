@@ -1505,7 +1505,14 @@ const Payment = mongoose.model('Payment', paymentSchema);
 // ============================================
 
 function getDefaultSubjects(grade, type) {
-    const fallback = [{ name: 'MATHEMATICS', max: 50 }, { name: 'ENGLISH', max: 50 }, { name: 'KISWAHILI', max: 50 }, { name: 'SCIENCE', max: 50 }, { name: 'SOCIAL STUDIES', max: 50 }, { name: 'CREATIVE ARTS', max: 50 }];
+    const fallback = [
+        { name: 'MATHEMATICS', max: 50 }, 
+        { name: 'ENGLISH', max: 50 }, 
+        { name: 'KISWAHILI', max: 50 }, 
+        { name: 'SCIENCE', max: 50 }, 
+        { name: 'SOCIAL STUDIES', max: 50 }, 
+        { name: 'CREATIVE ARTS', max: 50 }
+    ];
     return fallback;
 }
 
@@ -2620,7 +2627,7 @@ app.get('/api/assessments/search', async (req, res) => {
 });
 
 // ============================================
-// SUBJECT CONFIGURATION MANAGEMENT ROUTES
+// SUBJECT CONFIGURATION MANAGEMENT ROUTES - FIXED
 // ============================================
 
 // GET all subject configurations
@@ -2665,6 +2672,14 @@ app.get('/api/subject-config/grade/:grade', async (req, res) => {
             });
         }
         
+        // Make sure subjects have the 'max' field
+        if (config.subjects) {
+            config.subjects = config.subjects.map(s => ({
+                name: s.name,
+                max: s.max || s.maxScore || 50
+            }));
+        }
+        
         res.json({ success: true, config });
     } catch (error) {
         console.error('Error fetching subject config:', error);
@@ -2700,10 +2715,10 @@ app.post('/api/subject-config', async (req, res) => {
             });
         }
         
-        // Validate subjects
+        // Validate subjects - handle both 'max' and 'maxScore'
         const validatedSubjects = subjects.map(s => ({
             name: s.name || s.subject || 'Untitled',
-            max: parseInt(s.max) || (s.maxScore || 50)
+            max: parseInt(s.max) || parseInt(s.maxScore) || 50
         }));
         
         const config = {
@@ -2760,9 +2775,10 @@ app.put('/api/subject-config/:id', async (req, res) => {
         if (period !== undefined) updateData.period = period;
         
         if (subjects && Array.isArray(subjects) && subjects.length > 0) {
+            // Handle both 'max' and 'maxScore'
             updateData.subjects = subjects.map(s => ({
                 name: s.name || s.subject || 'Untitled',
-                max: parseInt(s.max) || (s.maxScore || 50)
+                max: parseInt(s.max) || parseInt(s.maxScore) || 50
             }));
         }
         
@@ -2856,6 +2872,7 @@ app.get('/api/subject-config/stats', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // ============================================
 // CBC ANALYSIS ROUTE - COMPETENCY BASED ANALYSIS
 // ============================================
@@ -4607,6 +4624,25 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// ============================================
+// DEBUG - LIST ALL REGISTERED ROUTES (FIXED)
+// ============================================
+try {
+    console.log('\n📋 REGISTERED ROUTES:');
+    if (app._router && app._router.stack) {
+        app._router.stack.forEach(function(r) {
+            if (r.route && r.route.path) {
+                const methods = Object.keys(r.route.methods).join(',').toUpperCase();
+                console.log(`  ${methods} ${r.route.path}`);
+            }
+        });
+    } else {
+        console.log('  Router not yet initialized');
+    }
+    console.log('='.repeat(50) + '\n');
+} catch (error) {
+    console.log('⚠️ Could not list routes:', error.message);
+}
 
 // 404 handler - MUST BE LAST
 app.use((req, res) => {
