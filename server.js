@@ -180,7 +180,6 @@ function calculateStudentOverall(assessments) {
         totalMaxScore += a.maxScore || 0;
     });
     
-    // ✅ CORRECT: Average as percentage of total possible
     const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     const performanceLevel = calculatePerformanceLevel(avgPercentage);
     
@@ -245,7 +244,7 @@ function isCloudinaryConfigured() {
 }
 
 // ============================================
-// PROFESSIONAL CBC STUDENT REPORT - REDESIGNED
+// PROFESSIONAL CBC STUDENT REPORT - FIXED
 // ============================================
 function generateStudentReportPDF(student) {
     return new Promise((resolve, reject) => {
@@ -261,7 +260,6 @@ function generateStudentReportPDF(student) {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
 
-            // Professional Colors
             const colors = {
                 primary: '#0A1628',
                 gold: '#C9A84C',
@@ -286,10 +284,8 @@ function generateStudentReportPDF(student) {
             const logoPath = path.join(__dirname, 'images', 'logo.jpg');
             const hasLogo = fs.existsSync(logoPath);
 
-            // Top decorative border
             doc.rect(0, 0, 595, 6).fillColor(colors.gold).fill();
 
-            // Logo
             let logoY = 20;
             if (hasLogo) {
                 try {
@@ -300,7 +296,6 @@ function generateStudentReportPDF(student) {
                 }
             }
 
-            // School Name
             doc.fontSize(20)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
@@ -311,14 +306,12 @@ function generateStudentReportPDF(student) {
                 .fillColor(colors.gold)
                 .text('"Assurance to Excellence"', hasLogo ? 100 : 35, 42, { width: 400 });
 
-            // School Contact
             doc.fontSize(7)
                 .font('Helvetica')
                 .fillColor(colors.gray)
                 .text('P.O Box 7, Cheptais  •  Tel: +254 721 556 252  •  Email: starchangara@gmail.com', 
                       hasLogo ? 100 : 35, 56, { width: 400 });
 
-            // Divider
             doc.moveTo(30, 78)
                 .lineTo(565, 78)
                 .strokeColor(colors.gold)
@@ -330,7 +323,6 @@ function generateStudentReportPDF(student) {
             // ============================================
             const infoY = 88;
             
-            // Info card background
             doc.roundedRect(30, infoY, 535, 42, 6)
                 .fillColor(colors.grayLight)
                 .fill()
@@ -453,7 +445,6 @@ function generateStudentReportPDF(student) {
                 .fillColor(colors.primary)
                 .text('SUBJECT ASSESSMENT', 30, tableY);
 
-            // Table Header
             const tableTop = tableY + 12;
             doc.roundedRect(30, tableTop, 535, 18, 4)
                 .fillColor(colors.primary)
@@ -473,7 +464,6 @@ function generateStudentReportPDF(student) {
                 headerX += colWidths[i];
             });
 
-            // Table Rows
             let rowY = tableTop + 18;
             let rowIndex = 0;
             let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
@@ -599,7 +589,6 @@ function generateStudentReportPDF(student) {
                     .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100))
                     .slice(0, 4);
 
-                // Strengths Box
                 doc.roundedRect(30, swY, 260, 50, 6)
                     .fillColor(colors.successLight)
                     .fill()
@@ -630,7 +619,6 @@ function generateStudentReportPDF(student) {
                         .text('No subjects meeting expectations yet.', 40, strengthsY);
                 }
 
-                // Weaknesses Box
                 doc.roundedRect(305, swY, 260, 50, 6)
                     .fillColor(colors.dangerLight)
                     .fill()
@@ -673,7 +661,6 @@ function generateStudentReportPDF(student) {
                     .fillColor(colors.primary)
                     .text('📝 Teacher\'s Comments', 30, feedbackY);
 
-                // Feedback box
                 doc.roundedRect(30, feedbackY + 8, 535, 40, 6)
                     .fillColor(colors.grayLight)
                     .fill()
@@ -719,7 +706,7 @@ function generateStudentReportPDF(student) {
 }
 
 // ============================================
-// HELPER: Generate Teacher Feedback - UPDATED
+// HELPER: Generate Teacher Feedback
 // ============================================
 function generateTeacherFeedback(student) {
     const level = student.performanceLevel || 'Approaching Expectation';
@@ -762,7 +749,7 @@ function generateTeacherFeedback(student) {
 }
 
 // ============================================
-// PROFESSIONAL CLASS REPORT - LANDSCAPE
+// PROFESSIONAL CLASS REPORT
 // ============================================
 function generateClassReportPDF(students, grade, type, term, year, period) {
     return new Promise((resolve, reject) => {
@@ -778,7 +765,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
             
-            // Header
             doc.fontSize(20)
                .font('Helvetica-Bold')
                .fillColor('#0A1628')
@@ -801,7 +787,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                .text(`${term || ''} ${year || ''} ${period ? '- ' + period : ''}`, { align: 'center' })
                .moveDown(0.5);
             
-            // Statistics
             const totalStudents = students.length;
             let exceeding = 0, meeting = 0, approaching = 0, below = 0;
             let totalAvg = 0;
@@ -851,14 +836,12 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             
             doc.moveDown(2);
             
-            // ✅ UPDATED: Class report legend
             doc.fontSize(8)
                .font('Helvetica-Bold')
                .fillColor('#6c757d')
                .text('EE: Exceeding (75-100%)   ME: Meeting (41-74%)   AE: Approaching (21-40%)   BE: Below (0-20%)   Rank: 1st, 2nd, 3rd', 45, doc.y);
             doc.moveDown(1);
             
-            // Get all subjects
             let allSubjects = [];
             students.forEach(s => {
                 if (s.assessments) {
@@ -871,7 +854,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             });
             allSubjects.sort();
             
-            // Student Table
             const nameColWidth = 90;
             const rankColWidth = 35;
             const totalColWidth = 50;
@@ -910,7 +892,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             
             doc.text('Level', headerX + 3, tableTop + 7, { width: levelColWidth - 6, align: 'center' });
             
-            // Max scores row
             const maxRowY = tableTop + 24;
             doc.rect(30, maxRowY, tableWidth, 18)
                .fillColor('#f8f9fa')
@@ -938,7 +919,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 maxX += subjectColWidth;
             });
             
-            // Sort students
             const sortedStudents = [...students].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
             let rowY = maxRowY + 18;
             let rowIndex = 0;
@@ -1028,7 +1008,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 rowIndex++;
             });
             
-            // Footer
             doc.moveDown(1);
             doc.fontSize(8)
                .font('Helvetica-Bold')
@@ -2329,7 +2308,7 @@ app.post('/api/students/payment', async (req, res) => {
 });
 
 // ============================================
-// STUDENT ASSESSMENT ROUTES
+// STUDENT ASSESSMENT ROUTES - COMPLETE FIXED
 // ============================================
 
 app.get('/api/assessments/students/:grade', async (req, res) => {
@@ -2351,164 +2330,7 @@ app.get('/api/assessments/students/:grade', async (req, res) => {
     }
 });
 
-app.get('/api/assessments/student/:studentId', async (req, res) => {
-    try {
-        const { studentId } = req.params;
-        const assessment = await StudentAssessment.findOne({ studentId });
-        if (!assessment) {
-            return res.status(404).json({ success: false, message: 'Assessment not found for this student' });
-        }
-        res.json({ success: true, assessment });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// SUBJECT CONFIG ROUTES
-// ============================================
-
-app.get('/api/assessments/subjects/:grade', async (req, res) => {
-    try {
-        const grade = req.params.grade;
-        const type = req.query.type || 'monthly';
-        const period = req.query.period || '';
-        const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs_new');
-        let config = await collection.findOne({ grade: grade, type: type, period: period });
-        if (!config && period) {
-            config = await collection.findOne({ grade: grade, type: type, period: '' });
-        }
-        if (!config) {
-            const defaultSubjects = getDefaultSubjects(grade, type);
-            config = {
-                grade: grade,
-                type: type,
-                period: period || '',
-                subjects: defaultSubjects,
-                rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
-                rubric: {
-                    exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
-                    meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
-                    approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
-                    below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
-                },
-                updatedAt: new Date()
-            };
-            await collection.insertOne(config);
-            console.log('Created default config for:', grade, type, period);
-        }
-        res.json({ success: true, config });
-    } catch (error) {
-        console.error('GET error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-app.delete('/api/assessments/subjects/:grade', async (req, res) => {
-    try {
-        const grade = req.params.grade;
-        const { type, period } = req.query;
-        if (!type) {
-            return res.status(400).json({ success: false, message: 'Type is required' });
-        }
-        const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs_new');
-        const query = { grade: grade, type: type };
-        if (period) query.period = period;
-        const result = await collection.deleteMany(query);
-        console.log(`Deleted ${result.deletedCount} configs for ${grade} (${type})`);
-        res.json({ success: true, message: `Deleted config for ${grade} (${type})`, deleted: result.deletedCount });
-    } catch (error) {
-        console.log('Delete error:', error);
-        res.json({ success: true, message: `Config for ${grade} cleared`, deleted: 0 });
-    }
-});
-
-app.put('/api/assessments/subjects/:grade', async (req, res) => {
-    try {
-        const grade = req.params.grade;
-        const { type, period, subjects, rankLevels, rubric } = req.body;
-        if (!grade) {
-            return res.status(400).json({ success: false, message: 'Grade is required' });
-        }
-        if (!type) {
-            return res.status(400).json({ success: false, message: 'Type is required' });
-        }
-        if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
-            return res.status(400).json({ success: false, message: 'Subjects array is required' });
-        }
-        for (const s of subjects) {
-            if (!s.name || typeof s.name !== 'string' || s.name.trim() === '') {
-                return res.status(400).json({ success: false, message: 'Each subject must have a name' });
-            }
-            if (typeof s.max !== 'number' || s.max < 1) {
-                return res.status(400).json({ success: false, message: 'Each subject must have a max score > 0' });
-            }
-        }
-        const cleanedSubjects = subjects.map(s => ({
-            name: s.name.trim(),
-            max: s.max
-        }));
-        const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs_new');
-        const query = { grade: grade, type: type };
-        if (period) query.period = period;
-        await collection.deleteMany(query);
-        const newConfig = {
-            grade: grade,
-            type: type,
-            period: period || '',
-            subjects: cleanedSubjects,
-            rankLevels: rankLevels || ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
-            rubric: rubric || {
-                exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
-                meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
-                approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
-                below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
-            },
-            updatedAt: new Date()
-        };
-        await collection.insertOne(newConfig);
-        console.log(`Inserted new config for ${grade} (${type}) ${period ? 'period: '+period : ''}`);
-        
-        const filter = { grade: grade, type: type };
-        if (period) filter.period = period;
-        const students = await StudentAssessment.find(filter);
-        for (const student of students) {
-            let updated = false;
-            for (const assessment of student.assessments) {
-                const subjectConfig = cleanedSubjects.find(s => s.name === assessment.subject);
-                if (subjectConfig && assessment.maxScore !== subjectConfig.max) {
-                    assessment.maxScore = subjectConfig.max;
-                    updated = true;
-                }
-                const perf = calculateAssessmentPerformance(assessment.score, assessment.maxScore);
-                assessment.percentage = perf.percentage;
-                assessment.performanceLevel = perf.level;
-                assessment.rating = perf.rating;
-                updated = true;
-            }
-            if (updated) {
-                const overall = calculateStudentOverall(student.assessments);
-                student.totalScore = overall.totalScore;
-                student.averageScore = overall.averageScore;
-                student.performanceLevel = overall.performanceLevel;
-                student.overallRating = overall.overallRating;
-                await student.save();
-            }
-        }
-        res.json({ success: true, message: 'Subject configuration saved successfully!', config: newConfig });
-    } catch (error) {
-        console.error('Save error:', error);
-        res.status(500).json({ success: false, message: 'Error saving subjects: ' + error.message });
-    }
-});
-
-// ============================================
-// ASSESSMENT ROUTES
-// ============================================
-
+// GET assessments by grade - RECALCULATES PERFORMANCE LEVELS
 app.get('/api/assessments/grade/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
@@ -2519,7 +2341,36 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
         if (month) filter.month = month;
         if (year) filter.year = year;
         if (term) filter.term = term;
+        
         const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
+        
+        // ✅ RECALCULATE performance levels with NEW rubric
+        const updatedStudents = students.map(student => {
+            // Recalculate each subject
+            if (student.assessments) {
+                student.assessments = student.assessments.map(a => {
+                    const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+                    return {
+                        subject: a.subject,
+                        maxScore: a.maxScore,
+                        score: a.score,
+                        percentage: perf.percentage,
+                        performanceLevel: perf.level,
+                        rating: perf.rating
+                    };
+                });
+            }
+            
+            // Recalculate overall
+            const overall = calculateStudentOverall(student.assessments || []);
+            student.totalScore = overall.totalScore;
+            student.averageScore = overall.averageScore;
+            student.performanceLevel = overall.performanceLevel;
+            student.overallRating = overall.overallRating;
+            
+            return student;
+        });
+        
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
         const configFilter = { grade: grade, type: type || 'monthly' };
@@ -2529,30 +2380,57 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
             const defaultSubjects = getDefaultSubjects(grade, type || 'monthly');
             config = { grade: grade, type: type || 'monthly', period: period || '', subjects: defaultSubjects };
         }
-        res.json({ success: true, students, subjectConfig: { [`${grade}_${type || 'monthly'}`]: config } });
+        
+        res.json({ success: true, students: updatedStudents, subjectConfig: { [`${grade}_${type || 'monthly'}`]: config } });
     } catch (error) {
+        console.error('Error in /api/assessments/grade/:grade:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
+// GET student assessment by ID - RECALCULATES PERFORMANCE LEVELS
 app.get('/api/assessments/student/:id', async (req, res) => {
     try {
         const student = await StudentAssessment.findById(req.params.id);
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
+        
+        // ✅ RECALCULATE performance levels with NEW rubric
+        if (student.assessments) {
+            student.assessments = student.assessments.map(a => {
+                const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+                return {
+                    subject: a.subject,
+                    maxScore: a.maxScore,
+                    score: a.score,
+                    percentage: perf.percentage,
+                    performanceLevel: perf.level,
+                    rating: perf.rating
+                };
+            });
+        }
+        const overall = calculateStudentOverall(student.assessments || []);
+        student.totalScore = overall.totalScore;
+        student.averageScore = overall.averageScore;
+        student.performanceLevel = overall.performanceLevel;
+        student.overallRating = overall.overallRating;
+        
         res.json({ success: true, student });
     } catch (error) {
+        console.error('Error fetching student assessment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
+// POST - Create assessment
 app.post('/api/assessments', async (req, res) => {
     try {
         const { studentName, studentId, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
         if (!studentName || !grade || !assessments || !Array.isArray(assessments) || assessments.length === 0) {
             return res.status(400).json({ success: false, message: 'Invalid data. Need studentName, grade, and assessments array.' });
         }
+        
         const assessmentsWithRubric = assessments.map(a => {
             const perf = calculateAssessmentPerformance(a.score, a.maxScore);
             return {
@@ -2565,6 +2443,7 @@ app.post('/api/assessments', async (req, res) => {
             };
         });
         const overall = calculateStudentOverall(assessmentsWithRubric);
+        
         const student = new StudentAssessment({
             studentName,
             studentId: studentId || '',
@@ -2584,10 +2463,12 @@ app.post('/api/assessments', async (req, res) => {
         await student.save();
         res.status(201).json({ success: true, message: 'Student assessment created successfully!', student });
     } catch (error) {
+        console.error('Error creating assessment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
+// PUT - Update assessment
 app.put('/api/assessments/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -2596,6 +2477,7 @@ app.put('/api/assessments/:id', async (req, res) => {
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
+        
         if (studentName) student.studentName = studentName;
         if (studentId) student.studentId = studentId;
         if (admissionNumber) student.admissionNumber = admissionNumber;
@@ -2605,6 +2487,7 @@ app.put('/api/assessments/:id', async (req, res) => {
         if (month) student.month = month;
         if (year) student.year = year;
         if (term) student.term = term;
+        
         if (assessments && Array.isArray(assessments) && assessments.length > 0) {
             const assessmentsWithRubric = assessments.map(a => {
                 const perf = calculateAssessmentPerformance(a.score, a.maxScore);
@@ -2624,14 +2507,17 @@ app.put('/api/assessments/:id', async (req, res) => {
             student.performanceLevel = overall.performanceLevel;
             student.overallRating = overall.overallRating;
         }
+        
         student.updatedAt = new Date();
         await student.save();
         res.json({ success: true, message: 'Student assessment updated successfully!', student });
     } catch (error) {
+        console.error('Error updating assessment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
+// DELETE - Delete assessment
 app.delete('/api/assessments/:id', async (req, res) => {
     try {
         const student = await StudentAssessment.findByIdAndDelete(req.params.id);
@@ -2640,20 +2526,47 @@ app.delete('/api/assessments/:id', async (req, res) => {
         }
         res.json({ success: true, message: 'Student assessment deleted successfully!' });
     } catch (error) {
+        console.error('Error deleting assessment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
+// GET all assessments - RECALCULATES PERFORMANCE LEVELS
 app.get('/api/assessments/all', async (req, res) => {
     try {
         const students = await StudentAssessment.find().sort({ studentName: 1 });
-        res.json({ success: true, students: students, count: students.length });
+        
+        // ✅ RECALCULATE performance levels with NEW rubric
+        const updatedStudents = students.map(student => {
+            if (student.assessments) {
+                student.assessments = student.assessments.map(a => {
+                    const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+                    return {
+                        subject: a.subject,
+                        maxScore: a.maxScore,
+                        score: a.score,
+                        percentage: perf.percentage,
+                        performanceLevel: perf.level,
+                        rating: perf.rating
+                    };
+                });
+            }
+            const overall = calculateStudentOverall(student.assessments || []);
+            student.totalScore = overall.totalScore;
+            student.averageScore = overall.averageScore;
+            student.performanceLevel = overall.performanceLevel;
+            student.overallRating = overall.overallRating;
+            return student;
+        });
+        
+        res.json({ success: true, students: updatedStudents, count: updatedStudents.length });
     } catch (error) {
         console.error('Error fetching all assessments:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
+// SEARCH assessments - RECALCULATES PERFORMANCE LEVELS
 app.get('/api/assessments/search', async (req, res) => {
     try {
         const { name, grade, type } = req.query;
@@ -2667,12 +2580,38 @@ app.get('/api/assessments/search', async (req, res) => {
         if (type && type.trim() !== '') {
             filter.type = type.trim();
         }
+        
+        let students;
         if (Object.keys(filter).length === 0) {
-            const allStudents = await StudentAssessment.find().sort({ studentName: 1 });
-            return res.json({ success: true, students: allStudents, count: allStudents.length });
+            students = await StudentAssessment.find().sort({ studentName: 1 });
+        } else {
+            students = await StudentAssessment.find(filter).sort({ studentName: 1 });
         }
-        const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
-        res.json({ success: true, students: students, count: students.length });
+        
+        // ✅ RECALCULATE performance levels with NEW rubric
+        const updatedStudents = students.map(student => {
+            if (student.assessments) {
+                student.assessments = student.assessments.map(a => {
+                    const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+                    return {
+                        subject: a.subject,
+                        maxScore: a.maxScore,
+                        score: a.score,
+                        percentage: perf.percentage,
+                        performanceLevel: perf.level,
+                        rating: perf.rating
+                    };
+                });
+            }
+            const overall = calculateStudentOverall(student.assessments || []);
+            student.totalScore = overall.totalScore;
+            student.averageScore = overall.averageScore;
+            student.performanceLevel = overall.performanceLevel;
+            student.overallRating = overall.overallRating;
+            return student;
+        });
+        
+        res.json({ success: true, students: updatedStudents, count: updatedStudents.length });
     } catch (error) {
         console.error('Search error:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -2689,6 +2628,27 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
+        
+        // ✅ RECALCULATE before generating PDF
+        if (student.assessments) {
+            student.assessments = student.assessments.map(a => {
+                const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+                return {
+                    subject: a.subject,
+                    maxScore: a.maxScore,
+                    score: a.score,
+                    percentage: perf.percentage,
+                    performanceLevel: perf.level,
+                    rating: perf.rating
+                };
+            });
+        }
+        const overall = calculateStudentOverall(student.assessments || []);
+        student.totalScore = overall.totalScore;
+        student.averageScore = overall.averageScore;
+        student.performanceLevel = overall.performanceLevel;
+        student.overallRating = overall.overallRating;
+        
         const pdfBuffer = await generateStudentReportPDF(student);
         
         res.setHeader('Content-Type', 'application/pdf');
@@ -2707,6 +2667,27 @@ app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
+        
+        // ✅ RECALCULATE before generating PDF
+        if (student.assessments) {
+            student.assessments = student.assessments.map(a => {
+                const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+                return {
+                    subject: a.subject,
+                    maxScore: a.maxScore,
+                    score: a.score,
+                    percentage: perf.percentage,
+                    performanceLevel: perf.level,
+                    rating: perf.rating
+                };
+            });
+        }
+        const overall = calculateStudentOverall(student.assessments || []);
+        student.totalScore = overall.totalScore;
+        student.averageScore = overall.averageScore;
+        student.performanceLevel = overall.performanceLevel;
+        student.overallRating = overall.overallRating;
+        
         const pdfBuffer = await generateStudentReportPDF(student);
         
         res.setHeader('Content-Type', 'application/pdf');
@@ -2727,6 +2708,27 @@ app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) =
             return res.status(404).json({ success: false, message: 'No assessments found' });
         }
         const latest = allAssessments[allAssessments.length - 1];
+        
+        // ✅ RECALCULATE before generating PDF
+        if (latest.assessments) {
+            latest.assessments = latest.assessments.map(a => {
+                const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+                return {
+                    subject: a.subject,
+                    maxScore: a.maxScore,
+                    score: a.score,
+                    percentage: perf.percentage,
+                    performanceLevel: perf.level,
+                    rating: perf.rating
+                };
+            });
+        }
+        const overall = calculateStudentOverall(latest.assessments || []);
+        latest.totalScore = overall.totalScore;
+        latest.averageScore = overall.averageScore;
+        latest.performanceLevel = overall.performanceLevel;
+        latest.overallRating = overall.overallRating;
+        
         const pdfBuffer = await generateStudentReportPDF(latest);
         
         res.setHeader('Content-Type', 'application/pdf');
