@@ -21,8 +21,10 @@ function getPerformanceRating(level) {
 }
 
 // ============================================
-// CBC STUDENT OVERALL - CORRECTED
+// CBC STUDENT OVERALL - CORRECT CBC METHOD
 // ============================================
+// Overall rating = AVERAGE of all subject ratings (EE=4, ME=3, AE=2, BE=1)
+// Overall level = determined by the average rating
 function calculateStudentOverall(assessments) {
     if (!assessments || assessments.length === 0) {
         return { 
@@ -56,18 +58,26 @@ function calculateStudentOverall(assessments) {
         levelDistribution[short] = (levelDistribution[short] || 0) + 1;
     });
     
-    // OVERALL LEVEL: Based on average percentage (THIS IS THE KEY FIX)
-    const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
-    const performanceLevel = calculatePerformanceLevel(avgPercentage);
-    
-    // CBC Rating: Average of all subject ratings (for display only)
+    // ============================================
+    // CBC METHOD: Overall rating = AVERAGE of all subject ratings
+    // ============================================
     const overallRating = subjectCount > 0 ? parseFloat((totalRating / subjectCount).toFixed(1)) : 2;
+    
+    // Determine overall performance level based on average rating
+    let performanceLevel = 'Approaching Expectation';
+    if (overallRating >= 3.5) performanceLevel = 'Exceeding Expectation';
+    else if (overallRating >= 2.5) performanceLevel = 'Meeting Expectation';
+    else if (overallRating >= 1.5) performanceLevel = 'Approaching Expectation';
+    else performanceLevel = 'Below Expectation';
+    
+    // Calculate average percentage for display (informational only)
+    const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     
     return {
         totalScore: totalScore,
-        averageScore: parseFloat(avgPercentage.toFixed(1)),
-        overallRating: overallRating,  // This is the CBC rating (3.9, 3.6, etc.)
-        performanceLevel: performanceLevel,  // This is the level based on percentage
+        averageScore: parseFloat(avgPercentage.toFixed(1)),  // Informational only
+        overallRating: overallRating,  // CBC Rating (3.9, 3.6, etc.)
+        performanceLevel: performanceLevel,  // Overall level based on average rating
         levelDistribution: levelDistribution,
         subjectCount: subjectCount
     };
