@@ -8,7 +8,6 @@ const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const crypto = require('crypto');
 const logger = require('./logger');
-const { ObjectId } = require('mongodb');
 
 // ============================================
 // LOAD ENVIRONMENT VARIABLES FIRST
@@ -2338,7 +2337,151 @@ app.get('/api/assessments/students/:grade', async (req, res) => {
     }
 });
 
-// GET assessments by grade - RECALCULATES PERFORMANCE LEVELS
+// ============================================
+// SUBJECT CONFIG ROUTES (WORKING)
+// ============================================
+
+app.get('/api/assessments/subjects/:grade', async (req, res) => {
+    try {
+        const grade = req.params.grade;
+        const type = req.query.type || 'monthly';
+        const period = req.query.period || '';
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        let config = await collection.findOne({ grade: grade, type: type, period: period });
+        if (!config && period) {
+            config = await collection.findOne({ grade: grade, type: type, period: '' });
+        }
+        if (!config) {
+            const defaultSubjects = getDefaultSubjects(grade, type);
+            config = {
+                grade: grade,
+                type: type,
+                period: period || '',
+                subjects: defaultSubjects,
+                rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+                rubric: {
+                    exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
+                    meeting: { min: 50, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
+                    approaching: { min: 26, max: 49, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
+                    below: { min: 0, max: 25, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+                },
+                updatedAt: new Date()
+            };
+            await collection.insertOne(config);
+            console.log('Created default config for:', grade, type, period);
+        }
+        res.json({ success: true, config });
+    } catch (error) {
+        console.error('GET error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.delete('/api/assessments/subjects/:grade', async (req, res) => {
+    try {
+        const grade = req.params.grade;
+        const { type, period } = req.query;
+        if (!type) {
+            return res.status(400).json({ success: false, message: 'Type is required' });
+        }
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        const query = { grade: grade, type: type };
+        if (period) query.period = period;
+        const result = await collection.deleteMany(query);
+        console.log(`Deleted ${result.deletedCount} configs for ${grade} (${type})`);
+        res.json({ success: true, message: `Deleted config for ${grade} (${type})`, deleted: result.deletedCount });
+    } catch (error) {
+        console.log('Delete error:', error);
+        res.json({ success: true, message: `Config for ${grade} cleared`, deleted: 0 });
+    }
+});
+
+app.put('/api/assessments/subjects/:grade', async (req, res) => {
+    try {
+        const grade = req.params.grade;
+        const { type, period, subjects, rankLevels, rubric } = req.body;
+        if (!grade) {
+            return res.status(400).json({ success: false, message: 'Grade is required' });
+        }
+        if (!type) {
+            return res.status(400).json({ success: false, message: 'Type is required' });
+        }
+        if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
+            return res.status(400).json({ success: false, message: 'Subjects array is required' });
+        }
+        for (const s of subjects) {
+            if (!s.name || typeof s.name !== 'string' || s.name.trim() === '') {
+                return res.status(400).json({ success: false, message: 'Each subject must have a name' });
+            }
+            if (typeof s.max !== 'number' || s.max < 1) {
+                return res.status(400).json({ success: false, message: 'Each subject must have a max score > 0' });
+            }
+        }
+        const cleanedSubjects = subjects.map(s => ({
+            name: s.name.trim(),
+            max: s.max
+        }));
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        const query = { grade: grade, type: type };
+        if (period) query.period = period;
+        await collection.deleteMany(query);
+        const newConfig = {
+            grade: grade,
+            type: type,
+            period: period || '',
+            subjects: cleanedSubjects,
+            rankLevels: rankLevels || ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+            rubric: rubric || {
+                exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
+                meeting: { min: 50, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
+                approaching: { min: 26, max: 49, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
+                below: { min: 0, max: 25, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+            },
+            updatedAt: new Date()
+        };
+        await collection.insertOne(newConfig);
+        console.log(`Inserted new config for ${grade} (${type}) ${period ? 'period: '+period : ''}`);
+        
+        const filter = { grade: grade, type: type };
+        if (period) filter.period = period;
+        const students = await StudentAssessment.find(filter);
+        for (const student of students) {
+            let updated = false;
+            for (const assessment of student.assessments) {
+                const subjectConfig = cleanedSubjects.find(s => s.name === assessment.subject);
+                if (subjectConfig && assessment.maxScore !== subjectConfig.max) {
+                    assessment.maxScore = subjectConfig.max;
+                    updated = true;
+                }
+                const perf = calculateAssessmentPerformance(assessment.score, assessment.maxScore);
+                assessment.percentage = perf.percentage;
+                assessment.performanceLevel = perf.level;
+                assessment.rating = perf.rating;
+                updated = true;
+            }
+            if (updated) {
+                const overall = calculateStudentOverall(student.assessments);
+                student.totalScore = overall.totalScore;
+                student.averageScore = overall.averageScore;
+                student.performanceLevel = overall.performanceLevel;
+                student.overallRating = overall.overallRating;
+                await student.save();
+            }
+        }
+        res.json({ success: true, message: 'Subject configuration saved successfully!', config: newConfig });
+    } catch (error) {
+        console.error('Save error:', error);
+        res.status(500).json({ success: false, message: 'Error saving subjects: ' + error.message });
+    }
+});
+
+// ============================================
+// ASSESSMENT ROUTES
+// ============================================
+
 app.get('/api/assessments/grade/:grade', async (req, res) => {
     try {
         const { grade } = req.params;
@@ -2349,36 +2492,7 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
         if (month) filter.month = month;
         if (year) filter.year = year;
         if (term) filter.term = term;
-        
         const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
-        
-        // ✅ RECALCULATE performance levels with NEW rubric
-        const updatedStudents = students.map(student => {
-            // Recalculate each subject
-            if (student.assessments) {
-                student.assessments = student.assessments.map(a => {
-                    const perf = calculateAssessmentPerformance(a.score, a.maxScore);
-                    return {
-                        subject: a.subject,
-                        maxScore: a.maxScore,
-                        score: a.score,
-                        percentage: perf.percentage,
-                        performanceLevel: perf.level,
-                        rating: perf.rating
-                    };
-                });
-            }
-            
-            // Recalculate overall
-            const overall = calculateStudentOverall(student.assessments || []);
-            student.totalScore = overall.totalScore;
-            student.averageScore = overall.averageScore;
-            student.performanceLevel = overall.performanceLevel;
-            student.overallRating = overall.overallRating;
-            
-            return student;
-        });
-        
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
         const configFilter = { grade: grade, type: type || 'monthly' };
@@ -2388,57 +2502,30 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
             const defaultSubjects = getDefaultSubjects(grade, type || 'monthly');
             config = { grade: grade, type: type || 'monthly', period: period || '', subjects: defaultSubjects };
         }
-        
-        res.json({ success: true, students: updatedStudents, subjectConfig: { [`${grade}_${type || 'monthly'}`]: config } });
+        res.json({ success: true, students, subjectConfig: { [`${grade}_${type || 'monthly'}`]: config } });
     } catch (error) {
-        console.error('Error in /api/assessments/grade/:grade:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// GET student assessment by ID - RECALCULATES PERFORMANCE LEVELS
 app.get('/api/assessments/student/:id', async (req, res) => {
     try {
         const student = await StudentAssessment.findById(req.params.id);
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        
-        // ✅ RECALCULATE performance levels with NEW rubric
-        if (student.assessments) {
-            student.assessments = student.assessments.map(a => {
-                const perf = calculateAssessmentPerformance(a.score, a.maxScore);
-                return {
-                    subject: a.subject,
-                    maxScore: a.maxScore,
-                    score: a.score,
-                    percentage: perf.percentage,
-                    performanceLevel: perf.level,
-                    rating: perf.rating
-                };
-            });
-        }
-        const overall = calculateStudentOverall(student.assessments || []);
-        student.totalScore = overall.totalScore;
-        student.averageScore = overall.averageScore;
-        student.performanceLevel = overall.performanceLevel;
-        student.overallRating = overall.overallRating;
-        
         res.json({ success: true, student });
     } catch (error) {
-        console.error('Error fetching student assessment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// POST - Create assessment
 app.post('/api/assessments', async (req, res) => {
     try {
         const { studentName, studentId, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
         if (!studentName || !grade || !assessments || !Array.isArray(assessments) || assessments.length === 0) {
             return res.status(400).json({ success: false, message: 'Invalid data. Need studentName, grade, and assessments array.' });
         }
-        
         const assessmentsWithRubric = assessments.map(a => {
             const perf = calculateAssessmentPerformance(a.score, a.maxScore);
             return {
@@ -2451,7 +2538,6 @@ app.post('/api/assessments', async (req, res) => {
             };
         });
         const overall = calculateStudentOverall(assessmentsWithRubric);
-        
         const student = new StudentAssessment({
             studentName,
             studentId: studentId || '',
@@ -2471,12 +2557,10 @@ app.post('/api/assessments', async (req, res) => {
         await student.save();
         res.status(201).json({ success: true, message: 'Student assessment created successfully!', student });
     } catch (error) {
-        console.error('Error creating assessment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// PUT - Update assessment
 app.put('/api/assessments/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -2485,7 +2569,6 @@ app.put('/api/assessments/:id', async (req, res) => {
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        
         if (studentName) student.studentName = studentName;
         if (studentId) student.studentId = studentId;
         if (admissionNumber) student.admissionNumber = admissionNumber;
@@ -2495,7 +2578,6 @@ app.put('/api/assessments/:id', async (req, res) => {
         if (month) student.month = month;
         if (year) student.year = year;
         if (term) student.term = term;
-        
         if (assessments && Array.isArray(assessments) && assessments.length > 0) {
             const assessmentsWithRubric = assessments.map(a => {
                 const perf = calculateAssessmentPerformance(a.score, a.maxScore);
@@ -2515,17 +2597,14 @@ app.put('/api/assessments/:id', async (req, res) => {
             student.performanceLevel = overall.performanceLevel;
             student.overallRating = overall.overallRating;
         }
-        
         student.updatedAt = new Date();
         await student.save();
         res.json({ success: true, message: 'Student assessment updated successfully!', student });
     } catch (error) {
-        console.error('Error updating assessment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// DELETE - Delete assessment
 app.delete('/api/assessments/:id', async (req, res) => {
     try {
         const student = await StudentAssessment.findByIdAndDelete(req.params.id);
@@ -2534,47 +2613,20 @@ app.delete('/api/assessments/:id', async (req, res) => {
         }
         res.json({ success: true, message: 'Student assessment deleted successfully!' });
     } catch (error) {
-        console.error('Error deleting assessment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// GET all assessments - RECALCULATES PERFORMANCE LEVELS
 app.get('/api/assessments/all', async (req, res) => {
     try {
         const students = await StudentAssessment.find().sort({ studentName: 1 });
-        
-        // ✅ RECALCULATE performance levels with NEW rubric
-        const updatedStudents = students.map(student => {
-            if (student.assessments) {
-                student.assessments = student.assessments.map(a => {
-                    const perf = calculateAssessmentPerformance(a.score, a.maxScore);
-                    return {
-                        subject: a.subject,
-                        maxScore: a.maxScore,
-                        score: a.score,
-                        percentage: perf.percentage,
-                        performanceLevel: perf.level,
-                        rating: perf.rating
-                    };
-                });
-            }
-            const overall = calculateStudentOverall(student.assessments || []);
-            student.totalScore = overall.totalScore;
-            student.averageScore = overall.averageScore;
-            student.performanceLevel = overall.performanceLevel;
-            student.overallRating = overall.overallRating;
-            return student;
-        });
-        
-        res.json({ success: true, students: updatedStudents, count: updatedStudents.length });
+        res.json({ success: true, students: students, count: students.length });
     } catch (error) {
         console.error('Error fetching all assessments:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// SEARCH assessments - RECALCULATES PERFORMANCE LEVELS
 app.get('/api/assessments/search', async (req, res) => {
     try {
         const { name, grade, type } = req.query;
@@ -2588,430 +2640,14 @@ app.get('/api/assessments/search', async (req, res) => {
         if (type && type.trim() !== '') {
             filter.type = type.trim();
         }
-        
-        let students;
         if (Object.keys(filter).length === 0) {
-            students = await StudentAssessment.find().sort({ studentName: 1 });
-        } else {
-            students = await StudentAssessment.find(filter).sort({ studentName: 1 });
+            const allStudents = await StudentAssessment.find().sort({ studentName: 1 });
+            return res.json({ success: true, students: allStudents, count: allStudents.length });
         }
-        
-        // ✅ RECALCULATE performance levels with NEW rubric
-        const updatedStudents = students.map(student => {
-            if (student.assessments) {
-                student.assessments = student.assessments.map(a => {
-                    const perf = calculateAssessmentPerformance(a.score, a.maxScore);
-                    return {
-                        subject: a.subject,
-                        maxScore: a.maxScore,
-                        score: a.score,
-                        percentage: perf.percentage,
-                        performanceLevel: perf.level,
-                        rating: perf.rating
-                    };
-                });
-            }
-            const overall = calculateStudentOverall(student.assessments || []);
-            student.totalScore = overall.totalScore;
-            student.averageScore = overall.averageScore;
-            student.performanceLevel = overall.performanceLevel;
-            student.overallRating = overall.overallRating;
-            return student;
-        });
-        
-        res.json({ success: true, students: updatedStudents, count: updatedStudents.length });
+        const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
+        res.json({ success: true, students: students, count: students.length });
     } catch (error) {
         console.error('Search error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// SUBJECT CONFIGURATION MANAGEMENT ROUTES - FIXED
-// ============================================
-
-// GET all subject configurations
-app.get('/api/subject-config/all', async (req, res) => {
-    try {
-        const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs_new');
-        const configs = await collection.find({}).toArray();
-        res.json({ success: true, count: configs.length, configs });
-    } catch (error) {
-        console.error('Error fetching subject configs:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// GET subject config by grade
-app.get('/api/subject-config/grade/:grade', async (req, res) => {
-    try {
-        const { grade } = req.params;
-        const { type, period } = req.query;
-        
-        const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs_new');
-        const filter = { grade: grade };
-        if (type) filter.type = type;
-        if (period) filter.period = period;
-        
-        const config = await collection.findOne(filter);
-        
-        if (!config) {
-            // Return default config if not found
-            const defaultSubjects = getDefaultSubjects(grade, type || 'monthly');
-            return res.json({ 
-                success: true, 
-                config: { 
-                    grade, 
-                    type: type || 'monthly', 
-                    period: period || '',
-                    subjects: defaultSubjects,
-                    isDefault: true 
-                } 
-            });
-        }
-        
-        // Make sure subjects have the 'max' field
-        if (config.subjects) {
-            config.subjects = config.subjects.map(s => ({
-                name: s.name,
-                max: s.max || s.maxScore || 50
-            }));
-        }
-        
-        res.json({ success: true, config });
-    } catch (error) {
-        console.error('Error fetching subject config:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// CREATE subject configuration
-app.post('/api/subject-config', async (req, res) => {
-    try {
-        const { grade, type, period, subjects } = req.body;
-        
-        if (!grade) {
-            return res.status(400).json({ success: false, message: 'Grade is required' });
-        }
-        
-        if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
-            return res.status(400).json({ success: false, message: 'Subjects array is required with at least one subject' });
-        }
-        
-        const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs_new');
-        
-        // Check if config already exists
-        const existingFilter = { grade, type: type || 'monthly' };
-        if (period) existingFilter.period = period;
-        
-        const existing = await collection.findOne(existingFilter);
-        if (existing) {
-            return res.status(409).json({ 
-                success: false, 
-                message: 'Configuration already exists for this grade. Use PUT to update.' 
-            });
-        }
-        
-        // Validate subjects - handle both 'max' and 'maxScore'
-        const validatedSubjects = subjects.map(s => ({
-            name: s.name || s.subject || 'Untitled',
-            max: parseInt(s.max) || parseInt(s.maxScore) || 50
-        }));
-        
-        const config = {
-            grade,
-            type: type || 'monthly',
-            period: period || '',
-            subjects: validatedSubjects,
-            rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
-            rubric: {
-                exceeding: { min: 75, max: 100, label: 'Exceeding Expectation' },
-                meeting: { min: 41, max: 74, label: 'Meeting Expectation' },
-                approaching: { min: 21, max: 40, label: 'Approaching Expectation' },
-                below: { min: 0, max: 20, label: 'Below Expectation' }
-            },
-            updatedAt: new Date()
-        };
-        
-        const result = await collection.insertOne(config);
-        
-        res.status(201).json({ 
-            success: true, 
-            message: 'Subject configuration created successfully!',
-            config: { ...config, _id: result.insertedId }
-        });
-    } catch (error) {
-        console.error('Error creating subject config:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// UPDATE subject configuration
-app.put('/api/subject-config/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { grade, type, period, subjects } = req.body;
-        
-        const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs_new');
-        
-        // ObjectId is already imported at the top of the file
-        const objectId = new ObjectId(id);
-        const existing = await collection.findOne({ _id: objectId });
-        
-        if (!existing) {
-            return res.status(404).json({ success: false, message: 'Configuration not found' });
-        }
-        
-        const updateData = {
-            updatedAt: new Date()
-        };
-        
-        if (grade) updateData.grade = grade;
-        if (type) updateData.type = type;
-        if (period !== undefined) updateData.period = period;
-        
-        if (subjects && Array.isArray(subjects) && subjects.length > 0) {
-            // Handle both 'max' and 'maxScore'
-            updateData.subjects = subjects.map(s => ({
-                name: s.name || s.subject || 'Untitled',
-                max: parseInt(s.max) || parseInt(s.maxScore) || 50
-            }));
-        }
-        
-        const result = await collection.updateOne(
-            { _id: objectId },
-            { $set: updateData }
-        );
-        
-        if (result.modifiedCount === 0) {
-            return res.status(400).json({ success: false, message: 'No changes were made' });
-        }
-        
-        const updated = await collection.findOne({ _id: objectId });
-        res.json({ 
-            success: true, 
-            message: 'Subject configuration updated successfully!',
-            config: updated
-        });
-    } catch (error) {
-        console.error('Error updating subject config:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// DELETE subject configuration
-app.delete('/api/subject-config/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { confirm } = req.query;
-        
-        if (confirm !== 'yes') {
-            return res.status(400).json({ 
-                success: false, 
-                message: '⚠️ Deletion requires confirmation. Use ?confirm=yes to proceed.' 
-            });
-        }
-        
-        const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs_new');
-        
-        // ObjectId is already imported at the top of the file
-        const objectId = new ObjectId(id);
-        const existing = await collection.findOne({ _id: objectId });
-        
-        if (!existing) {
-            return res.status(404).json({ success: false, message: 'Configuration not found' });
-        }
-        
-        await collection.deleteOne({ _id: objectId });
-        
-        res.json({ 
-            success: true, 
-            message: `Subject configuration for ${existing.grade} deleted successfully!` 
-        });
-    } catch (error) {
-        console.error('Error deleting subject config:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// GET subject config statistics
-app.get('/api/subject-config/stats', async (req, res) => {
-    try {
-        const db = mongoose.connection.db;
-        const collection = db.collection('subjectconfigs_new');
-        
-        const total = await collection.countDocuments();
-        const byGrade = await collection.aggregate([
-            { $group: { _id: '$grade', count: { $sum: 1 } } },
-            { $sort: { _id: 1 } }
-        ]).toArray();
-        
-        const allConfigs = await collection.find({}).toArray();
-        
-        res.json({ 
-            success: true, 
-            stats: {
-                total,
-                byGrade,
-                configs: allConfigs.map(c => ({
-                    grade: c.grade,
-                    type: c.type,
-                    period: c.period || '',
-                    subjectsCount: c.subjects ? c.subjects.length : 0,
-                    updatedAt: c.updatedAt
-                }))
-            }
-        });
-    } catch (error) {
-        console.error('Error fetching subject config stats:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// CBC ANALYSIS ROUTE - COMPETENCY BASED ANALYSIS
-// ============================================
-
-// GET CBC analysis for a class
-app.get('/api/assessments/cbc-analysis/:grade', async (req, res) => {
-    try {
-        const { grade } = req.params;
-        const { type, period, term, year } = req.query;
-        
-        const filter = { grade };
-        if (type) filter.type = type;
-        if (period) filter.period = period;
-        if (term) filter.term = term;
-        if (year) filter.year = year;
-        
-        const students = await StudentAssessment.find(filter);
-        
-        if (!students || students.length === 0) {
-            return res.json({ 
-                success: true, 
-                students: [],
-                cbcAnalysis: {
-                    subjectCompetencies: [],
-                    classAverage: 0,
-                    performanceDistribution: { exceeding: 0, meeting: 0, approaching: 0, below: 0 }
-                }
-            });
-        }
-        
-        // Recalculate all students with current rubric
-        const updatedStudents = students.map(student => {
-            if (student.assessments) {
-                student.assessments = student.assessments.map(a => {
-                    const perf = calculateAssessmentPerformance(a.score, a.maxScore);
-                    return {
-                        subject: a.subject,
-                        maxScore: a.maxScore,
-                        score: a.score,
-                        percentage: perf.percentage,
-                        performanceLevel: perf.level,
-                        rating: perf.rating
-                    };
-                });
-            }
-            const overall = calculateStudentOverall(student.assessments || []);
-            student.totalScore = overall.totalScore;
-            student.averageScore = overall.averageScore;
-            student.performanceLevel = overall.performanceLevel;
-            student.overallRating = overall.overallRating;
-            return student;
-        });
-        
-        // Calculate performance distribution
-        let exceeding = 0, meeting = 0, approaching = 0, below = 0;
-        let totalAvg = 0;
-        
-        updatedStudents.forEach(s => {
-            const level = s.performanceLevel || 'Approaching Expectation';
-            if (level === 'Exceeding Expectation') exceeding++;
-            else if (level === 'Meeting Expectation') meeting++;
-            else if (level === 'Approaching Expectation') approaching++;
-            else below++;
-            totalAvg += s.averageScore || 0;
-        });
-        
-        const classAverage = updatedStudents.length > 0 ? (totalAvg / updatedStudents.length).toFixed(1) : 0;
-        
-        // Calculate subject competencies
-        const subjectMap = {};
-        updatedStudents.forEach(s => {
-            if (s.assessments) {
-                s.assessments.forEach(a => {
-                    if (!subjectMap[a.subject]) {
-                        subjectMap[a.subject] = { 
-                            scores: [], 
-                            maxScores: [], 
-                            count: 0,
-                            exceeding: 0,
-                            meeting: 0,
-                            approaching: 0,
-                            below: 0
-                        };
-                    }
-                    subjectMap[a.subject].scores.push(a.score || 0);
-                    subjectMap[a.subject].maxScores.push(a.maxScore || 50);
-                    subjectMap[a.subject].count++;
-                    
-                    const level = a.performanceLevel || 'Approaching Expectation';
-                    if (level === 'Exceeding Expectation') subjectMap[a.subject].exceeding++;
-                    else if (level === 'Meeting Expectation') subjectMap[a.subject].meeting++;
-                    else if (level === 'Approaching Expectation') subjectMap[a.subject].approaching++;
-                    else subjectMap[a.subject].below++;
-                });
-            }
-        });
-        
-        const subjectCompetencies = Object.keys(subjectMap).map(subject => {
-            const data = subjectMap[subject];
-            const avgScore = data.scores.reduce((sum, s) => sum + s, 0) / data.count;
-            const avgMax = data.maxScores.reduce((sum, s) => sum + s, 0) / data.count;
-            const percentage = avgMax > 0 ? (avgScore / avgMax) * 100 : 0;
-            const level = calculatePerformanceLevel(percentage);
-            
-            return {
-                subject,
-                averageScore: parseFloat(avgScore.toFixed(1)),
-                maxScore: parseFloat(avgMax.toFixed(1)),
-                percentage: parseFloat(percentage.toFixed(1)),
-                performanceLevel: level,
-                color: getPerformanceColor(level),
-                short: getPerformanceShort(level),
-                rating: getPerformanceRating(level),
-                distribution: {
-                    exceeding: data.exceeding,
-                    meeting: data.meeting,
-                    approaching: data.approaching,
-                    below: data.below,
-                    total: data.count
-                }
-            };
-        });
-        
-        // Sort by percentage descending
-        subjectCompetencies.sort((a, b) => b.percentage - a.percentage);
-        
-        res.json({
-            success: true,
-            students: updatedStudents,
-            cbcAnalysis: {
-                subjectCompetencies,
-                classAverage: parseFloat(classAverage),
-                performanceDistribution: { exceeding, meeting, approaching, below, total: updatedStudents.length },
-                totalStudents: updatedStudents.length
-            }
-        });
-        
-    } catch (error) {
-        console.error('Error in CBC analysis:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
