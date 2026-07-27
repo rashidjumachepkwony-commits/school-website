@@ -244,13 +244,13 @@ function isCloudinaryConfigured() {
 }
 
 // ============================================
-// PROFESSIONAL CBC STUDENT REPORT - FIXED
+// PROFESSIONAL CBC STUDENT REPORT - ONE PAGE
 // ============================================
 function generateStudentReportPDF(student) {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({
-                margin: 30,
+                margin: 25,
                 size: 'A4',
                 layout: 'portrait'
             });
@@ -281,94 +281,100 @@ function generateStudentReportPDF(student) {
             // ============================================
             // HEADER WITH LOGO
             // ============================================
-            const logoPath = path.join(__dirname, 'images', 'logo.jpg');
-            const hasLogo = fs.existsSync(logoPath);
-
-            doc.rect(0, 0, 595, 6).fillColor(colors.gold).fill();
-
-            let logoY = 20;
-            if (hasLogo) {
-                try {
-                    doc.image(logoPath, 35, 15, { width: 55, height: 55 });
-                    logoY = 20;
-                } catch (e) {
-                    console.log('Logo placement error:', e.message);
-                }
-            }
-
-            doc.fontSize(20)
+            // Create logo from text (since we can't use image file directly)
+            const logoY = 15;
+            
+            // School Name with Logo Style
+            doc.fontSize(22)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
-                .text('CHANGARA STAR ACADEMY', hasLogo ? 100 : 35, 18, { width: 400 });
-
-            doc.fontSize(10)
+                .text('CHANGARA', 35, logoY, { align: 'left', width: 200 });
+            
+            doc.fontSize(18)
+                .font('Helvetica-Bold')
+                .fillColor(colors.gold)
+                .text('STAR', 35, logoY + 28, { align: 'left', width: 200 });
+            
+            doc.fontSize(8)
+                .font('Helvetica-Bold')
+                .fillColor(colors.primary)
+                .text('ACADEMY', 35, logoY + 50, { align: 'left', width: 200 });
+            
+            // Small tagline
+            doc.fontSize(6)
                 .font('Helvetica-Oblique')
                 .fillColor(colors.gold)
-                .text('"Assurance to Excellence"', hasLogo ? 100 : 35, 42, { width: 400 });
+                .text('"Nurturing Stars, Building Futures"', 35, logoY + 62, { width: 200 });
 
-            doc.fontSize(7)
+            // Right side - Assessment Title
+            doc.fontSize(14)
+                .font('Helvetica-Bold')
+                .fillColor(colors.primary)
+                .text('CBC ASSESSMENT REPORT', 300, logoY + 10, { align: 'right', width: 270 });
+            
+            doc.fontSize(8)
                 .font('Helvetica')
                 .fillColor(colors.gray)
-                .text('P.O Box 7, Cheptais  •  Tel: +254 721 556 252  •  Email: starchangara@gmail.com', 
-                      hasLogo ? 100 : 35, 56, { width: 400 });
+                .text(`${student.type || 'Monthly'} Assessment • ${student.term || ''} ${student.year || ''}`, 
+                    300, logoY + 30, { align: 'right', width: 270 });
 
-            doc.moveTo(30, 78)
-                .lineTo(565, 78)
+            // Decorative line
+            doc.moveTo(30, logoY + 72)
+                .lineTo(565, logoY + 72)
                 .strokeColor(colors.gold)
-                .lineWidth(1.5)
+                .lineWidth(2)
                 .stroke();
 
             // ============================================
-            // STUDENT INFORMATION
+            // STUDENT INFORMATION - COMPACT
             // ============================================
-            const infoY = 88;
+            const infoY = logoY + 80;
             
-            doc.roundedRect(30, infoY, 535, 42, 6)
+            doc.roundedRect(30, infoY, 535, 30, 4)
                 .fillColor(colors.grayLight)
                 .fill()
                 .strokeColor(colors.border)
-                .lineWidth(1)
-                .roundedRect(30, infoY, 535, 42, 6)
+                .lineWidth(0.5)
+                .roundedRect(30, infoY, 535, 30, 4)
                 .stroke();
 
             const infoData = [
                 ['Student:', student.studentName || 'N/A'],
                 ['Grade:', student.grade || 'N/A'],
                 ['Admission:', student.studentId || 'N/A'],
-                ['Assessment:', student.type || 'Monthly'],
                 ['Term:', student.term || 'N/A'],
-                ['Date:', formatKenyaFullTime(new Date())]
+                ['Date:', formatKenyaDate(new Date())]
             ];
 
-            const infoColWidth = 260;
-            const infoXStart = 45;
+            const infoColWidth = 200;
+            const infoXStart = 40;
 
             infoData.forEach((item, i) => {
-                const col = i % 2;
-                const row = Math.floor(i / 2);
+                const col = i % 3;
+                const row = Math.floor(i / 3);
                 const x = infoXStart + (col * infoColWidth);
-                const y = infoY + 6 + (row * 16);
+                const y = infoY + 6 + (row * 14);
 
-                doc.fontSize(8)
+                doc.fontSize(7)
                     .font('Helvetica-Bold')
                     .fillColor(colors.gray)
                     .text(item[0], x, y);
 
-                doc.fontSize(8)
+                doc.fontSize(7)
                     .font('Helvetica')
                     .fillColor(colors.primary)
-                    .text(item[1], x + 55, y);
+                    .text(item[1], x + 50, y, { width: 140 });
             });
 
             // ============================================
-            // PERFORMANCE RUBRIC
+            // PERFORMANCE RUBRIC - COMPACT
             // ============================================
-            const rubricY = infoY + 54;
+            const rubricY = infoY + 38;
             
-            doc.fontSize(8)
+            doc.fontSize(6)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
-                .text('PERFORMANCE RUBRIC', 30, rubricY);
+                .text('PERFORMANCE RUBRIC:', 30, rubricY);
 
             const rubricData = [
                 { label: 'Exceeding', range: '75-100%', color: colors.success, bg: colors.successLight },
@@ -377,27 +383,27 @@ function generateStudentReportPDF(student) {
                 { label: 'Below', range: '0-20%', color: colors.danger, bg: colors.dangerLight }
             ];
 
-            let rubricX = 30;
+            let rubricX = 110;
             rubricData.forEach((item) => {
-                doc.roundedRect(rubricX, rubricY + 10, 128, 22, 4)
+                doc.roundedRect(rubricX, rubricY - 2, 108, 16, 3)
                     .fillColor(item.bg)
                     .fill()
                     .strokeColor(item.color)
-                    .lineWidth(1)
-                    .roundedRect(rubricX, rubricY + 10, 128, 22, 4)
+                    .lineWidth(0.5)
+                    .roundedRect(rubricX, rubricY - 2, 108, 16, 3)
                     .stroke();
 
-                doc.fontSize(6)
+                doc.fontSize(5)
                     .font('Helvetica-Bold')
                     .fillColor(item.color)
-                    .text(item.label, rubricX + 5, rubricY + 13, { width: 118, align: 'center' });
+                    .text(item.label, rubricX + 2, rubricY + 1, { width: 60, align: 'left' });
 
-                doc.fontSize(5)
+                doc.fontSize(4)
                     .font('Helvetica')
                     .fillColor(colors.gray)
-                    .text(item.range, rubricX + 5, rubricY + 23, { width: 118, align: 'center' });
+                    .text(item.range, rubricX + 65, rubricY + 2, { width: 40, align: 'right' });
 
-                rubricX += 133;
+                rubricX += 113;
             });
 
             // ============================================
@@ -412,59 +418,59 @@ function generateStudentReportPDF(student) {
             };
             const perfColors = levelColors[level] || levelColors['Approaching Expectation'];
 
-            const perfY = rubricY + 40;
-            doc.roundedRect(30, perfY, 535, 36, 6)
+            const perfY = rubricY + 22;
+            doc.roundedRect(30, perfY, 535, 28, 4)
                 .fillColor(perfColors.bg)
                 .fill()
                 .strokeColor(perfColors.border)
-                .lineWidth(2)
-                .roundedRect(30, perfY, 535, 36, 6)
+                .lineWidth(1.5)
+                .roundedRect(30, perfY, 535, 28, 4)
                 .stroke();
 
-            doc.fontSize(18)
+            doc.fontSize(14)
                 .font('Helvetica-Bold')
                 .fillColor(perfColors.text)
-                .text(`${perfColors.icon} ${level}`, 45, perfY + 8);
+                .text(`${perfColors.icon} ${level}`, 40, perfY + 5);
 
             const totalScore = student.totalScore || 0;
             const avgScore = student.averageScore !== undefined && student.averageScore !== null ? student.averageScore.toFixed(1) : '0';
             const rating = getPerformanceRating(level);
 
-            doc.fontSize(10)
+            doc.fontSize(8)
                 .font('Helvetica')
                 .fillColor(colors.primary)
-                .text(`Total: ${totalScore}  •  Avg: ${avgScore}%  •  Rating: ${rating}/4`, 280, perfY + 12);
+                .text(`Total: ${totalScore}  •  Average: ${avgScore}%  •  Rating: ${rating}/4`, 250, perfY + 8);
 
             // ============================================
-            // SUBJECT ASSESSMENT TABLE
+            // SUBJECT ASSESSMENT TABLE - COMPACT
             // ============================================
-            const tableY = perfY + 48;
+            const tableY = perfY + 36;
 
-            doc.fontSize(9)
+            doc.fontSize(7)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
                 .text('SUBJECT ASSESSMENT', 30, tableY);
 
-            const tableTop = tableY + 12;
-            doc.roundedRect(30, tableTop, 535, 18, 4)
+            const tableTop = tableY + 8;
+            doc.roundedRect(30, tableTop, 535, 14, 3)
                 .fillColor(colors.primary)
                 .fill();
 
             const headers = ['Subject', 'Score', 'Max', '%', 'Performance'];
-            const colWidths = [160, 50, 50, 55, 190];
+            const colWidths = [170, 45, 45, 55, 190];
             let headerX = 40;
 
-            doc.fontSize(7)
+            doc.fontSize(6)
                 .font('Helvetica-Bold')
                 .fillColor('white');
 
             headers.forEach((h, i) => {
                 const align = i === 0 ? 'left' : 'center';
-                doc.text(h, headerX, tableTop + 4, { width: colWidths[i] - 5, align: align });
+                doc.text(h, headerX, tableTop + 3, { width: colWidths[i] - 5, align: align });
                 headerX += colWidths[i];
             });
 
-            let rowY = tableTop + 18;
+            let rowY = tableTop + 14;
             let rowIndex = 0;
             let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
 
@@ -474,7 +480,8 @@ function generateStudentReportPDF(student) {
                 return pB - pA;
             });
 
-            const displayAssessments = sortedAssessments.slice(0, 10);
+            // Limit to fit on one page (max 8 subjects)
+            const displayAssessments = sortedAssessments.slice(0, 8);
 
             displayAssessments.forEach((a) => {
                 const percentage = a.maxScore > 0 ? ((a.score / a.maxScore) * 100) : 0;
@@ -487,30 +494,30 @@ function generateStudentReportPDF(student) {
                 else belowCount++;
 
                 const bgColor = rowIndex % 2 === 0 ? '#ffffff' : colors.grayLight;
-                doc.roundedRect(30, rowY, 535, 16, 2)
+                doc.roundedRect(30, rowY, 535, 12, 1)
                     .fillColor(bgColor)
                     .fill()
                     .strokeColor(colors.border)
-                    .lineWidth(0.5)
-                    .roundedRect(30, rowY, 535, 16, 2)
+                    .lineWidth(0.3)
+                    .roundedRect(30, rowY, 535, 12, 1)
                     .stroke();
 
                 let xPos = 40;
-                doc.fontSize(7)
+                doc.fontSize(6)
                     .font('Helvetica');
 
                 doc.fillColor(colors.primary)
                     .font('Helvetica-Bold')
-                    .text(a.subject, xPos, rowY + 4, { width: colWidths[0] - 5 });
+                    .text(a.subject, xPos, rowY + 2, { width: colWidths[0] - 5 });
                 xPos += colWidths[0];
 
                 doc.font('Helvetica')
                     .fillColor(colors.primary)
-                    .text(a.score.toString(), xPos, rowY + 4, { width: colWidths[1] - 5, align: 'center' });
+                    .text(a.score.toString(), xPos, rowY + 2, { width: colWidths[1] - 5, align: 'center' });
                 xPos += colWidths[1];
 
                 doc.fillColor(colors.gray)
-                    .text(a.maxScore.toString(), xPos, rowY + 4, { width: colWidths[2] - 5, align: 'center' });
+                    .text(a.maxScore.toString(), xPos, rowY + 2, { width: colWidths[2] - 5, align: 'center' });
                 xPos += colWidths[2];
 
                 const pctColor = percentage >= 75 ? colors.success : 
@@ -518,185 +525,206 @@ function generateStudentReportPDF(student) {
                                  (percentage >= 21 ? colors.warning : colors.danger));
                 doc.fillColor(pctColor)
                     .font('Helvetica-Bold')
-                    .text(percentage.toFixed(0) + '%', xPos, rowY + 4, { width: colWidths[3] - 5, align: 'center' });
+                    .text(percentage.toFixed(0) + '%', xPos, rowY + 2, { width: colWidths[3] - 5, align: 'center' });
                 xPos += colWidths[3];
 
                 doc.fillColor(levelColor2)
                     .font('Helvetica-Bold')
-                    .text(level2, xPos, rowY + 4, { width: colWidths[4] - 5 });
+                    .text(level2, xPos, rowY + 2, { width: colWidths[4] - 5 });
 
-                rowY += 16;
+                rowY += 12;
                 rowIndex++;
             });
 
             // ============================================
-            // PERFORMANCE SUMMARY BADGES
+            // CBC ANALYSIS - COMPETENCY BASED
             // ============================================
-            const summaryY = rowY + 8;
+            const cbcY = rowY + 8;
             
-            doc.fontSize(7)
-                .font('Helvetica-Bold')
-                .fillColor(colors.gray)
-                .text('Summary:', 30, summaryY);
+            // Only add CBC analysis if there's room on the page
+            if (cbcY < 680) {
+                doc.fontSize(7)
+                    .font('Helvetica-Bold')
+                    .fillColor(colors.primary)
+                    .text('📊 CBC COMPETENCY ANALYSIS', 30, cbcY);
 
-            const badgeData = [
-                { label: 'Exceeding', count: exceedingCount, color: colors.success, bg: colors.successLight },
-                { label: 'Meeting', count: meetingCount, color: colors.info, bg: colors.infoLight },
-                { label: 'Approaching', count: approachingCount, color: colors.warning, bg: colors.warningLight },
-                { label: 'Below', count: belowCount, color: colors.danger, bg: colors.dangerLight }
-            ];
+                // Calculate subject averages
+                const allAssessments = student.assessments || [];
+                const subjectAverages = {};
+                allAssessments.forEach(a => {
+                    const pct = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+                    subjectAverages[a.subject] = parseFloat(pct.toFixed(1));
+                });
 
-            let badgeX = 80;
-            badgeData.forEach((item) => {
-                if (item.count > 0 || item.label === 'Exceeding') {
-                    doc.roundedRect(badgeX, summaryY - 2, 60, 16, 4)
+                const sortedSubjects = Object.keys(subjectAverages).sort((a, b) => subjectAverages[b] - subjectAverages[a]);
+                
+                // Performance distribution
+                const totalStudents = 1; // Single student report
+                const classAvg = student.averageScore || 0;
+
+                // Competency level indicators
+                const competencyLevels = {
+                    'Exceeding Expectation': { label: '🌟 Exceeding', color: colors.success, range: '75-100%' },
+                    'Meeting Expectation': { label: '✅ Meeting', color: colors.info, range: '41-74%' },
+                    'Approaching Expectation': { label: '📌 Approaching', color: colors.warning, range: '21-40%' },
+                    'Below Expectation': { label: '⚠️ Below', color: colors.danger, range: '0-20%' }
+                };
+
+                // Summary badges with CBC labels
+                const badgeY = cbcY + 12;
+                const badgeData = [
+                    { label: 'Exceeding', count: exceedingCount, color: colors.success, bg: colors.successLight },
+                    { label: 'Meeting', count: meetingCount, color: colors.info, bg: colors.infoLight },
+                    { label: 'Approaching', count: approachingCount, color: colors.warning, bg: colors.warningLight },
+                    { label: 'Below', count: belowCount, color: colors.danger, bg: colors.dangerLight }
+                ];
+
+                let badgeX = 30;
+                const totalSubjects = displayAssessments.length || 1;
+                
+                badgeData.forEach((item) => {
+                    const pct = totalSubjects > 0 ? Math.round((item.count / totalSubjects) * 100) : 0;
+                    doc.roundedRect(badgeX, badgeY, 125, 20, 4)
                         .fillColor(item.bg)
                         .fill()
                         .strokeColor(item.color)
-                        .lineWidth(1)
-                        .roundedRect(badgeX, summaryY - 2, 60, 16, 4)
+                        .lineWidth(0.5)
+                        .roundedRect(badgeX, badgeY, 125, 20, 4)
                         .stroke();
 
                     doc.fontSize(9)
                         .font('Helvetica-Bold')
                         .fillColor(item.color)
-                        .text(item.count.toString(), badgeX + 6, summaryY);
+                        .text(item.count.toString(), badgeX + 6, badgeY + 2);
 
                     doc.fontSize(5)
                         .font('Helvetica')
                         .fillColor(colors.gray)
-                        .text(item.label, badgeX + 20, summaryY + 1);
+                        .text(item.label, badgeX + 22, badgeY + 2);
 
-                    badgeX += 68;
-                }
-            });
+                    doc.fontSize(5)
+                        .font('Helvetica-Bold')
+                        .fillColor(item.color)
+                        .text(pct + '%', badgeX + 90, badgeY + 2, { width: 30, align: 'right' });
 
-            // ============================================
-            // STRENGTHS & WEAKNESSES
-            // ============================================
-            const swY = summaryY + 28;
+                    badgeX += 132;
+                });
 
-            if (swY < 720 && displayAssessments.length > 0) {
-                const allAssessments = student.assessments || [];
+                // Strengths and Areas for Improvement - CBC style
+                const swY = badgeY + 28;
                 
-                const strengths = allAssessments
-                    .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
-                    .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100))
-                    .slice(0, 4);
+                if (swY < 720 && sortedSubjects.length > 0) {
+                    // Top performing subjects (Strengths)
+                    const strengths = sortedSubjects.filter(s => subjectAverages[s] >= 50).slice(0, 3);
+                    const weaknesses = sortedSubjects.filter(s => subjectAverages[s] < 41).slice(0, 3);
 
-                const weaknesses = allAssessments
-                    .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 41)
-                    .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100))
-                    .slice(0, 4);
+                    // Strengths box
+                    doc.roundedRect(30, swY, 260, 32, 4)
+                        .fillColor(colors.successLight)
+                        .fill()
+                        .strokeColor(colors.success)
+                        .lineWidth(0.5)
+                        .roundedRect(30, swY, 260, 32, 4)
+                        .stroke();
 
-                doc.roundedRect(30, swY, 260, 50, 6)
-                    .fillColor(colors.successLight)
-                    .fill()
-                    .strokeColor(colors.success)
-                    .lineWidth(1.5)
-                    .roundedRect(30, swY, 260, 50, 6)
-                    .stroke();
-
-                doc.fontSize(8)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.success)
-                    .text('🌟 Strengths', 40, swY + 6);
-
-                let strengthsY = swY + 20;
-                if (strengths.length > 0) {
-                    strengths.forEach((s) => {
-                        const pct = ((s.score / s.maxScore) * 100).toFixed(0);
-                        doc.fontSize(7)
-                            .font('Helvetica')
-                            .fillColor(colors.primary)
-                            .text(`✓ ${s.subject}: ${pct}%`, 40, strengthsY);
-                        strengthsY += 12;
-                    });
-                } else {
-                    doc.fontSize(7)
-                        .font('Helvetica-Oblique')
-                        .fillColor(colors.gray)
-                        .text('No subjects meeting expectations yet.', 40, strengthsY);
-                }
-
-                doc.roundedRect(305, swY, 260, 50, 6)
-                    .fillColor(colors.dangerLight)
-                    .fill()
-                    .strokeColor(colors.danger)
-                    .lineWidth(1.5)
-                    .roundedRect(305, swY, 260, 50, 6)
-                    .stroke();
-
-                doc.fontSize(8)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.danger)
-                    .text('⚠️ Areas for Improvement', 315, swY + 6);
-
-                let weaknessesY = swY + 20;
-                if (weaknesses.length > 0) {
-                    weaknesses.forEach((s) => {
-                        const pct = ((s.score / s.maxScore) * 100).toFixed(0);
-                        doc.fontSize(7)
-                            .font('Helvetica')
-                            .fillColor(colors.primary)
-                            .text(`→ ${s.subject}: ${pct}%`, 315, weaknessesY);
-                        weaknessesY += 12;
-                    });
-                } else {
-                    doc.fontSize(7)
+                    doc.fontSize(6)
                         .font('Helvetica-Bold')
                         .fillColor(colors.success)
-                        .text('🎉 All subjects meeting expectations!', 315, weaknessesY);
+                        .text('🌟 Strengths', 38, swY + 3);
+
+                    if (strengths.length > 0) {
+                        let strengthsY = swY + 13;
+                        strengths.forEach((s) => {
+                            doc.fontSize(5)
+                                .font('Helvetica')
+                                .fillColor(colors.primary)
+                                .text(`✓ ${s}: ${subjectAverages[s]}%`, 38, strengthsY);
+                            strengthsY += 9;
+                        });
+                    } else {
+                        doc.fontSize(5)
+                            .font('Helvetica-Oblique')
+                            .fillColor(colors.gray)
+                            .text('Continue building on your progress', 38, swY + 13);
+                    }
+
+                    // Areas for Improvement box
+                    doc.roundedRect(305, swY, 260, 32, 4)
+                        .fillColor(colors.dangerLight)
+                        .fill()
+                        .strokeColor(colors.danger)
+                        .lineWidth(0.5)
+                        .roundedRect(305, swY, 260, 32, 4)
+                        .stroke();
+
+                    doc.fontSize(6)
+                        .font('Helvetica-Bold')
+                        .fillColor(colors.danger)
+                        .text('📈 Areas for Improvement', 313, swY + 3);
+
+                    if (weaknesses.length > 0) {
+                        let weaknessesY = swY + 13;
+                        weaknesses.forEach((s) => {
+                            doc.fontSize(5)
+                                .font('Helvetica')
+                                .fillColor(colors.primary)
+                                .text(`→ ${s}: ${subjectAverages[s]}%`, 313, weaknessesY);
+                            weaknessesY += 9;
+                        });
+                    } else {
+                        doc.fontSize(5)
+                            .font('Helvetica-Bold')
+                            .fillColor(colors.success)
+                            .text('🎉 All subjects meeting expectations!', 313, swY + 13);
+                    }
+                }
+
+                // Teacher's Comments - CBC Narrative
+                const feedbackY = (swY + 40 > 720) ? 720 : swY + 40;
+                
+                if (feedbackY < 730) {
+                    doc.fontSize(6)
+                        .font('Helvetica-Bold')
+                        .fillColor(colors.primary)
+                        .text('📝 Teacher\'s CBC Comments', 30, feedbackY);
+
+                    doc.roundedRect(30, feedbackY + 5, 535, 28, 4)
+                        .fillColor(colors.grayLight)
+                        .fill()
+                        .strokeColor(colors.border)
+                        .lineWidth(0.5)
+                        .roundedRect(30, feedbackY + 5, 535, 28, 4)
+                        .stroke();
+
+                    const feedbackText = generateTeacherFeedback(student);
+                    doc.fontSize(6)
+                        .font('Helvetica')
+                        .fillColor(colors.primary)
+                        .text(feedbackText, 38, feedbackY + 11, { width: 520, align: 'left' });
                 }
             }
 
             // ============================================
-            // TEACHER NARRATIVE FEEDBACK
+            // FOOTER - Always at bottom
             // ============================================
-            const feedbackY = swY + 64;
-
-            if (feedbackY < 730) {
-                doc.fontSize(8)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.primary)
-                    .text('📝 Teacher\'s Comments', 30, feedbackY);
-
-                doc.roundedRect(30, feedbackY + 8, 535, 40, 6)
-                    .fillColor(colors.grayLight)
-                    .fill()
-                    .strokeColor(colors.border)
-                    .lineWidth(1)
-                    .roundedRect(30, feedbackY + 8, 535, 40, 6)
-                    .stroke();
-
-                const feedbackText = generateTeacherFeedback(student);
-                doc.fontSize(8)
-                    .font('Helvetica')
-                    .fillColor(colors.primary)
-                    .text(feedbackText, 40, feedbackY + 16, { width: 515, align: 'left' });
-            }
-
-            // ============================================
-            // FOOTER
-            // ============================================
-            const footerY = 745;
+            const footerY = 760;
             doc.moveTo(30, footerY)
                 .lineTo(565, footerY)
                 .strokeColor(colors.gold)
                 .lineWidth(1.5)
                 .stroke();
 
-            doc.fontSize(7)
+            doc.fontSize(6)
                 .font('Helvetica')
                 .fillColor(colors.gray)
-                .text(`Generated: ${formatKenyaFullTime(new Date())}`, 30, footerY + 8, { align: 'left' })
-                .text('Parent Signature: ___________________', 30, footerY + 20, { align: 'left' });
+                .text(`Generated: ${formatKenyaFullTime(new Date())}`, 30, footerY + 6, { align: 'left' })
+                .text('Parent Signature: ___________________', 30, footerY + 16, { align: 'left' });
 
-            doc.fontSize(6)
+            doc.fontSize(5)
                 .font('Helvetica-Oblique')
                 .fillColor(colors.gray)
-                .text(`© ${new Date().getFullYear()} Changara Star Academy • P.O Box 7, Cheptais • All Rights Reserved`, 
-                      30, footerY + 34, { align: 'center' });
+                .text(`© ${new Date().getFullYear()} Changara Star Academy • "Nurturing Stars, Building Futures" • P.O Box 7, Cheptais`, 
+                      30, footerY + 28, { align: 'center' });
 
             doc.end();
         } catch (error) {
