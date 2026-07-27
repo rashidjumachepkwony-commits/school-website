@@ -160,9 +160,10 @@ function calculateAssessmentPerformance(score, maxScore) {
 }
 
 // ============================================
-// CBC STUDENT OVERALL - CORRECT METHOD
+// CBC STUDENT OVERALL - CORRECT CBC METHOD
 // ============================================
 // Overall rating = AVERAGE of all subject ratings (EE=4, ME=3, AE=2, BE=1)
+// Overall level = determined by the average rating
 function calculateStudentOverall(assessments) {
     if (!assessments || assessments.length === 0) {
         return { 
@@ -200,7 +201,9 @@ function calculateStudentOverall(assessments) {
         levelDistribution[short] = (levelDistribution[short] || 0) + 1;
     });
     
-    // Overall rating = AVERAGE of all subject ratings (CBC method)
+    // ============================================
+    // CBC METHOD: Overall rating = AVERAGE of all subject ratings
+    // ============================================
     const overallRating = subjectCount > 0 ? parseFloat((totalRating / subjectCount).toFixed(1)) : 2;
     
     // Determine overall performance level based on average rating
@@ -210,13 +213,14 @@ function calculateStudentOverall(assessments) {
     else if (overallRating >= 1.5) performanceLevel = 'Approaching Expectation';
     else performanceLevel = 'Below Expectation';
     
+    // Calculate average percentage for display (informational only)
     const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     
     return {
         totalScore: totalScore,
-        averageScore: parseFloat(avgPercentage.toFixed(1)),
-        overallRating: overallRating,
-        performanceLevel: performanceLevel,
+        averageScore: parseFloat(avgPercentage.toFixed(1)),  // Informational only
+        overallRating: overallRating,  // CBC Rating (3.8, 3.6, etc.)
+        performanceLevel: performanceLevel,  // Overall level based on average rating
         levelDistribution: levelDistribution,
         subjectCount: subjectCount
     };
@@ -950,7 +954,7 @@ function generateTeacherFeedback(student) {
 }
 
 // ============================================
-// PROFESSIONAL CLASS REPORT - CBC STYLE - FIXED
+// PROFESSIONAL CLASS REPORT - CBC STYLE - COMPLETE FIX
 // ============================================
 function generateClassReportPDF(students, grade, type, term, year, period) {
     return new Promise((resolve, reject) => {
@@ -1098,7 +1102,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                .text('EE: Exceeding (75-100%)   ME: Meeting (41-74%)   AE: Approaching (21-40%)   BE: Below (0-20%)', 35, legendY);
 
             // ============================================
-            // GET ALL SUBJECTS - ONLY FROM VALID STUDENTS
+            // GET ALL SUBJECTS
             // ============================================
             let allSubjects = [];
             students.forEach(s => {
@@ -1122,9 +1126,9 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             // ============================================
             const tableTop = legendY + 12;
             const rankColWidth = 28;
-            const nameColWidth = 80;
+            const nameColWidth = 85;
             const totalColWidth = 42;
-            const avgColWidth = 42;
+            const avgColWidth = 45;
             const levelColWidth = 55;
             const subjectColWidth = Math.min(34, (730 - rankColWidth - nameColWidth - totalColWidth - avgColWidth - levelColWidth) / Math.max(1, allSubjects.length));
             
@@ -1140,7 +1144,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                         }
                     }
                 });
-                subjectMaxScores[subject] = maxScore || 50; // Default max if not found
+                subjectMaxScores[subject] = maxScore || 50;
             });
             
             // Header background
@@ -1234,9 +1238,8 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                    .text(rank <= 3 ? ['🏆', '🥈', '🥉'][rank - 1] : rank.toString(), x, rowY + 2, { width: rankColWidth - 5, align: 'center' });
                 x += rankColWidth;
                 
-                // Student Name - Clean the name (remove any prefixes like "0-1-")
+                // Student Name - Clean the name
                 let cleanName = student.studentName || 'N/A';
-                // Remove any number-prefix like "0-1-", "0-0-", etc.
                 cleanName = cleanName.replace(/^[\d-]+/, '').trim();
                 doc.fillColor('#0A1628')
                    .font('Helvetica-Bold')
@@ -1268,12 +1271,12 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                    .text((student.totalScore || 0).toString(), x, rowY + 2, { width: totalColWidth - 5, align: 'center' });
                 x += totalColWidth;
                 
-                // Average
+                // Average Percentage
                 doc.fillColor('#0d6efd')
                    .text(avgScore + '%', x, rowY + 2, { width: avgColWidth - 5, align: 'center' });
                 x += avgColWidth;
                 
-                // Performance Level with Rating
+                // Performance Level with Rating (CBC)
                 const levelColors = {
                     'Exceeding Expectation': '#28a745',
                     'Meeting Expectation': '#0d6efd',
@@ -1321,7 +1324,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
         }
     });
 }
-
 // ============================================
 // FIX PAST RECORDS
 // ============================================
