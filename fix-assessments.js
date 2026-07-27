@@ -20,30 +20,58 @@ function getPerformanceRating(level) {
     return ratings[level] || 2;
 }
 
+// ============================================
+// CBC STUDENT OVERALL - CORRECTED
+// ============================================
 function calculateStudentOverall(assessments) {
     if (!assessments || assessments.length === 0) {
-        return { totalScore: 0, averageScore: 0, performanceLevel: 'Approaching Expectation', overallRating: 2 };
+        return { 
+            totalScore: 0, 
+            averageScore: 0, 
+            performanceLevel: 'Approaching Expectation', 
+            overallRating: 2,
+            levelDistribution: { EE: 0, ME: 0, AE: 0, BE: 0 }
+        };
     }
     
     let totalScore = 0;
     let totalMaxScore = 0;
+    let totalRating = 0;
+    let subjectCount = 0;
+    let levelDistribution = { EE: 0, ME: 0, AE: 0, BE: 0 };
     
     assessments.forEach(a => {
         totalScore += a.score || 0;
         totalMaxScore += a.maxScore || 0;
+        
+        // Get rating for this subject
+        const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+        const level = calculatePerformanceLevel(percentage);
+        const rating = getPerformanceRating(level);
+        totalRating += rating;
+        subjectCount++;
+        
+        // Track distribution
+        const short = getPerformanceShort(level);
+        levelDistribution[short] = (levelDistribution[short] || 0) + 1;
     });
     
+    // OVERALL LEVEL: Based on average percentage (THIS IS THE KEY FIX)
     const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     const performanceLevel = calculatePerformanceLevel(avgPercentage);
+    
+    // CBC Rating: Average of all subject ratings (for display only)
+    const overallRating = subjectCount > 0 ? parseFloat((totalRating / subjectCount).toFixed(1)) : 2;
     
     return {
         totalScore: totalScore,
         averageScore: parseFloat(avgPercentage.toFixed(1)),
-        performanceLevel: performanceLevel,
-        overallRating: getPerformanceRating(performanceLevel)
+        overallRating: overallRating,  // This is the CBC rating (3.9, 3.6, etc.)
+        performanceLevel: performanceLevel,  // This is the level based on percentage
+        levelDistribution: levelDistribution,
+        subjectCount: subjectCount
     };
 }
-
 async function fixAllAssessments() {
     try {
         await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB');

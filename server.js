@@ -1226,8 +1226,9 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                    .text(avgScore + '%', x, rowY + 2, { width: avgColWidth - 5, align: 'center' });
                 x += avgColWidth;
                 
-                doc.fillColor(levelColor)
-                   .text(`${short} (${rating})`, x, rowY + 2, { width: levelColWidth - 5, align: 'center' });
+                // In the student data rows section, update the level display:
+doc.fillColor(levelColor)
+   .text(`${short} (${rating})`, x, rowY + 2, { width: levelColWidth - 5, align: 'center' });
                 
                 rowY += 14;
                 rowIndex++;
