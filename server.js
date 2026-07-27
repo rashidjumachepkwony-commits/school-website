@@ -102,12 +102,12 @@ function formatKenyaDate(date) {
 }
 
 // ============================================
-// PERFORMANCE RUBRIC - UPDATED
+// PERFORMANCE RUBRIC - CBC CORRECT
 // ============================================
-// Exceeding Expectations (EE): 75-100%
-// Meeting Expectations (ME): 41-74%
-// Approaching Expectations (AE): 21-40%
-// Below Expectations (BE): 0-20%
+// Exceeding Expectations (EE): 75-100% = Rating 4
+// Meeting Expectations (ME): 41-74% = Rating 3
+// Approaching Expectations (AE): 21-40% = Rating 2
+// Below Expectations (BE): 0-20% = Rating 1
 
 function calculatePerformanceLevel(percentage) {
     if (percentage >= 75) return 'Exceeding Expectation';
@@ -160,34 +160,61 @@ function calculateAssessmentPerformance(score, maxScore) {
 }
 
 // ============================================
-// CALCULATE STUDENT OVERALL - FIXED
+// CBC STUDENT OVERALL - CORRECT METHOD
 // ============================================
+// Overall rating = AVERAGE of all subject ratings (EE=4, ME=3, AE=2, BE=1)
 function calculateStudentOverall(assessments) {
     if (!assessments || assessments.length === 0) {
         return { 
             totalScore: 0, 
             averageScore: 0, 
             performanceLevel: 'Approaching Expectation', 
-            overallRating: 2 
+            overallRating: 2,
+            levelDistribution: { EE: 0, ME: 0, AE: 0, BE: 0 }
         };
     }
     
     let totalScore = 0;
     let totalMaxScore = 0;
+    let totalRating = 0;
+    let subjectCount = 0;
+    let levelDistribution = { EE: 0, ME: 0, AE: 0, BE: 0 };
     
     assessments.forEach(a => {
         totalScore += a.score || 0;
         totalMaxScore += a.maxScore || 0;
+        
+        // Get rating for this subject
+        const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+        const level = calculatePerformanceLevel(percentage);
+        const rating = getPerformanceRating(level);
+        totalRating += rating;
+        subjectCount++;
+        
+        // Track distribution
+        const short = getPerformanceShort(level);
+        levelDistribution[short] = (levelDistribution[short] || 0) + 1;
     });
     
+    // Overall rating = AVERAGE of all subject ratings (CBC method)
+    const overallRating = subjectCount > 0 ? parseFloat((totalRating / subjectCount).toFixed(1)) : 2;
+    
+    // Determine overall performance level based on average rating
+    let performanceLevel = 'Approaching Expectation';
+    if (overallRating >= 3.5) performanceLevel = 'Exceeding Expectation';
+    else if (overallRating >= 2.5) performanceLevel = 'Meeting Expectation';
+    else if (overallRating >= 1.5) performanceLevel = 'Approaching Expectation';
+    else performanceLevel = 'Below Expectation';
+    
     const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
-    const performanceLevel = calculatePerformanceLevel(avgPercentage);
     
     return {
         totalScore: totalScore,
         averageScore: parseFloat(avgPercentage.toFixed(1)),
+        overallRating: overallRating,
         performanceLevel: performanceLevel,
-        overallRating: getPerformanceRating(performanceLevel)
+        levelDistribution: levelDistribution,
+        subjectCount: subjectCount
     };
 }
 
@@ -244,11 +271,152 @@ function isCloudinaryConfigured() {
 }
 
 // ============================================
+// STAFF REPORT PDF
+// ============================================
+function generateStaffReportPDF(report, periodLabel) {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ 
+                margin: 40, 
+                size: 'A4',
+                landscape: true
+            });
+            const chunks = [];
+            
+            doc.on('data', (chunk) => chunks.push(chunk));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+            
+            doc.fontSize(20)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text('CHANGARA STAR ACADEMY', { align: 'center' });
+            
+            doc.fontSize(10)
+               .font('Helvetica')
+               .fillColor('#D4A017')
+               .text('"Assurance to Excellence"', { align: 'center' })
+               .moveDown(0.3);
+            
+            doc.fontSize(14)
+               .font('Helvetica-Bold')
+               .fillColor('#0A1628')
+               .text('STAFF ATTENDANCE REPORT', { align: 'center' })
+               .moveDown(0.3);
+            
+            doc.fontSize(10)
+               .font('Helvetica')
+               .fillColor('#6c757d')
+               .text(periodLabel || 'Attendance Report', { align: 'center' })
+               .moveDown(0.5);
+            
+            const totalStaff = report.length;
+            let totalOnTime = 0, totalLate = 0, totalAbsent = 0, totalDays = 0;
+            report.forEach(s => { totalOnTime += s.onTime || 0; totalLate += s.late || 0; totalAbsent += s.absent || 0; totalDays += s.totalDays || 0; });
+            
+            const statsData = [
+                { label: 'Total Staff', value: totalStaff, color: '#0A1628' },
+                { label: 'On Time', value: totalOnTime, color: '#1a8a3f' },
+                { label: 'Late', value: totalLate, color: '#e6a800' },
+                { label: 'Absent', value: totalAbsent, color: '#dc3545' },
+                { label: 'Attendance Rate', value: totalDays > 0 ? ((totalOnTime / totalDays) * 100).toFixed(1) + '%' : '0%', color: '#0d6efd' }
+            ];
+            
+            const statsY = doc.y;
+            const boxWidth = 140;
+            statsData.forEach((stat, i) => {
+                const x = 45 + (i * (boxWidth + 10));
+                doc.roundedRect(x, statsY, boxWidth, 40, 6)
+                   .fillColor('#f8f9fa')
+                   .fill()
+                   .strokeColor('#dee2e6')
+                   .lineWidth(1)
+                   .roundedRect(x, statsY, boxWidth, 40, 6)
+                   .stroke();
+                
+                doc.fontSize(18)
+                   .font('Helvetica-Bold')
+                   .fillColor(stat.color)
+                   .text(stat.value.toString(), x + 5, statsY + 5, { width: boxWidth - 10, align: 'center' });
+                
+                doc.fontSize(8)
+                   .font('Helvetica-Bold')
+                   .fillColor('#6c757d')
+                   .text(stat.label, x + 5, statsY + 25, { width: boxWidth - 10, align: 'center' });
+            });
+            
+            doc.moveDown(2.5);
+            
+            const tableTop = doc.y;
+            const colWidths = [25, 160, 60, 60, 60, 60];
+            const tableWidth = 425;
+            
+            doc.rect(45, tableTop, tableWidth, 22)
+               .fillColor('#0A1628')
+               .fill();
+            
+            doc.fontSize(9)
+               .font('Helvetica-Bold')
+               .fillColor('white')
+               .text('#', 50, tableTop + 5)
+               .text('Staff Name', 75, tableTop + 5)
+               .text('Days', 235, tableTop + 5, { width: 45, align: 'center' })
+               .text('On Time', 280, tableTop + 5, { width: 45, align: 'center' })
+               .text('Late', 325, tableTop + 5, { width: 45, align: 'center' })
+               .text('Absent', 370, tableTop + 5, { width: 45, align: 'center' });
+            
+            let rowY = tableTop + 22;
+            report.forEach((s, index) => {
+                if (rowY > 530) { doc.addPage(); rowY = 50; }
+                doc.rect(45, rowY, tableWidth, 20)
+                   .fillColor(index % 2 === 0 ? '#f8f9fa' : 'white')
+                   .fill();
+                
+                doc.fontSize(9)
+                   .font('Helvetica-Bold')
+                   .fillColor('#0A1628')
+                   .text((index + 1).toString(), 50, rowY + 5)
+                   .text(s.name || 'N/A', 75, rowY + 5)
+                   .text((s.totalDays || 0).toString(), 235, rowY + 5, { width: 45, align: 'center' })
+                   .fillColor('#1a8a3f')
+                   .text((s.onTime || 0).toString(), 280, rowY + 5, { width: 45, align: 'center' })
+                   .fillColor('#e6a800')
+                   .text((s.late || 0).toString(), 325, rowY + 5, { width: 45, align: 'center' })
+                   .fillColor('#dc3545')
+                   .text((s.absent || 0).toString(), 370, rowY + 5, { width: 45, align: 'center' });
+                
+                rowY += 20;
+            });
+            
+            doc.moveDown(2);
+            doc.fontSize(8)
+               .font('Helvetica-Bold')
+               .fillColor('#6c757d')
+               .text(`Generated: ${formatKenyaFullTime(new Date())}`, 45, 550, { align: 'left' })
+               .text('CHANGARA STAR ACADEMY | P.O Box 7, Cheptais | 📞 +254 721 556 252', 45, 565, { align: 'center' });
+            
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+// ============================================
 // PROFESSIONAL CBC STUDENT REPORT - ONE PAGE
 // ============================================
 function generateStudentReportPDF(student) {
     return new Promise((resolve, reject) => {
         try {
+            // First, recalculate with CBC method
+            const cbcResult = calculateStudentOverall(student.assessments || []);
+            student.totalScore = cbcResult.totalScore;
+            student.averageScore = cbcResult.averageScore;
+            student.performanceLevel = cbcResult.performanceLevel;
+            student.overallRating = cbcResult.overallRating;
+            student.levelDistribution = cbcResult.levelDistribution;
+            student.subjectCount = cbcResult.subjectCount;
+
             const doc = new PDFDocument({
                 margin: 25,
                 size: 'A4',
@@ -278,13 +446,20 @@ function generateStudentReportPDF(student) {
                 white: '#ffffff'
             };
 
+            const level = student.performanceLevel || 'Approaching Expectation';
+            const levelColors = {
+                'Exceeding Expectation': { bg: '#E8F5E9', border: '#1a8a3f', text: '#1a8a3f', icon: '🌟' },
+                'Meeting Expectation': { bg: '#E3F2FD', border: '#0d6efd', text: '#0d6efd', icon: '✅' },
+                'Approaching Expectation': { bg: '#FFF8E1', border: '#e6a800', text: '#e6a800', icon: '📌' },
+                'Below Expectation': { bg: '#FBE9E7', border: '#dc3545', text: '#dc3545', icon: '⚠️' }
+            };
+            const perfColors = levelColors[level] || levelColors['Approaching Expectation'];
+
             // ============================================
             // HEADER WITH LOGO
             // ============================================
-            // Create logo from text (since we can't use image file directly)
             const logoY = 15;
             
-            // School Name with Logo Style
             doc.fontSize(22)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
@@ -300,13 +475,11 @@ function generateStudentReportPDF(student) {
                 .fillColor(colors.primary)
                 .text('ACADEMY', 35, logoY + 50, { align: 'left', width: 200 });
             
-            // Small tagline
             doc.fontSize(6)
                 .font('Helvetica-Oblique')
                 .fillColor(colors.gold)
                 .text('"Nurturing Stars, Building Futures"', 35, logoY + 62, { width: 200 });
 
-            // Right side - Assessment Title
             doc.fontSize(14)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
@@ -318,7 +491,6 @@ function generateStudentReportPDF(student) {
                 .text(`${student.type || 'Monthly'} Assessment • ${student.term || ''} ${student.year || ''}`, 
                     300, logoY + 30, { align: 'right', width: 270 });
 
-            // Decorative line
             doc.moveTo(30, logoY + 72)
                 .lineTo(565, logoY + 72)
                 .strokeColor(colors.gold)
@@ -326,7 +498,7 @@ function generateStudentReportPDF(student) {
                 .stroke();
 
             // ============================================
-            // STUDENT INFORMATION - COMPACT
+            // STUDENT INFORMATION
             // ============================================
             const infoY = logoY + 80;
             
@@ -367,84 +539,119 @@ function generateStudentReportPDF(student) {
             });
 
             // ============================================
-            // PERFORMANCE RUBRIC - COMPACT
+            // PERFORMANCE RUBRIC
             // ============================================
             const rubricY = infoY + 38;
             
             doc.fontSize(6)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
-                .text('PERFORMANCE RUBRIC:', 30, rubricY);
+                .text('RUBRIC:', 30, rubricY);
 
             const rubricData = [
-                { label: 'Exceeding', range: '75-100%', color: colors.success, bg: colors.successLight },
-                { label: 'Meeting', range: '41-74%', color: colors.info, bg: colors.infoLight },
-                { label: 'Approaching', range: '21-40%', color: colors.warning, bg: colors.warningLight },
-                { label: 'Below', range: '0-20%', color: colors.danger, bg: colors.dangerLight }
+                { label: 'EE (4)', range: '75-100%', color: colors.success, bg: colors.successLight },
+                { label: 'ME (3)', range: '41-74%', color: colors.info, bg: colors.infoLight },
+                { label: 'AE (2)', range: '21-40%', color: colors.warning, bg: colors.warningLight },
+                { label: 'BE (1)', range: '0-20%', color: colors.danger, bg: colors.dangerLight }
             ];
 
-            let rubricX = 110;
+            let rubricX = 80;
             rubricData.forEach((item) => {
-                doc.roundedRect(rubricX, rubricY - 2, 108, 16, 3)
+                doc.roundedRect(rubricX, rubricY - 2, 100, 16, 3)
                     .fillColor(item.bg)
                     .fill()
                     .strokeColor(item.color)
                     .lineWidth(0.5)
-                    .roundedRect(rubricX, rubricY - 2, 108, 16, 3)
+                    .roundedRect(rubricX, rubricY - 2, 100, 16, 3)
                     .stroke();
 
                 doc.fontSize(5)
                     .font('Helvetica-Bold')
                     .fillColor(item.color)
-                    .text(item.label, rubricX + 2, rubricY + 1, { width: 60, align: 'left' });
+                    .text(item.label, rubricX + 3, rubricY + 1, { width: 50, align: 'left' });
 
                 doc.fontSize(4)
                     .font('Helvetica')
                     .fillColor(colors.gray)
-                    .text(item.range, rubricX + 65, rubricY + 2, { width: 40, align: 'right' });
+                    .text(item.range, rubricX + 55, rubricY + 2, { width: 42, align: 'right' });
 
-                rubricX += 113;
+                rubricX += 108;
             });
 
             // ============================================
             // PERFORMANCE SUMMARY
             // ============================================
-            const level = student.performanceLevel || 'Approaching Expectation';
-            const levelColors = {
-                'Exceeding Expectation': { bg: '#E8F5E9', border: '#1a8a3f', text: '#1a8a3f', icon: '🌟' },
-                'Meeting Expectation': { bg: '#E3F2FD', border: '#0d6efd', text: '#0d6efd', icon: '✅' },
-                'Approaching Expectation': { bg: '#FFF8E1', border: '#e6a800', text: '#e6a800', icon: '📌' },
-                'Below Expectation': { bg: '#FBE9E7', border: '#dc3545', text: '#dc3545', icon: '⚠️' }
-            };
-            const perfColors = levelColors[level] || levelColors['Approaching Expectation'];
-
             const perfY = rubricY + 22;
-            doc.roundedRect(30, perfY, 535, 28, 4)
+            doc.roundedRect(30, perfY, 535, 30, 4)
                 .fillColor(perfColors.bg)
                 .fill()
                 .strokeColor(perfColors.border)
                 .lineWidth(1.5)
-                .roundedRect(30, perfY, 535, 28, 4)
+                .roundedRect(30, perfY, 535, 30, 4)
                 .stroke();
 
             doc.fontSize(14)
                 .font('Helvetica-Bold')
                 .fillColor(perfColors.text)
-                .text(`${perfColors.icon} ${level}`, 40, perfY + 5);
+                .text(`${perfColors.icon} ${level}`, 40, perfY + 6);
 
             const totalScore = student.totalScore || 0;
             const avgScore = student.averageScore !== undefined && student.averageScore !== null ? student.averageScore.toFixed(1) : '0';
-            const rating = getPerformanceRating(level);
+            const rating = student.overallRating || 2;
+            const subjects = student.subjectCount || 0;
 
             doc.fontSize(8)
                 .font('Helvetica')
                 .fillColor(colors.primary)
-                .text(`Total: ${totalScore}  •  Average: ${avgScore}%  •  Rating: ${rating}/4`, 250, perfY + 8);
+                .text(`Total: ${totalScore}  •  Avg: ${avgScore}%  •  CBC Rating: ${rating}/4  •  Subjects: ${subjects}`, 250, perfY + 8);
 
             // ============================================
-            // SUBJECT ASSESSMENT TABLE - COMPACT
+            // LEVEL DISTRIBUTION
             // ============================================
-            const tableY = perfY + 36;
+            const distY = perfY + 36;
+            const dist = student.levelDistribution || { EE: 0, ME: 0, AE: 0, BE: 0 };
+            const total = subjects || 1;
+            
+            doc.fontSize(6)
+                .font('Helvetica-Bold')
+                .fillColor(colors.primary)
+                .text('CBC LEVEL DISTRIBUTION:', 30, distY);
+
+            const distData = [
+                { label: 'EE', count: dist.EE || 0, color: colors.success, bg: colors.successLight },
+                { label: 'ME', count: dist.ME || 0, color: colors.info, bg: colors.infoLight },
+                { label: 'AE', count: dist.AE || 0, color: colors.warning, bg: colors.warningLight },
+                { label: 'BE', count: dist.BE || 0, color: colors.danger, bg: colors.dangerLight }
+            ];
+
+            let distX = 150;
+            distData.forEach((item) => {
+                const pct = Math.round((item.count / total) * 100);
+                doc.roundedRect(distX, distY - 2, 80, 16, 3)
+                    .fillColor(item.bg)
+                    .fill()
+                    .strokeColor(item.color)
+                    .lineWidth(0.5)
+                    .roundedRect(distX, distY - 2, 80, 16, 3)
+                    .stroke();
+
+                doc.fontSize(8)
+                    .font('Helvetica-Bold')
+                    .fillColor(item.color)
+                    .text(item.count.toString(), distX + 4, distY);
+
+                doc.fontSize(5)
+                    .font('Helvetica')
+                    .fillColor(colors.gray)
+                    .text(item.label + ' ' + pct + '%', distX + 22, distY + 1);
+
+                distX += 88;
+            });
+
+            // ============================================
+            // SUBJECT ASSESSMENT TABLE
+            // ============================================
+            const tableY = distY + 22;
 
             doc.fontSize(7)
                 .font('Helvetica-Bold')
@@ -456,8 +663,8 @@ function generateStudentReportPDF(student) {
                 .fillColor(colors.primary)
                 .fill();
 
-            const headers = ['Subject', 'Score', 'Max', '%', 'Performance'];
-            const colWidths = [170, 45, 45, 55, 190];
+            const headers = ['Subject', 'Max', 'Score', '%', 'Level (Rating)'];
+            const colWidths = [170, 40, 40, 55, 190];
             let headerX = 40;
 
             doc.fontSize(6)
@@ -472,7 +679,6 @@ function generateStudentReportPDF(student) {
 
             let rowY = tableTop + 14;
             let rowIndex = 0;
-            let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
 
             const sortedAssessments = [...(student.assessments || [])].sort((a, b) => {
                 const pA = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
@@ -480,18 +686,15 @@ function generateStudentReportPDF(student) {
                 return pB - pA;
             });
 
-            // Limit to fit on one page (max 8 subjects)
-            const displayAssessments = sortedAssessments.slice(0, 8);
+            // Max 10 subjects to fit on one page
+            const displayAssessments = sortedAssessments.slice(0, 10);
 
             displayAssessments.forEach((a) => {
                 const percentage = a.maxScore > 0 ? ((a.score / a.maxScore) * 100) : 0;
                 const level2 = calculatePerformanceLevel(percentage);
                 const levelColor2 = getPerformanceColor(level2);
-
-                if (level2 === 'Exceeding Expectation') exceedingCount++;
-                else if (level2 === 'Meeting Expectation') meetingCount++;
-                else if (level2 === 'Approaching Expectation') approachingCount++;
-                else belowCount++;
+                const short2 = getPerformanceShort(level2);
+                const rating2 = getPerformanceRating(level2);
 
                 const bgColor = rowIndex % 2 === 0 ? '#ffffff' : colors.grayLight;
                 doc.roundedRect(30, rowY, 535, 12, 1)
@@ -512,12 +715,13 @@ function generateStudentReportPDF(student) {
                 xPos += colWidths[0];
 
                 doc.font('Helvetica')
-                    .fillColor(colors.primary)
-                    .text(a.score.toString(), xPos, rowY + 2, { width: colWidths[1] - 5, align: 'center' });
+                    .fillColor(colors.gray)
+                    .text(a.maxScore.toString(), xPos, rowY + 2, { width: colWidths[1] - 5, align: 'center' });
                 xPos += colWidths[1];
 
-                doc.fillColor(colors.gray)
-                    .text(a.maxScore.toString(), xPos, rowY + 2, { width: colWidths[2] - 5, align: 'center' });
+                doc.fillColor(colors.primary)
+                    .font('Helvetica-Bold')
+                    .text(a.score.toString(), xPos, rowY + 2, { width: colWidths[2] - 5, align: 'center' });
                 xPos += colWidths[2];
 
                 const pctColor = percentage >= 75 ? colors.success : 
@@ -530,182 +734,119 @@ function generateStudentReportPDF(student) {
 
                 doc.fillColor(levelColor2)
                     .font('Helvetica-Bold')
-                    .text(level2, xPos, rowY + 2, { width: colWidths[4] - 5 });
+                    .text(`${short2} (${rating2})`, xPos, rowY + 2, { width: colWidths[4] - 5 });
 
                 rowY += 12;
                 rowIndex++;
             });
 
             // ============================================
-            // CBC ANALYSIS - COMPETENCY BASED
+            // STRENGTHS & AREAS FOR IMPROVEMENT
             // ============================================
-            const cbcY = rowY + 8;
+            const swY = rowY + 10;
             
-            // Only add CBC analysis if there's room on the page
-            if (cbcY < 680) {
-                doc.fontSize(7)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.primary)
-                    .text('📊 CBC COMPETENCY ANALYSIS', 30, cbcY);
-
-                // Calculate subject averages
+            if (swY < 700 && displayAssessments.length > 0) {
                 const allAssessments = student.assessments || [];
-                const subjectAverages = {};
-                allAssessments.forEach(a => {
-                    const pct = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
-                    subjectAverages[a.subject] = parseFloat(pct.toFixed(1));
-                });
-
-                const sortedSubjects = Object.keys(subjectAverages).sort((a, b) => subjectAverages[b] - subjectAverages[a]);
                 
-                // Performance distribution
-                const totalStudents = 1; // Single student report
-                const classAvg = student.averageScore || 0;
+                const strengths = allAssessments
+                    .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
+                    .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100))
+                    .slice(0, 3);
 
-                // Competency level indicators
-                const competencyLevels = {
-                    'Exceeding Expectation': { label: '🌟 Exceeding', color: colors.success, range: '75-100%' },
-                    'Meeting Expectation': { label: '✅ Meeting', color: colors.info, range: '41-74%' },
-                    'Approaching Expectation': { label: '📌 Approaching', color: colors.warning, range: '21-40%' },
-                    'Below Expectation': { label: '⚠️ Below', color: colors.danger, range: '0-20%' }
-                };
+                const weaknesses = allAssessments
+                    .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 41)
+                    .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100))
+                    .slice(0, 3);
 
-                // Summary badges with CBC labels
-                const badgeY = cbcY + 12;
-                const badgeData = [
-                    { label: 'Exceeding', count: exceedingCount, color: colors.success, bg: colors.successLight },
-                    { label: 'Meeting', count: meetingCount, color: colors.info, bg: colors.infoLight },
-                    { label: 'Approaching', count: approachingCount, color: colors.warning, bg: colors.warningLight },
-                    { label: 'Below', count: belowCount, color: colors.danger, bg: colors.dangerLight }
-                ];
+                doc.roundedRect(30, swY, 260, 32, 4)
+                    .fillColor(colors.successLight)
+                    .fill()
+                    .strokeColor(colors.success)
+                    .lineWidth(0.5)
+                    .roundedRect(30, swY, 260, 32, 4)
+                    .stroke();
 
-                let badgeX = 30;
-                const totalSubjects = displayAssessments.length || 1;
-                
-                badgeData.forEach((item) => {
-                    const pct = totalSubjects > 0 ? Math.round((item.count / totalSubjects) * 100) : 0;
-                    doc.roundedRect(badgeX, badgeY, 125, 20, 4)
-                        .fillColor(item.bg)
-                        .fill()
-                        .strokeColor(item.color)
-                        .lineWidth(0.5)
-                        .roundedRect(badgeX, badgeY, 125, 20, 4)
-                        .stroke();
+                doc.fontSize(6)
+                    .font('Helvetica-Bold')
+                    .fillColor(colors.success)
+                    .text('🌟 Strengths', 38, swY + 3);
 
-                    doc.fontSize(9)
-                        .font('Helvetica-Bold')
-                        .fillColor(item.color)
-                        .text(item.count.toString(), badgeX + 6, badgeY + 2);
-
+                if (strengths.length > 0) {
+                    let strengthsY = swY + 13;
+                    strengths.forEach((s) => {
+                        const pct = ((s.score / s.maxScore) * 100).toFixed(0);
+                        doc.fontSize(5)
+                            .font('Helvetica')
+                            .fillColor(colors.primary)
+                            .text(`✓ ${s.subject}: ${pct}%`, 38, strengthsY);
+                        strengthsY += 9;
+                    });
+                } else {
                     doc.fontSize(5)
-                        .font('Helvetica')
+                        .font('Helvetica-Oblique')
                         .fillColor(colors.gray)
-                        .text(item.label, badgeX + 22, badgeY + 2);
-
-                    doc.fontSize(5)
-                        .font('Helvetica-Bold')
-                        .fillColor(item.color)
-                        .text(pct + '%', badgeX + 90, badgeY + 2, { width: 30, align: 'right' });
-
-                    badgeX += 132;
-                });
-
-                // Strengths and Areas for Improvement - CBC style
-                const swY = badgeY + 28;
-                
-                if (swY < 720 && sortedSubjects.length > 0) {
-                    // Top performing subjects (Strengths)
-                    const strengths = sortedSubjects.filter(s => subjectAverages[s] >= 50).slice(0, 3);
-                    const weaknesses = sortedSubjects.filter(s => subjectAverages[s] < 41).slice(0, 3);
-
-                    // Strengths box
-                    doc.roundedRect(30, swY, 260, 32, 4)
-                        .fillColor(colors.successLight)
-                        .fill()
-                        .strokeColor(colors.success)
-                        .lineWidth(0.5)
-                        .roundedRect(30, swY, 260, 32, 4)
-                        .stroke();
-
-                    doc.fontSize(6)
-                        .font('Helvetica-Bold')
-                        .fillColor(colors.success)
-                        .text('🌟 Strengths', 38, swY + 3);
-
-                    if (strengths.length > 0) {
-                        let strengthsY = swY + 13;
-                        strengths.forEach((s) => {
-                            doc.fontSize(5)
-                                .font('Helvetica')
-                                .fillColor(colors.primary)
-                                .text(`✓ ${s}: ${subjectAverages[s]}%`, 38, strengthsY);
-                            strengthsY += 9;
-                        });
-                    } else {
-                        doc.fontSize(5)
-                            .font('Helvetica-Oblique')
-                            .fillColor(colors.gray)
-                            .text('Continue building on your progress', 38, swY + 13);
-                    }
-
-                    // Areas for Improvement box
-                    doc.roundedRect(305, swY, 260, 32, 4)
-                        .fillColor(colors.dangerLight)
-                        .fill()
-                        .strokeColor(colors.danger)
-                        .lineWidth(0.5)
-                        .roundedRect(305, swY, 260, 32, 4)
-                        .stroke();
-
-                    doc.fontSize(6)
-                        .font('Helvetica-Bold')
-                        .fillColor(colors.danger)
-                        .text('📈 Areas for Improvement', 313, swY + 3);
-
-                    if (weaknesses.length > 0) {
-                        let weaknessesY = swY + 13;
-                        weaknesses.forEach((s) => {
-                            doc.fontSize(5)
-                                .font('Helvetica')
-                                .fillColor(colors.primary)
-                                .text(`→ ${s}: ${subjectAverages[s]}%`, 313, weaknessesY);
-                            weaknessesY += 9;
-                        });
-                    } else {
-                        doc.fontSize(5)
-                            .font('Helvetica-Bold')
-                            .fillColor(colors.success)
-                            .text('🎉 All subjects meeting expectations!', 313, swY + 13);
-                    }
+                        .text('Continue building on your progress', 38, swY + 13);
                 }
 
-                // Teacher's Comments - CBC Narrative
-                const feedbackY = (swY + 40 > 720) ? 720 : swY + 40;
-                
-                if (feedbackY < 730) {
-                    doc.fontSize(6)
+                doc.roundedRect(305, swY, 260, 32, 4)
+                    .fillColor(colors.dangerLight)
+                    .fill()
+                    .strokeColor(colors.danger)
+                    .lineWidth(0.5)
+                    .roundedRect(305, swY, 260, 32, 4)
+                    .stroke();
+
+                doc.fontSize(6)
+                    .font('Helvetica-Bold')
+                    .fillColor(colors.danger)
+                    .text('📈 Areas for Improvement', 313, swY + 3);
+
+                if (weaknesses.length > 0) {
+                    let weaknessesY = swY + 13;
+                    weaknesses.forEach((s) => {
+                        const pct = ((s.score / s.maxScore) * 100).toFixed(0);
+                        doc.fontSize(5)
+                            .font('Helvetica')
+                            .fillColor(colors.primary)
+                            .text(`→ ${s.subject}: ${pct}%`, 313, weaknessesY);
+                        weaknessesY += 9;
+                    });
+                } else {
+                    doc.fontSize(5)
                         .font('Helvetica-Bold')
-                        .fillColor(colors.primary)
-                        .text('📝 Teacher\'s CBC Comments', 30, feedbackY);
-
-                    doc.roundedRect(30, feedbackY + 5, 535, 28, 4)
-                        .fillColor(colors.grayLight)
-                        .fill()
-                        .strokeColor(colors.border)
-                        .lineWidth(0.5)
-                        .roundedRect(30, feedbackY + 5, 535, 28, 4)
-                        .stroke();
-
-                    const feedbackText = generateTeacherFeedback(student);
-                    doc.fontSize(6)
-                        .font('Helvetica')
-                        .fillColor(colors.primary)
-                        .text(feedbackText, 38, feedbackY + 11, { width: 520, align: 'left' });
+                        .fillColor(colors.success)
+                        .text('🎉 All subjects meeting expectations!', 313, swY + 13);
                 }
             }
 
             // ============================================
-            // FOOTER - Always at bottom
+            // TEACHER'S COMMENTS
+            // ============================================
+            const feedbackY = (swY + 40 > 720) ? 720 : swY + 40;
+            
+            if (feedbackY < 730) {
+                doc.fontSize(6)
+                    .font('Helvetica-Bold')
+                    .fillColor(colors.primary)
+                    .text('📝 Teacher\'s Comments', 30, feedbackY);
+
+                doc.roundedRect(30, feedbackY + 5, 535, 28, 4)
+                    .fillColor(colors.grayLight)
+                    .fill()
+                    .strokeColor(colors.border)
+                    .lineWidth(0.5)
+                    .roundedRect(30, feedbackY + 5, 535, 28, 4)
+                    .stroke();
+
+                const feedbackText = generateTeacherFeedback(student);
+                doc.fontSize(6)
+                    .font('Helvetica')
+                    .fillColor(colors.primary)
+                    .text(feedbackText, 38, feedbackY + 11, { width: 520, align: 'left' });
+            }
+
+            // ============================================
+            // FOOTER
             // ============================================
             const footerY = 760;
             doc.moveTo(30, footerY)
@@ -742,13 +883,13 @@ function generateTeacherFeedback(student) {
     let feedback = '';
     
     if (level === 'Exceeding Expectation') {
-        feedback = `Excellent performance! ${student.studentName || 'The student'} is demonstrating outstanding mastery of the learning outcomes (75-100%). `;
+        feedback = `Excellent performance! ${student.studentName || 'The student'} is demonstrating outstanding mastery of the learning outcomes. `;
     } else if (level === 'Meeting Expectation') {
-        feedback = `Good progress! ${student.studentName || 'The student'} is meeting the expected learning outcomes (41-74%). `;
+        feedback = `Good progress! ${student.studentName || 'The student'} is meeting the expected learning outcomes. `;
     } else if (level === 'Approaching Expectation') {
-        feedback = `${student.studentName || 'The student'} is making progress and approaching the expected learning outcomes (21-40%). `;
+        feedback = `${student.studentName || 'The student'} is making progress and approaching the expected learning outcomes. `;
     } else {
-        feedback = `${student.studentName || 'The student'} needs additional support to meet the expected learning outcomes (0-20%). `;
+        feedback = `${student.studentName || 'The student'} needs additional support to meet the expected learning outcomes. `;
     }
     
     const strengths = (student.assessments || [])
@@ -777,285 +918,42 @@ function generateTeacherFeedback(student) {
 }
 
 // ============================================
-// PROFESSIONAL CLASS REPORT
+// PROFESSIONAL CLASS REPORT - CBC STYLE
 // ============================================
 function generateClassReportPDF(students, grade, type, term, year, period) {
     return new Promise((resolve, reject) => {
         try {
-            const doc = new PDFDocument({ 
-                margin: 30, 
-                size: 'A4',
-                landscape: true
-            });
-            const chunks = [];
-            
-            doc.on('data', (chunk) => chunks.push(chunk));
-            doc.on('end', () => resolve(Buffer.concat(chunks)));
-            doc.on('error', reject);
-            
-            doc.fontSize(20)
-               .font('Helvetica-Bold')
-               .fillColor('#0A1628')
-               .text('CHANGARA STAR ACADEMY', { align: 'center' });
-            
-            doc.fontSize(10)
-               .font('Helvetica')
-               .fillColor('#D4A017')
-               .text('"Assurance to Excellence"', { align: 'center' })
-               .moveDown(0.3);
-            
-            doc.fontSize(14)
-               .font('Helvetica-Bold')
-               .fillColor('#0A1628')
-               .text(`${grade} - ${type || 'Monthly'} Assessment Results`, { align: 'center' });
-            
-            doc.fontSize(9)
-               .font('Helvetica')
-               .fillColor('#6c757d')
-               .text(`${term || ''} ${year || ''} ${period ? '- ' + period : ''}`, { align: 'center' })
-               .moveDown(0.5);
-            
-            const totalStudents = students.length;
-            let exceeding = 0, meeting = 0, approaching = 0, below = 0;
-            let totalAvg = 0;
-            
-            students.forEach(s => {
-                const level = s.performanceLevel || 'Approaching Expectation';
-                if (level === 'Exceeding Expectation') exceeding++;
-                else if (level === 'Meeting Expectation') meeting++;
-                else if (level === 'Approaching Expectation') approaching++;
-                else below++;
-                totalAvg += s.averageScore || 0;
-            });
-            
-            const avgClass = totalStudents > 0 ? (totalAvg / totalStudents).toFixed(1) : 0;
-            
-            const stats = [
-                { label: 'STUDENTS', value: totalStudents, color: '#0A1628' },
-                { label: 'EE (4)', value: exceeding, color: '#1a8a3f' },
-                { label: 'ME (3)', value: meeting, color: '#0d6efd' },
-                { label: 'AE (2)', value: approaching, color: '#e6a800' },
-                { label: 'BE (1)', value: below, color: '#dc3545' },
-                { label: 'CLASS AVG', value: avgClass + '%', color: '#6f42c1' }
-            ];
-            
-            const statsY = doc.y;
-            const boxWidth = 120;
-            stats.forEach((stat, i) => {
-                const x = 45 + (i * (boxWidth + 8));
-                doc.roundedRect(x, statsY, boxWidth, 35, 6)
-                   .fillColor('#f8f9fa')
-                   .fill()
-                   .strokeColor('#dee2e6')
-                   .lineWidth(1)
-                   .roundedRect(x, statsY, boxWidth, 35, 6)
-                   .stroke();
-                
-                doc.fontSize(18)
-                   .font('Helvetica-Bold')
-                   .fillColor(stat.color)
-                   .text(stat.value.toString(), x + 5, statsY + 4, { width: boxWidth - 10, align: 'center' });
-                
-                doc.fontSize(7)
-                   .font('Helvetica-Bold')
-                   .fillColor('#6c757d')
-                   .text(stat.label, x + 5, statsY + 22, { width: boxWidth - 10, align: 'center' });
-            });
-            
-            doc.moveDown(2);
-            
-            doc.fontSize(8)
-               .font('Helvetica-Bold')
-               .fillColor('#6c757d')
-               .text('EE: Exceeding (75-100%)   ME: Meeting (41-74%)   AE: Approaching (21-40%)   BE: Below (0-20%)   Rank: 1st, 2nd, 3rd', 45, doc.y);
-            doc.moveDown(1);
-            
-            let allSubjects = [];
-            students.forEach(s => {
+            // ============================================
+            // RECALCULATE ALL STUDENTS WITH CBC METHOD
+            // ============================================
+            students = students.map(s => {
                 if (s.assessments) {
-                    s.assessments.forEach(a => {
-                        if (!allSubjects.includes(a.subject)) {
-                            allSubjects.push(a.subject);
-                        }
+                    // Calculate each subject's performance level
+                    s.assessments = s.assessments.map(a => {
+                        const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+                        const level = calculatePerformanceLevel(percentage);
+                        const rating = getPerformanceRating(level);
+                        return {
+                            subject: a.subject,
+                            maxScore: a.maxScore,
+                            score: a.score,
+                            percentage: parseFloat(percentage.toFixed(1)),
+                            performanceLevel: level,
+                            rating: rating
+                        };
                     });
-                }
-            });
-            allSubjects.sort();
-            
-            const nameColWidth = 90;
-            const rankColWidth = 35;
-            const totalColWidth = 50;
-            const avgColWidth = 45;
-            const levelColWidth = 55;
-            const subjectColWidth = Math.min(35, (780 - nameColWidth - rankColWidth - totalColWidth - avgColWidth - levelColWidth) / Math.max(1, allSubjects.length));
-            const tableWidth = nameColWidth + rankColWidth + (allSubjects.length * subjectColWidth) + totalColWidth + avgColWidth + levelColWidth;
-            
-            const tableTop = doc.y;
-            doc.rect(30, tableTop, tableWidth, 24)
-               .fillColor('#0A1628')
-               .fill();
-            
-            let headerX = 30;
-            doc.fontSize(8)
-               .font('Helvetica-Bold')
-               .fillColor('white');
-            
-            doc.text('Rank', headerX + 3, tableTop + 7, { width: rankColWidth - 6, align: 'center' });
-            headerX += rankColWidth;
-            
-            doc.text('Student', headerX + 3, tableTop + 7, { width: nameColWidth - 6 });
-            headerX += nameColWidth;
-            
-            allSubjects.forEach(subject => {
-                const shortName = subject.length > 8 ? subject.substring(0, 6) + '..' : subject;
-                doc.text(shortName, headerX + 2, tableTop + 7, { width: subjectColWidth - 4, align: 'center' });
-                headerX += subjectColWidth;
-            });
-            
-            doc.text('Total', headerX + 3, tableTop + 7, { width: totalColWidth - 6, align: 'center' });
-            headerX += totalColWidth;
-            
-            doc.text('Avg', headerX + 3, tableTop + 7, { width: avgColWidth - 6, align: 'center' });
-            headerX += avgColWidth;
-            
-            doc.text('Level', headerX + 3, tableTop + 7, { width: levelColWidth - 6, align: 'center' });
-            
-            const maxRowY = tableTop + 24;
-            doc.rect(30, maxRowY, tableWidth, 18)
-               .fillColor('#f8f9fa')
-               .fill();
-            
-            let maxX = 30;
-            doc.fontSize(6)
-               .font('Helvetica-Bold')
-               .fillColor('#6c757d')
-               .text('Max:', maxX + 3, maxRowY + 5);
-            maxX += rankColWidth;
-            maxX += nameColWidth;
-            
-            allSubjects.forEach(subject => {
-                let maxScore = 0;
-                students.forEach(s => {
-                    if (s.assessments) {
-                        const found = s.assessments.find(a => a.subject === subject);
-                        if (found && found.maxScore > maxScore) {
-                            maxScore = found.maxScore;
-                        }
-                    }
-                });
-                doc.text(maxScore.toString(), maxX + 2, maxRowY + 5, { width: subjectColWidth - 4, align: 'center' });
-                maxX += subjectColWidth;
-            });
-            
-            const sortedStudents = [...students].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-            let rowY = maxRowY + 18;
-            let rowIndex = 0;
-            
-            sortedStudents.forEach((student) => {
-                if (rowY > 490) {
-                    doc.addPage();
-                    doc.rect(30, 30, tableWidth, 24)
-                       .fillColor('#0A1628')
-                       .fill();
                     
-                    headerX = 30;
-                    doc.fontSize(8)
-                       .font('Helvetica-Bold')
-                       .fillColor('white');
-                    
-                    doc.text('Rank', headerX + 3, 37, { width: rankColWidth - 6, align: 'center' });
-                    headerX += rankColWidth;
-                    doc.text('Student', headerX + 3, 37, { width: nameColWidth - 6 });
-                    headerX += nameColWidth;
-                    allSubjects.forEach(subject => {
-                        const shortName = subject.length > 8 ? subject.substring(0, 6) + '..' : subject;
-                        doc.text(shortName, headerX + 2, 37, { width: subjectColWidth - 4, align: 'center' });
-                        headerX += subjectColWidth;
-                    });
-                    doc.text('Total', headerX + 3, 37, { width: totalColWidth - 6, align: 'center' });
-                    headerX += totalColWidth;
-                    doc.text('Avg', headerX + 3, 37, { width: avgColWidth - 6, align: 'center' });
-                    headerX += avgColWidth;
-                    doc.text('Level', headerX + 3, 37, { width: levelColWidth - 6, align: 'center' });
-                    rowY = 54;
+                    // Calculate CBC overall (average of ratings)
+                    const cbcResult = calculateStudentOverall(s.assessments);
+                    s.totalScore = cbcResult.totalScore;
+                    s.averageScore = cbcResult.averageScore;
+                    s.performanceLevel = cbcResult.performanceLevel;
+                    s.overallRating = cbcResult.overallRating;
+                    s.levelDistribution = cbcResult.levelDistribution;
                 }
-                
-                doc.rect(30, rowY, tableWidth, 20)
-                   .fillColor(rowIndex % 2 === 0 ? '#fafafa' : 'white')
-                   .fill();
-                
-                let x = 30;
-                const level = student.performanceLevel || 'Approaching Expectation';
-                const levelColor = getPerformanceColor(level);
-                const short = getPerformanceShort(level);
-                const rating = getPerformanceRating(level);
-                const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
-                const rank = rowIndex + 1;
-                
-                doc.fontSize(8)
-                   .font('Helvetica-Bold')
-                   .fillColor(rank <= 3 ? '#D4A017' : '#6c757d')
-                   .text(rank <= 3 ? ['🏆', '🥈', '🥉'][rank - 1] : rank.toString(), x + 3, rowY + 5, { width: rankColWidth - 6, align: 'center' });
-                x += rankColWidth;
-                
-                doc.fillColor('#0A1628')
-                   .text(student.studentName || 'N/A', x + 3, rowY + 5, { width: nameColWidth - 6 });
-                x += nameColWidth;
-                
-                allSubjects.forEach(subject => {
-                    const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
-                    if (assessment) {
-                        const percentage = assessment.maxScore > 0 ? ((assessment.score / assessment.maxScore) * 100) : 0;
-                        let color = '#28a745';
-                        if (percentage < 21) color = '#dc3545';
-                        else if (percentage < 41) color = '#e6a800';
-                        else if (percentage < 75) color = '#0d6efd';
-                        doc.fillColor(color)
-                           .font('Helvetica-Bold')
-                           .text(assessment.score.toString(), x + 2, rowY + 5, { width: subjectColWidth - 4, align: 'center' });
-                    } else {
-                        doc.fillColor('#dee2e6')
-                           .text('-', x + 2, rowY + 5, { width: subjectColWidth - 4, align: 'center' });
-                    }
-                    x += subjectColWidth;
-                });
-                
-                doc.fillColor('#D4A017')
-                   .font('Helvetica-Bold')
-                   .text((student.totalScore || 0).toString(), x + 3, rowY + 5, { width: totalColWidth - 6, align: 'center' });
-                x += totalColWidth;
-                
-                doc.fillColor('#0d6efd')
-                   .text(avgScore, x + 3, rowY + 5, { width: avgColWidth - 6, align: 'center' });
-                x += avgColWidth;
-                
-                doc.fillColor(levelColor)
-                   .text(`${short} (${rating})`, x + 3, rowY + 5, { width: levelColWidth - 6, align: 'center' });
-                
-                rowY += 20;
-                rowIndex++;
+                return s;
             });
-            
-            doc.moveDown(1);
-            doc.fontSize(8)
-               .font('Helvetica-Bold')
-               .fillColor('#6c757d')
-               .text(`Generated: ${formatKenyaFullTime(new Date())}`, 30, 545, { align: 'left' })
-               .text('© 2026 Changara Star Academy - P.O Box 7, Cheptais | 📞 +254 721 556 252 | 📧 starchangara@gmail.com', 30, 558, { align: 'center' });
-            
-            doc.end();
-        } catch (error) {
-            reject(error);
-        }
-    });
-}
 
-// ============================================
-// PROFESSIONAL CLASS REPORT - ONE PAGE WITH CORRECT RUBRIC
-// ============================================
-function generateClassReportPDF(students, grade, type, term, year, period) {
-    return new Promise((resolve, reject) => {
-        try {
             const doc = new PDFDocument({ 
                 margin: 20, 
                 size: 'A4',
@@ -1070,7 +968,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             // ============================================
             // HEADER WITH LOGO
             // ============================================
-            // School Name with Logo Style
             doc.fontSize(18)
                 .font('Helvetica-Bold')
                 .fillColor('#0A1628')
@@ -1091,7 +988,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 .fillColor('#C9A84C')
                 .text('"Nurturing Stars, Building Futures"', 30, 57, { width: 150 });
 
-            // Title - Right side
             doc.fontSize(12)
                 .font('Helvetica-Bold')
                 .fillColor('#0A1628')
@@ -1102,7 +998,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 .fillColor('#6c757d')
                 .text(`${term || ''} ${year || ''} ${period ? '- ' + period : ''}`, 190, 38, { align: 'center', width: 400 });
 
-            // Decorative line
             doc.moveTo(30, 65)
                 .lineTo(770, 65)
                 .strokeColor('#C9A84C')
@@ -1110,32 +1005,13 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 .stroke();
 
             // ============================================
-            // STATISTICS CARDS - COMPACT
+            // STATISTICS CARDS
             // ============================================
             const totalStudents = students.length;
             let exceeding = 0, meeting = 0, approaching = 0, below = 0;
             let totalAvg = 0;
             
-            // RECALCULATE with correct rubric
             students.forEach(s => {
-                // Recalculate each student's performance
-                if (s.assessments) {
-                    let totalScore = 0;
-                    let totalMaxScore = 0;
-                    s.assessments.forEach(a => {
-                        totalScore += a.score || 0;
-                        totalMaxScore += a.maxScore || 0;
-                    });
-                    const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
-                    s.averageScore = parseFloat(avgPercentage.toFixed(1));
-                    
-                    // Use the correct rubric (75%+ = EE, 41-74% = ME, 21-40% = AE, 0-20% = BE)
-                    if (avgPercentage >= 75) s.performanceLevel = 'Exceeding Expectation';
-                    else if (avgPercentage >= 41) s.performanceLevel = 'Meeting Expectation';
-                    else if (avgPercentage >= 21) s.performanceLevel = 'Approaching Expectation';
-                    else s.performanceLevel = 'Below Expectation';
-                }
-                
                 const level = s.performanceLevel || 'Approaching Expectation';
                 if (level === 'Exceeding Expectation') exceeding++;
                 else if (level === 'Meeting Expectation') meeting++;
@@ -1206,11 +1082,11 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             // TABLE HEADER
             // ============================================
             const tableTop = legendY + 12;
-            const rankColWidth = 30;
-            const nameColWidth = 80;
-            const totalColWidth = 45;
-            const avgColWidth = 45;
-            const levelColWidth = 55;
+            const rankColWidth = 28;
+            const nameColWidth = 75;
+            const totalColWidth = 42;
+            const avgColWidth = 42;
+            const levelColWidth = 50;
             const subjectColWidth = Math.min(32, (730 - rankColWidth - nameColWidth - totalColWidth - avgColWidth - levelColWidth) / Math.max(1, allSubjects.length));
             
             // Calculate max scores for each subject
@@ -1229,7 +1105,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             });
             
             // Header background
-            doc.rect(30, tableTop, 740, 18)
+            doc.rect(30, tableTop, 740, 16)
                .fillColor('#0A1628')
                .fill();
             
@@ -1238,37 +1114,31 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                .font('Helvetica-Bold')
                .fillColor('white');
             
-            // Rank
             doc.text('Rank', headerX, tableTop + 4, { width: rankColWidth - 5, align: 'center' });
             headerX += rankColWidth;
             
-            // Student Name
             doc.text('Student', headerX, tableTop + 4, { width: nameColWidth - 5 });
             headerX += nameColWidth;
             
-            // Subjects
             allSubjects.forEach(subject => {
                 const shortName = subject.length > 6 ? subject.substring(0, 5) + '.' : subject;
                 doc.text(shortName, headerX + 2, tableTop + 4, { width: subjectColWidth - 4, align: 'center' });
                 headerX += subjectColWidth;
             });
             
-            // Total
             doc.text('Total', headerX, tableTop + 4, { width: totalColWidth - 5, align: 'center' });
             headerX += totalColWidth;
             
-            // Avg
             doc.text('Avg', headerX, tableTop + 4, { width: avgColWidth - 5, align: 'center' });
             headerX += avgColWidth;
             
-            // Level
             doc.text('Level', headerX, tableTop + 4, { width: levelColWidth - 5, align: 'center' });
 
             // ============================================
             // MAX SCORES ROW
             // ============================================
-            let maxRowY = tableTop + 18;
-            doc.rect(30, maxRowY, 740, 14)
+            let maxRowY = tableTop + 16;
+            doc.rect(30, maxRowY, 740, 12)
                .fillColor('#f8f9fa')
                .fill();
             
@@ -1297,16 +1167,16 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             // STUDENT DATA ROWS
             // ============================================
             const sortedStudents = [...students].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-            let rowY = maxRowY + 14;
+            let rowY = maxRowY + 12;
             let rowIndex = 0;
             
-            // Calculate max rows that fit on one page (landscape A4 = ~30 rows)
+            // Max rows that fit on one page
             const maxRows = 28;
             const displayStudents = sortedStudents.slice(0, maxRows);
             
             displayStudents.forEach((student) => {
                 const bgColor = rowIndex % 2 === 0 ? '#fafafa' : 'white';
-                doc.rect(30, rowY, 740, 16)
+                doc.rect(30, rowY, 740, 14)
                    .fillColor(bgColor)
                    .fill();
                 
@@ -1314,24 +1184,21 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 const level = student.performanceLevel || 'Approaching Expectation';
                 const levelColor = getPerformanceColor(level);
                 const short = getPerformanceShort(level);
-                const rating = getPerformanceRating(level);
+                const rating = student.overallRating || 2;
                 const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
                 const rank = rowIndex + 1;
                 
-                // Rank
                 doc.fontSize(6)
                    .font('Helvetica-Bold')
                    .fillColor(rank <= 3 ? '#C9A84C' : '#6c757d')
-                   .text(rank <= 3 ? ['🏆', '🥈', '🥉'][rank - 1] : rank.toString(), x, rowY + 3, { width: rankColWidth - 5, align: 'center' });
+                   .text(rank <= 3 ? ['🏆', '🥈', '🥉'][rank - 1] : rank.toString(), x, rowY + 2, { width: rankColWidth - 5, align: 'center' });
                 x += rankColWidth;
                 
-                // Student Name
                 doc.fillColor('#0A1628')
                    .font('Helvetica-Bold')
-                   .text(student.studentName || 'N/A', x, rowY + 3, { width: nameColWidth - 5 });
+                   .text(student.studentName || 'N/A', x, rowY + 2, { width: nameColWidth - 5 });
                 x += nameColWidth;
                 
-                // Subject scores
                 allSubjects.forEach(subject => {
                     const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
                     if (assessment) {
@@ -1342,36 +1209,27 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                         else if (percentage < 75) color = '#0d6efd';
                         doc.fillColor(color)
                            .font('Helvetica-Bold')
-                           .text(assessment.score.toString(), x + 2, rowY + 3, { width: subjectColWidth - 4, align: 'center' });
+                           .text(assessment.score.toString(), x + 2, rowY + 2, { width: subjectColWidth - 4, align: 'center' });
                     } else {
                         doc.fillColor('#dee2e6')
-                           .text('-', x + 2, rowY + 3, { width: subjectColWidth - 4, align: 'center' });
+                           .text('-', x + 2, rowY + 2, { width: subjectColWidth - 4, align: 'center' });
                     }
                     x += subjectColWidth;
                 });
                 
-                // Total Score
                 doc.fillColor('#C9A84C')
                    .font('Helvetica-Bold')
-                   .text((student.totalScore || 0).toString(), x, rowY + 3, { width: totalColWidth - 5, align: 'center' });
+                   .text((student.totalScore || 0).toString(), x, rowY + 2, { width: totalColWidth - 5, align: 'center' });
                 x += totalColWidth;
                 
-                // Average
                 doc.fillColor('#0d6efd')
-                   .text(avgScore + '%', x, rowY + 3, { width: avgColWidth - 5, align: 'center' });
+                   .text(avgScore + '%', x, rowY + 2, { width: avgColWidth - 5, align: 'center' });
                 x += avgColWidth;
                 
-                // Performance Level
-                const levelColors = {
-                    'Exceeding Expectation': '#28a745',
-                    'Meeting Expectation': '#0d6efd',
-                    'Approaching Expectation': '#e6a800',
-                    'Below Expectation': '#dc3545'
-                };
-                doc.fillColor(levelColors[level] || '#6c757d')
-                   .text(`${short} (${rating})`, x, rowY + 3, { width: levelColWidth - 5, align: 'center' });
+                doc.fillColor(levelColor)
+                   .text(`${short} (${rating})`, x, rowY + 2, { width: levelColWidth - 5, align: 'center' });
                 
-                rowY += 16;
+                rowY += 14;
                 rowIndex++;
             });
 
@@ -1381,13 +1239,13 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                    .font('Helvetica-Oblique')
                    .fillColor('#6c757d')
                    .text(`... and ${sortedStudents.length - maxRows} more students`, 35, rowY + 4);
-                rowY += 20;
+                rowY += 18;
             }
 
             // ============================================
             // FOOTER
             // ============================================
-            const footerY = Math.max(rowY + 20, 550);
+            const footerY = Math.max(rowY + 16, 540);
             
             doc.moveTo(30, footerY)
                 .lineTo(770, footerY)
@@ -1398,9 +1256,9 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             doc.fontSize(6)
                 .font('Helvetica')
                 .fillColor('#6c757d')
-                .text(`Generated: ${formatKenyaFullTime(new Date())}`, 35, footerY + 8, { align: 'left' })
+                .text(`Generated: ${formatKenyaFullTime(new Date())}`, 35, footerY + 6, { align: 'left' })
                 .text('© 2026 Changara Star Academy • "Nurturing Stars, Building Futures" • P.O Box 7, Cheptais', 
-                      35, footerY + 18, { align: 'center' });
+                      35, footerY + 16, { align: 'center' });
             
             doc.end();
         } catch (error) {
@@ -2617,9 +2475,9 @@ app.get('/api/assessments/subjects/:grade', async (req, res) => {
                 rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
                 rubric: {
                     exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
-                    meeting: { min: 50, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
-                    approaching: { min: 26, max: 49, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
-                    below: { min: 0, max: 25, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+                    meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
+                    approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
+                    below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
                 },
                 updatedAt: new Date()
             };
@@ -2691,9 +2549,9 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
             rankLevels: rankLevels || ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
             rubric: rubric || {
                 exceeding: { min: 75, max: 100, label: 'Exceeding Expectation', short: 'EE', rating: 4, color: '#1a8a3f' },
-                meeting: { min: 50, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
-                approaching: { min: 26, max: 49, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
-                below: { min: 0, max: 25, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
+                meeting: { min: 41, max: 74, label: 'Meeting Expectation', short: 'ME', rating: 3, color: '#0d6efd' },
+                approaching: { min: 21, max: 40, label: 'Approaching Expectation', short: 'AE', rating: 2, color: '#e6a800' },
+                below: { min: 0, max: 20, label: 'Below Expectation', short: 'BE', rating: 1, color: '#dc3545' }
             },
             updatedAt: new Date()
         };
