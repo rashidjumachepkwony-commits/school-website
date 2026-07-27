@@ -4606,17 +4606,7 @@ app.use(express.static(__dirname));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
-// ============================================
-// DEBUG - LIST ALL REGISTERED ROUTES
-// ============================================
-console.log('\n📋 REGISTERED ROUTES:');
-app._router.stack.forEach(function(r) {
-    if (r.route && r.route.path) {
-        const methods = Object.keys(r.route.methods).join(',').toUpperCase();
-        console.log(`  ${methods} ${r.route.path}`);
-    }
-});
-console.log('='.repeat(50) + '\n');
+
 
 // 404 handler - MUST BE LAST
 app.use((req, res) => {
