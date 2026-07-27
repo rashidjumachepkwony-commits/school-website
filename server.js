@@ -181,11 +181,15 @@ function calculateStudentOverall(assessments) {
     let levelDistribution = { EE: 0, ME: 0, AE: 0, BE: 0 };
     
     assessments.forEach(a => {
-        totalScore += a.score || 0;
-        totalMaxScore += a.maxScore || 0;
+        // Ensure valid data
+        const score = Math.min(a.score || 0, a.maxScore || 0);
+        const maxScore = a.maxScore || 1;
+        
+        totalScore += score;
+        totalMaxScore += maxScore;
         
         // Get rating for this subject
-        const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+        const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
         const level = calculatePerformanceLevel(percentage);
         const rating = getPerformanceRating(level);
         totalRating += rating;
@@ -217,7 +221,6 @@ function calculateStudentOverall(assessments) {
         subjectCount: subjectCount
     };
 }
-
 // ============================================
 // CLOUDINARY UPLOAD HELPER
 // ============================================
@@ -947,7 +950,7 @@ function generateTeacherFeedback(student) {
 }
 
 // ============================================
-// PROFESSIONAL CLASS REPORT - CBC STYLE
+// PROFESSIONAL CLASS REPORT - CBC STYLE - FIXED
 // ============================================
 function generateClassReportPDF(students, grade, type, term, year, period) {
     return new Promise((resolve, reject) => {
@@ -956,16 +959,18 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             // RECALCULATE ALL STUDENTS WITH CBC METHOD
             // ============================================
             students = students.map(s => {
-                if (s.assessments) {
-                    // Calculate each subject's performance level
+                if (s.assessments && s.assessments.length > 0) {
+                    // Validate and clean each assessment
                     s.assessments = s.assessments.map(a => {
-                        const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+                        const score = Math.min(a.score || 0, a.maxScore || 0);
+                        const maxScore = a.maxScore || 1;
+                        const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
                         const level = calculatePerformanceLevel(percentage);
                         const rating = getPerformanceRating(level);
                         return {
-                            subject: a.subject,
-                            maxScore: a.maxScore,
-                            score: a.score,
+                            subject: a.subject || 'Untitled',
+                            maxScore: maxScore,
+                            score: score,
                             percentage: parseFloat(percentage.toFixed(1)),
                             performanceLevel: level,
                             rating: rating
@@ -1093,13 +1098,13 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                .text('EE: Exceeding (75-100%)   ME: Meeting (41-74%)   AE: Approaching (21-40%)   BE: Below (0-20%)', 35, legendY);
 
             // ============================================
-            // GET ALL SUBJECTS
+            // GET ALL SUBJECTS - ONLY FROM VALID STUDENTS
             // ============================================
             let allSubjects = [];
             students.forEach(s => {
-                if (s.assessments) {
+                if (s.assessments && s.assessments.length > 0) {
                     s.assessments.forEach(a => {
-                        if (!allSubjects.includes(a.subject)) {
+                        if (a.subject && a.subject !== 'Untitled' && !allSubjects.includes(a.subject)) {
                             allSubjects.push(a.subject);
                         }
                     });
@@ -1107,16 +1112,21 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             });
             allSubjects.sort();
             
+            // If no subjects found, use default
+            if (allSubjects.length === 0) {
+                allSubjects = ['MATH', 'ENG', 'KIS', 'SCI', 'SST', 'CRE'];
+            }
+            
             // ============================================
             // TABLE HEADER
             // ============================================
             const tableTop = legendY + 12;
             const rankColWidth = 28;
-            const nameColWidth = 75;
+            const nameColWidth = 80;
             const totalColWidth = 42;
             const avgColWidth = 42;
-            const levelColWidth = 50;
-            const subjectColWidth = Math.min(32, (730 - rankColWidth - nameColWidth - totalColWidth - avgColWidth - levelColWidth) / Math.max(1, allSubjects.length));
+            const levelColWidth = 55;
+            const subjectColWidth = Math.min(34, (730 - rankColWidth - nameColWidth - totalColWidth - avgColWidth - levelColWidth) / Math.max(1, allSubjects.length));
             
             // Calculate max scores for each subject
             const subjectMaxScores = {};
@@ -1130,7 +1140,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                         }
                     }
                 });
-                subjectMaxScores[subject] = maxScore;
+                subjectMaxScores[subject] = maxScore || 50; // Default max if not found
             });
             
             // Header background
@@ -1150,7 +1160,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             headerX += nameColWidth;
             
             allSubjects.forEach(subject => {
-                const shortName = subject.length > 6 ? subject.substring(0, 5) + '.' : subject;
+                const shortName = subject.length > 8 ? subject.substring(0, 6) + '..' : subject;
                 doc.text(shortName, headerX + 2, tableTop + 4, { width: subjectColWidth - 4, align: 'center' });
                 headerX += subjectColWidth;
             });
@@ -1181,7 +1191,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             maxX += nameColWidth;
             
             allSubjects.forEach(subject => {
-                const maxScore = subjectMaxScores[subject] || 0;
+                const maxScore = subjectMaxScores[subject] || 50;
                 doc.text(maxScore.toString(), maxX + 2, maxRowY + 3, { width: subjectColWidth - 4, align: 'center' });
                 maxX += subjectColWidth;
             });
@@ -1217,17 +1227,23 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 const avgScore = student.averageScore ? student.averageScore.toFixed(1) : '0';
                 const rank = rowIndex + 1;
                 
+                // Rank
                 doc.fontSize(6)
                    .font('Helvetica-Bold')
                    .fillColor(rank <= 3 ? '#C9A84C' : '#6c757d')
                    .text(rank <= 3 ? ['🏆', '🥈', '🥉'][rank - 1] : rank.toString(), x, rowY + 2, { width: rankColWidth - 5, align: 'center' });
                 x += rankColWidth;
                 
+                // Student Name - Clean the name (remove any prefixes like "0-1-")
+                let cleanName = student.studentName || 'N/A';
+                // Remove any number-prefix like "0-1-", "0-0-", etc.
+                cleanName = cleanName.replace(/^[\d-]+/, '').trim();
                 doc.fillColor('#0A1628')
                    .font('Helvetica-Bold')
-                   .text(student.studentName || 'N/A', x, rowY + 2, { width: nameColWidth - 5 });
+                   .text(cleanName, x, rowY + 2, { width: nameColWidth - 5 });
                 x += nameColWidth;
                 
+                // Subject scores
                 allSubjects.forEach(subject => {
                     const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
                     if (assessment) {
@@ -1246,18 +1262,26 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                     x += subjectColWidth;
                 });
                 
+                // Total Score
                 doc.fillColor('#C9A84C')
                    .font('Helvetica-Bold')
                    .text((student.totalScore || 0).toString(), x, rowY + 2, { width: totalColWidth - 5, align: 'center' });
                 x += totalColWidth;
                 
+                // Average
                 doc.fillColor('#0d6efd')
                    .text(avgScore + '%', x, rowY + 2, { width: avgColWidth - 5, align: 'center' });
                 x += avgColWidth;
                 
-                // In the student data rows section, update the level display:
-doc.fillColor(levelColor)
-   .text(`${short} (${rating})`, x, rowY + 2, { width: levelColWidth - 5, align: 'center' });
+                // Performance Level with Rating
+                const levelColors = {
+                    'Exceeding Expectation': '#28a745',
+                    'Meeting Expectation': '#0d6efd',
+                    'Approaching Expectation': '#e6a800',
+                    'Below Expectation': '#dc3545'
+                };
+                doc.fillColor(levelColors[level] || '#6c757d')
+                   .text(`${short} (${rating})`, x, rowY + 2, { width: levelColWidth - 5, align: 'center' });
                 
                 rowY += 14;
                 rowIndex++;
@@ -1292,6 +1316,7 @@ doc.fillColor(levelColor)
             
             doc.end();
         } catch (error) {
+            console.error('Class report generation error:', error);
             reject(error);
         }
     });

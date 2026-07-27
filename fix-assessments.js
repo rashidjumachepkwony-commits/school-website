@@ -43,11 +43,15 @@ function calculateStudentOverall(assessments) {
     let levelDistribution = { EE: 0, ME: 0, AE: 0, BE: 0 };
     
     assessments.forEach(a => {
-        totalScore += a.score || 0;
-        totalMaxScore += a.maxScore || 0;
+        // Ensure valid data
+        const score = Math.min(a.score || 0, a.maxScore || 0);
+        const maxScore = a.maxScore || 1;
+        
+        totalScore += score;
+        totalMaxScore += maxScore;
         
         // Get rating for this subject
-        const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+        const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
         const level = calculatePerformanceLevel(percentage);
         const rating = getPerformanceRating(level);
         totalRating += rating;
@@ -58,6 +62,27 @@ function calculateStudentOverall(assessments) {
         levelDistribution[short] = (levelDistribution[short] || 0) + 1;
     });
     
+    // Overall rating = AVERAGE of all subject ratings (CBC method)
+    const overallRating = subjectCount > 0 ? parseFloat((totalRating / subjectCount).toFixed(1)) : 2;
+    
+    // Determine overall performance level based on average rating
+    let performanceLevel = 'Approaching Expectation';
+    if (overallRating >= 3.5) performanceLevel = 'Exceeding Expectation';
+    else if (overallRating >= 2.5) performanceLevel = 'Meeting Expectation';
+    else if (overallRating >= 1.5) performanceLevel = 'Approaching Expectation';
+    else performanceLevel = 'Below Expectation';
+    
+    const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
+    
+    return {
+        totalScore: totalScore,
+        averageScore: parseFloat(avgPercentage.toFixed(1)),
+        overallRating: overallRating,
+        performanceLevel: performanceLevel,
+        levelDistribution: levelDistribution,
+        subjectCount: subjectCount
+    };
+}
     // ============================================
     // CBC METHOD: Overall rating = AVERAGE of all subject ratings
     // ============================================
