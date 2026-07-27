@@ -820,6 +820,45 @@
 
     <script>
         // ============================================
+        // PERFORMANCE RUBRIC - UPDATED (FRONTEND)
+        // ============================================
+        // Exceeding Expectations (EE): 75-100%
+        // Meeting Expectations (ME): 41-74%
+        // Approaching Expectations (AE): 21-40%
+        // Below Expectations (BE): 0-20%
+
+        function getPerformanceLevel(percentage) {
+            if (percentage >= 75) return 'Exceeding Expectation';
+            if (percentage >= 41) return 'Meeting Expectation';
+            if (percentage >= 21) return 'Approaching Expectation';
+            return 'Below Expectation';
+        }
+
+        function getPerformanceBadge(level) {
+            const badges = {
+                'Exceeding Expectation': 'exceeding',
+                'Meeting Expectation': 'meeting',
+                'Approaching Expectation': 'approaching',
+                'Below Expectation': 'below'
+            };
+            return badges[level] || 'approaching';
+        }
+
+        function calculateAverage(assessments) {
+            if (!assessments || assessments.length === 0) return 0;
+            
+            let totalScore = 0;
+            let totalMaxScore = 0;
+            
+            assessments.forEach(a => {
+                totalScore += a.score || 0;
+                totalMaxScore += a.maxScore || 0;
+            });
+            
+            return totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
+        }
+
+        // ============================================
         // CHECK AUTH
         // ============================================
         (function() {
@@ -1425,7 +1464,7 @@
         }
 
         // ============================================
-        // CLASS ASSESSMENT RESULTS
+        // CLASS ASSESSMENT RESULTS - FIXED
         // ============================================
         async function loadClassResults() {
             const grade = document.getElementById('classGradeFilter').value;
@@ -1442,7 +1481,39 @@
                 hideLoading();
 
                 if (data.success) {
-                    const students = data.students || [];
+                    let students = data.students || [];
+                    
+                    // ✅ RECALCULATE on frontend with correct rubric
+                    students = students.map(student => {
+                        // Recalculate each subject
+                        if (student.assessments) {
+                            student.assessments = student.assessments.map(a => {
+                                const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+                                const level = getPerformanceLevel(percentage);
+                                return {
+                                    ...a,
+                                    percentage: percentage,
+                                    performanceLevel: level
+                                };
+                            });
+                        }
+                        
+                        // Recalculate overall average using percentage of total max
+                        let totalScore = 0;
+                        let totalMaxScore = 0;
+                        if (student.assessments) {
+                            student.assessments.forEach(a => {
+                                totalScore += a.score || 0;
+                                totalMaxScore += a.maxScore || 0;
+                            });
+                        }
+                        const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
+                        student.averageScore = parseFloat(avgPercentage.toFixed(1));
+                        student.performanceLevel = getPerformanceLevel(avgPercentage);
+                        
+                        return student;
+                    });
+
                     const tbody = document.getElementById('classResultsBody');
 
                     let total = students.length;
@@ -1471,15 +1542,15 @@
                     students.forEach((student, index) => {
                         const tr = document.createElement('tr');
                         const level = student.performanceLevel || 'Approaching Expectation';
-                        const levelClass = level.toLowerCase().replace(' ', '-');
-                        const avg = student.averageScore ? student.averageScore.toFixed(1) : '0';
+                        const levelClass = getPerformanceBadge(level);
+                        const avg = student.averageScore !== undefined && student.averageScore !== null ? student.averageScore.toFixed(1) : '0';
 
                         tr.innerHTML = `
                             <td>${index + 1}</td>
                             <td><strong>${student.studentName}</strong></td>
                             <td>${student.admissionNumber || '-'}</td>
                             <td style="text-align:center;">${student.totalScore || 0}</td>
-                            <td style="text-align:center;">${avg}</td>
+                            <td style="text-align:center;font-weight:700;color:${level === 'Exceeding Expectation' ? '#28a745' : level === 'Meeting Expectation' ? '#17a2b8' : level === 'Approaching Expectation' ? '#d4a017' : '#dc3545'};">${avg}%</td>
                             <td style="text-align:center;">
                                 <span class="performance-level-badge ${levelClass}">${level}</span>
                             </td>
@@ -1495,7 +1566,7 @@
                         tbody.appendChild(tr);
                     });
 
-                    showAlert(`✅ Loaded ${students.length} students`, 'success');
+                    showAlert(`✅ Loaded ${students.length} students with correct rubric`, 'success');
                 } else {
                     showAlert('❌ Error: ' + data.message, 'error');
                 }
@@ -1528,7 +1599,12 @@
             }
         }
 
-        
+        function downloadStudentReport(studentId) {
+            showLoading('Generating PDF...');
+            window.open(`/api/assessments/download-report/${studentId}`, '_blank');
+            setTimeout(hideLoading, 1000);
+            showAlert('📄 Student report is downloading...', 'info');
+        }
 
         function downloadClassResultsPDF() {
             const grade = document.getElementById('classGradeFilter').value;
@@ -1582,14 +1658,14 @@
 
                     let rowsHtml = students.map((student, index) => {
                         const level = student.performanceLevel || 'Approaching Expectation';
-                        const levelClass = level.toLowerCase().replace(' ', '-');
+                        const levelClass = getPerformanceBadge(level);
                         return `
                             <tr>
                                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
                                 <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${student.studentName}</td>
                                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${student.admissionNumber || '-'}</td>
                                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${student.totalScore || 0}</td>
-                                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${student.averageScore ? student.averageScore.toFixed(1) : '0'}</td>
+                                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:700;color:${level === 'Exceeding Expectation' ? '#28a745' : level === 'Meeting Expectation' ? '#17a2b8' : level === 'Approaching Expectation' ? '#d4a017' : '#dc3545'};">${student.averageScore ? student.averageScore.toFixed(1) : '0'}%</td>
                                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">
                                     <span style="display:inline-block;padding:2px 10px;border-radius:50px;font-size:10px;font-weight:700;color:white;background:${level === 'Exceeding Expectation' ? '#28a745' : level === 'Meeting Expectation' ? '#17a2b8' : level === 'Approaching Expectation' ? '#d4a017' : '#dc3545'};">${level}</span>
                                 </td>
