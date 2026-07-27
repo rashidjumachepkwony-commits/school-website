@@ -8,6 +8,7 @@ const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const crypto = require('crypto');
 const logger = require('./logger');
+const { ObjectId } = require('mongodb');
 
 // ============================================
 // LOAD ENVIRONMENT VARIABLES FIRST
@@ -2742,7 +2743,7 @@ app.put('/api/subject-config/:id', async (req, res) => {
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
         
-        const { ObjectId } = require('mongodb');
+        // ObjectId is already imported at the top of the file
         const objectId = new ObjectId(id);
         const existing = await collection.findOne({ _id: objectId });
         
@@ -2802,7 +2803,7 @@ app.delete('/api/subject-config/:id', async (req, res) => {
         const db = mongoose.connection.db;
         const collection = db.collection('subjectconfigs_new');
         
-        const { ObjectId } = require('mongodb');
+        // ObjectId is already imported at the top of the file
         const objectId = new ObjectId(id);
         const existing = await collection.findOne({ _id: objectId });
         
@@ -2855,7 +2856,6 @@ app.get('/api/subject-config/stats', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
 // ============================================
 // CBC ANALYSIS ROUTE - COMPETENCY BASED ANALYSIS
 // ============================================
@@ -4606,6 +4606,17 @@ app.use(express.static(__dirname));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
+// ============================================
+// DEBUG - LIST ALL REGISTERED ROUTES
+// ============================================
+console.log('\n📋 REGISTERED ROUTES:');
+app._router.stack.forEach(function(r) {
+    if (r.route && r.route.path) {
+        const methods = Object.keys(r.route.methods).join(',').toUpperCase();
+        console.log(`  ${methods} ${r.route.path}`);
+    }
+});
+console.log('='.repeat(50) + '\n');
 
 // 404 handler - MUST BE LAST
 app.use((req, res) => {
