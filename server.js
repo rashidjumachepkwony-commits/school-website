@@ -2619,6 +2619,244 @@ app.get('/api/assessments/search', async (req, res) => {
 });
 
 // ============================================
+// SUBJECT CONFIGURATION MANAGEMENT ROUTES
+// ============================================
+
+// GET all subject configurations
+app.get('/api/subject-config/all', async (req, res) => {
+    try {
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        const configs = await collection.find({}).toArray();
+        res.json({ success: true, count: configs.length, configs });
+    } catch (error) {
+        console.error('Error fetching subject configs:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET subject config by grade
+app.get('/api/subject-config/grade/:grade', async (req, res) => {
+    try {
+        const { grade } = req.params;
+        const { type, period } = req.query;
+        
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        const filter = { grade: grade };
+        if (type) filter.type = type;
+        if (period) filter.period = period;
+        
+        const config = await collection.findOne(filter);
+        
+        if (!config) {
+            // Return default config if not found
+            const defaultSubjects = getDefaultSubjects(grade, type || 'monthly');
+            return res.json({ 
+                success: true, 
+                config: { 
+                    grade, 
+                    type: type || 'monthly', 
+                    period: period || '',
+                    subjects: defaultSubjects,
+                    isDefault: true 
+                } 
+            });
+        }
+        
+        res.json({ success: true, config });
+    } catch (error) {
+        console.error('Error fetching subject config:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// CREATE subject configuration
+app.post('/api/subject-config', async (req, res) => {
+    try {
+        const { grade, type, period, subjects } = req.body;
+        
+        if (!grade) {
+            return res.status(400).json({ success: false, message: 'Grade is required' });
+        }
+        
+        if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
+            return res.status(400).json({ success: false, message: 'Subjects array is required with at least one subject' });
+        }
+        
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        
+        // Check if config already exists
+        const existingFilter = { grade, type: type || 'monthly' };
+        if (period) existingFilter.period = period;
+        
+        const existing = await collection.findOne(existingFilter);
+        if (existing) {
+            return res.status(409).json({ 
+                success: false, 
+                message: 'Configuration already exists for this grade. Use PUT to update.' 
+            });
+        }
+        
+        // Validate subjects
+        const validatedSubjects = subjects.map(s => ({
+            name: s.name || s.subject || 'Untitled',
+            max: parseInt(s.max) || (s.maxScore || 50)
+        }));
+        
+        const config = {
+            grade,
+            type: type || 'monthly',
+            period: period || '',
+            subjects: validatedSubjects,
+            rankLevels: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
+            rubric: {
+                exceeding: { min: 75, max: 100, label: 'Exceeding Expectation' },
+                meeting: { min: 41, max: 74, label: 'Meeting Expectation' },
+                approaching: { min: 21, max: 40, label: 'Approaching Expectation' },
+                below: { min: 0, max: 20, label: 'Below Expectation' }
+            },
+            updatedAt: new Date()
+        };
+        
+        const result = await collection.insertOne(config);
+        
+        res.status(201).json({ 
+            success: true, 
+            message: 'Subject configuration created successfully!',
+            config: { ...config, _id: result.insertedId }
+        });
+    } catch (error) {
+        console.error('Error creating subject config:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// UPDATE subject configuration
+app.put('/api/subject-config/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { grade, type, period, subjects } = req.body;
+        
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        
+        const { ObjectId } = require('mongodb');
+        const objectId = new ObjectId(id);
+        const existing = await collection.findOne({ _id: objectId });
+        
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Configuration not found' });
+        }
+        
+        const updateData = {
+            updatedAt: new Date()
+        };
+        
+        if (grade) updateData.grade = grade;
+        if (type) updateData.type = type;
+        if (period !== undefined) updateData.period = period;
+        
+        if (subjects && Array.isArray(subjects) && subjects.length > 0) {
+            updateData.subjects = subjects.map(s => ({
+                name: s.name || s.subject || 'Untitled',
+                max: parseInt(s.max) || (s.maxScore || 50)
+            }));
+        }
+        
+        const result = await collection.updateOne(
+            { _id: objectId },
+            { $set: updateData }
+        );
+        
+        if (result.modifiedCount === 0) {
+            return res.status(400).json({ success: false, message: 'No changes were made' });
+        }
+        
+        const updated = await collection.findOne({ _id: objectId });
+        res.json({ 
+            success: true, 
+            message: 'Subject configuration updated successfully!',
+            config: updated
+        });
+    } catch (error) {
+        console.error('Error updating subject config:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// DELETE subject configuration
+app.delete('/api/subject-config/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { confirm } = req.query;
+        
+        if (confirm !== 'yes') {
+            return res.status(400).json({ 
+                success: false, 
+                message: '⚠️ Deletion requires confirmation. Use ?confirm=yes to proceed.' 
+            });
+        }
+        
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        
+        const { ObjectId } = require('mongodb');
+        const objectId = new ObjectId(id);
+        const existing = await collection.findOne({ _id: objectId });
+        
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Configuration not found' });
+        }
+        
+        await collection.deleteOne({ _id: objectId });
+        
+        res.json({ 
+            success: true, 
+            message: `Subject configuration for ${existing.grade} deleted successfully!` 
+        });
+    } catch (error) {
+        console.error('Error deleting subject config:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET subject config statistics
+app.get('/api/subject-config/stats', async (req, res) => {
+    try {
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        
+        const total = await collection.countDocuments();
+        const byGrade = await collection.aggregate([
+            { $group: { _id: '$grade', count: { $sum: 1 } } },
+            { $sort: { _id: 1 } }
+        ]).toArray();
+        
+        const allConfigs = await collection.find({}).toArray();
+        
+        res.json({ 
+            success: true, 
+            stats: {
+                total,
+                byGrade,
+                configs: allConfigs.map(c => ({
+                    grade: c.grade,
+                    type: c.type,
+                    period: c.period || '',
+                    subjectsCount: c.subjects ? c.subjects.length : 0,
+                    updatedAt: c.updatedAt
+                }))
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching subject config stats:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
 // DOWNLOAD STUDENT REPORT
 // ============================================
 
