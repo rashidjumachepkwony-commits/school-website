@@ -180,6 +180,7 @@ function calculateStudentOverall(assessments) {
         totalMaxScore += a.maxScore || 0;
     });
     
+    // ✅ CORRECT: Average as percentage of total possible
     const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     const performanceLevel = calculatePerformanceLevel(avgPercentage);
     
@@ -192,7 +193,7 @@ function calculateStudentOverall(assessments) {
 }
 
 // ============================================
-// CLOUDINARY UPLOAD HELPER - PERMANENT FIX
+// CLOUDINARY UPLOAD HELPER
 // ============================================
 async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') {
     return new Promise((resolve, reject) => {
@@ -200,11 +201,9 @@ async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') 
         console.log(`📁 Folder: ${folder}`);
         console.log(`📦 File size: ${fileBuffer.length} bytes`);
         
-        // ✅ Determine correct resource type
         const ext = filename.split('.').pop().toLowerCase();
-        let resourceType = 'raw'; // Default for PDFs, docs, etc.
+        let resourceType = 'raw';
         
-        // For images, use 'image' type
         if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) {
             resourceType = 'image';
         } else if (['mp4', 'avi', 'mov', 'mkv', 'webm'].includes(ext)) {
@@ -212,9 +211,6 @@ async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') 
         } else if (['mp3', 'wav', 'ogg', 'aac'].includes(ext)) {
             resourceType = 'video';
         }
-        // For PDFs, Word, Excel, text files - use 'raw'
-        
-        console.log(`📄 Resource type: ${resourceType}`);
         
         cloudinary.uploader.upload_stream(
             {
@@ -224,7 +220,6 @@ async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') 
                 use_filename: true,
                 unique_filename: true,
                 timeout: 60000,
-                // For raw files, ensure proper handling
                 type: 'upload'
             },
             (error, result) => {
@@ -248,14 +243,15 @@ function isCloudinaryConfigured() {
            process.env.CLOUDINARY_API_KEY && 
            process.env.CLOUDINARY_API_SECRET;
 }
+
 // ============================================
-// PROFESSIONAL CBC STUDENT REPORT - ONE PAGE
+// PROFESSIONAL CBC STUDENT REPORT - REDESIGNED
 // ============================================
 function generateStudentReportPDF(student) {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({
-                margin: 25,
+                margin: 30,
                 size: 'A4',
                 layout: 'portrait'
             });
@@ -269,7 +265,6 @@ function generateStudentReportPDF(student) {
             const colors = {
                 primary: '#0A1628',
                 gold: '#C9A84C',
-                goldDark: '#B8942A',
                 goldLight: '#F5ECD7',
                 success: '#1a8a3f',
                 successLight: '#E8F5E9',
@@ -282,156 +277,139 @@ function generateStudentReportPDF(student) {
                 gray: '#6c757d',
                 grayLight: '#f8f9fa',
                 border: '#dee2e6',
-                white: '#ffffff',
-                black: '#1a1a1a'
+                white: '#ffffff'
             };
 
             // ============================================
-            // HEADER WITH LOGO - Centered
+            // HEADER WITH LOGO
             // ============================================
             const logoPath = path.join(__dirname, 'images', 'logo.jpg');
             const hasLogo = fs.existsSync(logoPath);
 
             // Top decorative border
-            doc.rect(0, 0, 595, 8).fillColor(colors.gold).fill();
+            doc.rect(0, 0, 595, 6).fillColor(colors.gold).fill();
 
-            // Logo - Centered
-            let logoY = 18;
+            // Logo
+            let logoY = 20;
             if (hasLogo) {
                 try {
-                    const logoWidth = 65;
-                    const logoHeight = 65;
-                    const logoX = (595 - logoWidth) / 2;
-                    doc.image(logoPath, logoX, 12, { width: logoWidth, height: logoHeight });
-                    logoY = 80;
+                    doc.image(logoPath, 35, 15, { width: 55, height: 55 });
+                    logoY = 20;
                 } catch (e) {
                     console.log('Logo placement error:', e.message);
-                    logoY = 30;
                 }
             }
 
-            // School Name - Centered
-            doc.fontSize(24)
+            // School Name
+            doc.fontSize(20)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
-                .text('CHANGARA STAR ACADEMY', 0, logoY, { align: 'center' });
+                .text('CHANGARA STAR ACADEMY', hasLogo ? 100 : 35, 18, { width: 400 });
 
-            doc.fontSize(12)
+            doc.fontSize(10)
                 .font('Helvetica-Oblique')
                 .fillColor(colors.gold)
-                .text('"Assurance to Excellence"', 0, logoY + 28, { align: 'center' });
+                .text('"Assurance to Excellence"', hasLogo ? 100 : 35, 42, { width: 400 });
 
-            // School Contact - Centered
-            doc.fontSize(8)
+            // School Contact
+            doc.fontSize(7)
                 .font('Helvetica')
                 .fillColor(colors.gray)
-                .text('P.O Box 7, Cheptais  •  Tel: +254 721 556 252  •  Email: starchangara@gmail.com', 0, logoY + 46, { align: 'center' });
+                .text('P.O Box 7, Cheptais  •  Tel: +254 721 556 252  •  Email: starchangara@gmail.com', 
+                      hasLogo ? 100 : 35, 56, { width: 400 });
 
-            // Decorative line
-            const lineY = logoY + 62;
-            doc.moveTo(40, lineY)
-                .lineTo(555, lineY)
+            // Divider
+            doc.moveTo(30, 78)
+                .lineTo(565, 78)
                 .strokeColor(colors.gold)
-                .lineWidth(2)
+                .lineWidth(1.5)
                 .stroke();
 
-            // Subtitle
-            doc.fontSize(11)
-                .font('Helvetica-Bold')
-                .fillColor(colors.primary)
-                .text('STUDENT PROGRESS REPORT - CBC', 0, lineY + 10, { align: 'center' });
-
             // ============================================
-            // STUDENT INFORMATION - Centered Cards
+            // STUDENT INFORMATION
             // ============================================
-            const infoY = lineY + 32;
+            const infoY = 88;
             
             // Info card background
-            doc.roundedRect(35, infoY, 525, 50, 6)
+            doc.roundedRect(30, infoY, 535, 42, 6)
                 .fillColor(colors.grayLight)
                 .fill()
                 .strokeColor(colors.border)
                 .lineWidth(1)
-                .roundedRect(35, infoY, 525, 50, 6)
+                .roundedRect(30, infoY, 535, 42, 6)
                 .stroke();
 
             const infoData = [
-                ['Student Name:', student.studentName || 'N/A'],
-                ['Grade/Level:', student.grade || 'N/A'],
-                ['Admission No.:', student.studentId || 'N/A'],
-                ['Assessment Type:', student.type || 'Monthly'],
-                ['Term/Year:', student.term || 'N/A'],
-                ['Report Date:', formatKenyaFullTime(new Date())]
+                ['Student:', student.studentName || 'N/A'],
+                ['Grade:', student.grade || 'N/A'],
+                ['Admission:', student.studentId || 'N/A'],
+                ['Assessment:', student.type || 'Monthly'],
+                ['Term:', student.term || 'N/A'],
+                ['Date:', formatKenyaFullTime(new Date())]
             ];
 
             const infoColWidth = 260;
-            const infoXStart = 50;
+            const infoXStart = 45;
 
             infoData.forEach((item, i) => {
                 const col = i % 2;
                 const row = Math.floor(i / 2);
                 const x = infoXStart + (col * infoColWidth);
-                const y = infoY + 8 + (row * 17);
+                const y = infoY + 6 + (row * 16);
 
                 doc.fontSize(8)
                     .font('Helvetica-Bold')
                     .fillColor(colors.gray)
                     .text(item[0], x, y);
 
-                doc.fontSize(9)
-                    .font('Helvetica-Bold')
+                doc.fontSize(8)
+                    .font('Helvetica')
                     .fillColor(colors.primary)
-                    .text(item[1], x + 85, y);
+                    .text(item[1], x + 55, y);
             });
 
             // ============================================
-            // PERFORMANCE RUBRIC / GRADING SCALE - UPDATED
+            // PERFORMANCE RUBRIC
             // ============================================
-            const rubricY = infoY + 60;
+            const rubricY = infoY + 54;
             
             doc.fontSize(8)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
-                .text('PERFORMANCE RUBRIC', 35, rubricY);
+                .text('PERFORMANCE RUBRIC', 30, rubricY);
 
-            doc.fontSize(7)
-                .font('Helvetica')
-                .fillColor(colors.gray)
-                .text('4-Point Proficiency Scale', 35, rubricY + 12);
-
-            // ✅ UPDATED RUBRIC VALUES
             const rubricData = [
-                { label: 'Exceeding Expectations', range: '75-100%', color: colors.success, bg: colors.successLight },
-                { label: 'Meeting Expectations', range: '41-74%', color: colors.info, bg: colors.infoLight },
-                { label: 'Approaching Expectations', range: '21-40%', color: colors.warning, bg: colors.warningLight },
-                { label: 'Below Expectations', range: '0-20%', color: colors.danger, bg: colors.dangerLight }
+                { label: 'Exceeding', range: '75-100%', color: colors.success, bg: colors.successLight },
+                { label: 'Meeting', range: '41-74%', color: colors.info, bg: colors.infoLight },
+                { label: 'Approaching', range: '21-40%', color: colors.warning, bg: colors.warningLight },
+                { label: 'Below', range: '0-20%', color: colors.danger, bg: colors.dangerLight }
             ];
 
-            let rubricX = 35;
+            let rubricX = 30;
             rubricData.forEach((item) => {
-                doc.roundedRect(rubricX, rubricY + 20, 127, 28, 4)
+                doc.roundedRect(rubricX, rubricY + 10, 128, 22, 4)
                     .fillColor(item.bg)
                     .fill()
                     .strokeColor(item.color)
-                    .lineWidth(1.5)
-                    .roundedRect(rubricX, rubricY + 20, 127, 28, 4)
+                    .lineWidth(1)
+                    .roundedRect(rubricX, rubricY + 10, 128, 22, 4)
                     .stroke();
 
-                doc.fontSize(7)
+                doc.fontSize(6)
                     .font('Helvetica-Bold')
                     .fillColor(item.color)
-                    .text(item.label, rubricX + 5, rubricY + 23, { width: 117, align: 'center' });
+                    .text(item.label, rubricX + 5, rubricY + 13, { width: 118, align: 'center' });
 
-                doc.fontSize(6)
+                doc.fontSize(5)
                     .font('Helvetica')
                     .fillColor(colors.gray)
-                    .text(item.range, rubricX + 5, rubricY + 36, { width: 117, align: 'center' });
+                    .text(item.range, rubricX + 5, rubricY + 23, { width: 118, align: 'center' });
 
-                rubricX += 132;
+                rubricX += 133;
             });
 
             // ============================================
-            // PERFORMANCE SUMMARY - FIXED DISPLAY
+            // PERFORMANCE SUMMARY
             // ============================================
             const level = student.performanceLevel || 'Approaching Expectation';
             const levelColors = {
@@ -442,63 +420,61 @@ function generateStudentReportPDF(student) {
             };
             const perfColors = levelColors[level] || levelColors['Approaching Expectation'];
 
-            const perfY = rubricY + 60;
-            doc.roundedRect(35, perfY, 525, 44, 8)
+            const perfY = rubricY + 40;
+            doc.roundedRect(30, perfY, 535, 36, 6)
                 .fillColor(perfColors.bg)
                 .fill()
                 .strokeColor(perfColors.border)
-                .lineWidth(2.5)
-                .roundedRect(35, perfY, 525, 44, 8)
+                .lineWidth(2)
+                .roundedRect(30, perfY, 535, 36, 6)
                 .stroke();
 
-            // Overall Performance - Large
-            doc.fontSize(20)
+            doc.fontSize(18)
                 .font('Helvetica-Bold')
                 .fillColor(perfColors.text)
-                .text(`${perfColors.icon} ${level}`, 50, perfY + 10);
+                .text(`${perfColors.icon} ${level}`, 45, perfY + 8);
 
-            // ✅ FIXED: Display total score and average correctly
             const totalScore = student.totalScore || 0;
             const avgScore = student.averageScore !== undefined && student.averageScore !== null ? student.averageScore.toFixed(1) : '0';
             const rating = getPerformanceRating(level);
 
-            doc.fontSize(11)
+            doc.fontSize(10)
                 .font('Helvetica')
                 .fillColor(colors.primary)
-                .text(`Total Score: ${totalScore}  •  Average: ${avgScore}%  •  Rating: ${rating}/4`, 300, perfY + 14);
+                .text(`Total: ${totalScore}  •  Avg: ${avgScore}%  •  Rating: ${rating}/4`, 280, perfY + 12);
 
             // ============================================
-            // CORE COMPETENCIES ASSESSMENT TABLE
+            // SUBJECT ASSESSMENT TABLE
             // ============================================
-            const tableY = perfY + 56;
+            const tableY = perfY + 48;
 
             doc.fontSize(9)
                 .font('Helvetica-Bold')
                 .fillColor(colors.primary)
-                .text('CORE COMPETENCIES & SUBJECT ASSESSMENT', 35, tableY);
+                .text('SUBJECT ASSESSMENT', 30, tableY);
 
             // Table Header
-            const tableTop = tableY + 14;
-            doc.roundedRect(35, tableTop, 525, 20, 4)
+            const tableTop = tableY + 12;
+            doc.roundedRect(30, tableTop, 535, 18, 4)
                 .fillColor(colors.primary)
                 .fill();
 
-            const headers = ['Subject', 'Score', 'Max', '%', 'Performance Level'];
-            const colWidths = [160, 70, 70, 70, 135];
-            let headerX = 45;
+            const headers = ['Subject', 'Score', 'Max', '%', 'Performance'];
+            const colWidths = [160, 50, 50, 55, 190];
+            let headerX = 40;
 
-            doc.fontSize(8)
+            doc.fontSize(7)
                 .font('Helvetica-Bold')
                 .fillColor('white');
 
             headers.forEach((h, i) => {
                 const align = i === 0 ? 'left' : 'center';
-                doc.text(h, headerX, tableTop + 5, { width: colWidths[i] - 5, align: align });
+                doc.text(h, headerX, tableTop + 4, { width: colWidths[i] - 5, align: align });
                 headerX += colWidths[i];
             });
 
             // Table Rows
-            let rowY = tableTop + 20;
+            let rowY = tableTop + 18;
             let rowIndex = 0;
             let exceedingCount = 0, meetingCount = 0, approachingCount = 0, belowCount = 0;
 
@@ -508,10 +484,9 @@ function generateStudentReportPDF(student) {
                 return pB - pA;
             });
 
-            // Show all subjects (max 10 to fit page)
             const displayAssessments = sortedAssessments.slice(0, 10);
 
-            displayAssessments.forEach((a, index) => {
+            displayAssessments.forEach((a) => {
                 const percentage = a.maxScore > 0 ? ((a.score / a.maxScore) * 100) : 0;
                 const level2 = calculatePerformanceLevel(percentage);
                 const levelColor2 = getPerformanceColor(level2);
@@ -521,38 +496,33 @@ function generateStudentReportPDF(student) {
                 else if (level2 === 'Approaching Expectation') approachingCount++;
                 else belowCount++;
 
-                // Alternate row background
                 const bgColor = rowIndex % 2 === 0 ? '#ffffff' : colors.grayLight;
-                doc.roundedRect(35, rowY, 525, 18, 2)
+                doc.roundedRect(30, rowY, 535, 16, 2)
                     .fillColor(bgColor)
                     .fill()
                     .strokeColor(colors.border)
                     .lineWidth(0.5)
-                    .roundedRect(35, rowY, 525, 18, 2)
+                    .roundedRect(30, rowY, 535, 16, 2)
                     .stroke();
 
-                let xPos = 45;
-                doc.fontSize(8)
+                let xPos = 40;
+                doc.fontSize(7)
                     .font('Helvetica');
 
-                // Subject
                 doc.fillColor(colors.primary)
                     .font('Helvetica-Bold')
                     .text(a.subject, xPos, rowY + 4, { width: colWidths[0] - 5 });
                 xPos += colWidths[0];
 
-                // Score
                 doc.font('Helvetica')
                     .fillColor(colors.primary)
                     .text(a.score.toString(), xPos, rowY + 4, { width: colWidths[1] - 5, align: 'center' });
                 xPos += colWidths[1];
 
-                // Max Score
                 doc.fillColor(colors.gray)
                     .text(a.maxScore.toString(), xPos, rowY + 4, { width: colWidths[2] - 5, align: 'center' });
                 xPos += colWidths[2];
 
-                // Percentage - UPDATED
                 const pctColor = percentage >= 75 ? colors.success : 
                                  (percentage >= 41 ? colors.info : 
                                  (percentage >= 21 ? colors.warning : colors.danger));
@@ -561,173 +531,170 @@ function generateStudentReportPDF(student) {
                     .text(percentage.toFixed(0) + '%', xPos, rowY + 4, { width: colWidths[3] - 5, align: 'center' });
                 xPos += colWidths[3];
 
-                // Performance Level
                 doc.fillColor(levelColor2)
                     .font('Helvetica-Bold')
                     .text(level2, xPos, rowY + 4, { width: colWidths[4] - 5 });
 
-                rowY += 18;
+                rowY += 16;
                 rowIndex++;
             });
 
             // ============================================
-            // SCHOOL VALUES & CHARACTER ASSESSMENT
+            // PERFORMANCE SUMMARY BADGES
             // ============================================
-            const valuesY = rowY + 10;
+            const summaryY = rowY + 8;
+            
+            doc.fontSize(7)
+                .font('Helvetica-Bold')
+                .fillColor(colors.gray)
+                .text('Summary:', 30, summaryY);
 
-            if (valuesY < 720) {
+            const badgeData = [
+                { label: 'Exceeding', count: exceedingCount, color: colors.success, bg: colors.successLight },
+                { label: 'Meeting', count: meetingCount, color: colors.info, bg: colors.infoLight },
+                { label: 'Approaching', count: approachingCount, color: colors.warning, bg: colors.warningLight },
+                { label: 'Below', count: belowCount, color: colors.danger, bg: colors.dangerLight }
+            ];
+
+            let badgeX = 80;
+            badgeData.forEach((item) => {
+                if (item.count > 0 || item.label === 'Exceeding') {
+                    doc.roundedRect(badgeX, summaryY - 2, 60, 16, 4)
+                        .fillColor(item.bg)
+                        .fill()
+                        .strokeColor(item.color)
+                        .lineWidth(1)
+                        .roundedRect(badgeX, summaryY - 2, 60, 16, 4)
+                        .stroke();
+
+                    doc.fontSize(9)
+                        .font('Helvetica-Bold')
+                        .fillColor(item.color)
+                        .text(item.count.toString(), badgeX + 6, summaryY);
+
+                    doc.fontSize(5)
+                        .font('Helvetica')
+                        .fillColor(colors.gray)
+                        .text(item.label, badgeX + 20, summaryY + 1);
+
+                    badgeX += 68;
+                }
+            });
+
+            // ============================================
+            // STRENGTHS & WEAKNESSES
+            // ============================================
+            const swY = summaryY + 28;
+
+            if (swY < 720 && displayAssessments.length > 0) {
+                const allAssessments = student.assessments || [];
+                
+                const strengths = allAssessments
+                    .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
+                    .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100))
+                    .slice(0, 4);
+
+                const weaknesses = allAssessments
+                    .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 41)
+                    .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100))
+                    .slice(0, 4);
+
+                // Strengths Box
+                doc.roundedRect(30, swY, 260, 50, 6)
+                    .fillColor(colors.successLight)
+                    .fill()
+                    .strokeColor(colors.success)
+                    .lineWidth(1.5)
+                    .roundedRect(30, swY, 260, 50, 6)
+                    .stroke();
+
                 doc.fontSize(8)
                     .font('Helvetica-Bold')
-                    .fillColor(colors.primary)
-                    .text('SCHOOL VALUES & CHARACTER ASSESSMENT', 35, valuesY);
+                    .fillColor(colors.success)
+                    .text('🌟 Strengths', 40, swY + 6);
 
-                const values = [
-                    { name: 'Respect', icon: '🤝' },
-                    { name: 'Responsibility', icon: '💪' },
-                    { name: 'Integrity', icon: '⭐' },
-                    { name: 'Unity', icon: '🤗' },
-                    { name: 'Self-Efficacy', icon: '🌱' },
-                    { name: 'Digital Literacy', icon: '💻' }
-                ];
+                let strengthsY = swY + 20;
+                if (strengths.length > 0) {
+                    strengths.forEach((s) => {
+                        const pct = ((s.score / s.maxScore) * 100).toFixed(0);
+                        doc.fontSize(7)
+                            .font('Helvetica')
+                            .fillColor(colors.primary)
+                            .text(`✓ ${s.subject}: ${pct}%`, 40, strengthsY);
+                        strengthsY += 12;
+                    });
+                } else {
+                    doc.fontSize(7)
+                        .font('Helvetica-Oblique')
+                        .fillColor(colors.gray)
+                        .text('No subjects meeting expectations yet.', 40, strengthsY);
+                }
 
-                let valueX = 35;
-                values.forEach((v) => {
-                    doc.roundedRect(valueX, valuesY + 12, 82, 28, 4)
-                        .fillColor(colors.grayLight)
-                        .fill()
-                        .strokeColor(colors.border)
-                        .lineWidth(1)
-                        .roundedRect(valueX, valuesY + 12, 82, 28, 4)
-                        .stroke();
+                // Weaknesses Box
+                doc.roundedRect(305, swY, 260, 50, 6)
+                    .fillColor(colors.dangerLight)
+                    .fill()
+                    .strokeColor(colors.danger)
+                    .lineWidth(1.5)
+                    .roundedRect(305, swY, 260, 50, 6)
+                    .stroke();
 
-                    doc.fontSize(14)
-                        .text(v.icon, valueX + 28, valuesY + 14);
+                doc.fontSize(8)
+                    .font('Helvetica-Bold')
+                    .fillColor(colors.danger)
+                    .text('⚠️ Areas for Improvement', 315, swY + 6);
 
-                    doc.fontSize(6)
-                        .font('Helvetica-Bold')
-                        .fillColor(colors.primary)
-                        .text(v.name, valueX + 5, valuesY + 32, { width: 72, align: 'center' });
-
-                    valueX += 87;
-                });
-
-                // ============================================
-                // STRENGTHS & AREAS FOR IMPROVEMENT - UPDATED
-                // ============================================
-                const swY = valuesY + 54;
-
-                if (swY < 720) {
-                    const allAssessments = student.assessments || [];
-                    
-                    // ✅ Strengths: >= 50%
-                    const strengths = allAssessments
-                        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
-                        .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100))
-                        .slice(0, 4);
-
-                    // ✅ Weaknesses: < 41%
-                    const weaknesses = allAssessments
-                        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 41)
-                        .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100))
-                        .slice(0, 4);
-
-                    // Strengths Box
-                    doc.roundedRect(35, swY, 255, 55, 6)
-                        .fillColor(colors.successLight)
-                        .fill()
-                        .strokeColor(colors.success)
-                        .lineWidth(1.5)
-                        .roundedRect(35, swY, 255, 55, 6)
-                        .stroke();
-
-                    doc.fontSize(9)
+                let weaknessesY = swY + 20;
+                if (weaknesses.length > 0) {
+                    weaknesses.forEach((s) => {
+                        const pct = ((s.score / s.maxScore) * 100).toFixed(0);
+                        doc.fontSize(7)
+                            .font('Helvetica')
+                            .fillColor(colors.primary)
+                            .text(`→ ${s.subject}: ${pct}%`, 315, weaknessesY);
+                        weaknessesY += 12;
+                    });
+                } else {
+                    doc.fontSize(7)
                         .font('Helvetica-Bold')
                         .fillColor(colors.success)
-                        .text('🌟 Strengths', 45, swY + 6);
-
-                    let strengthsY = swY + 22;
-                    if (strengths.length > 0) {
-                        strengths.forEach((s) => {
-                            const pct = ((s.score / s.maxScore) * 100).toFixed(0);
-                            doc.fontSize(8)
-                                .font('Helvetica')
-                                .fillColor(colors.primary)
-                                .text(`✓ ${s.subject}: ${pct}%`, 45, strengthsY);
-                            strengthsY += 14;
-                        });
-                    } else {
-                        doc.fontSize(8)
-                            .font('Helvetica-Oblique')
-                            .fillColor(colors.gray)
-                            .text('No subjects meeting expectations yet.', 45, strengthsY);
-                    }
-
-                    // Areas for Improvement Box
-                    doc.roundedRect(305, swY, 255, 55, 6)
-                        .fillColor(colors.dangerLight)
-                        .fill()
-                        .strokeColor(colors.danger)
-                        .lineWidth(1.5)
-                        .roundedRect(305, swY, 255, 55, 6)
-                        .stroke();
-
-                    doc.fontSize(9)
-                        .font('Helvetica-Bold')
-                        .fillColor(colors.danger)
-                        .text('📌 Areas for Improvement', 315, swY + 6);
-
-                    let weaknessesY = swY + 22;
-                    if (weaknesses.length > 0) {
-                        weaknesses.forEach((s) => {
-                            const pct = ((s.score / s.maxScore) * 100).toFixed(0);
-                            doc.fontSize(8)
-                                .font('Helvetica')
-                                .fillColor(colors.primary)
-                                .text(`→ ${s.subject}: ${pct}%`, 315, weaknessesY);
-                            weaknessesY += 14;
-                        });
-                    } else {
-                        doc.fontSize(8)
-                            .font('Helvetica-Bold')
-                            .fillColor(colors.success)
-                            .text('🎉 All subjects meeting expectations!', 315, weaknessesY);
-                    }
+                        .text('🎉 All subjects meeting expectations!', 315, weaknessesY);
                 }
             }
 
             // ============================================
             // TEACHER NARRATIVE FEEDBACK
             // ============================================
-            const feedbackY = rowY + 10 + (valuesY < 720 ? 140 : 0);
+            const feedbackY = swY + 64;
 
             if (feedbackY < 730) {
                 doc.fontSize(8)
                     .font('Helvetica-Bold')
                     .fillColor(colors.primary)
-                    .text('TEACHER NARRATIVE FEEDBACK', 35, feedbackY);
+                    .text('📝 Teacher\'s Comments', 30, feedbackY);
 
                 // Feedback box
-                doc.roundedRect(35, feedbackY + 10, 525, 40, 6)
+                doc.roundedRect(30, feedbackY + 8, 535, 40, 6)
                     .fillColor(colors.grayLight)
                     .fill()
                     .strokeColor(colors.border)
                     .lineWidth(1)
-                    .roundedRect(35, feedbackY + 10, 525, 40, 6)
+                    .roundedRect(30, feedbackY + 8, 535, 40, 6)
                     .stroke();
 
                 const feedbackText = generateTeacherFeedback(student);
                 doc.fontSize(8)
                     .font('Helvetica')
                     .fillColor(colors.primary)
-                    .text(feedbackText, 45, feedbackY + 18, { width: 505, align: 'left' });
+                    .text(feedbackText, 40, feedbackY + 16, { width: 515, align: 'left' });
             }
 
             // ============================================
-            // FOOTER - Professional
+            // FOOTER
             // ============================================
             const footerY = 745;
-            doc.moveTo(35, footerY)
-                .lineTo(560, footerY)
+            doc.moveTo(30, footerY)
+                .lineTo(565, footerY)
                 .strokeColor(colors.gold)
                 .lineWidth(1.5)
                 .stroke();
@@ -735,14 +702,14 @@ function generateStudentReportPDF(student) {
             doc.fontSize(7)
                 .font('Helvetica')
                 .fillColor(colors.gray)
-                .text(`Generated: ${formatKenyaFullTime(new Date())}`, 35, footerY + 8, { align: 'left' })
-                .text('Parent Signature: ___________________', 35, footerY + 20, { align: 'left' });
+                .text(`Generated: ${formatKenyaFullTime(new Date())}`, 30, footerY + 8, { align: 'left' })
+                .text('Parent Signature: ___________________', 30, footerY + 20, { align: 'left' });
 
             doc.fontSize(6)
                 .font('Helvetica-Oblique')
                 .fillColor(colors.gray)
                 .text(`© ${new Date().getFullYear()} Changara Star Academy • P.O Box 7, Cheptais • All Rights Reserved`, 
-                      35, footerY + 34, { align: 'center' });
+                      30, footerY + 34, { align: 'center' });
 
             doc.end();
         } catch (error) {
@@ -1031,7 +998,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                     const assessment = student.assessments ? student.assessments.find(a => a.subject === subject) : null;
                     if (assessment) {
                         const percentage = assessment.maxScore > 0 ? ((assessment.score / assessment.maxScore) * 100) : 0;
-                        // ✅ UPDATED: Subject color logic
                         let color = '#28a745';
                         if (percentage < 21) color = '#dc3545';
                         else if (percentage < 41) color = '#e6a800';
@@ -1244,6 +1210,7 @@ async function connectToMongoDB(attempt = 1) {
 }
 
 connectToMongoDB();
+
 // ============================================
 // FILE UPLOAD SETUP
 // ============================================
@@ -1472,14 +1439,13 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model('Student', studentSchema);
 
-// Subject Config Schema - FIXED
+// Subject Config Schema
 const subjectConfigSchema = new mongoose.Schema({
     grade: { type: String, required: true },
     type: { type: String, required: true, default: 'monthly' },
     period: { type: String, default: '' },
     subjects: [{ name: { type: String, required: true }, max: { type: Number, required: true } }],
     rankLevels: { type: [String], default: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'] },
-    // ✅ FIXED: Use Mixed type for rubric
     rubric: { type: mongoose.Schema.Types.Mixed, default: {} },
     updatedAt: { type: Date, default: Date.now }
 }, { autoIndex: false, collection: 'subjectconfigs_new' });
@@ -1527,7 +1493,7 @@ const holidayAssignmentSchema = new mongoose.Schema({
     fileSize: { type: Number, default: 0 },
     uploadedBy: { type: String, default: 'Admin' },
     cloudinaryPublicId: { type: String, default: '' },
-    fileData: { type: String, default: '' },  // ✅ ADD THIS FIELD
+    fileData: { type: String, default: '' },
     isActive: { type: Boolean, default: true },
     deletedAt: { type: Date, default: null },
     deletedBy: { type: String, default: '' },
@@ -1601,6 +1567,7 @@ function getFeeStructure(grade, type) {
     }
     return dayFees[grade] || { term1: 0, term2: 0, term3: 0, total: 0 };
 }
+
 // ============================================
 // API ROUTES - CONTENT
 // ============================================
@@ -2045,6 +2012,7 @@ app.get('/api/admin/attendance/summary', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // ============================================
 // VISITOR ROUTES
 // ============================================
@@ -2359,6 +2327,7 @@ app.post('/api/students/payment', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // ============================================
 // STUDENT ASSESSMENT ROUTES
 // ============================================
@@ -2876,10 +2845,62 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+// ============================================
+// HOLIDAY ASSIGNMENTS - COMPLETE ROUTES
+// ============================================
+
+// GET all assignments
+app.get('/api/holiday-assignments/all', async (req, res) => {
+    try {
+        console.log('📡 GET /api/holiday-assignments/all');
+        const assignments = await HolidayAssignment.find({}).sort({ createdAt: -1 });
+        console.log(`📚 Found ${assignments.length} assignments`);
+        res.json({ success: true, assignments });
+    } catch (error) {
+        console.error('Error fetching assignments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET assignments by grade
+app.get('/api/holiday-assignments/:grade', async (req, res) => {
+    try {
+        const grade = req.params.grade;
+        console.log(`📡 GET /api/holiday-assignments/${grade}`);
+        
+        if (grade === 'all') {
+            const assignments = await HolidayAssignment.find({}).sort({ createdAt: -1 });
+            return res.json({ success: true, assignments });
+        }
+        
+        const assignments = await HolidayAssignment.find({ grade: grade }).sort({ createdAt: -1 });
+        console.log(`📚 Found ${assignments.length} assignments for grade ${grade}`);
+        res.json({ success: true, assignments });
+    } catch (error) {
+        console.error('Error fetching assignments by grade:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET single assignment by ID
+app.get('/api/holiday-assignments/id/:id', async (req, res) => {
+    try {
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        res.json({ success: true, assignment });
+    } catch (error) {
+        console.error('Error fetching assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // POST - Upload assignment (Stored in Database as Base64)
 app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
     try {
-        console.log('📤 Upload request received');
+        console.log('📤 POST /api/holiday-assignments');
         console.log('Body:', req.body);
         console.log('File:', req.file);
         
@@ -2893,7 +2914,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             return res.status(400).json({ success: false, message: 'Please upload a file' });
         }
         
-        // ✅ Read file and convert to Base64
+        // Read file and convert to Base64
         const fileBuffer = fs.readFileSync(req.file.path);
         const base64File = fileBuffer.toString('base64');
         
@@ -2904,11 +2925,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         const fileType = fileName.split('.').pop().toLowerCase();
         const fileSize = req.file.size;
         
-        // ✅ Create data URL for download
-        const mimeType = req.file.mimetype || 'application/octet-stream';
-        const dataUrl = `data:${mimeType};base64,${base64File}`;
-        
-        // ✅ Save to database - file is stored as Base64 in MongoDB
+        // Save to database - file is stored as Base64 in MongoDB
         const assignment = new HolidayAssignment({
             title,
             grade,
@@ -2919,8 +2936,8 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
             fileType,
             fileSize,
             uploadedBy: req.body.uploadedBy || 'Admin',
-            cloudinaryPublicId: '',  // Not used
-            fileData: base64File,    // ✅ File stored here
+            cloudinaryPublicId: '',
+            fileData: base64File,
             isActive: true,
             createdAt: new Date(),
             updatedAt: new Date()
@@ -2928,7 +2945,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         
         await assignment.save();
         
-        // ✅ Delete local file after saving to database
+        // Delete local file after saving to database
         if (fs.existsSync(req.file.path)) {
             fs.unlinkSync(req.file.path);
             console.log('🗑️ Local file deleted (stored in database)');
@@ -2955,7 +2972,8 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
         res.status(500).json({ success: false, message: error.message || 'Internal server error' });
     }
 });
-// PUT - Update assignment - FIXED (No file deletion!)
+
+// PUT - Update assignment
 app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) => {
     try {
         console.log('📝 Update request for:', req.params.id);
@@ -2967,29 +2985,24 @@ app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) 
 
         const { title, grade, subject, description, isActive } = req.body;
         
-        // Update text fields
         if (title) assignment.title = title;
         if (grade) assignment.grade = grade;
         if (subject !== undefined) assignment.subject = subject;
         if (description !== undefined) assignment.description = description;
         if (isActive !== undefined) assignment.isActive = isActive === 'true' || isActive === true;
 
-        // Handle file upload
         if (req.file) {
             console.log('📄 New file uploaded:', req.file.originalname);
             
-            // ✅ Only delete old file if it exists and is not on Cloudinary
             const oldFilename = path.basename(assignment.fileUrl);
             const oldFilePath = path.join(__dirname, 'uploads', 'assignments', oldFilename);
             
-            // Upload new file to Cloudinary if configured
             const fileBuffer = fs.readFileSync(req.file.path);
             let fileUrl = '';
             let cloudinaryPublicId = '';
             
             if (isCloudinaryConfigured()) {
                 try {
-                    // Delete old file from Cloudinary if exists
                     if (assignment.cloudinaryPublicId) {
                         try {
                             await cloudinary.uploader.destroy(assignment.cloudinaryPublicId);
@@ -3004,25 +3017,21 @@ app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) 
                     cloudinaryPublicId = cloudinaryResult.public_id;
                     console.log('✅ Uploaded new file to Cloudinary:', fileUrl);
                     
-                    // ✅ Delete old local file if exists
                     if (fs.existsSync(oldFilePath)) {
                         fs.unlinkSync(oldFilePath);
                         console.log('🗑️ Deleted old local file');
                     }
                     
-                    // ✅ Delete temp file after successful Cloudinary upload
                     if (fs.existsSync(req.file.path)) {
                         fs.unlinkSync(req.file.path);
                         console.log('🗑️ Temp file deleted');
                     }
                 } catch (cloudinaryError) {
                     console.error('⚠️ Cloudinary upload failed:', cloudinaryError.message);
-                    // ✅ Keep local file
                     fileUrl = `/uploads/assignments/${req.file.filename}`;
                     console.log('📁 Using local file:', fileUrl);
                 }
             } else {
-                // ✅ Cloudinary not configured - keep local file
                 fileUrl = `/uploads/assignments/${req.file.filename}`;
                 console.log('📁 Cloudinary not configured, using local file:', fileUrl);
             }
@@ -3052,12 +3061,10 @@ app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) 
 // DOWNLOAD assignment file - FROM DATABASE
 app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     try {
-        console.log('📥 Download request for:', req.params.id);
+        console.log('📥 GET /api/holiday-assignments/download/', req.params.id);
         
-        // ✅ Try to find by ID
         let assignment = await HolidayAssignment.findById(req.params.id);
         
-        // ✅ If not found, try to find by fileUrl
         if (!assignment) {
             assignment = await HolidayAssignment.findOne({ 
                 fileUrl: { $regex: req.params.id } 
@@ -3072,7 +3079,6 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
         console.log('📁 File name:', assignment.fileName);
         console.log('📊 File data size:', assignment.fileData ? assignment.fileData.length : 0);
         
-        // ✅ Check if file data exists
         if (!assignment.fileData || assignment.fileData === '') {
             return res.status(404).json({ 
                 success: false, 
@@ -3084,11 +3090,9 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
             });
         }
         
-        // ✅ Decode Base64 file
         const fileBuffer = Buffer.from(assignment.fileData, 'base64');
         console.log(`📄 File size: ${fileBuffer.length} bytes`);
         
-        // ✅ Set headers
         const mimeType = assignment.fileType === 'pdf' ? 'application/pdf' :
                          assignment.fileType === 'doc' ? 'application/msword' :
                          assignment.fileType === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' :
@@ -3099,8 +3103,6 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
         res.setHeader('Content-Type', mimeType);
         res.setHeader('Content-Disposition', `attachment; filename="${assignment.fileName}"`);
         res.setHeader('Content-Length', fileBuffer.length);
-        
-        // ✅ Send file
         res.send(fileBuffer);
         
     } catch (error) {
@@ -3108,10 +3110,10 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // DELETE - Delete assignment with confirmation
 app.delete('/api/holiday-assignments/:id', async (req, res) => {
     try {
-        // ✅ Require confirmation
         const { confirm } = req.query;
         if (confirm !== 'yes') {
             return res.status(400).json({ 
@@ -3130,7 +3132,6 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
         console.log('  File:', assignment.fileName);
         console.log('  Cloudinary ID:', assignment.cloudinaryPublicId || 'None');
         
-        // ✅ Delete from Cloudinary if applicable
         if (assignment.cloudinaryPublicId && isCloudinaryConfigured()) {
             try {
                 await cloudinary.uploader.destroy(assignment.cloudinaryPublicId);
@@ -3140,7 +3141,6 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
             }
         }
         
-        // ✅ Delete local file if it exists
         const filename = path.basename(assignment.fileUrl);
         const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
         
@@ -3157,7 +3157,7 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
     }
 });
 
-// SOFT DELETE - Mark as inactive (recommended)
+// SOFT DELETE - Mark as inactive
 app.delete('/api/holiday-assignments/soft/:id', async (req, res) => {
     try {
         const assignment = await HolidayAssignment.findById(req.params.id);
@@ -3165,7 +3165,6 @@ app.delete('/api/holiday-assignments/soft/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Assignment not found' });
         }
         
-        // ✅ Soft delete - just mark as inactive
         assignment.isActive = false;
         assignment.deletedAt = new Date();
         assignment.deletedBy = req.headers['x-user'] || 'Unknown';
@@ -3202,112 +3201,6 @@ app.post('/api/holiday-assignments/restore/:id', async (req, res) => {
             assignment
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// RECOVER - Try to recover a missing file
-app.post('/api/holiday-assignments/recover/:id', async (req, res) => {
-    try {
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
-        }
-        
-        const results = {
-            title: assignment.title,
-            recovered: false,
-            method: null,
-            fileUrl: null
-        };
-        
-        const filename = path.basename(assignment.fileUrl);
-        const filePath = path.join(__dirname, 'uploads', 'assignments', filename);
-        
-        // Check if file exists locally
-        if (fs.existsSync(filePath)) {
-            results.recovered = true;
-            results.method = 'local file exists';
-            results.fileUrl = assignment.fileUrl;
-            console.log('✅ File exists locally:', filePath);
-            
-            // If it exists locally but not on Cloudinary, upload it
-            if (isCloudinaryConfigured()) {
-                try {
-                    console.log('📤 Uploading to Cloudinary...');
-                    const fileBuffer = fs.readFileSync(filePath);
-                    const cloudinaryResult = await uploadToCloudinary(fileBuffer, assignment.fileName || filename, 'assignments');
-                    
-                    assignment.fileUrl = cloudinaryResult.secure_url;
-                    assignment.cloudinaryPublicId = cloudinaryResult.public_id;
-                    await assignment.save();
-                    
-                    results.recovered = true;
-                    results.method = 'migrated to Cloudinary';
-                    results.fileUrl = cloudinaryResult.secure_url;
-                    console.log('✅ Migrated to Cloudinary:', cloudinaryResult.secure_url);
-                } catch (e) {
-                    console.log('⚠️ Cloudinary migration failed:', e.message);
-                }
-            }
-        } else {
-            // Try alternative paths
-            const altPaths = [
-                path.join(__dirname, 'uploads', assignment.fileName || filename),
-                path.join(__dirname, 'uploads/assignments', assignment.fileName || filename),
-                path.join(__dirname, 'public/uploads/assignments', filename),
-            ];
-            
-            for (const alt of altPaths) {
-                if (fs.existsSync(alt)) {
-                    results.recovered = true;
-                    results.method = 'found at alternative path';
-                    results.fileUrl = alt;
-                    console.log('✅ Found at alternative path:', alt);
-                    break;
-                }
-            }
-        }
-        
-        // If still not recovered, check if the file exists in the uploads folder with a different name
-        if (!results.recovered) {
-            const uploadDir = path.join(__dirname, 'uploads', 'assignments');
-            if (fs.existsSync(uploadDir)) {
-                const files = fs.readdirSync(uploadDir);
-                for (const file of files) {
-                    if (file.includes(filename.split('.')[0]) || (assignment.fileName && file.includes(assignment.fileName.split('.')[0]))) {
-                        const foundPath = path.join(uploadDir, file);
-                        results.recovered = true;
-                        results.method = 'found matching file';
-                        results.fileUrl = `/uploads/assignments/${file}`;
-                        console.log('✅ Found matching file:', foundPath);
-                        break;
-                    }
-                }
-            }
-        }
-        
-        // If recovered by finding a matching file, update the database
-        if (results.recovered && results.fileUrl && results.fileUrl !== assignment.fileUrl) {
-            assignment.fileUrl = results.fileUrl;
-            await assignment.save();
-            console.log('✅ Updated database with new file URL:', results.fileUrl);
-        }
-        
-        res.json({
-            success: true,
-            assignment: {
-                id: assignment._id,
-                title: assignment.title,
-                grade: assignment.grade,
-                fileUrl: assignment.fileUrl,
-                cloudinaryPublicId: assignment.cloudinaryPublicId || 'None'
-            },
-            recovery: results
-        });
-        
-    } catch (error) {
-        console.error('❌ Recovery error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -3372,6 +3265,432 @@ app.get('/api/holiday-assignments/stats', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+// ============================================
+// TEST ROUTE FOR HOLIDAY ASSIGNMENTS
+// ============================================
+
+app.get('/api/holiday-assignments/test', (req, res) => {
+    res.json({ 
+        success: true, 
+        message: 'Holiday assignment routes are working!',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// ============================================
+// STAFF & VISITOR REPORTS
+// ============================================
+
+// GET staff attendance report
+app.get('/api/reports/staff/attendance', async (req, res) => {
+    try {
+        console.log('📡 GET /api/reports/staff/attendance');
+        const { period, date, department } = req.query;
+        
+        const query = { isActive: true };
+        if (department) query.department = department;
+        
+        const teachers = await Teacher.find(query);
+        const report = [];
+        let targetDate = null;
+        
+        if (date) {
+            targetDate = new Date(date);
+            targetDate.setHours(0, 0, 0, 0);
+        } else {
+            targetDate = getKenyaDate();
+        }
+        
+        let weekStart = null, weekEnd = null, monthStart = null, monthEnd = null;
+        
+        if (period === 'weekly') {
+            weekStart = new Date(targetDate);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 7);
+        } else if (period === 'monthly') {
+            monthStart = new Date(targetDate);
+            monthStart.setDate(1);
+            monthStart.setHours(0, 0, 0, 0);
+            monthEnd = new Date(monthStart);
+            monthEnd.setMonth(monthEnd.getMonth() + 1);
+        }
+        
+        for (const teacher of teachers) {
+            let attendance = teacher.attendance || [];
+            
+            if (period === 'daily' && targetDate) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    aDate.setHours(0, 0, 0, 0);
+                    return aDate.getTime() === targetDate.getTime();
+                });
+            } else if (period === 'weekly' && weekStart) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= weekStart && aDate < weekEnd;
+                });
+            } else if (period === 'monthly' && monthStart) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= monthStart && aDate < monthEnd;
+                });
+            }
+            
+            const totalDays = attendance.length;
+            const onTime = attendance.filter(a => a.isLate === false).length;
+            const late = attendance.filter(a => a.isLate === true).length;
+            
+            let absent = 0;
+            if (period === 'daily' && targetDate) {
+                absent = totalDays === 0 ? 1 : 0;
+            }
+            
+            report.push({
+                name: `${teacher.firstName} ${teacher.lastName}`,
+                employeeId: teacher.employeeId,
+                department: teacher.department || 'Teaching',
+                totalDays: totalDays || 0,
+                onTime: onTime || 0,
+                late: late || 0,
+                absent: absent || 0
+            });
+        }
+        
+        res.json({ success: true, report });
+    } catch (error) {
+        console.error('Error generating staff report:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET staff report PDF download
+app.get('/api/reports/staff/download-pdf', async (req, res) => {
+    try {
+        const { period, date, department } = req.query;
+        
+        const query = { isActive: true };
+        if (department) query.department = department;
+        
+        const teachers = await Teacher.find(query);
+        const report = [];
+        let targetDate = null;
+        
+        if (date) {
+            targetDate = new Date(date);
+            targetDate.setHours(0, 0, 0, 0);
+        } else {
+            targetDate = getKenyaDate();
+        }
+        
+        let weekStart = null, weekEnd = null, monthStart = null, monthEnd = null;
+        
+        if (period === 'weekly') {
+            weekStart = new Date(targetDate);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 7);
+        } else if (period === 'monthly') {
+            monthStart = new Date(targetDate);
+            monthStart.setDate(1);
+            monthStart.setHours(0, 0, 0, 0);
+            monthEnd = new Date(monthStart);
+            monthEnd.setMonth(monthEnd.getMonth() + 1);
+        }
+        
+        for (const teacher of teachers) {
+            let attendance = teacher.attendance || [];
+            
+            if (period === 'daily' && targetDate) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    aDate.setHours(0, 0, 0, 0);
+                    return aDate.getTime() === targetDate.getTime();
+                });
+            } else if (period === 'weekly' && weekStart) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= weekStart && aDate < weekEnd;
+                });
+            } else if (period === 'monthly' && monthStart) {
+                attendance = attendance.filter(a => {
+                    const aDate = new Date(a.date);
+                    return aDate >= monthStart && aDate < monthEnd;
+                });
+            }
+            
+            const totalDays = attendance.length;
+            const onTime = attendance.filter(a => a.isLate === false).length;
+            const late = attendance.filter(a => a.isLate === true).length;
+            
+            let absent = 0;
+            if (period === 'daily' && targetDate) {
+                absent = totalDays === 0 ? 1 : 0;
+            }
+            
+            report.push({
+                name: `${teacher.firstName} ${teacher.lastName}`,
+                employeeId: teacher.employeeId,
+                department: teacher.department || 'Teaching',
+                totalDays: totalDays || 0,
+                onTime: onTime || 0,
+                late: late || 0,
+                absent: absent || 0
+            });
+        }
+        
+        const periodLabel = period === 'daily' ? 'Daily' : period === 'weekly' ? 'Weekly' : 'Monthly';
+        const pdfBuffer = await generateStaffReportPDF(report, `${periodLabel} Staff Attendance Report - ${date || 'Today'}`);
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="staff_attendance_report_${period}_${date || 'today'}.pdf"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generating staff PDF:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET visitor report
+app.get('/api/reports/visitors', async (req, res) => {
+    try {
+        console.log('📡 GET /api/reports/visitors');
+        const { period, date, purpose } = req.query;
+        
+        let query = {};
+        let targetDate = null;
+        
+        if (date) {
+            targetDate = new Date(date);
+            targetDate.setHours(0, 0, 0, 0);
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            query.checkIn = { $gte: targetDate, $lt: nextDay };
+        } else {
+            targetDate = getKenyaDate();
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            query.checkIn = { $gte: targetDate, $lt: nextDay };
+        }
+        
+        if (purpose) query.purpose = purpose;
+        
+        let visitors = await Visitor.find(query).sort({ checkIn: -1 });
+        
+        if (period === 'weekly' && targetDate) {
+            const weekStart = new Date(targetDate);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            visitors = visitors.filter(v => v.checkIn >= weekStart);
+        } else if (period === 'monthly' && targetDate) {
+            const monthStart = new Date(targetDate);
+            monthStart.setDate(1);
+            monthStart.setHours(0, 0, 0, 0);
+            visitors = visitors.filter(v => v.checkIn >= monthStart);
+        }
+        
+        const report = visitors.map(v => ({
+            fullName: `${v.firstName} ${v.lastName}`,
+            firstName: v.firstName,
+            lastName: v.lastName,
+            badgeNumber: v.badgeNumber,
+            purpose: v.purpose,
+            personToVisit: v.personToVisit,
+            checkIn: v.checkIn,
+            checkOut: v.checkOut,
+            status: v.status,
+            duration: v.checkOut ? Math.round((v.checkOut - v.checkIn) / 1000 / 60) : 0,
+            checkInTime: formatKenyaTime(v.checkIn),
+            checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
+        }));
+        
+        res.json({ success: true, report });
+    } catch (error) {
+        console.error('Error generating visitor report:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET visitor report PDF download
+app.get('/api/reports/visitors/download-pdf', async (req, res) => {
+    try {
+        const { period, date, purpose } = req.query;
+        
+        let query = {};
+        let targetDate = null;
+        
+        if (date) {
+            targetDate = new Date(date);
+            targetDate.setHours(0, 0, 0, 0);
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            query.checkIn = { $gte: targetDate, $lt: nextDay };
+        } else {
+            targetDate = getKenyaDate();
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            query.checkIn = { $gte: targetDate, $lt: nextDay };
+        }
+        
+        if (purpose) query.purpose = purpose;
+        
+        let visitors = await Visitor.find(query).sort({ checkIn: -1 });
+        
+        if (period === 'weekly' && targetDate) {
+            const weekStart = new Date(targetDate);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            visitors = visitors.filter(v => v.checkIn >= weekStart);
+        } else if (period === 'monthly' && targetDate) {
+            const monthStart = new Date(targetDate);
+            monthStart.setDate(1);
+            monthStart.setHours(0, 0, 0, 0);
+            visitors = visitors.filter(v => v.checkIn >= monthStart);
+        }
+        
+        const report = visitors.map(v => ({
+            fullName: `${v.firstName} ${v.lastName}`,
+            firstName: v.firstName,
+            lastName: v.lastName,
+            badgeNumber: v.badgeNumber,
+            purpose: v.purpose,
+            personToVisit: v.personToVisit,
+            checkIn: v.checkIn,
+            checkOut: v.checkOut,
+            status: v.status,
+            duration: v.checkOut ? Math.round((v.checkOut - v.checkIn) / 1000 / 60) : 0,
+            checkInTime: formatKenyaTime(v.checkIn),
+            checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
+        }));
+        
+        const doc = new PDFDocument({ margin: 40, size: 'A4', landscape: true });
+        const chunks = [];
+        
+        doc.on('data', (chunk) => chunks.push(chunk));
+        doc.on('end', () => {
+            const pdfBuffer = Buffer.concat(chunks);
+            const periodLabel = period === 'daily' ? 'Daily' : period === 'weekly' ? 'Weekly' : 'Monthly';
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="visitor_report_${period}_${date || 'today'}.pdf"`);
+            res.setHeader('Content-Length', pdfBuffer.length);
+            res.send(pdfBuffer);
+        });
+        doc.on('error', (err) => {
+            console.error('PDF error:', err);
+            res.status(500).json({ success: false, message: 'Error generating PDF' });
+        });
+        
+        // Header
+        doc.fontSize(20)
+           .font('Helvetica-Bold')
+           .fillColor('#0A1628')
+           .text('CHANGARA STAR ACADEMY', { align: 'center' });
+        
+        doc.fontSize(12)
+           .font('Helvetica-Oblique')
+           .fillColor('#D4A017')
+           .text('"Assurance to Excellence"', { align: 'center' })
+           .moveDown(0.5);
+        
+        const periodLabel = period === 'daily' ? 'Daily' : period === 'weekly' ? 'Weekly' : 'Monthly';
+        doc.fontSize(14)
+           .font('Helvetica-Bold')
+           .fillColor('#0A1628')
+           .text(`VISITOR REPORT - ${periodLabel.toUpperCase()}`, { align: 'center' });
+        
+        doc.fontSize(10)
+           .font('Helvetica')
+           .fillColor('#6c757d')
+           .text(`Date: ${date || formatKenyaDate(new Date())}`, { align: 'center' })
+           .moveDown(1);
+        
+        // Table
+        const tableTop = doc.y;
+        const colWidths = [25, 130, 60, 80, 80, 70, 70, 60];
+        const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+        
+        doc.rect(40, tableTop, tableWidth, 22)
+           .fillColor('#0A1628')
+           .fill();
+        
+        const headers = ['#', 'Visitor', 'Badge', 'Purpose', 'Person', 'Check In', 'Check Out', 'Duration'];
+        let headerX = 45;
+        doc.fontSize(8)
+           .font('Helvetica-Bold')
+           .fillColor('white');
+        
+        headers.forEach((h, i) => {
+            const align = i === 0 || i === headers.length - 1 ? 'center' : 'left';
+            doc.text(h, headerX, tableTop + 5, { width: colWidths[i] - 5, align: align });
+            headerX += colWidths[i];
+        });
+        
+        let rowY = tableTop + 22;
+        report.slice(0, 20).forEach((v, index) => {
+            if (rowY > 500) { doc.addPage(); rowY = 50; }
+            
+            doc.rect(40, rowY, tableWidth, 18)
+               .fillColor(index % 2 === 0 ? '#f8f9fa' : 'white')
+               .fill();
+            
+            let xPos = 45;
+            doc.fontSize(7)
+               .font('Helvetica')
+               .fillColor('#0A1628');
+            
+            doc.text((index + 1).toString(), xPos, rowY + 3, { width: colWidths[0] - 5, align: 'center' });
+            xPos += colWidths[0];
+            
+            doc.text(v.fullName || 'Unknown', xPos, rowY + 3, { width: colWidths[1] - 5 });
+            xPos += colWidths[1];
+            
+            doc.text(v.badgeNumber || '-', xPos, rowY + 3, { width: colWidths[2] - 5 });
+            xPos += colWidths[2];
+            
+            doc.text(v.purpose || '-', xPos, rowY + 3, { width: colWidths[3] - 5 });
+            xPos += colWidths[3];
+            
+            doc.text(v.personToVisit || '-', xPos, rowY + 3, { width: colWidths[4] - 5 });
+            xPos += colWidths[4];
+            
+            doc.text(v.checkInTime || '-', xPos, rowY + 3, { width: colWidths[5] - 5 });
+            xPos += colWidths[5];
+            
+            doc.text(v.checkOutTime || '-', xPos, rowY + 3, { width: colWidths[6] - 5 });
+            xPos += colWidths[6];
+            
+            doc.text(v.duration > 0 ? v.duration + 'm' : '-', xPos, rowY + 3, { width: colWidths[7] - 5, align: 'center' });
+            
+            rowY += 18;
+        });
+        
+        // Summary
+        const totalVisitors = report.length;
+        const active = report.filter(v => v.status === 'Checked In').length;
+        const completed = report.filter(v => v.status === 'Checked Out').length;
+        const totalDuration = report.reduce((sum, v) => sum + (v.duration || 0), 0);
+        const avgDuration = totalVisitors > 0 ? Math.round(totalDuration / totalVisitors) : 0;
+        
+        doc.moveDown(1);
+        doc.fontSize(9)
+           .font('Helvetica-Bold')
+           .fillColor('#0A1628')
+           .text(`Total Visitors: ${totalVisitors}`, 40, rowY + 5)
+           .text(`Active: ${active}`, 200, rowY + 5)
+           .text(`Completed: ${completed}`, 350, rowY + 5)
+           .text(`Avg Duration: ${avgDuration} min`, 500, rowY + 5);
+        
+        doc.end();
+    } catch (error) {
+        console.error('Error generating visitor PDF:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // ============================================
 // CLERK DASHBOARD API ROUTES
 // ============================================
@@ -3893,505 +4212,7 @@ app.post('/api/migrate-to-cloudinary', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-// ============================================
-// HOLIDAY ASSIGNMENTS - GET ROUTES (ADD THIS)
-// ============================================
 
-// GET all assignments
-app.get('/api/holiday-assignments/all', async (req, res) => {
-    try {
-        console.log('📡 GET /api/holiday-assignments/all');
-        const assignments = await HolidayAssignment.find({}).sort({ createdAt: -1 });
-        console.log(`📚 Found ${assignments.length} assignments`);
-        res.json({ success: true, assignments });
-    } catch (error) {
-        console.error('Error fetching assignments:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// GET assignments by grade
-app.get('/api/holiday-assignments/:grade', async (req, res) => {
-    try {
-        const grade = req.params.grade;
-        console.log(`📡 GET /api/holiday-assignments/${grade}`);
-        
-        // Handle 'all' as a special case
-        if (grade === 'all') {
-            const assignments = await HolidayAssignment.find({}).sort({ createdAt: -1 });
-            return res.json({ success: true, assignments });
-        }
-        
-        const assignments = await HolidayAssignment.find({ grade: grade }).sort({ createdAt: -1 });
-        console.log(`📚 Found ${assignments.length} assignments for grade ${grade}`);
-        res.json({ success: true, assignments });
-    } catch (error) {
-        console.error('Error fetching assignments by grade:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// GET single assignment by ID
-app.get('/api/holiday-assignments/id/:id', async (req, res) => {
-    try {
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
-        }
-        res.json({ success: true, assignment });
-    } catch (error) {
-        console.error('Error fetching assignment:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ✅ Test route to verify holiday routes are working
-app.get('/api/holiday-assignments/test', (req, res) => {
-    res.json({ 
-        success: true, 
-        message: 'Holiday assignment routes are working!',
-        timestamp: new Date().toISOString()
-    });
-});
-// ============================================
-// STAFF & VISITOR REPORTS - COMPLETE
-// ============================================
-
-// ============================================
-// STAFF ATTENDANCE REPORTS
-// ============================================
-app.get('/api/reports/staff/attendance', async (req, res) => {
-    try {
-        console.log('📡 GET /api/reports/staff/attendance');
-        const { period, date, department } = req.query;
-        
-        console.log(`   Period: ${period}, Date: ${date}, Department: ${department}`);
-        
-        const query = { isActive: true };
-        if (department) query.department = department;
-        
-        const teachers = await Teacher.find(query);
-        console.log(`   Found ${teachers.length} teachers`);
-        
-        const report = [];
-        let targetDate = null;
-        
-        if (date) {
-            targetDate = new Date(date);
-            targetDate.setHours(0, 0, 0, 0);
-        } else {
-            targetDate = getKenyaDate();
-        }
-        
-        console.log(`   Target date: ${targetDate}`);
-        
-        // Calculate week start and end
-        let weekStart = null;
-        let weekEnd = null;
-        let monthStart = null;
-        let monthEnd = null;
-        
-        if (period === 'weekly') {
-            weekStart = new Date(targetDate);
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            weekStart.setHours(0, 0, 0, 0);
-            weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekEnd.getDate() + 7);
-            console.log(`   Week: ${weekStart} to ${weekEnd}`);
-        } else if (period === 'monthly') {
-            monthStart = new Date(targetDate);
-            monthStart.setDate(1);
-            monthStart.setHours(0, 0, 0, 0);
-            monthEnd = new Date(monthStart);
-            monthEnd.setMonth(monthEnd.getMonth() + 1);
-            console.log(`   Month: ${monthStart} to ${monthEnd}`);
-        }
-        
-        for (const teacher of teachers) {
-            let attendance = teacher.attendance || [];
-            
-            // Filter by date
-            if (period === 'daily' && targetDate) {
-                attendance = attendance.filter(a => {
-                    const aDate = new Date(a.date);
-                    aDate.setHours(0, 0, 0, 0);
-                    return aDate.getTime() === targetDate.getTime();
-                });
-            } else if (period === 'weekly' && weekStart) {
-                attendance = attendance.filter(a => {
-                    const aDate = new Date(a.date);
-                    return aDate >= weekStart && aDate < weekEnd;
-                });
-            } else if (period === 'monthly' && monthStart) {
-                attendance = attendance.filter(a => {
-                    const aDate = new Date(a.date);
-                    return aDate >= monthStart && aDate < monthEnd;
-                });
-            }
-            
-            const totalDays = attendance.length;
-            const onTime = attendance.filter(a => a.isLate === false).length;
-            const late = attendance.filter(a => a.isLate === true).length;
-            
-            // Calculate absent days (if daily, check if they were present)
-            let absent = 0;
-            if (period === 'daily' && targetDate) {
-                absent = totalDays === 0 ? 1 : 0;
-            }
-            
-            report.push({
-                name: `${teacher.firstName} ${teacher.lastName}`,
-                employeeId: teacher.employeeId,
-                department: teacher.department || 'Teaching',
-                totalDays: totalDays || 0,
-                onTime: onTime || 0,
-                late: late || 0,
-                absent: absent || 0
-            });
-        }
-        
-        console.log(`📊 Report generated with ${report.length} entries`);
-        res.json({ success: true, report });
-    } catch (error) {
-        console.error('Error generating staff report:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// GET staff report PDF download
-app.get('/api/reports/staff/download-pdf', async (req, res) => {
-    try {
-        const { period, date, department } = req.query;
-        
-        const query = { isActive: true };
-        if (department) query.department = department;
-        
-        const teachers = await Teacher.find(query);
-        const report = [];
-        let targetDate = null;
-        
-        if (date) {
-            targetDate = new Date(date);
-            targetDate.setHours(0, 0, 0, 0);
-        } else {
-            targetDate = getKenyaDate();
-        }
-        
-        let weekStart = null, weekEnd = null, monthStart = null, monthEnd = null;
-        
-        if (period === 'weekly') {
-            weekStart = new Date(targetDate);
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            weekStart.setHours(0, 0, 0, 0);
-            weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekEnd.getDate() + 7);
-        } else if (period === 'monthly') {
-            monthStart = new Date(targetDate);
-            monthStart.setDate(1);
-            monthStart.setHours(0, 0, 0, 0);
-            monthEnd = new Date(monthStart);
-            monthEnd.setMonth(monthEnd.getMonth() + 1);
-        }
-        
-        for (const teacher of teachers) {
-            let attendance = teacher.attendance || [];
-            
-            if (period === 'daily' && targetDate) {
-                attendance = attendance.filter(a => {
-                    const aDate = new Date(a.date);
-                    aDate.setHours(0, 0, 0, 0);
-                    return aDate.getTime() === targetDate.getTime();
-                });
-            } else if (period === 'weekly' && weekStart) {
-                attendance = attendance.filter(a => {
-                    const aDate = new Date(a.date);
-                    return aDate >= weekStart && aDate < weekEnd;
-                });
-            } else if (period === 'monthly' && monthStart) {
-                attendance = attendance.filter(a => {
-                    const aDate = new Date(a.date);
-                    return aDate >= monthStart && aDate < monthEnd;
-                });
-            }
-            
-            const totalDays = attendance.length;
-            const onTime = attendance.filter(a => a.isLate === false).length;
-            const late = attendance.filter(a => a.isLate === true).length;
-            
-            let absent = 0;
-            if (period === 'daily' && targetDate) {
-                absent = totalDays === 0 ? 1 : 0;
-            }
-            
-            report.push({
-                name: `${teacher.firstName} ${teacher.lastName}`,
-                employeeId: teacher.employeeId,
-                department: teacher.department || 'Teaching',
-                totalDays: totalDays || 0,
-                onTime: onTime || 0,
-                late: late || 0,
-                absent: absent || 0
-            });
-        }
-        
-        const periodLabel = period === 'daily' ? 'Daily' : period === 'weekly' ? 'Weekly' : 'Monthly';
-        const pdfBuffer = await generateStaffReportPDF(report, `${periodLabel} Staff Attendance Report - ${date || 'Today'}`);
-        
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="staff_attendance_report_${period}_${date || 'today'}.pdf"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
-        res.send(pdfBuffer);
-    } catch (error) {
-        console.error('Error generating staff PDF:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// ============================================
-// VISITOR REPORTS
-// ============================================
-app.get('/api/reports/visitors', async (req, res) => {
-    try {
-        console.log('📡 GET /api/reports/visitors');
-        const { period, date, purpose } = req.query;
-        
-        console.log(`   Period: ${period}, Date: ${date}, Purpose: ${purpose}`);
-        
-        let query = {};
-        let targetDate = null;
-        
-        if (date) {
-            targetDate = new Date(date);
-            targetDate.setHours(0, 0, 0, 0);
-            const nextDay = new Date(targetDate);
-            nextDay.setDate(nextDay.getDate() + 1);
-            query.checkIn = { $gte: targetDate, $lt: nextDay };
-        } else {
-            targetDate = getKenyaDate();
-            const nextDay = new Date(targetDate);
-            nextDay.setDate(nextDay.getDate() + 1);
-            query.checkIn = { $gte: targetDate, $lt: nextDay };
-        }
-        
-        if (purpose) query.purpose = purpose;
-        
-        let visitors = await Visitor.find(query).sort({ checkIn: -1 });
-        console.log(`   Found ${visitors.length} visitors for date`);
-        
-        // Filter by period (weekly/monthly)
-        if (period === 'weekly' && targetDate) {
-            const weekStart = new Date(targetDate);
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            weekStart.setHours(0, 0, 0, 0);
-            visitors = visitors.filter(v => v.checkIn >= weekStart);
-            console.log(`   Filtered to ${visitors.length} for week`);
-        } else if (period === 'monthly' && targetDate) {
-            const monthStart = new Date(targetDate);
-            monthStart.setDate(1);
-            monthStart.setHours(0, 0, 0, 0);
-            visitors = visitors.filter(v => v.checkIn >= monthStart);
-            console.log(`   Filtered to ${visitors.length} for month`);
-        }
-        
-        const report = visitors.map(v => ({
-            fullName: `${v.firstName} ${v.lastName}`,
-            firstName: v.firstName,
-            lastName: v.lastName,
-            badgeNumber: v.badgeNumber,
-            purpose: v.purpose,
-            personToVisit: v.personToVisit,
-            checkIn: v.checkIn,
-            checkOut: v.checkOut,
-            status: v.status,
-            duration: v.checkOut ? Math.round((v.checkOut - v.checkIn) / 1000 / 60) : 0,
-            checkInTime: formatKenyaTime(v.checkIn),
-            checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
-        }));
-        
-        console.log(`📊 Visitor report generated with ${report.length} entries`);
-        res.json({ success: true, report });
-    } catch (error) {
-        console.error('Error generating visitor report:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// GET visitor report PDF download
-app.get('/api/reports/visitors/download-pdf', async (req, res) => {
-    try {
-        const { period, date, purpose } = req.query;
-        
-        let query = {};
-        let targetDate = null;
-        
-        if (date) {
-            targetDate = new Date(date);
-            targetDate.setHours(0, 0, 0, 0);
-            const nextDay = new Date(targetDate);
-            nextDay.setDate(nextDay.getDate() + 1);
-            query.checkIn = { $gte: targetDate, $lt: nextDay };
-        } else {
-            targetDate = getKenyaDate();
-            const nextDay = new Date(targetDate);
-            nextDay.setDate(nextDay.getDate() + 1);
-            query.checkIn = { $gte: targetDate, $lt: nextDay };
-        }
-        
-        if (purpose) query.purpose = purpose;
-        
-        let visitors = await Visitor.find(query).sort({ checkIn: -1 });
-        
-        if (period === 'weekly' && targetDate) {
-            const weekStart = new Date(targetDate);
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            weekStart.setHours(0, 0, 0, 0);
-            visitors = visitors.filter(v => v.checkIn >= weekStart);
-        } else if (period === 'monthly' && targetDate) {
-            const monthStart = new Date(targetDate);
-            monthStart.setDate(1);
-            monthStart.setHours(0, 0, 0, 0);
-            visitors = visitors.filter(v => v.checkIn >= monthStart);
-        }
-        
-        const report = visitors.map(v => ({
-            fullName: `${v.firstName} ${v.lastName}`,
-            firstName: v.firstName,
-            lastName: v.lastName,
-            badgeNumber: v.badgeNumber,
-            purpose: v.purpose,
-            personToVisit: v.personToVisit,
-            checkIn: v.checkIn,
-            checkOut: v.checkOut,
-            status: v.status,
-            duration: v.checkOut ? Math.round((v.checkOut - v.checkIn) / 1000 / 60) : 0,
-            checkInTime: formatKenyaTime(v.checkIn),
-            checkOutTime: v.checkOut ? formatKenyaTime(v.checkOut) : null
-        }));
-        
-        // Generate PDF using visitor report function
-        const doc = new PDFDocument({ margin: 40, size: 'A4', landscape: true });
-        const chunks = [];
-        
-        doc.on('data', (chunk) => chunks.push(chunk));
-        doc.on('end', () => {
-            const pdfBuffer = Buffer.concat(chunks);
-            const periodLabel = period === 'daily' ? 'Daily' : period === 'weekly' ? 'Weekly' : 'Monthly';
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="visitor_report_${period}_${date || 'today'}.pdf"`);
-            res.setHeader('Content-Length', pdfBuffer.length);
-            res.send(pdfBuffer);
-        });
-        doc.on('error', (err) => {
-            console.error('PDF error:', err);
-            res.status(500).json({ success: false, message: 'Error generating PDF' });
-        });
-        
-        // Header
-        doc.fontSize(20)
-           .font('Helvetica-Bold')
-           .fillColor('#0A1628')
-           .text('CHANGARA STAR ACADEMY', { align: 'center' });
-        
-        doc.fontSize(12)
-           .font('Helvetica-Oblique')
-           .fillColor('#D4A017')
-           .text('"Assurance to Excellence"', { align: 'center' })
-           .moveDown(0.5);
-        
-        const periodLabel = period === 'daily' ? 'Daily' : period === 'weekly' ? 'Weekly' : 'Monthly';
-        doc.fontSize(14)
-           .font('Helvetica-Bold')
-           .fillColor('#0A1628')
-           .text(`VISITOR REPORT - ${periodLabel.toUpperCase()}`, { align: 'center' });
-        
-        doc.fontSize(10)
-           .font('Helvetica')
-           .fillColor('#6c757d')
-           .text(`Date: ${date || formatKenyaDate(new Date())}`, { align: 'center' })
-           .moveDown(1);
-        
-        // Table
-        const tableTop = doc.y;
-        const colWidths = [25, 130, 60, 80, 80, 70, 70, 60];
-        const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-        
-        doc.rect(40, tableTop, tableWidth, 22)
-           .fillColor('#0A1628')
-           .fill();
-        
-        const headers = ['#', 'Visitor', 'Badge', 'Purpose', 'Person', 'Check In', 'Check Out', 'Duration'];
-        let headerX = 45;
-        doc.fontSize(8)
-           .font('Helvetica-Bold')
-           .fillColor('white');
-        
-        headers.forEach((h, i) => {
-            const align = i === 0 || i === headers.length - 1 ? 'center' : 'left';
-            doc.text(h, headerX, tableTop + 5, { width: colWidths[i] - 5, align: align });
-            headerX += colWidths[i];
-        });
-        
-        let rowY = tableTop + 22;
-        report.slice(0, 20).forEach((v, index) => {
-            if (rowY > 500) { doc.addPage(); rowY = 50; }
-            
-            doc.rect(40, rowY, tableWidth, 18)
-               .fillColor(index % 2 === 0 ? '#f8f9fa' : 'white')
-               .fill();
-            
-            let xPos = 45;
-            doc.fontSize(7)
-               .font('Helvetica')
-               .fillColor('#0A1628');
-            
-            doc.text((index + 1).toString(), xPos, rowY + 3, { width: colWidths[0] - 5, align: 'center' });
-            xPos += colWidths[0];
-            
-            doc.text(v.fullName || 'Unknown', xPos, rowY + 3, { width: colWidths[1] - 5 });
-            xPos += colWidths[1];
-            
-            doc.text(v.badgeNumber || '-', xPos, rowY + 3, { width: colWidths[2] - 5 });
-            xPos += colWidths[2];
-            
-            doc.text(v.purpose || '-', xPos, rowY + 3, { width: colWidths[3] - 5 });
-            xPos += colWidths[3];
-            
-            doc.text(v.personToVisit || '-', xPos, rowY + 3, { width: colWidths[4] - 5 });
-            xPos += colWidths[4];
-            
-            doc.text(v.checkInTime || '-', xPos, rowY + 3, { width: colWidths[5] - 5 });
-            xPos += colWidths[5];
-            
-            doc.text(v.checkOutTime || '-', xPos, rowY + 3, { width: colWidths[6] - 5 });
-            xPos += colWidths[6];
-            
-            doc.text(v.duration > 0 ? v.duration + 'm' : '-', xPos, rowY + 3, { width: colWidths[7] - 5, align: 'center' });
-            
-            rowY += 18;
-        });
-        
-        // Summary
-        const totalVisitors = report.length;
-        const active = report.filter(v => v.status === 'Checked In').length;
-        const completed = report.filter(v => v.status === 'Checked Out').length;
-        const totalDuration = report.reduce((sum, v) => sum + (v.duration || 0), 0);
-        const avgDuration = totalVisitors > 0 ? Math.round(totalDuration / totalVisitors) : 0;
-        
-        doc.moveDown(1);
-        doc.fontSize(9)
-           .font('Helvetica-Bold')
-           .fillColor('#0A1628')
-           .text(`Total Visitors: ${totalVisitors}`, 40, rowY + 5)
-           .text(`Active: ${active}`, 200, rowY + 5)
-           .text(`Completed: ${completed}`, 350, rowY + 5)
-           .text(`Avg Duration: ${avgDuration} min`, 500, rowY + 5);
-        
-        doc.end();
-    } catch (error) {
-        console.error('Error generating visitor PDF:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
 // ============================================
 // REGISTER STATIC FILES
 // ============================================
@@ -4403,6 +4224,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// 404 handler - MUST BE LAST
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
 });
