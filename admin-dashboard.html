@@ -820,7 +820,7 @@
 
     <script>
         // ============================================
-        // PERFORMANCE RUBRIC - UPDATED (FRONTEND)
+        // PERFORMANCE RUBRIC - FRONTEND (CORRECTED)
         // ============================================
         // Exceeding Expectations (EE): 75-100%
         // Meeting Expectations (ME): 41-74%
@@ -1483,9 +1483,11 @@
                 if (data.success) {
                     let students = data.students || [];
                     
-                    // ✅ RECALCULATE on frontend with correct rubric
+                    // ============================================
+                    // ✅ RECALCULATE WITH CORRECT RUBRIC ON FRONTEND
+                    // ============================================
                     students = students.map(student => {
-                        // Recalculate each subject
+                        // Recalculate each subject's performance level
                         if (student.assessments) {
                             student.assessments = student.assessments.map(a => {
                                 const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
@@ -1544,13 +1546,20 @@
                         const level = student.performanceLevel || 'Approaching Expectation';
                         const levelClass = getPerformanceBadge(level);
                         const avg = student.averageScore !== undefined && student.averageScore !== null ? student.averageScore.toFixed(1) : '0';
+                        
+                        // Color based on performance level
+                        let color = '#0A1628';
+                        if (level === 'Exceeding Expectation') color = '#28a745';
+                        else if (level === 'Meeting Expectation') color = '#17a2b8';
+                        else if (level === 'Approaching Expectation') color = '#d4a017';
+                        else if (level === 'Below Expectation') color = '#dc3545';
 
                         tr.innerHTML = `
                             <td>${index + 1}</td>
                             <td><strong>${student.studentName}</strong></td>
                             <td>${student.admissionNumber || '-'}</td>
                             <td style="text-align:center;">${student.totalScore || 0}</td>
-                            <td style="text-align:center;font-weight:700;color:${level === 'Exceeding Expectation' ? '#28a745' : level === 'Meeting Expectation' ? '#17a2b8' : level === 'Approaching Expectation' ? '#d4a017' : '#dc3545'};">${avg}%</td>
+                            <td style="text-align:center;font-weight:700;color:${color};">${avg}%</td>
                             <td style="text-align:center;">
                                 <span class="performance-level-badge ${levelClass}">${level}</span>
                             </td>
