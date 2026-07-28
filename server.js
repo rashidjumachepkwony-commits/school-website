@@ -102,7 +102,7 @@ function formatKenyaDate(date) {
 }
 
 // ============================================
-// PERFORMANCE RUBRIC - CBC CORRECT
+// PERFORMANCE RUBRIC - CBC CORRECT (APPLIES TO ALL CLASSES)
 // ============================================
 // Exceeding Expectations (EE): 75-100% = Rating 4
 // Meeting Expectations (ME): 41-74% = Rating 3
@@ -160,8 +160,10 @@ function calculateAssessmentPerformance(score, maxScore) {
 }
 
 // ============================================
-// CBC STUDENT OVERALL - CORRECT CBC METHOD
+// CBC STUDENT OVERALL - CORRECT CBC METHOD (APPLIES TO ALL CLASSES)
 // ============================================
+// Overall rating = AVERAGE of all subject ratings (EE=4, ME=3, AE=2, BE=1)
+// Overall level = determined by the average rating
 function calculateStudentOverall(assessments) {
     if (!assessments || assessments.length === 0) {
         return { 
@@ -180,38 +182,45 @@ function calculateStudentOverall(assessments) {
     let levelDistribution = { EE: 0, ME: 0, AE: 0, BE: 0 };
     
     assessments.forEach(a => {
+        // Ensure valid data
         const score = Math.min(a.score || 0, a.maxScore || 0);
         const maxScore = a.maxScore || 1;
         
         totalScore += score;
         totalMaxScore += maxScore;
         
+        // Get rating for this subject
         const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
         const level = calculatePerformanceLevel(percentage);
         const rating = getPerformanceRating(level);
         totalRating += rating;
         subjectCount++;
         
+        // Track distribution
         const short = getPerformanceShort(level);
         levelDistribution[short] = (levelDistribution[short] || 0) + 1;
     });
     
-    // CBC: Overall rating = AVERAGE of all subject ratings
+    // ============================================
+    // CBC METHOD: Overall rating = AVERAGE of all subject ratings
+    // ============================================
     const overallRating = subjectCount > 0 ? parseFloat((totalRating / subjectCount).toFixed(1)) : 2;
     
+    // Determine overall performance level based on average rating
     let performanceLevel = 'Approaching Expectation';
     if (overallRating >= 3.5) performanceLevel = 'Exceeding Expectation';
     else if (overallRating >= 2.5) performanceLevel = 'Meeting Expectation';
     else if (overallRating >= 1.5) performanceLevel = 'Approaching Expectation';
     else performanceLevel = 'Below Expectation';
     
+    // Calculate average percentage for display (informational only)
     const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     
     return {
         totalScore: totalScore,
-        averageScore: parseFloat(avgPercentage.toFixed(1)),
-        overallRating: overallRating,
-        performanceLevel: performanceLevel,
+        averageScore: parseFloat(avgPercentage.toFixed(1)),  // Informational only
+        overallRating: overallRating,  // CBC Rating (3.8, 3.6, etc.)
+        performanceLevel: performanceLevel,  // Overall level based on average rating
         levelDistribution: levelDistribution,
         subjectCount: subjectCount
     };
@@ -402,471 +411,48 @@ function generateStaffReportPDF(report, periodLabel) {
 }
 
 // ============================================
-// GENERATE REPORT HTML - UNIFIED FOR SCREEN
-// ============================================
-function generateReportHTML(student) {
-    const level = student.performanceLevel || 'Approaching Expectation';
-    const levelColors = {
-        'Exceeding Expectation': '#28a745',
-        'Meeting Expectation': '#0d6efd',
-        'Approaching Expectation': '#e6a800',
-        'Below Expectation': '#dc3545'
-    };
-    const levelIcons = {
-        'Exceeding Expectation': '🌟',
-        'Meeting Expectation': '✅',
-        'Approaching Expectation': '📌',
-        'Below Expectation': '⚠️'
-    };
-    const color = levelColors[level] || '#6c757d';
-    const icon = levelIcons[level] || '📌';
-    const rating = student.overallRating || 2;
-    const subjects = student.subjectCount || 0;
-    const dist = student.levelDistribution || { EE: 0, ME: 0, AE: 0, BE: 0 };
-    const total = subjects || 1;
-    
-    // Build subject rows
-    let subjectRows = '';
-    if (student.assessments && student.assessments.length > 0) {
-        const sorted = [...student.assessments].sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
-        sorted.forEach(a => {
-            const pct = a.percentage || 0;
-            const level2 = a.performanceLevel || 'Approaching Expectation';
-            const levelColor = levelColors[level2] || '#6c757d';
-            const short = getPerformanceShort(level2);
-            const rating2 = a.rating || 2;
-            const pctColor = pct >= 75 ? '#28a745' : pct >= 41 ? '#0d6efd' : pct >= 21 ? '#e6a800' : '#dc3545';
-            
-            subjectRows += `
-                <tr>
-                    <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;color:#0A1628;">${a.subject}</td>
-                    <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;color:#6c757d;">${a.maxScore}</td>
-                    <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-weight:600;color:#0A1628;">${a.score}</td>
-                    <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-weight:700;color:${pctColor};">${pct.toFixed(1)}%</td>
-                    <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">
-                        <span style="display:inline-block;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;color:white;background:${levelColor};">${short} (${rating2})</span>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-    
-    // Build distribution
-    const distributionHTML = `
-        <div style="display:flex;gap:15px;margin:15px 0;flex-wrap:wrap;justify-content:center;">
-            <span style="padding:5px 15px;background:#E8F5E9;border-radius:4px;font-size:10px;font-weight:600;color:#1a8a3f;">🌟 EE: ${dist.EE || 0} (${Math.round((dist.EE/total)*100)}%)</span>
-            <span style="padding:5px 15px;background:#E3F2FD;border-radius:4px;font-size:10px;font-weight:600;color:#0d6efd;">✅ ME: ${dist.ME || 0} (${Math.round((dist.ME/total)*100)}%)</span>
-            <span style="padding:5px 15px;background:#FFF8E1;border-radius:4px;font-size:10px;font-weight:600;color:#e6a800;">📌 AE: ${dist.AE || 0} (${Math.round((dist.AE/total)*100)}%)</span>
-            <span style="padding:5px 15px;background:#FBE9E7;border-radius:4px;font-size:10px;font-weight:600;color:#dc3545;">⚠️ BE: ${dist.BE || 0} (${Math.round((dist.BE/total)*100)}%)</span>
-        </div>
-    `;
-    
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Student Report - ${student.studentName}</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { 
-                    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-                    background: white;
-                    padding: 20px;
-                }
-                .report-container {
-                    max-width: 800px;
-                    margin: 0 auto;
-                    background: white;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                    padding: 30px;
-                    border-radius: 8px;
-                }
-                .header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-start;
-                    padding-bottom: 15px;
-                    border-bottom: 3px solid #C9A84C;
-                    margin-bottom: 20px;
-                }
-                .logo-section .school-name {
-                    font-size: 28px;
-                    font-weight: 900;
-                    color: #0A1628;
-                    letter-spacing: 2px;
-                }
-                .logo-section .star {
-                    color: #C9A84C;
-                    font-size: 28px;
-                    font-weight: 900;
-                }
-                .logo-section .academy {
-                    font-size: 12px;
-                    font-weight: 700;
-                    color: #0A1628;
-                    display: block;
-                }
-                .logo-section .tagline {
-                    font-size: 10px;
-                    color: #C9A84C;
-                    font-style: italic;
-                    margin-top: 2px;
-                }
-                .title-section {
-                    text-align: right;
-                }
-                .title-section .report-title {
-                    font-size: 18px;
-                    font-weight: 700;
-                    color: #0A1628;
-                }
-                .title-section .report-subtitle {
-                    font-size: 11px;
-                    color: #6c757d;
-                }
-                
-                .student-info {
-                    background: #f8f9fa;
-                    padding: 12px 20px;
-                    border-radius: 6px;
-                    margin-bottom: 15px;
-                    border: 1px solid #e8ecf1;
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 10px 30px;
-                }
-                .student-info .info-item {
-                    font-size: 11px;
-                }
-                .student-info .info-item .label {
-                    color: #6c757d;
-                    font-weight: 600;
-                }
-                .student-info .info-item .value {
-                    color: #0A1628;
-                    font-weight: 700;
-                }
-                
-                .rubric {
-                    display: flex;
-                    gap: 10px;
-                    margin-bottom: 15px;
-                    font-size: 10px;
-                    flex-wrap: wrap;
-                }
-                .rubric .rubric-item {
-                    padding: 4px 12px;
-                    border-radius: 4px;
-                    border: 1px solid #dee2e6;
-                    font-weight: 600;
-                }
-                .rubric .rubric-item.ee { background: #E8F5E9; color: #1a8a3f; border-color: #1a8a3f; }
-                .rubric .rubric-item.me { background: #E3F2FD; color: #0d6efd; border-color: #0d6efd; }
-                .rubric .rubric-item.ae { background: #FFF8E1; color: #e6a800; border-color: #e6a800; }
-                .rubric .rubric-item.be { background: #FBE9E7; color: #dc3545; border-color: #dc3545; }
-                
-                .performance-summary {
-                    background: ${color}15;
-                    border: 2px solid ${color};
-                    border-radius: 8px;
-                    padding: 15px 25px;
-                    margin-bottom: 20px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                }
-                .performance-summary .level {
-                    font-size: 20px;
-                    font-weight: 700;
-                    color: ${color};
-                }
-                .performance-summary .level .icon {
-                    font-size: 24px;
-                }
-                .performance-summary .stats {
-                    display: flex;
-                    gap: 25px;
-                    font-size: 11px;
-                    flex-wrap: wrap;
-                }
-                .performance-summary .stats .stat-item {
-                    text-align: center;
-                }
-                .performance-summary .stats .stat-item .stat-value {
-                    font-weight: 700;
-                    color: #0A1628;
-                    font-size: 16px;
-                }
-                .performance-summary .stats .stat-item .stat-label {
-                    color: #6c757d;
-                    font-size: 8px;
-                }
-                
-                .table-wrapper {
-                    overflow-x: auto;
-                    margin: 15px 0;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    font-size: 11px;
-                }
-                table thead th {
-                    background: #0A1628;
-                    color: white;
-                    padding: 10px 12px;
-                    text-align: left;
-                    font-weight: 700;
-                }
-                table thead th:not(:first-child) {
-                    text-align: center;
-                }
-                table tbody td {
-                    padding: 8px 12px;
-                    border-bottom: 1px solid #eee;
-                }
-                table tbody td:not(:first-child) {
-                    text-align: center;
-                }
-                table tbody tr:nth-child(even) {
-                    background: #fafbfc;
-                }
-                
-                .footer {
-                    margin-top: 25px;
-                    padding-top: 15px;
-                    border-top: 2px solid #C9A84C;
-                    display: flex;
-                    justify-content: space-between;
-                    font-size: 9px;
-                    color: #6c757d;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                }
-                
-                .btn-group {
-                    text-align: center;
-                    margin-top: 15px;
-                }
-                .btn-group .btn {
-                    display: inline-block;
-                    padding: 10px 25px;
-                    border: none;
-                    border-radius: 6px;
-                    font-weight: 700;
-                    cursor: pointer;
-                    font-size: 14px;
-                    margin: 5px;
-                }
-                .btn-group .btn-print {
-                    background: #C9A84C;
-                    color: #0A1628;
-                }
-                .btn-group .btn-print:hover {
-                    background: #b8963a;
-                }
-                .btn-group .btn-download {
-                    background: #dc3545;
-                    color: white;
-                }
-                .btn-group .btn-download:hover {
-                    background: #c82333;
-                }
-                
-                @media print {
-                    body { padding: 0; }
-                    .report-container { box-shadow: none; padding: 20px; }
-                    .btn-group { display: none; }
-                }
-                @media (max-width: 600px) {
-                    .header { flex-direction: column; align-items: center; text-align: center; }
-                    .title-section { text-align: center; margin-top: 10px; }
-                    .performance-summary { flex-direction: column; text-align: center; }
-                    .student-info { flex-direction: column; gap: 5px; }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="report-container">
-                <!-- Header -->
-                <div class="header">
-                    <div class="logo-section">
-                        <span class="school-name">CHANGARA</span>
-                        <span class="star">STAR</span>
-                        <span class="academy">ACADEMY</span>
-                        <div class="tagline">"Nurturing Stars, Building Futures"</div>
-                    </div>
-                    <div class="title-section">
-                        <div class="report-title">CBC ASSESSMENT REPORT</div>
-                        <div class="report-subtitle">${student.type || 'Monthly'} Assessment • ${student.term || ''} ${student.year || ''}</div>
-                        <div class="report-subtitle">Generated: ${formatKenyaFullTime(new Date())}</div>
-                    </div>
-                </div>
-
-                <!-- Student Information -->
-                <div class="student-info">
-                    <div class="info-item"><span class="label">Student:</span> <span class="value">${student.studentName || 'N/A'}</span></div>
-                    <div class="info-item"><span class="label">Grade:</span> <span class="value">${student.grade || 'N/A'}</span></div>
-                    <div class="info-item"><span class="label">Admission:</span> <span class="value">${student.studentId || 'N/A'}</span></div>
-                    <div class="info-item"><span class="label">Term:</span> <span class="value">${student.term || 'N/A'}</span></div>
-                    <div class="info-item"><span class="label">Date:</span> <span class="value">${formatKenyaDate(new Date())}</span></div>
-                </div>
-
-                <!-- Rubric -->
-                <div class="rubric">
-                    <span style="font-weight:700;color:#0A1628;">Rubric:</span>
-                    <span class="rubric-item ee">EE (4): 75-100%</span>
-                    <span class="rubric-item me">ME (3): 41-74%</span>
-                    <span class="rubric-item ae">AE (2): 21-40%</span>
-                    <span class="rubric-item be">BE (1): 0-20%</span>
-                </div>
-
-                <!-- Performance Summary -->
-                <div class="performance-summary">
-                    <div class="level">
-                        <span class="icon">${icon}</span> ${level}
-                    </div>
-                    <div class="stats">
-                        <div class="stat-item">
-                            <div class="stat-value">${student.totalScore || 0}</div>
-                            <div class="stat-label">Total Score</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${student.averageScore || 0}%</div>
-                            <div class="stat-label">Average %</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${student.overallRating || 2}</div>
-                            <div class="stat-label">CBC Rating</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${student.subjectCount || 0}</div>
-                            <div class="stat-label">Subjects</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Level Distribution -->
-                ${distributionHTML}
-
-                <!-- Subject Assessment Table -->
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="text-align:left;">Subject</th>
-                                <th style="text-align:center;">Max</th>
-                                <th style="text-align:center;">Score</th>
-                                <th style="text-align:center;">%</th>
-                                <th style="text-align:center;">Level (Rating)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${subjectRows || '<tr><td colspan="5" style="text-align:center;color:#999;padding:20px;">No subjects found</td></tr>'}
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Footer -->
-                <div class="footer">
-                    <div>
-                        <div>Parent/Guardian Signature: ___________________</div>
-                        <div style="margin-top:3px;">Date: _______________</div>
-                    </div>
-                    <div style="text-align:center;">
-                        <div>© ${new Date().getFullYear()} Changara Star Academy</div>
-                        <div>"Nurturing Stars, Building Futures"</div>
-                    </div>
-                </div>
-
-                <!-- Buttons -->
-                <div class="btn-group">
-                    <button class="btn btn-print" onclick="window.print()">🖨️ Print Report</button>
-                    <button class="btn btn-download" onclick="downloadPDF()">📄 Download PDF</button>
-                </div>
-            </div>
-
-            <script>
-                function downloadPDF() {
-                    const studentId = '${student._id}';
-                    window.open('/api/assessments/download-report/' + studentId, '_blank');
-                }
-            </script>
-        </body>
-        </html>
-    `;
-}
-
-// ============================================
-// RECALCULATE STUDENT DATA - UNIFIED FUNCTION
-// ============================================
-function recalculateStudentData(student) {
-    let validAssessments = [];
-    let totalScore = 0;
-    let totalMaxScore = 0;
-    let totalRating = 0;
-    let subjectCount = 0;
-    let levelDistribution = { EE: 0, ME: 0, AE: 0, BE: 0 };
-    
-    if (student.assessments && student.assessments.length > 0) {
-        validAssessments = student.assessments.map(a => {
-            const maxScore = Math.max(1, parseInt(a.maxScore) || 1);
-            const score = Math.min(parseInt(a.score) || 0, maxScore);
-            const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
-            const level = calculatePerformanceLevel(percentage);
-            const rating = getPerformanceRating(level);
-            const short = getPerformanceShort(level);
-            
-            totalScore += score;
-            totalMaxScore += maxScore;
-            totalRating += rating;
-            subjectCount++;
-            
-            levelDistribution[short] = (levelDistribution[short] || 0) + 1;
-            
-            return {
-                subject: a.subject || 'Untitled',
-                maxScore: maxScore,
-                score: score,
-                percentage: parseFloat(percentage.toFixed(1)),
-                performanceLevel: level,
-                rating: rating,
-                short: short
-            };
-        });
-    }
-    
-    const overallRating = subjectCount > 0 ? parseFloat((totalRating / subjectCount).toFixed(1)) : 2;
-    let performanceLevel = 'Approaching Expectation';
-    if (overallRating >= 3.5) performanceLevel = 'Exceeding Expectation';
-    else if (overallRating >= 2.5) performanceLevel = 'Meeting Expectation';
-    else if (overallRating >= 1.5) performanceLevel = 'Approaching Expectation';
-    else performanceLevel = 'Below Expectation';
-    
-    const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
-    
-    student.assessments = validAssessments;
-    student.totalScore = totalScore;
-    student.averageScore = parseFloat(avgPercentage.toFixed(1));
-    student.performanceLevel = performanceLevel;
-    student.overallRating = overallRating;
-    student.levelDistribution = levelDistribution;
-    student.subjectCount = subjectCount;
-    
-    return student;
-}
-
-// ============================================
-// GENERATE STUDENT REPORT PDF - PDFKIT
+// PROFESSIONAL CBC STUDENT REPORT - PDFKIT ONLY
 // ============================================
 function generateStudentReportPDF(student) {
     return new Promise((resolve, reject) => {
         try {
             console.log('📄 Generating PDF for student:', student.studentName);
             
+            // ============================================
+            // VALIDATE AND CLEAN DATA
+            // ============================================
+            let validAssessments = [];
+            
+            if (student.assessments && student.assessments.length > 0) {
+                validAssessments = student.assessments.map(a => {
+                    const maxScore = Math.max(1, parseInt(a.maxScore) || 1);
+                    const score = Math.min(parseInt(a.score) || 0, maxScore);
+                    const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+                    const level = calculatePerformanceLevel(percentage);
+                    const rating = getPerformanceRating(level);
+                    
+                    return {
+                        subject: a.subject || 'Untitled',
+                        maxScore: maxScore,
+                        score: score,
+                        percentage: parseFloat(percentage.toFixed(1)),
+                        performanceLevel: level,
+                        rating: rating,
+                        short: getPerformanceShort(level)
+                    };
+                });
+            }
+            
+            const cbcResult = calculateStudentOverall(validAssessments);
+            
+            student.assessments = validAssessments;
+            student.totalScore = cbcResult.totalScore;
+            student.averageScore = cbcResult.averageScore;
+            student.performanceLevel = cbcResult.performanceLevel;
+            student.overallRating = cbcResult.overallRating;
+            student.levelDistribution = cbcResult.levelDistribution;
+            student.subjectCount = cbcResult.subjectCount;
+
             const doc = new PDFDocument({
                 margin: 25,
                 size: 'A4',
@@ -1113,7 +699,7 @@ function generateTeacherFeedback(student) {
 }
 
 // ============================================
-// PROFESSIONAL CLASS REPORT - CBC STYLE
+// PROFESSIONAL CLASS REPORT - CBC STYLE (APPLIES TO ALL CLASSES)
 // ============================================
 function generateClassReportPDF(students, grade, type, term, year, period) {
     return new Promise((resolve, reject) => {
@@ -1822,7 +1408,92 @@ const Payment = mongoose.model('Payment', paymentSchema);
 // ============================================
 
 function getDefaultSubjects(grade, type) {
-    const fallback = [
+    // Grade-specific subject configurations
+    const gradeSubjects = {
+        'Playgroup': [
+            { name: 'LANGUAGE ACTIVITIES', max: 30 },
+            { name: 'MATHEMATICAL ACTIVITIES', max: 30 },
+            { name: 'ENVIRONMENTAL ACTIVITIES', max: 30 },
+            { name: 'PSYCHOMOTOR ACTIVITIES', max: 30 },
+            { name: 'CREATIVE ACTIVITIES', max: 30 },
+            { name: 'RELIGIOUS EDUCATION', max: 20 }
+        ],
+        'PP1': [
+            { name: 'LANGUAGE ACTIVITIES', max: 30 },
+            { name: 'MATHEMATICAL ACTIVITIES', max: 30 },
+            { name: 'ENVIRONMENTAL ACTIVITIES', max: 30 },
+            { name: 'PSYCHOMOTOR ACTIVITIES', max: 30 },
+            { name: 'CREATIVE ACTIVITIES', max: 30 },
+            { name: 'RELIGIOUS EDUCATION', max: 20 }
+        ],
+        'PP2': [
+            { name: 'LANGUAGE ACTIVITIES', max: 30 },
+            { name: 'MATHEMATICAL ACTIVITIES', max: 30 },
+            { name: 'ENVIRONMENTAL ACTIVITIES', max: 30 },
+            { name: 'PSYCHOMOTOR ACTIVITIES', max: 30 },
+            { name: 'CREATIVE ACTIVITIES', max: 30 },
+            { name: 'RELIGIOUS EDUCATION', max: 20 }
+        ],
+        'Grade 1': [
+            { name: 'MATHEMATICS', max: 50 },
+            { name: 'ENGLISH', max: 50 },
+            { name: 'KISWAHILI', max: 50 },
+            { name: 'SCIENCE', max: 50 },
+            { name: 'SOCIAL STUDIES', max: 50 },
+            { name: 'CREATIVE ARTS', max: 50 },
+            { name: 'RELIGIOUS EDUCATION', max: 30 }
+        ],
+        'Grade 2': [
+            { name: 'MATHEMATICS', max: 50 },
+            { name: 'ENGLISH', max: 50 },
+            { name: 'KISWAHILI', max: 50 },
+            { name: 'SCIENCE', max: 50 },
+            { name: 'SOCIAL STUDIES', max: 50 },
+            { name: 'CREATIVE ARTS', max: 50 },
+            { name: 'RELIGIOUS EDUCATION', max: 30 }
+        ],
+        'Grade 3': [
+            { name: 'MATHEMATICS', max: 50 },
+            { name: 'ENGLISH', max: 50 },
+            { name: 'KISWAHILI', max: 50 },
+            { name: 'SCIENCE', max: 50 },
+            { name: 'SOCIAL STUDIES', max: 50 },
+            { name: 'CREATIVE ARTS', max: 50 },
+            { name: 'RELIGIOUS EDUCATION', max: 30 }
+        ],
+        'Grade 4': [
+            { name: 'MATHEMATICS', max: 50 },
+            { name: 'ENGLISH', max: 50 },
+            { name: 'KISWAHILI', max: 50 },
+            { name: 'SCIENCE & TECHNOLOGY', max: 50 },
+            { name: 'SOCIAL STUDIES', max: 50 },
+            { name: 'CREATIVE ARTS', max: 50 },
+            { name: 'RELIGIOUS EDUCATION', max: 30 },
+            { name: 'AGRICULTURE', max: 40 }
+        ],
+        'Grade 5': [
+            { name: 'MATHS ACTIVITIES', max: 30 },
+            { name: 'ENGLISH ACTIVITIES', max: 50 },
+            { name: 'SCIENCE & TECH', max: 33 },
+            { name: 'KISWAHILI LUGHA', max: 50 },
+            { name: 'SOCIAL STUDIES', max: 20 },
+            { name: 'RELIGIOUS EDUCATION', max: 25 },
+            { name: 'AGRICULTURE', max: 33 },
+            { name: 'CREATIVE ART', max: 33 }
+        ],
+        'Grade 6': [
+            { name: 'MATHEMATICS', max: 50 },
+            { name: 'ENGLISH', max: 50 },
+            { name: 'KISWAHILI', max: 50 },
+            { name: 'SCIENCE & TECHNOLOGY', max: 50 },
+            { name: 'SOCIAL STUDIES', max: 50 },
+            { name: 'CREATIVE ARTS', max: 50 },
+            { name: 'RELIGIOUS EDUCATION', max: 30 },
+            { name: 'AGRICULTURE', max: 40 }
+        ]
+    };
+    
+    return gradeSubjects[grade] || [
         { name: 'MATHEMATICS', max: 50 }, 
         { name: 'ENGLISH', max: 50 }, 
         { name: 'KISWAHILI', max: 50 }, 
@@ -1830,7 +1501,6 @@ function getDefaultSubjects(grade, type) {
         { name: 'SOCIAL STUDIES', max: 50 }, 
         { name: 'CREATIVE ARTS', max: 50 }
     ];
-    return fallback;
 }
 
 async function generateStudentId() {
@@ -2980,7 +2650,7 @@ app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
         
-        // Recalculate using unified function
+        // Recalculate with CBC method
         const recalculated = recalculateStudentData(student);
         
         // Generate HTML for display
@@ -3003,7 +2673,7 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
         
-        // Recalculate using unified function
+        // Recalculate with CBC method
         const recalculated = recalculateStudentData(student);
         
         // Generate PDF
@@ -3029,7 +2699,6 @@ app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) =
         }
         const latest = allAssessments[allAssessments.length - 1];
         
-        // Recalculate using unified function
         const recalculated = recalculateStudentData(latest);
         
         const pdfBuffer = await generateStudentReportPDF(recalculated);
