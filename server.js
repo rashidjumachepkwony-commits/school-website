@@ -758,31 +758,92 @@ function generateStudentReportPDF(student) {
 
             doc.fontSize(8).font('Helvetica').fillColor(colors.primary).text(`Total: ${totalScore}  •  Avg: ${avgScore}%  •  CBC Rating: ${rating}/4  •  Subjects: ${subjects}`, 250, perfY + 8);
 
-            // LEVEL DISTRIBUTION
+            // ============================================
+            // CBC LEVEL DISTRIBUTION - FIXED
+            // ============================================
             const distY = perfY + 36;
             const dist = student.levelDistribution || { EE: 0, ME: 0, AE: 0, BE: 0 };
             const total = subjects || 1;
             
             doc.fontSize(6).font('Helvetica-Bold').fillColor(colors.primary).text('CBC LEVEL DISTRIBUTION:', 30, distY);
 
+            // Define distribution data with proper labels
             const distData = [
-                { label: 'EE', count: dist.EE || 0, color: colors.success, bg: colors.successLight },
-                { label: 'ME', count: dist.ME || 0, color: colors.info, bg: colors.infoLight },
-                { label: 'AE', count: dist.AE || 0, color: colors.warning, bg: colors.warningLight },
-                { label: 'BE', count: dist.BE || 0, color: colors.danger, bg: colors.dangerLight }
+                { 
+                    label: 'EE (4)', 
+                    count: dist.EE || 0, 
+                    color: colors.success, 
+                    bg: colors.successLight,
+                    desc: 'Exceeding Expectation'
+                },
+                { 
+                    label: 'ME (3)', 
+                    count: dist.ME || 0, 
+                    color: colors.info, 
+                    bg: colors.infoLight,
+                    desc: 'Meeting Expectation'
+                },
+                { 
+                    label: 'AE (2)', 
+                    count: dist.AE || 0, 
+                    color: colors.warning, 
+                    bg: colors.warningLight,
+                    desc: 'Approaching Expectation'
+                },
+                { 
+                    label: 'BE (1)', 
+                    count: dist.BE || 0, 
+                    color: colors.danger, 
+                    bg: colors.dangerLight,
+                    desc: 'Below Expectation'
+                }
             ];
 
             let distX = 150;
             distData.forEach((item) => {
-                const pct = Math.round((item.count / total) * 100);
-                doc.roundedRect(distX, distY - 2, 80, 16, 3).fillColor(item.bg).fill().strokeColor(item.color).lineWidth(0.5).roundedRect(distX, distY - 2, 80, 16, 3).stroke();
-                doc.fontSize(8).font('Helvetica-Bold').fillColor(item.color).text(item.count.toString(), distX + 4, distY);
-                doc.fontSize(5).font('Helvetica').fillColor(colors.gray).text(item.label + ' ' + pct + '%', distX + 22, distY + 1);
-                distX += 88;
+                const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
+                
+                // Draw background box
+                doc.roundedRect(distX, distY - 2, 88, 16, 3)
+                   .fillColor(item.bg)
+                   .fill()
+                   .strokeColor(item.color)
+                   .lineWidth(0.5)
+                   .roundedRect(distX, distY - 2, 88, 16, 3)
+                   .stroke();
+                
+                // Show count and label
+                doc.fontSize(8)
+                   .font('Helvetica-Bold')
+                   .fillColor(item.color)
+                   .text(item.count.toString(), distX + 4, distY);
+                
+                // Show percentage
+                doc.fontSize(5)
+                   .font('Helvetica')
+                   .fillColor(colors.gray)
+                   .text(`${item.label} ${pct}%`, distX + 22, distY + 1);
+                
+                distX += 96;
             });
 
+            // Add distribution summary text below
+            const distSummaryY = distY + 20;
+            let summaryText = '';
+            distData.forEach((item, index) => {
+                if (index > 0) summaryText += '  •  ';
+                const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
+                summaryText += `${item.label}: ${item.count} (${pct}%)`;
+            });
+            doc.fontSize(5)
+               .font('Helvetica')
+               .fillColor(colors.gray)
+               .text(summaryText, 30, distSummaryY, { width: 535, align: 'left' });
+
+            // ============================================
             // SUBJECT ASSESSMENT TABLE
-            const tableY = distY + 22;
+            // ============================================
+            const tableY = distY + 30;
             doc.fontSize(7).font('Helvetica-Bold').fillColor(colors.primary).text('SUBJECT ASSESSMENT', 30, tableY);
 
             const tableTop = tableY + 8;
@@ -833,7 +894,7 @@ function generateStudentReportPDF(student) {
                 xPos += colWidths[2];
 
                 const pctColor = percentage >= 75 ? colors.success : (percentage >= 41 ? colors.info : (percentage >= 21 ? colors.warning : colors.danger));
-                doc.fillColor(pctColor).font('Helvetica-Bold').text(percentage.toFixed(0) + '%', xPos, rowY + 2, { width: colWidths[3] - 5, align: 'center' });
+                doc.fillColor(pctColor).font('Helvetica-Bold').text(percentage.toFixed(1) + '%', xPos, rowY + 2, { width: colWidths[3] - 5, align: 'center' });
                 xPos += colWidths[3];
 
                 doc.fillColor(levelColor2).font('Helvetica-Bold').text(`${short2} (${rating2})`, xPos, rowY + 2, { width: colWidths[4] - 5 });
@@ -843,7 +904,7 @@ function generateStudentReportPDF(student) {
             });
 
             // FOOTER
-            const footerY = 760;
+            const footerY = Math.max(rowY + 20, 760);
             doc.moveTo(30, footerY).lineTo(565, footerY).strokeColor(colors.gold).lineWidth(1.5).stroke();
             doc.fontSize(6).font('Helvetica').fillColor(colors.gray).text(`Generated: ${formatKenyaFullTime(new Date())}`, 30, footerY + 6, { align: 'left' }).text('Parent Signature: ___________________', 30, footerY + 16, { align: 'left' });
             doc.fontSize(5).font('Helvetica-Oblique').fillColor(colors.gray).text(`© ${new Date().getFullYear()} Changara Star Academy • "Nurturing Stars, Building Futures" • P.O Box 7, Cheptais`, 30, footerY + 28, { align: 'center' });
