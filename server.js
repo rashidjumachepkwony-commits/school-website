@@ -2709,24 +2709,39 @@ app.get('/api/assessments/student/:id', async (req, res) => {
     }
 });
 
+// ============================================
+// CREATE ASSESSMENT - FIXED PERCENTAGE CALCULATION
+// ============================================
 app.post('/api/assessments', async (req, res) => {
     try {
         const { studentName, studentId, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
+        
         if (!studentName || !grade || !assessments || !Array.isArray(assessments) || assessments.length === 0) {
             return res.status(400).json({ success: false, message: 'Invalid data. Need studentName, grade, and assessments array.' });
         }
+        
+        // ✅ FIX: Calculate percentage for each assessment
         const assessmentsWithRubric = assessments.map(a => {
-            const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+            const maxScore = Math.max(1, parseInt(a.maxScore) || 1);
+            const score = Math.min(parseInt(a.score) || 0, maxScore);
+            
+            // ✅ Calculate percentage correctly
+            const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+            const level = calculatePerformanceLevel(percentage);
+            const rating = getPerformanceRating(level);
+            
             return {
                 subject: a.subject,
-                maxScore: a.maxScore,
-                score: a.score,
-                percentage: perf.percentage,
-                performanceLevel: perf.level,
-                rating: perf.rating
+                maxScore: maxScore,
+                score: score,
+                percentage: parseFloat(percentage.toFixed(1)), // ✅ Store with 1 decimal
+                performanceLevel: level,
+                rating: rating
             };
         });
+        
         const overall = calculateStudentOverall(assessmentsWithRubric);
+        
         const student = new StudentAssessment({
             studentName,
             studentId: studentId || '',
@@ -2743,21 +2758,28 @@ app.post('/api/assessments', async (req, res) => {
             performanceLevel: overall.performanceLevel,
             overallRating: overall.overallRating
         });
+        
         await student.save();
         res.status(201).json({ success: true, message: 'Student assessment created successfully!', student });
     } catch (error) {
+        console.error('❌ Error creating assessment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
+// ============================================
+// UPDATE ASSESSMENT - FIXED PERCENTAGE CALCULATION
+// ============================================
 app.put('/api/assessments/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { studentName, studentId, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
+        
         const student = await StudentAssessment.findById(id);
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
+        
         if (studentName) student.studentName = studentName;
         if (studentId) student.studentId = studentId;
         if (admissionNumber) student.admissionNumber = admissionNumber;
@@ -2767,29 +2789,43 @@ app.put('/api/assessments/:id', async (req, res) => {
         if (month) student.month = month;
         if (year) student.year = year;
         if (term) student.term = term;
+        
         if (assessments && Array.isArray(assessments) && assessments.length > 0) {
+            // ✅ FIX: Calculate percentage for each assessment
             const assessmentsWithRubric = assessments.map(a => {
-                const perf = calculateAssessmentPerformance(a.score, a.maxScore);
+                const maxScore = Math.max(1, parseInt(a.maxScore) || 1);
+                const score = Math.min(parseInt(a.score) || 0, maxScore);
+                
+                // ✅ Calculate percentage correctly
+                const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+                const level = calculatePerformanceLevel(percentage);
+                const rating = getPerformanceRating(level);
+                
                 return {
                     subject: a.subject,
-                    maxScore: a.maxScore,
-                    score: a.score,
-                    percentage: perf.percentage,
-                    performanceLevel: perf.level,
-                    rating: perf.rating
+                    maxScore: maxScore,
+                    score: score,
+                    percentage: parseFloat(percentage.toFixed(1)),
+                    performanceLevel: level,
+                    rating: rating
                 };
             });
+            
             student.assessments = assessmentsWithRubric;
+            
             const overall = calculateStudentOverall(assessmentsWithRubric);
             student.totalScore = overall.totalScore;
             student.averageScore = overall.averageScore;
             student.performanceLevel = overall.performanceLevel;
             student.overallRating = overall.overallRating;
         }
+        
         student.updatedAt = new Date();
         await student.save();
+        
         res.json({ success: true, message: 'Student assessment updated successfully!', student });
     } catch (error) {
+        console.error('❌ Error updating assessment:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
