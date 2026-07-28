@@ -5022,6 +5022,334 @@ app.get('/api/students/debug', async (req, res) => {
     }
 });
 // ============================================
+// HOLIDAY ASSIGNMENTS - ROUTES
+// ============================================
+
+// GET all assignments
+app.get('/api/holiday-assignments/all', async (req, res) => {
+    try {
+        console.log('📡 GET /api/holiday-assignments/all');
+        const assignments = await HolidayAssignment.find({ isActive: true }).sort({ createdAt: -1 });
+        console.log(`📚 Found ${assignments.length} assignments`);
+        res.json({ success: true, assignments });
+    } catch (error) {
+        console.error('❌ Error fetching assignments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET assignments by grade
+app.get('/api/holiday-assignments/:grade', async (req, res) => {
+    try {
+        const grade = req.params.grade;
+        console.log(`📡 GET /api/holiday-assignments/${grade}`);
+        
+        if (grade === 'all') {
+            const assignments = await HolidayAssignment.find({ isActive: true }).sort({ createdAt: -1 });
+            return res.json({ success: true, assignments });
+        }
+        
+        const assignments = await HolidayAssignment.find({ 
+            grade: grade, 
+            isActive: true 
+        }).sort({ createdAt: -1 });
+        
+        console.log(`📚 Found ${assignments.length} assignments for grade ${grade}`);
+        res.json({ success: true, assignments });
+    } catch (error) {
+        console.error('❌ Error fetching assignments by grade:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET single assignment by ID
+app.get('/api/holiday-assignments/id/:id', async (req, res) => {
+    try {
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        res.json({ success: true, assignment });
+    } catch (error) {
+        console.error('❌ Error fetching assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// POST - Upload assignment (Stored in Database as Base64)
+app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
+    try {
+        console.log('📤 POST /api/holiday-assignments');
+        console.log('Body:', req.body);
+        console.log('File:', req.file);
+        
+        const { title, grade, subject, description } = req.body;
+        
+        if (!title || !grade) {
+            return res.status(400).json({ success: false, message: 'Title and Grade are required' });
+        }
+        
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Please upload a file' });
+        }
+        
+        // Read file and convert to Base64
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const base64File = fileBuffer.toString('base64');
+        
+        console.log(`📄 File read: ${req.file.originalname}, Size: ${fileBuffer.length} bytes`);
+        console.log(`📄 Base64 size: ${base64File.length} characters`);
+        
+        const fileName = req.file.originalname;
+        const fileType = fileName.split('.').pop().toLowerCase();
+        const fileSize = req.file.size;
+        
+        // Save to database - file is stored as Base64 in MongoDB
+        const assignment = new HolidayAssignment({
+            title,
+            grade,
+            subject: subject || '',
+            description: description || '',
+            fileName,
+            fileUrl: `/api/holiday-assignments/download/${Date.now()}_${fileName}`,
+            fileType,
+            fileSize,
+            uploadedBy: req.body.uploadedBy || 'Admin',
+            cloudinaryPublicId: '',
+            fileData: base64File,
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+        
+        await assignment.save();
+        
+        // Delete local file after saving to database
+        if (fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+            console.log('🗑️ Local file deleted (stored in database)');
+        }
+        
+        console.log('✅ Assignment saved to database:', assignment._id);
+        console.log(`📁 File stored in MongoDB (${base64File.length} chars)`);
+        
+        res.status(201).json({
+            success: true,
+            message: 'Assignment uploaded successfully! (Stored in database)',
+            assignment: {
+                id: assignment._id,
+                title: assignment.title,
+                grade: assignment.grade,
+                fileName: assignment.fileName,
+                fileUrl: `/api/holiday-assignments/download/${assignment._id}`,
+                storedIn: 'MongoDB (Base64)',
+                fileSize: assignment.fileSize
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error uploading assignment:', error);
+        res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+    }
+});
+
+// PUT - Update assignment
+app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) => {
+    try {
+        console.log('📝 Update request for:', req.params.id);
+        
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+
+        const { title, grade, subject, description, isActive } = req.body;
+        
+        if (title) assignment.title = title;
+        if (grade) assignment.grade = grade;
+        if (subject !== undefined) assignment.subject = subject;
+        if (description !== undefined) assignment.description = description;
+        if (isActive !== undefined) assignment.isActive = isActive === 'true' || isActive === true;
+
+        if (req.file) {
+            console.log('📄 New file uploaded:', req.file.originalname);
+            
+            const oldFilename = path.basename(assignment.fileUrl);
+            const oldFilePath = path.join(__dirname, 'uploads', 'assignments', oldFilename);
+            
+            const fileBuffer = fs.readFileSync(req.file.path);
+            const base64File = fileBuffer.toString('base64');
+            
+            // Update file data
+            assignment.fileData = base64File;
+            assignment.fileName = req.file.originalname;
+            assignment.fileType = req.file.originalname.split('.').pop().toLowerCase();
+            assignment.fileSize = req.file.size;
+            
+            // Clean up old local file if exists
+            if (fs.existsSync(oldFilePath)) {
+                fs.unlinkSync(oldFilePath);
+                console.log('🗑️ Deleted old local file');
+            }
+            
+            // Clean up temp file
+            if (fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+                console.log('🗑️ Temp file deleted');
+            }
+        }
+
+        assignment.updatedAt = new Date();
+        await assignment.save();
+
+        console.log('✅ Assignment updated successfully:', assignment._id);
+        res.json({ 
+            success: true, 
+            message: 'Assignment updated successfully!', 
+            assignment 
+        });
+    } catch (error) {
+        console.error('❌ Error updating assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// DOWNLOAD assignment file - FROM DATABASE
+app.get('/api/holiday-assignments/download/:id', async (req, res) => {
+    try {
+        console.log('📥 GET /api/holiday-assignments/download/', req.params.id);
+        
+        let assignment = await HolidayAssignment.findById(req.params.id);
+        
+        if (!assignment) {
+            assignment = await HolidayAssignment.findOne({ 
+                fileUrl: { $regex: req.params.id } 
+            });
+        }
+        
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        
+        console.log('📄 Assignment found:', assignment.title);
+        console.log('📁 File name:', assignment.fileName);
+        console.log('📊 File data size:', assignment.fileData ? assignment.fileData.length : 0);
+        
+        if (!assignment.fileData || assignment.fileData === '') {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'File data not found in database. Please re-upload.',
+                details: {
+                    title: assignment.title,
+                    fileName: assignment.fileName
+                }
+            });
+        }
+        
+        const fileBuffer = Buffer.from(assignment.fileData, 'base64');
+        console.log(`📄 File size: ${fileBuffer.length} bytes`);
+        
+        const mimeType = assignment.fileType === 'pdf' ? 'application/pdf' :
+                         assignment.fileType === 'doc' ? 'application/msword' :
+                         assignment.fileType === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' :
+                         assignment.fileType === 'xls' ? 'application/vnd.ms-excel' :
+                         assignment.fileType === 'xlsx' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' :
+                         assignment.fileType === 'jpg' || assignment.fileType === 'jpeg' ? 'image/jpeg' :
+                         assignment.fileType === 'png' ? 'image/png' :
+                         'application/octet-stream';
+        
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Content-Disposition', `attachment; filename="${assignment.fileName}"`);
+        res.setHeader('Content-Length', fileBuffer.length);
+        res.send(fileBuffer);
+        
+    } catch (error) {
+        console.error('❌ Download error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// DELETE - Delete assignment with confirmation
+app.delete('/api/holiday-assignments/:id', async (req, res) => {
+    try {
+        const { confirm } = req.query;
+        if (confirm !== 'yes') {
+            return res.status(400).json({ 
+                success: false, 
+                message: '⚠️ Deletion requires confirmation. Use ?confirm=yes to proceed.' 
+            });
+        }
+        
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        
+        console.log('🗑️ DELETING assignment:', assignment.title);
+        console.log('  Grade:', assignment.grade);
+        console.log('  File:', assignment.fileName);
+        
+        // Delete from database
+        await HolidayAssignment.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'Assignment deleted successfully!' });
+    } catch (error) {
+        console.error('❌ Error deleting assignment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET assignment statistics
+app.get('/api/holiday-assignments/stats', async (req, res) => {
+    try {
+        const total = await HolidayAssignment.countDocuments({ isActive: true });
+        const byGrade = await HolidayAssignment.aggregate([
+            { $match: { isActive: true } },
+            { $group: { _id: '$grade', count: { $sum: 1 } } },
+            { $sort: { _id: 1 } }
+        ]);
+        
+        const recent = await HolidayAssignment.find({ isActive: true })
+            .sort({ createdAt: -1 })
+            .limit(5);
+        
+        res.json({
+            success: true,
+            stats: {
+                total,
+                byGrade,
+                recent: recent.map(a => ({
+                    id: a._id,
+                    title: a.title,
+                    grade: a.grade,
+                    createdAt: a.createdAt
+                }))
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error fetching stats:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET all grades that have assignments
+app.get('/api/holiday-assignments/grades/list', async (req, res) => {
+    try {
+        const grades = await HolidayAssignment.distinct('grade', { isActive: true });
+        res.json({ success: true, grades });
+    } catch (error) {
+        console.error('❌ Error fetching grades:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// TEST route for holiday assignments
+app.get('/api/holiday-assignments/test', (req, res) => {
+    res.json({ 
+        success: true, 
+        message: 'Holiday assignment routes are working!',
+        timestamp: new Date().toISOString()
+    });
+});
+// ============================================
 // REGISTER STATIC FILES
 // ============================================
 
