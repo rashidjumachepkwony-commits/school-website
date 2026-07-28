@@ -4393,23 +4393,12 @@ app.post('/api/migrate-to-cloudinary', async (req, res) => {
 // STUDENT PORTAL ROUTES - COMPLETE FIX
 // ============================================
 
-// OPTION 1: Using the existing Student model directly
+// Get all students for auto-complete (portal)
 app.get('/api/students/list', async (req, res) => {
     try {
-        console.log('📡 GET /api/students/list - Fetching students for portal');
-        
-        // Check if Student model is available
-        if (!Student) {
-            console.error('❌ Student model not available');
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Student model not available' 
-            });
-        }
-        
+        console.log('📡 GET /api/students/list');
         const students = await Student.find({ isActive: true }).sort({ name: 1 });
         console.log(`✅ Found ${students.length} students`);
-        
         res.json({ 
             success: true, 
             students: students.map(s => ({
@@ -4421,30 +4410,6 @@ app.get('/api/students/list', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Error in /api/students/list:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: error.message,
-            stack: error.stack 
-        });
-    }
-});
-
-// OPTION 2: Alternative route using the existing API endpoint
-app.get('/api/students/all', async (req, res) => {
-    try {
-        console.log('📡 GET /api/students/all - Alternative endpoint');
-        const students = await Student.find({ isActive: true }).sort({ name: 1 });
-        res.json({ 
-            success: true, 
-            students: students.map(s => ({
-                studentId: s.studentId,
-                name: s.name,
-                grade: s.grade,
-                type: s.type
-            })) 
-        });
-    } catch (error) {
-        console.error('❌ Error in /api/students/all:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -4457,12 +4422,8 @@ app.get('/api/students/portal/:id', async (req, res) => {
             studentId: req.params.id, 
             isActive: true 
         });
-        
         if (!student) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Student not found' 
-            });
+            return res.status(404).json({ success: false, message: 'Student not found' });
         }
         res.json({ success: true, student });
     } catch (error) {
@@ -4471,41 +4432,23 @@ app.get('/api/students/portal/:id', async (req, res) => {
     }
 });
 
-// Debug route
+// Debug route - check if students exist
 app.get('/api/students/debug', async (req, res) => {
     try {
         console.log('📡 GET /api/students/debug');
-        
-        // Check MongoDB connection
-        const mongoose = require('mongoose');
-        const dbState = mongoose.connection.readyState;
-        const states = {
-            0: 'disconnected',
-            1: 'connected',
-            2: 'connecting',
-            3: 'disconnecting'
-        };
-        
         const count = await Student.countDocuments({ isActive: true });
         const students = await Student.find({ isActive: true })
             .limit(5)
             .select('studentId name grade type');
-        
+        console.log(`✅ Found ${count} students total`);
         res.json({
             success: true,
-            dbState: states[dbState] || 'unknown',
-            readyState: dbState,
             totalStudents: count,
-            sampleStudents: students,
-            studentModelExists: typeof Student !== 'undefined'
+            sampleStudents: students
         });
     } catch (error) {
         console.error('❌ Error in /api/students/debug:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: error.message,
-            stack: error.stack 
-        });
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 
@@ -4520,21 +4463,16 @@ app.get('/student-portal.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'student-portal.html'));
 });
 
-// Get student assessment by name
+// Get student assessment by name (for portal)
 app.get('/api/assessments/student-name/:name', async (req, res) => {
     try {
         const name = decodeURIComponent(req.params.name);
         console.log(`📡 GET /api/assessments/student-name/${name}`);
-        
         const student = await StudentAssessment.findOne({ 
             studentName: { $regex: new RegExp('^' + name + '$', 'i') } 
         });
-        
         if (!student) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Student not found' 
-            });
+            return res.status(404).json({ success: false, message: 'Student not found' });
         }
         res.json({ success: true, student });
     } catch (error) {
@@ -4552,6 +4490,421 @@ app.get('/student-report', (req, res) => {
 app.get('/student-report.html', (req, res) => {
     console.log('📄 Serving student report page');
     res.sendFile(path.join(__dirname, 'student_report.html'));
+});
+
+// ============================================
+// CLERK DASHBOARD - FEE MANAGEMENT ROUTES
+// ============================================
+
+// Get all students with fee information for clerk
+app.get('/api/clerk/students/fees', async (req, res) => {
+    try {
+        console.log('📡 GET /api/clerk/students/fees');
+        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+        
+        const studentFees = students.map(student => {
+            const feeData = getFeeStructure(student.grade, student.type);
+            const paid = student.paid || 0;
+            const totalFees = feeData.total || 0;
+            const balance = totalFees - paid;
+            return {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                studentType: student.type,
+                isBoarding: student.type === 'Boarder',
+                totalFees: totalFees,
+                paid: paid,
+                balance: balance,
+                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
+            };
+        });
+        
+        const totalStudents = studentFees.length;
+        const totalDayScholars = studentFees.filter(s => s.studentType === 'Day Scholar').length;
+        const totalBoarders = studentFees.filter(s => s.studentType === 'Boarder').length;
+        const totalPaid = studentFees.reduce((sum, s) => sum + s.paid, 0);
+        const totalBalance = studentFees.reduce((sum, s) => sum + s.balance, 0);
+        
+        res.json({
+            success: true,
+            students: studentFees,
+            totalStudents,
+            totalDayScholars,
+            totalBoarders,
+            totalPaid,
+            totalBalance
+        });
+    } catch (error) {
+        console.error('❌ Error fetching student fees:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get single student fee details for clerk
+app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
+    try {
+        console.log(`📡 GET /api/clerk/students/fees/${req.params.studentId}`);
+        const student = await Student.findOne({ 
+            studentId: req.params.studentId, 
+            isActive: true 
+        });
+        
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        
+        const feeData = getFeeStructure(student.grade, student.type);
+        const paid = student.paid || 0;
+        const totalFees = feeData.total || 0;
+        const balance = totalFees - paid;
+        const payments = await Payment.find({ studentId: student.studentId }).sort({ date: -1 });
+        
+        res.json({
+            success: true,
+            student: {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                studentType: student.type,
+                isBoarding: student.type === 'Boarder'
+            },
+            fees: {
+                total: totalFees,
+                paid: paid,
+                balance: balance,
+                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
+            },
+            feeBreakdown: feeData,
+            payments: payments
+        });
+    } catch (error) {
+        console.error('❌ Error fetching student fee details:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Record payment for clerk
+app.post('/api/clerk/payments/record', async (req, res) => {
+    try {
+        const { studentId, payments, method, reference, notes } = req.body;
+        
+        if (!studentId) {
+            return res.status(400).json({ success: false, message: 'Student ID is required' });
+        }
+        
+        const student = await Student.findOne({ studentId, isActive: true });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        
+        let totalAmount = 0;
+        const categoryList = [];
+        
+        for (const [category, amount] of Object.entries(payments)) {
+            if (amount > 0) {
+                totalAmount += amount;
+                categoryList.push({ category, amount });
+            }
+        }
+        
+        if (totalAmount === 0) {
+            return res.status(400).json({ success: false, message: 'Please enter at least one payment amount' });
+        }
+        
+        student.paid = (student.paid || 0) + totalAmount;
+        await student.save();
+        
+        const payment = new Payment({
+            studentId: student.studentId,
+            studentName: student.name,
+            amount: totalAmount,
+            category: 'Multiple Categories',
+            method: method || 'MPESA',
+            reference: reference || '',
+            notes: notes || '',
+            categories: payments,
+            date: new Date()
+        });
+        await payment.save();
+        
+        res.json({
+            success: true,
+            message: `Payment of KES ${totalAmount.toLocaleString()} recorded for ${student.name}`,
+            totalAmount: totalAmount,
+            categories: categoryList,
+            date: payment.date
+        });
+    } catch (error) {
+        console.error('❌ Error recording payment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get all payments for clerk
+app.get('/api/clerk/payments/all', async (req, res) => {
+    try {
+        console.log('📡 GET /api/clerk/payments/all');
+        const payments = await Payment.find().sort({ date: -1 });
+        res.json({ success: true, payments });
+    } catch (error) {
+        console.error('❌ Error fetching payments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Update payment for clerk
+app.put('/api/clerk/payments/:paymentId', async (req, res) => {
+    try {
+        const { paymentId } = req.params;
+        const { amount, category, method, reference, notes } = req.body;
+        
+        const payment = await Payment.findById(paymentId);
+        if (!payment) {
+            return res.status(404).json({ success: false, message: 'Payment not found' });
+        }
+        
+        const oldAmount = payment.amount;
+        const amountDiff = amount - oldAmount;
+        
+        payment.amount = amount || payment.amount;
+        payment.category = category || payment.category;
+        payment.method = method || payment.method;
+        payment.reference = reference || payment.reference;
+        payment.notes = notes || payment.notes;
+        await payment.save();
+        
+        if (amountDiff !== 0) {
+            const student = await Student.findOne({ studentId: payment.studentId });
+            if (student) {
+                student.paid = (student.paid || 0) + amountDiff;
+                await student.save();
+            }
+        }
+        
+        res.json({ success: true, message: 'Payment updated successfully!' });
+    } catch (error) {
+        console.error('❌ Error updating payment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Delete payment for clerk
+app.delete('/api/clerk/payments/:paymentId', async (req, res) => {
+    try {
+        const { paymentId } = req.params;
+        
+        const payment = await Payment.findById(paymentId);
+        if (!payment) {
+            return res.status(404).json({ success: false, message: 'Payment not found' });
+        }
+        
+        const student = await Student.findOne({ studentId: payment.studentId });
+        if (student) {
+            student.paid = Math.max(0, (student.paid || 0) - payment.amount);
+            await student.save();
+        }
+        
+        await Payment.findByIdAndDelete(paymentId);
+        res.json({ success: true, message: 'Payment deleted successfully!' });
+    } catch (error) {
+        console.error('❌ Error deleting payment:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get fees structure for clerk
+app.get('/api/clerk/fees/structure', async (req, res) => {
+    try {
+        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+        const feeStructure = {};
+        grades.forEach(grade => {
+            feeStructure[grade] = getFeeStructure(grade, 'Day Scholar');
+        });
+        feeStructure['boarding'] = {
+            'Full Boarding': { term1: 8000, term2: 8000, term3: 8000, total: 24000 }
+        };
+        res.json({ success: true, fees: feeStructure });
+    } catch (error) {
+        console.error('❌ Error fetching fees structure:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Update fees structure for clerk
+app.post('/api/clerk/fees/update', async (req, res) => {
+    try {
+        const { fees, type } = req.body;
+        if (!global.feesStructure) {
+            global.feesStructure = {};
+        }
+        if (type === 'boarding') {
+            global.feesStructure.boarding = fees;
+        } else {
+            global.feesStructure.day = fees;
+        }
+        res.json({ success: true, message: 'Fees structure updated successfully!' });
+    } catch (error) {
+        console.error('❌ Error updating fees:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Download fee report for clerk
+app.get('/api/clerk/reports/fee/:type', async (req, res) => {
+    try {
+        const { type } = req.params;
+        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+        
+        const studentFees = students.map(student => {
+            const feeData = getFeeStructure(student.grade, student.type);
+            const paid = student.paid || 0;
+            const totalFees = feeData.total || 0;
+            const balance = totalFees - paid;
+            return {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                studentType: student.type,
+                totalFees: totalFees,
+                paid: paid,
+                balance: balance,
+                status: balance === 0 ? 'Paid' : balance < totalFees ? 'Partial' : 'Unpaid'
+            };
+        });
+        
+        const doc = new PDFDocument({ margin: 40, size: 'A4' });
+        const chunks = [];
+        
+        doc.on('data', (chunk) => chunks.push(chunk));
+        doc.on('end', () => {
+            const pdfBuffer = Buffer.concat(chunks);
+            const filename = `fee_report_${type}_${new Date().toISOString().split('T')[0]}.pdf`;
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Length', pdfBuffer.length);
+            res.send(pdfBuffer);
+        });
+        doc.on('error', (err) => {
+            console.error('PDF error:', err);
+            res.status(500).json({ success: false, message: 'Error generating PDF' });
+        });
+        
+        doc.rect(0, 0, 595, 5).fillColor('#D4A017').fill();
+        doc.moveDown(1);
+        doc.fontSize(18).font('Helvetica-Bold').fillColor('#0A1628').text('CHANGARA STAR ACADEMY', { align: 'center' });
+        doc.fontSize(9).font('Helvetica').fillColor('#D4A017').text('"Assurance to Excellence"', { align: 'center' }).moveDown();
+        doc.fontSize(14).font('Helvetica-Bold').fillColor('#0A1628').text('FEE REPORT', { align: 'center' }).moveDown();
+        doc.fontSize(9).font('Helvetica').fillColor('#6c757d').text(`Type: ${type}`, { align: 'center' }).moveDown(0.3);
+        doc.fontSize(8).font('Helvetica').fillColor('#333').text(`Total Students: ${studentFees.length}`, { align: 'center' });
+        doc.fontSize(8).font('Helvetica').fillColor('#333').text(`Total Fees: KES ${studentFees.reduce((s, i) => s + i.totalFees, 0).toLocaleString()}`, { align: 'center' });
+        doc.fontSize(8).font('Helvetica').fillColor('#333').text(`Total Paid: KES ${studentFees.reduce((s, i) => s + i.paid, 0).toLocaleString()}`, { align: 'center' });
+        doc.fontSize(8).font('Helvetica').fillColor('#333').text(`Total Balance: KES ${studentFees.reduce((s, i) => s + i.balance, 0).toLocaleString()}`, { align: 'center' }).moveDown(0.5);
+        
+        studentFees.forEach((s, i) => {
+            if (doc.y > 700) { doc.addPage(); }
+            doc.fontSize(7).font('Helvetica').fillColor('#333').text(`${i+1}. ${s.name} (${s.id}) - ${s.grade} - ${s.studentType} - Total: KES ${s.totalFees.toLocaleString()}, Paid: KES ${s.paid.toLocaleString()}, Balance: KES ${s.balance.toLocaleString()}`);
+            doc.moveDown(0.15);
+        });
+        doc.moveDown(2);
+        doc.fontSize(7).font('Helvetica').fillColor('#6c757d').text(`Report Date: ${formatKenyaFullTime(new Date())}`, { align: 'center' }).text('CHANGARA STAR ACADEMY | P.O Box 7, Cheptais | 📞 +254 721 556 252', { align: 'center' });
+        doc.end();
+    } catch (error) {
+        console.error('❌ Error generating fee report:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Download fees structure PDF for clerk
+app.get('/api/clerk/reports/fees-structure', async (req, res) => {
+    try {
+        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+        const doc = new PDFDocument({ margin: 40, size: 'A4' });
+        const chunks = [];
+        
+        doc.on('data', (chunk) => chunks.push(chunk));
+        doc.on('end', () => {
+            const pdfBuffer = Buffer.concat(chunks);
+            const filename = `fees_structure_${new Date().toISOString().split('T')[0]}.pdf`;
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Length', pdfBuffer.length);
+            res.send(pdfBuffer);
+        });
+        doc.on('error', (err) => {
+            console.error('PDF error:', err);
+            res.status(500).json({ success: false, message: 'Error generating PDF' });
+        });
+        
+        doc.rect(0, 0, 595, 5).fillColor('#D4A017').fill();
+        doc.moveDown(1);
+        doc.fontSize(18).font('Helvetica-Bold').fillColor('#0A1628').text('CHANGARA STAR ACADEMY', { align: 'center' });
+        doc.fontSize(9).font('Helvetica').fillColor('#D4A017').text('"Assurance to Excellence"', { align: 'center' }).moveDown();
+        doc.fontSize(14).font('Helvetica-Bold').fillColor('#0A1628').text('FEES STRUCTURE', { align: 'center' }).moveDown();
+        doc.fontSize(9).font('Helvetica').fillColor('#333').text(`Academic Year ${new Date().getFullYear()}`, { align: 'center' }).moveDown(1);
+        doc.fontSize(10).font('Helvetica-Bold').fillColor('#0A1628').text('DAY SCHOLAR FEES', { underline: true }).moveDown(0.3);
+        grades.forEach(grade => {
+            const fees = getFeeStructure(grade, 'Day Scholar');
+            doc.fontSize(8).font('Helvetica').fillColor('#333').text(`${grade}: Term 1: KES ${fees.term1.toLocaleString()} | Term 2: KES ${fees.term2.toLocaleString()} | Term 3: KES ${fees.term3.toLocaleString()} | Total: KES ${fees.total.toLocaleString()}`);
+            doc.moveDown(0.2);
+        });
+        doc.moveDown(1);
+        doc.fontSize(10).font('Helvetica-Bold').fillColor('#0A1628').text('BOARDING FEES (Grades 3-6)', { underline: true }).moveDown(0.3);
+        const boardingGrades = ['Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+        boardingGrades.forEach(grade => {
+            const fees = getFeeStructure(grade, 'Boarder');
+            doc.fontSize(8).font('Helvetica').fillColor('#333').text(`${grade}: Term 1: KES ${fees.term1.toLocaleString()} | Term 2: KES ${fees.term2.toLocaleString()} | Term 3: KES ${fees.term3.toLocaleString()} | Total: KES ${fees.total.toLocaleString()}`);
+            doc.moveDown(0.2);
+        });
+        doc.moveDown(2);
+        doc.fontSize(8).font('Helvetica-Bold').fillColor('#dc3545').text('N/B: NO CASH IS ALLOWED IN SCHOOL', { align: 'center' });
+        doc.moveDown(1);
+        doc.fontSize(7).font('Helvetica').fillColor('#6c757d').text(`Generated: ${formatKenyaFullTime(new Date())}`, { align: 'center' });
+        doc.end();
+    } catch (error) {
+        console.error('❌ Error generating fees structure PDF:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// ADMIN ASSESSMENT - FETCH STUDENTS WITH ASSESSMENTS
+// ============================================
+
+// Get students with assessments for admin
+app.get('/api/assessments/grade/:grade', async (req, res) => {
+    try {
+        const { grade } = req.params;
+        const { type, period, month, year, term } = req.query;
+        
+        const filter = { grade };
+        if (type) filter.type = type;
+        if (period) filter.period = period;
+        if (month) filter.month = month;
+        if (year) filter.year = year;
+        if (term) filter.term = term;
+        
+        const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
+        
+        // Get subject config
+        const db = mongoose.connection.db;
+        const collection = db.collection('subjectconfigs_new');
+        const configFilter = { grade: grade, type: type || 'monthly' };
+        if (period) configFilter.period = period;
+        let config = await collection.findOne(configFilter);
+        if (!config) {
+            const defaultSubjects = getDefaultSubjects(grade, type || 'monthly');
+            config = { grade: grade, type: type || 'monthly', period: period || '', subjects: defaultSubjects };
+        }
+        
+        res.json({ success: true, students, subjectConfig: { [`${grade}_${type || 'monthly'}`]: config } });
+    } catch (error) {
+        console.error('❌ Error fetching assessments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 });
 
 // ============================================
