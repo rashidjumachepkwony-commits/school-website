@@ -3,488 +3,1580 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Holiday Assignments - Admin</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Student Portal - Changara Star Academy</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f0f2f5;
             min-height: 100vh;
-            padding: 20px;
         }
-        .container {
+
+        .header {
+            background: linear-gradient(135deg, #0A1628 0%, #1a2a4a 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-        }
-        .header {
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #D4A017;
         }
-        .header h1 { color: #0A1628; font-size: 28px; }
-        .header h1 i { color: #D4A017; margin-right: 10px; }
-        .header .btn-home {
-            padding: 10px 25px;
-            background: #0A1628;
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .logo h1 span {
+            color: #C9A84C;
+        }
+
+        .logo .motto {
+            font-size: 12px;
+            color: #C9A84C;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-back {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #C9A84C;
             color: white;
-            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-back:hover {
+            background: #C9A84C;
+            color: #0A1628;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: white;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            color: #333;
+        }
+
+        .tab:hover {
+            border-color: #C9A84C;
+            background: #f8f9fa;
+        }
+
+        .tab.active {
+            background: #0A1628;
+            color: white;
+            border-color: #0A1628;
+        }
+
+        .tab i {
+            margin-right: 8px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #1a8a3f 0%, #0d6efd 100%);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .welcome-card h2 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .welcome-card p {
+            opacity: 0.9;
+            margin-top: 5px;
+            font-size: 15px;
+        }
+
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .search-section h3 {
+            color: #0A1628;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #C9A84C;
+        }
+
+        .search-box button {
+            padding: 12px 30px;
+            background: #0A1628;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+
+        .search-box button:hover {
+            background: #1a2a4a;
+        }
+
+        .search-box button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .search-hint {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+
+        .suggestions {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 100;
+        }
+
+        .suggestions.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 12px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: #f8f9fa;
+        }
+
+        .suggestion-item .name {
+            font-weight: 500;
+            color: #0A1628;
+        }
+
+        .suggestion-item .details {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .suggestion-item .badge {
+            background: #C9A84C;
+            color: #0A1628;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .student-info {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: none;
+            margin-bottom: 30px;
+            border-left: 4px solid #C9A84C;
+        }
+
+        .student-info.active {
+            display: block;
+        }
+
+        .student-info .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .student-info .info-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .student-info .info-item .label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .student-info .info-item .value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0A1628;
+            margin-top: 2px;
+        }
+
+        .fee-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .fee-section.active {
+            display: block;
+        }
+
+        .fee-section h3 {
+            color: #0A1628;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .fee-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .fee-card {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .fee-card .amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0A1628;
+        }
+
+        .fee-card .label {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .fee-card.paid .amount {
+            color: #1a8a3f;
+        }
+
+        .fee-card.balance .amount {
+            color: #dc3545;
+        }
+
+        .fee-card.total .amount {
+            color: #0A1628;
+        }
+
+        .fee-status {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .fee-status.paid {
+            background: #E8F5E9;
+            color: #1a8a3f;
+        }
+
+        .fee-status.partial {
+            background: #FFF8E1;
+            color: #e6a800;
+        }
+
+        .fee-status.unpaid {
+            background: #FBE9E7;
+            color: #dc3545;
+        }
+
+        .payments-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .payments-table th {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 13px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .payments-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .payments-table tr:hover td {
+            background: #fafafa;
+        }
+
+        .payments-table .no-payments {
+            text-align: center;
+            color: #6c757d;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        .assessment-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .assessment-section.active {
+            display: block;
+        }
+
+        .assessment-section h3 {
+            color: #0A1628;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .assessment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .assessment-card {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 4px solid #C9A84C;
+        }
+
+        .assessment-card .subject {
+            font-weight: 600;
+            color: #0A1628;
+            font-size: 15px;
+        }
+
+        .assessment-card .score {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+
+        .assessment-card .score .max {
+            font-size: 14px;
+            font-weight: 400;
+            color: #6c757d;
+        }
+
+        .assessment-card .level {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .assessment-card .level.EE {
+            color: #1a8a3f;
+        }
+        .assessment-card .level.ME {
+            color: #0d6efd;
+        }
+        .assessment-card .level.AE {
+            color: #e6a800;
+        }
+        .assessment-card .level.BE {
+            color: #dc3545;
+        }
+
+        .assessment-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            text-align: center;
+        }
+
+        .assessment-summary .stat {
+            padding: 10px;
+        }
+
+        .assessment-summary .stat .number {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0A1628;
+        }
+
+        .assessment-summary .stat .label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* Holiday Assignments Section */
+        .assignments-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .assignments-section.active {
+            display: block;
+        }
+
+        .assignments-section h3 {
+            color: #0A1628;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .assignments-section h3 i {
+            color: #D4A017;
+        }
+
+        .assignment-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .assignment-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #C9A84C;
+        }
+
+        .assignment-card .info {
+            flex: 1;
+        }
+
+        .assignment-card .info .title {
+            font-weight: 600;
+            color: #0A1628;
+            font-size: 16px;
+        }
+
+        .assignment-card .info .meta {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .assignment-card .info .meta span {
+            margin-right: 15px;
+        }
+
+        .assignment-card .info .description {
+            font-size: 13px;
+            color: #555;
+            margin-top: 8px;
+        }
+
+        .assignment-card .download-btn {
+            padding: 10px 25px;
+            background: #C9A84C;
+            color: #0A1628;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.3s;
-        }
-        .header .btn-home:hover { background: #1a2a4a; transform: scale(1.02); }
-
-        .alert {
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin: 15px 0;
-            display: none;
-            font-weight: 600;
-        }
-        .alert.success { display: block; background: #d4edda; color: #155724; border: 2px solid #0b8f34; }
-        .alert.error { display: block; background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
-        .alert.info { display: block; background: #d1ecf1; color: #0c5460; border: 2px solid #0b5394; }
-
-        .form-section {
-            background: #f8f9fc;
-            padding: 25px;
-            border-radius: 15px;
-            border: 2px solid #e8ecf1;
-            margin-bottom: 25px;
-        }
-        .form-section h3 { color: #0A1628; margin-bottom: 15px; font-size: 20px; }
-        .form-section h3 i { color: #28a745; margin-right: 8px; }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 10px 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
             font-size: 14px;
-            background: white;
-            transition: border-color 0.3s;
-            font-family: inherit;
         }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            border-color: #D4A017;
-            outline: none;
-        }
-        .form-group textarea { resize: vertical; min-height: 60px; }
-        .form-group .file-input-wrapper {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: white;
-        }
-        .form-group .file-input-wrapper:hover { border-color: #28a745; background: #fafffe; }
-        .form-group .file-input-wrapper .icon { font-size: 32px; display: block; }
-        .form-group .file-input-wrapper input[type="file"] { display: none; }
-        .form-group .file-input-wrapper .file-name { color: #0b5394; font-weight: 600; margin-top: 5px; }
 
-        .btn {
-            padding: 8px 18px;
+        .assignment-card .download-btn:hover {
+            background: #b8983a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.3);
+        }
+
+        .assignment-card .file-icon {
+            font-size: 32px;
+            margin-right: 15px;
+            color: #dc3545;
+        }
+
+        .assignment-card .file-icon.pdf { color: #dc3545; }
+        .assignment-card .file-icon.word { color: #2b5797; }
+        .assignment-card .file-icon.excel { color: #217346; }
+        .assignment-card .file-icon.image { color: #17a2b8; }
+
+        .no-assignments {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .no-assignments .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .btn-report {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #C9A84C;
+            color: #0A1628;
             border: none;
             border-radius: 8px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
+            margin-top: 15px;
+            text-decoration: none;
         }
-        .btn:hover { transform: scale(1.02); }
-        .btn-primary { background: #D4A017; color: #0A1628; }
-        .btn-primary:hover { background: #f5c842; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-success:hover { background: #1e7e34; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-danger:hover { background: #c82333; }
-        .btn-info { background: #17a2b8; color: white; }
-        .btn-info:hover { background: #138496; }
-        .btn-secondary { background: #6c757d; color: white; }
-        .btn-secondary:hover { background: #5a6268; }
-        .btn-sm { padding: 4px 12px; font-size: 12px; }
 
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        table th { background: #0A1628; color: white; padding: 10px 12px; text-align: left; }
-        table td { padding: 8px 12px; border-bottom: 1px solid #e8ecf1; }
-        table tr:nth-child(even) { background: #fafbfc; }
-        table tr:hover { background: #f0f4ff; }
-        .no-records { text-align: center; padding: 30px; color: #999; }
+        .btn-report:hover {
+            background: #b8983a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3);
+        }
 
-        .loading-spinner {
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #e8ecf1;
-            border-top: 3px solid #D4A017;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f0f0f0;
+            border-top: 3px solid #C9A84C;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .badge-grade {
-            display: inline-block;
-            padding: 2px 12px;
-            border-radius: 50px;
-            font-size: 11px;
-            font-weight: 700;
-            background: #D4A017;
-            color: #0A1628;
-        }
-        .badge-stored {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 50px;
-            font-size: 10px;
-            font-weight: 700;
-            background: #17a2b8;
-            color: white;
         }
 
-        .search-section {
-            background: #f8f9fc;
-            padding: 15px;
-            border-radius: 12px;
-            border: 2px solid #e8ecf1;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #FBE9E7;
+            color: #dc3545;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            display: none;
             margin-bottom: 20px;
         }
-        .search-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 15px;
-            align-items: end;
-        }
-        .search-grid .form-group label {
+
+        .error-message.active {
             display: block;
-            font-weight: 600;
-            color: #333;
-            font-size: 12px;
-            margin-bottom: 4px;
+        }
+
+        .info-message {
+            background: #E3F2FD;
+            color: #0d6efd;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #0d6efd;
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .info-message.active {
+            display: block;
+        }
+
+        .footer {
+            background: #0A1628;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .footer p {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .footer .gold {
+            color: #C9A84C;
         }
 
         @media (max-width: 768px) {
-            .container { padding: 15px; }
-            .form-grid { grid-template-columns: 1fr; }
-            .search-grid { grid-template-columns: 1fr; }
-            .header { flex-direction: column; gap: 10px; text-align: center; }
-            table { font-size: 11px; }
-            table th, table td { padding: 6px 8px; }
+            .header-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .header-right {
+                flex-direction: column;
+            }
+
+            .welcome-card {
+                padding: 20px;
+            }
+
+            .welcome-card h2 {
+                font-size: 20px;
+            }
+
+            .search-box input {
+                min-width: 100%;
+            }
+
+            .search-box button {
+                width: 100%;
+            }
+
+            .student-info .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fee-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .assessment-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .payments-table {
+                font-size: 12px;
+            }
+
+            .payments-table th,
+            .payments-table td {
+                padding: 8px 10px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                text-align: center;
+            }
+
+            .assignment-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .assignment-card .file-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .assignment-card .download-btn {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .fee-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .assessment-summary {
+                grid-template-columns: 1fr 1fr;
+            }
         }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <div class="header">
-        <h1><i class="fas fa-file-alt"></i> Holiday Assignments</h1>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <a href="admin-dashboard.html" class="btn-home"><i class="fas fa-arrow-left"></i> Dashboard</a>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>CHANGARA <span>STAR</span></h1>
+                <div class="motto">"Nurturing Stars, Building Futures"</div>
+            </div>
+            <div class="header-right">
+                <span>Student Portal</span>
+                <a href="/" class="btn-back">← Back to Home</a>
+            </div>
         </div>
-    </div>
+    </header>
 
-    <div id="alert" class="alert"></div>
+    <div class="container">
+        <div class="welcome-card">
+            <h2>👋 Welcome to Student Portal</h2>
+            <p>Search for your name to view your assessment results, fee status, and download holiday assignments.</p>
+        </div>
 
-    <!-- Upload Form -->
-    <div class="form-section">
-        <h3><i class="fas fa-upload"></i> Upload New Assignment</h3>
-        <div class="form-grid">
-            <div class="form-group">
-                <label>📝 Assignment Title *</label>
-                <input type="text" id="assignmentTitle" placeholder="e.g., Holiday Assignment - Term 2">
+        <div id="errorMessage" class="error-message"></div>
+        <div id="infoMessage" class="info-message"></div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('profile')"><i class="fas fa-user"></i> My Profile</button>
+            <button class="tab" onclick="switchTab('assignments')"><i class="fas fa-file-alt"></i> Holiday Assignments</button>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="tabProfile" class="tab-content active">
+            <div class="search-section">
+                <h3>🔍 Find Your Profile</h3>
+                <div class="search-box">
+                    <input type="text" id="studentSearch" placeholder="Type your name or student ID..." autocomplete="off">
+                    <button id="searchBtn">Search</button>
+                </div>
+                <div class="search-hint">💡 Start typing your name to see suggestions</div>
+                <div id="suggestions" class="suggestions"></div>
             </div>
-            <div class="form-group">
-                <label>🎓 Grade *</label>
-                <select id="assignmentGrade">
-                    <option value="Playgroup">Playgroup</option>
-                    <option value="PP1">PP1</option>
-                    <option value="PP2">PP2</option>
-                    <option value="Grade 1">Grade 1</option>
-                    <option value="Grade 2">Grade 2</option>
-                    <option value="Grade 3">Grade 3</option>
-                    <option value="Grade 4" selected>Grade 4</option>
-                    <option value="Grade 5">Grade 5</option>
-                    <option value="Grade 6">Grade 6</option>
-                </select>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Loading student data...</p>
             </div>
-            <div class="form-group">
-                <label>📚 Subject (Optional)</label>
-                <input type="text" id="assignmentSubject" placeholder="e.g., Mathematics, English">
+
+            <div id="studentInfo" class="student-info">
+                <div class="info-grid" id="studentInfoGrid"></div>
             </div>
-            <div class="form-group">
-                <label>📄 Upload File *</label>
-                <div class="file-input-wrapper" onclick="document.getElementById('fileInput').click()">
-                    <span class="icon">📂</span>
-                    <p><strong>Click to select file</strong></p>
-                    <p style="font-size:12px;color:#666;">PDF, Word, Excel, Images accepted</p>
-                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" onchange="handleFileSelect(event)">
-                    <div class="file-name" id="fileName">No file selected</div>
+
+            <div id="feeSection" class="fee-section">
+                <h3>💰 Fee Status</h3>
+                <div id="feeCards" class="fee-cards"></div>
+                <div id="feeStatus"></div>
+                <h3 style="margin-top: 25px;">📋 Payment History</h3>
+                <div id="paymentsContainer"></div>
+            </div>
+
+            <div id="assessmentSection" class="assessment-section">
+                <h3>📊 Assessment Results</h3>
+                <div id="assessmentGrid" class="assessment-grid"></div>
+                <div id="assessmentSummary" class="assessment-summary"></div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn-report" onclick="downloadReport()">📄 Download Full Report</button>
                 </div>
             </div>
-            <div class="form-group" style="grid-column: 1 / -1;">
-                <label>📋 Description (Optional)</label>
-                <textarea id="assignmentDescription" placeholder="Brief description of the assignment..."></textarea>
-            </div>
         </div>
-        <button class="btn btn-success" onclick="uploadAssignment()" style="padding:12px 35px;font-size:16px;margin-top:10px;">
-            <i class="fas fa-upload"></i> Upload Assignment
-        </button>
-    </div>
 
-    <!-- Search & List -->
-    <h3 style="color:#0A1628;margin:20px 0 10px;"><i class="fas fa-list"></i> Uploaded Assignments</h3>
-    
-    <div class="search-section">
-        <div class="search-grid">
-            <div class="form-group">
-                <label>🎓 Filter by Grade</label>
-                <select id="filterGrade" onchange="loadAssignments()">
-                    <option value="">All Grades</option>
-                    <option value="Playgroup">Playgroup</option>
-                    <option value="PP1">PP1</option>
-                    <option value="PP2">PP2</option>
-                    <option value="Grade 1">Grade 1</option>
-                    <option value="Grade 2">Grade 2</option>
-                    <option value="Grade 3">Grade 3</option>
-                    <option value="Grade 4">Grade 4</option>
-                    <option value="Grade 5">Grade 5</option>
-                    <option value="Grade 6">Grade 6</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>🔍 Search</label>
-                <input type="text" id="filterTitle" placeholder="Search by title..." onkeyup="loadAssignments()">
-            </div>
-            <button class="btn btn-primary" onclick="loadAssignments()" style="align-self:end;">
-                <i class="fas fa-sync"></i> Refresh
-            </button>
-        </div>
-    </div>
-
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Grade</th>
-                    <th>Subject</th>
-                    <th>File</th>
-                    <th>Storage</th>
-                    <th>Uploaded</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="assignmentsBody">
-                <tr><td colspan="8" class="no-records"><span class="loading-spinner"></span> Loading...</td></tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-    let selectedFile = null;
-    let allAssignments = [];
-
-    function showAlert(message, type) {
-        const el = document.getElementById('alert');
-        el.className = 'alert ' + type;
-        el.textContent = message;
-        el.style.display = 'block';
-        setTimeout(() => { el.style.display = 'none'; }, 5000);
-    }
-
-    function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (file) {
-            selectedFile = file;
-            document.getElementById('fileName').textContent = '📄 ' + file.name + ' (' + (file.size / 1024).toFixed(2) + ' KB)';
-        }
-    }
-
-    async function uploadAssignment() {
-        const title = document.getElementById('assignmentTitle').value.trim();
-        const grade = document.getElementById('assignmentGrade').value;
-        const subject = document.getElementById('assignmentSubject').value.trim();
-        const description = document.getElementById('assignmentDescription').value.trim();
-
-        if (!title) { showAlert('❌ Please enter a title', 'error'); return; }
-        if (!selectedFile) { showAlert('❌ Please select a file to upload', 'error'); return; }
-
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('grade', grade);
-        formData.append('subject', subject);
-        formData.append('description', description);
-        formData.append('file', selectedFile);
-
-        const uploadBtn = document.querySelector('.btn-success');
-        const originalText = uploadBtn.innerHTML;
-        uploadBtn.innerHTML = '<span class="loading-spinner"></span> Uploading...';
-        uploadBtn.disabled = true;
-
-        try {
-            const response = await fetch('/api/holiday-assignments', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                showAlert('✅ Assignment uploaded successfully! (Stored in database)', 'success');
-                document.getElementById('assignmentTitle').value = '';
-                document.getElementById('assignmentSubject').value = '';
-                document.getElementById('assignmentDescription').value = '';
-                document.getElementById('fileName').textContent = 'No file selected';
-                selectedFile = null;
-                document.getElementById('fileInput').value = '';
-                loadAssignments();
-            } else {
-                showAlert('❌ Error: ' + data.message, 'error');
-            }
-        } catch (error) {
-            console.error('Upload error:', error);
-            showAlert('❌ Error uploading: ' + error.message, 'error');
-        } finally {
-            uploadBtn.innerHTML = originalText;
-            uploadBtn.disabled = false;
-        }
-    }
-
-    async function loadAssignments() {
-        const grade = document.getElementById('filterGrade').value;
-        const title = document.getElementById('filterTitle').value.toLowerCase().trim();
-        const tbody = document.getElementById('assignmentsBody');
-        tbody.innerHTML = '<tr><td colspan="8" class="no-records"><span class="loading-spinner"></span> Loading...</td></tr>';
-
-        try {
-            const url = grade ? `/api/holiday-assignments/${encodeURIComponent(grade)}` : '/api/holiday-assignments/all';
-            console.log('📡 Fetching:', url);
-            
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.success) {
-                allAssignments = data.assignments || [];
-                console.log('📚 Found', allAssignments.length, 'assignments');
+        <!-- Assignments Tab -->
+        <div id="tabAssignments" class="tab-content">
+            <div class="assignments-section active">
+                <h3><i class="fas fa-file-alt"></i> Holiday Assignments</h3>
+                <p style="color: #6c757d; margin-bottom: 20px;">Select a student to view their grade-specific holiday assignments.</p>
                 
-                if (title) {
-                    allAssignments = allAssignments.filter(a => 
-                        a.title.toLowerCase().includes(title)
-                    );
+                <!-- Assignment Search -->
+                <div class="search-section" style="margin-bottom: 20px;">
+                    <div class="search-box">
+                        <input type="text" id="assignmentSearch" placeholder="Search assignments by title..." onkeyup="filterAssignments()">
+                        <select id="assignmentGradeFilter" onchange="loadAssignmentsForStudent()" style="padding:12px 18px; border:2px solid #e0e0e0; border-radius:8px; font-size:15px; min-width:150px;">
+                            <option value="">All Grades</option>
+                            <option value="Playgroup">Playgroup</option>
+                            <option value="PP1">PP1</option>
+                            <option value="PP2">PP2</option>
+                            <option value="Grade 1">Grade 1</option>
+                            <option value="Grade 2">Grade 2</option>
+                            <option value="Grade 3">Grade 3</option>
+                            <option value="Grade 4">Grade 4</option>
+                            <option value="Grade 5">Grade 5</option>
+                            <option value="Grade 6">Grade 6</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="loadAssignmentsForStudent()" style="padding:12px 25px; background:#0A1628; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="search-hint">💡 Assignments are filtered by the selected student's grade</div>
+                </div>
+
+                <div id="assignmentsList">
+                    <div class="no-assignments">
+                        <div class="icon">📚</div>
+                        <h4>No Student Selected</h4>
+                        <p>Please search for your profile in the "My Profile" tab first, then come back here to see your grade-specific assignments.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© <span id="year"></span> <span class="gold">Changara Star Academy</span> • P.O Box 7, Cheptais • 📞 +254 721 556 252</p>
+        <p style="font-size: 11px; opacity: 0.6; margin-top: 5px;">"Assurance to Excellence"</p>
+    </footer>
+
+    <script>
+        // ============================================
+        // STUDENT PORTAL - JavaScript
+        // ============================================
+
+        const searchInput = document.getElementById('studentSearch');
+        const searchBtn = document.getElementById('searchBtn');
+        const suggestions = document.getElementById('suggestions');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const infoMessage = document.getElementById('infoMessage');
+        const studentInfo = document.getElementById('studentInfo');
+        const studentInfoGrid = document.getElementById('studentInfoGrid');
+        const feeSection = document.getElementById('feeSection');
+        const feeCards = document.getElementById('feeCards');
+        const feeStatus = document.getElementById('feeStatus');
+        const paymentsContainer = document.getElementById('paymentsContainer');
+        const assessmentSection = document.getElementById('assessmentSection');
+        const assessmentGrid = document.getElementById('assessmentGrid');
+        const assessmentSummary = document.getElementById('assessmentSummary');
+
+        let currentStudent = null;
+        let allStudents = [];
+        let allAssignments = [];
+        let searchTimeout = null;
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // ============================================
+        // TAB SWITCHING
+        // ============================================
+
+        function switchTab(tab) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+            if (tab === 'profile') {
+                document.querySelector('.tab:first-child').classList.add('active');
+                document.getElementById('tabProfile').classList.add('active');
+            } else {
+                document.querySelector('.tab:last-child').classList.add('active');
+                document.getElementById('tabAssignments').classList.add('active');
+                // Load assignments if student is selected
+                if (currentStudent) {
+                    loadAssignmentsForStudent();
+                } else {
+                    document.getElementById('assignmentsList').innerHTML = `
+                        <div class="no-assignments">
+                            <div class="icon">👤</div>
+                            <h4>No Student Selected</h4>
+                            <p>Please search for your profile in the "My Profile" tab first, then come back here to see your grade-specific assignments.</p>
+                        </div>
+                    `;
                 }
+            }
+        }
 
-                if (allAssignments.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="no-records">📭 No assignments found. Upload one above!</td></tr>';
-                    return;
+        // ============================================
+        // LOAD STUDENTS - USING EXISTING /api/students
+        // ============================================
+
+        async function loadStudents() {
+            try {
+                showInfo('Loading student data...');
+                
+                const response = await fetch('/api/students');
+                const data = await response.json();
+                
+                console.log('📡 API Response:', data);
+                
+                if (data.success) {
+                    allStudents = data.students || [];
+                    console.log('✅ Loaded', allStudents.length, 'students');
+                    
+                    if (allStudents.length === 0) {
+                        showInfo('ℹ️ No students found in the database. Please add students first via the admin panel.');
+                    } else {
+                        hideInfo();
+                        showInfo(`✅ ${allStudents.length} students available. Start typing to search.`);
+                        setTimeout(hideInfo, 3000);
+                    }
+                } else {
+                    showError('Failed to load students: ' + (data.message || 'Unknown error'));
                 }
+            } catch (err) {
+                console.error('Error loading students:', err);
+                showError('Could not connect to the server. Please check if the server is running.');
+            }
+        }
 
-                let html = '';
-                allAssignments.forEach((a, index) => {
-                    const date = a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'Unknown';
-                    const fileIcon = a.fileType === 'pdf' ? 'fa-file-pdf' :
-                                   a.fileType === 'doc' ? 'fa-file-word' :
-                                   a.fileType === 'docx' ? 'fa-file-word' :
-                                   a.fileType === 'xls' ? 'fa-file-excel' :
-                                   a.fileType === 'xlsx' ? 'fa-file-excel' :
-                                   'fa-file-alt';
-                    const fileColor = a.fileType === 'pdf' ? '#dc3545' :
-                                     a.fileType === 'doc' || a.fileType === 'docx' ? '#2b5797' :
-                                     a.fileType === 'xls' || a.fileType === 'xlsx' ? '#217346' : '#17a2b8';
+        // ============================================
+        // SEARCH / AUTOCOMPLETE
+        // ============================================
 
-                    // ✅ Check if file is stored in database (has fileData)
-                    const isInDatabase = a.fileData && a.fileData.length > 0;
-                    const storageLabel = isInDatabase ? 'Database' : (a.cloudinaryPublicId ? 'Cloudinary' : 'Local');
-                    const storageBadge = isInDatabase ? 'badge-stored' : 'badge-grade';
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            clearTimeout(searchTimeout);
 
-                    html += `
+            if (query.length === 0) {
+                suggestions.classList.remove('active');
+                return;
+            }
+
+            if (query.length < 2) {
+                suggestions.classList.remove('active');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                const matches = allStudents.filter(s =>
+                    s.name.toLowerCase().includes(query) ||
+                    (s.studentId || '').toLowerCase().includes(query)
+                ).slice(0, 10);
+
+                renderSuggestions(matches);
+            }, 200);
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const query = this.value.trim();
+                if (query.length > 0) {
+                    suggestions.classList.remove('active');
+                    searchStudent(query);
+                }
+            }
+        });
+
+        function renderSuggestions(matches) {
+            if (matches.length === 0) {
+                suggestions.classList.remove('active');
+                return;
+            }
+
+            suggestions.innerHTML = matches.map(s => `
+                <div class="suggestion-item" data-studentid="${s.studentId}" onclick="selectStudent('${s.studentId}')">
+                    <div>
+                        <div class="name">${s.name}</div>
+                        <div class="details">${s.studentId} • ${s.grade}</div>
+                    </div>
+                    <span class="badge">${s.type === 'Boarder' ? '🏠 Boarder' : 'Day'}</span>
+                </div>
+            `).join('');
+
+            suggestions.classList.add('active');
+        }
+
+        function selectStudent(studentId) {
+            searchInput.value = '';
+            suggestions.classList.remove('active');
+            fetchStudentData(studentId);
+        }
+
+        searchBtn.addEventListener('click', function() {
+            const query = searchInput.value.trim();
+            if (query.length === 0) {
+                showError('Please enter a student name or ID');
+                return;
+            }
+            suggestions.classList.remove('active');
+            searchStudent(query);
+        });
+
+        function searchStudent(query) {
+            if (allStudents.length === 0) {
+                showError('No students loaded. Please refresh the page or contact admin.');
+                return;
+            }
+
+            const exactMatch = allStudents.find(s =>
+                s.name.toLowerCase() === query.toLowerCase() ||
+                (s.studentId || '').toLowerCase() === query.toLowerCase()
+            );
+
+            if (exactMatch) {
+                fetchStudentData(exactMatch.studentId);
+                return;
+            }
+
+            const partialMatches = allStudents.filter(s =>
+                s.name.toLowerCase().includes(query.toLowerCase()) ||
+                (s.studentId || '').toLowerCase().includes(query.toLowerCase())
+            );
+
+            if (partialMatches.length === 1) {
+                fetchStudentData(partialMatches[0].studentId);
+                return;
+            }
+
+            if (partialMatches.length > 1) {
+                renderSuggestions(partialMatches);
+                showError('Multiple students found. Please select one from the suggestions.');
+                return;
+            }
+
+            showError('No student found with name or ID: "' + query + '". Please check and try again.');
+        }
+
+        // ============================================
+        // FETCH STUDENT DATA
+        // ============================================
+
+        function fetchStudentData(studentId) {
+            showLoading(true);
+            hideError();
+            hideInfo();
+
+            fetch(`/api/students/${studentId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        showError(data.message || 'Student not found');
+                        showLoading(false);
+                        return;
+                    }
+                    currentStudent = data.student;
+                    displayStudentInfo(currentStudent);
+                    fetchStudentFees(studentId);
+                    fetchStudentAssessment(studentId);
+                    showLoading(false);
+                    
+                    // Load assignments for this student's grade
+                    loadAssignmentsForStudent();
+                })
+                .catch(err => {
+                    showError('Error fetching student data: ' + err.message);
+                    showLoading(false);
+                });
+        }
+
+        // ============================================
+        // DISPLAY STUDENT INFO
+        // ============================================
+
+        function displayStudentInfo(student) {
+            studentInfo.classList.add('active');
+
+            const typeIcon = student.type === 'Boarder' ? '🏠' : '☀️';
+            const genderIcon = student.gender === 'Male' ? '👨' : '👩';
+
+            studentInfoGrid.innerHTML = `
+                <div class="info-item">
+                    <div class="label">Student ID</div>
+                    <div class="value">${student.studentId}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Full Name</div>
+                    <div class="value">${student.name}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Grade</div>
+                    <div class="value">${student.grade}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Gender</div>
+                    <div class="value">${genderIcon} ${student.gender}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Student Type</div>
+                    <div class="value">${typeIcon} ${student.type}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Guardian</div>
+                    <div class="value">${student.guardian || 'Not specified'}</div>
+                </div>
+            `;
+
+            // Update assignment grade filter
+            document.getElementById('assignmentGradeFilter').value = student.grade;
+        }
+
+        // ============================================
+        // FETCH STUDENT FEES
+        // ============================================
+
+        function fetchStudentFees(studentId) {
+            fetch(`/api/clerk/students/fees/${studentId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        displayFees(data);
+                    } else {
+                        feeSection.classList.remove('active');
+                        console.error('Fee data error:', data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching fees:', err);
+                    feeSection.classList.remove('active');
+                });
+        }
+
+        function displayFees(data) {
+            feeSection.classList.add('active');
+
+            const { fees, payments } = data;
+
+            feeCards.innerHTML = `
+                <div class="fee-card total">
+                    <div class="amount">KES ${fees.total.toLocaleString()}</div>
+                    <div class="label">Total Fees</div>
+                </div>
+                <div class="fee-card paid">
+                    <div class="amount">KES ${fees.paid.toLocaleString()}</div>
+                    <div class="label">Amount Paid</div>
+                </div>
+                <div class="fee-card balance">
+                    <div class="amount">KES ${fees.balance.toLocaleString()}</div>
+                    <div class="label">Balance</div>
+                </div>
+            `;
+
+            const statusClass = fees.status === 'paid' ? 'paid' : fees.status === 'partial' ? 'partial' : 'unpaid';
+            const statusText = fees.status === 'paid' ? '✅ Fully Paid' :
+                              fees.status === 'partial' ? '🔄 Partial Payment' : '❌ Unpaid';
+
+            feeStatus.innerHTML = `
+                <div style="margin-top: 10px; padding: 10px 0; border-top: 1px solid #f0f0f0;">
+                    <span class="fee-status ${statusClass}">${statusText}</span>
+                </div>
+            `;
+
+            if (payments && payments.length > 0) {
+                let tableHtml = `
+                    <table class="payments-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Category</th>
+                                <th>Method</th>
+                                <th>Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                payments.forEach(p => {
+                    const date = new Date(p.date);
+                    tableHtml += `
                         <tr>
-                            <td>${index + 1}</td>
-                            <td><strong>${a.title}</strong></td>
-                            <td><span class="badge-grade">${a.grade}</span></td>
-                            <td>${a.subject || '-'}</td>
-                            <td>
-                                <a href="/api/holiday-assignments/download/${a._id}" style="color:${fileColor};text-decoration:none;font-weight:600;" target="_blank">
-                                    <i class="fas ${fileIcon}"></i> ${a.fileName}
-                                </a>
-                            </td>
-                            <td><span class="${storageBadge}">${storageLabel}</span></td>
-                            <td style="font-size:12px;color:#666;">${date}</td>
-                            <td>
-                                <button class="btn btn-danger btn-sm" onclick="deleteAssignment('${a._id}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
+                            <td>${date.toLocaleDateString('en-KE')}</td>
+                            <td><strong>KES ${(p.amount || 0).toLocaleString()}</strong></td>
+                            <td>${p.category || 'School Fees'}</td>
+                            <td>${p.method || 'MPESA'}</td>
+                            <td>${p.reference || '-'}</td>
                         </tr>
                     `;
                 });
-                tbody.innerHTML = html;
+
+                tableHtml += `
+                        </tbody>
+                    </table>
+                `;
+
+                paymentsContainer.innerHTML = tableHtml;
             } else {
-                tbody.innerHTML = '<tr><td colspan="8" class="no-records">❌ Error loading assignments: ' + (data.message || 'Unknown error') + '</td></tr>';
+                paymentsContainer.innerHTML = `
+                    <div class="no-payments">No payment records found</div>
+                `;
             }
-        } catch (error) {
-            console.error('Error:', error);
-            tbody.innerHTML = '<tr><td colspan="8" class="no-records">❌ Error loading assignments: ' + error.message + '</td></tr>';
         }
-    }
 
-    async function deleteAssignment(id) {
-        if (!confirm('⚠️ Are you sure you want to delete this assignment? This cannot be undone.')) return;
+        // ============================================
+        // FETCH STUDENT ASSESSMENT
+        // ============================================
 
-        try {
-            const response = await fetch(`/api/holiday-assignments/${id}?confirm=yes`, {
-                method: 'DELETE'
+        function fetchStudentAssessment(studentId) {
+            fetch(`/api/assessments/student-name/${encodeURIComponent(currentStudent.name)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.student) {
+                        displayAssessment(data.student);
+                    } else {
+                        fetch(`/api/assessments/search?name=${encodeURIComponent(currentStudent.name)}`)
+                            .then(res => res.json())
+                            .then(searchData => {
+                                if (searchData.success && searchData.students && searchData.students.length > 0) {
+                                    const latest = searchData.students.sort((a, b) =>
+                                        new Date(b.createdAt) - new Date(a.createdAt)
+                                    )[0];
+                                    displayAssessment(latest);
+                                } else {
+                                    assessmentSection.classList.remove('active');
+                                }
+                            })
+                            .catch(() => {
+                                assessmentSection.classList.remove('active');
+                            });
+                    }
+                })
+                .catch(() => {
+                    assessmentSection.classList.remove('active');
+                });
+        }
+
+        function displayAssessment(student) {
+            assessmentSection.classList.add('active');
+
+            const assessments = student.assessments || [];
+
+            if (assessments.length > 0) {
+                assessmentGrid.innerHTML = assessments.map(a => {
+                    const levelClass = a.performanceLevel === 'Exceeding Expectation' ? 'EE' :
+                                       a.performanceLevel === 'Meeting Expectation' ? 'ME' :
+                                       a.performanceLevel === 'Approaching Expectation' ? 'AE' : 'BE';
+                    const pct = a.maxScore > 0 ? ((a.score / a.maxScore) * 100) : 0;
+                    return `
+                        <div class="assessment-card">
+                            <div class="subject">${a.subject || 'Untitled'}</div>
+                            <div class="score">
+                                ${a.score || 0} <span class="max">/ ${a.maxScore || 0}</span>
+                            </div>
+                            <div class="level ${levelClass}">${pct.toFixed(1)}% • ${a.performanceLevel || 'N/A'}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                assessmentGrid.innerHTML = `
+                    <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
+                        No assessment records found
+                    </p>
+                `;
+            }
+
+            const level = student.performanceLevel || 'Approaching Expectation';
+            const levelEmoji = {
+                'Exceeding Expectation': '🌟',
+                'Meeting Expectation': '✅',
+                'Approaching Expectation': '📌',
+                'Below Expectation': '⚠️'
+            };
+
+            const levelColors = {
+                'Exceeding Expectation': '#1a8a3f',
+                'Meeting Expectation': '#0d6efd',
+                'Approaching Expectation': '#e6a800',
+                'Below Expectation': '#dc3545'
+            };
+
+            assessmentSummary.innerHTML = `
+                <div class="stat">
+                    <div class="number" style="color: ${levelColors[level] || '#0A1628'}">
+                        ${levelEmoji[level] || '📊'} ${level}
+                    </div>
+                    <div class="label">Performance Level</div>
+                </div>
+                <div class="stat">
+                    <div class="number">${student.totalScore || 0}</div>
+                    <div class="label">Total Score</div>
+                </div>
+                <div class="stat">
+                    <div class="number">${(student.averageScore || 0).toFixed(1)}%</div>
+                    <div class="label">Average Score</div>
+                </div>
+                <div class="stat">
+                    <div class="number">${student.overallRating || 2}/4</div>
+                    <div class="label">CBC Rating</div>
+                </div>
+                <div class="stat">
+                    <div class="number">${assessments.length}</div>
+                    <div class="label">Subjects</div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // DOWNLOAD REPORT
+        // ============================================
+
+        function downloadReport() {
+            if (!currentStudent) {
+                showError('No student selected');
+                return;
+            }
+
+            fetch(`/api/assessments/search?name=${encodeURIComponent(currentStudent.name)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.students && data.students.length > 0) {
+                        const latest = data.students.sort((a, b) =>
+                            new Date(b.createdAt) - new Date(a.createdAt)
+                        )[0];
+                        window.location.href = `/api/assessments/download-report/${latest._id}`;
+                    } else {
+                        showError('No assessment report found for this student');
+                    }
+                })
+                .catch(err => {
+                    showError('Error generating report: ' + err.message);
+                });
+        }
+
+        // ============================================
+        // HOLIDAY ASSIGNMENTS
+        // ============================================
+
+        async function loadAssignmentsForStudent() {
+            const grade = document.getElementById('assignmentGradeFilter').value;
+            
+            if (!grade && !currentStudent) {
+                document.getElementById('assignmentsList').innerHTML = `
+                    <div class="no-assignments">
+                        <div class="icon">👤</div>
+                        <h4>No Student Selected</h4>
+                        <p>Please search for your profile in the "My Profile" tab first.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const searchGrade = grade || (currentStudent ? currentStudent.grade : '');
+            
+            if (!searchGrade) {
+                document.getElementById('assignmentsList').innerHTML = `
+                    <div class="no-assignments">
+                        <div class="icon">📚</div>
+                        <h4>No Grade Selected</h4>
+                        <p>Please select a grade from the dropdown above.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('assignmentsList').innerHTML = `
+                <div style="text-align:center; padding:20px;">
+                    <div class="spinner"></div>
+                    <p style="margin-top:10px;">Loading assignments for ${searchGrade}...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/api/holiday-assignments/${encodeURIComponent(searchGrade)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    allAssignments = data.assignments || [];
+                    renderAssignments(allAssignments);
+                } else {
+                    document.getElementById('assignmentsList').innerHTML = `
+                        <div class="no-assignments">
+                            <div class="icon">❌</div>
+                            <h4>Error Loading Assignments</h4>
+                            <p>${data.message || 'Unknown error occurred'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading assignments:', error);
+                document.getElementById('assignmentsList').innerHTML = `
+                    <div class="no-assignments">
+                        <div class="icon">❌</div>
+                        <h4>Connection Error</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderAssignments(assignments) {
+            const container = document.getElementById('assignmentsList');
+            
+            // Filter by search term
+            const searchTerm = document.getElementById('assignmentSearch').value.toLowerCase().trim();
+            let filtered = assignments;
+            
+            if (searchTerm) {
+                filtered = assignments.filter(a => 
+                    a.title.toLowerCase().includes(searchTerm) ||
+                    (a.subject || '').toLowerCase().includes(searchTerm) ||
+                    (a.description || '').toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="no-assignments">
+                        <div class="icon">📭</div>
+                        <h4>No Assignments Found</h4>
+                        <p>${assignments.length > 0 ? 'No assignments match your search.' : 'No holiday assignments available for your grade yet. Check back later!'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((a, index) => {
+                const fileIcon = a.fileType === 'pdf' ? 'fa-file-pdf pdf' :
+                               a.fileType === 'doc' ? 'fa-file-word word' :
+                               a.fileType === 'docx' ? 'fa-file-word word' :
+                               a.fileType === 'xls' ? 'fa-file-excel excel' :
+                               a.fileType === 'xlsx' ? 'fa-file-excel excel' :
+                               a.fileType === 'jpg' || a.fileType === 'jpeg' || a.fileType === 'png' ? 'fa-file-image image' :
+                               'fa-file-alt';
+                
+                const date = a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-KE') : 'Unknown';
+                
+                html += `
+                    <div class="assignment-card">
+                        <div style="display:flex;align-items:center;flex-wrap:wrap;flex:1;">
+                            <i class="fas ${fileIcon} file-icon"></i>
+                            <div class="info">
+                                <div class="title">${a.title}</div>
+                                <div class="meta">
+                                    <span><i class="fas fa-tag"></i> ${a.grade}</span>
+                                    ${a.subject ? `<span><i class="fas fa-book"></i> ${a.subject}</span>` : ''}
+                                    <span><i class="fas fa-calendar"></i> ${date}</span>
+                                    <span><i class="fas fa-file"></i> ${a.fileName}</span>
+                                </div>
+                                ${a.description ? `<div class="description">${a.description}</div>` : ''}
+                            </div>
+                        </div>
+                        <a href="/api/holiday-assignments/download/${a._id}" class="download-btn" target="_blank">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                `;
             });
 
-            const data = await response.json();
-            if (data.success) {
-                showAlert('✅ Assignment deleted successfully!', 'success');
-                loadAssignments();
-            } else {
-                showAlert('❌ Error: ' + data.message, 'error');
-            }
-        } catch (error) {
-            showAlert('❌ Error deleting: ' + error.message, 'error');
+            container.innerHTML = html;
         }
-    }
 
-    // Load on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        loadAssignments();
-    });
-</script>
+        function filterAssignments() {
+            renderAssignments(allAssignments);
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+
+        function showLoading(show) {
+            loading.classList.toggle('active', show);
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+            setTimeout(() => {
+                errorMessage.classList.remove('active');
+            }, 8000);
+        }
+
+        function hideError() {
+            errorMessage.classList.remove('active');
+        }
+
+        function showInfo(message) {
+            infoMessage.textContent = message;
+            infoMessage.classList.add('active');
+        }
+
+        function hideInfo() {
+            infoMessage.classList.remove('active');
+        }
+
+        // ============================================
+        // CLOSE SUGGESTIONS ON CLICK OUTSIDE
+        // ============================================
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-section')) {
+                suggestions.classList.remove('active');
+            }
+        });
+
+        // ============================================
+        // INITIALIZE
+        // ============================================
+
+        console.log('✅ Student Portal loaded successfully!');
+        loadStudents();
+    </script>
 </body>
 </html>
