@@ -380,8 +380,8 @@
             color: white;
         }
         .performance-level-badge.exceeding { background: #28a745; }
-        .performance-level-badge.meeting { background: #17a2b8; }
-        .performance-level-badge.approaching { background: #d4a017; }
+        .performance-level-badge.meeting { background: #0d6efd; }
+        .performance-level-badge.approaching { background: #e6a800; }
         .performance-level-badge.below { background: #dc3545; }
 
         .loading-overlay {
@@ -820,7 +820,7 @@
 
     <script>
         // ============================================
-        // PERFORMANCE RUBRIC - FRONTEND (CORRECTED)
+        // PERFORMANCE RUBRIC - FRONTEND (CORRECTED CBC)
         // ============================================
         // Exceeding Expectations (EE): 75-100%
         // Meeting Expectations (ME): 41-74%
@@ -844,6 +844,36 @@
             return badges[level] || 'approaching';
         }
 
+        function getPerformanceColor(level) {
+            const colors = {
+                'Exceeding Expectation': '#28a745',
+                'Meeting Expectation': '#0d6efd',
+                'Approaching Expectation': '#e6a800',
+                'Below Expectation': '#dc3545'
+            };
+            return colors[level] || '#6c757d';
+        }
+
+        function getPerformanceShort(level) {
+            const shorts = {
+                'Exceeding Expectation': 'EE',
+                'Meeting Expectation': 'ME',
+                'Approaching Expectation': 'AE',
+                'Below Expectation': 'BE'
+            };
+            return shorts[level] || 'AE';
+        }
+
+        function getPerformanceRating(level) {
+            const ratings = {
+                'Exceeding Expectation': 4,
+                'Meeting Expectation': 3,
+                'Approaching Expectation': 2,
+                'Below Expectation': 1
+            };
+            return ratings[level] || 2;
+        }
+
         function calculateAverage(assessments) {
             if (!assessments || assessments.length === 0) return 0;
             
@@ -856,6 +886,60 @@
             });
             
             return totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
+        }
+
+        function calculateStudentOverall(assessments) {
+            if (!assessments || assessments.length === 0) {
+                return { 
+                    totalScore: 0, 
+                    averageScore: 0, 
+                    performanceLevel: 'Approaching Expectation', 
+                    overallRating: 2,
+                    levelDistribution: { EE: 0, ME: 0, AE: 0, BE: 0 }
+                };
+            }
+            
+            let totalScore = 0;
+            let totalMaxScore = 0;
+            let totalRating = 0;
+            let subjectCount = 0;
+            let levelDistribution = { EE: 0, ME: 0, AE: 0, BE: 0 };
+            
+            assessments.forEach(a => {
+                const score = Math.min(a.score || 0, a.maxScore || 0);
+                const maxScore = a.maxScore || 1;
+                
+                totalScore += score;
+                totalMaxScore += maxScore;
+                
+                const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+                const level = getPerformanceLevel(percentage);
+                const rating = getPerformanceRating(level);
+                totalRating += rating;
+                subjectCount++;
+                
+                const short = getPerformanceShort(level);
+                levelDistribution[short] = (levelDistribution[short] || 0) + 1;
+            });
+            
+            const overallRating = subjectCount > 0 ? parseFloat((totalRating / subjectCount).toFixed(1)) : 2;
+            
+            let performanceLevel = 'Approaching Expectation';
+            if (overallRating >= 3.5) performanceLevel = 'Exceeding Expectation';
+            else if (overallRating >= 2.5) performanceLevel = 'Meeting Expectation';
+            else if (overallRating >= 1.5) performanceLevel = 'Approaching Expectation';
+            else performanceLevel = 'Below Expectation';
+            
+            const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
+            
+            return {
+                totalScore: totalScore,
+                averageScore: parseFloat(avgPercentage.toFixed(1)),
+                overallRating: overallRating,
+                performanceLevel: performanceLevel,
+                levelDistribution: levelDistribution,
+                subjectCount: subjectCount
+            };
         }
 
         // ============================================
@@ -1464,7 +1548,7 @@
         }
 
         // ============================================
-        // CLASS ASSESSMENT RESULTS - FIXED
+        // CLASS ASSESSMENT RESULTS - FIXED WITH CBC
         // ============================================
         async function loadClassResults() {
             const grade = document.getElementById('classGradeFilter').value;
@@ -1484,34 +1568,31 @@
                     let students = data.students || [];
                     
                     // ============================================
-                    // ✅ RECALCULATE WITH CORRECT RUBRIC ON FRONTEND
+                    // ✅ RECALCULATE WITH CORRECT CBC RUBRIC
                     // ============================================
                     students = students.map(student => {
-                        // Recalculate each subject's performance level
+                        // Recalculate each subject's performance level with correct rubric
                         if (student.assessments) {
                             student.assessments = student.assessments.map(a => {
                                 const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
                                 const level = getPerformanceLevel(percentage);
+                                const rating = getPerformanceRating(level);
                                 return {
                                     ...a,
                                     percentage: percentage,
-                                    performanceLevel: level
+                                    performanceLevel: level,
+                                    rating: rating
                                 };
                             });
                         }
                         
-                        // Recalculate overall average using percentage of total max
-                        let totalScore = 0;
-                        let totalMaxScore = 0;
-                        if (student.assessments) {
-                            student.assessments.forEach(a => {
-                                totalScore += a.score || 0;
-                                totalMaxScore += a.maxScore || 0;
-                            });
-                        }
-                        const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
-                        student.averageScore = parseFloat(avgPercentage.toFixed(1));
-                        student.performanceLevel = getPerformanceLevel(avgPercentage);
+                        // Recalculate overall using CBC method (average of ratings)
+                        const overall = calculateStudentOverall(student.assessments || []);
+                        student.totalScore = overall.totalScore;
+                        student.averageScore = overall.averageScore;
+                        student.performanceLevel = overall.performanceLevel;
+                        student.overallRating = overall.overallRating;
+                        student.levelDistribution = overall.levelDistribution;
                         
                         return student;
                     });
@@ -1546,12 +1627,14 @@
                         const level = student.performanceLevel || 'Approaching Expectation';
                         const levelClass = getPerformanceBadge(level);
                         const avg = student.averageScore !== undefined && student.averageScore !== null ? student.averageScore.toFixed(1) : '0';
+                        const short = getPerformanceShort(level);
+                        const rating = student.overallRating || 2;
                         
                         // Color based on performance level
                         let color = '#0A1628';
                         if (level === 'Exceeding Expectation') color = '#28a745';
-                        else if (level === 'Meeting Expectation') color = '#17a2b8';
-                        else if (level === 'Approaching Expectation') color = '#d4a017';
+                        else if (level === 'Meeting Expectation') color = '#0d6efd';
+                        else if (level === 'Approaching Expectation') color = '#e6a800';
                         else if (level === 'Below Expectation') color = '#dc3545';
 
                         tr.innerHTML = `
@@ -1561,7 +1644,7 @@
                             <td style="text-align:center;">${student.totalScore || 0}</td>
                             <td style="text-align:center;font-weight:700;color:${color};">${avg}%</td>
                             <td style="text-align:center;">
-                                <span class="performance-level-badge ${levelClass}">${level}</span>
+                                <span class="performance-level-badge ${levelClass}">${short} (${rating})</span>
                             </td>
                             <td style="text-align:center;">
                                 <button class="btn btn-info btn-sm" onclick="viewStudentReport('${student._id}')" title="View Report">
@@ -1575,7 +1658,7 @@
                         tbody.appendChild(tr);
                     });
 
-                    showAlert(`✅ Loaded ${students.length} students with correct rubric`, 'success');
+                    showAlert(`✅ Loaded ${students.length} students with correct CBC rubric`, 'success');
                 } else {
                     showAlert('❌ Error: ' + data.message, 'error');
                 }
@@ -1668,15 +1751,17 @@
                     let rowsHtml = students.map((student, index) => {
                         const level = student.performanceLevel || 'Approaching Expectation';
                         const levelClass = getPerformanceBadge(level);
+                        const short = getPerformanceShort(level);
+                        const rating = getPerformanceRating(level);
                         return `
                             <tr>
                                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${index + 1}</td>
                                 <td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${student.studentName}</td>
                                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${student.admissionNumber || '-'}</td>
                                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${student.totalScore || 0}</td>
-                                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:700;color:${level === 'Exceeding Expectation' ? '#28a745' : level === 'Meeting Expectation' ? '#17a2b8' : level === 'Approaching Expectation' ? '#d4a017' : '#dc3545'};">${student.averageScore ? student.averageScore.toFixed(1) : '0'}%</td>
+                                <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;font-weight:700;color:${level === 'Exceeding Expectation' ? '#28a745' : level === 'Meeting Expectation' ? '#0d6efd' : level === 'Approaching Expectation' ? '#e6a800' : '#dc3545'};">${student.averageScore ? student.averageScore.toFixed(1) : '0'}%</td>
                                 <td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">
-                                    <span style="display:inline-block;padding:2px 10px;border-radius:50px;font-size:10px;font-weight:700;color:white;background:${level === 'Exceeding Expectation' ? '#28a745' : level === 'Meeting Expectation' ? '#17a2b8' : level === 'Approaching Expectation' ? '#d4a017' : '#dc3545'};">${level}</span>
+                                    <span style="display:inline-block;padding:2px 10px;border-radius:50px;font-size:10px;font-weight:700;color:white;background:${level === 'Exceeding Expectation' ? '#28a745' : level === 'Meeting Expectation' ? '#0d6efd' : level === 'Approaching Expectation' ? '#e6a800' : '#dc3545'};">${short} (${rating})</span>
                                 </td>
                             </tr>
                         `;
@@ -1701,8 +1786,8 @@
                                 .summary-box .item .label { font-size: 12px; color: #666; }
                                 .summary-box .item .num.gold { color: #D4A017; }
                                 .summary-box .item .num.green { color: #28a745; }
-                                .summary-box .item .num.blue { color: #17a2b8; }
-                                .summary-box .item .num.orange { color: #d4a017; }
+                                .summary-box .item .num.blue { color: #0d6efd; }
+                                .summary-box .item .num.orange { color: #e6a800; }
                                 .summary-box .item .num.red { color: #dc3545; }
                                 table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
                                 table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
