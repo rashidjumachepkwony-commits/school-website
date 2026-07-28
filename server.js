@@ -4491,7 +4491,23 @@ app.get('/student-report', (req, res) => {
 app.get('/student-report.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'student_report.html'));
 });
+// ============================================
+// DEBUG ROUTE FOR STUDENT PORTAL
+// ============================================
 
+app.get('/api/students/debug', async (req, res) => {
+    try {
+        const count = await Student.countDocuments({ isActive: true });
+        const students = await Student.find({ isActive: true }).limit(10).select('studentId name grade type');
+        res.json({
+            success: true,
+            totalStudents: count,
+            sampleStudents: students
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 // ============================================
 // REGISTER STATIC FILES
 // ============================================
