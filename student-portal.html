@@ -5,25 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Portal - Changara Star Academy</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f0f2f5;
             min-height: 100vh;
         }
-
         .header {
             background: linear-gradient(135deg, #0A1628 0%, #1a2a4a 100%);
             color: white;
             padding: 20px 0;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-
         .header-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -33,30 +26,10 @@
             align-items: center;
             flex-wrap: wrap;
         }
-
-        .logo h1 {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        .logo h1 span {
-            color: #C9A84C;
-        }
-
-        .logo .motto {
-            font-size: 12px;
-            color: #C9A84C;
-            font-style: italic;
-            letter-spacing: 1px;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
+        .logo h1 { font-size: 28px; font-weight: 700; letter-spacing: 1px; }
+        .logo h1 span { color: #C9A84C; }
+        .logo .motto { font-size: 12px; color: #C9A84C; font-style: italic; letter-spacing: 1px; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
         .btn-back {
             background: rgba(255,255,255,0.1);
             border: 1px solid #C9A84C;
@@ -69,18 +42,8 @@
             text-decoration: none;
             display: inline-block;
         }
-
-        .btn-back:hover {
-            background: #C9A84C;
-            color: #0A1628;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
+        .btn-back:hover { background: #C9A84C; color: #0A1628; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
         .welcome-card {
             background: linear-gradient(135deg, #1a8a3f 0%, #0d6efd 100%);
             color: white;
@@ -89,18 +52,8 @@
             margin-bottom: 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
-        .welcome-card h2 {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .welcome-card p {
-            opacity: 0.9;
-            margin-top: 5px;
-            font-size: 15px;
-        }
-
+        .welcome-card h2 { font-size: 24px; font-weight: 600; }
+        .welcome-card p { opacity: 0.9; margin-top: 5px; font-size: 15px; }
         .search-section {
             background: white;
             padding: 30px;
@@ -108,19 +61,8 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             margin-bottom: 30px;
         }
-
-        .search-section h3 {
-            color: #0A1628;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
+        .search-section h3 { color: #0A1628; margin-bottom: 15px; font-size: 18px; }
+        .search-box { display: flex; gap: 15px; flex-wrap: wrap; }
         .search-box input {
             flex: 1;
             min-width: 250px;
@@ -131,11 +73,7 @@
             transition: border-color 0.3s;
             outline: none;
         }
-
-        .search-box input:focus {
-            border-color: #C9A84C;
-        }
-
+        .search-box input:focus { border-color: #C9A84C; }
         .search-box button {
             padding: 12px 30px;
             background: #0A1628;
@@ -147,22 +85,9 @@
             transition: background 0.3s;
             font-weight: 600;
         }
-
-        .search-box button:hover {
-            background: #1a2a4a;
-        }
-
-        .search-box button:disabled {
-            background: #999;
-            cursor: not-allowed;
-        }
-
-        .search-hint {
-            font-size: 13px;
-            color: #6c757d;
-            margin-top: 10px;
-        }
-
+        .search-box button:hover { background: #1a2a4a; }
+        .search-box button:disabled { background: #999; cursor: not-allowed; }
+        .search-hint { font-size: 13px; color: #6c757d; margin-top: 10px; }
         .suggestions {
             background: white;
             border: 1px solid #e0e0e0;
@@ -175,11 +100,7 @@
             position: relative;
             z-index: 100;
         }
-
-        .suggestions.active {
-            display: block;
-        }
-
+        .suggestions.active { display: block; }
         .suggestion-item {
             padding: 12px 18px;
             cursor: pointer;
@@ -189,21 +110,9 @@
             align-items: center;
             transition: background 0.2s;
         }
-
-        .suggestion-item:hover {
-            background: #f8f9fa;
-        }
-
-        .suggestion-item .name {
-            font-weight: 500;
-            color: #0A1628;
-        }
-
-        .suggestion-item .details {
-            font-size: 13px;
-            color: #6c757d;
-        }
-
+        .suggestion-item:hover { background: #f8f9fa; }
+        .suggestion-item .name { font-weight: 500; color: #0A1628; }
+        .suggestion-item .details { font-size: 13px; color: #6c757d; }
         .suggestion-item .badge {
             background: #C9A84C;
             color: #0A1628;
@@ -212,7 +121,6 @@
             font-size: 11px;
             font-weight: 600;
         }
-
         .student-info {
             background: white;
             padding: 30px;
@@ -222,36 +130,15 @@
             margin-bottom: 30px;
             border-left: 4px solid #C9A84C;
         }
-
-        .student-info.active {
-            display: block;
-        }
-
+        .student-info.active { display: block; }
         .student-info .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
-
-        .student-info .info-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .student-info .info-item .label {
-            font-size: 12px;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .student-info .info-item .value {
-            font-size: 16px;
-            font-weight: 600;
-            color: #0A1628;
-            margin-top: 2px;
-        }
-
+        .student-info .info-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .student-info .info-item .label { font-size: 12px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
+        .student-info .info-item .value { font-size: 16px; font-weight: 600; color: #0A1628; margin-top: 2px; }
         .fee-section {
             background: white;
             padding: 30px;
@@ -260,55 +147,25 @@
             display: none;
             margin-bottom: 30px;
         }
-
-        .fee-section.active {
-            display: block;
-        }
-
-        .fee-section h3 {
-            color: #0A1628;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-
+        .fee-section.active { display: block; }
+        .fee-section h3 { color: #0A1628; margin-bottom: 20px; font-size: 18px; }
         .fee-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
-
         .fee-card {
             background: #f8f9fa;
             padding: 18px;
             border-radius: 8px;
             text-align: center;
         }
-
-        .fee-card .amount {
-            font-size: 24px;
-            font-weight: 700;
-            color: #0A1628;
-        }
-
-        .fee-card .label {
-            font-size: 13px;
-            color: #6c757d;
-            margin-top: 5px;
-        }
-
-        .fee-card.paid .amount {
-            color: #1a8a3f;
-        }
-
-        .fee-card.balance .amount {
-            color: #dc3545;
-        }
-
-        .fee-card.total .amount {
-            color: #0A1628;
-        }
-
+        .fee-card .amount { font-size: 24px; font-weight: 700; color: #0A1628; }
+        .fee-card .label { font-size: 13px; color: #6c757d; margin-top: 5px; }
+        .fee-card.paid .amount { color: #1a8a3f; }
+        .fee-card.balance .amount { color: #dc3545; }
+        .fee-card.total .amount { color: #0A1628; }
         .fee-status {
             display: inline-block;
             padding: 4px 16px;
@@ -316,28 +173,10 @@
             font-size: 13px;
             font-weight: 600;
         }
-
-        .fee-status.paid {
-            background: #E8F5E9;
-            color: #1a8a3f;
-        }
-
-        .fee-status.partial {
-            background: #FFF8E1;
-            color: #e6a800;
-        }
-
-        .fee-status.unpaid {
-            background: #FBE9E7;
-            color: #dc3545;
-        }
-
-        .payments-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
+        .fee-status.paid { background: #E8F5E9; color: #1a8a3f; }
+        .fee-status.partial { background: #FFF8E1; color: #e6a800; }
+        .fee-status.unpaid { background: #FBE9E7; color: #dc3545; }
+        .payments-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         .payments-table th {
             background: #f8f9fa;
             padding: 12px 15px;
@@ -348,24 +187,9 @@
             letter-spacing: 0.5px;
             font-weight: 600;
         }
-
-        .payments-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-        }
-
-        .payments-table tr:hover td {
-            background: #fafafa;
-        }
-
-        .payments-table .no-payments {
-            text-align: center;
-            color: #6c757d;
-            padding: 30px;
-            font-style: italic;
-        }
-
+        .payments-table td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .payments-table tr:hover td { background: #fafafa; }
+        .payments-table .no-payments { text-align: center; color: #6c757d; padding: 30px; font-style: italic; }
         .assessment-section {
             background: white;
             padding: 30px;
@@ -374,67 +198,28 @@
             display: none;
             margin-bottom: 30px;
         }
-
-        .assessment-section.active {
-            display: block;
-        }
-
-        .assessment-section h3 {
-            color: #0A1628;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-
+        .assessment-section.active { display: block; }
+        .assessment-section h3 { color: #0A1628; margin-bottom: 20px; font-size: 18px; }
         .assessment-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
-
         .assessment-card {
             background: #f8f9fa;
             padding: 18px;
             border-radius: 8px;
             border-left: 4px solid #C9A84C;
         }
-
-        .assessment-card .subject {
-            font-weight: 600;
-            color: #0A1628;
-            font-size: 15px;
-        }
-
-        .assessment-card .score {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 5px 0;
-        }
-
-        .assessment-card .score .max {
-            font-size: 14px;
-            font-weight: 400;
-            color: #6c757d;
-        }
-
-        .assessment-card .level {
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .assessment-card .level.EE {
-            color: #1a8a3f;
-        }
-        .assessment-card .level.ME {
-            color: #0d6efd;
-        }
-        .assessment-card .level.AE {
-            color: #e6a800;
-        }
-        .assessment-card .level.BE {
-            color: #dc3545;
-        }
-
+        .assessment-card .subject { font-weight: 600; color: #0A1628; font-size: 15px; }
+        .assessment-card .score { font-size: 20px; font-weight: 700; margin: 5px 0; }
+        .assessment-card .score .max { font-size: 14px; font-weight: 400; color: #6c757d; }
+        .assessment-card .level { font-size: 13px; font-weight: 500; }
+        .assessment-card .level.EE { color: #1a8a3f; }
+        .assessment-card .level.ME { color: #0d6efd; }
+        .assessment-card .level.AE { color: #e6a800; }
+        .assessment-card .level.BE { color: #dc3545; }
         .assessment-summary {
             background: #f8f9fa;
             padding: 20px;
@@ -444,22 +229,9 @@
             gap: 15px;
             text-align: center;
         }
-
-        .assessment-summary .stat {
-            padding: 10px;
-        }
-
-        .assessment-summary .stat .number {
-            font-size: 22px;
-            font-weight: 700;
-            color: #0A1628;
-        }
-
-        .assessment-summary .stat .label {
-            font-size: 12px;
-            color: #6c757d;
-        }
-
+        .assessment-summary .stat { padding: 10px; }
+        .assessment-summary .stat .number { font-size: 22px; font-weight: 700; color: #0A1628; }
+        .assessment-summary .stat .label { font-size: 12px; color: #6c757d; }
         .btn-report {
             display: inline-block;
             padding: 12px 30px;
@@ -474,24 +246,9 @@
             margin-top: 15px;
             text-decoration: none;
         }
-
-        .btn-report:hover {
-            background: #b8983a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3);
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: #6c757d;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
+        .btn-report:hover { background: #b8983a; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3); }
+        .loading { display: none; text-align: center; padding: 20px; color: #6c757d; }
+        .loading.active { display: block; }
         .spinner {
             display: inline-block;
             width: 30px;
@@ -501,12 +258,7 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
+        @keyframes spin { to { transform: rotate(360deg); } }
         .error-message {
             background: #FBE9E7;
             color: #dc3545;
@@ -516,11 +268,7 @@
             display: none;
             margin-bottom: 20px;
         }
-
-        .error-message.active {
-            display: block;
-        }
-
+        .error-message.active { display: block; }
         .info-message {
             background: #E3F2FD;
             color: #0d6efd;
@@ -530,11 +278,7 @@
             display: none;
             margin-bottom: 20px;
         }
-
-        .info-message.active {
-            display: block;
-        }
-
+        .info-message.active { display: block; }
         .footer {
             background: #0A1628;
             color: white;
@@ -542,17 +286,8 @@
             padding: 20px;
             margin-top: 40px;
         }
-
-        .footer p {
-            font-size: 13px;
-            opacity: 0.8;
-        }
-
-        .footer .gold {
-            color: #C9A84C;
-        }
-
-        /* Debug section */
+        .footer p { font-size: 13px; opacity: 0.8; }
+        .footer .gold { color: #C9A84C; }
         .debug-section {
             background: #f8f9fa;
             padding: 15px 20px;
@@ -561,13 +296,7 @@
             border: 1px dashed #dee2e6;
             font-size: 13px;
         }
-
-        .debug-section summary {
-            cursor: pointer;
-            font-weight: 600;
-            color: #6c757d;
-        }
-
+        .debug-section summary { cursor: pointer; font-weight: 600; color: #6c757d; }
         .debug-section pre {
             background: #0A1628;
             color: #C9A84C;
@@ -579,64 +308,22 @@
             max-height: 300px;
             overflow-y: auto;
         }
-
         @media (max-width: 768px) {
-            .header-container {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
-            }
-
-            .header-right {
-                flex-direction: column;
-            }
-
-            .welcome-card {
-                padding: 20px;
-            }
-
-            .welcome-card h2 {
-                font-size: 20px;
-            }
-
-            .search-box input {
-                min-width: 100%;
-            }
-
-            .search-box button {
-                width: 100%;
-            }
-
-            .student-info .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .fee-cards {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .assessment-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .payments-table {
-                font-size: 12px;
-            }
-
-            .payments-table th,
-            .payments-table td {
-                padding: 8px 10px;
-            }
+            .header-container { flex-direction: column; text-align: center; gap: 10px; }
+            .header-right { flex-direction: column; }
+            .welcome-card { padding: 20px; }
+            .welcome-card h2 { font-size: 20px; }
+            .search-box input { min-width: 100%; }
+            .search-box button { width: 100%; }
+            .student-info .info-grid { grid-template-columns: 1fr; }
+            .fee-cards { grid-template-columns: 1fr 1fr; }
+            .assessment-grid { grid-template-columns: 1fr; }
+            .payments-table { font-size: 12px; }
+            .payments-table th, .payments-table td { padding: 8px 10px; }
         }
-
         @media (max-width: 480px) {
-            .fee-cards {
-                grid-template-columns: 1fr;
-            }
-
-            .assessment-summary {
-                grid-template-columns: 1fr 1fr;
-            }
+            .fee-cards { grid-template-columns: 1fr; }
+            .assessment-summary { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -695,11 +382,10 @@
             <div id="assessmentGrid" class="assessment-grid"></div>
             <div id="assessmentSummary" class="assessment-summary"></div>
             <div style="text-align: center; margin-top: 15px;">
-                <button id="downloadReportBtn" class="btn-report" onclick="downloadReport()">📄 Download Full Report</button>
+                <button class="btn-report" onclick="downloadReport()">📄 Download Full Report</button>
             </div>
         </div>
 
-        <!-- Debug Section -->
         <details class="debug-section">
             <summary>🔧 Debug Info (Click to expand)</summary>
             <div id="debugContent">
@@ -746,10 +432,14 @@
 
         async function loadStudents() {
             try {
-                showInfo('Loading student data...');
+                showInfo('📡 Loading student data...');
                 
+                console.log('Fetching /api/students/list...');
                 const response = await fetch('/api/students/list');
+                console.log('Response status:', response.status);
+                
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 if (data.success) {
                     allStudents = data.students || [];
