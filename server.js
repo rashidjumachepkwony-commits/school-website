@@ -5365,6 +5365,33 @@ app.get('/', (req, res) => {
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
 });
+// ============================================
+// DEBUG - CHECK ASSIGNMENTS
+// ============================================
+app.get('/api/debug/assignments', async (req, res) => {
+    try {
+        const total = await HolidayAssignment.countDocuments();
+        const active = await HolidayAssignment.countDocuments({ isActive: true });
+        const all = await HolidayAssignment.find({ isActive: true }).limit(5);
+        const grades = await HolidayAssignment.distinct('grade', { isActive: true });
+        
+        res.json({
+            success: true,
+            total: total,
+            active: active,
+            grades: grades,
+            samples: all.map(a => ({
+                id: a._id,
+                title: a.title,
+                grade: a.grade,
+                fileName: a.fileName,
+                hasData: !!(a.fileData && a.fileData.length > 0)
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 // ============================================
 // DEBUG - LIST ALL REGISTERED ROUTES (FIXED)
