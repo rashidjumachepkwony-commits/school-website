@@ -4393,7 +4393,7 @@ app.post('/api/migrate-to-cloudinary', async (req, res) => {
 // STUDENT PORTAL ROUTES
 // ============================================
 
-// Get all students (for auto-complete)
+// Get all students (for auto-complete) - using /list to avoid conflict with existing /api/students
 app.get('/api/students/list', async (req, res) => {
     try {
         const students = await Student.find({ isActive: true }).sort({ name: 1 });
@@ -4421,7 +4421,8 @@ app.get('/api/students/:id', async (req, res) => {
     }
 });
 
-// Get student fees
+// Get student fees - Note: This route might conflict with /api/students/fees/:studentId
+// Consider changing to /api/clerk/students/fee-details/:studentId if needed
 app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
     try {
         const student = await Student.findOne({ studentId: req.params.studentId, isActive: true });
