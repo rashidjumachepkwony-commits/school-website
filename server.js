@@ -2312,9 +2312,7 @@ app.get('/api/visitors/today', async (req, res) => {
 // STUDENT MANAGEMENT API ROUTES
 // ============================================
 
-app.get('/api/students', async (req, res) => {
-    try {
-        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+// REMOVED: ).sort({ studentId: 1 });
         res.json({ success: true, students });
     } catch (error) {
         console.error('Error fetching students:', error);
@@ -2322,9 +2320,7 @@ app.get('/api/students', async (req, res) => {
     }
 });
 
-app.get('/api/students/:id', async (req, res) => {
-    try {
-        const student = await Student.findOne({ studentId: req.params.id });
+// REMOVED: );
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
@@ -2460,9 +2456,7 @@ app.post('/api/student/login', async (req, res) => {
 // STUDENT FEE MANAGEMENT ROUTES
 // ============================================
 
-app.get('/api/students/fees', async (req, res) => {
-    try {
-        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+// REMOVED: ).sort({ studentId: 1 });
         const studentFees = students.map(student => {
             const feeData = getFeeStructure(student.grade, student.type);
             const paid = student.paid || 0;
@@ -2501,9 +2495,7 @@ app.get('/api/students/fees', async (req, res) => {
     }
 });
 
-app.get('/api/students/fees/:studentId', async (req, res) => {
-    try {
-        const student = await Student.findOne({ studentId: req.params.studentId, isActive: true });
+// REMOVED: );
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
@@ -2731,9 +2723,7 @@ app.put('/api/assessments/subjects/:grade', async (req, res) => {
 // ASSESSMENT ROUTES
 // ============================================
 
-app.get('/api/assessments/grade/:grade', async (req, res) => {
-    try {
-        const { grade } = req.params;
+// REMOVED:  = req.params;
         const { type, period, month, year, term } = req.query;
         const filter = { grade };
         if (type) filter.type = type;
@@ -2772,9 +2762,7 @@ app.get('/api/assessments/student/:id', async (req, res) => {
 // ============================================
 // CREATE ASSESSMENT - FIXED PERCENTAGE CALCULATION
 // ============================================
-app.post('/api/assessments', async (req, res) => {
-    try {
-        const { studentName, studentId, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
+// REMOVED:  = req.body;
         
         if (!studentName || !grade || !assessments || !Array.isArray(assessments) || assessments.length === 0) {
             return res.status(400).json({ success: false, message: 'Invalid data. Need studentName, grade, and assessments array.' });
@@ -2830,9 +2818,7 @@ app.post('/api/assessments', async (req, res) => {
 // ============================================
 // UPDATE ASSESSMENT - FIXED PERCENTAGE CALCULATION
 // ============================================
-app.put('/api/assessments/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
+// REMOVED:  = req.params;
         const { studentName, studentId, admissionNumber, grade, type, period, month, year, term, assessments } = req.body;
         
         const student = await StudentAssessment.findById(id);
@@ -2890,11 +2876,7 @@ app.put('/api/assessments/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/assessments/:id', async (req, res) => {
-    try {
-        const student = await StudentAssessment.findByIdAndDelete(req.params.id);
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
+// REMOVED: );
         }
         res.json({ success: true, message: 'Student assessment deleted successfully!' });
     } catch (error) {
@@ -2902,9 +2884,7 @@ app.delete('/api/assessments/:id', async (req, res) => {
     }
 });
 
-app.get('/api/assessments/all', async (req, res) => {
-    try {
-        const students = await StudentAssessment.find().sort({ studentName: 1 });
+// REMOVED: );
         res.json({ success: true, students: students, count: students.length });
     } catch (error) {
         console.error('Error fetching all assessments:', error);
@@ -2912,9 +2892,7 @@ app.get('/api/assessments/all', async (req, res) => {
     }
 });
 
-app.get('/api/assessments/search', async (req, res) => {
-    try {
-        const { name, grade, type } = req.query;
+// REMOVED:  = req.query;
         let filter = {};
         if (name && name.trim() !== '') {
             filter.studentName = { $regex: name.trim(), $options: 'i' };
@@ -2940,11 +2918,7 @@ app.get('/api/assessments/search', async (req, res) => {
 // ============================================
 // GENERATE REPORT FOR VIEWING - FIXED
 // ============================================
-app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
-    try {
-        const student = await StudentAssessment.findById(req.params.studentId);
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
+// REMOVED: );
         }
         
         // Recalculate with CBC method
@@ -2963,11 +2937,7 @@ app.get('/api/assessments/generate-report/:studentId', async (req, res) => {
 // ============================================
 // DOWNLOAD STUDENT REPORT - FIXED
 // ============================================
-app.get('/api/assessments/download-report/:studentId', async (req, res) => {
-    try {
-        const student = await StudentAssessment.findById(req.params.studentId);
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
+// REMOVED: );
         }
         
         // Recalculate with CBC method
@@ -2987,10 +2957,7 @@ app.get('/api/assessments/download-report/:studentId', async (req, res) => {
     }
 });
 
-app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) => {
-    try {
-        const studentName = decodeURIComponent(req.params.studentName);
-        const allAssessments = await StudentAssessment.find({ studentName: studentName }).sort({ createdAt: 1 });
+// REMOVED: ).sort({ createdAt: 1 });
         if (allAssessments.length === 0) {
             return res.status(404).json({ success: false, message: 'No assessments found' });
         }
@@ -3011,9 +2978,7 @@ app.get('/api/assessments/comprehensive-report/:studentName', async (req, res) =
     }
 });
 
-app.post('/api/assessments/copy', async (req, res) => {
-    try {
-        const { fromGrade, fromType, fromPeriod, fromMonth, fromYear, fromTerm, toGrade, toType, toPeriod, toMonth, toYear, toTerm } = req.body;
+// REMOVED:  = req.body;
         const sourceFilter = { grade: fromGrade };
         if (fromType) sourceFilter.type = fromType;
         if (fromPeriod) sourceFilter.period = fromPeriod;
@@ -3081,9 +3046,7 @@ app.post('/api/assessments/copy', async (req, res) => {
 // DOWNLOAD CLASS REPORT
 // ============================================
 
-app.get('/api/assessments/download-class-pdf', async (req, res) => {
-    try {
-        const { grade, type, term, year, period } = req.query;
+// REMOVED:  = req.query;
         if (!grade) {
             return res.status(400).json({ success: false, message: 'Grade is required' });
         }
@@ -3123,10 +3086,7 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
 // ============================================
 
 // GET all assignments
-app.get('/api/holiday-assignments/all', async (req, res) => {
-    try {
-        console.log('📡 GET /api/holiday-assignments/all');
-        const assignments = await HolidayAssignment.find({}).sort({ createdAt: -1 });
+// REMOVED: ).sort({ createdAt: -1 });
         console.log(`📚 Found ${assignments.length} assignments`);
         res.json({ success: true, assignments });
     } catch (error) {
@@ -3136,10 +3096,7 @@ app.get('/api/holiday-assignments/all', async (req, res) => {
 });
 
 // GET assignments by grade
-app.get('/api/holiday-assignments/:grade', async (req, res) => {
-    try {
-        const grade = req.params.grade;
-        console.log(`📡 GET /api/holiday-assignments/${grade}`);
+// REMOVED: `);
         
         if (grade === 'all') {
             const assignments = await HolidayAssignment.find({}).sort({ createdAt: -1 });
@@ -3156,11 +3113,7 @@ app.get('/api/holiday-assignments/:grade', async (req, res) => {
 });
 
 // GET single assignment by ID
-app.get('/api/holiday-assignments/id/:id', async (req, res) => {
-    try {
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
+
         }
         res.json({ success: true, assignment });
     } catch (error) {
@@ -3170,13 +3123,7 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
 });
 
 // POST - Upload assignment (Stored in Database as Base64)
-app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
-    try {
-        console.log('📤 POST /api/holiday-assignments');
-        console.log('Body:', req.body);
-        console.log('File:', req.file);
-        
-        const { title, grade, subject, description } = req.body;
+// REMOVED:  = req.body;
         
         if (!title || !grade) {
             return res.status(400).json({ success: false, message: 'Title and Grade are required' });
@@ -3246,13 +3193,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
 });
 
 // PUT - Update assignment
-app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) => {
-    try {
-        console.log('📝 Update request for:', req.params.id);
-        
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
+// REMOVED: );
         }
 
         const { title, grade, subject, description, isActive } = req.body;
@@ -3331,15 +3272,7 @@ app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) 
 });
 
 // DOWNLOAD assignment file - FROM DATABASE
-app.get('/api/holiday-assignments/download/:id', async (req, res) => {
-    try {
-        console.log('📥 GET /api/holiday-assignments/download/', req.params.id);
-        
-        let assignment = await HolidayAssignment.findById(req.params.id);
-        
-        if (!assignment) {
-            assignment = await HolidayAssignment.findOne({ 
-                fileUrl: { $regex: req.params.id } 
+// REMOVED:  
             });
         }
         
@@ -3384,9 +3317,7 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
 });
 
 // DELETE - Delete assignment with confirmation
-app.delete('/api/holiday-assignments/:id', async (req, res) => {
-    try {
-        const { confirm } = req.query;
+// REMOVED:  = req.query;
         if (confirm !== 'yes') {
             return res.status(400).json({ 
                 success: false, 
@@ -3430,11 +3361,7 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
 });
 
 // SOFT DELETE - Mark as inactive
-app.delete('/api/holiday-assignments/soft/:id', async (req, res) => {
-    try {
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
+// REMOVED: );
         }
         
         assignment.isActive = false;
@@ -3455,11 +3382,7 @@ app.delete('/api/holiday-assignments/soft/:id', async (req, res) => {
 });
 
 // RESTORE - Bring back soft deleted assignment
-app.post('/api/holiday-assignments/restore/:id', async (req, res) => {
-    try {
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
+// REMOVED: );
         }
         
         assignment.isActive = true;
@@ -3478,9 +3401,7 @@ app.post('/api/holiday-assignments/restore/:id', async (req, res) => {
 });
 
 // GET assignments with filters (search)
-app.get('/api/holiday-assignments/search', async (req, res) => {
-    try {
-        const { grade, title, subject } = req.query;
+// REMOVED:  = req.query;
         let filter = {};
         
         if (grade) filter.grade = grade;
@@ -3496,10 +3417,7 @@ app.get('/api/holiday-assignments/search', async (req, res) => {
 });
 
 // GET all grades that have assignments
-app.get('/api/holiday-assignments/grades/list', async (req, res) => {
-    try {
-        const grades = await HolidayAssignment.distinct('grade');
-        res.json({ success: true, grades });
+// REMOVED: );
     } catch (error) {
         console.error('Error fetching grades:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -3507,11 +3425,7 @@ app.get('/api/holiday-assignments/grades/list', async (req, res) => {
 });
 
 // GET assignment statistics
-app.get('/api/holiday-assignments/stats', async (req, res) => {
-    try {
-        const total = await HolidayAssignment.countDocuments();
-        const byGrade = await HolidayAssignment.aggregate([
-            { $group: { _id: '$grade', count: { $sum: 1 } } },
+// REMOVED:  } },
             { $sort: { _id: 1 } }
         ]);
         
@@ -3542,12 +3456,7 @@ app.get('/api/holiday-assignments/stats', async (req, res) => {
 // TEST ROUTE FOR HOLIDAY ASSIGNMENTS
 // ============================================
 
-app.get('/api/holiday-assignments/test', (req, res) => {
-    res.json({ 
-        success: true, 
-        message: 'Holiday assignment routes are working!',
-        timestamp: new Date().toISOString()
-    });
+
 });
 
 // ============================================
@@ -3967,9 +3876,7 @@ app.get('/api/reports/visitors/download-pdf', async (req, res) => {
 // CLERK DASHBOARD API ROUTES
 // ============================================
 
-app.get('/api/clerk/students/fees', async (req, res) => {
-    try {
-        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+// REMOVED: ).sort({ studentId: 1 });
         const studentFees = students.map(student => {
             const feeData = getFeeStructure(student.grade, student.type);
             const paid = student.paid || 0;
@@ -4008,9 +3915,7 @@ app.get('/api/clerk/students/fees', async (req, res) => {
     }
 });
 
-app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
-    try {
-        const student = await Student.findOne({ studentId: req.params.studentId, isActive: true });
+// REMOVED: );
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
@@ -4026,9 +3931,7 @@ app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
     }
 });
 
-app.post('/api/clerk/payments/record', async (req, res) => {
-    try {
-        const { studentId, payments, method, reference, notes } = req.body;
+// REMOVED:  = req.body;
         if (!studentId) {
             return res.status(400).json({ success: false, message: 'Student ID is required' });
         }
@@ -4068,9 +3971,7 @@ app.post('/api/clerk/payments/record', async (req, res) => {
     }
 });
 
-app.get('/api/clerk/payments/all', async (req, res) => {
-    try {
-        const payments = await Payment.find().sort({ date: -1 });
+// REMOVED: );
         res.json({ success: true, payments: payments });
     } catch (error) {
         console.error('Error fetching payments:', error);
@@ -4078,9 +3979,7 @@ app.get('/api/clerk/payments/all', async (req, res) => {
     }
 });
 
-app.put('/api/clerk/payments/:paymentId', async (req, res) => {
-    try {
-        const { paymentId } = req.params;
+// REMOVED:  = req.params;
         const { amount, category, method, reference, notes } = req.body;
         const payment = await Payment.findById(paymentId);
         if (!payment) {
@@ -4108,9 +4007,7 @@ app.put('/api/clerk/payments/:paymentId', async (req, res) => {
     }
 });
 
-app.delete('/api/clerk/payments/:paymentId', async (req, res) => {
-    try {
-        const { paymentId } = req.params;
+// REMOVED:  = req.params;
         const payment = await Payment.findById(paymentId);
         if (!payment) {
             return res.status(404).json({ success: false, message: 'Payment not found' });
@@ -4128,10 +4025,7 @@ app.delete('/api/clerk/payments/:paymentId', async (req, res) => {
     }
 });
 
-app.get('/api/clerk/fees/structure', async (req, res) => {
-    try {
-        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        const feeStructure = {};
+// REMOVED: ;
         grades.forEach(grade => {
             feeStructure[grade] = getFeeStructure(grade, 'Day Scholar');
         });
@@ -4145,9 +4039,7 @@ app.get('/api/clerk/fees/structure', async (req, res) => {
     }
 });
 
-app.post('/api/clerk/fees/update', async (req, res) => {
-    try {
-        const { fees, type } = req.body;
+
         if (!global.feesStructure) {
             global.feesStructure = {};
         }
@@ -4163,10 +4055,7 @@ app.post('/api/clerk/fees/update', async (req, res) => {
     }
 });
 
-app.get('/api/clerk/reports/fees-structure', async (req, res) => {
-    try {
-        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        const doc = new PDFDocument({ margin: 40, size: 'A4' });
+// REMOVED: );
         const chunks = [];
         doc.on('data', (chunk) => chunks.push(chunk));
         doc.on('end', () => {
@@ -4213,9 +4102,7 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
     }
 });
 
-app.get('/api/clerk/reports/fee/:type', async (req, res) => {
-    try {
-        const { type } = req.params;
+// REMOVED:  = req.params;
         const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
         const studentFees = students.map(student => {
             const feeData = getFeeStructure(student.grade, student.type);
@@ -4529,10 +4416,7 @@ app.get('/api/students/portal/:id', async (req, res) => {
 });
 
 // Debug route - check if students exist
-app.get('/api/students/debug', async (req, res) => {
-    try {
-        console.log('📡 GET /api/students/debug');
-        const count = await Student.countDocuments({ isActive: true });
+
         const students = await Student.find({ isActive: true })
             .limit(5)
             .select('studentId name grade type');
@@ -4560,10 +4444,7 @@ app.get('/student-portal.html', (req, res) => {
 });
 
 // Get student assessment by name (for portal)
-app.get('/api/assessments/student-name/:name', async (req, res) => {
-    try {
-        const name = decodeURIComponent(req.params.name);
-        console.log(`📡 GET /api/assessments/student-name/${name}`);
+// REMOVED: `);
         const student = await StudentAssessment.findOne({ 
             studentName: { $regex: new RegExp('^' + name + '$', 'i') } 
         });
@@ -4593,10 +4474,7 @@ app.get('/student-report.html', (req, res) => {
 // ============================================
 
 // Get all students with fee information for clerk
-app.get('/api/clerk/students/fees', async (req, res) => {
-    try {
-        console.log('📡 GET /api/clerk/students/fees');
-        const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+// REMOVED: ).sort({ studentId: 1 });
         
         const studentFees = students.map(student => {
             const feeData = getFeeStructure(student.grade, student.type);
@@ -4639,9 +4517,7 @@ app.get('/api/clerk/students/fees', async (req, res) => {
 });
 
 // Get single student fee details for clerk
-app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
-    try {
-        console.log(`📡 GET /api/clerk/students/fees/${req.params.studentId}`);
+// REMOVED: `);
         const student = await Student.findOne({ 
             studentId: req.params.studentId, 
             isActive: true 
@@ -4683,9 +4559,7 @@ app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
 });
 
 // Record payment for clerk
-app.post('/api/clerk/payments/record', async (req, res) => {
-    try {
-        const { studentId, payments, method, reference, notes } = req.body;
+// REMOVED:  = req.body;
         
         if (!studentId) {
             return res.status(400).json({ success: false, message: 'Student ID is required' });
@@ -4740,10 +4614,7 @@ app.post('/api/clerk/payments/record', async (req, res) => {
 });
 
 // Get all payments for clerk
-app.get('/api/clerk/payments/all', async (req, res) => {
-    try {
-        console.log('📡 GET /api/clerk/payments/all');
-        const payments = await Payment.find().sort({ date: -1 });
+// REMOVED: );
         res.json({ success: true, payments });
     } catch (error) {
         console.error('❌ Error fetching payments:', error);
@@ -4752,9 +4623,7 @@ app.get('/api/clerk/payments/all', async (req, res) => {
 });
 
 // Update payment for clerk
-app.put('/api/clerk/payments/:paymentId', async (req, res) => {
-    try {
-        const { paymentId } = req.params;
+// REMOVED:  = req.params;
         const { amount, category, method, reference, notes } = req.body;
         
         const payment = await Payment.findById(paymentId);
@@ -4788,9 +4657,7 @@ app.put('/api/clerk/payments/:paymentId', async (req, res) => {
 });
 
 // Delete payment for clerk
-app.delete('/api/clerk/payments/:paymentId', async (req, res) => {
-    try {
-        const { paymentId } = req.params;
+// REMOVED:  = req.params;
         
         const payment = await Payment.findById(paymentId);
         if (!payment) {
@@ -4812,10 +4679,7 @@ app.delete('/api/clerk/payments/:paymentId', async (req, res) => {
 });
 
 // Get fees structure for clerk
-app.get('/api/clerk/fees/structure', async (req, res) => {
-    try {
-        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        const feeStructure = {};
+// REMOVED: ;
         grades.forEach(grade => {
             feeStructure[grade] = getFeeStructure(grade, 'Day Scholar');
         });
@@ -4830,9 +4694,7 @@ app.get('/api/clerk/fees/structure', async (req, res) => {
 });
 
 // Update fees structure for clerk
-app.post('/api/clerk/fees/update', async (req, res) => {
-    try {
-        const { fees, type } = req.body;
+
         if (!global.feesStructure) {
             global.feesStructure = {};
         }
@@ -4849,9 +4711,7 @@ app.post('/api/clerk/fees/update', async (req, res) => {
 });
 
 // Download fee report for clerk
-app.get('/api/clerk/reports/fee/:type', async (req, res) => {
-    try {
-        const { type } = req.params;
+// REMOVED:  = req.params;
         const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
         
         const studentFees = students.map(student => {
@@ -4915,10 +4775,7 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
 });
 
 // Download fees structure PDF for clerk
-app.get('/api/clerk/reports/fees-structure', async (req, res) => {
-    try {
-        const grades = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
-        const doc = new PDFDocument({ margin: 40, size: 'A4' });
+// REMOVED: );
         const chunks = [];
         
         doc.on('data', (chunk) => chunks.push(chunk));
@@ -4971,9 +4828,7 @@ app.get('/api/clerk/reports/fees-structure', async (req, res) => {
 // ============================================
 
 // Get students with assessments for admin
-app.get('/api/assessments/grade/:grade', async (req, res) => {
-    try {
-        const { grade } = req.params;
+// REMOVED:  = req.params;
         const { type, period, month, year, term } = req.query;
         
         const filter = { grade };
@@ -5007,9 +4862,7 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
 // DEBUG ROUTE FOR STUDENT PORTAL
 // ============================================
 
-app.get('/api/students/debug', async (req, res) => {
-    try {
-        const count = await Student.countDocuments({ isActive: true });
+
         const students = await Student.find({ isActive: true }).limit(10).select('studentId name grade type');
         res.json({
             success: true,
@@ -5025,10 +4878,7 @@ app.get('/api/students/debug', async (req, res) => {
 // ============================================
 
 // GET all assignments
-app.get('/api/holiday-assignments/all', async (req, res) => {
-    try {
-        console.log('📡 GET /api/holiday-assignments/all');
-        const assignments = await HolidayAssignment.find({ isActive: true }).sort({ createdAt: -1 });
+// REMOVED: ).sort({ createdAt: -1 });
         console.log(`📚 Found ${assignments.length} assignments`);
         res.json({ success: true, assignments });
     } catch (error) {
@@ -5038,10 +4888,7 @@ app.get('/api/holiday-assignments/all', async (req, res) => {
 });
 
 // GET assignments by grade
-app.get('/api/holiday-assignments/:grade', async (req, res) => {
-    try {
-        const grade = req.params.grade;
-        console.log(`📡 GET /api/holiday-assignments/${grade}`);
+// REMOVED: `);
         
         if (grade === 'all') {
             const assignments = await HolidayAssignment.find({ isActive: true }).sort({ createdAt: -1 });
@@ -5062,11 +4909,7 @@ app.get('/api/holiday-assignments/:grade', async (req, res) => {
 });
 
 // GET single assignment by ID
-app.get('/api/holiday-assignments/id/:id', async (req, res) => {
-    try {
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
+
         }
         res.json({ success: true, assignment });
     } catch (error) {
@@ -5076,13 +4919,7 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
 });
 
 // POST - Upload assignment (Stored in Database as Base64)
-app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
-    try {
-        console.log('📤 POST /api/holiday-assignments');
-        console.log('Body:', req.body);
-        console.log('File:', req.file);
-        
-        const { title, grade, subject, description } = req.body;
+// REMOVED:  = req.body;
         
         if (!title || !grade) {
             return res.status(400).json({ success: false, message: 'Title and Grade are required' });
@@ -5152,13 +4989,7 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
 });
 
 // PUT - Update assignment
-app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) => {
-    try {
-        console.log('📝 Update request for:', req.params.id);
-        
-        const assignment = await HolidayAssignment.findById(req.params.id);
-        if (!assignment) {
-            return res.status(404).json({ success: false, message: 'Assignment not found' });
+// REMOVED: );
         }
 
         const { title, grade, subject, description, isActive } = req.body;
@@ -5213,15 +5044,7 @@ app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) 
 });
 
 // DOWNLOAD assignment file - FROM DATABASE
-app.get('/api/holiday-assignments/download/:id', async (req, res) => {
-    try {
-        console.log('📥 GET /api/holiday-assignments/download/', req.params.id);
-        
-        let assignment = await HolidayAssignment.findById(req.params.id);
-        
-        if (!assignment) {
-            assignment = await HolidayAssignment.findOne({ 
-                fileUrl: { $regex: req.params.id } 
+// REMOVED:  
             });
         }
         
@@ -5268,9 +5091,7 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
 });
 
 // DELETE - Delete assignment with confirmation
-app.delete('/api/holiday-assignments/:id', async (req, res) => {
-    try {
-        const { confirm } = req.query;
+// REMOVED:  = req.query;
         if (confirm !== 'yes') {
             return res.status(400).json({ 
                 success: false, 
@@ -5297,9 +5118,7 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
 });
 
 // GET assignment statistics
-app.get('/api/holiday-assignments/stats', async (req, res) => {
-    try {
-        const total = await HolidayAssignment.countDocuments({ isActive: true });
+// REMOVED: );
         const byGrade = await HolidayAssignment.aggregate([
             { $match: { isActive: true } },
             { $group: { _id: '$grade', count: { $sum: 1 } } },
@@ -5330,9 +5149,7 @@ app.get('/api/holiday-assignments/stats', async (req, res) => {
 });
 
 // GET all grades that have assignments
-app.get('/api/holiday-assignments/grades/list', async (req, res) => {
-    try {
-        const grades = await HolidayAssignment.distinct('grade', { isActive: true });
+// REMOVED: );
         res.json({ success: true, grades });
     } catch (error) {
         console.error('❌ Error fetching grades:', error);
@@ -5341,12 +5158,7 @@ app.get('/api/holiday-assignments/grades/list', async (req, res) => {
 });
 
 // TEST route for holiday assignments
-app.get('/api/holiday-assignments/test', (req, res) => {
-    res.json({ 
-        success: true, 
-        message: 'Holiday assignment routes are working!',
-        timestamp: new Date().toISOString()
-    });
+
 });
 // ============================================
 // REGISTER STATIC FILES
@@ -5362,6 +5174,288 @@ app.get('/', (req, res) => {
 // ============================================
 // 404 handler - MUST BE LAST
 // ============================================
+
+
+// ============================================
+// STUDENT PORTAL - ADDED MISSING ROUTES
+// ============================================
+
+// Get student fees with PIN verification
+app.get('/api/students/portal/fees/:studentId', async (req, res) => {
+    try {
+        const { pin } = req.query;
+        console.log(`📡 GET /api/students/portal/fees/${req.params.studentId}`);
+        
+        const student = await Student.findOne({ 
+            studentId: req.params.studentId, 
+            isActive: true 
+        });
+        
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        
+        if (pin && student.pin !== pin) {
+            return res.status(401).json({ success: false, message: 'Invalid PIN' });
+        }
+        
+        const feeData = getFeeStructure(student.grade, student.type);
+        const paid = student.paid || 0;
+        const totalFees = feeData.total || 0;
+        const balance = totalFees - paid;
+        const payments = await Payment.find({ studentId: student.studentId }).sort({ date: -1 });
+        
+        res.json({
+            success: true,
+            student: {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                studentType: student.type,
+                isBoarding: student.type === 'Boarder'
+            },
+            fees: {
+                total: totalFees,
+                paid: paid,
+                balance: balance,
+                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
+            },
+            feeBreakdown: feeData,
+            payments: payments
+        });
+    } catch (error) {
+        console.error('❌ Error fetching student fee details:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get student assessments with PIN verification
+app.get('/api/students/portal/assessments/:studentId', async (req, res) => {
+    try {
+        const { pin } = req.query;
+        console.log(`📡 GET /api/students/portal/assessments/${req.params.studentId}`);
+        
+        const student = await Student.findOne({ 
+            studentId: req.params.studentId, 
+            isActive: true 
+        });
+        
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        
+        if (pin && student.pin !== pin) {
+            return res.status(401).json({ success: false, message: 'Invalid PIN' });
+        }
+        
+        const assessment = await StudentAssessment.findOne({ 
+            studentName: student.name 
+        }).sort({ createdAt: -1 });
+        
+        res.json({
+            success: true,
+            student: {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade
+            },
+            assessment: assessment || null
+        });
+    } catch (error) {
+        console.error('❌ Error fetching student assessments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get holiday assignments with PIN verification
+app.get('/api/students/portal/assignments/:studentId', async (req, res) => {
+    try {
+        const { pin } = req.query;
+        console.log(`📡 GET /api/students/portal/assignments/${req.params.studentId}`);
+        
+        const student = await Student.findOne({ 
+            studentId: req.params.studentId, 
+            isActive: true 
+        });
+        
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        
+        if (pin && student.pin !== pin) {
+            return res.status(401).json({ success: false, message: 'Invalid PIN' });
+        }
+        
+        const assignments = await HolidayAssignment.find({ 
+            grade: student.grade, 
+            isActive: true 
+        }).sort({ createdAt: -1 });
+        
+        res.json({
+            success: true,
+            student: {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade
+            },
+            assignments: assignments
+        });
+    } catch (error) {
+        console.error('❌ Error fetching assignments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get assessment by student name
+app.get('/api/assessments/student-name/:name', async (req, res) => {
+    try {
+        const name = decodeURIComponent(req.params.name);
+        console.log(`📡 GET /api/assessments/student-name/${name}`);
+        
+        const student = await StudentAssessment.findOne({ 
+            studentName: { $regex: new RegExp('^' + name + '$', 'i') } 
+        });
+        
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        res.json({ success: true, student });
+    } catch (error) {
+        console.error('❌ Error in /api/assessments/student-name/:name:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Search assessments
+app.get('/api/assessments/search', async (req, res) => {
+    try {
+        const { name, grade, type } = req.query;
+        console.log(`📡 GET /api/assessments/search - name: ${name}, grade: ${grade}, type: ${type}`);
+        
+        let filter = {};
+        if (name && name.trim() !== '') {
+            filter.studentName = { $regex: name.trim(), $options: 'i' };
+        }
+        if (grade && grade.trim() !== '') {
+            filter.grade = grade.trim();
+        }
+        if (type && type.trim() !== '') {
+            filter.type = type.trim();
+        }
+        
+        const students = await StudentAssessment.find(filter).sort({ studentName: 1 });
+        res.json({ success: true, students, count: students.length });
+    } catch (error) {
+        console.error('❌ Search error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Download student report with PIN verification
+app.get('/api/assessments/download-report/:studentId', async (req, res) => {
+    try {
+        const { pin } = req.query;
+        console.log(`📡 GET /api/assessments/download-report/${req.params.studentId}`);
+        
+        const student = await StudentAssessment.findById(req.params.studentId);
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        
+        const studentRecord = await Student.findOne({ 
+            studentId: student.studentId, 
+            isActive: true 
+        });
+        
+        if (studentRecord && pin && studentRecord.pin !== pin) {
+            return res.status(401).json({ success: false, message: 'Invalid PIN' });
+        }
+        
+        const recalculated = recalculateStudentData(student);
+        const pdfBuffer = await generateStudentReportPDF(recalculated);
+        
+        const filename = `student_report_${recalculated.studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('❌ PDF generation error:', error);
+        res.status(500).json({ success: false, message: 'Error generating PDF: ' + error.message });
+    }
+});
+
+// Get holiday assignments by grade (with PIN verification)
+app.get('/api/holiday-assignments/grade/:grade', async (req, res) => {
+    try {
+        const grade = req.params.grade;
+        const { pin, studentId } = req.query;
+        console.log(`📡 GET /api/holiday-assignments/grade/${grade}`);
+        
+        if (studentId && pin) {
+            const student = await Student.findOne({ studentId, isActive: true });
+            if (!student || student.pin !== pin) {
+                return res.status(401).json({ success: false, message: 'Invalid PIN' });
+            }
+        }
+        
+        const assignments = await HolidayAssignment.find({ 
+            grade: grade, 
+            isActive: true 
+        }).sort({ createdAt: -1 });
+        
+        res.json({ success: true, assignments });
+    } catch (error) {
+        console.error('❌ Error fetching assignments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Download holiday assignment (with PIN verification)
+app.get('/api/holiday-assignments/download/:id', async (req, res) => {
+    try {
+        const { pin, studentId } = req.query;
+        console.log(`📥 GET /api/holiday-assignments/download/${req.params.id}`);
+        
+        if (studentId && pin) {
+            const student = await Student.findOne({ studentId, isActive: true });
+            if (!student || student.pin !== pin) {
+                return res.status(401).json({ success: false, message: 'Invalid PIN' });
+            }
+        }
+        
+        const assignment = await HolidayAssignment.findById(req.params.id);
+        if (!assignment) {
+            return res.status(404).json({ success: false, message: 'Assignment not found' });
+        }
+        
+        if (!assignment.fileData || assignment.fileData === '') {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'File data not found in database.'
+            });
+        }
+        
+        const fileBuffer = Buffer.from(assignment.fileData, 'base64');
+        
+        const mimeType = assignment.fileType === 'pdf' ? 'application/pdf' :
+                         assignment.fileType === 'doc' || assignment.fileType === 'docx' ? 'application/msword' :
+                         assignment.fileType === 'xls' || assignment.fileType === 'xlsx' ? 'application/vnd.ms-excel' :
+                         assignment.fileType === 'jpg' || assignment.fileType === 'jpeg' ? 'image/jpeg' :
+                         assignment.fileType === 'png' ? 'image/png' :
+                         'application/octet-stream';
+        
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Content-Disposition', `attachment; filename="${assignment.fileName}"`);
+        res.setHeader('Content-Length', fileBuffer.length);
+        res.send(fileBuffer);
+    } catch (error) {
+        console.error('❌ Download error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
 });
