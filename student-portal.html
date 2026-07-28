@@ -81,6 +81,49 @@
             padding: 0 20px;
         }
 
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            color: #333;
+        }
+
+        .tab:hover {
+            border-color: #C9A84C;
+            background: #f8f9fa;
+        }
+
+        .tab.active {
+            background: #0A1628;
+            color: white;
+            border-color: #0A1628;
+        }
+
+        .tab i {
+            margin-right: 8px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         .welcome-card {
             background: linear-gradient(135deg, #1a8a3f 0%, #0d6efd 100%);
             color: white;
@@ -150,17 +193,6 @@
 
         .search-box button:hover {
             background: #1a2a4a;
-        }
-
-        .search-box button:disabled {
-            background: #999;
-            cursor: not-allowed;
-        }
-
-        .search-hint {
-            font-size: 13px;
-            color: #6c757d;
-            margin-top: 10px;
         }
 
         .suggestions {
@@ -460,6 +492,111 @@
             color: #6c757d;
         }
 
+        .assignments-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .assignments-section h3 {
+            color: #0A1628;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .assignments-section h3 i {
+            color: #D4A017;
+        }
+
+        .assignment-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .assignment-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #C9A84C;
+        }
+
+        .assignment-card .info {
+            flex: 1;
+        }
+
+        .assignment-card .info .title {
+            font-weight: 600;
+            color: #0A1628;
+            font-size: 16px;
+        }
+
+        .assignment-card .info .meta {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .assignment-card .info .meta span {
+            margin-right: 15px;
+        }
+
+        .assignment-card .info .description {
+            font-size: 13px;
+            color: #555;
+            margin-top: 8px;
+        }
+
+        .assignment-card .download-btn {
+            padding: 10px 25px;
+            background: #C9A84C;
+            color: #0A1628;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .assignment-card .download-btn:hover {
+            background: #b8983a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.3);
+        }
+
+        .assignment-card .file-icon {
+            font-size: 32px;
+            margin-right: 15px;
+        }
+
+        .assignment-card .file-icon.pdf { color: #dc3545; }
+        .assignment-card .file-icon.word { color: #2b5797; }
+        .assignment-card .file-icon.excel { color: #217346; }
+        .assignment-card .file-icon.image { color: #17a2b8; }
+
+        .no-assignments {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .no-assignments .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
         .btn-report {
             display: inline-block;
             padding: 12px 30px;
@@ -599,15 +736,29 @@
             .payments-table td {
                 padding: 8px 10px;
             }
-        }
 
-        @media (max-width: 480px) {
-            .fee-cards {
-                grid-template-columns: 1fr;
+            .tabs {
+                flex-direction: column;
             }
 
-            .assessment-summary {
-                grid-template-columns: 1fr 1fr;
+            .tab {
+                text-align: center;
+            }
+
+            .assignment-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .assignment-card .file-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .assignment-card .download-btn {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -629,45 +780,77 @@
     <div class="container">
         <div class="welcome-card">
             <h2>👋 Welcome to Student Portal</h2>
-            <p>Search for your name to view your assessment results, fee status, and download your report card.</p>
+            <p>Search for your name to view your assessment results, fee status, and download holiday assignments.</p>
         </div>
 
         <div id="errorMessage" class="error-message"></div>
         <div id="infoMessage" class="info-message"></div>
 
-        <div class="search-section">
-            <h3>🔍 Find Your Profile</h3>
-            <div class="search-box">
-                <input type="text" id="studentSearch" placeholder="Type your name or student ID..." autocomplete="off">
-                <button id="searchBtn">Search</button>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('profile')"><i class="fas fa-user"></i> My Profile</button>
+            <button class="tab" onclick="switchTab('assignments')"><i class="fas fa-file-alt"></i> Holiday Assignments</button>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="tabProfile" class="tab-content active">
+            <div class="search-section">
+                <h3>🔍 Find Your Profile</h3>
+                <div class="search-box">
+                    <input type="text" id="studentSearch" placeholder="Type your name or student ID..." autocomplete="off">
+                    <button id="searchBtn">Search</button>
+                </div>
+                <div class="search-hint">💡 Start typing your name to see suggestions</div>
+                <div id="suggestions" class="suggestions"></div>
             </div>
-            <div class="search-hint">💡 Start typing your name to see suggestions</div>
-            <div id="suggestions" class="suggestions"></div>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Loading student data...</p>
+            </div>
+
+            <div id="studentInfo" class="student-info">
+                <div class="info-grid" id="studentInfoGrid"></div>
+            </div>
+
+            <div id="feeSection" class="fee-section">
+                <h3>💰 Fee Status</h3>
+                <div id="feeCards" class="fee-cards"></div>
+                <div id="feeStatus"></div>
+                <h3 style="margin-top: 25px;">📋 Payment History</h3>
+                <div id="paymentsContainer"></div>
+            </div>
+
+            <div id="assessmentSection" class="assessment-section">
+                <h3>📊 Assessment Results</h3>
+                <div id="assessmentGrid" class="assessment-grid"></div>
+                <div id="assessmentSummary" class="assessment-summary"></div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn-report" onclick="downloadReport()">📄 Download Full Report</button>
+                </div>
+            </div>
         </div>
 
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
-            <p style="margin-top: 10px;">Loading student data...</p>
-        </div>
+        <!-- Assignments Tab -->
+        <div id="tabAssignments" class="tab-content">
+            <div class="assignments-section">
+                <h3><i class="fas fa-file-alt"></i> Holiday Assignments</h3>
+                
+                <!-- Assignment Search -->
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="assignmentSearch" placeholder="Search assignments by title..." onkeyup="filterAssignments()" style="flex:1; min-width:200px; padding:10px 14px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px;">
+                    <button onclick="loadAssignmentsForStudent()" style="padding:10px 25px; background:#0A1628; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
 
-        <div id="studentInfo" class="student-info">
-            <div class="info-grid" id="studentInfoGrid"></div>
-        </div>
-
-        <div id="feeSection" class="fee-section">
-            <h3>💰 Fee Status</h3>
-            <div id="feeCards" class="fee-cards"></div>
-            <div id="feeStatus"></div>
-            <h3 style="margin-top: 25px;">📋 Payment History</h3>
-            <div id="paymentsContainer"></div>
-        </div>
-
-        <div id="assessmentSection" class="assessment-section">
-            <h3>📊 Assessment Results</h3>
-            <div id="assessmentGrid" class="assessment-grid"></div>
-            <div id="assessmentSummary" class="assessment-summary"></div>
-            <div style="text-align: center; margin-top: 15px;">
-                <button class="btn-report" onclick="downloadReport()">📄 Download Full Report</button>
+                <div id="assignmentsList">
+                    <div class="no-assignments">
+                        <div class="icon">👤</div>
+                        <h4>No Student Selected</h4>
+                        <p>Please search for your profile in the "My Profile" tab first, then come back here to see your grade-specific assignments.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -700,31 +883,58 @@
 
         let currentStudent = null;
         let allStudents = [];
+        let allAssignments = [];
         let searchTimeout = null;
 
         document.getElementById('year').textContent = new Date().getFullYear();
 
         // ============================================
-        // LOAD STUDENTS - USING EXISTING /api/students
+        // TAB SWITCHING
+        // ============================================
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+            if (tab === 'profile') {
+                document.querySelector('.tab:first-child').classList.add('active');
+                document.getElementById('tabProfile').classList.add('active');
+            } else {
+                document.querySelector('.tab:last-child').classList.add('active');
+                document.getElementById('tabAssignments').classList.add('active');
+                if (currentStudent) {
+                    loadAssignmentsForStudent();
+                } else {
+                    document.getElementById('assignmentsList').innerHTML = `
+                        <div class="no-assignments">
+                            <div class="icon">👤</div>
+                            <h4>No Student Selected</h4>
+                            <p>Please search for your profile in the "My Profile" tab first.</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // ============================================
+        // LOAD STUDENTS
         // ============================================
 
         async function loadStudents() {
             try {
                 showInfo('Loading student data...');
                 
-                // ✅ USE THE EXISTING /api/students ROUTE
                 const response = await fetch('/api/students');
                 const data = await response.json();
                 
                 console.log('📡 API Response:', data);
                 
                 if (data.success) {
-                    // ✅ The existing route returns students directly
                     allStudents = data.students || [];
                     console.log('✅ Loaded', allStudents.length, 'students');
                     
                     if (allStudents.length === 0) {
-                        showInfo('ℹ️ No students found in the database. Please add students first via the admin panel.');
+                        showInfo('ℹ️ No students found. Please add students first via the admin panel.');
                     } else {
                         hideInfo();
                         showInfo(`✅ ${allStudents.length} students available. Start typing to search.`);
@@ -735,7 +945,7 @@
                 }
             } catch (err) {
                 console.error('Error loading students:', err);
-                showError('Could not connect to the server. Please check if the server is running.');
+                showError('Could not connect to the server.');
             }
         }
 
@@ -815,11 +1025,10 @@
 
         function searchStudent(query) {
             if (allStudents.length === 0) {
-                showError('No students loaded. Please refresh the page or contact admin.');
+                showError('No students loaded. Please refresh the page.');
                 return;
             }
 
-            // Try exact match
             const exactMatch = allStudents.find(s =>
                 s.name.toLowerCase() === query.toLowerCase() ||
                 (s.studentId || '').toLowerCase() === query.toLowerCase()
@@ -830,7 +1039,6 @@
                 return;
             }
 
-            // Try partial match
             const partialMatches = allStudents.filter(s =>
                 s.name.toLowerCase().includes(query.toLowerCase()) ||
                 (s.studentId || '').toLowerCase().includes(query.toLowerCase())
@@ -847,7 +1055,7 @@
                 return;
             }
 
-            showError('No student found with name or ID: "' + query + '". Please check and try again.');
+            showError('No student found with name or ID: "' + query + '".');
         }
 
         // ============================================
@@ -859,7 +1067,6 @@
             hideError();
             hideInfo();
 
-            // ✅ Use the existing /api/students/:id route
             fetch(`/api/students/${studentId}`)
                 .then(res => res.json())
                 .then(data => {
@@ -873,6 +1080,9 @@
                     fetchStudentFees(studentId);
                     fetchStudentAssessment(studentId);
                     showLoading(false);
+                    
+                    // Load assignments for this student's grade
+                    setTimeout(() => loadAssignmentsForStudent(), 500);
                 })
                 .catch(err => {
                     showError('Error fetching student data: ' + err.message);
@@ -1015,14 +1225,12 @@
         // ============================================
 
         function fetchStudentAssessment(studentId) {
-            // Try to find by student name first
             fetch(`/api/assessments/student-name/${encodeURIComponent(currentStudent.name)}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.student) {
                         displayAssessment(data.student);
                     } else {
-                        // Try searching by name
                         fetch(`/api/assessments/search?name=${encodeURIComponent(currentStudent.name)}`)
                             .then(res => res.json())
                             .then(searchData => {
@@ -1055,7 +1263,7 @@
                     const levelClass = a.performanceLevel === 'Exceeding Expectation' ? 'EE' :
                                        a.performanceLevel === 'Meeting Expectation' ? 'ME' :
                                        a.performanceLevel === 'Approaching Expectation' ? 'AE' : 'BE';
-                    const pct = a.percentage || 0;
+                    const pct = a.maxScore > 0 ? ((a.score / a.maxScore) * 100) : 0;
                     return `
                         <div class="assessment-card">
                             <div class="subject">${a.subject || 'Untitled'}</div>
@@ -1140,6 +1348,130 @@
                 .catch(err => {
                     showError('Error generating report: ' + err.message);
                 });
+        }
+
+        // ============================================
+        // HOLIDAY ASSIGNMENTS
+        // ============================================
+
+        async function loadAssignmentsForStudent() {
+            if (!currentStudent) {
+                document.getElementById('assignmentsList').innerHTML = `
+                    <div class="no-assignments">
+                        <div class="icon">👤</div>
+                        <h4>No Student Selected</h4>
+                        <p>Please search for your profile in the "My Profile" tab first.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const grade = currentStudent.grade;
+            console.log('📡 Loading assignments for grade:', grade);
+
+            document.getElementById('assignmentsList').innerHTML = `
+                <div style="text-align:center; padding:20px;">
+                    <div class="spinner"></div>
+                    <p style="margin-top:10px;">Loading assignments for ${grade}...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/api/holiday-assignments/${encodeURIComponent(grade)}`);
+                console.log('📡 Response status:', response.status);
+                
+                const data = await response.json();
+                console.log('📡 Response data:', data);
+
+                if (data.success) {
+                    allAssignments = data.assignments || [];
+                    console.log(`📚 Found ${allAssignments.length} assignments for ${grade}`);
+                    renderAssignments(allAssignments);
+                } else {
+                    document.getElementById('assignmentsList').innerHTML = `
+                        <div class="no-assignments">
+                            <div class="icon">❌</div>
+                            <h4>Error Loading Assignments</h4>
+                            <p>${data.message || 'Unknown error occurred'}</p>
+                            <p style="font-size:12px;color:#999;margin-top:10px;">Please try refreshing or contact admin.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Error loading assignments:', error);
+                document.getElementById('assignmentsList').innerHTML = `
+                    <div class="no-assignments">
+                        <div class="icon">❌</div>
+                        <h4>Connection Error</h4>
+                        <p>${error.message}</p>
+                        <p style="font-size:12px;color:#999;margin-top:10px;">Please check if the server is running.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderAssignments(assignments) {
+            const container = document.getElementById('assignmentsList');
+            
+            const searchTerm = document.getElementById('assignmentSearch').value.toLowerCase().trim();
+            let filtered = assignments;
+            
+            if (searchTerm) {
+                filtered = assignments.filter(a => 
+                    a.title.toLowerCase().includes(searchTerm) ||
+                    (a.subject || '').toLowerCase().includes(searchTerm) ||
+                    (a.description || '').toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="no-assignments">
+                        <div class="icon">📭</div>
+                        <h4>${assignments.length > 0 ? 'No matching assignments' : 'No Assignments Available'}</h4>
+                        <p>${assignments.length > 0 ? 'Try adjusting your search.' : 'No holiday assignments available for your grade yet. Check back later!'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((a) => {
+                const fileIcon = a.fileType === 'pdf' ? 'fa-file-pdf pdf' :
+                               a.fileType === 'doc' || a.fileType === 'docx' ? 'fa-file-word word' :
+                               a.fileType === 'xls' || a.fileType === 'xlsx' ? 'fa-file-excel excel' :
+                               a.fileType === 'jpg' || a.fileType === 'jpeg' || a.fileType === 'png' ? 'fa-file-image image' :
+                               'fa-file-alt';
+                
+                const date = a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-KE') : 'Unknown';
+                
+                html += `
+                    <div class="assignment-card">
+                        <div style="display:flex;align-items:center;flex-wrap:wrap;flex:1;">
+                            <i class="fas ${fileIcon} file-icon"></i>
+                            <div class="info">
+                                <div class="title">${a.title}</div>
+                                <div class="meta">
+                                    <span><i class="fas fa-tag"></i> ${a.grade}</span>
+                                    ${a.subject ? `<span><i class="fas fa-book"></i> ${a.subject}</span>` : ''}
+                                    <span><i class="fas fa-calendar"></i> ${date}</span>
+                                    <span><i class="fas fa-file"></i> ${a.fileName}</span>
+                                </div>
+                                ${a.description ? `<div class="description">${a.description}</div>` : ''}
+                            </div>
+                        </div>
+                        <a href="/api/holiday-assignments/download/${a._id}" class="download-btn" target="_blank">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function filterAssignments() {
+            renderAssignments(allAssignments);
         }
 
         // ============================================
