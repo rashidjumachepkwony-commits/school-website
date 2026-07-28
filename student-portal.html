@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Portal - Changara Star Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -398,6 +399,7 @@
             font-style: italic;
         }
 
+        /* Assessment Section with Filters */
         .assessment-section {
             background: white;
             padding: 30px;
@@ -415,6 +417,67 @@
             color: #0A1628;
             margin-bottom: 20px;
             font-size: 18px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e8ecf1;
+            align-items: flex-end;
+        }
+
+        .filter-bar .filter-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .filter-bar .filter-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-bar .filter-group select,
+        .filter-bar .filter-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            transition: border-color 0.3s;
+        }
+
+        .filter-bar .filter-group select:focus,
+        .filter-bar .filter-group input:focus {
+            border-color: #C9A84C;
+            outline: none;
+        }
+
+        .filter-bar .btn-filter {
+            padding: 8px 20px;
+            background: #C9A84C;
+            color: #0A1628;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .filter-bar .btn-filter:hover {
+            background: #b8983a;
+            transform: translateY(-2px);
         }
 
         .assessment-grid {
@@ -492,6 +555,7 @@
             color: #6c757d;
         }
 
+        /* Assignments Section with Filters */
         .assignments-section {
             background: white;
             padding: 30px;
@@ -760,6 +824,19 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            .filter-bar {
+                flex-direction: column;
+            }
+
+            .filter-bar .filter-group {
+                min-width: 100%;
+            }
+
+            .filter-bar .btn-filter {
+                width: 100%;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -823,6 +900,72 @@
 
             <div id="assessmentSection" class="assessment-section">
                 <h3>📊 Assessment Results</h3>
+                
+                <!-- Assessment Filters -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label><i class="fas fa-graduation-cap"></i> Grade</label>
+                        <select id="assessmentGradeFilter">
+                            <option value="">All Grades</option>
+                            <option value="Playgroup">Playgroup</option>
+                            <option value="PP1">PP1</option>
+                            <option value="PP2">PP2</option>
+                            <option value="Grade 1">Grade 1</option>
+                            <option value="Grade 2">Grade 2</option>
+                            <option value="Grade 3">Grade 3</option>
+                            <option value="Grade 4">Grade 4</option>
+                            <option value="Grade 5">Grade 5</option>
+                            <option value="Grade 6">Grade 6</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar-alt"></i> Period</label>
+                        <select id="assessmentPeriodFilter">
+                            <option value="">All Periods</option>
+                            <option value="Week 1">Week 1</option>
+                            <option value="Week 2">Week 2</option>
+                            <option value="Week 3">Week 3</option>
+                            <option value="Week 4">Week 4</option>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar-check"></i> Term</label>
+                        <select id="assessmentTermFilter">
+                            <option value="">All Terms</option>
+                            <option value="Term 1">Term 1</option>
+                            <option value="Term 2">Term 2</option>
+                            <option value="Term 3">Term 3</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-tag"></i> Type</label>
+                        <select id="assessmentTypeFilter">
+                            <option value="">All Types</option>
+                            <option value="weekly">Weekly Assessment</option>
+                            <option value="monthly">Monthly Examination</option>
+                            <option value="term">End of Term Exam</option>
+                        </select>
+                    </div>
+                    <button class="btn-filter" onclick="applyAssessmentFilters()">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <button class="btn-filter" onclick="resetAssessmentFilters()" style="background:#6c757d;color:white;">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+
                 <div id="assessmentGrid" class="assessment-grid"></div>
                 <div id="assessmentSummary" class="assessment-summary"></div>
                 <div style="text-align: center; margin-top: 15px;">
@@ -836,11 +979,44 @@
             <div class="assignments-section">
                 <h3><i class="fas fa-file-alt"></i> Holiday Assignments</h3>
                 
-                <!-- Assignment Search -->
-                <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-                    <input type="text" id="assignmentSearch" placeholder="Search assignments by title..." onkeyup="filterAssignments()" style="flex:1; min-width:200px; padding:10px 14px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px;">
-                    <button onclick="loadAssignmentsForStudent()" style="padding:10px 25px; background:#0A1628; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
-                        <i class="fas fa-sync"></i> Refresh
+                <!-- Assignment Filters -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label><i class="fas fa-graduation-cap"></i> Grade</label>
+                        <select id="assignmentGradeFilter">
+                            <option value="">All Grades</option>
+                            <option value="Playgroup">Playgroup</option>
+                            <option value="PP1">PP1</option>
+                            <option value="PP2">PP2</option>
+                            <option value="Grade 1">Grade 1</option>
+                            <option value="Grade 2">Grade 2</option>
+                            <option value="Grade 3">Grade 3</option>
+                            <option value="Grade 4">Grade 4</option>
+                            <option value="Grade 5">Grade 5</option>
+                            <option value="Grade 6">Grade 6</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar-alt"></i> Period</label>
+                        <select id="assignmentPeriodFilter">
+                            <option value="">All Periods</option>
+                            <option value="Term 1">Term 1</option>
+                            <option value="Term 2">Term 2</option>
+                            <option value="Term 3">Term 3</option>
+                            <option value="April Holiday">April Holiday</option>
+                            <option value="August Holiday">August Holiday</option>
+                            <option value="December Holiday">December Holiday</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-search"></i> Search</label>
+                        <input type="text" id="assignmentSearchFilter" placeholder="Search by title..." onkeyup="applyAssignmentFilters()">
+                    </div>
+                    <button class="btn-filter" onclick="applyAssignmentFilters()">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <button class="btn-filter" onclick="resetAssignmentFilters()" style="background:#6c757d;color:white;">
+                        <i class="fas fa-undo"></i> Reset
                     </button>
                 </div>
 
@@ -884,6 +1060,7 @@
         let currentStudent = null;
         let allStudents = [];
         let allAssignments = [];
+        let currentAssessmentData = null;
         let searchTimeout = null;
 
         document.getElementById('year').textContent = new Date().getFullYear();
@@ -899,10 +1076,16 @@
             if (tab === 'profile') {
                 document.querySelector('.tab:first-child').classList.add('active');
                 document.getElementById('tabProfile').classList.add('active');
+                // Update grade filter with student's grade
+                if (currentStudent) {
+                    document.getElementById('assessmentGradeFilter').value = currentStudent.grade;
+                }
             } else {
                 document.querySelector('.tab:last-child').classList.add('active');
                 document.getElementById('tabAssignments').classList.add('active');
                 if (currentStudent) {
+                    // Set grade filter to student's grade
+                    document.getElementById('assignmentGradeFilter').value = currentStudent.grade;
                     loadAssignmentsForStudent();
                 } else {
                     document.getElementById('assignmentsList').innerHTML = `
@@ -1081,6 +1264,10 @@
                     fetchStudentAssessment(studentId);
                     showLoading(false);
                     
+                    // Update grade filters
+                    document.getElementById('assessmentGradeFilter').value = currentStudent.grade;
+                    document.getElementById('assignmentGradeFilter').value = currentStudent.grade;
+                    
                     // Load assignments for this student's grade
                     setTimeout(() => loadAssignmentsForStudent(), 500);
                 })
@@ -1229,6 +1416,7 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.student) {
+                        currentAssessmentData = data.student;
                         displayAssessment(data.student);
                     } else {
                         fetch(`/api/assessments/search?name=${encodeURIComponent(currentStudent.name)}`)
@@ -1238,28 +1426,84 @@
                                     const latest = searchData.students.sort((a, b) =>
                                         new Date(b.createdAt) - new Date(a.createdAt)
                                     )[0];
+                                    currentAssessmentData = latest;
                                     displayAssessment(latest);
                                 } else {
                                     assessmentSection.classList.remove('active');
+                                    currentAssessmentData = null;
                                 }
                             })
                             .catch(() => {
                                 assessmentSection.classList.remove('active');
+                                currentAssessmentData = null;
                             });
                     }
                 })
                 .catch(() => {
                     assessmentSection.classList.remove('active');
+                    currentAssessmentData = null;
                 });
         }
 
         function displayAssessment(student) {
             assessmentSection.classList.add('active');
+            currentAssessmentData = student;
+            applyAssessmentFilters();
+        }
 
-            const assessments = student.assessments || [];
+        // ============================================
+        // ASSESSMENT FILTERS
+        // ============================================
 
-            if (assessments.length > 0) {
-                assessmentGrid.innerHTML = assessments.map(a => {
+        function applyAssessmentFilters() {
+            if (!currentAssessmentData) {
+                assessmentGrid.innerHTML = `
+                    <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
+                        No assessment data available. Please search for your profile first.
+                    </p>
+                `;
+                assessmentSummary.innerHTML = '';
+                return;
+            }
+
+            const gradeFilter = document.getElementById('assessmentGradeFilter').value;
+            const periodFilter = document.getElementById('assessmentPeriodFilter').value;
+            const termFilter = document.getElementById('assessmentTermFilter').value;
+            const typeFilter = document.getElementById('assessmentTypeFilter').value;
+
+            // Filter assessments
+            let filteredAssessments = currentAssessmentData.assessments || [];
+
+            // Apply filters
+            if (gradeFilter && currentAssessmentData.grade !== gradeFilter) {
+                // If grade doesn't match, show empty
+                filteredAssessments = [];
+            }
+
+            // Filter by period if available
+            if (periodFilter && currentAssessmentData.period) {
+                if (currentAssessmentData.period !== periodFilter) {
+                    filteredAssessments = [];
+                }
+            }
+
+            // Filter by term if available
+            if (termFilter && currentAssessmentData.term) {
+                if (currentAssessmentData.term !== termFilter) {
+                    filteredAssessments = [];
+                }
+            }
+
+            // Filter by type if available
+            if (typeFilter && currentAssessmentData.type) {
+                if (currentAssessmentData.type !== typeFilter) {
+                    filteredAssessments = [];
+                }
+            }
+
+            // Render filtered assessments
+            if (filteredAssessments.length > 0) {
+                assessmentGrid.innerHTML = filteredAssessments.map(a => {
                     const levelClass = a.performanceLevel === 'Exceeding Expectation' ? 'EE' :
                                        a.performanceLevel === 'Meeting Expectation' ? 'ME' :
                                        a.performanceLevel === 'Approaching Expectation' ? 'AE' : 'BE';
@@ -1277,19 +1521,21 @@
             } else {
                 assessmentGrid.innerHTML = `
                     <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
-                        No assessment records found
+                        ${filteredAssessments.length === 0 && (periodFilter || termFilter || typeFilter) ? 
+                            'No assessments match your filters. Try adjusting your criteria.' : 
+                            'No assessment records found'}
                     </p>
                 `;
             }
 
-            const level = student.performanceLevel || 'Approaching Expectation';
+            // Update summary
+            const level = currentAssessmentData.performanceLevel || 'Approaching Expectation';
             const levelEmoji = {
                 'Exceeding Expectation': '🌟',
                 'Meeting Expectation': '✅',
                 'Approaching Expectation': '📌',
                 'Below Expectation': '⚠️'
             };
-
             const levelColors = {
                 'Exceeding Expectation': '#1a8a3f',
                 'Meeting Expectation': '#0d6efd',
@@ -1305,22 +1551,30 @@
                     <div class="label">Performance Level</div>
                 </div>
                 <div class="stat">
-                    <div class="number">${student.totalScore || 0}</div>
+                    <div class="number">${currentAssessmentData.totalScore || 0}</div>
                     <div class="label">Total Score</div>
                 </div>
                 <div class="stat">
-                    <div class="number">${(student.averageScore || 0).toFixed(1)}%</div>
+                    <div class="number">${(currentAssessmentData.averageScore || 0).toFixed(1)}%</div>
                     <div class="label">Average Score</div>
                 </div>
                 <div class="stat">
-                    <div class="number">${student.overallRating || 2}/4</div>
+                    <div class="number">${currentAssessmentData.overallRating || 2}/4</div>
                     <div class="label">CBC Rating</div>
                 </div>
                 <div class="stat">
-                    <div class="number">${assessments.length}</div>
+                    <div class="number">${filteredAssessments.length}</div>
                     <div class="label">Subjects</div>
                 </div>
             `;
+        }
+
+        function resetAssessmentFilters() {
+            document.getElementById('assessmentGradeFilter').value = currentStudent ? currentStudent.grade : '';
+            document.getElementById('assessmentPeriodFilter').value = '';
+            document.getElementById('assessmentTermFilter').value = '';
+            document.getElementById('assessmentTypeFilter').value = '';
+            applyAssessmentFilters();
         }
 
         // ============================================
@@ -1386,7 +1640,7 @@
                 if (data.success) {
                     allAssignments = data.assignments || [];
                     console.log(`📚 Found ${allAssignments.length} assignments for ${grade}`);
-                    renderAssignments(allAssignments);
+                    applyAssignmentFilters();
                 } else {
                     document.getElementById('assignmentsList').innerHTML = `
                         <div class="no-assignments">
@@ -1410,33 +1664,61 @@
             }
         }
 
-        function renderAssignments(assignments) {
-            const container = document.getElementById('assignmentsList');
-            
-            const searchTerm = document.getElementById('assignmentSearch').value.toLowerCase().trim();
-            let filtered = assignments;
-            
+        function applyAssignmentFilters() {
+            const gradeFilter = document.getElementById('assignmentGradeFilter').value;
+            const periodFilter = document.getElementById('assignmentPeriodFilter').value;
+            const searchTerm = document.getElementById('assignmentSearchFilter').value.toLowerCase().trim();
+
+            let filtered = allAssignments;
+
+            // Filter by grade
+            if (gradeFilter) {
+                filtered = filtered.filter(a => a.grade === gradeFilter);
+            }
+
+            // Filter by period (using description or subject as period indicator)
+            if (periodFilter) {
+                filtered = filtered.filter(a => 
+                    (a.description || '').toLowerCase().includes(periodFilter.toLowerCase()) ||
+                    (a.subject || '').toLowerCase().includes(periodFilter.toLowerCase())
+                );
+            }
+
+            // Filter by search term
             if (searchTerm) {
-                filtered = assignments.filter(a => 
+                filtered = filtered.filter(a => 
                     a.title.toLowerCase().includes(searchTerm) ||
                     (a.subject || '').toLowerCase().includes(searchTerm) ||
                     (a.description || '').toLowerCase().includes(searchTerm)
                 );
             }
 
-            if (filtered.length === 0) {
+            renderAssignments(filtered);
+        }
+
+        function resetAssignmentFilters() {
+            document.getElementById('assignmentGradeFilter').value = currentStudent ? currentStudent.grade : '';
+            document.getElementById('assignmentPeriodFilter').value = '';
+            document.getElementById('assignmentSearchFilter').value = '';
+            applyAssignmentFilters();
+        }
+
+        function renderAssignments(assignments) {
+            const container = document.getElementById('assignmentsList');
+
+            if (assignments.length === 0) {
                 container.innerHTML = `
                     <div class="no-assignments">
                         <div class="icon">📭</div>
-                        <h4>${assignments.length > 0 ? 'No matching assignments' : 'No Assignments Available'}</h4>
-                        <p>${assignments.length > 0 ? 'Try adjusting your search.' : 'No holiday assignments available for your grade yet. Check back later!'}</p>
+                        <h4>${allAssignments.length > 0 ? 'No matching assignments' : 'No Assignments Available'}</h4>
+                        <p>${allAssignments.length > 0 ? 'Try adjusting your filters.' : 'No holiday assignments available for your grade yet. Check back later!'}</p>
                     </div>
                 `;
                 return;
             }
 
             let html = '';
-            filtered.forEach((a) => {
+            assignments.forEach((a) => {
                 const fileIcon = a.fileType === 'pdf' ? 'fa-file-pdf pdf' :
                                a.fileType === 'doc' || a.fileType === 'docx' ? 'fa-file-word word' :
                                a.fileType === 'xls' || a.fileType === 'xlsx' ? 'fa-file-excel excel' :
@@ -1468,10 +1750,6 @@
             });
 
             container.innerHTML = html;
-        }
-
-        function filterAssignments() {
-            renderAssignments(allAssignments);
         }
 
         // ============================================
