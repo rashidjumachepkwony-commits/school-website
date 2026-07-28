@@ -1649,7 +1649,6 @@ const holidayAssignmentSchema = new mongoose.Schema({
 }, { collection: 'holidayassignments' });
 
 const HolidayAssignment = mongoose.model('HolidayAssignment', holidayAssignmentSchema);
-
 // Payment Schema
 const paymentSchema = new mongoose.Schema({
     studentId: { type: String, required: true },
