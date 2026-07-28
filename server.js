@@ -4187,6 +4187,118 @@ app.post('/api/migrate-to-cloudinary', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+// Add these routes to your server.js (after your existing routes)
+
+// ============================================
+// STUDENT PORTAL ROUTES
+// ============================================
+
+// Get all students (for auto-complete)
+app.get('/api/students', async (req, res) => {
+    try {
+        const students = await Student.find({ isActive: true }).sort({ name: 1 });
+        res.json({ success: true, students: students.map(s => ({
+            studentId: s.studentId,
+            name: s.name,
+            grade: s.grade,
+            type: s.type
+        })) });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get student by ID
+app.get('/api/students/:id', async (req, res) => {
+    try {
+        const student = await Student.findOne({ studentId: req.params.id, isActive: true });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        res.json({ success: true, student });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get student fees
+app.get('/api/clerk/students/fees/:studentId', async (req, res) => {
+    try {
+        const student = await Student.findOne({ studentId: req.params.studentId, isActive: true });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        const feeData = getFeeStructure(student.grade, student.type);
+        const paid = student.paid || 0;
+        const totalFees = feeData.total || 0;
+        const balance = totalFees - paid;
+        const payments = await Payment.find({ studentId: student.studentId }).sort({ date: -1 });
+        res.json({
+            success: true,
+            student: {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade,
+                gender: student.gender,
+                studentType: student.type,
+                isBoarding: student.type === 'Boarder'
+            },
+            fees: {
+                total: totalFees,
+                paid: paid,
+                balance: balance,
+                status: balance === 0 ? 'paid' : balance < totalFees ? 'partial' : 'unpaid'
+            },
+            feeBreakdown: feeData,
+            payments: payments
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Serve student portal page
+app.get('/student-portal', (req, res) => {
+    res.sendFile(path.join(__dirname, 'student-portal.html'));
+});
+
+app.get('/student-portal.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'student-portal.html'));
+});
+
+// Serve student report page
+app.get('/student_report.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'student_report.html'));
+});
+
+// Get student assessment by name (for portal)
+app.get('/api/assessments/student-name/:name', async (req, res) => {
+    try {
+        const name = decodeURIComponent(req.params.name);
+        const student = await StudentAssessment.findOne({ studentName: { $regex: new RegExp('^' + name + '$', 'i') } });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        res.json({ success: true, student });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+// ============================================
+// SERVE STUDENT REPORT PAGE
+// ============================================
+app.get('/student-report', (req, res) => {
+    res.sendFile(path.join(__dirname, 'student_report.html'));
+});
+
+app.get('/student-report.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'student_report.html'));
+});
+
+// 404 handler - MUST BE LAST
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: 'Route not found' });
+});
 
 // ============================================
 // REGISTER STATIC FILES
@@ -4198,6 +4310,7 @@ app.use(express.static(__dirname));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
+
 
 // ============================================
 // DEBUG - LIST ALL REGISTERED ROUTES (FIXED)
