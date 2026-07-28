@@ -1581,7 +1581,7 @@
         }
 
         // ============================================
-        // HOLIDAY ASSIGNMENTS
+        // HOLIDAY ASSIGNMENTS - SIMPLIFIED ROUTE
         // ============================================
 
         async function loadAssignmentsForStudent() {
@@ -1600,9 +1600,10 @@
             const period = document.getElementById('assignmentPeriodFilter').value || '';
             const search = document.getElementById('assignmentSearchFilter').value || '';
 
-            let url = `/api/students/portal/assignments/filtered?studentId=${currentStudent.studentId}&grade=${encodeURIComponent(grade)}`;
-            if (period) url += `&period=${encodeURIComponent(period)}`;
-            if (search) url += `&search=${encodeURIComponent(search)}`;
+            // Use the simpler route that doesn't require PIN verification
+            let url = `/api/holiday-assignments/${encodeURIComponent(grade)}`;
+            
+            console.log('📡 Loading assignments URL:', url);
 
             document.getElementById('assignmentsList').innerHTML = `
                 <div style="text-align:center; padding:20px;">
@@ -1614,17 +1615,40 @@
             try {
                 const response = await fetch(url);
                 const data = await response.json();
+                console.log('📡 Response data:', data);
 
                 if (data.success) {
                     allAssignments = data.assignments || [];
                     console.log(`📚 Found ${allAssignments.length} assignments`);
-                    renderAssignments(allAssignments);
+                    
+                    // Apply client-side filters
+                    let filtered = allAssignments;
+                    
+                    if (period) {
+                        filtered = filtered.filter(a => 
+                            (a.description || '').toLowerCase().includes(period.toLowerCase()) ||
+                            (a.subject || '').toLowerCase().includes(period.toLowerCase()) ||
+                            (a.title || '').toLowerCase().includes(period.toLowerCase())
+                        );
+                    }
+                    
+                    if (search) {
+                        const searchLower = search.toLowerCase();
+                        filtered = filtered.filter(a => 
+                            (a.title || '').toLowerCase().includes(searchLower) ||
+                            (a.subject || '').toLowerCase().includes(searchLower) ||
+                            (a.description || '').toLowerCase().includes(searchLower)
+                        );
+                    }
+                    
+                    renderAssignments(filtered);
                 } else {
                     document.getElementById('assignmentsList').innerHTML = `
                         <div class="no-assignments">
                             <div class="icon">❌</div>
-                            <h4>Error Loading Assignments</h4>
+                            <h4>${data.message || 'Error Loading Assignments'}</h4>
                             <p>${data.message || 'Unknown error occurred'}</p>
+                            <p style="font-size:12px;color:#999;margin-top:10px;">Please try refreshing or contact admin.</p>
                         </div>
                     `;
                 }
@@ -1635,6 +1659,7 @@
                         <div class="icon">❌</div>
                         <h4>Connection Error</h4>
                         <p>${error.message}</p>
+                        <p style="font-size:12px;color:#999;margin-top:10px;">Please check if the server is running.</p>
                     </div>
                 `;
             }
