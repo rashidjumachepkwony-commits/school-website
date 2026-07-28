@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Results - Changara Star Academy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        
+        .class-report {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #C9A84C;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .header .school-name {
+            font-size: 28px;
+            font-weight: 900;
+            color: #0A1628;
+            letter-spacing: 3px;
+        }
+        .header .school-name .star {
+            color: #C9A84C;
+        }
+        .header .motto {
+            font-size: 12px;
+            color: #C9A84C;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+        .header .address {
+            font-size: 10px;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+        .header .title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0A1628;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .header .subtitle {
+            font-size: 13px;
+            color: #6c757d;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            border: 1px solid #e8ecf1;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0A1628;
+        }
+        .stat-card .label {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-card.exceeding .number { color: #1a8a3f; }
+        .stat-card.meeting .number { color: #0d6efd; }
+        .stat-card.approaching .number { color: #e6a800; }
+        .stat-card.below .number { color: #dc3545; }
+        .stat-card.gold .number { color: #C9A84C; }
+        
+        /* Rubric */
+        .rubric {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .rubric-item {
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .rubric-item.ee { background: #E8F5E9; color: #1a8a3f; border: 1px solid #1a8a3f; }
+        .rubric-item.me { background: #E3F2FD; color: #0d6efd; border: 1px solid #0d6efd; }
+        .rubric-item.ae { background: #FFF8E1; color: #e6a800; border: 1px solid #e6a800; }
+        .rubric-item.be { background: #FBE9E7; color: #dc3545; border: 1px solid #dc3545; }
+        
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 15px;
+            border-radius: 8px;
+            border: 1px solid #e8ecf1;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 900px;
+        }
+        table thead {
+            background: #0A1628;
+            color: white;
+        }
+        table thead th {
+            padding: 10px 12px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        table thead th:first-child {
+            text-align: left;
+        }
+        table tbody td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: center;
+            vertical-align: middle;
+        }
+        table tbody td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+        table tbody tr:hover {
+            background: #f0f4ff;
+        }
+        table tbody tr:nth-child(even) {
+            background: #fafbfc;
+        }
+        table tbody tr:nth-child(even):hover {
+            background: #f0f2f5;
+        }
+        
+        .student-name {
+            font-weight: 600;
+            color: #0A1628;
+        }
+        .student-id {
+            color: #6c757d;
+            font-size: 10px;
+        }
+        .score-cell.high { color: #1a8a3f; font-weight: 700; }
+        .score-cell.medium { color: #0d6efd; font-weight: 700; }
+        .score-cell.low { color: #e6a800; font-weight: 700; }
+        .score-cell.fail { color: #dc3545; font-weight: 700; }
+        
+        .level-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+        }
+        .level-badge.ee { background: #1a8a3f; }
+        .level-badge.me { background: #0d6efd; }
+        .level-badge.ae { background: #e6a800; }
+        .level-badge.be { background: #dc3545; }
+        
+        .rank-badge {
+            display: inline-block;
+            font-size: 16px;
+            text-align: center;
+            min-width: 30px;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body { background: white; padding: 0; }
+            .class-report { box-shadow: none; border-radius: 0; padding: 20px; }
+            .btn-group { display: none; }
+            table tbody tr:hover { background: inherit; }
+            table tbody tr:nth-child(even) { background: #fafbfc; }
+        }
+        
+        .btn-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn-group .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+        .btn-group .btn-print {
+            background: #C9A84C;
+            color: #0A1628;
+        }
+        .btn-group .btn-print:hover {
+            background: #b8963a;
+        }
+        .btn-group .btn-download {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-group .btn-download:hover {
+            background: #c82333;
+        }
+        .btn-group .btn-excel {
+            background: #1a8a3f;
+            color: white;
+        }
+        .btn-group .btn-excel:hover {
+            background: #136e32;
+        }
+        .btn-group .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-group .btn-back:hover {
+            background: #5a6268;
+        }
+        
+        @media (max-width: 768px) {
+            .class-report { padding: 15px; }
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+            table { font-size: 10px; min-width: 700px; }
+            table thead th, table tbody td { padding: 5px 6px; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="class-report" id="classReport">
+        <!-- Header -->
+        <div class="header">
+            <div class="school-name">CHANGARA <span class="star">STAR</span> ACADEMY</div>
+            <div class="motto">"Nurturing Stars, Building Futures"</div>
+            <div class="address">P.O Box 7, Cheptais | Tel: +254 721 556 252 | Email: starchangara@gmail.com</div>
+            <div class="title">CLASS PERFORMANCE REPORT</div>
+            <div class="subtitle" id="reportSubtitle">Grade 5 - End of Term Assessment - Term 2, 2026</div>
+        </div>
+
+        <!-- Rubric -->
+        <div class="rubric">
+            <span class="rubric-item ee">EE: 75-100% (4)</span>
+            <span class="rubric-item me">ME: 41-74% (3)</span>
+            <span class="rubric-item ae">AE: 21-40% (2)</span>
+            <span class="rubric-item be">BE: 0-20% (1)</span>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card gold">
+                <div class="number" id="totalStudents">0</div>
+                <div class="label">Total Students</div>
+            </div>
+            <div class="stat-card exceeding">
+                <div class="number" id="exceedingCount">0</div>
+                <div class="label">Exceeding (EE)</div>
+            </div>
+            <div class="stat-card meeting">
+                <div class="number" id="meetingCount">0</div>
+                <div class="label">Meeting (ME)</div>
+            </div>
+            <div class="stat-card approaching">
+                <div class="number" id="approachingCount">0</div>
+                <div class="label">Approaching (AE)</div>
+            </div>
+            <div class="stat-card below">
+                <div class="number" id="belowCount">0</div>
+                <div class="label">Below (BE)</div>
+            </div>
+            <div class="stat-card gold">
+                <div class="number" id="classAvg">0%</div>
+                <div class="label">Class Average</div>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="table-wrapper">
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">Student</th>
+                        <th style="width:40px;">ID</th>
+                        <th>Maths</th>
+                        <th>English</th>
+                        <th>Sci & Tech</th>
+                        <th>Kiswahili</th>
+                        <th>SST</th>
+                        <th>RE</th>
+                        <th>Agriculture</th>
+                        <th>Creative Art</th>
+                        <th>Total</th>
+                        <th>Avg %</th>
+                        <th>Level</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    <tr><td colspan="14" style="text-align:center;color:#999;">Loading data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top:20px;padding-top:15px;border-top:2px solid #C9A84C;display:flex;justify-content:space-between;font-size:9px;color:#6c757d;">
+            <div>Generated: <span id="generatedDate">-</span></div>
+            <div>© 2026 Changara Star Academy</div>
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-group">
+        <button class="btn btn-print" onclick="window.print()">🖨️ Print Report</button>
+        <button class="btn btn-download" onclick="downloadPDF()">📄 Download PDF</button>
+        <button class="btn btn-excel" onclick="exportExcel()">📊 Export Excel</button>
+        <button class="btn btn-back" onclick="window.history.back()">⬅ Back</button>
+    </div>
+
+    <script>
+        // ============================================
+        // GRADE 5 ASSESSMENT DATA
+        // ============================================
+        const classData = {
+            grade: "Grade 5",
+            term: "Term 2",
+            year: "2026",
+            type: "End of Term",
+            subjects: [
+                { name: "MATHS ACTIVITIES", max: 30, short: "Maths" },
+                { name: "ENGLISH ACTIVITIES", max: 50, short: "English" },
+                { name: "SCIENCE & TECH", max: 33, short: "Sci & Tech" },
+                { name: "KISWAHILI LUGHA", max: 50, short: "Kiswahili" },
+                { name: "SOCIAL STUDIES", max: 20, short: "SST" },
+                { name: "RELIGIOUS EDUCATION", max: 25, short: "RE" },
+                { name: "AGRICULTURE", max: 33, short: "Agriculture" },
+                { name: "CREATIVE ART", max: 33, short: "Creative Art" }
+            ],
+            students: [
+                { name: "JUSTINE NYAMORI", id: "ST001", scores: [21, 40, 22, 35, 17, 13, 26, 24], total: 198 },
+                { name: "YUSRA CHEBET", id: "ST002", scores: [17, 43, 22, 37, 14, 7, 28, 18], total: 186 },
+                { name: "KENNEDY ETYANG", id: "ST003", scores: [15, 39, 18, 31, 18, 14, 30, 21], total: 186 },
+                { name: "NIMRAH SHADIA", id: "ST004", scores: [18, 41, 19, 36, 12, 10, 27, 22], total: 185 },
+                { name: "BRITNEY NANJALA", id: "ST005", scores: [14, 41, 23, 35, 14, 7, 27, 20], total: 181 },
+                { name: "MAYER STACY", id: "ST006", scores: [18, 35, 15, 39, 16, 11, 25, 15], total: 171 },
+                { name: "MILNER MAUKA", id: "ST007", scores: [13, 31, 18, 35, 15, 9, 25, 20], total: 166 },
+                { name: "DORCAS AMWENO", id: "ST008", scores: [11, 39, 17, 39, 13, 11, 18, 20], total: 168 },
+                { name: "JOSEPH ISHARA", id: "ST009", scores: [16, 34, 16, 28, 13, 8, 25, 24], total: 164 },
+                { name: "VENTIAS PEPELA", id: "ST010", scores: [17, 34, 16, 37, 12, 6, 22, 20], total: 164 },
+                { name: "MERCY OMAGURIA", id: "ST011", scores: [9, 18, 8, 18, 8, 8, 7, 16], total: 92 },
+                { name: "FRANCIS ESEME", id: "ST012", scores: [11, 12, 10, 16, 10, 9, 12, 10], total: 88 },
+                { name: "MARK WAFULA", id: "ST013", scores: [10, 13, 12, 14, 9, 5, 13, 10], total: 86 }
+            ]
+        };
+
+        // ============================================
+        // PERFORMANCE RUBRIC FUNCTIONS
+        // ============================================
+        function calculatePerformanceLevel(percentage) {
+            if (percentage >= 75) return 'Exceeding Expectation';
+            if (percentage >= 41) return 'Meeting Expectation';
+            if (percentage >= 21) return 'Approaching Expectation';
+            return 'Below Expectation';
+        }
+
+        function getPerformanceShort(level) {
+            const shorts = {
+                'Exceeding Expectation': 'EE',
+                'Meeting Expectation': 'ME',
+                'Approaching Expectation': 'AE',
+                'Below Expectation': 'BE'
+            };
+            return shorts[level] || 'AE';
+        }
+
+        function getPerformanceRating(level) {
+            const ratings = {
+                'Exceeding Expectation': 4,
+                'Meeting Expectation': 3,
+                'Approaching Expectation': 2,
+                'Below Expectation': 1
+            };
+            return ratings[level] || 2;
+        }
+
+        function getScoreClass(percentage) {
+            if (percentage >= 75) return 'high';
+            if (percentage >= 41) return 'medium';
+            if (percentage >= 21) return 'low';
+            return 'fail';
+        }
+
+        // ============================================
+        // RENDER CLASS RESULTS
+        // ============================================
+        function renderClassResults() {
+            const students = classData.students;
+            const subjects = classData.subjects;
+            const totalMax = subjects.reduce((sum, s) => sum + s.max, 0);
+
+            // Calculate stats
+            let exceeding = 0, meeting = 0, approaching = 0, below = 0;
+            let totalAvg = 0;
+
+            // Process each student
+            const processedStudents = students.map(student => {
+                const percentages = student.scores.map((score, index) => {
+                    return subjects[index].max > 0 ? (score / subjects[index].max) * 100 : 0;
+                });
+                const avgPercentage = totalMax > 0 ? (student.total / totalMax) * 100 : 0;
+                const level = calculatePerformanceLevel(avgPercentage);
+                const short = getPerformanceShort(level);
+                const rating = getPerformanceRating(level);
+
+                // Count levels
+                if (short === 'EE') exceeding++;
+                else if (short === 'ME') meeting++;
+                else if (short === 'AE') approaching++;
+                else below++;
+
+                totalAvg += avgPercentage;
+
+                return {
+                    ...student,
+                    percentages: percentages,
+                    avgPercentage: avgPercentage,
+                    level: level,
+                    short: short,
+                    rating: rating
+                };
+            });
+
+            // Sort by total score descending
+            processedStudents.sort((a, b) => b.total - a.total);
+
+            // Update stats
+            document.getElementById('totalStudents').textContent = processedStudents.length;
+            document.getElementById('exceedingCount').textContent = exceeding;
+            document.getElementById('meetingCount').textContent = meeting;
+            document.getElementById('approachingCount').textContent = approaching;
+            document.getElementById('belowCount').textContent = below;
+            document.getElementById('classAvg').textContent = processedStudents.length > 0 ? (totalAvg / processedStudents.length).toFixed(1) + '%' : '0%';
+
+            // Update table
+            const tbody = document.getElementById('resultsBody');
+            let rows = '';
+
+            processedStudents.forEach((student, index) => {
+                const rank = index + 1;
+                const rankDisplay = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+
+                rows += `
+                    <tr>
+                        <td style="text-align:left;">
+                            <div class="student-name">${student.name}</div>
+                            <div class="student-id">${student.id}</div>
+                        </td>
+                        <td>${student.id}</td>
+                `;
+
+                // Subject scores
+                student.scores.forEach((score, i) => {
+                    const pct = student.percentages[i];
+                    const cls = getScoreClass(pct);
+                    rows += `<td class="score-cell ${cls}">${score}</td>`;
+                });
+
+                // Total, Avg, Level, Rating
+                rows += `
+                    <td><strong>${student.total}</strong></td>
+                    <td class="score-cell ${getScoreClass(student.avgPercentage)}">${student.avgPercentage.toFixed(1)}%</td>
+                    <td><span class="level-badge ${student.short.toLowerCase()}">${student.short}</span></td>
+                    <td>${student.rating}</td>
+                `;
+
+                rows += `</tr>`;
+            });
+
+            tbody.innerHTML = rows;
+
+            // Update generated date
+            document.getElementById('generatedDate').textContent = new Date().toLocaleString('en-KE', {
+                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        // ============================================
+        // EXPORT EXCEL (CSV)
+        // ============================================
+        function exportExcel() {
+            const students = classData.students;
+            const subjects = classData.subjects;
+            const totalMax = subjects.reduce((sum, s) => sum + s.max, 0);
+
+            let csv = '\uFEFF'; // BOM for Excel
+            csv += 'CHANGARA STAR ACADEMY - CLASS PERFORMANCE REPORT\n';
+            csv += `Grade: ${classData.grade}, Term: ${classData.term}, Year: ${classData.year}\n\n`;
+
+            // Header row
+            csv += 'Rank,Student Name,Student ID';
+            subjects.forEach(s => csv += `,${s.short}`);
+            csv += ',Total,Average %,Level,Rating\n';
+
+            // Process and sort students
+            const sorted = [...students].sort((a, b) => b.total - a.total);
+
+            sorted.forEach((student, index) => {
+                const rank = index + 1;
+                const avgPercentage = totalMax > 0 ? (student.total / totalMax) * 100 : 0;
+                const level = calculatePerformanceLevel(avgPercentage);
+                const short = getPerformanceShort(level);
+                const rating = getPerformanceRating(level);
+
+                csv += `${rank},"${student.name}",${student.id}`;
+                student.scores.forEach(score => csv += `,${score}`);
+                csv += `,${student.total},${avgPercentage.toFixed(1)}%,${short},${rating}\n`;
+            });
+
+            // Add summary
+            let exceeding = 0, meeting = 0, approaching = 0, below = 0;
+            sorted.forEach(student => {
+                const avgPercentage = totalMax > 0 ? (student.total / totalMax) * 100 : 0;
+                const short = getPerformanceShort(calculatePerformanceLevel(avgPercentage));
+                if (short === 'EE') exceeding++;
+                else if (short === 'ME') meeting++;
+                else if (short === 'AE') approaching++;
+                else below++;
+            });
+
+            csv += '\n\nSUMMARY STATISTICS\n';
+            csv += `Total Students,${sorted.length}\n`;
+            csv += `Exceeding (EE),${exceeding}\n`;
+            csv += `Meeting (ME),${meeting}\n`;
+            csv += `Approaching (AE),${approaching}\n`;
+            csv += `Below (BE),${below}\n`;
+
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Class_Results_${classData.grade}_${classData.term}_${classData.year}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================
+        // DOWNLOAD PDF
+        // ============================================
+        function downloadPDF() {
+            window.print();
+            alert('📄 To save as PDF:\n1. In the print dialog, select "Save as PDF" as the destination.\n2. Click Save.');
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            renderClassResults();
+        });
+    </script>
+</body>
+</html>

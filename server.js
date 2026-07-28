@@ -1408,7 +1408,7 @@ const Payment = mongoose.model('Payment', paymentSchema);
 // ============================================
 
 function getDefaultSubjects(grade, type) {
-    // Grade-specific subject configurations
+    // Grade-specific subject configurations - INCLUDING GRADE 5
     const gradeSubjects = {
         'Playgroup': [
             { name: 'LANGUAGE ACTIVITIES', max: 30 },
