@@ -741,7 +741,7 @@
         document.getElementById('year').textContent = new Date().getFullYear();
 
         // ============================================
-        // LOAD STUDENTS & DEBUG
+        // LOAD STUDENTS
         // ============================================
 
         async function loadStudents() {
@@ -783,8 +783,6 @@
                     <p><strong>Total Students:</strong> ${data.totalStudents || 0}</p>
                     <p><strong>Sample Students:</strong></p>
                     <pre>${JSON.stringify(data.sampleStudents || [], null, 2)}</pre>
-                    <p><strong>Full Response:</strong></p>
-                    <pre>${JSON.stringify(data, null, 2)}</pre>
                 `;
             } catch (err) {
                 document.getElementById('debugContent').innerHTML = `
@@ -913,7 +911,7 @@
             hideError();
             hideInfo();
 
-            fetch(`/api/students/${studentId}`)
+            fetch(`/api/students/portal/${studentId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (!data.success) {
