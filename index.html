@@ -192,31 +192,6 @@
             50% { box-shadow: 0 0 0 8px rgba(111, 66, 193, 0); }
         }
 
-        /* ===== NEW: Continuous Assessment Link ===== */
-        .main-header .nav-links a.assessment-link {
-            background: linear-gradient(135deg, var(--kenya-green), #004d00);
-            color: white;
-            font-weight: 600;
-            padding: 5px 16px;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            font-size: 11px;
-            animation: pulseAssessment 2s infinite;
-        }
-        .main-header .nav-links a.assessment-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 102, 0, 0.4);
-        }
-        .main-header .nav-links a.assessment-link::after { display: none; }
-        .main-header .nav-links a.assessment-link i {
-            margin-right: 4px;
-        }
-
-        @keyframes pulseAssessment {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 102, 0, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(0, 102, 0, 0); }
-        }
-
         .main-header .mobile-menu-btn {
             display: none;
             background: none;
@@ -467,6 +442,200 @@
         }
         .top-nav-bar .nav-right .quick-link i {
             margin-right: 4px;
+        }
+
+        /* ========================================
+           STUDENT PORTAL LOGIN SECTION - PROMINENT
+           ======================================== */
+        .portal-login-section {
+            padding: 60px 0;
+            background: linear-gradient(135deg, #0A1628 0%, #1a2a4a 100%);
+            scroll-margin-top: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+        .portal-login-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(111, 66, 193, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .portal-login-section .container {
+            position: relative;
+            z-index: 1;
+        }
+        .portal-login-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .portal-login-left {
+            color: white;
+        }
+        .portal-login-left .portal-icon {
+            font-size: 56px;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .portal-login-left h2 {
+            font-family: var(--font-primary);
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .portal-login-left h2 .highlight {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .portal-login-left p {
+            color: rgba(255,255,255,0.6);
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .portal-login-left .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .portal-login-left .features .feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .portal-login-left .features .feature i {
+            color: var(--school-gold);
+            font-size: 16px;
+            min-width: 20px;
+        }
+        .portal-login-right {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        .portal-login-right h3 {
+            color: #0A1628;
+            font-size: 20px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .portal-login-right .subtitle {
+            color: #6c757d;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .portal-login-right .form-group {
+            margin-bottom: 15px;
+        }
+        .portal-login-right .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .portal-login-right .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+            font-family: var(--font-secondary);
+        }
+        .portal-login-right .form-group input:focus {
+            border-color: #6f42c1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+        }
+        .portal-login-right .form-group .input-hint {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+        .portal-login-right .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .portal-login-right .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(111, 66, 193, 0.4);
+        }
+        .portal-login-right .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .portal-login-right .login-error {
+            background: #FBE9E7;
+            color: #dc3545;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+            margin-top: 10px;
+        }
+        .portal-login-right .login-error.show {
+            display: block;
+        }
+        .portal-login-right .login-success {
+            background: #E8F5E9;
+            color: #1a8a3f;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+            margin-top: 10px;
+        }
+        .portal-login-right .login-success.show {
+            display: block;
+        }
+        .portal-login-right .register-link {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #6c757d;
+        }
+        .portal-login-right .register-link a {
+            color: #6f42c1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .portal-login-right .register-link a:hover {
+            text-decoration: underline;
         }
 
         /* ========================================
@@ -1227,26 +1396,6 @@
             background: #6f42c1;
         }
 
-        @keyframes pulseStudentPortal {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4); }
-            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(111, 66, 193, 0.7); }
-        }
-
-        /* ===== NEW: Continuous Assessment Card ===== */
-        .card-assessment {
-            border-color: var(--kenya-green) !important;
-            background: linear-gradient(135deg, #ffffff, #f0fff4) !important;
-        }
-        .card-assessment .badge {
-            background: var(--kenya-green);
-            color: white;
-            animation: pulseBadgeGreen 1.8s infinite;
-        }
-        .card-assessment .card-cta {
-            background: linear-gradient(135deg, var(--kenya-green), #004d00);
-            color: white;
-        }
-
         /* ========================================
            FEATURES
            ======================================== */
@@ -1598,6 +1747,17 @@
         /* ========================================
            RESPONSIVE
            ======================================== */
+        @media (max-width: 992px) {
+            .portal-login-wrapper {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 30px;
+            }
+            .portal-login-left .features {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
             .main-header .nav-links {
                 display: none;
@@ -1660,6 +1820,20 @@
             .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
             .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
             .hero-video-play .play-text { font-size: 10px; }
+
+            .portal-login-wrapper {
+                padding: 20px;
+                gap: 20px;
+            }
+            .portal-login-left .features {
+                grid-template-columns: 1fr;
+            }
+            .portal-login-left h2 {
+                font-size: 26px;
+            }
+            .portal-login-right {
+                padding: 25px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1685,6 +1859,15 @@
             .top-nav-bar .nav-links a i {
                 font-size: 11px;
             }
+            .portal-login-section {
+                padding: 40px 0;
+            }
+            .portal-login-left .portal-icon {
+                font-size: 40px;
+            }
+            .portal-login-left h2 {
+                font-size: 22px;
+            }
         }
     </style>
 </head>
@@ -1706,13 +1889,9 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <!-- NEW: Student Portal Link -->
+                <!-- Student Portal Link -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
-                </a>
-                <!-- NEW: Continuous Assessment Link -->
-                <a href="academics.html#assessments" class="assessment-link">
-                    <i class="fas fa-clipboard-check"></i> Assessment
                 </a>
                 <a href="portal.html" class="portal-link">🔐 Admin</a>
                 <a href="contact.html">Contact</a>
@@ -1789,10 +1968,6 @@
                     <i class="fas fa-user-graduate"></i> Student Portal
                     <span class="badge-green">NEW</span>
                 </a>
-                <a href="academics.html#assessments">
-                    <i class="fas fa-clipboard-check"></i> Assessment
-                    <span class="badge-green">NEW</span>
-                </a>
                 <a href="fees.html">
                     <i class="fas fa-coins"></i> Fees
                     <span class="badge">VIEW</span>
@@ -1842,14 +2017,9 @@
             <button class="tab-btn" onclick="scrollToSection('slide-fees')">
                 <span class="tab-icon">💰</span> Fees
             </button>
-            <!-- NEW: Student Portal Tab -->
+            <!-- Student Portal Tab -->
             <button class="tab-btn" onclick="window.location.href='student-portal.html'">
                 <span class="tab-icon">🎓</span> Student Portal
-                <span class="tab-badge">NEW</span>
-            </button>
-            <!-- NEW: Assessment Tab -->
-            <button class="tab-btn" onclick="window.location.href='academics.html#assessments'">
-                <span class="tab-icon">📊</span> Assessment
                 <span class="tab-badge">NEW</span>
             </button>
         </div>
@@ -1966,6 +2136,82 @@
     </div>
 
     <!-- ======================================== -->
+    <!-- STUDENT PORTAL LOGIN SECTION - PROMINENT -->
+    <!-- ======================================== -->
+    <section class="portal-login-section" id="slide-portal-login">
+        <div class="container">
+            <div class="portal-login-wrapper">
+                <div class="portal-login-left" data-aos="fade-right">
+                    <span class="portal-icon">🎓</span>
+                    <h2>Student <span class="highlight">Portal</span></h2>
+                    <p>
+                        Access your academic information, view assessment results, download reports,
+                        and check your fee status all in one place.
+                    </p>
+                    <div class="features">
+                        <div class="feature">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>View Results</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Download Reports</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Holiday Assignments</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Fee Status</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Attendance</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Profile Management</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="portal-login-right" data-aos="fade-left">
+                    <h3><i class="fas fa-sign-in-alt" style="color:#6f42c1;"></i> Login to Portal</h3>
+                    <p class="subtitle">Enter your Student ID and PIN to access your dashboard</p>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-id-card"></i> Student ID</label>
+                        <input type="text" id="portalStudentId" placeholder="e.g., ST001" value="ST001">
+                        <div class="input-hint">Your Student ID is provided by the school</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> PIN</label>
+                        <input type="password" id="portalPin" placeholder="Enter your 4-digit PIN" maxlength="6" value="1234">
+                        <div class="input-hint">Default PIN is 1234 (change after first login)</div>
+                    </div>
+                    
+                    <div id="loginError" class="login-error">
+                        <i class="fas fa-exclamation-circle"></i> Invalid Student ID or PIN. Please try again.
+                    </div>
+                    
+                    <div id="loginSuccess" class="login-success">
+                        <i class="fas fa-check-circle"></i> Login successful! Redirecting...
+                    </div>
+                    
+                    <button class="btn-login" id="portalLoginBtn" onclick="portalLogin()">
+                        <i class="fas fa-sign-in-alt"></i> Login to Portal
+                    </button>
+                    
+                    <div class="register-link">
+                        Don't have an account? <a href="contact.html">Contact the school</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
     <!-- CONTENT CARDS SECTION -->
     <!-- ======================================== -->
     <section class="content-cards-section" id="slide-content">
@@ -2080,7 +2326,7 @@
                     <div class="card-cta">👆 View Fees</div>
                 </div>
 
-                <!-- CARD 8: STUDENT PORTAL - NEW -->
+                <!-- CARD 8: STUDENT PORTAL -->
                 <div class="content-card card-student-portal" onclick="window.location.href='student-portal.html'" data-aos="fade-up" data-aos-delay="310">
                     <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseStudentPortal 2s infinite; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.5);">
                         🎓 NEW
@@ -2093,21 +2339,6 @@
                     </div>
                     <span class="badge">🎓 Login</span>
                     <div class="card-cta">👆 Access Portal</div>
-                </div>
-
-                <!-- CARD 9: CONTINUOUS ASSESSMENT - NEW -->
-                <div class="content-card card-assessment" onclick="window.location.href='academics.html#assessments'" data-aos="fade-up" data-aos-delay="340">
-                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.5);">
-                        📊 NEW
-                    </div>
-                    <span class="icon">📊</span>
-                    <h3>Continuous Assessment</h3>
-                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 Weekly • Monthly • End-of-Term</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Track Progress</span> • <span>✅ View Results</span> • <span>✅ Download Reports</span>
-                    </div>
-                    <span class="badge">📊 View Results</span>
-                    <div class="card-cta">👆 View Assessments</div>
                 </div>
 
             </div>
@@ -2304,7 +2535,6 @@
                     <a href="events.html">📰 Events</a>
                     <a href="downloads.html">📄 Downloads</a>
                     <a href="fees.html">💰 Fees</a>
-                    <a href="academics.html#assessments">📊 Assessment</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -2329,6 +2559,81 @@
             once: true,
             offset: 60,
             easing: 'ease-in-out'
+        });
+
+        // ============================================
+        // STUDENT PORTAL LOGIN
+        // ============================================
+        async function portalLogin() {
+            const studentId = document.getElementById('portalStudentId').value.trim();
+            const pin = document.getElementById('portalPin').value.trim();
+            const loginBtn = document.getElementById('portalLoginBtn');
+            const errorEl = document.getElementById('loginError');
+            const successEl = document.getElementById('loginSuccess');
+
+            // Reset messages
+            errorEl.classList.remove('show');
+            successEl.classList.remove('show');
+
+            if (!studentId || !pin) {
+                errorEl.textContent = '❌ Please enter both Student ID and PIN';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            // Show loading state
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
+            try {
+                const response = await fetch('/api/student/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ studentId, pin })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    successEl.textContent = '✅ ' + data.message;
+                    successEl.classList.add('show');
+                    
+                    // Store student info in session
+                    sessionStorage.setItem('studentId', studentId);
+                    sessionStorage.setItem('studentName', data.student.name);
+                    sessionStorage.setItem('studentGrade', data.student.grade);
+                    
+                    // Redirect after short delay
+                    setTimeout(() => {
+                        window.location.href = '/student-portal.html';
+                    }, 1500);
+                } else {
+                    errorEl.textContent = '❌ ' + data.message;
+                    errorEl.classList.add('show');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Portal';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorEl.textContent = '❌ Connection error. Please try again.';
+                errorEl.classList.add('show');
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Portal';
+            }
+        }
+
+        // Allow Enter key on login fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const studentIdInput = document.getElementById('portalStudentId');
+            const pinInput = document.getElementById('portalPin');
+            
+            studentIdInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') portalLogin();
+            });
+            
+            pinInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') portalLogin();
+            });
         });
 
         // ============================================
@@ -2688,6 +2993,12 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             loadWebsiteContent();
+            
+            // Set default student ID for demo
+            const studentIdInput = document.getElementById('portalStudentId');
+            if (studentIdInput && !studentIdInput.value) {
+                studentIdInput.value = 'ST001';
+            }
         });
     </script>
 </body>
