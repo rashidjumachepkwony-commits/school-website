@@ -227,6 +227,207 @@ function calculateStudentOverall(assessments) {
 }
 
 // ============================================
+// RECALCULATE STUDENT DATA - CBC METHOD
+// ============================================
+function recalculateStudentData(student) {
+    if (!student) return student;
+    
+    // Ensure student is a plain object with proper data
+    const studentData = student.toObject ? student.toObject() : { ...student };
+    
+    // Recalculate each assessment with proper CBC rubric
+    if (studentData.assessments && Array.isArray(studentData.assessments)) {
+        studentData.assessments = studentData.assessments.map(a => {
+            const maxScore = Math.max(1, parseInt(a.maxScore) || 1);
+            const score = Math.min(parseInt(a.score) || 0, maxScore);
+            const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+            const level = calculatePerformanceLevel(percentage);
+            const rating = getPerformanceRating(level);
+            
+            return {
+                subject: a.subject || 'Untitled',
+                maxScore: maxScore,
+                score: score,
+                percentage: parseFloat(percentage.toFixed(1)),
+                performanceLevel: level,
+                rating: rating,
+                short: getPerformanceShort(level)
+            };
+        });
+    }
+    
+    // Recalculate overall CBC result
+    const cbcResult = calculateStudentOverall(studentData.assessments || []);
+    studentData.totalScore = cbcResult.totalScore;
+    studentData.averageScore = cbcResult.averageScore;
+    studentData.performanceLevel = cbcResult.performanceLevel;
+    studentData.overallRating = cbcResult.overallRating;
+    studentData.levelDistribution = cbcResult.levelDistribution;
+    studentData.subjectCount = cbcResult.subjectCount;
+    
+    return studentData;
+}
+
+// ============================================
+// GENERATE REPORT HTML - FOR VIEWING
+// ============================================
+function generateReportHTML(student) {
+    if (!student) return '<p>No student data available</p>';
+    
+    const level = student.performanceLevel || 'Approaching Expectation';
+    const levelColors = {
+        'Exceeding Expectation': { bg: '#E8F5E9', border: '#1a8a3f', text: '#1a8a3f', icon: '🌟' },
+        'Meeting Expectation': { bg: '#E3F2FD', border: '#0d6efd', text: '#0d6efd', icon: '✅' },
+        'Approaching Expectation': { bg: '#FFF8E1', border: '#e6a800', text: '#e6a800', icon: '📌' },
+        'Below Expectation': { bg: '#FBE9E7', border: '#dc3545', text: '#dc3545', icon: '⚠️' }
+    };
+    const perfColors = levelColors[level] || levelColors['Approaching Expectation'];
+    
+    let html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CBC Assessment Report - ${student.studentName || 'Student'}</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+            .report-container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+            .header { text-align: center; border-bottom: 3px solid #C9A84C; padding-bottom: 15px; margin-bottom: 20px; }
+            .header h1 { color: #0A1628; margin: 0; font-size: 24px; }
+            .header h2 { color: #C9A84C; margin: 0; font-size: 18px; }
+            .header .motto { color: #6c757d; font-size: 12px; margin-top: 5px; }
+            .student-info { background: #f8f9fa; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+            .student-info .label { font-weight: bold; color: #6c757d; font-size: 12px; }
+            .student-info .value { color: #0A1628; font-size: 13px; }
+            .performance-banner { padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; background: ${perfColors.bg}; border: 2px solid ${perfColors.border}; }
+            .performance-banner .icon { font-size: 32px; display: block; }
+            .performance-banner .level { font-size: 20px; font-weight: bold; color: ${perfColors.text}; }
+            .performance-banner .details { font-size: 13px; color: #555; margin-top: 5px; }
+            .rubric { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+            .rubric-item { flex: 1; min-width: 80px; padding: 6px 10px; border-radius: 4px; text-align: center; font-size: 11px; border: 1px solid #dee2e6; }
+            .rubric-item.EE { background: #E8F5E9; border-color: #1a8a3f; }
+            .rubric-item.ME { background: #E3F2FD; border-color: #0d6efd; }
+            .rubric-item.AE { background: #FFF8E1; border-color: #e6a800; }
+            .rubric-item.BE { background: #FBE9E7; border-color: #dc3545; }
+            .rubric-item .label { font-weight: bold; }
+            .rubric-item .range { color: #6c757d; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+            table th { background: #0A1628; color: white; padding: 8px 10px; text-align: left; }
+            table td { padding: 7px 10px; border-bottom: 1px solid #eee; }
+            table tr:nth-child(even) { background: #fafafa; }
+            .subject-high { color: #1a8a3f; font-weight: bold; }
+            .subject-medium { color: #0d6efd; font-weight: bold; }
+            .subject-low { color: #e6a800; font-weight: bold; }
+            .subject-fail { color: #dc3545; font-weight: bold; }
+            .footer { margin-top: 25px; padding-top: 15px; border-top: 2px solid #C9A84C; text-align: center; font-size: 11px; color: #6c757d; }
+            .feedback { background: #f8f9fa; padding: 12px 15px; border-radius: 6px; margin-top: 15px; border-left: 4px solid #C9A84C; }
+            .feedback .label { font-weight: bold; color: #0A1628; }
+            .level-distribution { display: flex; gap: 10px; margin: 10px 0; flex-wrap: wrap; }
+            .dist-item { padding: 4px 12px; border-radius: 4px; font-size: 12px; }
+            .dist-item.EE { background: #E8F5E9; color: #1a8a3f; }
+            .dist-item.ME { background: #E3F2FD; color: #0d6efd; }
+            .dist-item.AE { background: #FFF8E1; color: #e6a800; }
+            .dist-item.BE { background: #FBE9E7; color: #dc3545; }
+            .print-btn { background: #0A1628; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 10px; }
+            .print-btn:hover { background: #1a2a3a; }
+            @media print { .print-btn { display: none; } .report-container { box-shadow: none; margin: 0; padding: 15px; } }
+        </style>
+    </head>
+    <body>
+        <div class="report-container">
+            <div class="header">
+                <h1>CHANGARA STAR ACADEMY</h1>
+                <h2>CBC ASSESSMENT REPORT</h2>
+                <div class="motto">"Nurturing Stars, Building Futures"</div>
+            </div>
+            
+            <div class="student-info">
+                <div><span class="label">Student:</span> <span class="value">${student.studentName || 'N/A'}</span></div>
+                <div><span class="label">Grade:</span> <span class="value">${student.grade || 'N/A'}</span></div>
+                <div><span class="label">Admission:</span> <span class="value">${student.studentId || student.admissionNumber || 'N/A'}</span></div>
+                <div><span class="label">Term:</span> <span class="value">${student.term || 'N/A'}</span></div>
+                <div><span class="label">Assessment:</span> <span class="value">${student.type || 'Monthly'} ${student.period ? '- ' + student.period : ''}</span></div>
+                <div><span class="label">Date:</span> <span class="value">${formatKenyaDate(new Date())}</span></div>
+            </div>
+            
+            <div class="performance-banner">
+                <span class="icon">${perfColors.icon}</span>
+                <div class="level">${level}</div>
+                <div class="details">
+                    Total Score: ${student.totalScore || 0} | 
+                    Average: ${student.averageScore || 0}% | 
+                    CBC Rating: ${student.overallRating || 2}/4 | 
+                    Subjects: ${student.subjectCount || 0}
+                </div>
+            </div>
+            
+            <div class="rubric">
+                <div class="rubric-item EE"><span class="label">EE (4)</span> <span class="range">75-100%</span></div>
+                <div class="rubric-item ME"><span class="label">ME (3)</span> <span class="range">41-74%</span></div>
+                <div class="rubric-item AE"><span class="label">AE (2)</span> <span class="range">21-40%</span></div>
+                <div class="rubric-item BE"><span class="label">BE (1)</span> <span class="range">0-20%</span></div>
+            </div>
+            
+            <div class="level-distribution">
+                ${Object.entries(student.levelDistribution || { EE: 0, ME: 0, AE: 0, BE: 0 }).map(([key, count]) => 
+                    `<span class="dist-item ${key}">${key}: ${count}</span>`
+                ).join('')}
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Max</th>
+                        <th>Score</th>
+                        <th>%</th>
+                        <th>Level</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${(student.assessments || []).sort((a, b) => (b.percentage || 0) - (a.percentage || 0)).map(a => {
+                        const pct = a.percentage || 0;
+                        let cls = 'subject-medium';
+                        if (pct >= 75) cls = 'subject-high';
+                        else if (pct >= 41) cls = 'subject-medium';
+                        else if (pct >= 21) cls = 'subject-low';
+                        else cls = 'subject-fail';
+                        return `<tr>
+                            <td><strong>${a.subject || 'Untitled'}</strong></td>
+                            <td>${a.maxScore || 0}</td>
+                            <td>${a.score || 0}</td>
+                            <td class="${cls}">${pct.toFixed(1)}%</td>
+                            <td>${a.performanceLevel || 'Approaching Expectation'}</td>
+                            <td>${a.rating || 2}/4</td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+            
+            <div class="feedback">
+                <div class="label">📝 Teacher's Feedback</div>
+                <div style="margin-top: 5px; font-size: 13px; color: #333;">
+                    ${generateTeacherFeedback(student)}
+                </div>
+            </div>
+            
+            <div class="footer">
+                Generated: ${formatKenyaFullTime(new Date())} | 
+                Parent Signature: ___________________<br>
+                © ${new Date().getFullYear()} Changara Star Academy • P.O Box 7, Cheptais • 📞 +254 721 556 252
+            </div>
+            
+            <button class="print-btn" onclick="window.print()">🖨️ Print Report</button>
+        </div>
+    </body>
+    </html>`;
+    
+    return html;
+}
+
+// ============================================
 // CLOUDINARY UPLOAD HELPER
 // ============================================
 async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') {
@@ -4187,14 +4388,13 @@ app.post('/api/migrate-to-cloudinary', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-// Add these routes to your server.js (after your existing routes)
 
 // ============================================
 // STUDENT PORTAL ROUTES
 // ============================================
 
 // Get all students (for auto-complete)
-app.get('/api/students', async (req, res) => {
+app.get('/api/students/list', async (req, res) => {
     try {
         const students = await Student.find({ isActive: true }).sort({ name: 1 });
         res.json({ success: true, students: students.map(s => ({
@@ -4266,11 +4466,6 @@ app.get('/student-portal.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'student-portal.html'));
 });
 
-// Serve student report page
-app.get('/student_report.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'student_report.html'));
-});
-
 // Get student assessment by name (for portal)
 app.get('/api/assessments/student-name/:name', async (req, res) => {
     try {
@@ -4284,6 +4479,7 @@ app.get('/api/assessments/student-name/:name', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // ============================================
 // SERVE STUDENT REPORT PAGE
 // ============================================
@@ -4293,11 +4489,6 @@ app.get('/student-report', (req, res) => {
 
 app.get('/student-report.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'student_report.html'));
-});
-
-// 404 handler - MUST BE LAST
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Route not found' });
 });
 
 // ============================================
@@ -4311,6 +4502,12 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// ============================================
+// 404 handler - MUST BE LAST
+// ============================================
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: 'Route not found' });
+});
 
 // ============================================
 // DEBUG - LIST ALL REGISTERED ROUTES (FIXED)
@@ -4331,21 +4528,6 @@ try {
 } catch (error) {
     console.log('⚠️ Could not list routes:', error.message);
 }
-// ============================================
-// SERVE STUDENT REPORT PAGE
-// ============================================
-app.get('/student-report', (req, res) => {
-    res.sendFile(path.join(__dirname, 'student_report.html'));
-});
-
-app.get('/student-report.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'student_report.html'));
-});
-
-// 404 handler - MUST BE LAST
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Route not found' });
-});
 
 // ============================================
 // START THE SERVER
