@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Report - Changara Star Academy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        
+        .result-slip {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #C9A84C;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .header .school-name {
+            font-size: 28px;
+            font-weight: 900;
+            color: #0A1628;
+            letter-spacing: 3px;
+        }
+        .header .school-name .star { color: #C9A84C; }
+        .header .motto {
+            font-size: 12px;
+            color: #C9A84C;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+        .header .address {
+            font-size: 10px;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+        .header .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0A1628;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .header .subtitle {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 30px;
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e8ecf1;
+        }
+        .student-info .info-item {
+            display: flex;
+            gap: 5px;
+            font-size: 13px;
+        }
+        .student-info .info-item .label {
+            color: #6c757d;
+            font-weight: 600;
+            min-width: 100px;
+        }
+        .student-info .info-item .value {
+            color: #0A1628;
+            font-weight: 600;
+        }
+        
+        .rubric {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .rubric-item {
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .rubric-item.ee { background: #E8F5E9; color: #1a8a3f; border: 1px solid #1a8a3f; }
+        .rubric-item.me { background: #E3F2FD; color: #0d6efd; border: 1px solid #0d6efd; }
+        .rubric-item.ae { background: #FFF8E1; color: #e6a800; border: 1px solid #e6a800; }
+        .rubric-item.be { background: #FBE9E7; color: #dc3545; border: 1px solid #dc3545; }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        .results-table thead th {
+            background: #0A1628;
+            color: white;
+            padding: 10px 12px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .results-table thead th:first-child { text-align: left; }
+        .results-table tbody td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e8ecf1;
+            text-align: center;
+        }
+        .results-table tbody td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+        .results-table tbody tr:nth-child(even) { background: #fafbfc; }
+        .results-table tbody tr:hover { background: #f0f4ff; }
+        
+        .level-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+        }
+        .level-badge.ee { background: #1a8a3f; }
+        .level-badge.me { background: #0d6efd; }
+        .level-badge.ae { background: #e6a800; }
+        .level-badge.be { background: #dc3545; }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e8ecf1;
+        }
+        .summary-item {
+            text-align: center;
+        }
+        .summary-item .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0A1628;
+        }
+        .summary-item .label {
+            font-size: 11px;
+            color: #6c757d;
+        }
+        .summary-item .number.gold { color: #C9A84C; }
+        .summary-item .number.green { color: #1a8a3f; }
+        .summary-item .number.blue { color: #0d6efd; }
+        .summary-item .number.orange { color: #e6a800; }
+        .summary-item .number.red { color: #dc3545; }
+        
+        .overall-performance {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 2px solid;
+        }
+        .overall-performance .level {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .overall-performance .sub {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .overall-performance .rating {
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .overall-performance.ee { background: #E8F5E9; border-color: #1a8a3f; }
+        .overall-performance.ee .level { color: #1a8a3f; }
+        .overall-performance.me { background: #E3F2FD; border-color: #0d6efd; }
+        .overall-performance.me .level { color: #0d6efd; }
+        .overall-performance.ae { background: #FFF8E1; border-color: #e6a800; }
+        .overall-performance.ae .level { color: #e6a800; }
+        .overall-performance.be { background: #FBE9E7; border-color: #dc3545; }
+        .overall-performance.be .level { color: #dc3545; }
+        
+        .position-badge {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            background: #C9A84C;
+            color: #0A1628;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #C9A84C;
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #6c757d;
+        }
+        .footer .signature { font-weight: 600; }
+        
+        .btn-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn-group .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+        .btn-group .btn-print {
+            background: #C9A84C;
+            color: #0A1628;
+        }
+        .btn-group .btn-print:hover { background: #b8963a; }
+        .btn-group .btn-download {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-group .btn-download:hover { background: #c82333; }
+        .btn-group .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-group .btn-back:hover { background: #5a6268; }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        .loading .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #C9A84C;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            color: #dc3545;
+        }
+        .error-message .icon { font-size: 48px; margin-bottom: 10px; }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .result-slip { box-shadow: none; border-radius: 0; padding: 20px; }
+            .btn-group { display: none; }
+            .results-table tbody tr:hover { background: inherit; }
+        }
+        @media (max-width: 600px) {
+            .result-slip { padding: 15px; }
+            .student-info { grid-template-columns: 1fr; gap: 4px; }
+            .summary { grid-template-columns: 1fr 1fr; }
+            .results-table { font-size: 11px; }
+            .results-table thead th, .results-table tbody td { padding: 5px 6px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingState" class="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 10px;">Loading student report...</p>
+    </div>
+
+    <div id="errorState" class="error-message" style="display:none;">
+        <div class="icon">❌</div>
+        <h3>Error Loading Report</h3>
+        <p id="errorMessage">Student not found</p>
+        <button class="btn btn-back" onclick="window.history.back()" style="margin-top:15px;padding:10px 25px;border:none;border-radius:6px;font-weight:700;cursor:pointer;background:#6c757d;color:white;">⬅ Go Back</button>
+    </div>
+
+    <div id="reportContent" style="display:none;">
+        <div class="result-slip" id="resultSlip">
+            <!-- Header -->
+            <div class="header">
+                <div class="school-name">CHANGARA <span class="star">STAR</span> ACADEMY</div>
+                <div class="motto">"Nurturing Stars, Building Futures"</div>
+                <div class="address">P.O Box 7, Cheptais | Tel: +254 721 556 252 | Email: starchangara@gmail.com</div>
+                <div class="title">END OF TERM ASSESSMENT REPORT</div>
+                <div class="subtitle" id="reportSubtitle">Loading...</div>
+            </div>
+
+            <!-- Student Information -->
+            <div class="student-info" id="studentInfo">
+                <div class="info-item"><span class="label">Student Name:</span><span class="value" id="studentName">-</span></div>
+                <div class="info-item"><span class="label">Admission No:</span><span class="value" id="studentId">-</span></div>
+                <div class="info-item"><span class="label">Grade:</span><span class="value" id="studentGrade">-</span></div>
+                <div class="info-item"><span class="label">Term:</span><span class="value" id="studentTerm">-</span></div>
+                <div class="info-item"><span class="label">Position:</span><span class="value" id="studentPosition">-</span></div>
+                <div class="info-item"><span class="label">Date:</span><span class="value" id="reportDate">-</span></div>
+            </div>
+
+            <!-- Rubric -->
+            <div class="rubric">
+                <span class="rubric-item ee">EE: 75-100% (4)</span>
+                <span class="rubric-item me">ME: 41-74% (3)</span>
+                <span class="rubric-item ae">AE: 21-40% (2)</span>
+                <span class="rubric-item be">BE: 0-20% (1)</span>
+            </div>
+
+            <!-- Results Table -->
+            <table class="results-table" id="resultsTable">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">Subject</th>
+                        <th>Max</th>
+                        <th>Score</th>
+                        <th>%</th>
+                        <th>Level</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    <tr><td colspan="6" style="text-align:center;color:#999;">No data available</td></tr>
+                </tbody>
+            </table>
+
+            <!-- Summary -->
+            <div class="summary" id="summarySection">
+                <div class="summary-item">
+                    <div class="number gold" id="totalScore">0</div>
+                    <div class="label">Total Score</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number blue" id="avgScore">0%</div>
+                    <div class="label">Average %</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number" id="subjectCount">0</div>
+                    <div class="label">Subjects</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number gold" id="cbcRating">0</div>
+                    <div class="label">CBC Rating (avg)</div>
+                </div>
+            </div>
+
+            <!-- Overall Performance -->
+            <div class="overall-performance ee" id="overallPerformance">
+                <div class="level" id="overallLevel">🌟 EXCEEDING EXPECTATION</div>
+                <div class="rating" id="overallRating">CBC Rating: 3.8/4</div>
+                <div class="sub">Overall Performance Level</div>
+            </div>
+
+            <!-- Teacher's Comments -->
+            <div style="margin:15px 0;padding:12px 16px;background:#f8f9fa;border-radius:6px;border-left:4px solid #C9A84C;">
+                <div style="font-size:11px;font-weight:600;color:#0A1628;">📝 Teacher's Comments</div>
+                <div style="font-size:10px;color:#333;margin-top:4px;" id="teacherComments">Loading comments...</div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <div>
+                    <div class="signature">Parent/Guardian Signature: ___________________</div>
+                    <div style="margin-top:3px;">Date: _______________</div>
+                </div>
+                <div style="text-align:right;">
+                    <div>Generated: <span id="generatedDate">-</span></div>
+                    <div>© 2026 Changara Star Academy</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="btn-group">
+            <button class="btn btn-print" onclick="window.print()">🖨️ Print Report</button>
+            <button class="btn btn-download" onclick="downloadPDF()">📄 Download PDF</button>
+            <button class="btn btn-back" onclick="window.history.back()">⬅ Back</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // PERFORMANCE RUBRIC FUNCTIONS
+        // ============================================
+        function calculatePerformanceLevel(percentage) {
+            if (percentage >= 75) return 'Exceeding Expectation';
+            if (percentage >= 41) return 'Meeting Expectation';
+            if (percentage >= 21) return 'Approaching Expectation';
+            return 'Below Expectation';
+        }
+
+        function getPerformanceShort(level) {
+            const shorts = {
+                'Exceeding Expectation': 'EE',
+                'Meeting Expectation': 'ME',
+                'Approaching Expectation': 'AE',
+                'Below Expectation': 'BE'
+            };
+            return shorts[level] || 'AE';
+        }
+
+        function getPerformanceRating(level) {
+            const ratings = {
+                'Exceeding Expectation': 4,
+                'Meeting Expectation': 3,
+                'Approaching Expectation': 2,
+                'Below Expectation': 1
+            };
+            return ratings[level] || 2;
+        }
+
+        function getPerformanceColor(level) {
+            const colors = {
+                'Exceeding Expectation': '#1a8a3f',
+                'Meeting Expectation': '#0d6efd',
+                'Approaching Expectation': '#e6a800',
+                'Below Expectation': '#dc3545'
+            };
+            return colors[level] || '#6c757d';
+        }
+
+        // ============================================
+        // GET STUDENT FROM URL
+        // ============================================
+        function getStudentIdFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        // ============================================
+        // GENERATE RESULT SLIP
+        // ============================================
+        function generateResultSlip(student) {
+            if (!student || !student.assessments || student.assessments.length === 0) {
+                showError('No assessment data found for this student.');
+                return;
+            }
+
+            // Update header
+            document.getElementById('reportSubtitle').textContent = 
+                `${student.grade || 'N/A'} - ${student.type || 'Assessment'} - ${student.term || ''} ${student.year || ''}`;
+
+            // Update student info
+            document.getElementById('studentName').textContent = student.studentName || 'N/A';
+            document.getElementById('studentId').textContent = student.studentId || 'N/A';
+            document.getElementById('studentGrade').textContent = student.grade || 'N/A';
+            document.getElementById('studentTerm').textContent = student.term || 'N/A';
+            document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-KE', { 
+                year: 'numeric', month: 'long', day: 'numeric' 
+            });
+
+            // Calculate position (if not provided)
+            let position = student.position || '-';
+            if (position !== '-') {
+                const posMap = { 1: '🥇 1st', 2: '🥈 2nd', 3: '🥉 3rd' };
+                position = posMap[position] || position + 'th';
+            }
+            document.getElementById('studentPosition').textContent = position;
+
+            // Process assessments
+            const subjects = student.assessments;
+            const totalSubjects = subjects.length;
+            let totalScore = 0;
+            let totalMaxScore = 0;
+            let totalRating = 0;
+            let levelDistribution = { EE: 0, ME: 0, AE: 0, BE: 0 };
+
+            // Build table rows
+            let rows = '';
+            const sorted = [...subjects].sort((a, b) => {
+                const pA = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
+                const pB = b.maxScore > 0 ? (b.score / b.maxScore) * 100 : 0;
+                return pB - pA;
+            });
+
+            sorted.forEach(subj => {
+                const score = Math.min(subj.score || 0, subj.maxScore || 0);
+                const maxScore = subj.maxScore || 1;
+                const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+                const level = calculatePerformanceLevel(percentage);
+                const short = getPerformanceShort(level);
+                const rating = getPerformanceRating(level);
+                const color = getPerformanceColor(level);
+
+                totalScore += score;
+                totalMaxScore += maxScore;
+                totalRating += rating;
+                levelDistribution[short] = (levelDistribution[short] || 0) + 1;
+
+                const pctColor = percentage >= 75 ? '#1a8a3f' : 
+                                 percentage >= 41 ? '#0d6efd' : 
+                                 percentage >= 21 ? '#e6a800' : '#dc3545';
+
+                rows += `
+                    <tr>
+                        <td style="text-align:left;">${subj.subject}</td>
+                        <td>${maxScore}</td>
+                        <td><strong>${score}</strong></td>
+                        <td style="font-weight:700;color:${pctColor};">${percentage.toFixed(1)}%</td>
+                        <td><span class="level-badge ${short.toLowerCase()}">${short}</span></td>
+                        <td>${rating}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('resultsBody').innerHTML = rows;
+
+            // Calculate overall
+            const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
+            const overallRating = totalSubjects > 0 ? parseFloat((totalRating / totalSubjects).toFixed(1)) : 0;
+            const overallLevel = calculatePerformanceLevel(avgPercentage);
+            const overallShort = getPerformanceShort(overallLevel);
+
+            // Update summary
+            document.getElementById('totalScore').textContent = totalScore;
+            document.getElementById('avgScore').textContent = avgPercentage.toFixed(1) + '%';
+            document.getElementById('subjectCount').textContent = totalSubjects;
+            document.getElementById('cbcRating').textContent = overallRating + '/4';
+
+            // Update overall performance
+            const perfDiv = document.getElementById('overallPerformance');
+            perfDiv.className = 'overall-performance ' + overallShort.toLowerCase();
+            const levelLabels = {
+                'EE': '🌟 EXCEEDING EXPECTATION',
+                'ME': '✅ MEETING EXPECTATION',
+                'AE': '📌 APPROACHING EXPECTATION',
+                'BE': '⚠️ BELOW EXPECTATION'
+            };
+            document.getElementById('overallLevel').textContent = levelLabels[overallShort] || '📌 APPROACHING EXPECTATION';
+            document.getElementById('overallRating').textContent = `CBC Rating: ${overallRating}/4`;
+
+            // Generate teacher's comments
+            let comments = '';
+            const strengths = sorted.filter(s => {
+                const pct = s.maxScore > 0 ? (s.score / s.maxScore) * 100 : 0;
+                return pct >= 50;
+            }).slice(0, 3);
+
+            const weaknesses = sorted.filter(s => {
+                const pct = s.maxScore > 0 ? (s.score / s.maxScore) * 100 : 0;
+                return pct < 41;
+            }).slice(0, 3);
+
+            if (overallShort === 'EE') {
+                comments = `Excellent performance! ${student.studentName} has demonstrated outstanding mastery of the learning outcomes. `;
+                if (strengths.length > 0) {
+                    comments += `Strong performance in ${strengths.map(s => s.subject).join(', ')}. `;
+                }
+                comments += `Continue the excellent work. We are proud of your progress!`;
+            } else if (overallShort === 'ME') {
+                comments = `Good progress! ${student.studentName} is meeting the expected learning outcomes. `;
+                if (weaknesses.length > 0) {
+                    comments += `Areas for improvement: ${weaknesses.map(s => s.subject).join(', ')}. `;
+                }
+                comments += `With continued effort, you will achieve even better results.`;
+            } else if (overallShort === 'AE') {
+                comments = `${student.studentName} is making progress and approaching the expected learning outcomes. `;
+                if (weaknesses.length > 0) {
+                    comments += `Focus on improving in ${weaknesses.map(s => s.subject).join(', ')}. `;
+                }
+                comments += `With hard work and practice, you will meet the expected standards.`;
+            } else {
+                comments = `${student.studentName} needs additional support to meet the expected learning outcomes. `;
+                if (weaknesses.length > 0) {
+                    comments += `Extra attention needed in ${weaknesses.map(s => s.subject).join(', ')}. `;
+                }
+                comments += `Please seek help from your teachers and parents.`;
+            }
+            document.getElementById('teacherComments').textContent = comments;
+
+            // Generated date
+            document.getElementById('generatedDate').textContent = new Date().toLocaleString('en-KE', { 
+                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+            });
+
+            // Show content, hide loading
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('reportContent').style.display = 'block';
+        }
+
+        // ============================================
+        // SHOW ERROR
+        // ============================================
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message || 'Student not found. Please check the ID and try again.';
+        }
+
+        // ============================================
+        // DOWNLOAD PDF
+        // ============================================
+        function downloadPDF() {
+            const studentName = document.getElementById('studentName').textContent;
+            const filename = `Student_Report_${studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            window.print();
+            setTimeout(() => {
+                alert('📄 To save as PDF:\n1. In the print dialog, select "Save as PDF" as the destination.\n2. Click Save.\n\nFilename: ' + filename);
+            }, 500);
+        }
+
+        // ============================================
+        // LOAD STUDENT DATA
+        // ============================================
+        async function loadStudentData() {
+            const studentId = getStudentIdFromURL();
+            
+            if (!studentId) {
+                showError('No student ID provided. Please use ?id=ST001 in the URL.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/assessments/student/${studentId}`);
+                const data = await response.json();
+
+                if (!data.success || !data.student) {
+                    showError(data.message || 'Student not found.');
+                    return;
+                }
+
+                generateResultSlip(data.student);
+            } catch (error) {
+                console.error('Error loading student:', error);
+                showError('Error loading student data: ' + error.message);
+            }
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', loadStudentData);
+    </script>
+</body>
+</html>

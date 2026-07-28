@@ -4218,6 +4218,16 @@ try {
 } catch (error) {
     console.log('⚠️ Could not list routes:', error.message);
 }
+// ============================================
+// SERVE STUDENT REPORT PAGE
+// ============================================
+app.get('/student-report', (req, res) => {
+    res.sendFile(path.join(__dirname, 'student_report.html'));
+});
+
+app.get('/student-report.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'student_report.html'));
+});
 
 // 404 handler - MUST BE LAST
 app.use((req, res) => {
