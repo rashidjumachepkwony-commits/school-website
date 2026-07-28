@@ -4390,19 +4390,26 @@ app.post('/api/migrate-to-cloudinary', async (req, res) => {
 });
 
 // ============================================
-// STUDENT PORTAL ROUTES
+// STUDENT PORTAL ROUTES - COMPLETE FIX
 // ============================================
 
-// ============================================
-// STUDENT PORTAL ROUTES - CORRECTED
-// ============================================
-
-// Get all students for auto-complete (using /list to avoid conflict)
+// OPTION 1: Using the existing Student model directly
 app.get('/api/students/list', async (req, res) => {
     try {
         console.log('📡 GET /api/students/list - Fetching students for portal');
+        
+        // Check if Student model is available
+        if (!Student) {
+            console.error('❌ Student model not available');
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Student model not available' 
+            });
+        }
+        
         const students = await Student.find({ isActive: true }).sort({ name: 1 });
         console.log(`✅ Found ${students.length} students`);
+        
         res.json({ 
             success: true, 
             students: students.map(s => ({
@@ -4414,17 +4421,48 @@ app.get('/api/students/list', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Error in /api/students/list:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message,
+            stack: error.stack 
+        });
+    }
+});
+
+// OPTION 2: Alternative route using the existing API endpoint
+app.get('/api/students/all', async (req, res) => {
+    try {
+        console.log('📡 GET /api/students/all - Alternative endpoint');
+        const students = await Student.find({ isActive: true }).sort({ name: 1 });
+        res.json({ 
+            success: true, 
+            students: students.map(s => ({
+                studentId: s.studentId,
+                name: s.name,
+                grade: s.grade,
+                type: s.type
+            })) 
+        });
+    } catch (error) {
+        console.error('❌ Error in /api/students/all:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// Get student by ID (for portal)
+// Get single student for portal
 app.get('/api/students/portal/:id', async (req, res) => {
     try {
         console.log(`📡 GET /api/students/portal/${req.params.id}`);
-        const student = await Student.findOne({ studentId: req.params.id, isActive: true });
+        const student = await Student.findOne({ 
+            studentId: req.params.id, 
+            isActive: true 
+        });
+        
         if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Student not found' 
+            });
         }
         res.json({ success: true, student });
     } catch (error) {
@@ -4433,8 +4471,43 @@ app.get('/api/students/portal/:id', async (req, res) => {
     }
 });
 
-// Get student fees (already exists, but keeping for clarity)
-// This route already exists earlier in the file
+// Debug route
+app.get('/api/students/debug', async (req, res) => {
+    try {
+        console.log('📡 GET /api/students/debug');
+        
+        // Check MongoDB connection
+        const mongoose = require('mongoose');
+        const dbState = mongoose.connection.readyState;
+        const states = {
+            0: 'disconnected',
+            1: 'connected',
+            2: 'connecting',
+            3: 'disconnecting'
+        };
+        
+        const count = await Student.countDocuments({ isActive: true });
+        const students = await Student.find({ isActive: true })
+            .limit(5)
+            .select('studentId name grade type');
+        
+        res.json({
+            success: true,
+            dbState: states[dbState] || 'unknown',
+            readyState: dbState,
+            totalStudents: count,
+            sampleStudents: students,
+            studentModelExists: typeof Student !== 'undefined'
+        });
+    } catch (error) {
+        console.error('❌ Error in /api/students/debug:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message,
+            stack: error.stack 
+        });
+    }
+});
 
 // Serve student portal page
 app.get('/student-portal', (req, res) => {
@@ -4447,16 +4520,21 @@ app.get('/student-portal.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'student-portal.html'));
 });
 
-// Get student assessment by name (for portal)
+// Get student assessment by name
 app.get('/api/assessments/student-name/:name', async (req, res) => {
     try {
         const name = decodeURIComponent(req.params.name);
         console.log(`📡 GET /api/assessments/student-name/${name}`);
+        
         const student = await StudentAssessment.findOne({ 
             studentName: { $regex: new RegExp('^' + name + '$', 'i') } 
         });
+        
         if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Student not found' 
+            });
         }
         res.json({ success: true, student });
     } catch (error) {
@@ -4465,9 +4543,7 @@ app.get('/api/assessments/student-name/:name', async (req, res) => {
     }
 });
 
-// ============================================
-// SERVE STUDENT REPORT PAGE
-// ============================================
+// Serve student report page
 app.get('/student-report', (req, res) => {
     console.log('📄 Serving student report page');
     res.sendFile(path.join(__dirname, 'student_report.html'));
@@ -4478,25 +4554,6 @@ app.get('/student-report.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'student_report.html'));
 });
 
-// ============================================
-// DEBUG ROUTE FOR STUDENT PORTAL
-// ============================================
-app.get('/api/students/debug', async (req, res) => {
-    try {
-        console.log('📡 GET /api/students/debug');
-        const count = await Student.countDocuments({ isActive: true });
-        const students = await Student.find({ isActive: true }).limit(10).select('studentId name grade type');
-        console.log(`✅ Found ${count} students total, showing ${students.length} sample`);
-        res.json({
-            success: true,
-            totalStudents: count,
-            sampleStudents: students
-        });
-    } catch (error) {
-        console.error('❌ Error in /api/students/debug:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
 // ============================================
 // DEBUG ROUTE FOR STUDENT PORTAL
 // ============================================
