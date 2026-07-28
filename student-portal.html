@@ -82,96 +82,48 @@
             padding: 0 20px;
         }
 
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .tab {
-            padding: 12px 25px;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.3s;
-            color: #333;
-        }
-
-        .tab:hover {
-            border-color: #C9A84C;
-            background: #f8f9fa;
-        }
-
-        .tab.active {
-            background: #0A1628;
-            color: white;
-            border-color: #0A1628;
-        }
-
-        .tab i {
-            margin-right: 8px;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .welcome-card {
-            background: linear-gradient(135deg, #1a8a3f 0%, #0d6efd 100%);
-            color: white;
-            padding: 30px 40px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .welcome-card h2 {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .welcome-card p {
-            opacity: 0.9;
-            margin-top: 5px;
-            font-size: 15px;
-        }
-
+        /* ===== SEARCH SECTION - BIG AND EASY ===== */
         .search-section {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 35px 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             margin-bottom: 30px;
+            text-align: center;
         }
 
-        .search-section h3 {
+        .search-section h2 {
             color: #0A1628;
-            margin-bottom: 15px;
-            font-size: 18px;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .search-section h2 i {
+            color: #C9A84C;
+        }
+
+        .search-section p {
+            color: #6c757d;
+            font-size: 15px;
+            margin-bottom: 20px;
         }
 
         .search-box {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
+            justify-content: center;
+            max-width: 700px;
+            margin: 0 auto;
         }
 
         .search-box input {
             flex: 1;
             min-width: 250px;
-            padding: 12px 18px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
+            padding: 16px 20px;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 18px;
             transition: border-color 0.3s;
             outline: none;
         }
@@ -181,32 +133,42 @@
         }
 
         .search-box button {
-            padding: 12px 30px;
-            background: #0A1628;
-            color: white;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #C9A84C, #b8983a);
+            color: #0A1628;
             border: none;
-            border-radius: 8px;
-            font-size: 15px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
             cursor: pointer;
-            transition: background 0.3s;
-            font-weight: 600;
+            transition: all 0.3s;
         }
 
         .search-box button:hover {
-            background: #1a2a4a;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(201, 168, 76, 0.4);
+        }
+
+        .search-hint {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 12px;
         }
 
         .suggestions {
             background: white;
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            max-height: 200px;
+            border-radius: 12px;
+            max-height: 220px;
             overflow-y: auto;
             display: none;
             margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             position: relative;
             z-index: 100;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .suggestions.active {
@@ -214,13 +176,14 @@
         }
 
         .suggestion-item {
-            padding: 12px 18px;
+            padding: 14px 20px;
             cursor: pointer;
             border-bottom: 1px solid #f0f0f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             transition: background 0.2s;
+            font-size: 16px;
         }
 
         .suggestion-item:hover {
@@ -228,36 +191,47 @@
         }
 
         .suggestion-item .name {
-            font-weight: 500;
+            font-weight: 600;
             color: #0A1628;
         }
 
         .suggestion-item .details {
-            font-size: 13px;
+            font-size: 14px;
             color: #6c757d;
         }
 
         .suggestion-item .badge {
             background: #C9A84C;
             color: #0A1628;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 11px;
+            padding: 2px 14px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 600;
         }
 
+        /* ===== STUDENT INFO - BIG AND CLEAR ===== */
         .student-info {
             background: white;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             display: none;
             margin-bottom: 30px;
-            border-left: 4px solid #C9A84C;
+            border-left: 6px solid #C9A84C;
         }
 
         .student-info.active {
             display: block;
+        }
+
+        .student-info h3 {
+            color: #0A1628;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .student-info h3 i {
+            color: #C9A84C;
         }
 
         .student-info .info-grid {
@@ -267,29 +241,429 @@
         }
 
         .student-info .info-item {
-            padding: 10px 0;
+            padding: 12px 0;
             border-bottom: 1px solid #f0f0f0;
         }
 
         .student-info .info-item .label {
-            font-size: 12px;
+            font-size: 13px;
             color: #6c757d;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .student-info .info-item .value {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 700;
             color: #0A1628;
             margin-top: 2px;
         }
 
+        /* ===== QUICK LINKS - BIG BUTTONS ===== */
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .quick-link-btn {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 16px;
+            text-align: center;
+            text-decoration: none;
+            color: #0A1628;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border: 2px solid #e8ecf1;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .quick-link-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+        }
+
+        .quick-link-btn .icon {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .quick-link-btn .label {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .quick-link-btn .sub-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .quick-link-btn.assessment {
+            border-color: #1a8a3f;
+            background: linear-gradient(135deg, #f0fff4, #ffffff);
+        }
+
+        .quick-link-btn.assessment .icon {
+            color: #1a8a3f;
+        }
+
+        .quick-link-btn.assignments {
+            border-color: #0d6efd;
+            background: linear-gradient(135deg, #f0f7ff, #ffffff);
+        }
+
+        .quick-link-btn.assignments .icon {
+            color: #0d6efd;
+        }
+
+        .quick-link-btn.fees {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5, #ffffff);
+        }
+
+        .quick-link-btn.fees .icon {
+            color: #dc3545;
+        }
+
+        .quick-link-btn.profile {
+            border-color: #6f42c1;
+            background: linear-gradient(135deg, #f8f0ff, #ffffff);
+        }
+
+        .quick-link-btn.profile .icon {
+            color: #6f42c1;
+        }
+
+        /* ========================================
+           ASSESSMENT SECTION - TOP
+           ======================================== */
+        .assessment-section {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .assessment-section.active {
+            display: block;
+        }
+
+        .assessment-section .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #1a8a3f;
+            padding-bottom: 12px;
+        }
+
+        .assessment-section .section-header h3 {
+            color: #0A1628;
+            font-size: 22px;
+        }
+
+        .assessment-section .section-header h3 i {
+            color: #1a8a3f;
+            margin-right: 10px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e8ecf1;
+            align-items: flex-end;
+        }
+
+        .filter-bar .filter-group {
+            flex: 1;
+            min-width: 130px;
+        }
+
+        .filter-bar .filter-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-bar .filter-group select,
+        .filter-bar .filter-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            transition: border-color 0.3s;
+        }
+
+        .filter-bar .filter-group select:focus,
+        .filter-bar .filter-group input:focus {
+            border-color: #1a8a3f;
+            outline: none;
+        }
+
+        .filter-bar .btn-filter {
+            padding: 10px 25px;
+            background: #1a8a3f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .filter-bar .btn-filter:hover {
+            background: #136e32;
+            transform: translateY(-2px);
+        }
+
+        .filter-bar .btn-filter.reset {
+            background: #6c757d;
+        }
+
+        .filter-bar .btn-filter.reset:hover {
+            background: #5a6268;
+        }
+
+        .assessment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .assessment-card {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 12px;
+            border-left: 5px solid #C9A84C;
+            transition: all 0.3s;
+        }
+
+        .assessment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .assessment-card .subject {
+            font-weight: 600;
+            color: #0A1628;
+            font-size: 16px;
+        }
+
+        .assessment-card .score {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+
+        .assessment-card .score .max {
+            font-size: 15px;
+            font-weight: 400;
+            color: #6c757d;
+        }
+
+        .assessment-card .level {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .assessment-card .level.EE {
+            color: #1a8a3f;
+        }
+        .assessment-card .level.ME {
+            color: #0d6efd;
+        }
+        .assessment-card .level.AE {
+            color: #e6a800;
+        }
+        .assessment-card .level.BE {
+            color: #dc3545;
+        }
+
+        .assessment-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            text-align: center;
+        }
+
+        .assessment-summary .stat {
+            padding: 10px;
+        }
+
+        .assessment-summary .stat .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0A1628;
+        }
+
+        .assessment-summary .stat .label {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .btn-report {
+            display: inline-block;
+            padding: 14px 35px;
+            background: linear-gradient(135deg, #C9A84C, #b8983a);
+            color: #0A1628;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+            text-decoration: none;
+        }
+
+        .btn-report:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(201, 168, 76, 0.4);
+        }
+
+        /* ========================================
+           HOLIDAY ASSIGNMENTS - MIDDLE
+           ======================================== */
+        .assignments-section {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .assignments-section.active {
+            display: block;
+        }
+
+        .assignments-section .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #0d6efd;
+            padding-bottom: 12px;
+        }
+
+        .assignments-section .section-header h3 {
+            color: #0A1628;
+            font-size: 22px;
+        }
+
+        .assignments-section .section-header h3 i {
+            color: #0d6efd;
+            margin-right: 10px;
+        }
+
+        .assignment-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .assignment-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-color: #0d6efd;
+        }
+
+        .assignment-card .info {
+            flex: 1;
+        }
+
+        .assignment-card .info .title {
+            font-weight: 600;
+            color: #0A1628;
+            font-size: 17px;
+        }
+
+        .assignment-card .info .meta {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .assignment-card .info .meta span {
+            margin-right: 15px;
+        }
+
+        .assignment-card .info .description {
+            font-size: 14px;
+            color: #555;
+            margin-top: 8px;
+        }
+
+        .assignment-card .download-btn {
+            padding: 12px 30px;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .assignment-card .download-btn:hover {
+            background: #0b5ed7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+        }
+
+        .assignment-card .file-icon {
+            font-size: 28px;
+            margin-right: 15px;
+        }
+
+        .assignment-card .file-icon.pdf { color: #dc3545; }
+        .assignment-card .file-icon.word { color: #2b5797; }
+        .assignment-card .file-icon.excel { color: #217346; }
+        .assignment-card .file-icon.image { color: #17a2b8; }
+
+        /* ========================================
+           FEES SECTION - BOTTOM
+           ======================================== */
         .fee-section {
             background: white;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             display: none;
             margin-bottom: 30px;
         }
@@ -298,10 +672,24 @@
             display: block;
         }
 
-        .fee-section h3 {
-            color: #0A1628;
+        .fee-section .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
             margin-bottom: 20px;
-            font-size: 18px;
+            border-bottom: 3px solid #dc3545;
+            padding-bottom: 12px;
+        }
+
+        .fee-section .section-header h3 {
+            color: #0A1628;
+            font-size: 22px;
+        }
+
+        .fee-section .section-header h3 i {
+            color: #dc3545;
+            margin-right: 10px;
         }
 
         .fee-cards {
@@ -313,19 +701,19 @@
 
         .fee-card {
             background: #f8f9fa;
-            padding: 18px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 12px;
             text-align: center;
         }
 
         .fee-card .amount {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             color: #0A1628;
         }
 
         .fee-card .label {
-            font-size: 13px;
+            font-size: 14px;
             color: #6c757d;
             margin-top: 5px;
         }
@@ -344,10 +732,10 @@
 
         .fee-status {
             display: inline-block;
-            padding: 4px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 700;
         }
 
         .fee-status.paid {
@@ -369,6 +757,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
+            font-size: 14px;
         }
 
         .payments-table th {
@@ -385,7 +774,6 @@
         .payments-table td {
             padding: 12px 15px;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
         }
 
         .payments-table tr:hover td {
@@ -399,300 +787,13 @@
             font-style: italic;
         }
 
-        .assessment-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            display: none;
-            margin-bottom: 30px;
-        }
-
-        .assessment-section.active {
-            display: block;
-        }
-
-        .assessment-section h3 {
-            color: #0A1628;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-
-        .filter-bar {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e8ecf1;
-            align-items: flex-end;
-        }
-
-        .filter-bar .filter-group {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .filter-bar .filter-group label {
-            display: block;
-            font-weight: 600;
-            font-size: 12px;
-            color: #555;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .filter-bar .filter-group select,
-        .filter-bar .filter-group input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 13px;
-            background: white;
-            transition: border-color 0.3s;
-        }
-
-        .filter-bar .filter-group select:focus,
-        .filter-bar .filter-group input:focus {
-            border-color: #C9A84C;
-            outline: none;
-        }
-
-        .filter-bar .btn-filter {
-            padding: 8px 20px;
-            background: #C9A84C;
-            color: #0A1628;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
-        }
-
-        .filter-bar .btn-filter:hover {
-            background: #b8983a;
-            transform: translateY(-2px);
-        }
-
-        .filter-bar .btn-filter.reset {
-            background: #6c757d;
-            color: white;
-        }
-
-        .filter-bar .btn-filter.reset:hover {
-            background: #5a6268;
-        }
-
-        .assessment-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .assessment-card {
-            background: #f8f9fa;
-            padding: 18px;
-            border-radius: 8px;
-            border-left: 4px solid #C9A84C;
-        }
-
-        .assessment-card .subject {
-            font-weight: 600;
-            color: #0A1628;
-            font-size: 15px;
-        }
-
-        .assessment-card .score {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 5px 0;
-        }
-
-        .assessment-card .score .max {
-            font-size: 14px;
-            font-weight: 400;
-            color: #6c757d;
-        }
-
-        .assessment-card .level {
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .assessment-card .level.EE {
-            color: #1a8a3f;
-        }
-        .assessment-card .level.ME {
-            color: #0d6efd;
-        }
-        .assessment-card .level.AE {
-            color: #e6a800;
-        }
-        .assessment-card .level.BE {
-            color: #dc3545;
-        }
-
-        .assessment-summary {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            text-align: center;
-        }
-
-        .assessment-summary .stat {
-            padding: 10px;
-        }
-
-        .assessment-summary .stat .number {
-            font-size: 22px;
-            font-weight: 700;
-            color: #0A1628;
-        }
-
-        .assessment-summary .stat .label {
-            font-size: 12px;
-            color: #6c757d;
-        }
-
-        .assignments-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            margin-bottom: 30px;
-        }
-
-        .assignments-section h3 {
-            color: #0A1628;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-
-        .assignments-section h3 i {
-            color: #D4A017;
-        }
-
-        .assignment-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #e0e0e0;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .assignment-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border-color: #C9A84C;
-        }
-
-        .assignment-card .info {
-            flex: 1;
-        }
-
-        .assignment-card .info .title {
-            font-weight: 600;
-            color: #0A1628;
-            font-size: 16px;
-        }
-
-        .assignment-card .info .meta {
-            font-size: 13px;
-            color: #6c757d;
-            margin-top: 5px;
-        }
-
-        .assignment-card .info .meta span {
-            margin-right: 15px;
-        }
-
-        .assignment-card .info .description {
-            font-size: 13px;
-            color: #555;
-            margin-top: 8px;
-        }
-
-        .assignment-card .download-btn {
-            padding: 10px 25px;
-            background: #C9A84C;
-            color: #0A1628;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-
-        .assignment-card .download-btn:hover {
-            background: #b8983a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.3);
-        }
-
-        .assignment-card .file-icon {
-            font-size: 32px;
-            margin-right: 15px;
-        }
-
-        .assignment-card .file-icon.pdf { color: #dc3545; }
-        .assignment-card .file-icon.word { color: #2b5797; }
-        .assignment-card .file-icon.excel { color: #217346; }
-        .assignment-card .file-icon.image { color: #17a2b8; }
-
-        .no-assignments {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-        }
-
-        .no-assignments .icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        .btn-report {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #C9A84C;
-            color: #0A1628;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 15px;
-            text-decoration: none;
-        }
-
-        .btn-report:hover {
-            background: #b8983a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3);
-        }
-
+        /* ========================================
+           LOADING & MESSAGES
+           ======================================== */
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             color: #6c757d;
         }
 
@@ -702,10 +803,10 @@
 
         .spinner {
             display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #f0f0f0;
-            border-top: 3px solid #C9A84C;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #C9A84C;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -719,10 +820,11 @@
             background: #FBE9E7;
             color: #dc3545;
             padding: 15px 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             border-left: 4px solid #dc3545;
             display: none;
             margin-bottom: 20px;
+            font-size: 15px;
         }
 
         .error-message.active {
@@ -733,16 +835,31 @@
             background: #E3F2FD;
             color: #0d6efd;
             padding: 15px 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             border-left: 4px solid #0d6efd;
             display: none;
             margin-bottom: 20px;
+            font-size: 15px;
         }
 
         .info-message.active {
             display: block;
         }
 
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .no-data .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        /* ========================================
+           FOOTER
+           ======================================== */
         .footer {
             background: #0A1628;
             color: white;
@@ -760,6 +877,9 @@
             color: #C9A84C;
         }
 
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
         @media (max-width: 768px) {
             .header-container {
                 flex-direction: column;
@@ -771,12 +891,8 @@
                 flex-direction: column;
             }
 
-            .welcome-card {
-                padding: 20px;
-            }
-
-            .welcome-card h2 {
-                font-size: 20px;
+            .search-box {
+                flex-direction: column;
             }
 
             .search-box input {
@@ -791,29 +907,28 @@
                 grid-template-columns: 1fr;
             }
 
-            .fee-cards {
+            .quick-links {
                 grid-template-columns: 1fr 1fr;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+            }
+
+            .filter-bar .filter-group {
+                min-width: 100%;
+            }
+
+            .filter-bar .btn-filter {
+                width: 100%;
             }
 
             .assessment-grid {
                 grid-template-columns: 1fr;
             }
 
-            .payments-table {
-                font-size: 12px;
-            }
-
-            .payments-table th,
-            .payments-table td {
-                padding: 8px 10px;
-            }
-
-            .tabs {
-                flex-direction: column;
-            }
-
-            .tab {
-                text-align: center;
+            .fee-cards {
+                grid-template-columns: 1fr 1fr;
             }
 
             .assignment-card {
@@ -832,17 +947,39 @@
                 justify-content: center;
             }
 
-            .filter-bar {
-                flex-direction: column;
+            .payments-table {
+                font-size: 12px;
             }
 
-            .filter-bar .filter-group {
-                min-width: 100%;
+            .payments-table th,
+            .payments-table td {
+                padding: 8px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quick-links {
+                grid-template-columns: 1fr;
             }
 
-            .filter-bar .btn-filter {
-                width: 100%;
-                text-align: center;
+            .fee-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .assessment-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .search-section {
+                padding: 20px;
+            }
+
+            .search-section h2 {
+                font-size: 20px;
+            }
+
+            .student-info .info-item .value {
+                font-size: 16px;
             }
         }
     </style>
@@ -862,178 +999,215 @@
     </header>
 
     <div class="container">
-        <div class="welcome-card">
-            <h2>👋 Welcome to Student Portal</h2>
-            <p>Search for your name to view your assessment results, fee status, and download holiday assignments.</p>
+        <!-- Welcome -->
+        <div style="background: linear-gradient(135deg, #1a8a3f 0%, #0d6efd 100%); color: white; padding: 25px 30px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <h2 style="font-size: 24px; font-weight: 600;">👋 Welcome to Student Portal</h2>
+            <p style="opacity: 0.9; margin-top: 5px; font-size: 15px;">Search for your name to view your assessment results, download assignments, and check fee status.</p>
         </div>
 
         <div id="errorMessage" class="error-message"></div>
         <div id="infoMessage" class="info-message"></div>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('profile')"><i class="fas fa-user"></i> My Profile</button>
-            <button class="tab" onclick="switchTab('assignments')"><i class="fas fa-file-alt"></i> Holiday Assignments</button>
+        <!-- ===== SEARCH SECTION ===== -->
+        <div class="search-section">
+            <h2><i class="fas fa-search"></i> Find Your Profile</h2>
+            <p>Type your name or Student ID to get started</p>
+            <div class="search-box">
+                <input type="text" id="studentSearch" placeholder="e.g., John Doe or ST001" autocomplete="off">
+                <button id="searchBtn"><i class="fas fa-arrow-right"></i> Search</button>
+            </div>
+            <div class="search-hint">💡 Start typing to see suggestions</div>
+            <div id="suggestions" class="suggestions"></div>
         </div>
 
-        <!-- Profile Tab -->
-        <div id="tabProfile" class="tab-content active">
-            <div class="search-section">
-                <h3>🔍 Find Your Profile</h3>
-                <div class="search-box">
-                    <input type="text" id="studentSearch" placeholder="Type your name or student ID..." autocomplete="off">
-                    <button id="searchBtn">Search</button>
-                </div>
-                <div class="search-hint">💡 Start typing your name to see suggestions</div>
-                <div id="suggestions" class="suggestions"></div>
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px;">Loading your data...</p>
+        </div>
+
+        <!-- ===== STUDENT INFO ===== -->
+        <div id="studentInfo" class="student-info">
+            <h3><i class="fas fa-user-graduate"></i> My Profile</h3>
+            <div class="info-grid" id="studentInfoGrid"></div>
+        </div>
+
+        <!-- ===== QUICK LINKS ===== -->
+        <div class="quick-links" id="quickLinks" style="display:none;">
+            <div class="quick-link-btn assessment" onclick="scrollToSection('assessmentSection')">
+                <span class="icon">📊</span>
+                <div class="label">My Results</div>
+                <div class="sub-label">View assessment scores</div>
             </div>
-
-            <div id="loading" class="loading">
-                <div class="spinner"></div>
-                <p style="margin-top: 10px;">Loading student data...</p>
+            <div class="quick-link-btn assignments" onclick="scrollToSection('assignmentsSection')">
+                <span class="icon">📝</span>
+                <div class="label">Assignments</div>
+                <div class="sub-label">Download holiday work</div>
             </div>
-
-            <div id="studentInfo" class="student-info">
-                <div class="info-grid" id="studentInfoGrid"></div>
+            <div class="quick-link-btn fees" onclick="scrollToSection('feeSection')">
+                <span class="icon">💰</span>
+                <div class="label">Fee Status</div>
+                <div class="sub-label">Check your balance</div>
             </div>
-
-            <div id="feeSection" class="fee-section">
-                <h3>💰 Fee Status</h3>
-                <div id="feeCards" class="fee-cards"></div>
-                <div id="feeStatus"></div>
-                <h3 style="margin-top: 25px;">📋 Payment History</h3>
-                <div id="paymentsContainer"></div>
-            </div>
-
-            <div id="assessmentSection" class="assessment-section">
-                <h3>📊 Assessment Results</h3>
-                
-                <!-- Assessment Filters -->
-                <div class="filter-bar">
-                    <div class="filter-group">
-                        <label><i class="fas fa-graduation-cap"></i> Grade</label>
-                        <select id="assessmentGradeFilter">
-                            <option value="">All Grades</option>
-                            <option value="Playgroup">Playgroup</option>
-                            <option value="PP1">PP1</option>
-                            <option value="PP2">PP2</option>
-                            <option value="Grade 1">Grade 1</option>
-                            <option value="Grade 2">Grade 2</option>
-                            <option value="Grade 3">Grade 3</option>
-                            <option value="Grade 4">Grade 4</option>
-                            <option value="Grade 5">Grade 5</option>
-                            <option value="Grade 6">Grade 6</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label><i class="fas fa-calendar-alt"></i> Period</label>
-                        <select id="assessmentPeriodFilter">
-                            <option value="">All Periods</option>
-                            <option value="Week 1">Week 1</option>
-                            <option value="Week 2">Week 2</option>
-                            <option value="Week 3">Week 3</option>
-                            <option value="Week 4">Week 4</option>
-                            <option value="January">January</option>
-                            <option value="February">February</option>
-                            <option value="March">March</option>
-                            <option value="April">April</option>
-                            <option value="May">May</option>
-                            <option value="June">June</option>
-                            <option value="July">July</option>
-                            <option value="August">August</option>
-                            <option value="September">September</option>
-                            <option value="October">October</option>
-                            <option value="November">November</option>
-                            <option value="December">December</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label><i class="fas fa-calendar-check"></i> Term</label>
-                        <select id="assessmentTermFilter">
-                            <option value="">All Terms</option>
-                            <option value="Term 1">Term 1</option>
-                            <option value="Term 2">Term 2</option>
-                            <option value="Term 3">Term 3</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label><i class="fas fa-tag"></i> Type</label>
-                        <select id="assessmentTypeFilter">
-                            <option value="">All Types</option>
-                            <option value="weekly">Weekly Assessment</option>
-                            <option value="monthly">Monthly Examination</option>
-                            <option value="term">End of Term Exam</option>
-                        </select>
-                    </div>
-                    <button class="btn-filter" onclick="applyAssessmentFilters()">
-                        <i class="fas fa-filter"></i> Apply Filters
-                    </button>
-                    <button class="btn-filter reset" onclick="resetAssessmentFilters()">
-                        <i class="fas fa-undo"></i> Reset
-                    </button>
-                </div>
-
-                <div id="assessmentGrid" class="assessment-grid"></div>
-                <div id="assessmentSummary" class="assessment-summary"></div>
-                <div style="text-align: center; margin-top: 15px;">
-                    <button class="btn-report" onclick="downloadReport()">📄 Download Full Report</button>
-                </div>
+            <div class="quick-link-btn profile" onclick="scrollToSection('studentInfo')">
+                <span class="icon">👤</span>
+                <div class="label">My Profile</div>
+                <div class="sub-label">View your details</div>
             </div>
         </div>
 
-        <!-- Assignments Tab -->
-        <div id="tabAssignments" class="tab-content">
-            <div class="assignments-section">
-                <h3><i class="fas fa-file-alt"></i> Holiday Assignments</h3>
-                
-                <!-- Assignment Filters -->
-                <div class="filter-bar">
-                    <div class="filter-group">
-                        <label><i class="fas fa-graduation-cap"></i> Grade</label>
-                        <select id="assignmentGradeFilter">
-                            <option value="">All Grades</option>
-                            <option value="Playgroup">Playgroup</option>
-                            <option value="PP1">PP1</option>
-                            <option value="PP2">PP2</option>
-                            <option value="Grade 1">Grade 1</option>
-                            <option value="Grade 2">Grade 2</option>
-                            <option value="Grade 3">Grade 3</option>
-                            <option value="Grade 4">Grade 4</option>
-                            <option value="Grade 5">Grade 5</option>
-                            <option value="Grade 6">Grade 6</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label><i class="fas fa-calendar-alt"></i> Period</label>
-                        <select id="assignmentPeriodFilter">
-                            <option value="">All Periods</option>
-                            <option value="Term 1">Term 1</option>
-                            <option value="Term 2">Term 2</option>
-                            <option value="Term 3">Term 3</option>
-                            <option value="April Holiday">April Holiday</option>
-                            <option value="August Holiday">August Holiday</option>
-                            <option value="December Holiday">December Holiday</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label><i class="fas fa-search"></i> Search</label>
-                        <input type="text" id="assignmentSearchFilter" placeholder="Search by title..." onkeyup="applyAssignmentFilters()">
-                    </div>
-                    <button class="btn-filter" onclick="applyAssignmentFilters()">
-                        <i class="fas fa-filter"></i> Apply Filters
-                    </button>
-                    <button class="btn-filter reset" onclick="resetAssignmentFilters()">
-                        <i class="fas fa-undo"></i> Reset
-                    </button>
-                </div>
+        <!-- ======================================== -->
+        <!-- ASSESSMENT SECTION - TOP -->
+        <!-- ======================================== -->
+        <div id="assessmentSection" class="assessment-section">
+            <div class="section-header">
+                <h3><i class="fas fa-chart-bar"></i> 📊 My Assessment Results</h3>
+                <button class="btn-report" onclick="downloadReport()">📄 Download Full Report</button>
+            </div>
 
-                <div id="assignmentsList">
-                    <div class="no-assignments">
-                        <div class="icon">👤</div>
-                        <h4>No Student Selected</h4>
-                        <p>Please search for your profile in the "My Profile" tab first, then come back here to see your grade-specific assignments.</p>
-                    </div>
+            <!-- Filters -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label><i class="fas fa-graduation-cap"></i> Grade</label>
+                    <select id="assessmentGradeFilter">
+                        <option value="">All Grades</option>
+                        <option value="Playgroup">Playgroup</option>
+                        <option value="PP1">PP1</option>
+                        <option value="PP2">PP2</option>
+                        <option value="Grade 1">Grade 1</option>
+                        <option value="Grade 2">Grade 2</option>
+                        <option value="Grade 3">Grade 3</option>
+                        <option value="Grade 4">Grade 4</option>
+                        <option value="Grade 5">Grade 5</option>
+                        <option value="Grade 6">Grade 6</option>
+                    </select>
                 </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar-alt"></i> Period</label>
+                    <select id="assessmentPeriodFilter">
+                        <option value="">All Periods</option>
+                        <option value="Week 1">Week 1</option>
+                        <option value="Week 2">Week 2</option>
+                        <option value="Week 3">Week 3</option>
+                        <option value="Week 4">Week 4</option>
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar-check"></i> Term</label>
+                    <select id="assessmentTermFilter">
+                        <option value="">All Terms</option>
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
+                    </select>
+                </div>
+                <button class="btn-filter" onclick="applyAssessmentFilters()"><i class="fas fa-filter"></i> Apply</button>
+                <button class="btn-filter reset" onclick="resetAssessmentFilters()"><i class="fas fa-undo"></i> Reset</button>
+            </div>
+
+            <div id="assessmentGrid" class="assessment-grid">
+                <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
+                    <i class="fas fa-search" style="font-size: 24px; display: block; margin-bottom: 10px;"></i>
+                    Search for your profile to view results
+                </p>
+            </div>
+            <div id="assessmentSummary" class="assessment-summary" style="display:none;"></div>
+        </div>
+
+        <!-- ======================================== -->
+        <!-- HOLIDAY ASSIGNMENTS - MIDDLE -->
+        <!-- ======================================== -->
+        <div id="assignmentsSection" class="assignments-section">
+            <div class="section-header">
+                <h3><i class="fas fa-file-alt"></i> 📝 Holiday Assignments</h3>
+                <span style="font-size:14px;color:#6c757d;"><i class="fas fa-info-circle"></i> Download your grade assignments</span>
+            </div>
+
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label><i class="fas fa-graduation-cap"></i> Grade</label>
+                    <select id="assignmentGradeFilter">
+                        <option value="">All Grades</option>
+                        <option value="Playgroup">Playgroup</option>
+                        <option value="PP1">PP1</option>
+                        <option value="PP2">PP2</option>
+                        <option value="Grade 1">Grade 1</option>
+                        <option value="Grade 2">Grade 2</option>
+                        <option value="Grade 3">Grade 3</option>
+                        <option value="Grade 4">Grade 4</option>
+                        <option value="Grade 5">Grade 5</option>
+                        <option value="Grade 6">Grade 6</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar-alt"></i> Period</label>
+                    <select id="assignmentPeriodFilter">
+                        <option value="">All Periods</option>
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
+                        <option value="April Holiday">April Holiday</option>
+                        <option value="August Holiday">August Holiday</option>
+                        <option value="December Holiday">December Holiday</option>
+                    </select>
+                </div>
+                <button class="btn-filter" onclick="applyAssignmentFilters()" style="background:#0d6efd;"><i class="fas fa-filter"></i> Apply</button>
+                <button class="btn-filter reset" onclick="resetAssignmentFilters()"><i class="fas fa-undo"></i> Reset</button>
+            </div>
+
+            <div id="assignmentsList">
+                <div class="no-data">
+                    <div class="icon">📚</div>
+                    <h4>No Student Selected</h4>
+                    <p>Please search for your profile first to see your grade-specific assignments.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================== -->
+        <!-- FEE SECTION - BOTTOM -->
+        <!-- ======================================== -->
+        <div id="feeSection" class="fee-section">
+            <div class="section-header">
+                <h3><i class="fas fa-money-bill-wave"></i> 💰 Fee Status</h3>
+                <span style="font-size:14px;color:#6c757d;"><i class="fas fa-info-circle"></i> View your fee balance</span>
+            </div>
+
+            <div id="feeCards" class="fee-cards">
+                <div class="fee-card total">
+                    <div class="amount">KES 0</div>
+                    <div class="label">Total Fees</div>
+                </div>
+                <div class="fee-card paid">
+                    <div class="amount">KES 0</div>
+                    <div class="label">Amount Paid</div>
+                </div>
+                <div class="fee-card balance">
+                    <div class="amount">KES 0</div>
+                    <div class="label">Balance</div>
+                </div>
+            </div>
+
+            <div id="feeStatus">
+                <div style="text-align:center;padding:10px 0;">
+                    <span class="fee-status unpaid">❌ Unpaid</span>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 25px; font-size: 18px; color: #0A1628;">📋 Payment History</h3>
+            <div id="paymentsContainer">
+                <div class="no-payments">No payment records found</div>
             </div>
         </div>
     </div>
@@ -1063,6 +1237,7 @@
         const assessmentSection = document.getElementById('assessmentSection');
         const assessmentGrid = document.getElementById('assessmentGrid');
         const assessmentSummary = document.getElementById('assessmentSummary');
+        const quickLinks = document.getElementById('quickLinks');
 
         let currentStudent = null;
         let allStudents = [];
@@ -1073,34 +1248,14 @@
         document.getElementById('year').textContent = new Date().getFullYear();
 
         // ============================================
-        // TAB SWITCHING
+        // SCROLL TO SECTION
         // ============================================
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-
-            if (tab === 'profile') {
-                document.querySelector('.tab:first-child').classList.add('active');
-                document.getElementById('tabProfile').classList.add('active');
-                if (currentStudent) {
-                    document.getElementById('assessmentGradeFilter').value = currentStudent.grade;
-                }
-            } else {
-                document.querySelector('.tab:last-child').classList.add('active');
-                document.getElementById('tabAssignments').classList.add('active');
-                if (currentStudent) {
-                    document.getElementById('assignmentGradeFilter').value = currentStudent.grade;
-                    loadAssignmentsForStudent();
-                } else {
-                    document.getElementById('assignmentsList').innerHTML = `
-                        <div class="no-assignments">
-                            <div class="icon">👤</div>
-                            <h4>No Student Selected</h4>
-                            <p>Please search for your profile in the "My Profile" tab first.</p>
-                        </div>
-                    `;
-                }
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const offset = 100;
+                const top = section.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({ top: top, behavior: 'smooth' });
             }
         }
 
@@ -1188,7 +1343,7 @@
                         <div class="name">${s.name}</div>
                         <div class="details">${s.studentId} • ${s.grade}</div>
                     </div>
-                    <span class="badge">${s.type === 'Boarder' ? '🏠 Boarder' : 'Day'}</span>
+                    <span class="badge">${s.type === 'Boarder' ? '🏠 Boarder' : '📖 Day'}</span>
                 </div>
             `).join('');
 
@@ -1269,8 +1424,14 @@
                     fetchStudentAssessment(studentId);
                     showLoading(false);
                     
+                    // Show quick links
+                    quickLinks.style.display = 'grid';
+                    
+                    // Update grade filters
                     document.getElementById('assessmentGradeFilter').value = currentStudent.grade;
                     document.getElementById('assignmentGradeFilter').value = currentStudent.grade;
+                    
+                    // Load assignments
                     setTimeout(() => loadAssignmentsForStudent(), 500);
                 })
                 .catch(err => {
@@ -1286,7 +1447,7 @@
         function displayStudentInfo(student) {
             studentInfo.classList.add('active');
 
-            const typeIcon = student.type === 'Boarder' ? '🏠' : '☀️';
+            const typeIcon = student.type === 'Boarder' ? '🏠 Boarder' : '📖 Day Scholar';
             const genderIcon = student.gender === 'Male' ? '👨' : '👩';
 
             studentInfoGrid.innerHTML = `
@@ -1308,7 +1469,7 @@
                 </div>
                 <div class="info-item">
                     <div class="label">Student Type</div>
-                    <div class="value">${typeIcon} ${student.type}</div>
+                    <div class="value">${typeIcon}</div>
                 </div>
                 <div class="info-item">
                     <div class="label">Guardian</div>
@@ -1363,7 +1524,7 @@
                               fees.status === 'partial' ? '🔄 Partial Payment' : '❌ Unpaid';
 
             feeStatus.innerHTML = `
-                <div style="margin-top: 10px; padding: 10px 0; border-top: 1px solid #f0f0f0;">
+                <div style="text-align:center;padding:10px 0;border-top:1px solid #f0f0f0;">
                     <span class="fee-status ${statusClass}">${statusText}</span>
                 </div>
             `;
@@ -1417,14 +1578,12 @@
             const grade = document.getElementById('assessmentGradeFilter').value || currentStudent?.grade || '';
             const period = document.getElementById('assessmentPeriodFilter').value || '';
             const term = document.getElementById('assessmentTermFilter').value || '';
-            const type = document.getElementById('assessmentTypeFilter').value || '';
             
             let url = `/api/students/portal/assessments/filtered/${studentId}?`;
             const params = [];
             if (grade) params.push(`grade=${encodeURIComponent(grade)}`);
             if (period) params.push(`period=${encodeURIComponent(period)}`);
             if (term) params.push(`term=${encodeURIComponent(term)}`);
-            if (type) params.push(`type=${encodeURIComponent(type)}`);
             url += params.join('&');
             
             fetch(url)
@@ -1434,15 +1593,16 @@
                         if (data.assessment) {
                             currentAssessmentData = data.assessment;
                             displayAssessment(data.assessment);
+                            assessmentSection.classList.add('active');
                         } else {
                             assessmentSection.classList.remove('active');
-                            currentAssessmentData = null;
                             assessmentGrid.innerHTML = `
                                 <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
-                                    No assessment records found for the selected filters.
+                                    <i class="fas fa-info-circle" style="font-size: 24px; display: block; margin-bottom: 10px;"></i>
+                                    No assessment records found
                                 </p>
                             `;
-                            assessmentSummary.innerHTML = '';
+                            assessmentSummary.style.display = 'none';
                         }
                     } else {
                         showError(data.message || 'Error fetching assessment');
@@ -1450,7 +1610,6 @@
                 })
                 .catch(err => {
                     console.error('Error fetching assessment:', err);
-                    showError('Error loading assessment data');
                 });
         }
 
@@ -1482,6 +1641,7 @@
             } else {
                 assessmentGrid.innerHTML = `
                     <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
+                        <i class="fas fa-info-circle" style="font-size: 24px; display: block; margin-bottom: 10px;"></i>
                         No assessment records found
                     </p>
                 `;
@@ -1502,6 +1662,7 @@
                 'Below Expectation': '#dc3545'
             };
 
+            assessmentSummary.style.display = 'grid';
             assessmentSummary.innerHTML = `
                 <div class="stat">
                     <div class="number" style="color: ${levelColors[level] || '#0A1628'}">
@@ -1534,12 +1695,7 @@
 
         function applyAssessmentFilters() {
             if (!currentStudent) {
-                assessmentGrid.innerHTML = `
-                    <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
-                        No student selected. Please search for your profile first.
-                    </p>
-                `;
-                assessmentSummary.innerHTML = '';
+                showError('Please search for your profile first');
                 return;
             }
             fetchStudentData(currentStudent.studentId);
@@ -1549,7 +1705,6 @@
             document.getElementById('assessmentGradeFilter').value = currentStudent ? currentStudent.grade : '';
             document.getElementById('assessmentPeriodFilter').value = '';
             document.getElementById('assessmentTermFilter').value = '';
-            document.getElementById('assessmentTypeFilter').value = '';
             applyAssessmentFilters();
         }
 
@@ -1581,32 +1736,27 @@
         }
 
         // ============================================
-        // HOLIDAY ASSIGNMENTS - SIMPLIFIED ROUTE
+        // HOLIDAY ASSIGNMENTS
         // ============================================
 
         async function loadAssignmentsForStudent() {
             if (!currentStudent) {
                 document.getElementById('assignmentsList').innerHTML = `
-                    <div class="no-assignments">
+                    <div class="no-data">
                         <div class="icon">👤</div>
                         <h4>No Student Selected</h4>
-                        <p>Please search for your profile in the "My Profile" tab first.</p>
+                        <p>Please search for your profile first.</p>
                     </div>
                 `;
                 return;
             }
 
             const grade = document.getElementById('assignmentGradeFilter').value || currentStudent.grade;
-            const period = document.getElementById('assignmentPeriodFilter').value || '';
-            const search = document.getElementById('assignmentSearchFilter').value || '';
 
-            // Use the simpler route that doesn't require PIN verification
-            let url = `/api/holiday-assignments/${encodeURIComponent(grade)}`;
-            
-            console.log('📡 Loading assignments URL:', url);
+            const url = `/api/holiday-assignments/${encodeURIComponent(grade)}`;
 
             document.getElementById('assignmentsList').innerHTML = `
-                <div style="text-align:center; padding:20px;">
+                <div style="text-align:center; padding:30px;">
                     <div class="spinner"></div>
                     <p style="margin-top:10px;">Loading assignments for ${grade}...</p>
                 </div>
@@ -1615,51 +1765,28 @@
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                console.log('📡 Response data:', data);
 
                 if (data.success) {
                     allAssignments = data.assignments || [];
                     console.log(`📚 Found ${allAssignments.length} assignments`);
-                    
-                    // Apply client-side filters
-                    let filtered = allAssignments;
-                    
-                    if (period) {
-                        filtered = filtered.filter(a => 
-                            (a.description || '').toLowerCase().includes(period.toLowerCase()) ||
-                            (a.subject || '').toLowerCase().includes(period.toLowerCase()) ||
-                            (a.title || '').toLowerCase().includes(period.toLowerCase())
-                        );
-                    }
-                    
-                    if (search) {
-                        const searchLower = search.toLowerCase();
-                        filtered = filtered.filter(a => 
-                            (a.title || '').toLowerCase().includes(searchLower) ||
-                            (a.subject || '').toLowerCase().includes(searchLower) ||
-                            (a.description || '').toLowerCase().includes(searchLower)
-                        );
-                    }
-                    
-                    renderAssignments(filtered);
+                    renderAssignments(allAssignments);
+                    assignmentsSection.classList.add('active');
                 } else {
                     document.getElementById('assignmentsList').innerHTML = `
-                        <div class="no-assignments">
+                        <div class="no-data">
                             <div class="icon">❌</div>
                             <h4>${data.message || 'Error Loading Assignments'}</h4>
                             <p>${data.message || 'Unknown error occurred'}</p>
-                            <p style="font-size:12px;color:#999;margin-top:10px;">Please try refreshing or contact admin.</p>
                         </div>
                     `;
                 }
             } catch (error) {
                 console.error('❌ Error loading assignments:', error);
                 document.getElementById('assignmentsList').innerHTML = `
-                    <div class="no-assignments">
+                    <div class="no-data">
                         <div class="icon">❌</div>
                         <h4>Connection Error</h4>
                         <p>${error.message}</p>
-                        <p style="font-size:12px;color:#999;margin-top:10px;">Please check if the server is running.</p>
                     </div>
                 `;
             }
@@ -1670,10 +1797,10 @@
 
             if (assignments.length === 0) {
                 container.innerHTML = `
-                    <div class="no-assignments">
+                    <div class="no-data">
                         <div class="icon">📭</div>
-                        <h4>${allAssignments.length > 0 ? 'No matching assignments' : 'No Assignments Available'}</h4>
-                        <p>${allAssignments.length > 0 ? 'Try adjusting your filters.' : 'No holiday assignments available for your grade yet. Check back later!'}</p>
+                        <h4>No Assignments Available</h4>
+                        <p>No holiday assignments available for your grade yet. Check back later!</p>
                     </div>
                 `;
                 return;
@@ -1716,13 +1843,7 @@
 
         function applyAssignmentFilters() {
             if (!currentStudent) {
-                document.getElementById('assignmentsList').innerHTML = `
-                    <div class="no-assignments">
-                        <div class="icon">👤</div>
-                        <h4>No Student Selected</h4>
-                        <p>Please search for your profile first.</p>
-                    </div>
-                `;
+                showError('Please search for your profile first');
                 return;
             }
             loadAssignmentsForStudent();
@@ -1731,7 +1852,6 @@
         function resetAssignmentFilters() {
             document.getElementById('assignmentGradeFilter').value = currentStudent ? currentStudent.grade : '';
             document.getElementById('assignmentPeriodFilter').value = '';
-            document.getElementById('assignmentSearchFilter').value = '';
             applyAssignmentFilters();
         }
 
