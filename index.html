@@ -167,7 +167,7 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
         
-        /* ===== NEW: Student Portal Link ===== */
+        /* Student Portal Link */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #6f42c1, #4a2a8a);
             color: white;
@@ -445,200 +445,6 @@
         }
 
         /* ========================================
-           STUDENT PORTAL LOGIN SECTION - PROMINENT
-           ======================================== */
-        .portal-login-section {
-            padding: 60px 0;
-            background: linear-gradient(135deg, #0A1628 0%, #1a2a4a 100%);
-            scroll-margin-top: 50px;
-            position: relative;
-            overflow: hidden;
-        }
-        .portal-login-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(111, 66, 193, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
-        .portal-login-section .container {
-            position: relative;
-            z-index: 1;
-        }
-        .portal-login-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: center;
-            background: rgba(255,255,255,0.04);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 40px;
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .portal-login-left {
-            color: white;
-        }
-        .portal-login-left .portal-icon {
-            font-size: 56px;
-            display: block;
-            margin-bottom: 15px;
-        }
-        .portal-login-left h2 {
-            font-family: var(--font-primary);
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-        .portal-login-left h2 .highlight {
-            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .portal-login-left p {
-            color: rgba(255,255,255,0.6);
-            font-size: 15px;
-            line-height: 1.7;
-            margin-bottom: 20px;
-        }
-        .portal-login-left .features {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .portal-login-left .features .feature {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: rgba(255,255,255,0.7);
-            font-size: 13px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.04);
-        }
-        .portal-login-left .features .feature i {
-            color: var(--school-gold);
-            font-size: 16px;
-            min-width: 20px;
-        }
-        .portal-login-right {
-            background: white;
-            border-radius: 16px;
-            padding: 35px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-        }
-        .portal-login-right h3 {
-            color: #0A1628;
-            font-size: 20px;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        .portal-login-right .subtitle {
-            color: #6c757d;
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
-        .portal-login-right .form-group {
-            margin-bottom: 15px;
-        }
-        .portal-login-right .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        .portal-login-right .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s;
-            font-family: var(--font-secondary);
-        }
-        .portal-login-right .form-group input:focus {
-            border-color: #6f42c1;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
-        }
-        .portal-login-right .form-group .input-hint {
-            font-size: 11px;
-            color: #999;
-            margin-top: 4px;
-        }
-        .portal-login-right .btn-login {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: var(--font-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .portal-login-right .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(111, 66, 193, 0.4);
-        }
-        .portal-login-right .btn-login:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .portal-login-right .login-error {
-            background: #FBE9E7;
-            color: #dc3545;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            display: none;
-            margin-top: 10px;
-        }
-        .portal-login-right .login-error.show {
-            display: block;
-        }
-        .portal-login-right .login-success {
-            background: #E8F5E9;
-            color: #1a8a3f;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            display: none;
-            margin-top: 10px;
-        }
-        .portal-login-right .login-success.show {
-            display: block;
-        }
-        .portal-login-right .register-link {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 13px;
-            color: #6c757d;
-        }
-        .portal-login-right .register-link a {
-            color: #6f42c1;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .portal-login-right .register-link a:hover {
-            text-decoration: underline;
-        }
-
-        /* ========================================
            SECTION TABS
            ======================================== */
         .section-tabs {
@@ -840,86 +646,6 @@
             justify-content: center;
             flex-wrap: wrap;
             animation: fadeInUp 1.6s ease forwards;
-        }
-
-        .banner-carousel-section {
-            padding: 24px 0 0;
-            background: linear-gradient(180deg, #f5f7fb 0%, #eef3f9 100%);
-        }
-
-        .banner-carousel {
-            position: relative;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
-            min-height: 220px;
-            background: #001f5c;
-        }
-
-        .banner-slide {
-            display: none;
-            padding: 30px 28px;
-            min-height: 220px;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            background: linear-gradient(135deg, rgba(10, 22, 40, 0.98) 0%, rgba(11, 83, 148, 0.96) 100%);
-            color: white;
-        }
-
-        .banner-slide.active {
-            display: flex;
-        }
-
-        .banner-slide .banner-copy {
-            max-width: 560px;
-        }
-
-        .banner-slide .banner-copy h3 {
-            font-size: 24px;
-            margin-bottom: 8px;
-            color: #ffeb99;
-        }
-
-        .banner-slide .banner-copy p {
-            margin: 0;
-            line-height: 1.6;
-            color: #e9f2ff;
-        }
-
-        .banner-slide .banner-badge {
-            display: inline-block;
-            padding: 10px 14px;
-            border-radius: 999px;
-            background: rgba(212, 160, 23, 0.24);
-            color: #ffeb99;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .banner-dots {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .banner-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(0, 31, 92, 0.2);
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .banner-dot.active {
-            background: #d4a017;
-            transform: scale(1.15);
         }
 
         /* ===== SCROLL DOWN BUTTON ===== */
@@ -1187,6 +913,94 @@
         .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
         /* ========================================
+           GALLERY SECTION - MOVED AFTER HERO
+           ======================================== */
+        .gallery-section {
+            padding: 60px 0;
+            background: linear-gradient(135deg, #0A1628, #001F5c);
+            scroll-margin-top: 50px;
+        }
+        .gallery-swiper {
+            padding: 15px 0;
+        }
+        .gallery-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .gallery-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .gallery-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .gallery-card:hover img {
+            transform: scale(1.05);
+        }
+        .gallery-card .gallery-content {
+            padding: 18px;
+        }
+        .gallery-card .gallery-content h4 {
+            color: var(--school-blue-dark);
+            font-size: 16px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .gallery-card .gallery-content p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .gallery-card .gallery-content .tag {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 9px;
+            font-weight: 700;
+            margin-top: 8px;
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: var(--school-gold) !important;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 50% !important;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .swiper-button-next:hover,
+        .swiper-button-prev:hover {
+            background: rgba(212, 160, 23, 0.2);
+            border-color: var(--school-gold);
+        }
+        .swiper-button-next::after,
+        .swiper-button-prev::after {
+            font-size: 14px !important;
+        }
+        .swiper-pagination-bullet {
+            background: rgba(255,255,255,0.2) !important;
+            width: 8px !important;
+            height: 8px !important;
+        }
+        .swiper-pagination-bullet-active {
+            background: var(--school-gold) !important;
+        }
+
+        /* ========================================
            CONTENT CARDS
            ======================================== */
         .content-cards-section {
@@ -1375,7 +1189,7 @@
             color: white;
         }
 
-        /* ===== NEW: Student Portal Card ===== */
+        /* Student Portal Card */
         .card-student-portal {
             border-color: #6f42c1 !important;
             background: linear-gradient(135deg, #ffffff, #f5f0ff) !important;
@@ -1510,94 +1324,6 @@
             color: white;
             font-weight: 300;
             letter-spacing: 1px;
-        }
-
-        /* ========================================
-           GALLERY
-           ======================================== */
-        .gallery-section {
-            padding: 50px 0;
-            background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
-            scroll-margin-top: 50px;
-        }
-        .gallery-swiper {
-            padding: 15px 0;
-        }
-        .gallery-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-        .gallery-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
-        .gallery-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        .gallery-card:hover img {
-            transform: scale(1.05);
-        }
-        .gallery-card .gallery-content {
-            padding: 18px;
-        }
-        .gallery-card .gallery-content h4 {
-            color: var(--school-blue-dark);
-            font-size: 16px;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        .gallery-card .gallery-content p {
-            color: #666;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-        .gallery-card .gallery-content .tag {
-            display: inline-block;
-            padding: 2px 12px;
-            border-radius: 50px;
-            font-size: 9px;
-            font-weight: 700;
-            margin-top: 8px;
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .swiper-button-next,
-        .swiper-button-prev {
-            color: var(--school-gold) !important;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            width: 40px !important;
-            height: 40px !important;
-            border-radius: 50% !important;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-        .swiper-button-next:hover,
-        .swiper-button-prev:hover {
-            background: rgba(212, 160, 23, 0.2);
-            border-color: var(--school-gold);
-        }
-        .swiper-button-next::after,
-        .swiper-button-prev::after {
-            font-size: 14px !important;
-        }
-        .swiper-pagination-bullet {
-            background: rgba(255,255,255,0.2) !important;
-            width: 8px !important;
-            height: 8px !important;
-        }
-        .swiper-pagination-bullet-active {
-            background: var(--school-gold) !important;
         }
 
         /* ========================================
@@ -1747,17 +1473,6 @@
         /* ========================================
            RESPONSIVE
            ======================================== */
-        @media (max-width: 992px) {
-            .portal-login-wrapper {
-                grid-template-columns: 1fr;
-                gap: 30px;
-                padding: 30px;
-            }
-            .portal-login-left .features {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
         @media (max-width: 768px) {
             .main-header .nav-links {
                 display: none;
@@ -1820,20 +1535,6 @@
             .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
             .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
             .hero-video-play .play-text { font-size: 10px; }
-
-            .portal-login-wrapper {
-                padding: 20px;
-                gap: 20px;
-            }
-            .portal-login-left .features {
-                grid-template-columns: 1fr;
-            }
-            .portal-login-left h2 {
-                font-size: 26px;
-            }
-            .portal-login-right {
-                padding: 25px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -1859,15 +1560,6 @@
             .top-nav-bar .nav-links a i {
                 font-size: 11px;
             }
-            .portal-login-section {
-                padding: 40px 0;
-            }
-            .portal-login-left .portal-icon {
-                font-size: 40px;
-            }
-            .portal-login-left h2 {
-                font-size: 22px;
-            }
         }
     </style>
 </head>
@@ -1889,7 +1581,6 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <!-- Student Portal Link -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
@@ -2017,7 +1708,6 @@
             <button class="tab-btn" onclick="scrollToSection('slide-fees')">
                 <span class="tab-icon">💰</span> Fees
             </button>
-            <!-- Student Portal Tab -->
             <button class="tab-btn" onclick="window.location.href='student-portal.html'">
                 <span class="tab-icon">🎓</span> Student Portal
                 <span class="tab-badge">NEW</span>
@@ -2083,130 +1773,63 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- HOME BANNER CAROUSEL -->
+    <!-- GALLERY SECTION - MOVED HERE AFTER HERO -->
     <!-- ======================================== -->
-    <section class="banner-carousel-section">
+    <section class="gallery-section" id="slide-gallery">
         <div class="container">
-            <div class="banner-carousel" id="bannerCarousel">
-                <div class="banner-slide active">
-                    <div class="banner-copy">
-                        <span class="banner-badge">New Term</span>
-                        <h3>Term 3 is now open with fresh learning opportunities.</h3>
-                        <p>Students are settling into an exciting academic journey focused on growth, creativity, and excellence.</p>
-                    </div>
-                    <span class="banner-badge">📚 Learn More</span>
-                </div>
-                <div class="banner-slide">
-                    <div class="banner-copy">
-                        <span class="banner-badge">Student Portal</span>
-                        <h3>Parents and learners can access school updates with ease.</h3>
-                        <p>Visit the student portal for fees, attendance, and important reports in one dashboard.</p>
-                    </div>
-                    <span class="banner-badge">🎓 Open Portal</span>
-                </div>
-                <div class="banner-slide">
-                    <div class="banner-copy">
-                        <span class="banner-badge">Community</span>
-                        <h3>Events and activities continue to bring our school family together.</h3>
-                        <p>Keep track of upcoming parent meetings, co-curricular programs, and celebration days.</p>
-                    </div>
-                    <span class="banner-badge">🗓️ View Events</span>
-                </div>
-            </div>
-            <div class="banner-dots" id="bannerDots" aria-label="Carousel navigation">
-                <button class="banner-dot active" data-index="0" aria-label="Show slide 1"></button>
-                <button class="banner-dot" data-index="1" aria-label="Show slide 2"></button>
-                <button class="banner-dot" data-index="2" aria-label="Show slide 3"></button>
-            </div>
-        </div>
-    </section>
+            <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
+            <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">Explore our school facilities and activities</p>
 
-    <!-- ======================================== -->
-    <!-- VIDEO MODAL -->
-    <!-- ======================================== -->
-    <div class="video-modal" id="videoModal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeVideoModal()">✕</button>
-            <video id="modalVideo" controls autoplay>
-                <source src="/videos/school-hero.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            <div class="modal-title">🏫 Changara Star Academy - Our Story</div>
-        </div>
-    </div>
-
-    <!-- ======================================== -->
-    <!-- STUDENT PORTAL LOGIN SECTION - PROMINENT -->
-    <!-- ======================================== -->
-    <section class="portal-login-section" id="slide-portal-login">
-        <div class="container">
-            <div class="portal-login-wrapper">
-                <div class="portal-login-left" data-aos="fade-right">
-                    <span class="portal-icon">🎓</span>
-                    <h2>Student <span class="highlight">Portal</span></h2>
-                    <p>
-                        Access your academic information, view assessment results, download reports,
-                        and check your fee status all in one place.
-                    </p>
-                    <div class="features">
-                        <div class="feature">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>View Results</span>
+            <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <img src="/images/school-compound.jpg" alt="School Compound">
+                            <div class="gallery-content">
+                                <h4>🏫 School Compound</h4>
+                                <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
+                                <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                            </div>
                         </div>
-                        <div class="feature">
-                            <i class="fas fa-file-pdf"></i>
-                            <span>Download Reports</span>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <img src="/images/ecde-section.jpg" alt="ECDE Section">
+                            <div class="gallery-content">
+                                <h4>🧸 E.C.D.E Section</h4>
+                                <p>Our Early Childhood Development Education section where young learners begin.</p>
+                                <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                            </div>
                         </div>
-                        <div class="feature">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Holiday Assignments</span>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <img src="/images/classroom-learning.jpg" alt="Classroom">
+                            <div class="gallery-content">
+                                <h4>📚 Classroom Learning</h4>
+                                <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
+                                <span class="tag">Academics</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                            </div>
                         </div>
-                        <div class="feature">
-                            <i class="fas fa-money-bill-wave"></i>
-                            <span>Fee Status</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-calendar-check"></i>
-                            <span>Attendance</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-user-edit"></i>
-                            <span>Profile Management</span>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <img src="/images/computer-lab.jpg" alt="Computer Lab">
+                            <div class="gallery-content">
+                                <h4>💻 Computer Lab</h4>
+                                <p>Students learning essential computer skills in our modern computer laboratory.</p>
+                                <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="portal-login-right" data-aos="fade-left">
-                    <h3><i class="fas fa-sign-in-alt" style="color:#6f42c1;"></i> Login to Portal</h3>
-                    <p class="subtitle">Enter your Student ID and PIN to access your dashboard</p>
-                    
-                    <div class="form-group">
-                        <label><i class="fas fa-id-card"></i> Student ID</label>
-                        <input type="text" id="portalStudentId" placeholder="e.g., ST001" value="ST001">
-                        <div class="input-hint">Your Student ID is provided by the school</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label><i class="fas fa-lock"></i> PIN</label>
-                        <input type="password" id="portalPin" placeholder="Enter your 4-digit PIN" maxlength="6" value="1234">
-                        <div class="input-hint">Default PIN is 1234 (change after first login)</div>
-                    </div>
-                    
-                    <div id="loginError" class="login-error">
-                        <i class="fas fa-exclamation-circle"></i> Invalid Student ID or PIN. Please try again.
-                    </div>
-                    
-                    <div id="loginSuccess" class="login-success">
-                        <i class="fas fa-check-circle"></i> Login successful! Redirecting...
-                    </div>
-                    
-                    <button class="btn-login" id="portalLoginBtn" onclick="portalLogin()">
-                        <i class="fas fa-sign-in-alt"></i> Login to Portal
-                    </button>
-                    
-                    <div class="register-link">
-                        Don't have an account? <a href="contact.html">Contact the school</a>
-                    </div>
-                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-pagination"></div>
             </div>
         </div>
     </section>
@@ -2410,68 +2033,6 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- GALLERY SECTION -->
-    <!-- ======================================== -->
-    <section class="gallery-section" id="slide-gallery">
-        <div class="container">
-            <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
-            <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">Explore our school facilities and activities</p>
-
-            <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
-                <div class="swiper-wrapper">
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/school-compound.jpg" alt="School Compound">
-                            <div class="gallery-content">
-                                <h4>🏫 School Compound</h4>
-                                <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/ecde-section.jpg" alt="ECDE Section">
-                            <div class="gallery-content">
-                                <h4>🧸 E.C.D.E Section</h4>
-                                <p>Our Early Childhood Development Education section where young learners begin.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/classroom-learning.jpg" alt="Classroom">
-                            <div class="gallery-content">
-                                <h4>📚 Classroom Learning</h4>
-                                <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
-                                <span class="tag">Academics</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/computer-lab.jpg" alt="Computer Lab">
-                            <div class="gallery-content">
-                                <h4>💻 Computer Lab</h4>
-                                <p>Students learning essential computer skills in our modern computer laboratory.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-pagination"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ======================================== -->
     <!-- NEWS SECTION -->
     <!-- ======================================== -->
     <section class="news-section" id="slide-news">
@@ -2559,81 +2120,6 @@
             once: true,
             offset: 60,
             easing: 'ease-in-out'
-        });
-
-        // ============================================
-        // STUDENT PORTAL LOGIN
-        // ============================================
-        async function portalLogin() {
-            const studentId = document.getElementById('portalStudentId').value.trim();
-            const pin = document.getElementById('portalPin').value.trim();
-            const loginBtn = document.getElementById('portalLoginBtn');
-            const errorEl = document.getElementById('loginError');
-            const successEl = document.getElementById('loginSuccess');
-
-            // Reset messages
-            errorEl.classList.remove('show');
-            successEl.classList.remove('show');
-
-            if (!studentId || !pin) {
-                errorEl.textContent = '❌ Please enter both Student ID and PIN';
-                errorEl.classList.add('show');
-                return;
-            }
-
-            // Show loading state
-            loginBtn.disabled = true;
-            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-
-            try {
-                const response = await fetch('/api/student/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ studentId, pin })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    successEl.textContent = '✅ ' + data.message;
-                    successEl.classList.add('show');
-                    
-                    // Store student info in session
-                    sessionStorage.setItem('studentId', studentId);
-                    sessionStorage.setItem('studentName', data.student.name);
-                    sessionStorage.setItem('studentGrade', data.student.grade);
-                    
-                    // Redirect after short delay
-                    setTimeout(() => {
-                        window.location.href = '/student-portal.html';
-                    }, 1500);
-                } else {
-                    errorEl.textContent = '❌ ' + data.message;
-                    errorEl.classList.add('show');
-                    loginBtn.disabled = false;
-                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Portal';
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                errorEl.textContent = '❌ Connection error. Please try again.';
-                errorEl.classList.add('show');
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Portal';
-            }
-        }
-
-        // Allow Enter key on login fields
-        document.addEventListener('DOMContentLoaded', function() {
-            const studentIdInput = document.getElementById('portalStudentId');
-            const pinInput = document.getElementById('portalPin');
-            
-            studentIdInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') portalLogin();
-            });
-            
-            pinInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') portalLogin();
-            });
         });
 
         // ============================================
@@ -2993,12 +2479,6 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             loadWebsiteContent();
-            
-            // Set default student ID for demo
-            const studentIdInput = document.getElementById('portalStudentId');
-            if (studentIdInput && !studentIdInput.value) {
-                studentIdInput.value = 'ST001';
-            }
         });
     </script>
 </body>
