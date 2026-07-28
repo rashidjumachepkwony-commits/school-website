@@ -162,8 +162,6 @@ function calculateAssessmentPerformance(score, maxScore) {
 // ============================================
 // CBC STUDENT OVERALL - CORRECT CBC METHOD (APPLIES TO ALL CLASSES)
 // ============================================
-// Overall rating = AVERAGE of all subject ratings (EE=4, ME=3, AE=2, BE=1)
-// Overall level = determined by the average rating
 function calculateStudentOverall(assessments) {
     if (!assessments || assessments.length === 0) {
         return { 
@@ -182,45 +180,37 @@ function calculateStudentOverall(assessments) {
     let levelDistribution = { EE: 0, ME: 0, AE: 0, BE: 0 };
     
     assessments.forEach(a => {
-        // Ensure valid data
         const score = Math.min(a.score || 0, a.maxScore || 0);
         const maxScore = a.maxScore || 1;
         
         totalScore += score;
         totalMaxScore += maxScore;
         
-        // Get rating for this subject
         const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
         const level = calculatePerformanceLevel(percentage);
         const rating = getPerformanceRating(level);
         totalRating += rating;
         subjectCount++;
         
-        // Track distribution
         const short = getPerformanceShort(level);
         levelDistribution[short] = (levelDistribution[short] || 0) + 1;
     });
     
-    // ============================================
-    // CBC METHOD: Overall rating = AVERAGE of all subject ratings
-    // ============================================
     const overallRating = subjectCount > 0 ? parseFloat((totalRating / subjectCount).toFixed(1)) : 2;
     
-    // Determine overall performance level based on average rating
     let performanceLevel = 'Approaching Expectation';
     if (overallRating >= 3.5) performanceLevel = 'Exceeding Expectation';
     else if (overallRating >= 2.5) performanceLevel = 'Meeting Expectation';
     else if (overallRating >= 1.5) performanceLevel = 'Approaching Expectation';
     else performanceLevel = 'Below Expectation';
     
-    // Calculate average percentage for display (informational only)
     const avgPercentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     
     return {
         totalScore: totalScore,
-        averageScore: parseFloat(avgPercentage.toFixed(1)),  // Informational only
-        overallRating: overallRating,  // CBC Rating (3.8, 3.6, etc.)
-        performanceLevel: performanceLevel,  // Overall level based on average rating
+        averageScore: parseFloat(avgPercentage.toFixed(1)),
+        overallRating: overallRating,
+        performanceLevel: performanceLevel,
         levelDistribution: levelDistribution,
         subjectCount: subjectCount
     };
@@ -232,10 +222,8 @@ function calculateStudentOverall(assessments) {
 function recalculateStudentData(student) {
     if (!student) return student;
     
-    // Ensure student is a plain object with proper data
     const studentData = student.toObject ? student.toObject() : { ...student };
     
-    // Recalculate each assessment with proper CBC rubric
     if (studentData.assessments && Array.isArray(studentData.assessments)) {
         studentData.assessments = studentData.assessments.map(a => {
             const maxScore = Math.max(1, parseInt(a.maxScore) || 1);
@@ -256,7 +244,6 @@ function recalculateStudentData(student) {
         });
     }
     
-    // Recalculate overall CBC result
     const cbcResult = calculateStudentOverall(studentData.assessments || []);
     studentData.totalScore = cbcResult.totalScore;
     studentData.averageScore = cbcResult.averageScore;
@@ -619,9 +606,6 @@ function generateStudentReportPDF(student) {
         try {
             console.log('📄 Generating PDF for student:', student.studentName);
             
-            // ============================================
-            // VALIDATE AND CLEAN DATA
-            // ============================================
             let validAssessments = [];
             
             if (student.assessments && student.assessments.length > 0) {
@@ -758,16 +742,13 @@ function generateStudentReportPDF(student) {
 
             doc.fontSize(8).font('Helvetica').fillColor(colors.primary).text(`Total: ${totalScore}  •  Avg: ${avgScore}%  •  CBC Rating: ${rating}/4  •  Subjects: ${subjects}`, 250, perfY + 8);
 
-            // ============================================
-            // CBC LEVEL DISTRIBUTION - FIXED
-            // ============================================
+            // CBC LEVEL DISTRIBUTION
             const distY = perfY + 36;
             const dist = student.levelDistribution || { EE: 0, ME: 0, AE: 0, BE: 0 };
             const total = subjects || 1;
             
             doc.fontSize(6).font('Helvetica-Bold').fillColor(colors.primary).text('CBC LEVEL DISTRIBUTION:', 30, distY);
 
-            // Define distribution data with proper labels
             const distData = [
                 { 
                     label: 'EE (4)', 
@@ -803,7 +784,6 @@ function generateStudentReportPDF(student) {
             distData.forEach((item) => {
                 const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
                 
-                // Draw background box
                 doc.roundedRect(distX, distY - 2, 88, 16, 3)
                    .fillColor(item.bg)
                    .fill()
@@ -812,13 +792,11 @@ function generateStudentReportPDF(student) {
                    .roundedRect(distX, distY - 2, 88, 16, 3)
                    .stroke();
                 
-                // Show count and label
                 doc.fontSize(8)
                    .font('Helvetica-Bold')
                    .fillColor(item.color)
                    .text(item.count.toString(), distX + 4, distY);
                 
-                // Show percentage
                 doc.fontSize(5)
                    .font('Helvetica')
                    .fillColor(colors.gray)
@@ -827,7 +805,6 @@ function generateStudentReportPDF(student) {
                 distX += 96;
             });
 
-            // Add distribution summary text below
             const distSummaryY = distY + 20;
             let summaryText = '';
             distData.forEach((item, index) => {
@@ -840,9 +817,7 @@ function generateStudentReportPDF(student) {
                .fillColor(colors.gray)
                .text(summaryText, 30, distSummaryY, { width: 535, align: 'left' });
 
-            // ============================================
             // SUBJECT ASSESSMENT TABLE
-            // ============================================
             const tableY = distY + 30;
             doc.fontSize(7).font('Helvetica-Bold').fillColor(colors.primary).text('SUBJECT ASSESSMENT', 30, tableY);
 
@@ -966,9 +941,6 @@ function generateTeacherFeedback(student) {
 function generateClassReportPDF(students, grade, type, term, year, period) {
     return new Promise((resolve, reject) => {
         try {
-            // ============================================
-            // RECALCULATE ALL STUDENTS WITH CBC METHOD
-            // ============================================
             students = students.map(s => {
                 if (s.assessments && s.assessments.length > 0) {
                     s.assessments = s.assessments.map(a => {
@@ -1008,9 +980,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
             
-            // ============================================
             // HEADER WITH LOGO
-            // ============================================
             doc.fontSize(18)
                 .font('Helvetica-Bold')
                 .fillColor('#0A1628')
@@ -1047,9 +1017,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 .lineWidth(1.5)
                 .stroke();
 
-            // ============================================
             // STATISTICS CARDS
-            // ============================================
             const totalStudents = students.length;
             let exceeding = 0, meeting = 0, approaching = 0, below = 0;
             let totalAvg = 0;
@@ -1097,18 +1065,14 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                    .text(stat.label, x + 5, statsY + 20, { width: boxWidth - 10, align: 'center' });
             });
 
-            // ============================================
             // RUBRIC LEGEND
-            // ============================================
             const legendY = statsY + 38;
             doc.fontSize(6)
                .font('Helvetica-Bold')
                .fillColor('#6c757d')
                .text('EE: Exceeding (75-100%)   ME: Meeting (41-74%)   AE: Approaching (21-40%)   BE: Below (0-20%)', 35, legendY);
 
-            // ============================================
             // GET ALL SUBJECTS
-            // ============================================
             let allSubjects = [];
             students.forEach(s => {
                 if (s.assessments && s.assessments.length > 0) {
@@ -1125,9 +1089,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 allSubjects = ['MATH', 'ENG', 'KIS', 'SCI', 'SST', 'CRE'];
             }
             
-            // ============================================
             // TABLE HEADER
-            // ============================================
             const tableTop = legendY + 12;
             const rankColWidth = 28;
             const nameColWidth = 85;
@@ -1150,7 +1112,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 subjectMaxScores[subject] = maxScore || 50;
             });
             
-            // Header background
             doc.rect(30, tableTop, 740, 16)
                .fillColor('#0A1628')
                .fill();
@@ -1180,9 +1141,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             
             doc.text('Level', headerX, tableTop + 4, { width: levelColWidth - 5, align: 'center' });
 
-            // ============================================
             // MAX SCORES ROW
-            // ============================================
             let maxRowY = tableTop + 16;
             doc.rect(30, maxRowY, 740, 12)
                .fillColor('#f8f9fa')
@@ -1209,9 +1168,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
             maxX += avgColWidth;
             doc.text('', maxX, maxRowY + 3, { width: levelColWidth - 5, align: 'center' });
 
-            // ============================================
             // STUDENT DATA ROWS
-            // ============================================
             const sortedStudents = [...students].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
             let rowY = maxRowY + 12;
             let rowIndex = 0;
@@ -1294,9 +1251,7 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
                 rowY += 18;
             }
 
-            // ============================================
             // FOOTER
-            // ============================================
             const footerY = Math.max(rowY + 16, 540);
             
             doc.moveTo(30, footerY)
@@ -1670,7 +1625,6 @@ const Payment = mongoose.model('Payment', paymentSchema);
 // ============================================
 
 function getDefaultSubjects(grade, type) {
-    // Grade-specific subject configurations - INCLUDING GRADE 5
     const gradeSubjects = {
         'Playgroup': [
             { name: 'LANGUAGE ACTIVITIES', max: 30 },
@@ -4467,6 +4421,110 @@ app.get('/api/debug/assignments', async (req, res) => {
 });
 
 // ============================================
+// STUDENT PORTAL - FILTERED ROUTES
+// ============================================
+
+// Get filtered assessments by grade, period, term, type
+app.get('/api/students/portal/assessments/filtered/:studentId', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const { pin, grade, period, term, type } = req.query;
+        
+        console.log(`📡 GET /api/students/portal/assessments/filtered/${studentId}`);
+        console.log(`   Filters: grade=${grade}, period=${period}, term=${term}, type=${type}`);
+        
+        const student = await Student.findOne({ studentId, isActive: true });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        
+        if (pin && student.pin !== pin) {
+            return res.status(401).json({ success: false, message: 'Invalid PIN' });
+        }
+        
+        let filter = { studentName: student.name };
+        if (grade) filter.grade = grade;
+        if (period) filter.period = period;
+        if (term) filter.term = term;
+        if (type) filter.type = type;
+        
+        const assessments = await StudentAssessment.find(filter).sort({ createdAt: -1 });
+        
+        let assessmentData = null;
+        if (assessments.length > 0) {
+            assessmentData = assessments[0];
+        }
+        
+        res.json({
+            success: true,
+            student: {
+                id: student.studentId,
+                name: student.name,
+                grade: student.grade
+            },
+            assessment: assessmentData,
+            filters: { grade, period, term, type },
+            count: assessments.length
+        });
+    } catch (error) {
+        console.error('❌ Error fetching filtered assessments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get filtered holiday assignments by grade and period
+app.get('/api/students/portal/assignments/filtered', async (req, res) => {
+    try {
+        const { pin, studentId, grade, period, search } = req.query;
+        
+        console.log(`📡 GET /api/students/portal/assignments/filtered`);
+        console.log(`   Filters: grade=${grade}, period=${period}, search=${search}`);
+        
+        if (studentId && pin) {
+            const student = await Student.findOne({ studentId, isActive: true });
+            if (!student) {
+                return res.status(404).json({ success: false, message: 'Student not found' });
+            }
+            if (student.pin !== pin) {
+                return res.status(401).json({ success: false, message: 'Invalid PIN' });
+            }
+        }
+        
+        let filter = { isActive: true };
+        if (grade) filter.grade = grade;
+        
+        let assignments = await HolidayAssignment.find(filter).sort({ createdAt: -1 });
+        
+        if (period) {
+            assignments = assignments.filter(a => 
+                (a.description || '').toLowerCase().includes(period.toLowerCase()) ||
+                (a.subject || '').toLowerCase().includes(period.toLowerCase()) ||
+                (a.title || '').toLowerCase().includes(period.toLowerCase())
+            );
+        }
+        
+        if (search) {
+            const searchLower = search.toLowerCase();
+            assignments = assignments.filter(a => 
+                (a.title || '').toLowerCase().includes(searchLower) ||
+                (a.subject || '').toLowerCase().includes(searchLower) ||
+                (a.description || '').toLowerCase().includes(searchLower)
+            );
+        }
+        
+        res.json({
+            success: true,
+            assignments: assignments,
+            filters: { grade, period, search },
+            count: assignments.length
+        });
+    } catch (error) {
+        console.error('❌ Error fetching filtered assignments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
 // REGISTER STATIC FILES
 // ============================================
 
@@ -4485,7 +4543,7 @@ app.use((req, res) => {
 });
 
 // ============================================
-// DEBUG - LIST ALL REGISTERED ROUTES (FIXED)
+// DEBUG - LIST ALL REGISTERED ROUTES
 // ============================================
 try {
     console.log('\n📋 REGISTERED ROUTES:');

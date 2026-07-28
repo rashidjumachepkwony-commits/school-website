@@ -399,7 +399,6 @@
             font-style: italic;
         }
 
-        /* Assessment Section with Filters */
         .assessment-section {
             background: white;
             padding: 30px;
@@ -480,6 +479,15 @@
             transform: translateY(-2px);
         }
 
+        .filter-bar .btn-filter.reset {
+            background: #6c757d;
+            color: white;
+        }
+
+        .filter-bar .btn-filter.reset:hover {
+            background: #5a6268;
+        }
+
         .assessment-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -555,7 +563,6 @@
             color: #6c757d;
         }
 
-        /* Assignments Section with Filters */
         .assignments-section {
             background: white;
             padding: 30px;
@@ -961,7 +968,7 @@
                     <button class="btn-filter" onclick="applyAssessmentFilters()">
                         <i class="fas fa-filter"></i> Apply Filters
                     </button>
-                    <button class="btn-filter" onclick="resetAssessmentFilters()" style="background:#6c757d;color:white;">
+                    <button class="btn-filter reset" onclick="resetAssessmentFilters()">
                         <i class="fas fa-undo"></i> Reset
                     </button>
                 </div>
@@ -1015,7 +1022,7 @@
                     <button class="btn-filter" onclick="applyAssignmentFilters()">
                         <i class="fas fa-filter"></i> Apply Filters
                     </button>
-                    <button class="btn-filter" onclick="resetAssignmentFilters()" style="background:#6c757d;color:white;">
+                    <button class="btn-filter reset" onclick="resetAssignmentFilters()">
                         <i class="fas fa-undo"></i> Reset
                     </button>
                 </div>
@@ -1076,7 +1083,6 @@
             if (tab === 'profile') {
                 document.querySelector('.tab:first-child').classList.add('active');
                 document.getElementById('tabProfile').classList.add('active');
-                // Update grade filter with student's grade
                 if (currentStudent) {
                     document.getElementById('assessmentGradeFilter').value = currentStudent.grade;
                 }
@@ -1084,7 +1090,6 @@
                 document.querySelector('.tab:last-child').classList.add('active');
                 document.getElementById('tabAssignments').classList.add('active');
                 if (currentStudent) {
-                    // Set grade filter to student's grade
                     document.getElementById('assignmentGradeFilter').value = currentStudent.grade;
                     loadAssignmentsForStudent();
                 } else {
@@ -1264,11 +1269,8 @@
                     fetchStudentAssessment(studentId);
                     showLoading(false);
                     
-                    // Update grade filters
                     document.getElementById('assessmentGradeFilter').value = currentStudent.grade;
                     document.getElementById('assignmentGradeFilter').value = currentStudent.grade;
-                    
-                    // Load assignments for this student's grade
                     setTimeout(() => loadAssignmentsForStudent(), 500);
                 })
                 .catch(err => {
@@ -1412,98 +1414,57 @@
         // ============================================
 
         function fetchStudentAssessment(studentId) {
-            fetch(`/api/assessments/student-name/${encodeURIComponent(currentStudent.name)}`)
+            const grade = document.getElementById('assessmentGradeFilter').value || currentStudent?.grade || '';
+            const period = document.getElementById('assessmentPeriodFilter').value || '';
+            const term = document.getElementById('assessmentTermFilter').value || '';
+            const type = document.getElementById('assessmentTypeFilter').value || '';
+            
+            let url = `/api/students/portal/assessments/filtered/${studentId}?`;
+            const params = [];
+            if (grade) params.push(`grade=${encodeURIComponent(grade)}`);
+            if (period) params.push(`period=${encodeURIComponent(period)}`);
+            if (term) params.push(`term=${encodeURIComponent(term)}`);
+            if (type) params.push(`type=${encodeURIComponent(type)}`);
+            url += params.join('&');
+            
+            fetch(url)
                 .then(res => res.json())
                 .then(data => {
-                    if (data.success && data.student) {
-                        currentAssessmentData = data.student;
-                        displayAssessment(data.student);
+                    if (data.success) {
+                        if (data.assessment) {
+                            currentAssessmentData = data.assessment;
+                            displayAssessment(data.assessment);
+                        } else {
+                            assessmentSection.classList.remove('active');
+                            currentAssessmentData = null;
+                            assessmentGrid.innerHTML = `
+                                <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
+                                    No assessment records found for the selected filters.
+                                </p>
+                            `;
+                            assessmentSummary.innerHTML = '';
+                        }
                     } else {
-                        fetch(`/api/assessments/search?name=${encodeURIComponent(currentStudent.name)}`)
-                            .then(res => res.json())
-                            .then(searchData => {
-                                if (searchData.success && searchData.students && searchData.students.length > 0) {
-                                    const latest = searchData.students.sort((a, b) =>
-                                        new Date(b.createdAt) - new Date(a.createdAt)
-                                    )[0];
-                                    currentAssessmentData = latest;
-                                    displayAssessment(latest);
-                                } else {
-                                    assessmentSection.classList.remove('active');
-                                    currentAssessmentData = null;
-                                }
-                            })
-                            .catch(() => {
-                                assessmentSection.classList.remove('active');
-                                currentAssessmentData = null;
-                            });
+                        showError(data.message || 'Error fetching assessment');
                     }
                 })
-                .catch(() => {
-                    assessmentSection.classList.remove('active');
-                    currentAssessmentData = null;
+                .catch(err => {
+                    console.error('Error fetching assessment:', err);
+                    showError('Error loading assessment data');
                 });
         }
 
         function displayAssessment(student) {
             assessmentSection.classList.add('active');
             currentAssessmentData = student;
-            applyAssessmentFilters();
+            renderAssessment(student);
         }
 
-        // ============================================
-        // ASSESSMENT FILTERS
-        // ============================================
+        function renderAssessment(student) {
+            const assessments = student.assessments || [];
 
-        function applyAssessmentFilters() {
-            if (!currentAssessmentData) {
-                assessmentGrid.innerHTML = `
-                    <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
-                        No assessment data available. Please search for your profile first.
-                    </p>
-                `;
-                assessmentSummary.innerHTML = '';
-                return;
-            }
-
-            const gradeFilter = document.getElementById('assessmentGradeFilter').value;
-            const periodFilter = document.getElementById('assessmentPeriodFilter').value;
-            const termFilter = document.getElementById('assessmentTermFilter').value;
-            const typeFilter = document.getElementById('assessmentTypeFilter').value;
-
-            // Filter assessments
-            let filteredAssessments = currentAssessmentData.assessments || [];
-
-            // Apply filters
-            if (gradeFilter && currentAssessmentData.grade !== gradeFilter) {
-                // If grade doesn't match, show empty
-                filteredAssessments = [];
-            }
-
-            // Filter by period if available
-            if (periodFilter && currentAssessmentData.period) {
-                if (currentAssessmentData.period !== periodFilter) {
-                    filteredAssessments = [];
-                }
-            }
-
-            // Filter by term if available
-            if (termFilter && currentAssessmentData.term) {
-                if (currentAssessmentData.term !== termFilter) {
-                    filteredAssessments = [];
-                }
-            }
-
-            // Filter by type if available
-            if (typeFilter && currentAssessmentData.type) {
-                if (currentAssessmentData.type !== typeFilter) {
-                    filteredAssessments = [];
-                }
-            }
-
-            // Render filtered assessments
-            if (filteredAssessments.length > 0) {
-                assessmentGrid.innerHTML = filteredAssessments.map(a => {
+            if (assessments.length > 0) {
+                assessmentGrid.innerHTML = assessments.map(a => {
                     const levelClass = a.performanceLevel === 'Exceeding Expectation' ? 'EE' :
                                        a.performanceLevel === 'Meeting Expectation' ? 'ME' :
                                        a.performanceLevel === 'Approaching Expectation' ? 'AE' : 'BE';
@@ -1521,21 +1482,19 @@
             } else {
                 assessmentGrid.innerHTML = `
                     <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
-                        ${filteredAssessments.length === 0 && (periodFilter || termFilter || typeFilter) ? 
-                            'No assessments match your filters. Try adjusting your criteria.' : 
-                            'No assessment records found'}
+                        No assessment records found
                     </p>
                 `;
             }
 
-            // Update summary
-            const level = currentAssessmentData.performanceLevel || 'Approaching Expectation';
+            const level = student.performanceLevel || 'Approaching Expectation';
             const levelEmoji = {
                 'Exceeding Expectation': '🌟',
                 'Meeting Expectation': '✅',
                 'Approaching Expectation': '📌',
                 'Below Expectation': '⚠️'
             };
+
             const levelColors = {
                 'Exceeding Expectation': '#1a8a3f',
                 'Meeting Expectation': '#0d6efd',
@@ -1551,22 +1510,39 @@
                     <div class="label">Performance Level</div>
                 </div>
                 <div class="stat">
-                    <div class="number">${currentAssessmentData.totalScore || 0}</div>
+                    <div class="number">${student.totalScore || 0}</div>
                     <div class="label">Total Score</div>
                 </div>
                 <div class="stat">
-                    <div class="number">${(currentAssessmentData.averageScore || 0).toFixed(1)}%</div>
+                    <div class="number">${(student.averageScore || 0).toFixed(1)}%</div>
                     <div class="label">Average Score</div>
                 </div>
                 <div class="stat">
-                    <div class="number">${currentAssessmentData.overallRating || 2}/4</div>
+                    <div class="number">${student.overallRating || 2}/4</div>
                     <div class="label">CBC Rating</div>
                 </div>
                 <div class="stat">
-                    <div class="number">${filteredAssessments.length}</div>
+                    <div class="number">${assessments.length}</div>
                     <div class="label">Subjects</div>
                 </div>
             `;
+        }
+
+        // ============================================
+        // ASSESSMENT FILTERS
+        // ============================================
+
+        function applyAssessmentFilters() {
+            if (!currentStudent) {
+                assessmentGrid.innerHTML = `
+                    <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
+                        No student selected. Please search for your profile first.
+                    </p>
+                `;
+                assessmentSummary.innerHTML = '';
+                return;
+            }
+            fetchStudentData(currentStudent.studentId);
         }
 
         function resetAssessmentFilters() {
@@ -1620,8 +1596,13 @@
                 return;
             }
 
-            const grade = currentStudent.grade;
-            console.log('📡 Loading assignments for grade:', grade);
+            const grade = document.getElementById('assignmentGradeFilter').value || currentStudent.grade;
+            const period = document.getElementById('assignmentPeriodFilter').value || '';
+            const search = document.getElementById('assignmentSearchFilter').value || '';
+
+            let url = `/api/students/portal/assignments/filtered?studentId=${currentStudent.studentId}&grade=${encodeURIComponent(grade)}`;
+            if (period) url += `&period=${encodeURIComponent(period)}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
 
             document.getElementById('assignmentsList').innerHTML = `
                 <div style="text-align:center; padding:20px;">
@@ -1631,23 +1612,19 @@
             `;
 
             try {
-                const response = await fetch(`/api/holiday-assignments/${encodeURIComponent(grade)}`);
-                console.log('📡 Response status:', response.status);
-                
+                const response = await fetch(url);
                 const data = await response.json();
-                console.log('📡 Response data:', data);
 
                 if (data.success) {
                     allAssignments = data.assignments || [];
-                    console.log(`📚 Found ${allAssignments.length} assignments for ${grade}`);
-                    applyAssignmentFilters();
+                    console.log(`📚 Found ${allAssignments.length} assignments`);
+                    renderAssignments(allAssignments);
                 } else {
                     document.getElementById('assignmentsList').innerHTML = `
                         <div class="no-assignments">
                             <div class="icon">❌</div>
                             <h4>Error Loading Assignments</h4>
                             <p>${data.message || 'Unknown error occurred'}</p>
-                            <p style="font-size:12px;color:#999;margin-top:10px;">Please try refreshing or contact admin.</p>
                         </div>
                     `;
                 }
@@ -1658,49 +1635,9 @@
                         <div class="icon">❌</div>
                         <h4>Connection Error</h4>
                         <p>${error.message}</p>
-                        <p style="font-size:12px;color:#999;margin-top:10px;">Please check if the server is running.</p>
                     </div>
                 `;
             }
-        }
-
-        function applyAssignmentFilters() {
-            const gradeFilter = document.getElementById('assignmentGradeFilter').value;
-            const periodFilter = document.getElementById('assignmentPeriodFilter').value;
-            const searchTerm = document.getElementById('assignmentSearchFilter').value.toLowerCase().trim();
-
-            let filtered = allAssignments;
-
-            // Filter by grade
-            if (gradeFilter) {
-                filtered = filtered.filter(a => a.grade === gradeFilter);
-            }
-
-            // Filter by period (using description or subject as period indicator)
-            if (periodFilter) {
-                filtered = filtered.filter(a => 
-                    (a.description || '').toLowerCase().includes(periodFilter.toLowerCase()) ||
-                    (a.subject || '').toLowerCase().includes(periodFilter.toLowerCase())
-                );
-            }
-
-            // Filter by search term
-            if (searchTerm) {
-                filtered = filtered.filter(a => 
-                    a.title.toLowerCase().includes(searchTerm) ||
-                    (a.subject || '').toLowerCase().includes(searchTerm) ||
-                    (a.description || '').toLowerCase().includes(searchTerm)
-                );
-            }
-
-            renderAssignments(filtered);
-        }
-
-        function resetAssignmentFilters() {
-            document.getElementById('assignmentGradeFilter').value = currentStudent ? currentStudent.grade : '';
-            document.getElementById('assignmentPeriodFilter').value = '';
-            document.getElementById('assignmentSearchFilter').value = '';
-            applyAssignmentFilters();
         }
 
         function renderAssignments(assignments) {
@@ -1750,6 +1687,27 @@
             });
 
             container.innerHTML = html;
+        }
+
+        function applyAssignmentFilters() {
+            if (!currentStudent) {
+                document.getElementById('assignmentsList').innerHTML = `
+                    <div class="no-assignments">
+                        <div class="icon">👤</div>
+                        <h4>No Student Selected</h4>
+                        <p>Please search for your profile first.</p>
+                    </div>
+                `;
+                return;
+            }
+            loadAssignmentsForStudent();
+        }
+
+        function resetAssignmentFilters() {
+            document.getElementById('assignmentGradeFilter').value = currentStudent ? currentStudent.grade : '';
+            document.getElementById('assignmentPeriodFilter').value = '';
+            document.getElementById('assignmentSearchFilter').value = '';
+            applyAssignmentFilters();
         }
 
         // ============================================
