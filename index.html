@@ -38,7 +38,7 @@
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-        /* ===== SPLASH SCREEN - Stays until page fully loads (covers Render.com spin-up) ===== */
+        /* ===== SPLASH SCREEN - Shows for 60 seconds to cover Render.com spin-up ===== */
         #splash-screen {
             position: fixed;
             inset: 0;
@@ -237,14 +237,14 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
 
-        /* ===== ENLARGED STUDENT PORTAL BUTTON ===== */
+        /* ===== ENLARGED STUDENT PORTAL BUTTON - MUCH BIGGER & MORE COLORFUL ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #8B5CF6, #6D28D9, #4C1D95);
             color: white;
             font-weight: 800;
-            padding: 12px 32px;
+            padding: 14px 36px;
             border-radius: 50px;
-            font-size: 18px;
+            font-size: 20px;
             transition: all 0.3s ease;
             box-shadow: 0 0 20px rgba(107, 70, 193, 0.5), 0 0 60px rgba(107, 70, 193, 0.2);
             animation: pulseStudentPortal 2s infinite;
@@ -254,7 +254,7 @@
         }
         .main-header .nav-links a.student-portal-link i {
             margin-right: 10px;
-            font-size: 20px;
+            font-size: 22px;
         }
         .main-header .nav-links a.student-portal-link:hover {
             transform: translateY(-3px) scale(1.05);
@@ -1127,7 +1127,7 @@
         }
         .stat-item p { font-size:13px; opacity:0.6; color:white; font-weight:300; letter-spacing:1px; }
 
-        /* ===== ENLARGED NEWS SECTION ===== */
+        /* ===== ENLARGED NEWS SECTION - fills white space ===== */
         .news-section {
             padding:70px 0 90px;
             background:#f0f2f5;
@@ -1301,8 +1301,7 @@
 <body>
 
     <!-- ======================================== -->
-    <!-- SPLASH SCREEN - Stays until page fully loads -->
-    <!-- This covers the full Render.com spin-up time (50+ seconds if needed) -->
+    <!-- SPLASH SCREEN - Shows for 60 seconds to cover Render.com spin-up -->
     <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
@@ -1347,7 +1346,7 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <!-- ENLARGED STUDENT PORTAL BUTTON -->
+                <!-- ENLARGED STUDENT PORTAL BUTTON - MUCH BIGGER -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
@@ -1583,7 +1582,7 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- ENLARGED NEWS SECTION -->
+    <!-- ENLARGED NEWS SECTION - fills white space -->
     <!-- ======================================== -->
     <section class="news-section" id="slide-news">
         <div class="container">
@@ -1673,8 +1672,8 @@
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
         // ========================================
-        // SPLASH SCREEN - Stays until page fully loads
-        // This covers the entire Render.com spin-up time
+        // SPLASH SCREEN - Shows for 60 seconds
+        // This covers Render.com spin-up (which can take 50+ seconds)
         // ========================================
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
@@ -1682,16 +1681,14 @@
             setTimeout(() => { splash.style.display = 'none'; }, 800);
         }
 
-        // Wait for everything to load before hiding splash
-        // This includes all images, fonts, videos, and API calls
-        window.addEventListener('load', function() {
-            // Give a small extra delay to ensure everything is rendered
-            setTimeout(hideSplash, 500);
-        });
-
-        // Fallback: if page takes too long, still hide after 60 seconds
-        // (Render.com typically spins up within 50-60 seconds)
+        // Hide splash after 60 seconds (covers Render.com spin-up)
         setTimeout(hideSplash, 60000);
+
+        // Also hide when page is fully loaded (whichever comes first)
+        window.addEventListener('load', function() {
+            // Small delay to ensure everything is rendered
+            setTimeout(hideSplash, 800);
+        });
 
         // ========================================
         // SPLASH NEWS - Update from CMS if available
