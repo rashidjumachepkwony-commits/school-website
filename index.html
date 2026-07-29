@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>🏫 Changara Star Academy – Excellence in Education</title>
-    <!-- ===== FAVICON - Using your logo ===== -->
-    <link rel="icon" type="image/x-icon" href="logo edited.ico" />
-    <link rel="shortcut icon" type="image/x-icon" href="logo edited.ico" />
+    <link rel="icon" type="image/x-icon" href="images/logo edited.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="images/logo edited.ico" />
     <meta name="description" content="Changara Star Academy – Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
 
+    <!-- ===== FONTS & EXTERNAL CSS ===== -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -17,6 +17,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <style>
+        /* ========================================
+           RESET & BASE
+           ======================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --kenya-black: #000000;
@@ -38,10 +41,22 @@
             line-height: 1.6;
             padding-top: 62px;
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .container-fluid { max-width: 100%; padding: 0; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+        .container-full {
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+        }
 
-        /* ===== SPLASH SCREEN ===== */
+        /* ========================================
+           SPLASH SCREEN
+           ======================================== */
         #splash-screen {
             position: fixed;
             inset: 0;
@@ -59,9 +74,7 @@
             visibility: hidden;
             pointer-events: none;
         }
-        #splash-screen.splash-done {
-            display: none !important;
-        }
+        #splash-screen.splash-done { display: none !important; }
         .splash-card {
             max-width: 750px;
             width: 100%;
@@ -101,55 +114,23 @@
             text-align: left;
             min-height: 160px;
         }
-        .splash-news .label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--school-gold);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
+        .splash-news .label { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--school-gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
         .splash-news .label i { font-size: 16px; }
         .splash-news .headline { font-size: 18px; font-weight: 700; margin-top: 4px; color: #fff; line-height: 1.4; }
         .splash-news .meta { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 6px; }
-        .splash-news .badge {
-            display: inline-block;
-            background: var(--kenya-red);
-            color: white;
-            font-size: 9px;
-            font-weight: 700;
-            padding: 3px 14px;
-            border-radius: 50px;
-            letter-spacing: 1px;
-            animation: pulseBadge 1.5s infinite;
-        }
-        .splash-news .news-sub {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            font-size: 13px;
-            color: rgba(255,255,255,0.5);
-        }
+        .splash-news .badge { display: inline-block; background: var(--kenya-red); color: white; font-size: 9px; font-weight: 700; padding: 3px 14px; border-radius: 50px; letter-spacing: 1px; animation: pulseBadge 1.5s infinite; }
+        .splash-news .news-sub { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; color: rgba(255,255,255,0.5); }
         .splash-news .news-sub i { color: var(--school-gold); margin-right: 6px; }
         .splash-loader { display: flex; justify-content: center; gap: 8px; margin-top: 6px; }
-        .splash-loader .dot {
-            width: 12px; height: 12px;
-            background: var(--school-gold);
-            border-radius: 50%;
-            animation: splashDot 1.2s infinite ease-in-out;
-        }
+        .splash-loader .dot { width: 12px; height: 12px; background: var(--school-gold); border-radius: 50%; animation: splashDot 1.2s infinite ease-in-out; }
         .splash-loader .dot:nth-child(2) { animation-delay: 0.2s; }
         .splash-loader .dot:nth-child(3) { animation-delay: 0.4s; }
         .splash-loading-text { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 6px; letter-spacing: 2px; }
-        @keyframes splashDot {
-            0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
-            40% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes splashDot { 0%,80%,100% { transform: scale(0.4); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
 
-        /* ===== KENYA FLAG ===== */
+        /* ========================================
+           KENYA FLAG STRIP
+           ======================================== */
         .kenya-flag-strip {
             height: 4px;
             background: linear-gradient(to right, #000 0%, #000 25%, #BB0000 25%, #BB0000 50%, #006600 50%, #006600 75%, #000 75%, #000 100%);
@@ -157,7 +138,9 @@
             z-index: 1001;
         }
 
-        /* ===== HEADER ===== */
+        /* ========================================
+           HEADER
+           ======================================== */
         .main-header {
             background: rgba(10, 22, 40, 0.96);
             backdrop-filter: blur(20px);
@@ -257,7 +240,7 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
 
-        /* ===== ATTRACTIVE STUDENT PORTAL BUTTON - Rainbow gradient + glow ===== */
+        /* ===== ATTRACTIVE STUDENT PORTAL BUTTON - RAINBOW ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
             background-size: 300% 300%;
@@ -297,25 +280,6 @@
         }
         .main-header .nav-links a.student-portal-link::after { display: none; }
 
-        @keyframes rainbowPulse {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes floatButton {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-4px); }
-        }
-        @keyframes bounceIcon {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-4px) scale(1.1); }
-        }
-        @keyframes shimmer {
-            0% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(180deg) scale(1.2); }
-            100% { transform: rotate(360deg) scale(1); }
-        }
-
         .main-header .mobile-menu-btn {
             display: none;
             background: none;
@@ -325,34 +289,9 @@
             cursor: pointer;
         }
 
-        /* ===== TOP NAV BAR - Student Portal button also attractive ===== */
-        .top-nav-bar .nav-links a.student-portal-link-top {
-            background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
-            background-size: 300% 300%;
-            color: white;
-            font-weight: 700;
-            padding: 10px 24px;
-            border-radius: 50px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
-            animation: rainbowPulse 3s ease infinite;
-            border: 2px solid rgba(255,255,255,0.1);
-            text-shadow: 0 1px 8px rgba(0,0,0,0.15);
-        }
-        .top-nav-bar .nav-links a.student-portal-link-top i {
-            margin-right: 8px;
-            font-size: 16px;
-            animation: bounceIcon 2s ease-in-out infinite;
-        }
-        .top-nav-bar .nav-links a.student-portal-link-top:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
-            border-color: rgba(255,255,255,0.3);
-        }
-        .top-nav-bar .nav-links a.student-portal-link-top::after { display: none; }
-
-        /* ===== NOTICE BAR ===== */
+        /* ========================================
+           NOTICE ALERT BAR
+           ======================================== */
         .notice-alert-bar {
             background: linear-gradient(135deg, var(--kenya-red), #8B0000);
             color: white;
@@ -400,7 +339,9 @@
         }
         .notice-alert-bar .notice-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
 
-        /* ===== NEWS TICKER ===== */
+        /* ========================================
+           NEWS TICKER
+           ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
             color: white;
@@ -462,7 +403,9 @@
             font-weight: 600;
         }
 
-        /* ===== TOP NAV BAR ===== */
+        /* ========================================
+           TOP NAV BAR
+           ======================================== */
         .top-nav-bar {
             background: linear-gradient(135deg, #0A1628, #1a2a4a);
             padding: 8px 0;
@@ -534,6 +477,33 @@
             font-weight: 700;
             animation: pulseBadgeGreen 1.8s infinite;
         }
+        /* ===== TOP NAV STUDENT PORTAL BUTTON ===== */
+        .top-nav-bar .nav-links a.student-portal-link-top {
+            background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
+            background-size: 300% 300%;
+            color: white;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+            animation: rainbowPulse 3s ease infinite;
+            border: 2px solid rgba(255,255,255,0.1);
+            text-shadow: 0 1px 8px rgba(0,0,0,0.15);
+        }
+        .top-nav-bar .nav-links a.student-portal-link-top i {
+            margin-right: 8px;
+            font-size: 16px;
+            animation: bounceIcon 2s ease-in-out infinite;
+        }
+        .top-nav-bar .nav-links a.student-portal-link-top:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .top-nav-bar .nav-links a.student-portal-link-top::after { display: none; }
+
         .top-nav-bar .nav-right { display: flex; align-items: center; gap: 12px; }
         .top-nav-bar .nav-right .quick-link {
             color: rgba(255,255,255,0.4);
@@ -544,7 +514,9 @@
         .top-nav-bar .nav-right .quick-link:hover { color: var(--school-gold); }
         .top-nav-bar .nav-right .quick-link i { margin-right: 4px; }
 
-        /* ===== SECTION TABS ===== */
+        /* ========================================
+           SECTION TABS
+           ======================================== */
         .section-tabs {
             background: white;
             padding: 8px 0;
@@ -604,7 +576,9 @@
             animation: pulseBadgeRed 1.5s infinite;
         }
 
-        /* ===== HERO ===== */
+        /* ========================================
+           HERO SECTION
+           ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
             margin-top: 100px;
@@ -837,7 +811,9 @@
             animation:scrollDot 2s ease-in-out infinite;
         }
 
-        /* ===== VIDEO MODAL ===== */
+        /* ========================================
+           VIDEO MODAL
+           ======================================== */
         .video-modal {
             display:none;
             position:fixed;
@@ -888,56 +864,28 @@
             backdrop-filter:blur(10px);
         }
 
-        /* ===== ANIMATIONS ===== */
-        @keyframes scrollDot {
-            0%,100% { transform:translateY(0); opacity:1; }
-            50% { transform:translateY(12px); opacity:0.3; }
-        }
-        @keyframes fadeInUp {
-            from { opacity:0; transform:translateY(30px); }
-            to { opacity:1; transform:translateY(0); }
-        }
-        @keyframes bounceArrow {
-            0%,100% { transform:translateY(0); }
-            50% { transform:translateY(8px); }
-        }
-        @keyframes arrowDown {
-            0%,100% { transform:translateY(0); }
-            50% { transform:translateY(5px); }
-        }
-        @keyframes float {
-            0%,100% { transform:translateY(0px); }
-            50% { transform:translateY(-6px); }
-        }
-        @keyframes slideDownNotice {
-            from { transform:translateY(-100%); opacity:0; }
-            to { transform:translateY(0); opacity:1; }
-        }
-        @keyframes pulseBell {
-            0%,100% { transform:scale(1); }
-            50% { transform:scale(1.15); }
-        }
-        @keyframes pulseBadge {
-            0%,100% { transform:scale(1); }
-            50% { transform:scale(1.05); }
-        }
-        @keyframes pulseBadgeRed {
-            0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(187,0,0,0.4); }
-            50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(187,0,0,0.7); }
-        }
-        @keyframes pulseBadgeGreen {
-            0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(0,102,0,0.4); }
-            50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(0,102,0,0.7); }
-        }
-        @keyframes tickerScroll {
-            0%,20% { transform:translateY(0); }
-            25%,45% { transform:translateY(-22px); }
-            50%,70% { transform:translateY(-44px); }
-            75%,95% { transform:translateY(-66px); }
-            100% { transform:translateY(0); }
-        }
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
+        @keyframes rainbowPulse { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes floatButton { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
+        @keyframes bounceIcon { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-4px) scale(1.1); } }
+        @keyframes shimmer { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.2); } 100% { transform: rotate(360deg) scale(1); } }
+        @keyframes scrollDot { 0%,100% { transform:translateY(0); opacity:1; } 50% { transform:translateY(12px); opacity:0.3; } }
+        @keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes bounceArrow { 0%,100% { transform:translateY(0); } 50% { transform:translateY(8px); } }
+        @keyframes arrowDown { 0%,100% { transform:translateY(0); } 50% { transform:translateY(5px); } }
+        @keyframes float { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(-6px); } }
+        @keyframes slideDownNotice { from { transform:translateY(-100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
+        @keyframes pulseBell { 0%,100% { transform:scale(1); } 50% { transform:scale(1.15); } }
+        @keyframes pulseBadge { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+        @keyframes pulseBadgeRed { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(187,0,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(187,0,0,0.7); } }
+        @keyframes pulseBadgeGreen { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(0,102,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(0,102,0,0.7); } }
+        @keyframes tickerScroll { 0%,20% { transform:translateY(0); } 25%,45% { transform:translateY(-22px); } 50%,70% { transform:translateY(-44px); } 75%,95% { transform:translateY(-66px); } 100% { transform:translateY(0); } }
 
-        /* ===== SECTIONS ===== */
+        /* ========================================
+           SECTIONS
+           ======================================== */
         .section-title {
             font-family:var(--font-primary);
             font-size:32px;
@@ -957,7 +905,9 @@
         }
         .section-subtitle.light { color:rgba(255,255,255,0.6); }
 
-        /* ===== GALLERY ===== */
+        /* ========================================
+           GALLERY
+           ======================================== */
         .gallery-section {
             padding:60px 0;
             background:linear-gradient(135deg,#0A1628,#001F5c);
@@ -1007,7 +957,9 @@
         .swiper-pagination-bullet { background:rgba(255,255,255,0.2) !important; width:8px !important; height:8px !important; }
         .swiper-pagination-bullet-active { background:var(--school-gold) !important; }
 
-        /* ===== CONTENT CARDS ===== */
+        /* ========================================
+           CONTENT CARDS
+           ======================================== */
         .content-cards-section {
             padding:50px 0;
             background:#f0f2f5;
@@ -1087,6 +1039,7 @@
             box-shadow:0 4px 15px rgba(212,160,23,0.25);
         }
         .content-card:hover .card-cta { transform:scale(1.05); }
+
         .card-academics { border-color:var(--school-gold) !important; background:linear-gradient(135deg,#ffffff,#fff8e7) !important; }
         .card-academics .badge { background:var(--kenya-red); color:white; animation:pulseBadgeRed 1.5s infinite; }
         .card-academics .card-cta { background:linear-gradient(135deg,var(--school-gold),var(--school-gold-dark)); color:var(--kenya-black); }
@@ -1114,7 +1067,9 @@
         .card-student-portal .icon { background:rgba(111,66,193,0.08); }
         .card-student-portal:hover .icon { background:#6f42c1; }
 
-        /* ===== FEATURES ===== */
+        /* ========================================
+           FEATURES
+           ======================================== */
         .features-section {
             padding:50px 0;
             background:linear-gradient(135deg,#000000,#1a0000,#0a1628);
@@ -1170,7 +1125,9 @@
         .read-more-btn i { font-size:10px; transition:transform 0.3s ease; }
         .read-more-btn:hover i { transform:translateX(3px); }
 
-        /* ===== STATS ===== */
+        /* ========================================
+           STATS
+           ======================================== */
         .stats-section {
             padding:50px 0;
             background:linear-gradient(135deg,var(--kenya-black),var(--school-blue-dark));
@@ -1203,56 +1160,85 @@
         }
         .stat-item p { font-size:13px; opacity:0.6; color:white; font-weight:300; letter-spacing:1px; }
 
-        /* ===== ENLARGED NEWS SECTION - FULL WIDTH, NO WHITE SPACE ===== */
+        /* ========================================
+           NEWS SECTION - FULL WIDTH, NO WHITE SPACE
+           ======================================== */
         .news-section {
-            padding:60px 0 80px;
-            background: #f0f2f5;
-            scroll-margin-top:50px;
-            width: 100%;
+            padding:60px 0 80px !important;
+            background: linear-gradient(180deg, #f8fbff 0%, #e8f0fe 100%) !important;
+            scroll-margin-top: 50px;
+            width: 100% !important;
         }
         .news-section .container {
-            max-width: 100%;
-            padding: 0 30px;
+            max-width: 100% !important;
+            padding: 0 20px !important;
+            margin: 0 auto !important;
+            width: 100% !important;
         }
         .news-grid {
-            display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(400px,1fr));
-            gap:30px;
-            width: 100%;
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)) !important;
+            gap: 30px !important;
+            width: 100% !important;
         }
         .news-item {
-            background:white;
-            padding:40px 35px;
-            border-radius:24px;
-            box-shadow:0 8px 35px rgba(0,0,0,0.06);
-            border-left:8px solid var(--school-gold);
-            transition:all 0.3s ease;
-            min-height: 260px;
-            width: 100%;
+            background: white !important;
+            padding: 40px 35px !important;
+            border-radius: 24px !important;
+            box-shadow: 0 8px 35px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0,0,0,0.02) !important;
+            border-left: 8px solid #d4a017 !important;
+            transition: all 0.4s ease !important;
+            min-height: 260px !important;
+            position: relative !important;
+            overflow: hidden !important;
         }
         .news-item:hover {
-            transform:translateY(-8px);
-            box-shadow:0 20px 60px rgba(0,0,0,0.1);
+            transform: translateY(-8px) !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(212,160,23,0.1) !important;
         }
         .news-item h4 {
-            color:var(--school-blue-dark);
-            font-size:24px;
-            margin-bottom:14px;
-            font-weight:800;
+            color: #001f5c !important;
+            font-size: 24px !important;
+            margin-bottom: 14px !important;
+            font-weight: 800 !important;
+            font-family: 'Playfair Display', serif !important;
         }
         .news-item p {
-            color:#444;
-            font-size:17px;
-            line-height:1.9;
+            color: #444 !important;
+            font-size: 17px !important;
+            line-height: 1.9 !important;
         }
         .news-item .date {
-            font-size:14px;
-            color:#999;
-            margin-top:16px;
-            display:block;
+            font-size: 14px !important;
+            color: #999 !important;
+            margin-top: 16px !important;
+            display: block !important;
+            font-weight: 500 !important;
+        }
+        .news-item .read-more-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            margin-top: 12px !important;
+            padding: 8px 20px !important;
+            background: linear-gradient(135deg, #d4a017, #b8890a) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 50px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            text-decoration: none !important;
+            transition: all 0.3s ease !important;
+            cursor: pointer !important;
+        }
+        .news-item .read-more-btn:hover {
+            transform: translateX(4px) !important;
+            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.3) !important;
         }
 
-        /* ===== FOOTER ===== */
+        /* ========================================
+           FOOTER
+           ======================================== */
         .main-footer {
             background:var(--kenya-black);
             color:white;
@@ -1320,7 +1306,9 @@
         }
         .main-footer .footer-social a:hover { color:var(--school-gold); border-color:var(--school-gold); transform:translateY(-2px); }
 
-        /* ===== RESPONSIVE ===== */
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
         @media (max-width:768px) {
             .main-header .nav-links { display:none; flex-direction:column; width:100%; padding:15px 0; gap:5px; }
             .main-header .nav-links.show { display:flex; }
@@ -1345,7 +1333,11 @@
             .content-grid { grid-template-columns:1fr 1fr; }
             .features-grid { grid-template-columns:1fr 1fr; }
             .stats-grid { grid-template-columns:1fr 1fr; }
-            .news-grid { grid-template-columns:1fr; }
+            .news-grid { grid-template-columns:1fr !important; }
+            .news-section .container { padding: 0 15px !important; }
+            .news-item { padding: 28px 22px !important; min-height: 200px !important; }
+            .news-item h4 { font-size: 20px !important; }
+            .news-item p { font-size: 15px !important; }
             .main-footer .footer-content { grid-template-columns:1fr; gap:15px; }
             .notice-alert-bar .container { flex-direction:column; text-align:center; }
             .gallery-card img { height:160px; }
@@ -1363,10 +1355,6 @@
             .splash-card h1 { font-size:22px; }
             .splash-news .headline { font-size:17px; }
             .splash-news { padding:18px 16px; min-height:140px; }
-            .news-item { padding:28px 22px; min-height:200px; }
-            .news-item h4 { font-size:20px; }
-            .news-item p { font-size:15px; }
-            .news-section .container { padding: 0 15px; }
         }
         @media (max-width:480px) {
             .content-grid { grid-template-columns:1fr; }
@@ -1387,19 +1375,21 @@
             .top-nav-bar .nav-links a { font-size:10px; padding:3px 10px; }
             .top-nav-bar .nav-links a i { font-size:11px; }
             .top-nav-bar .nav-links a.student-portal-link-top { font-size:11px; padding:6px 14px; }
-            .news-item { padding:22px 18px; min-height:180px; }
-            .news-item h4 { font-size:18px; }
-            .news-item p { font-size:14px; }
-            .news-section .container { padding: 0 10px; }
+            .news-item { padding: 22px 18px !important; min-height: 180px !important; }
+            .news-item h4 { font-size: 18px !important; }
+            .news-item p { font-size: 14px !important; }
+            .news-section .container { padding: 0 10px !important; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== SPLASH SCREEN ===== -->
+    <!-- ======================================== -->
+    <!-- SPLASH SCREEN - FIRST VISIT ONLY -->
+    <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
-            <img src="logo edited.ico" alt="Changara Star Academy" class="splash-logo" />
+            <img src="images/logo edited.ico" alt="Changara Star Academy" class="splash-logo" />
             <h1>Changara Star Academy</h1>
             <div class="sub">ASSURANCE TO EXCELLENCE</div>
             <div class="divider"></div>
@@ -1424,12 +1414,14 @@
         </div>
     </div>
 
-    <!-- ===== HEADER ===== -->
+    <!-- ======================================== -->
+    <!-- HEADER -->
+    <!-- ======================================== -->
     <header class="main-header">
         <div class="kenya-flag-strip"></div>
         <div class="container">
             <div class="logo-section">
-                <img src="logo edited.ico" alt="Changara Star Academy Logo" class="school-logo" />
+                <img src="images/logo edited.ico" alt="Changara Star Academy Logo" class="school-logo" />
                 <span class="school-icon">🏫</span>
                 <div>
                     <h1>Changara Star Academy</h1>
@@ -1439,7 +1431,6 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <!-- ATTRACTIVE STUDENT PORTAL BUTTON - Rainbow gradient -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
@@ -1450,7 +1441,9 @@
         </div>
     </header>
 
-    <!-- ===== NOTICE ALERT BAR ===== -->
+    <!-- ======================================== -->
+    <!-- NOTICE ALERT BAR -->
+    <!-- ======================================== -->
     <div class="notice-alert-bar" id="noticeAlertBar">
         <div class="container">
             <div class="notice-icon"><span class="bell">🔔</span><span style="font-weight:700;font-size:11px;">ALERT</span></div>
@@ -1462,7 +1455,9 @@
         </div>
     </div>
 
-    <!-- ===== NEWS TICKER ===== -->
+    <!-- ======================================== -->
+    <!-- NEWS TICKER -->
+    <!-- ======================================== -->
     <div class="news-ticker-section" id="newsTicker">
         <div class="container">
             <div class="ticker-label"><span class="icon">📰</span> News</div>
@@ -1477,7 +1472,9 @@
         </div>
     </div>
 
-    <!-- ===== TOP NAV BAR ===== -->
+    <!-- ======================================== -->
+    <!-- TOP NAV BAR -->
+    <!-- ======================================== -->
     <div class="top-nav-bar">
         <div class="container">
             <div class="nav-left">
@@ -1485,7 +1482,6 @@
             </div>
             <div class="nav-links">
                 <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                <!-- ATTRACTIVE STUDENT PORTAL BUTTON -->
                 <a href="student-portal.html" class="student-portal-link-top">
                     <i class="fas fa-user-graduate"></i> Student Portal <span class="badge-green">NEW</span>
                 </a>
@@ -1502,7 +1498,9 @@
         </div>
     </div>
 
-    <!-- ===== SECTION TABS ===== -->
+    <!-- ======================================== -->
+    <!-- SECTION TABS -->
+    <!-- ======================================== -->
     <div class="section-tabs" id="sectionTabs">
         <div class="container">
             <button class="tab-btn active" onclick="scrollToSection('slide-academics')"><span class="tab-icon">📚</span> Academics <span class="tab-badge">🔥</span></button>
@@ -1516,11 +1514,13 @@
         </div>
     </div>
 
-    <!-- ===== HERO ===== -->
+    <!-- ======================================== -->
+    <!-- HERO -->
+    <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-video-bg">
-            <video id="heroVideo" autoplay muted loop playsinline poster="/images/school-compound.jpg">
-                <source src="/videos/school-hero.mp4" type="video/mp4">
+            <video id="heroVideo" autoplay muted loop playsinline poster="images/school-compound.jpg">
+                <source src="videos/school-hero.mp4" type="video/mp4">
             </video>
             <div class="video-overlay"></div>
             <div class="video-overlay-kenya"></div>
@@ -1549,17 +1549,19 @@
         </div>
     </section>
 
-    <!-- ===== GALLERY ===== -->
+    <!-- ======================================== -->
+    <!-- GALLERY -->
+    <!-- ======================================== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
             <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">Explore our school facilities and activities</p>
             <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide"><div class="gallery-card"><img src="/images/school-compound.jpg" alt="School Compound"><div class="gallery-content"><h4>🏫 School Compound</h4><p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
-                    <div class="swiper-slide"><div class="gallery-card"><img src="/images/ecde-section.jpg" alt="ECDE Section"><div class="gallery-content"><h4>🧸 E.C.D.E Section</h4><p>Our Early Childhood Development Education section where young learners begin.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
-                    <div class="swiper-slide"><div class="gallery-card"><img src="/images/classroom-learning.jpg" alt="Classroom"><div class="gallery-content"><h4>📚 Classroom Learning</h4><p>Pupils engaged in active learning in our well-equipped classrooms.</p><span class="tag">Academics</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
-                    <div class="swiper-slide"><div class="gallery-card"><img src="/images/computer-lab.jpg" alt="Computer Lab"><div class="gallery-content"><h4>💻 Computer Lab</h4><p>Students learning essential computer skills in our modern computer laboratory.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
+                    <div class="swiper-slide"><div class="gallery-card"><img src="images/school-compound.jpg" alt="School Compound"><div class="gallery-content"><h4>🏫 School Compound</h4><p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
+                    <div class="swiper-slide"><div class="gallery-card"><img src="images/ecde-section.jpg" alt="ECDE Section"><div class="gallery-content"><h4>🧸 E.C.D.E Section</h4><p>Our Early Childhood Development Education section where young learners begin.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
+                    <div class="swiper-slide"><div class="gallery-card"><img src="images/classroom-learning.jpg" alt="Classroom"><div class="gallery-content"><h4>📚 Classroom Learning</h4><p>Pupils engaged in active learning in our well-equipped classrooms.</p><span class="tag">Academics</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
+                    <div class="swiper-slide"><div class="gallery-card"><img src="images/computer-lab.jpg" alt="Computer Lab"><div class="gallery-content"><h4>💻 Computer Lab</h4><p>Students learning essential computer skills in our modern computer laboratory.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
                 </div>
                 <div class="swiper-button-next"></div>
                 <div class="swiper-button-prev"></div>
@@ -1568,7 +1570,9 @@
         </div>
     </section>
 
-    <!-- ===== CONTENT CARDS ===== -->
+    <!-- ======================================== -->
+    <!-- CONTENT CARDS -->
+    <!-- ======================================== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
@@ -1634,7 +1638,9 @@
         </div>
     </section>
 
-    <!-- ===== FEATURES ===== -->
+    <!-- ======================================== -->
+    <!-- FEATURES -->
+    <!-- ======================================== -->
     <section class="features-section" id="slide-features">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🌟 Why <span style="color:var(--school-gold);">Choose Us</span></h2>
@@ -1648,7 +1654,9 @@
         </div>
     </section>
 
-    <!-- ===== STATS ===== -->
+    <!-- ======================================== -->
+    <!-- STATS -->
+    <!-- ======================================== -->
     <section class="stats-section" id="slide-stats">
         <div class="container">
             <div class="stats-grid" id="statsGrid">
@@ -1660,7 +1668,9 @@
         </div>
     </section>
 
-    <!-- ===== ENLARGED NEWS SECTION - FULL WIDTH, NO WHITE SPACE ===== -->
+    <!-- ======================================== -->
+    <!-- NEWS SECTION - FULL WIDTH, NO WHITE SPACE -->
+    <!-- ======================================== -->
     <section class="news-section" id="slide-news">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
@@ -1688,12 +1698,14 @@
         </div>
     </section>
 
-    <!-- ===== FOOTER ===== -->
+    <!-- ======================================== -->
+    <!-- FOOTER -->
+    <!-- ======================================== -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-info">
-                    <img src="logo edited.ico" alt="Changara Star Academy" class="footer-logo" />
+                    <img src="images/logo edited.ico" alt="Changara Star Academy" class="footer-logo" />
                     <h3>🏫 Changara Star Academy</h3>
                     <p>Changara Market, Teso North Sub-County, Busia County, Kenya</p>
                     <p>📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
@@ -1725,24 +1737,29 @@
         </div>
     </footer>
 
-    <!-- ===== VIDEO MODAL ===== -->
+    <!-- ======================================== -->
+    <!-- VIDEO MODAL -->
+    <!-- ======================================== -->
     <div class="video-modal" id="videoModal">
         <div class="modal-content">
             <video id="modalVideo" controls>
-                <source src="/videos/school-hero.mp4" type="video/mp4">
+                <source src="videos/school-hero.mp4" type="video/mp4">
             </video>
             <button class="close-modal" onclick="closeVideoModal()">✕</button>
             <div class="modal-title">🎬 Changara Star Academy – Our Story</div>
         </div>
     </div>
 
-    <!-- ===== SCRIPTS ===== -->
+    <!-- ======================================== -->
+    <!-- SCRIPTS -->
+    <!-- ======================================== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
+        // ===== SPLASH SCREEN - ONLY ON FIRST VISIT =====
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
             splash.classList.add('hide-splash');
@@ -1759,6 +1776,7 @@
             });
         }
 
+        // ===== SPLASH NEWS - Update from CMS =====
         async function updateSplashNews() {
             try {
                 const res = await fetch('/api/content');
@@ -1773,10 +1791,12 @@
         }
         updateSplashNews();
 
+        // ===== MOBILE MENU =====
         function toggleMobileMenu() {
             document.getElementById('navLinks').classList.toggle('show');
         }
 
+        // ===== SCROLL TO CONTENT =====
         function scrollToContent() {
             const el = document.getElementById('slide-content');
             if (el) {
@@ -1785,6 +1805,7 @@
             }
         }
 
+        // ===== SECTION TABS =====
         function scrollToSection(id) {
             const el = document.getElementById(id);
             if (el) {
@@ -1799,6 +1820,7 @@
             }
         }
 
+        // ===== NOTICE =====
         function closeNotice() {
             const bar = document.getElementById('noticeAlertBar');
             bar.classList.remove('show');
@@ -1819,6 +1841,7 @@
             }
         })();
 
+        // ===== VIDEO MODAL =====
         function openVideoModal() {
             document.getElementById('videoModal').classList.add('show');
             document.getElementById('modalVideo').play();
@@ -1832,6 +1855,7 @@
             if (e.target === this) closeVideoModal();
         });
 
+        // ===== SWIPER =====
         new Swiper('.gallery-swiper', {
             slidesPerView: 1,
             spaceBetween: 16,
@@ -1842,6 +1866,7 @@
             breakpoints: { 640: { slidesPerView: 1 }, 768: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }
         });
 
+        // ===== CMS LOAD =====
         function stripHtml(html) { if (!html) return ''; const d = document.createElement('DIV'); d.innerHTML = html; return d.textContent || d.innerText || ''; }
         async function loadCMS() {
             try {
