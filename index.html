@@ -38,7 +38,7 @@
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-        /* ===== SPLASH SCREEN - Shows for 60 seconds to cover Render.com spin-up ===== */
+        /* ===== SPLASH SCREEN - ONLY ON FIRST LOAD ===== */
         #splash-screen {
             position: fixed;
             inset: 0;
@@ -55,6 +55,10 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
+        }
+        /* Only show splash on first visit */
+        #splash-screen.splash-done {
+            display: none !important;
         }
         .splash-card {
             max-width: 750px;
@@ -168,7 +172,16 @@
             align-items: center;
             gap: 10px;
         }
-        .main-header .school-icon { font-size: 28px; animation: float 3s ease-in-out infinite; }
+        /* ===== LOGO IMAGE - replaces the building emoji ===== */
+        .main-header .logo-section .school-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            display: block;
+        }
+        .main-header .logo-section .school-icon { 
+            display: none; /* Hide the emoji, use image instead */
+        }
         .main-header .logo-section h1 {
             font-family: var(--font-primary);
             font-size: 18px;
@@ -275,6 +288,31 @@
             font-size: 24px;
             cursor: pointer;
         }
+
+        /* ===== TOP NAV BAR - Student Portal button also big here ===== */
+        .top-nav-bar .nav-links a.student-portal-link-top {
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9, #4C1D95);
+            color: white;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(107, 70, 193, 0.4);
+            border: 2px solid rgba(255,255,255,0.1);
+            text-shadow: 0 1px 8px rgba(0,0,0,0.15);
+            animation: pulseStudentPortal 2.5s infinite;
+        }
+        .top-nav-bar .nav-links a.student-portal-link-top i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        .top-nav-bar .nav-links a.student-portal-link-top:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 0 25px rgba(107, 70, 193, 0.6);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .top-nav-bar .nav-links a.student-portal-link-top::after { display: none; }
 
         /* ===== NOTICE BAR ===== */
         .notice-alert-bar {
@@ -1011,6 +1049,8 @@
             box-shadow:0 4px 15px rgba(212,160,23,0.25);
         }
         .content-card:hover .card-cta { transform:scale(1.05); }
+
+        /* Card styles */
         .card-academics { border-color:var(--school-gold) !important; background:linear-gradient(135deg,#ffffff,#fff8e7) !important; }
         .card-academics .badge { background:var(--kenya-red); color:white; animation:pulseBadgeRed 1.5s infinite; }
         .card-academics .card-cta { background:linear-gradient(135deg,var(--school-gold),var(--school-gold-dark)); color:var(--kenya-black); }
@@ -1127,7 +1167,7 @@
         }
         .stat-item p { font-size:13px; opacity:0.6; color:white; font-weight:300; letter-spacing:1px; }
 
-        /* ===== ENLARGED NEWS SECTION - fills white space ===== */
+        /* ===== ENLARGED NEWS SECTION ===== */
         .news-section {
             padding:70px 0 90px;
             background:#f0f2f5;
@@ -1239,6 +1279,7 @@
             .top-nav-bar .nav-links { justify-content:center; }
             .top-nav-bar .nav-right { justify-content:center; }
             .top-nav-bar .nav-links a { font-size:11px; padding:4px 12px; }
+            .top-nav-bar .nav-links a.student-portal-link-top { font-size:13px; padding:8px 18px; }
             .hero-section { padding:40px 0; margin-top:70px; }
             .hero-section h1 { font-size:32px; }
             .hero-section p { font-size:16px; }
@@ -1257,7 +1298,7 @@
             .notice-alert-bar .container { flex-direction:column; text-align:center; }
             .gallery-card img { height:160px; }
             .main-header .logo-section h1 { font-size:16px; }
-            .main-header .school-icon { font-size:24px; }
+            .main-header .logo-section .school-logo { width:32px; height:32px; }
             .news-ticker-section .ticker-label { font-size:8px; padding:2px 10px; }
             .news-ticker-section .ticker-content .ticker-item { font-size:11px; white-space:normal; }
             .video-modal { padding:20px; }
@@ -1283,7 +1324,7 @@
             .section-tabs .tab-btn { font-size:8px; padding:3px 8px; }
             .section-tabs .tab-btn .tab-icon { font-size:10px; }
             .main-header .logo-section h1 { font-size:14px; }
-            .main-header .school-icon { font-size:20px; }
+            .main-header .logo-section .school-logo { width:28px; height:28px; }
             body { padding-top:90px; }
             .section-tabs { top:48px; padding:4px 0; }
             .notice-alert-bar { top:90px; }
@@ -1292,6 +1333,7 @@
             .hero-video-play { bottom:60px; }
             .top-nav-bar .nav-links a { font-size:10px; padding:3px 10px; }
             .top-nav-bar .nav-links a i { font-size:11px; }
+            .top-nav-bar .nav-links a.student-portal-link-top { font-size:11px; padding:6px 14px; }
             .news-item { padding:22px 18px; min-height:180px; }
             .news-item h4 { font-size:18px; }
             .news-item p { font-size:14px; }
@@ -1301,7 +1343,7 @@
 <body>
 
     <!-- ======================================== -->
-    <!-- SPLASH SCREEN - Shows for 60 seconds to cover Render.com spin-up -->
+    <!-- SPLASH SCREEN - ONLY ON FIRST VISIT -->
     <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
@@ -1337,6 +1379,8 @@
         <div class="kenya-flag-strip"></div>
         <div class="container">
             <div class="logo-section">
+                <!-- ===== REPLACED EMOJI WITH YOUR LOGO IMAGE ===== -->
+                <img src="logo edited.ico" alt="Changara Star Academy Logo" class="school-logo" />
                 <span class="school-icon">🏫</span>
                 <div>
                     <h1>Changara Star Academy</h1>
@@ -1346,7 +1390,7 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <!-- ENLARGED STUDENT PORTAL BUTTON - MUCH BIGGER -->
+                <!-- ENLARGED STUDENT PORTAL BUTTON -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
@@ -1399,14 +1443,20 @@
             </div>
             <div class="nav-links">
                 <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                <a href="student-portal.html"><i class="fas fa-user-graduate"></i> Student Portal <span class="badge-green">NEW</span></a>
+                <!-- ===== STUDENT PORTAL - BIG & PURPLE (same style) ===== -->
+                <a href="student-portal.html" class="student-portal-link-top">
+                    <i class="fas fa-user-graduate"></i> Student Portal <span class="badge-green">NEW</span>
+                </a>
                 <a href="fees.html"><i class="fas fa-coins"></i> Fees <span class="badge">VIEW</span></a>
                 <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
                 <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
                 <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;"><i class="fas fa-user-lock"></i> Admin</a>
             </div>
             <div class="nav-right">
-                <a href="student-portal.html" class="quick-link" style="color:var(--school-gold);font-weight:600;"><i class="fas fa-user-graduate"></i> Student Portal</a>
+                <!-- ===== STUDENT PORTAL - BIG & PURPLE (same style) ===== -->
+                <a href="student-portal.html" class="quick-link" style="color:#8B5CF6;font-weight:700;font-size:14px;background:rgba(139,92,246,0.1);padding:6px 18px;border-radius:50px;border:2px solid rgba(139,92,246,0.2);">
+                    <i class="fas fa-user-graduate"></i> Student Portal
+                </a>
             </div>
         </div>
     </div>
@@ -1582,7 +1632,7 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- ENLARGED NEWS SECTION - fills white space -->
+    <!-- ENLARGED NEWS SECTION -->
     <!-- ======================================== -->
     <section class="news-section" id="slide-news">
         <div class="container">
@@ -1672,23 +1722,30 @@
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
         // ========================================
-        // SPLASH SCREEN - Shows for 60 seconds
-        // This covers Render.com spin-up (which can take 50+ seconds)
+        // SPLASH SCREEN - ONLY ON FIRST VISIT
+        // Uses sessionStorage to track if user has already seen it
         // ========================================
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
             splash.classList.add('hide-splash');
+            // Mark as seen so it won't show again in this session
+            sessionStorage.setItem('splashSeen', 'true');
             setTimeout(() => { splash.style.display = 'none'; }, 800);
         }
 
-        // Hide splash after 60 seconds (covers Render.com spin-up)
-        setTimeout(hideSplash, 60000);
-
-        // Also hide when page is fully loaded (whichever comes first)
-        window.addEventListener('load', function() {
-            // Small delay to ensure everything is rendered
-            setTimeout(hideSplash, 800);
-        });
+        // Check if splash has been seen in this session
+        if (sessionStorage.getItem('splashSeen')) {
+            // Already seen - hide immediately
+            document.getElementById('splash-screen').style.display = 'none';
+        } else {
+            // First visit - show splash
+            // Hide after 60 seconds (covers Render.com spin-up)
+            setTimeout(hideSplash, 60000);
+            // Also hide when page loads (whichever comes first)
+            window.addEventListener('load', function() {
+                setTimeout(hideSplash, 800);
+            });
+        }
 
         // ========================================
         // SPLASH NEWS - Update from CMS if available
