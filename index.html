@@ -46,7 +46,6 @@
             padding: 0 20px;
             width: 100%;
         }
-        /* ===== FULL WIDTH CONTAINER - NO WHITE SPACE ===== */
         .container-news {
             max-width: 100% !important;
             padding: 0 20px !important;
@@ -240,7 +239,7 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
 
-        /* ===== ATTRACTIVE STUDENT PORTAL BUTTON - RAINBOW ===== */
+        /* ===== ATTRACTIVE STUDENT PORTAL BUTTON - RAINBOW (KEEP ONLY THIS ONE) ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
             background-size: 300% 300%;
@@ -404,7 +403,7 @@
         }
 
         /* ========================================
-           TOP NAV BAR
+           TOP NAV BAR - REMOVED EXTRA STUDENT PORTAL, ADDED ENROLL NOW
            ======================================== */
         .top-nav-bar {
             background: linear-gradient(135deg, #0A1628, #1a2a4a);
@@ -477,32 +476,30 @@
             font-weight: 700;
             animation: pulseBadgeGreen 1.8s infinite;
         }
-        /* ===== TOP NAV STUDENT PORTAL BUTTON ===== */
-        .top-nav-bar .nav-links a.student-portal-link-top {
-            background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
-            background-size: 300% 300%;
+
+        /* ===== TOP NAV - ENROLL NOW BUTTON (Red, eye-catching) ===== */
+        .top-nav-bar .nav-links a.enroll-now-link {
+            background: linear-gradient(135deg, #BB0000, #8B0000);
             color: white;
             font-weight: 700;
-            padding: 10px 24px;
+            padding: 6px 18px;
             border-radius: 50px;
-            font-size: 15px;
+            font-size: 13px;
             transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
-            animation: rainbowPulse 3s ease infinite;
+            box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
             border: 2px solid rgba(255,255,255,0.1);
-            text-shadow: 0 1px 8px rgba(0,0,0,0.15);
+            animation: pulseBadgeRed 1.5s infinite;
         }
-        .top-nav-bar .nav-links a.student-portal-link-top i {
-            margin-right: 8px;
-            font-size: 16px;
-            animation: bounceIcon 2s ease-in-out infinite;
+        .top-nav-bar .nav-links a.enroll-now-link i {
+            margin-right: 6px;
+            font-size: 14px;
         }
-        .top-nav-bar .nav-links a.student-portal-link-top:hover {
+        .top-nav-bar .nav-links a.enroll-now-link:hover {
             transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+            box-shadow: 0 0 30px rgba(187, 0, 0, 0.5);
             border-color: rgba(255,255,255,0.3);
         }
-        .top-nav-bar .nav-links a.student-portal-link-top::after { display: none; }
+        .top-nav-bar .nav-links a.enroll-now-link::after { display: none; }
 
         .top-nav-bar .nav-right { display: flex; align-items: center; gap: 12px; }
         .top-nav-bar .nav-right .quick-link {
@@ -513,6 +510,26 @@
         }
         .top-nav-bar .nav-right .quick-link:hover { color: var(--school-gold); }
         .top-nav-bar .nav-right .quick-link i { margin-right: 4px; }
+        /* ===== TOP NAV - ENROLL NOW in nav-right ===== */
+        .top-nav-bar .nav-right .enroll-now-quick {
+            background: linear-gradient(135deg, #BB0000, #8B0000);
+            color: white;
+            font-weight: 700;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+            animation: pulseBadgeRed 1.5s infinite;
+            text-decoration: none;
+        }
+        .top-nav-bar .nav-right .enroll-now-quick i { margin-right: 6px; }
+        .top-nav-bar .nav-right .enroll-now-quick:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 30px rgba(187, 0, 0, 0.5);
+            border-color: rgba(255,255,255,0.3);
+        }
 
         /* ========================================
            SECTION TABS
@@ -577,7 +594,7 @@
         }
 
         /* ========================================
-           HERO SECTION
+           HERO SECTION - NO WHITE SPACE
            ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
@@ -627,7 +644,7 @@
         .hero-section .hero-content {
             position:relative;
             z-index:3;
-            max-width:800px;
+            max-width:850px;
             margin:0 auto;
             padding:0 20px;
         }
@@ -664,7 +681,7 @@
         }
         .hero-section h1 {
             font-family:var(--font-primary);
-            font-size:52px;
+            font-size:54px;
             margin-bottom:15px;
             font-weight:900;
             line-height:1.1;
@@ -682,18 +699,21 @@
             opacity:0.9;
             line-height:1.7;
             margin-bottom:25px;
-            max-width:650px;
+            max-width:700px;
             margin-left:auto;
             margin-right:auto;
             text-shadow:0 2px 20px rgba(0,0,0,0.3);
             animation:fadeInUp 1.4s ease forwards;
         }
+
+        /* ===== HERO BUTTONS ===== */
         .hero-section .btn-group {
             display:flex;
             gap:12px;
             justify-content:center;
             flex-wrap:wrap;
             animation:fadeInUp 1.6s ease forwards;
+            margin-bottom:20px;
         }
         .btn-scroll-down {
             display:inline-flex;
@@ -739,47 +759,48 @@
             border-color:var(--school-gold);
             transform:translateY(-3px);
         }
+
+        /* ===== HERO VIDEO PLAY BUTTON - IN HERO CONTENT ===== */
         .hero-video-play {
-            position:absolute;
-            bottom:100px;
-            left:50%;
-            transform:translateX(-50%);
-            z-index:5;
-            display:flex;
+            display:inline-flex;
             align-items:center;
             gap:12px;
-            background:rgba(255,255,255,0.08);
-            backdrop-filter:blur(10px);
-            padding:8px 20px 8px 8px;
+            background:rgba(255,255,255,0.12);
+            backdrop-filter:blur(12px);
+            padding:10px 24px 10px 10px;
             border-radius:50px;
-            border:1px solid rgba(255,255,255,0.1);
+            border:2px solid rgba(255,255,255,0.15);
             cursor:pointer;
             transition:all 0.3s ease;
-            animation:fadeInUp 2s ease forwards;
+            animation:fadeInUp 1.8s ease forwards;
+            margin:0 auto;
         }
         .hero-video-play:hover {
-            background:rgba(212,160,23,0.2);
+            background:rgba(212,160,23,0.25);
             border-color:var(--school-gold);
-            transform:translateX(-50%) scale(1.05);
+            transform:scale(1.05);
+            box-shadow:0 8px 30px rgba(212,160,23,0.2);
         }
         .hero-video-play .play-icon {
-            width:36px; height:36px;
+            width:40px;
+            height:40px;
             background:var(--school-gold);
             border-radius:50%;
             display:flex;
             align-items:center;
             justify-content:center;
             color:var(--kenya-black);
-            font-size:14px;
+            font-size:16px;
             transition:all 0.3s ease;
         }
         .hero-video-play:hover .play-icon { transform:scale(1.1); }
         .hero-video-play .play-text {
-            font-size:12px;
-            color:rgba(255,255,255,0.8);
-            font-weight:500;
-            letter-spacing:1px;
+            font-size:14px;
+            color:rgba(255,255,255,0.9);
+            font-weight:600;
+            letter-spacing:0.5px;
         }
+
         .scroll-indicator {
             position:absolute;
             bottom:20px;
@@ -1319,7 +1340,6 @@
             .top-nav-bar .nav-links { justify-content:center; }
             .top-nav-bar .nav-right { justify-content:center; }
             .top-nav-bar .nav-links a { font-size:11px; padding:4px 12px; }
-            .top-nav-bar .nav-links a.student-portal-link-top { font-size:13px; padding:8px 18px; }
             .hero-section { padding:40px 0; margin-top:70px; }
             .hero-section h1 { font-size:32px; }
             .hero-section p { font-size:16px; }
@@ -1347,9 +1367,9 @@
             .news-ticker-section .ticker-content .ticker-item { font-size:11px; white-space:normal; }
             .video-modal { padding:20px; }
             .video-modal .close-modal { top:-40px; font-size:20px; width:36px; height:36px; }
-            .hero-video-play { bottom:70px; padding:6px 14px 6px 6px; }
-            .hero-video-play .play-icon { width:30px; height:30px; font-size:12px; }
-            .hero-video-play .play-text { font-size:10px; }
+            .hero-video-play { padding:8px 16px 8px 8px; }
+            .hero-video-play .play-icon { width:32px; height:32px; font-size:14px; }
+            .hero-video-play .play-text { font-size:12px; }
             .splash-card { padding:30px 18px; }
             .splash-card .splash-logo { width:60px; height:60px; }
             .splash-card h1 { font-size:22px; }
@@ -1371,10 +1391,8 @@
             .notice-alert-bar { top:90px; }
             .news-ticker-section { top:90px; }
             .hero-section { margin-top:60px; }
-            .hero-video-play { bottom:60px; }
             .top-nav-bar .nav-links a { font-size:10px; padding:3px 10px; }
             .top-nav-bar .nav-links a i { font-size:11px; }
-            .top-nav-bar .nav-links a.student-portal-link-top { font-size:11px; padding:6px 14px; }
             .news-item { padding: 22px 18px !important; min-height: 180px !important; }
             .news-item h4 { font-size: 18px !important; }
             .news-item p { font-size: 14px !important; }
@@ -1431,6 +1449,7 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
+                <!-- ONLY ONE STUDENT PORTAL BUTTON - BIG, COLORFUL, RAINBOW -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
@@ -1473,7 +1492,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- TOP NAV BAR -->
+    <!-- TOP NAV BAR - REMOVED STUDENT PORTAL, ADDED ENROLL NOW -->
     <!-- ======================================== -->
     <div class="top-nav-bar">
         <div class="container">
@@ -1482,18 +1501,16 @@
             </div>
             <div class="nav-links">
                 <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                <a href="student-portal.html" class="student-portal-link-top">
-                    <i class="fas fa-user-graduate"></i> Student Portal <span class="badge-green">NEW</span>
-                </a>
                 <a href="fees.html"><i class="fas fa-coins"></i> Fees <span class="badge">VIEW</span></a>
                 <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
                 <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
                 <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;"><i class="fas fa-user-lock"></i> Admin</a>
+                <!-- ENROLL NOW BUTTON - RED, EYE-CATCHING -->
+                <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
             </div>
             <div class="nav-right">
-                <a href="student-portal.html" class="quick-link" style="color:#FF6B6B;font-weight:700;font-size:14px;background:rgba(255,107,107,0.15);padding:6px 18px;border-radius:50px;border:2px solid rgba(255,107,107,0.3);animation:floatButton 2.5s ease-in-out infinite;">
-                    <i class="fas fa-user-graduate"></i> Student Portal
-                </a>
+                <!-- ENROLL NOW QUICK LINK -->
+                <a href="admissions.html" class="enroll-now-quick"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
             </div>
         </div>
     </div>
@@ -1515,7 +1532,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HERO -->
+    <!-- HERO - WITH VIDEO PLAY BUTTON IN CONTENT -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-video-bg">
@@ -1526,10 +1543,6 @@
             <div class="video-overlay-kenya"></div>
         </div>
         <div class="hero-bg-pattern"></div>
-        <div class="hero-video-play" onclick="openVideoModal()">
-            <div class="play-icon"><i class="fas fa-play"></i></div>
-            <span class="play-text">▶ Watch Our Story</span>
-        </div>
         <div class="hero-content">
             <div class="hero-flag-badge">
                 <div class="flag-strip"><span class="b"></span><span class="r"></span><span class="g"></span><span class="w"></span></div>
@@ -1537,6 +1550,13 @@
             </div>
             <h1 id="heroTitle">Welcome to <br><span class="highlight">Changara Star Academy</span></h1>
             <p id="heroSubtitle">Nurturing young minds through quality education, discipline, innovation, and strong moral values. We provide a safe and supportive learning environment where every child is encouraged to discover their potential and achieve academic excellence.</p>
+
+            <!-- VIDEO PLAY BUTTON - NOW IN HERO CONTENT -->
+            <div class="hero-video-play" onclick="openVideoModal()">
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+                <span class="play-text">▶ Watch Our Story</span>
+            </div>
+
             <div class="btn-group">
                 <button class="btn-scroll-down" onclick="scrollToContent()"><span>Scroll Down</span><span class="arrow"><i class="fas fa-chevron-down"></i></span></button>
                 <a href="admissions.html" class="btn-outline" style="background:linear-gradient(135deg,#BB0000,#8B0000);color:white;border:none;"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
