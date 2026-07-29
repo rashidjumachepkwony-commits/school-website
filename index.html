@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>🏫 Changara Star Academy – Excellence in Education</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>" />
     <meta name="description" content="Changara Star Academy – Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
-    
+
     <!-- Fonts & CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,9 +16,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <style>
-        /* ========================================
-           ROOT VARIABLES
-           ======================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --kenya-black: #000000;
             --kenya-red: #BB0000;
@@ -30,11 +28,6 @@
             --font-primary: 'Playfair Display', serif;
             --font-secondary: 'Poppins', sans-serif;
         }
-
-        /* ========================================
-           RESET & BASE
-           ======================================== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         body {
             font-family: var(--font-secondary);
@@ -44,43 +37,145 @@
             line-height: 1.6;
             padding-top: 62px;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* ===== SPLASH SCREEN ===== */
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: linear-gradient(145deg, #0A1628 0%, #00142b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #splash-screen.hide-splash {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .splash-card {
+            max-width: 700px;
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            padding: 40px 30px;
+            border: 1px solid rgba(212, 160, 23, 0.15);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            text-align: center;
+            color: white;
+        }
+        .splash-card .school-icon-big {
+            font-size: 72px;
+            margin-bottom: 6px;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+        .splash-card h1 {
+            font-family: var(--font-primary);
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+        .splash-card .sub {
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+        .splash-card .divider {
+            width: 60px;
+            height: 2px;
+            background: var(--school-gold);
+            margin: 12px auto;
+        }
+        .splash-news {
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+            padding: 16px 18px;
+            margin: 16px 0 20px;
+            border-left: 4px solid var(--school-gold);
+            text-align: left;
+        }
+        .splash-news .label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--school-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .splash-news .label i { font-size: 14px; }
+        .splash-news .headline {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 4px;
+            color: #fff;
+        }
+        .splash-news .meta {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 4px;
+        }
+        .splash-news .badge {
+            display: inline-block;
+            background: var(--kenya-red);
+            color: white;
+            font-size: 8px;
+            font-weight: 700;
+            padding: 2px 12px;
+            border-radius: 50px;
+            letter-spacing: 1px;
+            animation: pulseBadge 1.5s infinite;
+        }
+        .splash-loader {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .splash-loader .dot {
+            width: 10px;
+            height: 10px;
+            background: var(--school-gold);
+            border-radius: 50%;
+            animation: splashDot 1.2s infinite ease-in-out;
+        }
+        .splash-loader .dot:nth-child(2) { animation-delay: 0.2s; }
+        .splash-loader .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes splashDot {
+            0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; }
         }
 
-        /* ========================================
-           KENYA FLAG STRIP
-           ======================================== */
+        /* ===== KENYA FLAG ===== */
         .kenya-flag-strip {
             height: 4px;
-            background: linear-gradient(to right,
-                var(--kenya-black) 0%, var(--kenya-black) 25%,
-                var(--kenya-red) 25%, var(--kenya-red) 50%,
-                var(--kenya-green) 50%, var(--kenya-green) 75%,
-                var(--kenya-black) 75%, var(--kenya-black) 100%
-            );
+            background: linear-gradient(to right, #000 0%, #000 25%, #BB0000 25%, #BB0000 50%, #006600 50%, #006600 75%, #000 75%, #000 100%);
             position: relative;
             z-index: 1001;
         }
 
-        /* ========================================
-           HEADER - FIXED AT TOP
-           ======================================== */
+        /* ===== HEADER ===== */
         .main-header {
             background: rgba(10, 22, 40, 0.96);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             color: white;
             padding: 8px 0;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             z-index: 1000;
-            border-bottom: 1px solid rgba(212, 160, 23, 0.15);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(212,160,23,0.15);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
         }
         .main-header .container {
             display: flex;
@@ -93,10 +188,7 @@
             align-items: center;
             gap: 10px;
         }
-        .main-header .school-icon {
-            font-size: 28px;
-            animation: float 3s ease-in-out infinite;
-        }
+        .main-header .school-icon { font-size: 28px; animation: float 3s ease-in-out infinite; }
         .main-header .logo-section h1 {
             font-family: var(--font-primary);
             font-size: 18px;
@@ -142,14 +234,10 @@
             transition: width 0.3s ease;
         }
         .main-header .nav-links a:hover::after,
-        .main-header .nav-links a.active::after {
-            width: 50%;
-        }
-        .main-header .nav-links a:hover {
-            color: white;
-        }
+        .main-header .nav-links a.active::after { width: 50%; }
+        .main-header .nav-links a:hover { color: white; }
         .main-header .nav-links a.active {
-            background: rgba(212, 160, 23, 0.12);
+            background: rgba(212,160,23,0.12);
             color: var(--school-gold);
         }
         .main-header .nav-links a.portal-link {
@@ -158,40 +246,40 @@
             font-weight: 600;
             padding: 5px 16px;
             border-radius: 50px;
-            transition: all 0.3s ease;
             font-size: 11px;
         }
         .main-header .nav-links a.portal-link:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.3);
+            box-shadow: 0 8px 25px rgba(212,160,23,0.3);
         }
-        .main-header .nav-links a.portal-link::after { display: none; }
-        
-        /* Student Portal Link */
+        /* ===== ENLARGED STUDENT PORTAL BUTTON ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #6f42c1, #4a2a8a);
             color: white;
-            font-weight: 600;
-            padding: 5px 16px;
+            font-weight: 700;
+            padding: 10px 28px;
             border-radius: 50px;
+            font-size: 16px;
             transition: all 0.3s ease;
-            font-size: 11px;
+            box-shadow: 0 0 0 0 rgba(111,66,193,0.4);
             animation: pulseStudentPortal 2s infinite;
+            letter-spacing: 0.5px;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        .main-header .nav-links a.student-portal-link i {
+            margin-right: 8px;
+            font-size: 18px;
         }
         .main-header .nav-links a.student-portal-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(111, 66, 193, 0.4);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(111,66,193,0.5);
+            border-color: rgba(255,255,255,0.2);
         }
         .main-header .nav-links a.student-portal-link::after { display: none; }
-        .main-header .nav-links a.student-portal-link i {
-            margin-right: 4px;
-        }
-
         @keyframes pulseStudentPortal {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(111, 66, 193, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(111, 66, 193, 0); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(111,66,193,0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(111,66,193,0); }
         }
-
         .main-header .mobile-menu-btn {
             display: none;
             background: none;
@@ -201,22 +289,18 @@
             cursor: pointer;
         }
 
-        /* ========================================
-           NOTICE ALERT BAR
-           ======================================== */
+        /* ===== NOTICE BAR ===== */
         .notice-alert-bar {
             background: linear-gradient(135deg, var(--kenya-red), #8B0000);
             color: white;
             padding: 6px 0;
             position: fixed;
-            top: 62px;
-            left: 0;
-            right: 0;
+            top: 62px; left: 0; right: 0;
             z-index: 1001;
             border-bottom: 3px solid var(--school-gold);
             display: none;
             animation: slideDownNotice 0.6s ease forwards;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
         .notice-alert-bar.show { display: block; }
         .notice-alert-bar .container {
@@ -226,20 +310,8 @@
             flex-wrap: wrap;
             gap: 6px;
         }
-        .notice-alert-bar .notice-icon {
-            font-size: 18px;
-            animation: pulseBell 1.5s infinite;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .notice-alert-bar .notice-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+        .notice-alert-bar .notice-icon { font-size: 18px; animation: pulseBell 1.5s infinite; display: flex; align-items: center; gap: 6px; }
+        .notice-alert-bar .notice-content { flex:1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .notice-alert-bar .notice-content .badge {
             background: var(--school-gold);
             color: var(--kenya-black);
@@ -251,46 +323,32 @@
             letter-spacing: 1px;
             animation: pulseBadge 1.5s infinite;
         }
-        .notice-alert-bar .notice-content .message {
-            font-size: 13px;
-            font-weight: 500;
-            flex: 1;
-        }
+        .notice-alert-bar .notice-content .message { font-size: 13px; font-weight: 500; flex:1; }
         .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
         .notice-alert-bar .notice-close {
             background: rgba(255,255,255,0.15);
             border: none;
             color: white;
-            width: 24px;
-            height: 24px;
+            width: 24px; height: 24px;
             border-radius: 50%;
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s ease;
         }
-        .notice-alert-bar .notice-close:hover {
-            background: rgba(255,255,255,0.3);
-            transform: rotate(90deg);
-        }
+        .notice-alert-bar .notice-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
 
-        /* ========================================
-           NEWS TICKER
-           ======================================== */
+        /* ===== NEWS TICKER ===== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
             color: white;
             padding: 4px 0;
             border-bottom: 2px solid var(--school-gold);
             position: fixed;
-            top: 62px;
-            left: 0;
-            right: 0;
+            top: 62px; left: 0; right: 0;
             z-index: 999;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.15);
         }
-        .news-ticker-section.show-notice {
-            top: 98px;
-        }
+        .news-ticker-section.show-notice { top: 98px; }
         .news-ticker-section .container {
             display: flex;
             align-items: center;
@@ -310,7 +368,6 @@
             gap: 4px;
             letter-spacing: 1px;
         }
-        .news-ticker-section .ticker-label .icon { font-size: 10px; }
         .news-ticker-section .ticker-wrapper {
             flex: 1;
             overflow: hidden;
@@ -342,9 +399,7 @@
             font-weight: 600;
         }
 
-        /* ========================================
-           TOP NAVIGATION BAR (ABOVE HERO)
-           ======================================== */
+        /* ===== TOP NAV BAR ===== */
         .top-nav-bar {
             background: linear-gradient(135deg, #0A1628, #1a2a4a);
             padding: 8px 0;
@@ -360,21 +415,13 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .top-nav-bar .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
+        .top-nav-bar .nav-left { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .top-nav-bar .nav-left .welcome-text {
             color: rgba(255,255,255,0.5);
             font-size: 11px;
             font-weight: 300;
         }
-        .top-nav-bar .nav-left .welcome-text i {
-            color: var(--school-gold);
-            margin-right: 4px;
-        }
+        .top-nav-bar .nav-left .welcome-text i { color: var(--school-gold); margin-right: 4px; }
         .top-nav-bar .nav-links {
             display: flex;
             gap: 6px;
@@ -395,19 +442,17 @@
             border: 1px solid transparent;
         }
         .top-nav-bar .nav-links a:hover {
-            background: rgba(212, 160, 23, 0.12);
+            background: rgba(212,160,23,0.12);
             color: var(--school-gold);
-            border-color: rgba(212, 160, 23, 0.15);
+            border-color: rgba(212,160,23,0.15);
             transform: translateY(-2px);
         }
         .top-nav-bar .nav-links a.active {
-            background: rgba(212, 160, 23, 0.18);
+            background: rgba(212,160,23,0.18);
             color: var(--school-gold);
             border-color: var(--school-gold);
         }
-        .top-nav-bar .nav-links a i {
-            font-size: 13px;
-        }
+        .top-nav-bar .nav-links a i { font-size: 13px; }
         .top-nav-bar .nav-links a .badge {
             background: var(--kenya-red);
             color: white;
@@ -426,44 +471,30 @@
             font-weight: 700;
             animation: pulseBadgeGreen 1.8s infinite;
         }
-        .top-nav-bar .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .top-nav-bar .nav-right { display: flex; align-items: center; gap: 12px; }
         .top-nav-bar .nav-right .quick-link {
             color: rgba(255,255,255,0.4);
             font-size: 11px;
             text-decoration: none;
             transition: all 0.3s ease;
         }
-        .top-nav-bar .nav-right .quick-link:hover {
-            color: var(--school-gold);
-        }
-        .top-nav-bar .nav-right .quick-link i {
-            margin-right: 4px;
-        }
+        .top-nav-bar .nav-right .quick-link:hover { color: var(--school-gold); }
+        .top-nav-bar .nav-right .quick-link i { margin-right: 4px; }
 
-        /* ========================================
-           SECTION TABS
-           ======================================== */
+        /* ===== SECTION TABS ===== */
         .section-tabs {
             background: white;
             padding: 8px 0;
             position: fixed;
-            top: 62px;
-            left: 0;
-            right: 0;
+            top: 62px; left: 0; right: 0;
             z-index: 100;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             border-bottom: 2px solid var(--school-gold);
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
-        .section-tabs::-webkit-scrollbar {
-            display: none;
-        }
+        .section-tabs::-webkit-scrollbar { display: none; }
         .section-tabs .container {
             display: flex;
             gap: 4px;
@@ -489,7 +520,7 @@
             position: relative;
         }
         .section-tabs .tab-btn:hover {
-            background: rgba(212, 160, 23, 0.08);
+            background: rgba(212,160,23,0.08);
             color: var(--school-gold);
             transform: translateY(-2px);
         }
@@ -497,11 +528,9 @@
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
             border-color: var(--school-gold);
-            box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3);
+            box-shadow: 0 4px 15px rgba(212,160,23,0.3);
         }
-        .section-tabs .tab-btn .tab-icon {
-            font-size: 13px;
-        }
+        .section-tabs .tab-btn .tab-icon { font-size: 13px; }
         .section-tabs .tab-btn .tab-badge {
             background: var(--kenya-red);
             color: white;
@@ -512,9 +541,7 @@
             animation: pulseBadgeRed 1.5s infinite;
         }
 
-        /* ========================================
-           HERO SECTION WITH VIDEO BACKGROUND
-           ======================================== */
+        /* ===== HERO ===== */
         .hero-section {
             min-height: calc(100vh - 62px);
             margin-top: 100px;
@@ -526,1053 +553,783 @@
             overflow: hidden;
             padding: 60px 0;
         }
-
-        /* ===== VIDEO BACKGROUND ===== */
         .hero-video-bg {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            overflow: hidden;
+            top:0; left:0;
+            width:100%; height:100%;
+            z-index:0;
+            overflow:hidden;
         }
         .hero-video-bg video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            width:100%; height:100%;
+            object-fit:cover;
+            position:absolute;
+            top:50%; left:50%;
+            transform:translate(-50%,-50%);
         }
         .hero-video-bg .video-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(10, 22, 40, 0.6) 50%, rgba(187, 0, 0, 0.25) 100%);
-            z-index: 1;
+            position:absolute;
+            inset:0;
+            background:linear-gradient(135deg,rgba(0,0,0,0.7) 0%,rgba(10,22,40,0.6) 50%,rgba(187,0,0,0.25) 100%);
+            z-index:1;
         }
         .hero-video-bg .video-overlay-kenya {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(187, 0, 0, 0.12) 50%, rgba(0, 102, 0, 0.12) 100%);
-            z-index: 2;
+            position:absolute;
+            inset:0;
+            background:linear-gradient(135deg,rgba(0,0,0,0.8) 0%,rgba(187,0,0,0.12) 50%,rgba(0,102,0,0.12) 100%);
+            z-index:2;
         }
-
-        /* ===== HERO CONTENT ===== */
         .hero-section .hero-bg-pattern {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
+            position:absolute;
+            inset:0;
+            z-index:1;
             background-image:
-                radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(212,160,23,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(212,160,23,0.08) 0%, transparent 50%);
         }
         .hero-section .hero-content {
-            position: relative;
-            z-index: 3;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 20px;
+            position:relative;
+            z-index:3;
+            max-width:800px;
+            margin:0 auto;
+            padding:0 20px;
         }
-
         .hero-flag-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 4px 16px 4px 4px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.15);
-            margin-bottom: 20px;
-            animation: fadeInUp 1s ease forwards;
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            background:rgba(255,255,255,0.1);
+            backdrop-filter:blur(10px);
+            padding:4px 16px 4px 4px;
+            border-radius:50px;
+            border:1px solid rgba(255,255,255,0.15);
+            margin-bottom:20px;
+            animation:fadeInUp 1s ease forwards;
         }
         .hero-flag-badge .flag-strip {
-            display: flex;
-            width: 32px;
-            height: 16px;
-            border-radius: 4px;
-            overflow: hidden;
+            display:flex;
+            width:32px;
+            height:16px;
+            border-radius:4px;
+            overflow:hidden;
         }
-        .hero-flag-badge .flag-strip span { flex: 1; height: 100%; }
-        .hero-flag-badge .flag-strip .b { background: #000000; }
-        .hero-flag-badge .flag-strip .r { background: #BB0000; }
-        .hero-flag-badge .flag-strip .g { background: #006600; }
-        .hero-flag-badge .flag-strip .w { background: #FFFFFF; }
+        .hero-flag-badge .flag-strip span { flex:1; }
+        .hero-flag-badge .flag-strip .b { background:#000; }
+        .hero-flag-badge .flag-strip .r { background:#BB0000; }
+        .hero-flag-badge .flag-strip .g { background:#006600; }
+        .hero-flag-badge .flag-strip .w { background:#FFF; }
         .hero-flag-badge .flag-text {
-            font-size: 10px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.7);
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            font-size:10px;
+            font-weight:600;
+            color:rgba(255,255,255,0.7);
+            letter-spacing:2px;
+            text-transform:uppercase;
         }
-
         .hero-section h1 {
-            font-family: var(--font-primary);
-            font-size: 52px;
-            margin-bottom: 15px;
-            font-weight: 900;
-            line-height: 1.1;
-            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-            animation: fadeInUp 1.2s ease forwards;
+            font-family:var(--font-primary);
+            font-size:52px;
+            margin-bottom:15px;
+            font-weight:900;
+            line-height:1.1;
+            text-shadow:0 4px 30px rgba(0,0,0,0.3);
+            animation:fadeInUp 1.2s ease forwards;
         }
         .hero-section h1 .highlight {
-            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            background:linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            background-clip:text;
         }
         .hero-section p {
-            font-size: 18px;
-            opacity: 0.9;
-            line-height: 1.7;
-            margin-bottom: 25px;
-            max-width: 650px;
-            margin-left: auto;
-            margin-right: auto;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-            animation: fadeInUp 1.4s ease forwards;
+            font-size:18px;
+            opacity:0.9;
+            line-height:1.7;
+            margin-bottom:25px;
+            max-width:650px;
+            margin-left:auto;
+            margin-right:auto;
+            text-shadow:0 2px 20px rgba(0,0,0,0.3);
+            animation:fadeInUp 1.4s ease forwards;
         }
         .hero-section .btn-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            animation: fadeInUp 1.6s ease forwards;
+            display:flex;
+            gap:12px;
+            justify-content:center;
+            flex-wrap:wrap;
+            animation:fadeInUp 1.6s ease forwards;
         }
-
-        /* ===== SCROLL DOWN BUTTON ===== */
         .btn-scroll-down {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 14px 35px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 15px;
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            animation: bounceArrow 2s infinite;
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            padding:14px 35px;
+            background:rgba(255,255,255,0.1);
+            backdrop-filter:blur(10px);
+            color:white;
+            text-decoration:none;
+            border-radius:50px;
+            font-weight:600;
+            font-size:15px;
+            border:2px solid rgba(255,255,255,0.25);
+            transition:all 0.3s ease;
+            cursor:pointer;
+            animation:bounceArrow 2s infinite;
         }
         .btn-scroll-down:hover {
-            background: rgba(212, 160, 23, 0.25);
-            border-color: var(--school-gold);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(212, 160, 23, 0.3);
+            background:rgba(212,160,23,0.25);
+            border-color:var(--school-gold);
+            transform:translateY(-3px);
+            box-shadow:0 8px 30px rgba(212,160,23,0.3);
         }
-        .btn-scroll-down .arrow {
-            display: inline-block;
-            animation: arrowDown 1.5s infinite;
-        }
-
+        .btn-scroll-down .arrow { display:inline-block; animation:arrowDown 1.5s infinite; }
         .btn-outline {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 32px;
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(10px);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 14px;
-            border: 2px solid rgba(255,255,255,0.2);
-            transition: all 0.3s ease;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:14px 32px;
+            background:rgba(255,255,255,0.08);
+            backdrop-filter:blur(10px);
+            color:white;
+            text-decoration:none;
+            border-radius:50px;
+            font-weight:600;
+            font-size:14px;
+            border:2px solid rgba(255,255,255,0.2);
+            transition:all 0.3s ease;
         }
         .btn-outline:hover {
-            background: rgba(255,255,255,0.15);
-            border-color: var(--school-gold);
-            transform: translateY(-3px);
+            background:rgba(255,255,255,0.15);
+            border-color:var(--school-gold);
+            transform:translateY(-3px);
         }
-
-        /* ===== VIDEO PLAY BUTTON ===== */
         .hero-video-play {
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 5;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(10px);
-            padding: 8px 20px 8px 8px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            animation: fadeInUp 2s ease forwards;
+            position:absolute;
+            bottom:100px;
+            left:50%;
+            transform:translateX(-50%);
+            z-index:5;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            background:rgba(255,255,255,0.08);
+            backdrop-filter:blur(10px);
+            padding:8px 20px 8px 8px;
+            border-radius:50px;
+            border:1px solid rgba(255,255,255,0.1);
+            cursor:pointer;
+            transition:all 0.3s ease;
+            animation:fadeInUp 2s ease forwards;
         }
         .hero-video-play:hover {
-            background: rgba(212, 160, 23, 0.2);
-            border-color: var(--school-gold);
-            transform: translateX(-50%) scale(1.05);
+            background:rgba(212,160,23,0.2);
+            border-color:var(--school-gold);
+            transform:translateX(-50%) scale(1.05);
         }
         .hero-video-play .play-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--school-gold);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--kenya-black);
-            font-size: 14px;
-            transition: all 0.3s ease;
+            width:36px; height:36px;
+            background:var(--school-gold);
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:var(--kenya-black);
+            font-size:14px;
+            transition:all 0.3s ease;
         }
-        .hero-video-play:hover .play-icon {
-            transform: scale(1.1);
-        }
+        .hero-video-play:hover .play-icon { transform:scale(1.1); }
         .hero-video-play .play-text {
-            font-size: 12px;
-            color: rgba(255,255,255,0.8);
-            font-weight: 500;
-            letter-spacing: 1px;
+            font-size:12px;
+            color:rgba(255,255,255,0.8);
+            font-weight:500;
+            letter-spacing:1px;
         }
-
         .scroll-indicator {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 3;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: rgba(255,255,255,0.3);
-            font-size: 10px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            position:absolute;
+            bottom:20px;
+            left:50%;
+            transform:translateX(-50%);
+            z-index:3;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:4px;
+            color:rgba(255,255,255,0.3);
+            font-size:10px;
+            letter-spacing:2px;
+            text-transform:uppercase;
         }
         .scroll-indicator .mouse {
-            width: 20px;
-            height: 30px;
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
-            position: relative;
-            display: flex;
-            justify-content: center;
+            width:20px; height:30px;
+            border:2px solid rgba(255,255,255,0.2);
+            border-radius:10px;
+            position:relative;
+            display:flex;
+            justify-content:center;
         }
         .scroll-indicator .mouse .dot {
-            width: 3px;
-            height: 6px;
-            background: var(--school-gold);
-            border-radius: 2px;
-            margin-top: 4px;
-            animation: scrollDot 2s ease-in-out infinite;
+            width:3px; height:6px;
+            background:var(--school-gold);
+            border-radius:2px;
+            margin-top:4px;
+            animation:scrollDot 2s ease-in-out infinite;
         }
 
         /* ===== VIDEO MODAL ===== */
         .video-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.92);
-            z-index: 99999;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
+            display:none;
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.92);
+            z-index:99999;
+            align-items:center;
+            justify-content:center;
+            padding:40px;
         }
-        .video-modal.show {
-            display: flex;
-        }
+        .video-modal.show { display:flex; }
         .video-modal .modal-content {
-            max-width: 900px;
-            width: 100%;
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            max-width:900px;
+            width:100%;
+            position:relative;
+            border-radius:16px;
+            overflow:hidden;
+            box-shadow:0 30px 80px rgba(0,0,0,0.5);
         }
-        .video-modal .modal-content video {
-            width: 100%;
-            display: block;
-            border-radius: 16px;
-        }
+        .video-modal .modal-content video { width:100%; display:block; border-radius:16px; }
         .video-modal .close-modal {
-            position: absolute;
-            top: -50px;
-            right: 0;
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            font-size: 24px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            position:absolute;
+            top:-50px;
+            right:0;
+            background:rgba(255,255,255,0.1);
+            border:none;
+            color:white;
+            font-size:24px;
+            width:44px; height:44px;
+            border-radius:50%;
+            cursor:pointer;
+            transition:all 0.3s ease;
+            backdrop-filter:blur(10px);
+            border:1px solid rgba(255,255,255,0.1);
         }
-        .video-modal .close-modal:hover {
-            background: var(--kenya-red);
-            transform: rotate(90deg);
-        }
+        .video-modal .close-modal:hover { background:var(--kenya-red); transform:rotate(90deg); }
         .video-modal .modal-title {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-            background: rgba(0, 0, 0, 0.5);
-            padding: 6px 16px;
-            border-radius: 50px;
-            backdrop-filter: blur(10px);
+            position:absolute;
+            bottom:20px;
+            left:20px;
+            color:white;
+            font-size:14px;
+            font-weight:600;
+            text-shadow:0 2px 20px rgba(0,0,0,0.5);
+            background:rgba(0,0,0,0.5);
+            padding:6px 16px;
+            border-radius:50px;
+            backdrop-filter:blur(10px);
         }
 
-        /* ===== KEYFRAMES ===== */
+        /* ===== ANIMATIONS ===== */
         @keyframes scrollDot {
-            0%, 100% { transform: translateY(0); opacity: 1; }
-            50% { transform: translateY(12px); opacity: 0.3; }
+            0%,100% { transform:translateY(0); opacity:1; }
+            50% { transform:translateY(12px); opacity:0.3; }
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity:0; transform:translateY(30px); }
+            to { opacity:1; transform:translateY(0); }
         }
         @keyframes bounceArrow {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(8px); }
+            0%,100% { transform:translateY(0); }
+            50% { transform:translateY(8px); }
         }
         @keyframes arrowDown {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(5px); }
+            0%,100% { transform:translateY(0); }
+            50% { transform:translateY(5px); }
         }
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
+            0%,100% { transform:translateY(0px); }
+            50% { transform:translateY(-6px); }
         }
         @keyframes slideDownNotice {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from { transform:translateY(-100%); opacity:0; }
+            to { transform:translateY(0); opacity:1; }
         }
         @keyframes pulseBell {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
+            0%,100% { transform:scale(1); }
+            50% { transform:scale(1.15); }
         }
         @keyframes pulseBadge {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%,100% { transform:scale(1); }
+            50% { transform:scale(1.05); }
         }
         @keyframes pulseBadgeRed {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(187, 0, 0, 0.4); }
-            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(187, 0, 0, 0.7); }
+            0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(187,0,0,0.4); }
+            50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(187,0,0,0.7); }
         }
         @keyframes pulseBadgeGreen {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4); }
-            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(0, 102, 0, 0.7); }
+            0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(0,102,0,0.4); }
+            50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(0,102,0,0.7); }
         }
-        /* ===== FIX: ADDED MISSING pulseBadgeBlue KEYFRAME ===== */
-        @keyframes pulseBadgeBlue {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4); }
-            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(23, 162, 184, 0.7); }
-        }
-        /* ========================================================== */
         @keyframes tickerScroll {
-            0%, 20% { transform: translateY(0); }
-            25%, 45% { transform: translateY(-22px); }
-            50%, 70% { transform: translateY(-44px); }
-            75%, 95% { transform: translateY(-66px); }
-            100% { transform: translateY(0); }
+            0%,20% { transform:translateY(0); }
+            25%,45% { transform:translateY(-22px); }
+            50%,70% { transform:translateY(-44px); }
+            75%,95% { transform:translateY(-66px); }
+            100% { transform:translateY(0); }
         }
 
-        /* ========================================
-           SECTION TITLES
-           ======================================== */
+        /* ===== SECTIONS ===== */
         .section-title {
-            font-family: var(--font-primary);
-            font-size: 32px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 5px;
-            color: var(--school-blue-dark);
+            font-family:var(--font-primary);
+            font-size:32px;
+            font-weight:700;
+            text-align:center;
+            margin-bottom:5px;
+            color:var(--school-blue-dark);
         }
-        .section-title .highlight { color: var(--school-gold); }
-        .section-title.light { color: white; }
+        .section-title .highlight { color:var(--school-gold); }
+        .section-title.light { color:white; }
         .section-subtitle {
-            text-align: center;
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 30px;
-            font-weight: 300;
+            text-align:center;
+            font-size:16px;
+            color:#666;
+            margin-bottom:30px;
+            font-weight:300;
         }
-        .section-subtitle.light { color: rgba(255,255,255,0.6); }
+        .section-subtitle.light { color:rgba(255,255,255,0.6); }
 
-        /* ========================================
-           GALLERY SECTION - MOVED AFTER HERO
-           ======================================== */
+        /* ===== GALLERY ===== */
         .gallery-section {
-            padding: 60px 0;
-            background: linear-gradient(135deg, #0A1628, #001F5c);
-            scroll-margin-top: 50px;
+            padding:60px 0;
+            background:linear-gradient(135deg,#0A1628,#001F5c);
+            scroll-margin-top:50px;
         }
-        .gallery-swiper {
-            padding: 15px 0;
-        }
+        .gallery-swiper { padding:15px 0; }
         .gallery-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            height: 100%;
+            background:white;
+            border-radius:16px;
+            overflow:hidden;
+            box-shadow:0 10px 40px rgba(0,0,0,0.2);
+            transition:all 0.3s ease;
+            height:100%;
         }
-        .gallery-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
-        .gallery-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        .gallery-card:hover img {
-            transform: scale(1.05);
-        }
-        .gallery-card .gallery-content {
-            padding: 18px;
-        }
-        .gallery-card .gallery-content h4 {
-            color: var(--school-blue-dark);
-            font-size: 16px;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        .gallery-card .gallery-content p {
-            color: #666;
-            font-size: 13px;
-            line-height: 1.5;
-        }
+        .gallery-card:hover { transform:translateY(-5px); box-shadow:0 20px 50px rgba(0,0,0,0.3); }
+        .gallery-card img { width:100%; height:200px; object-fit:cover; transition:transform 0.5s ease; }
+        .gallery-card:hover img { transform:scale(1.05); }
+        .gallery-card .gallery-content { padding:18px; }
+        .gallery-card .gallery-content h4 { color:var(--school-blue-dark); font-size:16px; margin-bottom:5px; font-weight:700; }
+        .gallery-card .gallery-content p { color:#666; font-size:13px; line-height:1.5; }
         .gallery-card .gallery-content .tag {
-            display: inline-block;
-            padding: 2px 12px;
-            border-radius: 50px;
-            font-size: 9px;
-            font-weight: 700;
-            margin-top: 8px;
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display:inline-block;
+            padding:2px 12px;
+            border-radius:50px;
+            font-size:9px;
+            font-weight:700;
+            margin-top:8px;
+            background:var(--school-gold);
+            color:var(--kenya-black);
+            text-transform:uppercase;
+            letter-spacing:0.5px;
         }
+        .swiper-button-next,.swiper-button-prev {
+            color:var(--school-gold) !important;
+            background:rgba(255,255,255,0.05);
+            backdrop-filter:blur(10px);
+            width:40px !important; height:40px !important;
+            border-radius:50% !important;
+            border:1px solid rgba(255,255,255,0.1);
+            transition:all 0.3s ease;
+        }
+        .swiper-button-next:hover,.swiper-button-prev:hover {
+            background:rgba(212,160,23,0.2);
+            border-color:var(--school-gold);
+        }
+        .swiper-button-next::after,.swiper-button-prev::after { font-size:14px !important; }
+        .swiper-pagination-bullet { background:rgba(255,255,255,0.2) !important; width:8px !important; height:8px !important; }
+        .swiper-pagination-bullet-active { background:var(--school-gold) !important; }
 
-        .swiper-button-next,
-        .swiper-button-prev {
-            color: var(--school-gold) !important;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            width: 40px !important;
-            height: 40px !important;
-            border-radius: 50% !important;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-        .swiper-button-next:hover,
-        .swiper-button-prev:hover {
-            background: rgba(212, 160, 23, 0.2);
-            border-color: var(--school-gold);
-        }
-        .swiper-button-next::after,
-        .swiper-button-prev::after {
-            font-size: 14px !important;
-        }
-        .swiper-pagination-bullet {
-            background: rgba(255,255,255,0.2) !important;
-            width: 8px !important;
-            height: 8px !important;
-        }
-        .swiper-pagination-bullet-active {
-            background: var(--school-gold) !important;
-        }
-
-        /* ========================================
-           CONTENT CARDS
-           ======================================== */
+        /* ===== CONTENT CARDS ===== */
         .content-cards-section {
-            padding: 50px 0;
-            background: #f0f2f5;
-            scroll-margin-top: 50px;
+            padding:50px 0;
+            background:#f0f2f5;
+            scroll-margin-top:50px;
         }
         .content-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
+            gap:25px;
         }
         .content-card {
-            background: white;
-            padding: 28px 20px;
-            border-radius: 18px;
-            text-align: center;
-            transition: all 0.4s ease;
-            border: 2px solid #e8ecf1;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
+            background:white;
+            padding:28px 20px;
+            border-radius:18px;
+            text-align:center;
+            transition:all 0.4s ease;
+            border:2px solid #e8ecf1;
+            box-shadow:0 4px 20px rgba(0,0,0,0.04);
+            text-decoration:none;
+            color:inherit;
+            display:block;
+            cursor:pointer;
+            position:relative;
+            overflow:hidden;
         }
         .content-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--school-gold), var(--school-gold-light), var(--school-gold-dark));
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            content:'';
+            position:absolute;
+            top:0; left:0; right:0;
+            height:4px;
+            background:linear-gradient(90deg, var(--school-gold), var(--school-gold-light), var(--school-gold-dark));
+            opacity:0;
+            transition:opacity 0.4s ease;
         }
-        .content-card:hover::before {
-            opacity: 1;
-        }
+        .content-card:hover::before { opacity:1; }
         .content-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--school-gold);
-            box-shadow: 0 16px 50px rgba(212, 160, 23, 0.15);
+            transform:translateY(-8px);
+            border-color:var(--school-gold);
+            box-shadow:0 16px 50px rgba(212,160,23,0.15);
         }
         .content-card .icon {
-            font-size: 40px;
-            display: block;
-            margin-bottom: 10px;
-            background: rgba(212, 160, 23, 0.08);
-            width: 65px;
-            height: 65px;
-            line-height: 65px;
-            border-radius: 50%;
-            margin-left: auto;
-            margin-right: auto;
-            transition: all 0.4s ease;
+            font-size:40px;
+            display:block;
+            margin-bottom:10px;
+            background:rgba(212,160,23,0.08);
+            width:65px; height:65px;
+            line-height:65px;
+            border-radius:50%;
+            margin-left:auto;
+            margin-right:auto;
+            transition:all 0.4s ease;
         }
         .content-card:hover .icon {
-            background: var(--school-gold);
-            transform: scale(1.1) rotate(-5deg);
+            background:var(--school-gold);
+            transform:scale(1.1) rotate(-5deg);
         }
-        .content-card h3 {
-            color: var(--school-blue-dark);
-            font-size: 17px;
-            margin-bottom: 6px;
-            font-weight: 700;
-        }
-        .content-card p {
-            color: #666;
-            font-size: 13px;
-            line-height: 1.6;
-        }
+        .content-card h3 { color:var(--school-blue-dark); font-size:17px; margin-bottom:6px; font-weight:700; }
+        .content-card p { color:#666; font-size:13px; line-height:1.6; }
         .content-card .badge {
-            display: inline-block;
-            padding: 3px 14px;
-            border-radius: 50px;
-            font-size: 9px;
-            font-weight: 700;
-            margin-top: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display:inline-block;
+            padding:3px 14px;
+            border-radius:50px;
+            font-size:9px;
+            font-weight:700;
+            margin-top:10px;
+            text-transform:uppercase;
+            letter-spacing:0.5px;
         }
         .card-cta {
-            margin-top: 10px;
-            padding: 6px 18px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 11px;
-            display: inline-block;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(212, 160, 23, 0.25);
+            margin-top:10px;
+            padding:6px 18px;
+            border-radius:50px;
+            font-weight:700;
+            font-size:11px;
+            display:inline-block;
+            transition:all 0.3s ease;
+            box-shadow:0 4px 15px rgba(212,160,23,0.25);
         }
-        .content-card:hover .card-cta {
-            transform: scale(1.05);
-        }
+        .content-card:hover .card-cta { transform:scale(1.05); }
+        .card-academics { border-color:var(--school-gold) !important; background:linear-gradient(135deg,#ffffff,#fff8e7) !important; }
+        .card-academics .badge { background:var(--kenya-red); color:white; animation:pulseBadgeRed 1.5s infinite; }
+        .card-academics .card-cta { background:linear-gradient(135deg,var(--school-gold),var(--school-gold-dark)); color:var(--kenya-black); }
+        .card-admissions { border-color:var(--kenya-green) !important; background:linear-gradient(135deg,#ffffff,#f0fff4) !important; }
+        .card-admissions .badge { background:var(--kenya-green); color:white; animation:pulseBadgeGreen 1.8s infinite; }
+        .card-admissions .card-cta { background:linear-gradient(135deg,var(--kenya-green),#004d00); color:white; }
+        .card-facilities { border-color:#17a2b8 !important; background:linear-gradient(135deg,#ffffff,#f0faff) !important; }
+        .card-facilities .badge { background:#17a2b8; color:white; }
+        .card-facilities .card-cta { background:linear-gradient(135deg,#17a2b8,#0d6e7a); color:white; }
+        .card-performance { border-color:#6f42c1 !important; background:linear-gradient(135deg,#ffffff,#f8f0ff) !important; }
+        .card-performance .badge { background:#6f42c1; color:white; }
+        .card-performance .card-cta { background:linear-gradient(135deg,#6f42c1,#4a2a8a); color:white; }
+        .card-parents { border-color:#fd7e14 !important; background:linear-gradient(135deg,#ffffff,#fff5eb) !important; }
+        .card-parents .badge { background:#fd7e14; color:white; }
+        .card-parents .card-cta { background:linear-gradient(135deg,#fd7e14,#c96a0a); color:white; }
+        .card-downloads { border-color:#20c997 !important; background:linear-gradient(135deg,#ffffff,#f0fff8) !important; }
+        .card-downloads .badge { background:#20c997; color:white; }
+        .card-downloads .card-cta { background:linear-gradient(135deg,#20c997,#128f6e); color:white; }
+        .card-fees { border-color:#dc3545 !important; background:linear-gradient(135deg,#ffffff,#fff0f0) !important; }
+        .card-fees .badge { background:#dc3545; color:white; animation:pulseBadgeRed 2.2s infinite; }
+        .card-fees .card-cta { background:linear-gradient(135deg,#dc3545,#a71d2a); color:white; }
+        .card-student-portal { border-color:#6f42c1 !important; background:linear-gradient(135deg,#ffffff,#f5f0ff) !important; }
+        .card-student-portal .badge { background:#6f42c1; color:white; animation:pulseStudentPortal 2s infinite; }
+        .card-student-portal .card-cta { background:linear-gradient(135deg,#6f42c1,#4a2a8a); color:white; }
+        .card-student-portal .icon { background:rgba(111,66,193,0.08); }
+        .card-student-portal:hover .icon { background:#6f42c1; }
 
-        /* Card variants */
-        .card-academics {
-            border-color: var(--school-gold) !important;
-            background: linear-gradient(135deg, #ffffff, #fff8e7) !important;
-        }
-        .card-academics .badge {
-            background: var(--kenya-red);
-            color: white;
-            animation: pulseBadgeRed 1.5s infinite;
-        }
-        .card-academics .card-cta {
-            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
-            color: var(--kenya-black);
-        }
-        .card-admissions {
-            border-color: var(--kenya-green) !important;
-            background: linear-gradient(135deg, #ffffff, #f0fff4) !important;
-        }
-        .card-admissions .badge {
-            background: var(--kenya-green);
-            color: white;
-            animation: pulseBadgeGreen 1.8s infinite;
-        }
-        .card-admissions .card-cta {
-            background: linear-gradient(135deg, var(--kenya-green), #004d00);
-            color: white;
-        }
-        .card-facilities {
-            border-color: #17a2b8 !important;
-            background: linear-gradient(135deg, #ffffff, #f0faff) !important;
-        }
-        .card-facilities .badge {
-            background: #17a2b8;
-            color: white;
-            animation: pulseBadgeBlue 2s infinite;
-        }
-        .card-facilities .card-cta {
-            background: linear-gradient(135deg, #17a2b8, #0d6e7a);
-            color: white;
-        }
-        .card-performance {
-            border-color: #6f42c1 !important;
-            background: linear-gradient(135deg, #ffffff, #f8f0ff) !important;
-        }
-        .card-performance .badge {
-            background: #6f42c1;
-            color: white;
-        }
-        .card-performance .card-cta {
-            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
-            color: white;
-        }
-        .card-parents {
-            border-color: #fd7e14 !important;
-            background: linear-gradient(135deg, #ffffff, #fff5eb) !important;
-        }
-        .card-parents .badge {
-            background: #fd7e14;
-            color: white;
-        }
-        .card-parents .card-cta {
-            background: linear-gradient(135deg, #fd7e14, #c96a0a);
-            color: white;
-        }
-        .card-downloads {
-            border-color: #20c997 !important;
-            background: linear-gradient(135deg, #ffffff, #f0fff8) !important;
-        }
-        .card-downloads .badge {
-            background: #20c997;
-            color: white;
-        }
-        .card-downloads .card-cta {
-            background: linear-gradient(135deg, #20c997, #128f6e);
-            color: white;
-        }
-        .card-fees {
-            border-color: #dc3545 !important;
-            background: linear-gradient(135deg, #ffffff, #fff0f0) !important;
-        }
-        .card-fees .badge {
-            background: #dc3545;
-            color: white;
-            animation: pulseBadgeRed 2.2s infinite;
-        }
-        .card-fees .card-cta {
-            background: linear-gradient(135deg, #dc3545, #a71d2a);
-            color: white;
-        }
-
-        /* Student Portal Card */
-        .card-student-portal {
-            border-color: #6f42c1 !important;
-            background: linear-gradient(135deg, #ffffff, #f5f0ff) !important;
-        }
-        .card-student-portal .badge {
-            background: #6f42c1;
-            color: white;
-            animation: pulseStudentPortal 2s infinite;
-        }
-        .card-student-portal .card-cta {
-            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
-            color: white;
-        }
-        .card-student-portal .icon {
-            background: rgba(111, 66, 193, 0.08);
-        }
-        .card-student-portal:hover .icon {
-            background: #6f42c1;
-        }
-
-        /* ========================================
-           FEATURES
-           ======================================== */
+        /* ===== FEATURES ===== */
         .features-section {
-            padding: 50px 0;
-            background: linear-gradient(135deg, #000000, #1a0000, #0a1628);
-            position: relative;
-            overflow: hidden;
-            scroll-margin-top: 50px;
+            padding:50px 0;
+            background:linear-gradient(135deg,#000000,#1a0000,#0a1628);
+            position:relative;
+            overflow:hidden;
+            scroll-margin-top:50px;
         }
         .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            position: relative;
-            z-index: 1;
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+            gap:20px;
+            position:relative;
+            z-index:1;
         }
         .feature-item {
-            text-align: center;
-            padding: 25px 15px;
-            background: rgba(255,255,255,0.04);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.06);
-            transition: all 0.3s ease;
+            text-align:center;
+            padding:25px 15px;
+            background:rgba(255,255,255,0.04);
+            backdrop-filter:blur(10px);
+            border-radius:16px;
+            border:1px solid rgba(255,255,255,0.06);
+            transition:all 0.3s ease;
         }
         .feature-item:hover {
-            transform: translateY(-4px);
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(212, 160, 23, 0.15);
+            transform:translateY(-4px);
+            background:rgba(255,255,255,0.08);
+            border-color:rgba(212,160,23,0.15);
         }
-        .feature-item .icon { font-size: 36px; display: block; margin-bottom: 10px; }
-        .feature-item h4 {
-            color: white;
-            font-size: 16px;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-        .feature-item p {
-            color: rgba(255,255,255,0.5);
-            font-size: 13px;
-            line-height: 1.5;
-        }
+        .feature-item .icon { font-size:36px; display:block; margin-bottom:10px; }
+        .feature-item h4 { color:white; font-size:16px; margin-bottom:6px; font-weight:600; }
+        .feature-item p { color:rgba(255,255,255,0.5); font-size:13px; line-height:1.5; }
         .read-more-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 8px;
-            padding: 4px 16px;
-            background: transparent;
-            color: var(--school-gold);
-            border: 2px solid var(--school-gold);
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 11px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            margin-top:8px;
+            padding:4px 16px;
+            background:transparent;
+            color:var(--school-gold);
+            border:2px solid var(--school-gold);
+            border-radius:50px;
+            font-weight:600;
+            font-size:11px;
+            text-decoration:none;
+            transition:all 0.3s ease;
+            cursor:pointer;
         }
         .read-more-btn:hover {
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            transform: translateX(4px);
+            background:var(--school-gold);
+            color:var(--kenya-black);
+            transform:translateX(4px);
         }
-        .read-more-btn i {
-            font-size: 10px;
-            transition: transform 0.3s ease;
-        }
-        .read-more-btn:hover i {
-            transform: translateX(3px);
-        }
+        .read-more-btn i { font-size:10px; transition:transform 0.3s ease; }
+        .read-more-btn:hover i { transform:translateX(3px); }
 
-        /* ========================================
-           STATS
-           ======================================== */
+        /* ===== STATS ===== */
         .stats-section {
-            padding: 50px 0;
-            background: linear-gradient(135deg, var(--kenya-black), var(--school-blue-dark));
-            position: relative;
-            overflow: hidden;
-            scroll-margin-top: 50px;
+            padding:50px 0;
+            background:linear-gradient(135deg,var(--kenya-black),var(--school-blue-dark));
+            position:relative;
+            overflow:hidden;
+            scroll-margin-top:50px;
         }
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+            gap:20px;
+            text-align:center;
+            position:relative;
+            z-index:1;
         }
         .stat-item {
-            padding: 20px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.3s ease;
+            padding:20px;
+            background:rgba(255,255,255,0.03);
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,0.05);
+            transition:all 0.3s ease;
         }
-        .stat-item:hover {
-            background: rgba(255,255,255,0.06);
-            transform: scale(1.02);
-        }
+        .stat-item:hover { background:rgba(255,255,255,0.06); transform:scale(1.02); }
         .stat-item h3 {
-            font-family: var(--font-primary);
-            font-size: 34px;
-            color: var(--school-gold);
-            margin-bottom: 3px;
-            font-weight: 700;
+            font-family:var(--font-primary);
+            font-size:34px;
+            color:var(--school-gold);
+            margin-bottom:3px;
+            font-weight:700;
         }
-        .stat-item p {
-            font-size: 13px;
-            opacity: 0.6;
-            color: white;
-            font-weight: 300;
-            letter-spacing: 1px;
-        }
+        .stat-item p { font-size:13px; opacity:0.6; color:white; font-weight:300; letter-spacing:1px; }
 
-        /* ========================================
-           NEWS
-           ======================================== */
+        /* ===== NEWS SECTION (enlarged) ===== */
         .news-section {
-            padding: 50px 0;
-            background: #f0f2f5;
-            scroll-margin-top: 50px;
+            padding:60px 0 80px;
+            background:#f0f2f5;
+            scroll-margin-top:50px;
         }
         .news-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(340px,1fr));
+            gap:30px;
         }
         .news-item {
-            background: white;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            border-left: 4px solid var(--school-gold);
-            transition: all 0.3s ease;
+            background:white;
+            padding:30px 28px;
+            border-radius:20px;
+            box-shadow:0 6px 30px rgba(0,0,0,0.05);
+            border-left:6px solid var(--school-gold);
+            transition:all 0.3s ease;
         }
         .news-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+            transform:translateY(-6px);
+            box-shadow:0 16px 50px rgba(0,0,0,0.08);
         }
-        .news-item h4 {
-            color: var(--school-blue-dark);
-            font-size: 18px;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-        .news-item p {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .news-item .date {
-            font-size: 12px;
-            color: #999;
-            margin-top: 10px;
-            display: block;
-        }
+        .news-item h4 { color:var(--school-blue-dark); font-size:20px; margin-bottom:10px; font-weight:700; }
+        .news-item p { color:#444; font-size:15px; line-height:1.7; }
+        .news-item .date { font-size:13px; color:#999; margin-top:12px; display:block; }
 
-        /* ========================================
-           FOOTER
-           ======================================== */
+        /* ===== FOOTER ===== */
         .main-footer {
-            background: var(--kenya-black);
-            color: white;
-            padding: 25px 0 12px;
-            position: relative;
+            background:var(--kenya-black);
+            color:white;
+            padding:25px 0 12px;
+            position:relative;
         }
         .main-footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--kenya-black), var(--kenya-red), var(--kenya-green), var(--kenya-black));
+            content:'';
+            position:absolute;
+            top:0; left:0; right:0;
+            height:3px;
+            background:linear-gradient(90deg, var(--kenya-black), var(--kenya-red), var(--kenya-green), var(--kenya-black));
         }
         .main-footer .footer-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display:grid;
+            grid-template-columns:2fr 1fr 1fr;
+            gap:25px;
+            padding-bottom:15px;
+            border-bottom:1px solid rgba(255,255,255,0.05);
         }
         .main-footer .footer-info h3 {
-            font-family: var(--font-primary);
-            font-size: 18px;
-            margin-bottom: 6px;
-            color: var(--school-gold);
+            font-family:var(--font-primary);
+            font-size:18px;
+            margin-bottom:6px;
+            color:var(--school-gold);
         }
-        .main-footer .footer-info p {
-            color: rgba(255,255,255,0.4);
-            line-height: 1.6;
-            font-size: 12px;
-        }
+        .main-footer .footer-info p { color:rgba(255,255,255,0.4); line-height:1.6; font-size:12px; }
         .main-footer .footer-info .ministry-badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.04);
-            padding: 4px 14px;
-            border-radius: 6px;
-            margin-top: 8px;
-            font-size: 10px;
-            color: rgba(255,255,255,0.35);
-            border: 1px solid rgba(255,255,255,0.04);
+            display:inline-block;
+            background:rgba(255,255,255,0.04);
+            padding:4px 14px;
+            border-radius:6px;
+            margin-top:8px;
+            font-size:10px;
+            color:rgba(255,255,255,0.35);
+            border:1px solid rgba(255,255,255,0.04);
         }
-        .main-footer .footer-info .ministry-badge i {
-            color: var(--school-gold);
-            margin-right: 6px;
-        }
-        .main-footer .footer-links h4 {
-            color: white;
-            font-size: 13px;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        .main-footer .footer-links {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .main-footer .footer-links a {
-            color: rgba(255,255,255,0.3);
-            text-decoration: none;
-            font-size: 12px;
-            transition: all 0.3s ease;
-        }
-        .main-footer .footer-links a:hover {
-            color: var(--school-gold);
-            padding-left: 4px;
-        }
-        .main-footer .footer-bottom {
-            text-align: center;
-            padding-top: 12px;
-            color: rgba(255,255,255,0.2);
-            font-size: 11px;
-        }
-        .main-footer .footer-social {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
+        .main-footer .footer-info .ministry-badge i { color:var(--school-gold); margin-right:6px; }
+        .main-footer .footer-links h4 { color:white; font-size:13px; margin-bottom:8px; font-weight:600; }
+        .main-footer .footer-links { display:flex; flex-direction:column; gap:4px; }
+        .main-footer .footer-links a { color:rgba(255,255,255,0.3); text-decoration:none; font-size:12px; transition:all 0.3s ease; }
+        .main-footer .footer-links a:hover { color:var(--school-gold); padding-left:4px; }
+        .main-footer .footer-bottom { text-align:center; padding-top:12px; color:rgba(255,255,255,0.2); font-size:11px; }
+        .main-footer .footer-social { display:flex; gap:8px; margin-top:8px; }
         .main-footer .footer-social a {
-            color: rgba(255,255,255,0.25);
-            font-size: 14px;
-            transition: all 0.3s ease;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.04);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
+            color:rgba(255,255,255,0.25);
+            font-size:14px;
+            transition:all 0.3s ease;
+            width:30px; height:30px;
+            border-radius:50%;
+            border:1px solid rgba(255,255,255,0.04);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-decoration:none;
         }
-        .main-footer .footer-social a:hover {
-            color: var(--school-gold);
-            border-color: var(--school-gold);
-            transform: translateY(-2px);
+        .main-footer .footer-social a:hover { color:var(--school-gold); border-color:var(--school-gold); transform:translateY(-2px); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width:768px) {
+            .main-header .nav-links { display:none; flex-direction:column; width:100%; padding:15px 0; gap:5px; }
+            .main-header .nav-links.show { display:flex; }
+            .main-header .mobile-menu-btn { display:block; }
+            .main-header .nav-links a.student-portal-link { font-size:14px; padding:10px 20px; width:100%; justify-content:center; }
+            .top-nav-bar .container { flex-direction:column; align-items:stretch; gap:8px; }
+            .top-nav-bar .nav-left { justify-content:center; }
+            .top-nav-bar .nav-links { justify-content:center; }
+            .top-nav-bar .nav-right { justify-content:center; }
+            .top-nav-bar .nav-links a { font-size:11px; padding:4px 12px; }
+            .hero-section { padding:40px 0; margin-top:70px; }
+            .hero-section h1 { font-size:32px; }
+            .hero-section p { font-size:16px; }
+            .hero-section .btn-group { flex-direction:column; align-items:center; }
+            .btn-scroll-down,.btn-outline { width:100%; justify-content:center; }
+            body { padding-top:100px; }
+            .section-tabs { top:55px; padding:6px 0; }
+            .notice-alert-bar { top:100px; }
+            .news-ticker-section { top:100px; }
+            .section-title { font-size:26px; }
+            .content-grid { grid-template-columns:1fr 1fr; }
+            .features-grid { grid-template-columns:1fr 1fr; }
+            .stats-grid { grid-template-columns:1fr 1fr; }
+            .news-grid { grid-template-columns:1fr; }
+            .main-footer .footer-content { grid-template-columns:1fr; gap:15px; }
+            .notice-alert-bar .container { flex-direction:column; text-align:center; }
+            .gallery-card img { height:160px; }
+            .main-header .logo-section h1 { font-size:16px; }
+            .main-header .school-icon { font-size:24px; }
+            .news-ticker-section .ticker-label { font-size:8px; padding:2px 10px; }
+            .news-ticker-section .ticker-content .ticker-item { font-size:11px; white-space:normal; }
+            .video-modal { padding:20px; }
+            .video-modal .close-modal { top:-40px; font-size:20px; width:36px; height:36px; }
+            .hero-video-play { bottom:70px; padding:6px 14px 6px 6px; }
+            .hero-video-play .play-icon { width:30px; height:30px; font-size:12px; }
+            .hero-video-play .play-text { font-size:10px; }
+            .splash-card { padding:30px 18px; }
+            .splash-card .school-icon-big { font-size:48px; }
+            .splash-card h1 { font-size:22px; }
         }
-
-        /* ========================================
-           RESPONSIVE
-           ======================================== */
-        @media (max-width: 768px) {
-            .main-header .nav-links {
-                display: none;
-                flex-direction: column;
-                width: 100%;
-                padding: 15px 0;
-                gap: 5px;
-            }
-            .main-header .nav-links.show { display: flex; }
-            .main-header .mobile-menu-btn { display: block; }
-
-            .top-nav-bar .container {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-            .top-nav-bar .nav-left {
-                justify-content: center;
-            }
-            .top-nav-bar .nav-links {
-                justify-content: center;
-            }
-            .top-nav-bar .nav-right {
-                justify-content: center;
-            }
-            .top-nav-bar .nav-links a {
-                font-size: 11px;
-                padding: 4px 12px;
-            }
-
-            .hero-section { padding: 40px 0; margin-top: 70px; }
-            .hero-section h1 { font-size: 32px; }
-            .hero-section p { font-size: 16px; }
-            .hero-section .btn-group { flex-direction: column; align-items: center; }
-            .btn-scroll-down, .btn-outline { width: 100%; justify-content: center; }
-
-            body { padding-top: 100px; }
-            .section-tabs { top: 55px; padding: 6px 0; }
-            .notice-alert-bar { top: 100px; }
-            .news-ticker-section { top: 100px; }
-
-            .section-title { font-size: 26px; }
-            .content-grid { grid-template-columns: 1fr 1fr; }
-            .features-grid { grid-template-columns: 1fr 1fr; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .news-grid { grid-template-columns: 1fr; }
-
-            .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
-            .notice-alert-bar .container { flex-direction: column; text-align: center; }
-            .gallery-card img { height: 160px; }
-            .main-header .logo-section h1 { font-size: 16px; }
-            .main-header .school-icon { font-size: 24px; }
-
-            .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
-            .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
-
-            .video-modal { padding: 20px; }
-            .video-modal .close-modal { top: -40px; font-size: 20px; width: 36px; height: 36px; }
-
-            .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
-            .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
-            .hero-video-play .play-text { font-size: 10px; }
-        }
-
-        @media (max-width: 480px) {
-            .content-grid { grid-template-columns: 1fr; }
-            .features-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .hero-section h1 { font-size: 26px; }
-            .section-title { font-size: 22px; }
-            .section-tabs .tab-btn { font-size: 8px; padding: 3px 8px; }
-            .section-tabs .tab-btn .tab-icon { font-size: 10px; }
-            .main-header .logo-section h1 { font-size: 14px; }
-            .main-header .school-icon { font-size: 20px; }
-            body { padding-top: 90px; }
-            .section-tabs { top: 48px; padding: 4px 0; }
-            .notice-alert-bar { top: 90px; }
-            .news-ticker-section { top: 90px; }
-            .hero-section { margin-top: 60px; }
-            .hero-video-play { bottom: 60px; }
-            .top-nav-bar .nav-links a {
-                font-size: 10px;
-                padding: 3px 10px;
-            }
-            .top-nav-bar .nav-links a i {
-                font-size: 11px;
-            }
+        @media (max-width:480px) {
+            .content-grid { grid-template-columns:1fr; }
+            .features-grid { grid-template-columns:1fr; }
+            .stats-grid { grid-template-columns:1fr 1fr; }
+            .hero-section h1 { font-size:26px; }
+            .section-title { font-size:22px; }
+            .section-tabs .tab-btn { font-size:8px; padding:3px 8px; }
+            .section-tabs .tab-btn .tab-icon { font-size:10px; }
+            .main-header .logo-section h1 { font-size:14px; }
+            .main-header .school-icon { font-size:20px; }
+            body { padding-top:90px; }
+            .section-tabs { top:48px; padding:4px 0; }
+            .notice-alert-bar { top:90px; }
+            .news-ticker-section { top:90px; }
+            .hero-section { margin-top:60px; }
+            .hero-video-play { bottom:60px; }
+            .top-nav-bar .nav-links a { font-size:10px; padding:3px 10px; }
+            .top-nav-bar .nav-links a i { font-size:11px; }
         }
     </style>
 </head>
 <body>
 
     <!-- ======================================== -->
-    <!-- HEADER - FIXED AT TOP -->
+    <!-- SPLASH SCREEN (News for parents/teachers/students) -->
+    <!-- ======================================== -->
+    <div id="splash-screen">
+        <div class="splash-card">
+            <span class="school-icon-big">🏫</span>
+            <h1>Changara Star Academy</h1>
+            <div class="sub">ASSURANCE TO EXCELLENCE</div>
+            <div class="divider"></div>
+
+            <!-- Splash News Area (enlarged) -->
+            <div class="splash-news">
+                <div class="label">
+                    <i class="fas fa-newspaper"></i> LATEST NEWS
+                    <span class="badge">📢 ALERT</span>
+                </div>
+                <div class="headline" id="splashHeadline">
+                    🎉 School opens Term 3 on 1st September 2026
+                </div>
+                <div class="meta" id="splashMeta">
+                    📅 Posted: 25 August 2026 • 🕒 8:00 AM
+                </div>
+                <div style="margin-top:10px; font-size:13px; color:rgba(255,255,255,0.5); border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">
+                    <i class="fas fa-arrow-right" style="color:var(--school-gold);"></i>
+                    <span id="splashSub">Parents' Meeting on 20th September • Sports Day 15th September</span>
+                </div>
+            </div>
+
+            <!-- Loader -->
+            <div class="splash-loader">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div style="font-size:10px; color:rgba(255,255,255,0.2); margin-top:6px;">Loading experience …</div>
+        </div>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- HEADER -->
     <!-- ======================================== -->
     <header class="main-header">
         <div class="kenya-flag-strip"></div>
@@ -1587,6 +1344,7 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
+                <!-- ENLARGED STUDENT PORTAL BUTTON -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
@@ -1602,15 +1360,10 @@
     <!-- ======================================== -->
     <div class="notice-alert-bar" id="noticeAlertBar">
         <div class="container">
-            <div class="notice-icon">
-                <span class="bell">🔔</span>
-                <span style="font-weight:700;font-size:11px;">ALERT</span>
-            </div>
+            <div class="notice-icon"><span class="bell">🔔</span><span style="font-weight:700;font-size:11px;">ALERT</span></div>
             <div class="notice-content">
                 <span class="badge">⚠️ STAFF NOTICE</span>
-                <span class="message" id="noticeMessage">
-                    <strong>📢 Important:</strong> Staff meeting on Friday at 4:00 PM in the staff room.
-                </span>
+                <span class="message" id="noticeMessage"><strong>📢 Important:</strong> Staff meeting on Friday at 4:00 PM in the staff room.</span>
             </div>
             <button class="notice-close" onclick="closeNotice()">✕</button>
         </div>
@@ -1621,111 +1374,60 @@
     <!-- ======================================== -->
     <div class="news-ticker-section" id="newsTicker">
         <div class="container">
-            <div class="ticker-label">
-                <span class="icon">📰</span> News
-            </div>
+            <div class="ticker-label"><span class="icon">📰</span> News</div>
             <div class="ticker-wrapper">
                 <div class="ticker-content" id="tickerContent">
-                    <div class="ticker-item">
-                        <span class="tag">🎉 NEW</span>
-                        School opens Term 3 on 1st September 2026
-                    </div>
-                    <div class="ticker-item">
-                        <span class="tag">🏆 EVENT</span>
-                        Sports Day on 15th September 2026
-                    </div>
-                    <div class="ticker-item">
-                        <span class="tag">📚 MEETING</span>
-                        Parents' Meeting on 20th September 2026
-                    </div>
-                    <div class="ticker-item">
-                        <span class="tag">📢 ANNOUNCEMENT</span>
-                        New computer lab now open!
-                    </div>
+                    <div class="ticker-item"><span class="tag">🎉 NEW</span> School opens Term 3 on 1st September 2026</div>
+                    <div class="ticker-item"><span class="tag">🏆 EVENT</span> Sports Day on 15th September 2026</div>
+                    <div class="ticker-item"><span class="tag">📚 MEETING</span> Parents' Meeting on 20th September 2026</div>
+                    <div class="ticker-item"><span class="tag">📢 ANNOUNCEMENT</span> New computer lab now open!</div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ======================================== -->
-    <!-- TOP NAVIGATION BAR (ABOVE HERO) -->
+    <!-- TOP NAV BAR -->
     <!-- ======================================== -->
     <div class="top-nav-bar">
         <div class="container">
             <div class="nav-left">
-                <span class="welcome-text">
-                    <i class="fas fa-graduation-cap"></i> Welcome to Changara Star Academy
-                </span>
+                <span class="welcome-text"><i class="fas fa-graduation-cap"></i> Welcome to Changara Star Academy</span>
             </div>
             <div class="nav-links">
-                <a href="index.html" class="active">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <a href="student-portal.html">
-                    <i class="fas fa-user-graduate"></i> Student Portal
-                    <span class="badge-green">NEW</span>
-                </a>
-                <a href="fees.html">
-                    <i class="fas fa-coins"></i> Fees
-                    <span class="badge">VIEW</span>
-                </a>
-                <a href="about.html">
-                    <i class="fas fa-info-circle"></i> About
-                </a>
-                <a href="contact.html">
-                    <i class="fas fa-phone"></i> Contact
-                </a>
-                <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;">
-                    <i class="fas fa-user-lock"></i> Admin
-                </a>
+                <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+                <a href="student-portal.html"><i class="fas fa-user-graduate"></i> Student Portal <span class="badge-green">NEW</span></a>
+                <a href="fees.html"><i class="fas fa-coins"></i> Fees <span class="badge">VIEW</span></a>
+                <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
+                <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
+                <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;"><i class="fas fa-user-lock"></i> Admin</a>
             </div>
             <div class="nav-right">
-                <a href="student-portal.html" class="quick-link" style="color:var(--school-gold);font-weight:600;">
-                    <i class="fas fa-user-graduate"></i> Student Portal
-                </a>
+                <a href="student-portal.html" class="quick-link" style="color:var(--school-gold);font-weight:600;"><i class="fas fa-user-graduate"></i> Student Portal</a>
             </div>
         </div>
     </div>
 
     <!-- ======================================== -->
-    <!-- SECTION NAVIGATION TABS -->
+    <!-- SECTION TABS -->
     <!-- ======================================== -->
     <div class="section-tabs" id="sectionTabs">
         <div class="container">
-            <button class="tab-btn active" onclick="scrollToSection('slide-academics')">
-                <span class="tab-icon">📚</span> Academics
-                <span class="tab-badge">🔥</span>
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-admissions')">
-                <span class="tab-icon">📝</span> Admissions
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-facilities')">
-                <span class="tab-icon">🏫</span> Facilities
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-performance')">
-                <span class="tab-icon">🏆</span> Performance
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-parents')">
-                <span class="tab-icon">👨‍👩‍👧‍👦</span> Parents
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-downloads')">
-                <span class="tab-icon">📥</span> Downloads
-            </button>
-            <button class="tab-btn" onclick="scrollToSection('slide-fees')">
-                <span class="tab-icon">💰</span> Fees
-            </button>
-            <button class="tab-btn" onclick="window.location.href='student-portal.html'">
-                <span class="tab-icon">🎓</span> Student Portal
-                <span class="tab-badge">NEW</span>
-            </button>
+            <button class="tab-btn active" onclick="scrollToSection('slide-academics')"><span class="tab-icon">📚</span> Academics <span class="tab-badge">🔥</span></button>
+            <button class="tab-btn" onclick="scrollToSection('slide-admissions')"><span class="tab-icon">📝</span> Admissions</button>
+            <button class="tab-btn" onclick="scrollToSection('slide-facilities')"><span class="tab-icon">🏫</span> Facilities</button>
+            <button class="tab-btn" onclick="scrollToSection('slide-performance')"><span class="tab-icon">🏆</span> Performance</button>
+            <button class="tab-btn" onclick="scrollToSection('slide-parents')"><span class="tab-icon">👨‍👩‍👧‍👦</span> Parents</button>
+            <button class="tab-btn" onclick="scrollToSection('slide-downloads')"><span class="tab-icon">📥</span> Downloads</button>
+            <button class="tab-btn" onclick="scrollToSection('slide-fees')"><span class="tab-icon">💰</span> Fees</button>
+            <button class="tab-btn" onclick="window.location.href='student-portal.html'"><span class="tab-icon">🎓</span> Student Portal <span class="tab-badge">NEW</span></button>
         </div>
     </div>
 
     <!-- ======================================== -->
-    <!-- HERO SECTION WITH VIDEO BACKGROUND -->
+    <!-- HERO -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
-        <!-- Video Background -->
         <div class="hero-video-bg">
             <video id="heroVideo" autoplay muted loop playsinline poster="/images/school-compound.jpg">
                 <source src="/videos/school-hero.mp4" type="video/mp4">
@@ -1733,45 +1435,24 @@
             <div class="video-overlay"></div>
             <div class="video-overlay-kenya"></div>
         </div>
-
         <div class="hero-bg-pattern"></div>
-
-        <!-- Video Play Button -->
         <div class="hero-video-play" onclick="openVideoModal()">
             <div class="play-icon"><i class="fas fa-play"></i></div>
             <span class="play-text">▶ Watch Our Story</span>
         </div>
-
         <div class="hero-content">
             <div class="hero-flag-badge">
-                <div class="flag-strip">
-                    <span class="b"></span><span class="r"></span>
-                    <span class="g"></span><span class="w"></span>
-                </div>
+                <div class="flag-strip"><span class="b"></span><span class="r"></span><span class="g"></span><span class="w"></span></div>
                 <span class="flag-text">🇰🇪 Proudly Kenyan</span>
             </div>
-            <h1 id="heroTitle">
-                Welcome to <br><span class="highlight">Changara Star Academy</span>
-            </h1>
-            <p id="heroSubtitle">
-                Nurturing young minds through quality education, discipline, innovation, and strong moral values.
-                We provide a safe and supportive learning environment where every child is encouraged to discover
-                their potential and achieve academic excellence.
-            </p>
+            <h1 id="heroTitle">Welcome to <br><span class="highlight">Changara Star Academy</span></h1>
+            <p id="heroSubtitle">Nurturing young minds through quality education, discipline, innovation, and strong moral values. We provide a safe and supportive learning environment where every child is encouraged to discover their potential and achieve academic excellence.</p>
             <div class="btn-group">
-                <button class="btn-scroll-down" onclick="scrollToContent()">
-                    <span>Scroll Down</span>
-                    <span class="arrow"><i class="fas fa-chevron-down"></i></span>
-                </button>
-                <a href="admissions.html" class="btn-outline">
-                    <i class="fas fa-pen-fancy"></i> Apply Now
-                </a>
-                <a href="student-portal.html" class="btn-outline" style="border-color:#6f42c1;background:rgba(111,66,193,0.15);">
-                    <i class="fas fa-user-graduate"></i> Student Portal
-                </a>
+                <button class="btn-scroll-down" onclick="scrollToContent()"><span>Scroll Down</span><span class="arrow"><i class="fas fa-chevron-down"></i></span></button>
+                <a href="admissions.html" class="btn-outline"><i class="fas fa-pen-fancy"></i> Apply Now</a>
+                <a href="student-portal.html" class="btn-outline" style="border-color:#6f42c1;background:rgba(111,66,193,0.15);"><i class="fas fa-user-graduate"></i> Student Portal</a>
             </div>
         </div>
-
         <div class="scroll-indicator">
             <div class="mouse"><div class="dot"></div></div>
             <span>Scroll</span>
@@ -1779,59 +1460,18 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- GALLERY SECTION - MOVED HERE AFTER HERO -->
+    <!-- GALLERY -->
     <!-- ======================================== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
             <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">Explore our school facilities and activities</p>
-
             <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/school-compound.jpg" alt="School Compound">
-                            <div class="gallery-content">
-                                <h4>🏫 School Compound</h4>
-                                <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/ecde-section.jpg" alt="ECDE Section">
-                            <div class="gallery-content">
-                                <h4>🧸 E.C.D.E Section</h4>
-                                <p>Our Early Childhood Development Education section where young learners begin.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/classroom-learning.jpg" alt="Classroom">
-                            <div class="gallery-content">
-                                <h4>📚 Classroom Learning</h4>
-                                <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
-                                <span class="tag">Academics</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="/images/computer-lab.jpg" alt="Computer Lab">
-                            <div class="gallery-content">
-                                <h4>💻 Computer Lab</h4>
-                                <p>Students learning essential computer skills in our modern computer laboratory.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="swiper-slide"><div class="gallery-card"><img src="/images/school-compound.jpg" alt="School Compound"><div class="gallery-content"><h4>🏫 School Compound</h4><p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
+                    <div class="swiper-slide"><div class="gallery-card"><img src="/images/ecde-section.jpg" alt="ECDE Section"><div class="gallery-content"><h4>🧸 E.C.D.E Section</h4><p>Our Early Childhood Development Education section where young learners begin.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
+                    <div class="swiper-slide"><div class="gallery-card"><img src="/images/classroom-learning.jpg" alt="Classroom"><div class="gallery-content"><h4>📚 Classroom Learning</h4><p>Pupils engaged in active learning in our well-equipped classrooms.</p><span class="tag">Academics</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
+                    <div class="swiper-slide"><div class="gallery-card"><img src="/images/computer-lab.jpg" alt="Computer Lab"><div class="gallery-content"><h4>💻 Computer Lab</h4><p>Students learning essential computer skills in our modern computer laboratory.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
                 </div>
                 <div class="swiper-button-next"></div>
                 <div class="swiper-button-prev"></div>
@@ -1841,205 +1481,105 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- CONTENT CARDS SECTION -->
+    <!-- CONTENT CARDS -->
     <!-- ======================================== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
-
             <div class="content-grid">
-
-                <!-- CARD 1: ACADEMICS -->
                 <div class="content-card card-academics" id="slide-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
-                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
-                        🔥 NEW
-                    </div>
-                    <span class="icon">📚</span>
-                    <h3>Academics</h3>
-                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📖 Playgroup to Grade 6 • CBC Curriculum</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Qualified Teachers</span> • <span>✅ Modern Facilities</span> • <span>✅ CBC</span>
-                    </div>
-                    <span class="badge">📢 Explore</span>
-                    <div class="card-cta">👆 Click to Explore</div>
+                    <div style="position:absolute;top:-8px;right:-8px;background:var(--kenya-red);color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseBadgeRed 1.5s infinite;box-shadow:0 4px 20px rgba(187,0,0,0.5);">🔥 NEW</div>
+                    <span class="icon">📚</span><h3>Academics</h3>
+                    <p style="font-weight:600;color:#1a1a2e;font-size:13px;">📖 Playgroup to Grade 6 • CBC Curriculum</p>
+                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Qualified Teachers</span> • <span>✅ Modern Facilities</span> • <span>✅ CBC</span></div>
+                    <span class="badge">📢 Explore</span><div class="card-cta">👆 Click to Explore</div>
                 </div>
-
-                <!-- CARD 2: ADMISSIONS -->
                 <div class="content-card card-admissions" id="slide-admissions" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130">
-                    <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
-                        📢 ENROLLING
-                    </div>
-                    <span class="icon">📝</span>
-                    <h3>Admissions</h3>
-                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 Open • Playgroup to Grade 6</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Simple Process</span> • <span>✅ Affordable Fees</span> • <span>✅ Quality</span>
-                    </div>
-                    <span class="badge">📢 Apply Now</span>
-                    <div class="card-cta">👆 Apply Now</div>
+                    <div style="position:absolute;top:-8px;right:-8px;background:var(--kenya-green);color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseBadgeGreen 1.8s infinite;box-shadow:0 4px 20px rgba(0,102,0,0.4);">📢 ENROLLING</div>
+                    <span class="icon">📝</span><h3>Admissions</h3>
+                    <p style="font-weight:600;color:#1a1a2e;font-size:13px;">📋 Open • Playgroup to Grade 6</p>
+                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Simple Process</span> • <span>✅ Affordable Fees</span> • <span>✅ Quality</span></div>
+                    <span class="badge">📢 Apply Now</span><div class="card-cta">👆 Apply Now</div>
                 </div>
-
-                <!-- CARD 3: FACILITIES -->
                 <div class="content-card card-facilities" id="slide-facilities" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #17a2b8; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeBlue 2s infinite; box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4);">
-                        🏫 MODERN
-                    </div>
-                    <span class="icon">🏫</span>
-                    <h3>School Facilities</h3>
-                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">🏗️ Modern Classrooms • Computer Lab • Library</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Safe Environment</span> • <span>✅ Sports Facilities</span> • <span>✅ Meals</span>
-                    </div>
-                    <span class="badge">🏗️ Explore</span>
-                    <div class="card-cta">👆 View Facilities</div>
+                    <div style="position:absolute;top:-8px;right:-8px;background:#17a2b8;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(23,162,184,0.4);">🏫 MODERN</div>
+                    <span class="icon">🏫</span><h3>School Facilities</h3>
+                    <p style="font-weight:600;color:#1a1a2e;font-size:13px;">🏗️ Modern Classrooms • Computer Lab • Library</p>
+                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Safe Environment</span> • <span>✅ Sports Facilities</span> • <span>✅ Meals</span></div>
+                    <span class="badge">🏗️ Explore</span><div class="card-cta">👆 View Facilities</div>
                 </div>
-
-                <!-- CARD 4: PERFORMANCE -->
                 <div class="content-card card-performance" id="slide-performance" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);">
-                        🏆 EXCELLENCE
-                    </div>
-                    <span class="icon">🏆</span>
-                    <h3>Performance</h3>
-                    <p id="displayPerformance" style="font-weight: 500;">Excellent academic performance in national examinations with top-performing students.</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Top Grades</span> • <span>✅ National Exams</span> • <span>✅ Track Record</span>
-                    </div>
-                    <span class="badge">🏆 Results</span>
-                    <div class="card-cta">👆 See Results</div>
+                    <div style="position:absolute;top:-8px;right:-8px;background:#6f42c1;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(111,66,193,0.4);">🏆 EXCELLENCE</div>
+                    <span class="icon">🏆</span><h3>Performance</h3>
+                    <p id="displayPerformance" style="font-weight:500;">Excellent academic performance in national examinations with top-performing students.</p>
+                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Top Grades</span> • <span>✅ National Exams</span> • <span>✅ Track Record</span></div>
+                    <span class="badge">🏆 Results</span><div class="card-cta">👆 See Results</div>
                 </div>
-
-                <!-- CARD 5: PARENTS CORNER -->
                 <div class="content-card card-parents" id="slide-parents" onclick="window.location.href='parents-corner.html'" data-aos="fade-up" data-aos-delay="220">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #fd7e14; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(253, 126, 20, 0.4);">
-                        👨‍👩‍👧‍👦 FAMILY
-                    </div>
-                    <span class="icon">👨‍👩‍👧‍👦</span>
-                    <h3>Parents Corner</h3>
-                    <p id="displayParents" style="font-weight: 500;">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Calendar</span> • <span>✅ Policies</span> • <span>✅ Communication</span>
-                    </div>
-                    <span class="badge">📋 Info</span>
-                    <div class="card-cta">👆 View Info</div>
+                    <div style="position:absolute;top:-8px;right:-8px;background:#fd7e14;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(253,126,20,0.4);">👨‍👩‍👧‍👦 FAMILY</div>
+                    <span class="icon">👨‍👩‍👧‍👦</span><h3>Parents Corner</h3>
+                    <p id="displayParents" style="font-weight:500;">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
+                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Calendar</span> • <span>✅ Policies</span> • <span>✅ Communication</span></div>
+                    <span class="badge">📋 Info</span><div class="card-cta">👆 View Info</div>
                 </div>
-
-                <!-- CARD 6: DOWNLOADS -->
                 <div class="content-card card-downloads" id="slide-downloads" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #20c997; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(32, 201, 151, 0.4);">
-                        📥 DOWNLOAD
-                    </div>
-                    <span class="icon">📄</span>
-                    <h3>Downloads</h3>
-                    <p id="displayDownloads" style="font-weight: 500;">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Forms</span> • <span>✅ Calendar</span> • <span>✅ Documents</span>
-                    </div>
-                    <span class="badge">📥 Get</span>
-                    <div class="card-cta">👆 Download</div>
+                    <div style="position:absolute;top:-8px;right:-8px;background:#20c997;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(32,201,151,0.4);">📥 DOWNLOAD</div>
+                    <span class="icon">📄</span><h3>Downloads</h3>
+                    <p id="displayDownloads" style="font-weight:500;">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
+                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Forms</span> • <span>✅ Calendar</span> • <span>✅ Documents</span></div>
+                    <span class="badge">📥 Get</span><div class="card-cta">👆 Download</div>
                 </div>
-
-                <!-- CARD 7: FEES STRUCTURE -->
                 <div class="content-card card-fees" id="slide-fees" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 2.2s infinite; box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);">
-                        💰 AFFORDABLE
-                    </div>
-                    <span class="icon">💰</span>
-                    <h3>Fees Structure</h3>
-                    <p id="displayFees" style="font-weight: 500;">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Affordable</span> • <span>✅ Day Scholars</span> • <span>✅ Boarding</span>
-                    </div>
-                    <span class="badge">💰 View</span>
-                    <div class="card-cta">👆 View Fees</div>
+                    <div style="position:absolute;top:-8px;right:-8px;background:#dc3545;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseBadgeRed 2.2s infinite;box-shadow:0 4px 20px rgba(220,53,69,0.4);">💰 AFFORDABLE</div>
+                    <span class="icon">💰</span><h3>Fees Structure</h3>
+                    <p id="displayFees" style="font-weight:500;">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
+                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Affordable</span> • <span>✅ Day Scholars</span> • <span>✅ Boarding</span></div>
+                    <span class="badge">💰 View</span><div class="card-cta">👆 View Fees</div>
                 </div>
-
-                <!-- CARD 8: STUDENT PORTAL -->
                 <div class="content-card card-student-portal" onclick="window.location.href='student-portal.html'" data-aos="fade-up" data-aos-delay="310">
-                    <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseStudentPortal 2s infinite; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.5);">
-                        🎓 NEW
-                    </div>
-                    <span class="icon">🎓</span>
-                    <h3>Student Portal</h3>
-                    <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 View Profile • Fees • Attendance</p>
-                    <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
-                        <span>✅ Check Results</span> • <span>✅ View Fees</span> • <span>✅ Download Reports</span>
-                    </div>
-                    <span class="badge">🎓 Login</span>
-                    <div class="card-cta">👆 Access Portal</div>
+                    <div style="position:absolute;top:-8px;right:-8px;background:#6f42c1;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseStudentPortal 2s infinite;box-shadow:0 4px 20px rgba(111,66,193,0.5);">🎓 NEW</div>
+                    <span class="icon">🎓</span><h3>Student Portal</h3>
+                    <p style="font-weight:600;color:#1a1a2e;font-size:13px;">📋 View Profile • Fees • Attendance</p>
+                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Check Results</span> • <span>✅ View Fees</span> • <span>✅ Download Reports</span></div>
+                    <span class="badge">🎓 Login</span><div class="card-cta">👆 Access Portal</div>
                 </div>
-
             </div>
         </div>
     </section>
 
     <!-- ======================================== -->
-    <!-- FEATURES SECTION -->
+    <!-- FEATURES -->
     <!-- ======================================== -->
     <section class="features-section" id="slide-features">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🌟 Why <span style="color:var(--school-gold);">Choose Us</span></h2>
-            <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">
-                We provide holistic education that nurtures talent and builds character for a successful future.
-            </p>
+            <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">We provide holistic education that nurtures talent and builds character for a successful future.</p>
             <div class="features-grid" id="featuresGrid">
-                <div class="feature-item" data-aos="zoom-in" data-aos-delay="100">
-                    <span class="icon">👨‍🏫</span>
-                    <h4>Qualified Teachers</h4>
-                    <p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p>
-                    <a href="about.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                </div>
-                <div class="feature-item" data-aos="zoom-in" data-aos-delay="200">
-                    <span class="icon">🏆</span>
-                    <h4>Excellence in Performance</h4>
-                    <p>We consistently produce top-performing students in national examinations and co-curricular activities.</p>
-                    <a href="performance.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                </div>
-                <div class="feature-item" data-aos="zoom-in" data-aos-delay="300">
-                    <span class="icon">🏫</span>
-                    <h4>Modern Facilities</h4>
-                    <p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p>
-                    <a href="facilities.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                </div>
-                <div class="feature-item" data-aos="zoom-in" data-aos-delay="400">
-                    <span class="icon">💡</span>
-                    <h4>Innovative Learning</h4>
-                    <p>We use modern teaching methods including technology integration and hands-on learning experiences.</p>
-                    <a href="academics.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                </div>
+                <div class="feature-item" data-aos="zoom-in" data-aos-delay="100"><span class="icon">👨‍🏫</span><h4>Qualified Teachers</h4><p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p><a href="about.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
+                <div class="feature-item" data-aos="zoom-in" data-aos-delay="200"><span class="icon">🏆</span><h4>Excellence in Performance</h4><p>We consistently produce top-performing students in national examinations and co-curricular activities.</p><a href="performance.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
+                <div class="feature-item" data-aos="zoom-in" data-aos-delay="300"><span class="icon">🏫</span><h4>Modern Facilities</h4><p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p><a href="facilities.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
+                <div class="feature-item" data-aos="zoom-in" data-aos-delay="400"><span class="icon">💡</span><h4>Innovative Learning</h4><p>We use modern teaching methods including technology integration and hands-on learning experiences.</p><a href="academics.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
             </div>
         </div>
     </section>
 
     <!-- ======================================== -->
-    <!-- STATS SECTION -->
+    <!-- STATS -->
     <!-- ======================================== -->
     <section class="stats-section" id="slide-stats">
         <div class="container">
             <div class="stats-grid" id="statsGrid">
-                <div class="stat-item" data-aos="flip-up" data-aos-delay="100">
-                    <h3 id="stat1Number">500+</h3>
-                    <p>Students</p>
-                </div>
-                <div class="stat-item" data-aos="flip-up" data-aos-delay="200">
-                    <h3 id="stat2Number">50+</h3>
-                    <p>Staff Members</p>
-                </div>
-                <div class="stat-item" data-aos="flip-up" data-aos-delay="300">
-                    <h3 id="stat3Number">98%</h3>
-                    <p>Attendance Rate</p>
-                </div>
-                <div class="stat-item" data-aos="flip-up" data-aos-delay="400">
-                    <h3 id="stat4Number">15+</h3>
-                    <p>Years of Excellence</p>
-                </div>
+                <div class="stat-item" data-aos="flip-up" data-aos-delay="100"><h3 id="stat1Number">500+</h3><p>Students</p></div>
+                <div class="stat-item" data-aos="flip-up" data-aos-delay="200"><h3 id="stat2Number">50+</h3><p>Staff Members</p></div>
+                <div class="stat-item" data-aos="flip-up" data-aos-delay="300"><h3 id="stat3Number">98%</h3><p>Attendance Rate</p></div>
+                <div class="stat-item" data-aos="flip-up" data-aos-delay="400"><h3 id="stat4Number">15+</h3><p>Years of Excellence</p></div>
             </div>
         </div>
     </section>
 
     <!-- ======================================== -->
-    <!-- NEWS SECTION -->
+    <!-- NEWS SECTION (enlarged) -->
     <!-- ======================================== -->
     <section class="news-section" id="slide-news">
         <div class="container">
@@ -2049,19 +1589,19 @@
                 <div class="news-item" data-aos="fade-up" data-aos-delay="100">
                     <h4>📅 Term 3 Opening</h4>
                     <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.</p>
-                    <span class="date">Posted: Recently</span>
+                    <span class="date">Posted: 25 August 2026</span>
                     <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="200">
                     <h4>🏆 Sports Day</h4>
                     <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.</p>
-                    <span class="date">Posted: Recently</span>
+                    <span class="date">Posted: 24 August 2026</span>
                     <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="300">
                     <h4>📚 Parents' Meeting</h4>
                     <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall.</p>
-                    <span class="date">Posted: Recently</span>
+                    <span class="date">Posted: 23 August 2026</span>
                     <a href="parents-corner.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
@@ -2084,9 +1624,7 @@
                         <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
                         <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
                     </div>
-                    <div class="ministry-badge">
-                        <i class="fas fa-certificate"></i> Registered under Ministry of Education, Kenya
-                    </div>
+                    <div class="ministry-badge"><i class="fas fa-certificate"></i> Registered under Ministry of Education, Kenya</div>
                 </div>
                 <div class="footer-links">
                     <h4>Quick Links</h4>
@@ -2104,11 +1642,22 @@
                     <a href="fees.html">💰 Fees</a>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Changara Star Academy. All rights reserved. | <span style="color:var(--school-gold);">🇰🇪 Proudly Kenyan</span></p>
-            </div>
+            <div class="footer-bottom"><p>&copy; 2026 Changara Star Academy. All rights reserved. | <span style="color:var(--school-gold);">🇰🇪 Proudly Kenyan</span></p></div>
         </div>
     </footer>
+
+    <!-- ======================================== -->
+    <!-- VIDEO MODAL -->
+    <!-- ======================================== -->
+    <div class="video-modal" id="videoModal">
+        <div class="modal-content">
+            <video id="modalVideo" controls>
+                <source src="/videos/school-hero.mp4" type="video/mp4">
+            </video>
+            <button class="close-modal" onclick="closeVideoModal()">✕</button>
+            <div class="modal-title">🎬 Changara Star Academy – Our Story</div>
+        </div>
+    </div>
 
     <!-- ======================================== -->
     <!-- SCRIPTS -->
@@ -2116,376 +1665,148 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
     <script>
-        // ============================================
-        // INITIALIZE AOS
-        // ============================================
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 60,
-            easing: 'ease-in-out'
-        });
+        // ===== INIT AOS =====
+        AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
-        // ============================================
-        // HOMEPAGE BANNER CAROUSEL
-        // ============================================
-        let currentBannerIndex = 0;
-        let bannerSlides = [];
-        let bannerDots = [];
-
-        function escapeHtml(value = '') {
-            return String(value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+        // ===== SPLASH SCREEN =====
+        function hideSplash() {
+            const splash = document.getElementById('splash-screen');
+            splash.classList.add('hide-splash');
+            // Optionally remove from DOM after transition
+            setTimeout(() => { splash.style.display = 'none'; }, 800);
         }
+        // Hide splash after 3.5s (simulate loading)
+        setTimeout(hideSplash, 3500);
 
-        function showBannerSlide(index) {
-            if (!bannerSlides.length) return;
-            currentBannerIndex = (index + bannerSlides.length) % bannerSlides.length;
-            bannerSlides.forEach((slide, slideIndex) => {
-                slide.classList.toggle('active', slideIndex === currentBannerIndex);
-            });
-            bannerDots.forEach((dot, dotIndex) => {
-                dot.classList.toggle('active', dotIndex === currentBannerIndex);
-            });
+        // ===== SPLASH DYNAMIC NEWS (can be updated via CMS later) =====
+        // For now, static content shown. But we can override from API.
+        async function updateSplashNews() {
+            try {
+                const res = await fetch('/api/content');
+                const data = await res.json();
+                if (data.success && data.content) {
+                    const c = data.content;
+                    if (c.splashHeadline) {
+                        document.getElementById('splashHeadline').textContent = c.splashHeadline;
+                    }
+                    if (c.splashMeta) {
+                        document.getElementById('splashMeta').textContent = c.splashMeta;
+                    }
+                    if (c.splashSub) {
+                        document.getElementById('splashSub').textContent = c.splashSub;
+                    }
+                }
+            } catch (e) { /* fallback to default */ }
         }
+        updateSplashNews();
 
-        function renderBannerCarousel(content) {
-            const carousel = document.getElementById('bannerCarousel');
-            const dotsContainer = document.getElementById('bannerDots');
-            if (!carousel || !dotsContainer) return;
-
-            const items = [];
-            const carouselItems = Array.isArray(content?.homeCarousel) ? content.homeCarousel.filter(Boolean) : [];
-            const newsItems = Array.isArray(content?.homeNews) ? content.homeNews.filter(Boolean) : [];
-            const eventItems = Array.isArray(content?.events) ? content.events.filter(Boolean) : [];
-
-            if (carouselItems.length) {
-                carouselItems.slice(0, 3).forEach((item) => {
-                    items.push({
-                        title: item.title || 'School Update',
-                        body: item.body || item.content || item.description || 'More details will appear here as the admin CMS is updated.',
-                        badge: item.badge || 'FEATURED'
-                    });
-                });
-            } else {
-                const sourceItems = newsItems.length ? newsItems : eventItems;
-
-                sourceItems.slice(0, 3).forEach((item) => {
-                    const title = item.title || 'School Update';
-                    const body = item.content || item.description || 'More details will appear here as the admin CMS is updated.';
-                    const badge = item.category ? item.category.toUpperCase() : 'UPDATE';
-                    items.push({
-                        title,
-                        body,
-                        badge
-                    });
-                });
-            }
-
-            if (!items.length) {
-                items.push(
-                    { title: content?.heroTitle || 'Welcome to Changara Star Academy', body: content?.heroSubtitle || 'A trusted place for quality education and growth.', badge: 'WELCOME' },
-                    { title: 'Student Portal', body: 'Parents and learners can access school updates from one secure place.', badge: 'PORTAL' },
-                    { title: 'Community Events', body: 'Stay connected with school activities, parent meetings, and celebrations.', badge: 'EVENTS' }
-                );
-            }
-
-            carousel.innerHTML = items.map((item, index) => `
-                <div class="banner-slide ${index === 0 ? 'active' : ''}">
-                    <div class="banner-copy">
-                        <span class="banner-badge">${escapeHtml(item.badge)}</span>
-                        <h3>${escapeHtml(item.title)}</h3>
-                        <p>${escapeHtml(item.body)}</p>
-                    </div>
-                    <span class="banner-badge">${index === 0 ? '📚 Featured' : index === 1 ? '🎓 Portal' : '🗓️ Events'}</span>
-                </div>
-            `).join('');
-
-            dotsContainer.innerHTML = items.map((_, index) => `
-                <button class="banner-dot ${index === 0 ? 'active' : ''}" data-index="${index}" aria-label="Show slide ${index + 1}"></button>
-            `).join('');
-
-            bannerSlides = Array.from(document.querySelectorAll('.banner-slide'));
-            bannerDots = Array.from(document.querySelectorAll('.banner-dot'));
-            bannerDots.forEach(dot => {
-                dot.addEventListener('click', () => showBannerSlide(Number(dot.dataset.index)));
-            });
-            showBannerSlide(0);
-        }
-
-        function nextBannerSlide() {
-            showBannerSlide(currentBannerIndex + 1);
-        }
-
-        if (bannerSlides.length) {
-            setInterval(nextBannerSlide, 5500);
-        }
-
-        // ============================================
-        // SCROLL TO CONTENT (for Scroll Down button)
-        // ============================================
-        function scrollToContent() {
-            const contentSection = document.getElementById('slide-content');
-            if (contentSection) {
-                const offset = 150;
-                const top = contentSection.getBoundingClientRect().top + window.pageYOffset - offset;
-                window.scrollTo({ top: top, behavior: 'smooth' });
-            }
-        }
-
-        // ============================================
-        // MOBILE MENU
-        // ============================================
+        // ===== MOBILE MENU =====
         function toggleMobileMenu() {
-            const nav = document.getElementById('navLinks');
-            if (nav) nav.classList.toggle('show');
+            document.getElementById('navLinks').classList.toggle('show');
         }
 
-        // ============================================
-        // SECTION TABS
-        // ============================================
-        function scrollToSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                const offset = 160;
-                const top = section.getBoundingClientRect().top + window.pageYOffset - offset;
-                window.scrollTo({ top: top, behavior: 'smooth' });
-
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                const tabs = document.querySelectorAll('.tab-btn');
-                const index = Array.from(tabs).findIndex(btn => {
-                    const onclick = btn.getAttribute('onclick');
-                    return onclick && onclick.includes(sectionId);
-                });
-                if (index !== -1) {
-                    tabs[index].classList.add('active');
-                }
+        // ===== SCROLL TO CONTENT =====
+        function scrollToContent() {
+            const el = document.getElementById('slide-content');
+            if (el) {
+                const top = el.getBoundingClientRect().top + window.pageYOffset - 150;
+                window.scrollTo({ top, behavior: 'smooth' });
             }
         }
 
-        // Update active tab on scroll
-        document.addEventListener('scroll', function() {
-            const sections = document.querySelectorAll('.content-card');
-            const tabs = document.querySelectorAll('.tab-btn');
-            const scrollPosition = window.scrollY + 170;
+        // ===== SECTION TABS =====
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                const top = el.getBoundingClientRect().top + window.pageYOffset - 160;
+                window.scrollTo({ top, behavior: 'smooth' });
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(id)) {
+                        b.classList.add('active');
+                    }
+                });
+            }
+        }
 
-            sections.forEach((section) => {
-                const sectionTop = section.offsetTop;
-                const sectionBottom = sectionTop + section.offsetHeight;
-
-                if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
-                    tabs.forEach(btn => btn.classList.remove('active'));
-                    const sectionId = section.id;
-                    tabs.forEach(btn => {
-                        const onclick = btn.getAttribute('onclick');
-                        if (onclick && onclick.includes(sectionId)) {
-                            btn.classList.add('active');
-                        }
-                    });
-                }
-            });
-        });
-
-        // ============================================
-        // NOTICE ALERT
-        // ============================================
+        // ===== NOTICE =====
         function closeNotice() {
             const bar = document.getElementById('noticeAlertBar');
             bar.classList.remove('show');
             localStorage.setItem('noticeClosed', 'true');
-            const ticker = document.getElementById('newsTicker');
-            if (ticker) {
-                ticker.style.top = '100px';
-            }
+            document.getElementById('newsTicker').style.top = '100px';
         }
-
-        function showNotice(message) {
+        function showNotice(msg) {
             const bar = document.getElementById('noticeAlertBar');
-            const msgEl = document.getElementById('noticeMessage');
-            if (message) {
-                msgEl.innerHTML = message;
-            }
+            if (msg) document.getElementById('noticeMessage').innerHTML = msg;
             bar.classList.add('show');
             localStorage.removeItem('noticeClosed');
-            const ticker = document.getElementById('newsTicker');
-            if (ticker) {
-                ticker.style.top = '136px';
-            }
+            document.getElementById('newsTicker').style.top = '136px';
         }
-
-        function checkNoticeStatus() {
-            const closed = localStorage.getItem('noticeClosed');
-            const bar = document.getElementById('noticeAlertBar');
-            const ticker = document.getElementById('newsTicker');
-            if (!closed) {
-                bar.classList.add('show');
-                if (ticker) {
-                    ticker.style.top = '136px';
-                }
+        (function checkNotice() {
+            if (!localStorage.getItem('noticeClosed')) {
+                document.getElementById('noticeAlertBar').classList.add('show');
+                document.getElementById('newsTicker').style.top = '136px';
             }
-        }
-        checkNoticeStatus();
+        })();
 
-        // ============================================
-        // VIDEO MODAL
-        // ============================================
+        // ===== VIDEO MODAL =====
         function openVideoModal() {
-            const modal = document.getElementById('videoModal');
-            const video = document.getElementById('modalVideo');
-            modal.classList.add('show');
-            video.play();
+            document.getElementById('videoModal').classList.add('show');
+            document.getElementById('modalVideo').play();
         }
-
         function closeVideoModal() {
-            const modal = document.getElementById('videoModal');
-            const video = document.getElementById('modalVideo');
-            modal.classList.remove('show');
-            video.pause();
+            document.getElementById('videoModal').classList.remove('show');
+            document.getElementById('modalVideo').pause();
         }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeVideoModal();
-            }
-        });
-
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideoModal(); });
         document.getElementById('videoModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeVideoModal();
-            }
+            if (e.target === this) closeVideoModal();
         });
 
-        // ============================================
-        // SWIPER GALLERY
-        // ============================================
-        const swiper = new Swiper('.gallery-swiper', {
+        // ===== SWIPER =====
+        new Swiper('.gallery-swiper', {
             slidesPerView: 1,
             spaceBetween: 16,
             loop: true,
-            autoplay: {
-                delay: 4000,
-                disableOnInteraction: false,
-            },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-            },
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            breakpoints: {
-                640: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
-            },
+            autoplay: { delay: 4000, disableOnInteraction: false },
+            pagination: { el: '.swiper-pagination', clickable: true },
+            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+            breakpoints: { 640: { slidesPerView: 1 }, 768: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }
         });
 
-        // ============================================
-        // LOAD CMS CONTENT
-        // ============================================
-        function stripHtml(html) {
-            if (!html) return '';
-            const tmp = document.createElement('DIV');
-            tmp.innerHTML = html;
-            return tmp.textContent || tmp.innerText || '';
-        }
-
-        async function loadWebsiteContent() {
+        // ===== CMS LOAD (optional) =====
+        function stripHtml(html) { if (!html) return ''; const d = document.createElement('DIV'); d.innerHTML = html; return d.textContent || d.innerText || ''; }
+        async function loadCMS() {
             try {
-                const response = await fetch('/api/content');
-                const data = await response.json();
-                if (data.success) {
+                const res = await fetch('/api/content');
+                const data = await res.json();
+                if (data.success && data.content) {
                     const c = data.content;
-
-                    if (c.heroTitle) {
-                        document.getElementById('heroTitle').innerHTML = c.heroTitle;
-                    }
-                    if (c.heroSubtitle) {
-                        document.getElementById('heroSubtitle').textContent = c.heroSubtitle;
-                    }
-
-                    renderBannerCarousel(c);
-
-                    const cardIds = [
-                        'displayPerformance', 'displayParents', 'displayDownloads', 'displayFees'
-                    ];
-
-                    const cmsData = [
-                        c.performanceKcpe, c.parentsCalendar, c.downloads, c.feesContent
-                    ];
-
-                    cardIds.forEach((id, index) => {
-                        const el = document.getElementById(id);
-                        if (el && cmsData[index]) {
-                            el.textContent = stripHtml(cmsData[index]);
-                        }
-                    });
-
-                    if (c.homeFeatures && c.homeFeatures.length > 0) {
-                        const featuresGrid = document.getElementById('featuresGrid');
-                        featuresGrid.innerHTML = '';
-                        c.homeFeatures.forEach((feature, i) => {
-                            const div = document.createElement('div');
-                            div.className = 'feature-item';
-                            div.setAttribute('data-aos', 'zoom-in');
-                            div.setAttribute('data-aos-delay', (i + 1) * 100);
-                            div.innerHTML = `
-                                <span class="icon">${feature.icon || '📚'}</span>
-                                <h4>${feature.title || 'Feature'}</h4>
-                                <p>${feature.description || ''}</p>
-                                <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                            `;
-                            featuresGrid.appendChild(div);
-                        });
-                    }
-
-                    if (c.homeStats && c.homeStats.length > 0) {
-                        const stats = c.homeStats;
-                        const statIds = ['stat1Number', 'stat2Number', 'stat3Number', 'stat4Number'];
-                        statIds.forEach((id, index) => {
-                            if (stats[index]) {
-                                document.getElementById(id).textContent = stats[index].number || '0';
-                            }
-                        });
-                    }
-
-                    if (c.homeNews && c.homeNews.length > 0) {
-                        const newsGrid = document.getElementById('newsGrid');
-                        newsGrid.innerHTML = '';
-                        c.homeNews.forEach((news, i) => {
+                    if (c.heroTitle) document.getElementById('heroTitle').innerHTML = c.heroTitle;
+                    if (c.heroSubtitle) document.getElementById('heroSubtitle').textContent = c.heroSubtitle;
+                    if (c.performanceKcpe) document.getElementById('displayPerformance').textContent = stripHtml(c.performanceKcpe);
+                    if (c.parentsCalendar) document.getElementById('displayParents').textContent = stripHtml(c.parentsCalendar);
+                    if (c.downloads) document.getElementById('displayDownloads').textContent = stripHtml(c.downloads);
+                    if (c.feesContent) document.getElementById('displayFees').textContent = stripHtml(c.feesContent);
+                    if (c.noticeAlert) showNotice(c.noticeAlert);
+                    if (c.homeNews && c.homeNews.length) {
+                        const grid = document.getElementById('newsGrid');
+                        grid.innerHTML = '';
+                        c.homeNews.forEach((n, i) => {
                             const div = document.createElement('div');
                             div.className = 'news-item';
                             div.setAttribute('data-aos', 'fade-up');
                             div.setAttribute('data-aos-delay', (i + 1) * 100);
-                            div.innerHTML = `
-                                <h4>${news.title || 'News'}</h4>
-                                <p>${news.content || ''}</p>
-                                <span class="date">Posted: ${new Date().toLocaleDateString()}</span>
-                                <a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                            `;
-                            newsGrid.appendChild(div);
+                            div.innerHTML = `<h4>${n.title||'News'}</h4><p>${n.content||''}</p><span class="date">Posted: ${new Date().toLocaleDateString()}</span><a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>`;
+                            grid.appendChild(div);
                         });
                     }
-
-                    if (c.noticeAlert) {
-                        showNotice(c.noticeAlert);
-                    }
                 }
-            } catch (error) {
-                console.log('CMS not available - using default content');
-            }
+            } catch (e) { /* fallback */ }
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadWebsiteContent();
-        });
+        document.addEventListener('DOMContentLoaded', loadCMS);
     </script>
 </body>
 </html>
