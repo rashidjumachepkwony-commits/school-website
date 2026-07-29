@@ -23,6 +23,127 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <style>
+        /* ============================================================
+           SPLASH SCREEN - SHOWS IMMEDIATELY WHILE SERVER WAKES UP
+           ============================================================ */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0A1628 0%, #1a2a4a 50%, #2a1a3a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            color: white;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        #splashScreen.hidden {
+            opacity: 0;
+            transform: scale(1.05);
+            pointer-events: none;
+        }
+
+        #splashScreen .logo-img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+            border-radius: 20px;
+            animation: splashFloat 3s ease-in-out infinite;
+        }
+
+        #splashScreen h1 {
+            font-size: 34px;
+            font-weight: 700;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        #splashScreen h1 span {
+            color: #C9A84C;
+        }
+
+        #splashScreen .motto {
+            color: rgba(255,255,255,0.5);
+            font-style: italic;
+            font-size: 15px;
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+
+        #splashScreen .loader-bar {
+            margin-top: 35px;
+            width: 250px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #splashScreen .loader-bar .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #C9A84C, #F5C842, #C9A84C);
+            border-radius: 10px;
+            animation: splashLoading 3s ease-in-out infinite;
+        }
+
+        #splashScreen .loading-text {
+            color: rgba(255,255,255,0.3);
+            font-size: 13px;
+            margin-top: 12px;
+            letter-spacing: 1px;
+        }
+
+        #splashScreen .loading-text .dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+
+        #splashScreen .flag-strip {
+            height: 3px;
+            background: linear-gradient(to right, 
+                #000000 0%, #000000 25%, 
+                #BB0000 25%, #BB0000 50%, 
+                #006600 50%, #006600 75%, 
+                #000000 75%, #000000 100%
+            );
+            width: 60%;
+            max-width: 280px;
+            margin-top: 18px;
+            border-radius: 2px;
+        }
+
+        #splashScreen .version {
+            color: rgba(255,255,255,0.12);
+            font-size: 10px;
+            margin-top: 12px;
+            letter-spacing: 1px;
+        }
+
+        @keyframes splashLoading {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes splashFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
         /* ========================================
            ROOT VARIABLES
            ======================================== */
@@ -174,7 +295,6 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
         
-        /* Student Portal Link */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #6f42c1, #4a2a8a);
             color: white;
@@ -534,7 +654,6 @@
             padding: 60px 0;
         }
 
-        /* ===== VIDEO BACKGROUND ===== */
         .hero-video-bg {
             position: absolute;
             top: 0;
@@ -572,7 +691,6 @@
             z-index: 2;
         }
 
-        /* ===== HERO CONTENT ===== */
         .hero-section .hero-bg-pattern {
             position: absolute;
             inset: 0;
@@ -655,7 +773,6 @@
             animation: fadeInUp 1.6s ease forwards;
         }
 
-        /* ===== SCROLL DOWN BUTTON ===== */
         .btn-scroll-down {
             display: inline-flex;
             align-items: center;
@@ -705,7 +822,6 @@
             transform: translateY(-3px);
         }
 
-        /* ===== VIDEO PLAY BUTTON ===== */
         .hero-video-play {
             position: absolute;
             bottom: 100px;
@@ -784,7 +900,6 @@
             animation: scrollDot 2s ease-in-out infinite;
         }
 
-        /* ===== VIDEO MODAL ===== */
         .video-modal {
             display: none;
             position: fixed;
@@ -848,7 +963,6 @@
             backdrop-filter: blur(10px);
         }
 
-        /* ===== KEYFRAMES ===== */
         @keyframes scrollDot {
             0%, 100% { transform: translateY(0); opacity: 1; }
             50% { transform: translateY(12px); opacity: 0.3; }
@@ -897,9 +1011,6 @@
             100% { transform: translateY(0); }
         }
 
-        /* ========================================
-           SECTION TITLES
-           ======================================== */
         .section-title {
             font-family: var(--font-primary);
             font-size: 32px;
@@ -919,9 +1030,6 @@
         }
         .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
-        /* ========================================
-           GALLERY SECTION - MOVED AFTER HERO
-           ======================================== */
         .gallery-section {
             padding: 60px 0;
             background: linear-gradient(135deg, #0A1628, #001F5c);
@@ -1007,9 +1115,6 @@
             background: var(--school-gold) !important;
         }
 
-        /* ========================================
-           CONTENT CARDS
-           ======================================== */
         .content-cards-section {
             padding: 50px 0;
             background: #f0f2f5;
@@ -1106,7 +1211,6 @@
             transform: scale(1.05);
         }
 
-        /* Card variants */
         .card-academics {
             border-color: var(--school-gold) !important;
             background: linear-gradient(135deg, #ffffff, #fff8e7) !important;
@@ -1196,7 +1300,6 @@
             color: white;
         }
 
-        /* Student Portal Card */
         .card-student-portal {
             border-color: #6f42c1 !important;
             background: linear-gradient(135deg, #ffffff, #f5f0ff) !important;
@@ -1217,9 +1320,6 @@
             background: #6f42c1;
         }
 
-        /* ========================================
-           FEATURES
-           ======================================== */
         .features-section {
             padding: 50px 0;
             background: linear-gradient(135deg, #000000, #1a0000, #0a1628);
@@ -1289,9 +1389,6 @@
             transform: translateX(3px);
         }
 
-        /* ========================================
-           STATS
-           ======================================== */
         .stats-section {
             padding: 50px 0;
             background: linear-gradient(135deg, var(--kenya-black), var(--school-blue-dark));
@@ -1333,9 +1430,6 @@
             letter-spacing: 1px;
         }
 
-        /* ========================================
-           NEWS
-           ======================================== */
         .news-section {
             padding: 50px 0;
             background: #f0f2f5;
@@ -1376,9 +1470,6 @@
             display: block;
         }
 
-        /* ========================================
-           FOOTER
-           ======================================== */
         .main-footer {
             background: var(--kenya-black);
             color: white;
@@ -1477,9 +1568,6 @@
             transform: translateY(-2px);
         }
 
-        /* ========================================
-           RESPONSIVE
-           ======================================== */
         @media (max-width: 768px) {
             .main-header .nav-links {
                 display: none;
@@ -1542,6 +1630,10 @@
             .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
             .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
             .hero-video-play .play-text { font-size: 10px; }
+
+            #splashScreen h1 { font-size: 26px; }
+            #splashScreen .logo-img { width: 80px; height: 80px; }
+            #splashScreen .loader-bar { width: 200px; }
         }
 
         @media (max-width: 480px) {
@@ -1567,10 +1659,29 @@
             .top-nav-bar .nav-links a i {
                 font-size: 11px;
             }
+            #splashScreen h1 { font-size: 22px; }
+            #splashScreen .logo-img { width: 70px; height: 70px; }
+            #splashScreen .loader-bar { width: 180px; }
+            #splashScreen .motto { font-size: 12px; }
         }
     </style>
 </head>
 <body>
+
+    <!-- ============================================================
+    SPLASH SCREEN - SHOWS IMMEDIATELY WHILE SERVER WAKES UP
+    ============================================================ -->
+    <div id="splashScreen">
+        <img src="/images/logo edited.ico" alt="Changara Star Academy" class="logo-img">
+        <h1>CHANGARA <span>STAR</span></h1>
+        <div class="motto">"Assurance to Excellence"</div>
+        <div class="loader-bar">
+            <div class="fill"></div>
+        </div>
+        <div class="loading-text">Loading <span class="dots"></span></div>
+        <div class="flag-strip"></div>
+        <div class="version">v2.0 • PWA Ready</div>
+    </div>
 
     <!-- ======================================== -->
     <!-- HEADER - FIXED AT TOP -->
@@ -1726,7 +1837,6 @@
     <!-- HERO SECTION WITH VIDEO BACKGROUND -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
-        <!-- Video Background -->
         <div class="hero-video-bg">
             <video id="heroVideo" autoplay muted loop playsinline poster="/images/school-compound.jpg">
                 <source src="/videos/school-hero.mp4" type="video/mp4">
@@ -1734,15 +1844,11 @@
             <div class="video-overlay"></div>
             <div class="video-overlay-kenya"></div>
         </div>
-
         <div class="hero-bg-pattern"></div>
-
-        <!-- Video Play Button -->
         <div class="hero-video-play" onclick="openVideoModal()">
             <div class="play-icon"><i class="fas fa-play"></i></div>
             <span class="play-text">▶ Watch Our Story</span>
         </div>
-
         <div class="hero-content">
             <div class="hero-flag-badge">
                 <div class="flag-strip">
@@ -1772,7 +1878,6 @@
                 </a>
             </div>
         </div>
-
         <div class="scroll-indicator">
             <div class="mouse"><div class="dot"></div></div>
             <span>Scroll</span>
@@ -1780,13 +1885,12 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- GALLERY SECTION - MOVED HERE AFTER HERO -->
+    <!-- GALLERY SECTION -->
     <!-- ======================================== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
             <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">Explore our school facilities and activities</p>
-
             <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
                 <div class="swiper-wrapper">
                     <div class="swiper-slide">
@@ -1848,10 +1952,7 @@
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
-
             <div class="content-grid">
-
-                <!-- CARD 1: ACADEMICS -->
                 <div class="content-card card-academics" id="slide-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
                         🔥 NEW
@@ -1865,8 +1966,6 @@
                     <span class="badge">📢 Explore</span>
                     <div class="card-cta">👆 Click to Explore</div>
                 </div>
-
-                <!-- CARD 2: ADMISSIONS -->
                 <div class="content-card card-admissions" id="slide-admissions" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
                         📢 ENROLLING
@@ -1880,8 +1979,6 @@
                     <span class="badge">📢 Apply Now</span>
                     <div class="card-cta">👆 Apply Now</div>
                 </div>
-
-                <!-- CARD 3: FACILITIES -->
                 <div class="content-card card-facilities" id="slide-facilities" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
                     <div style="position: absolute; top: -8px; right: -8px; background: #17a2b8; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeBlue 2s infinite; box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4);">
                         🏫 MODERN
@@ -1895,8 +1992,6 @@
                     <span class="badge">🏗️ Explore</span>
                     <div class="card-cta">👆 View Facilities</div>
                 </div>
-
-                <!-- CARD 4: PERFORMANCE -->
                 <div class="content-card card-performance" id="slide-performance" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
                     <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);">
                         🏆 EXCELLENCE
@@ -1910,8 +2005,6 @@
                     <span class="badge">🏆 Results</span>
                     <div class="card-cta">👆 See Results</div>
                 </div>
-
-                <!-- CARD 5: PARENTS CORNER -->
                 <div class="content-card card-parents" id="slide-parents" onclick="window.location.href='parents-corner.html'" data-aos="fade-up" data-aos-delay="220">
                     <div style="position: absolute; top: -8px; right: -8px; background: #fd7e14; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(253, 126, 20, 0.4);">
                         👨‍👩‍👧‍👦 FAMILY
@@ -1925,8 +2018,6 @@
                     <span class="badge">📋 Info</span>
                     <div class="card-cta">👆 View Info</div>
                 </div>
-
-                <!-- CARD 6: DOWNLOADS -->
                 <div class="content-card card-downloads" id="slide-downloads" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
                     <div style="position: absolute; top: -8px; right: -8px; background: #20c997; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(32, 201, 151, 0.4);">
                         📥 DOWNLOAD
@@ -1940,8 +2031,6 @@
                     <span class="badge">📥 Get</span>
                     <div class="card-cta">👆 Download</div>
                 </div>
-
-                <!-- CARD 7: FEES STRUCTURE -->
                 <div class="content-card card-fees" id="slide-fees" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
                     <div style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 2.2s infinite; box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);">
                         💰 AFFORDABLE
@@ -1955,8 +2044,6 @@
                     <span class="badge">💰 View</span>
                     <div class="card-cta">👆 View Fees</div>
                 </div>
-
-                <!-- CARD 8: STUDENT PORTAL -->
                 <div class="content-card card-student-portal" onclick="window.location.href='student-portal.html'" data-aos="fade-up" data-aos-delay="310">
                     <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseStudentPortal 2s infinite; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.5);">
                         🎓 NEW
@@ -1970,7 +2057,6 @@
                     <span class="badge">🎓 Login</span>
                     <div class="card-cta">👆 Access Portal</div>
                 </div>
-
             </div>
         </div>
     </section>
@@ -2119,9 +2205,50 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
-        // ============================================
-        // INITIALIZE AOS
-        // ============================================
+        // ============================================================
+        // SPLASH SCREEN - HIDE ONCE PAGE IS FULLY LOADED
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            window.addEventListener('load', function() {
+                const splash = document.getElementById('splashScreen');
+                if (splash) {
+                    setTimeout(function() {
+                        splash.classList.add('hidden');
+                        setTimeout(function() {
+                            splash.style.display = 'none';
+                        }, 800);
+                    }, 500);
+                }
+            });
+
+            // Fallback: Hide splash after 10 seconds
+            setTimeout(function() {
+                const splash = document.getElementById('splashScreen');
+                if (splash && !splash.classList.contains('hidden')) {
+                    splash.classList.add('hidden');
+                    setTimeout(function() {
+                        splash.style.display = 'none';
+                    }, 800);
+                }
+            }, 10000);
+        });
+
+        // ============================================================
+        // REGISTER SERVICE WORKER (PWA)
+        // ============================================================
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                    console.log('✅ Service Worker registered successfully');
+                })
+                .catch(function(error) {
+                    console.log('❌ Service Worker registration failed:', error);
+                });
+        }
+
+        // ============================================================
+        // YOUR EXISTING JAVASCRIPT FUNCTIONS
+        // ============================================================
         AOS.init({
             duration: 800,
             once: true,
@@ -2129,9 +2256,6 @@
             easing: 'ease-in-out'
         });
 
-        // ============================================
-        // HOMEPAGE BANNER CAROUSEL
-        // ============================================
         let currentBannerIndex = 0;
         let bannerSlides = [];
         let bannerDots = [];
@@ -2228,9 +2352,6 @@
             setInterval(nextBannerSlide, 5500);
         }
 
-        // ============================================
-        // SCROLL TO CONTENT (for Scroll Down button)
-        // ============================================
         function scrollToContent() {
             const contentSection = document.getElementById('slide-content');
             if (contentSection) {
@@ -2240,17 +2361,11 @@
             }
         }
 
-        // ============================================
-        // MOBILE MENU
-        // ============================================
         function toggleMobileMenu() {
             const nav = document.getElementById('navLinks');
             if (nav) nav.classList.toggle('show');
         }
 
-        // ============================================
-        // SECTION TABS
-        // ============================================
         function scrollToSection(sectionId) {
             const section = document.getElementById(sectionId);
             if (section) {
@@ -2270,7 +2385,6 @@
             }
         }
 
-        // Update active tab on scroll
         document.addEventListener('scroll', function() {
             const sections = document.querySelectorAll('.content-card');
             const tabs = document.querySelectorAll('.tab-btn');
@@ -2293,9 +2407,6 @@
             });
         });
 
-        // ============================================
-        // NOTICE ALERT
-        // ============================================
         function closeNotice() {
             const bar = document.getElementById('noticeAlertBar');
             bar.classList.remove('show');
@@ -2333,9 +2444,6 @@
         }
         checkNoticeStatus();
 
-        // ============================================
-        // VIDEO MODAL
-        // ============================================
         function openVideoModal() {
             const modal = document.getElementById('videoModal');
             const video = document.getElementById('modalVideo');
@@ -2362,9 +2470,6 @@
             }
         });
 
-        // ============================================
-        // SWIPER GALLERY
-        // ============================================
         const swiper = new Swiper('.gallery-swiper', {
             slidesPerView: 1,
             spaceBetween: 16,
@@ -2388,9 +2493,6 @@
             },
         });
 
-        // ============================================
-        // LOAD CMS CONTENT
-        // ============================================
         function stripHtml(html) {
             if (!html) return '';
             const tmp = document.createElement('DIV');
@@ -2487,19 +2589,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadWebsiteContent();
         });
-
-        // ============================================
-        // PWA SERVICE WORKER REGISTRATION
-        // ============================================
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(function(registration) {
-                    console.log('✅ Service Worker registered successfully');
-                })
-                .catch(function(error) {
-                    console.log('❌ Service Worker registration failed:', error);
-                });
-        }
     </script>
 </body>
 </html>
