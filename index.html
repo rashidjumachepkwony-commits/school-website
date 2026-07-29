@@ -225,24 +225,48 @@
         }
 
         /* ========================================
-           HEADER BUTTONS - SEQUENCE: Admin, Enroll Now, Student Portal
+           HEADER BUTTONS - SEQUENCE: Student Portal (Rainbow), Enroll Now (Red), Admin
            ======================================== */
 
-        /* ===== ADMIN BUTTON (Gold, smaller) ===== */
-        .main-header .nav-links a.portal-link {
-            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
-            color: var(--kenya-black);
-            font-weight: 600;
-            padding: 5px 16px;
+        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING) ===== */
+        .main-header .nav-links a.student-portal-link {
+            background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
+            background-size: 300% 300%;
+            color: white;
+            font-weight: 800;
+            padding: 8px 20px;
             border-radius: 50px;
-            font-size: 11px;
-            transition: all 0.3s ease;
+            font-size: 13px;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.4), 0 0 40px rgba(255, 180, 70, 0.2);
+            animation: rainbowPulse 3s ease infinite, floatButton 2.5s ease-in-out infinite;
+            letter-spacing: 0.5px;
+            border: 2px solid rgba(255,255,255,0.2);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
         }
-        .main-header .nav-links a.portal-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(212,160,23,0.3);
+        .main-header .nav-links a.student-portal-link::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: shimmer 4s ease-in-out infinite;
         }
-        .main-header .nav-links a.portal-link::after { display: none; }
+        .main-header .nav-links a.student-portal-link i {
+            margin-right: 6px;
+            font-size: 14px;
+            animation: bounceIcon 2s ease-in-out infinite;
+        }
+        .main-header .nav-links a.student-portal-link:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.6), 0 0 60px rgba(255, 180, 70, 0.3);
+            border-color: rgba(255,255,255,0.4);
+        }
+        .main-header .nav-links a.student-portal-link::after { display: none; }
 
         /* ===== ENROLL NOW BUTTON (Red) ===== */
         .main-header .nav-links a.enroll-now-link {
@@ -268,45 +292,21 @@
         }
         .main-header .nav-links a.enroll-now-link::after { display: none; }
 
-        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING) ===== */
-        .main-header .nav-links a.student-portal-link {
-            background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
-            background-size: 300% 300%;
-            color: white;
-            font-weight: 800;
-            padding: 14px 36px;
+        /* ===== ADMIN BUTTON (Gold, smaller) ===== */
+        .main-header .nav-links a.portal-link {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            font-weight: 600;
+            padding: 5px 16px;
             border-radius: 50px;
-            font-size: 20px;
-            transition: all 0.4s ease;
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.4), 0 0 60px rgba(255, 180, 70, 0.2);
-            animation: rainbowPulse 3s ease infinite, floatButton 2.5s ease-in-out infinite;
-            letter-spacing: 0.5px;
-            border: 2px solid rgba(255,255,255,0.2);
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
+            font-size: 11px;
+            transition: all 0.3s ease;
         }
-        .main-header .nav-links a.student-portal-link::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-            animation: shimmer 4s ease-in-out infinite;
+        .main-header .nav-links a.portal-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212,160,23,0.3);
         }
-        .main-header .nav-links a.student-portal-link i {
-            margin-right: 10px;
-            font-size: 22px;
-            animation: bounceIcon 2s ease-in-out infinite;
-        }
-        .main-header .nav-links a.student-portal-link:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 0 40px rgba(255, 107, 107, 0.6), 0 0 80px rgba(255, 180, 70, 0.3), 0 15px 40px rgba(0,0,0,0.3);
-            border-color: rgba(255,255,255,0.4);
-        }
-        .main-header .nav-links a.student-portal-link::after { display: none; }
+        .main-header .nav-links a.portal-link::after { display: none; }
 
         .main-header .mobile-menu-btn {
             display: none;
