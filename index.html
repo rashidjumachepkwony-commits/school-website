@@ -138,7 +138,7 @@
         }
 
         /* ========================================
-           HEADER
+           HEADER - CLEAN, PROFESSIONAL
            ======================================== */
         .main-header {
             background: rgba(10, 22, 40, 0.96);
@@ -239,7 +239,7 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
 
-        /* ===== STUDENT PORTAL BUTTON - RAINBOW GRADIENT (ORIGINAL) ===== */
+        /* ===== STUDENT PORTAL BUTTON - RAINBOW GRADIENT ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
             background-size: 300% 300%;
@@ -279,6 +279,30 @@
         }
         .main-header .nav-links a.student-portal-link::after { display: none; }
 
+        /* ===== ENROLL NOW BUTTON - RED ===== */
+        .main-header .nav-links a.enroll-now-link {
+            background: linear-gradient(135deg, #BB0000, #8B0000);
+            color: white;
+            font-weight: 700;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+            animation: pulseBadgeRed 1.5s infinite;
+        }
+        .main-header .nav-links a.enroll-now-link i {
+            margin-right: 6px;
+            font-size: 14px;
+        }
+        .main-header .nav-links a.enroll-now-link:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 30px rgba(187, 0, 0, 0.5);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .main-header .nav-links a.enroll-now-link::after { display: none; }
+
         .main-header .mobile-menu-btn {
             display: none;
             background: none;
@@ -289,19 +313,19 @@
         }
 
         /* ========================================
-           NOTICE ALERT BAR
+           NOTICE ALERT BAR (MOVED BELOW HEADER)
            ======================================== */
         .notice-alert-bar {
             background: linear-gradient(135deg, var(--kenya-red), #8B0000);
             color: white;
             padding: 6px 0;
-            position: fixed;
-            top: 62px; left: 0; right: 0;
-            z-index: 1001;
+            position: relative;
+            z-index: 999;
             border-bottom: 3px solid var(--school-gold);
             display: none;
             animation: slideDownNotice 0.6s ease forwards;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            margin-top: 62px;
         }
         .notice-alert-bar.show { display: block; }
         .notice-alert-bar .container {
@@ -339,19 +363,17 @@
         .notice-alert-bar .notice-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
 
         /* ========================================
-           NEWS TICKER
+           NEWS TICKER - REMOVED FROM HEADER, PLACED BELOW
            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
             color: white;
             padding: 4px 0;
             border-bottom: 2px solid var(--school-gold);
-            position: fixed;
-            top: 62px; left: 0; right: 0;
-            z-index: 999;
+            position: relative;
+            z-index: 998;
             box-shadow: 0 2px 15px rgba(0,0,0,0.15);
         }
-        .news-ticker-section.show-notice { top: 98px; }
         .news-ticker-section .container {
             display: flex;
             align-items: center;
@@ -411,7 +433,6 @@
             border-bottom: 2px solid var(--school-gold);
             position: relative;
             z-index: 100;
-            margin-top: 62px;
         }
         .top-nav-bar .container {
             display: flex;
@@ -476,8 +497,6 @@
             font-weight: 700;
             animation: pulseBadgeGreen 1.8s infinite;
         }
-
-        /* ===== ENROLL NOW BUTTON - RED ===== */
         .top-nav-bar .nav-links a.enroll-now-link {
             background: linear-gradient(135deg, #BB0000, #8B0000);
             color: white;
@@ -517,8 +536,7 @@
         .section-tabs {
             background: white;
             padding: 8px 0;
-            position: fixed;
-            top: 62px; left: 0; right: 0;
+            position: relative;
             z-index: 100;
             box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             border-bottom: 2px solid var(--school-gold);
@@ -574,18 +592,18 @@
         }
 
         /* ========================================
-           HERO SECTION - REMOVED WHITE SPACE
+           HERO SECTION - NO WHITE SPACE
            ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
-            margin-top: 0;
             display: flex;
             align-items: center;
             text-align: center;
             color: white;
             position: relative;
             overflow: hidden;
-            padding: 100px 0 60px;
+            padding: 80px 0 60px;
+            margin-top: 0;
         }
         .hero-video-bg {
             position: absolute;
@@ -1162,7 +1180,7 @@
         .stat-item p { font-size:13px; opacity:0.6; color:white; font-weight:300; letter-spacing:1px; }
 
         /* ========================================
-           NEWS SECTION - FULL WIDTH, NO WHITE SPACE
+           NEWS SECTION - FULL WIDTH
            ======================================== */
         .news-section {
             padding: 60px 0 80px !important;
@@ -1315,6 +1333,7 @@
             .main-header .nav-links.show { display:flex; }
             .main-header .mobile-menu-btn { display:block; }
             .main-header .nav-links a.student-portal-link { font-size:16px; padding:12px 24px; width:100%; justify-content:center; }
+            .main-header .nav-links a.enroll-now-link { width:100%; justify-content:center; }
             .top-nav-bar .container { flex-direction:column; align-items:stretch; gap:8px; }
             .top-nav-bar .nav-left { justify-content:center; }
             .top-nav-bar .nav-links { justify-content:center; }
@@ -1325,9 +1344,7 @@
             .hero-section p { font-size:16px; }
             .hero-section .btn-group { flex-direction:column; align-items:center; }
             .btn-scroll-down,.btn-outline { width:100%; justify-content:center; }
-            .section-tabs { top:55px; padding:6px 0; }
-            .notice-alert-bar { top:100px; }
-            .news-ticker-section { top:100px; }
+            .section-tabs { padding:6px 0; }
             .section-title { font-size:26px; }
             .content-grid { grid-template-columns:1fr 1fr; }
             .features-grid { grid-template-columns:1fr 1fr; }
@@ -1365,9 +1382,6 @@
             .section-tabs .tab-btn .tab-icon { font-size:10px; }
             .main-header .logo-section h1 { font-size:14px; }
             .main-header .logo-section .school-logo { width:28px; height:28px; }
-            .section-tabs { top:48px; padding:4px 0; }
-            .notice-alert-bar { top:90px; }
-            .news-ticker-section { top:90px; }
             .hero-section { padding:70px 0 30px; }
             .top-nav-bar .nav-links a { font-size:10px; padding:3px 10px; }
             .top-nav-bar .nav-links a i { font-size:11px; }
@@ -1411,7 +1425,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HEADER -->
+    <!-- HEADER - CLEAN, PROFESSIONAL -->
     <!-- ======================================== -->
     <header class="main-header">
         <div class="kenya-flag-strip"></div>
@@ -1427,9 +1441,13 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <!-- STUDENT PORTAL - RAINBOW GRADIENT (ORIGINAL) -->
+                <!-- STUDENT PORTAL - RAINBOW GRADIENT (KEEP THIS ONE) -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
+                </a>
+                <!-- ENROLL NOW - RED BUTTON (REPLACED THE DUPLICATE) -->
+                <a href="admissions.html" class="enroll-now-link">
+                    <i class="fas fa-pen-fancy"></i> Enroll Now
                 </a>
                 <a href="portal.html" class="portal-link">🔐 Admin</a>
                 <a href="contact.html">Contact</a>
@@ -1439,7 +1457,7 @@
     </header>
 
     <!-- ======================================== -->
-    <!-- NOTICE ALERT BAR -->
+    <!-- NOTICE ALERT BAR (BELOW HEADER) -->
     <!-- ======================================== -->
     <div class="notice-alert-bar" id="noticeAlertBar">
         <div class="container">
@@ -1453,7 +1471,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- NEWS TICKER -->
+    <!-- NEWS TICKER (BELOW HEADER, CLEAN) -->
     <!-- ======================================== -->
     <div class="news-ticker-section" id="newsTicker">
         <div class="container">
@@ -1483,11 +1501,9 @@
                 <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
                 <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
                 <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;"><i class="fas fa-user-lock"></i> Admin</a>
-                <!-- ENROLL NOW BUTTON - RED -->
                 <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
             </div>
             <div class="nav-right">
-                <!-- ENROLL NOW QUICK LINK - RED -->
                 <a href="admissions.html" class="enroll-now-link" style="padding:6px 18px;font-size:12px;"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
             </div>
         </div>
@@ -1537,9 +1553,7 @@
 
             <div class="btn-group">
                 <button class="btn-scroll-down" onclick="scrollToContent()"><span>Scroll Down</span><span class="arrow"><i class="fas fa-chevron-down"></i></span></button>
-                <!-- ENROLL NOW - RED BUTTON -->
                 <a href="admissions.html" class="btn-outline" style="background:linear-gradient(135deg,#BB0000,#8B0000);color:white;border:none;"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
-                <!-- STUDENT PORTAL - RAINBOW BUTTON -->
                 <a href="student-portal.html" class="btn-outline" style="border-color:#FF6B6B;background:rgba(255,107,107,0.2);animation:floatButton 2.5s ease-in-out infinite;"><i class="fas fa-user-graduate"></i> Student Portal</a>
             </div>
         </div>
@@ -1825,19 +1839,16 @@
             const bar = document.getElementById('noticeAlertBar');
             bar.classList.remove('show');
             localStorage.setItem('noticeClosed', 'true');
-            document.getElementById('newsTicker').style.top = '100px';
         }
         function showNotice(msg) {
             const bar = document.getElementById('noticeAlertBar');
             if (msg) document.getElementById('noticeMessage').innerHTML = msg;
             bar.classList.add('show');
             localStorage.removeItem('noticeClosed');
-            document.getElementById('newsTicker').style.top = '136px';
         }
         (function checkNotice() {
             if (!localStorage.getItem('noticeClosed')) {
                 document.getElementById('noticeAlertBar').classList.add('show');
-                document.getElementById('newsTicker').style.top = '136px';
             }
         })();
 
