@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Student Portal - Changara Star Academy</title>
+    
+    <!-- ===== PWA / APP META TAGS ===== -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0A1628">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/images/logo edited.ico">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -16,6 +24,100 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f0f2f5;
             min-height: 100vh;
+        }
+
+        /* ===== PWA SPLASH SCREEN EFFECT ===== */
+        .pwa-splash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0A1628 0%, #1a2a4a 40%, #2a1a3a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            color: white;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .pwa-splash-overlay.hidden {
+            opacity: 0;
+            transform: scale(1.05);
+            pointer-events: none;
+        }
+
+        .pwa-splash-overlay .icon {
+            font-size: 72px;
+            animation: pwaFloat 2.5s ease-in-out infinite;
+        }
+
+        .pwa-splash-overlay h1 {
+            font-size: 28px;
+            margin-top: 10px;
+            font-weight: 700;
+        }
+
+        .pwa-splash-overlay h1 span {
+            color: #C9A84C;
+        }
+
+        .pwa-splash-overlay .motto {
+            color: rgba(255,255,255,0.5);
+            font-style: italic;
+            font-size: 14px;
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+
+        .pwa-splash-overlay .loader {
+            margin-top: 30px;
+            width: 200px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .pwa-splash-overlay .loader .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #C9A84C, #F5C842);
+            border-radius: 10px;
+            animation: pwaSplashLoading 2.5s ease-in-out forwards;
+        }
+
+        .pwa-splash-overlay .version {
+            color: rgba(255,255,255,0.15);
+            font-size: 10px;
+            margin-top: 15px;
+        }
+
+        @keyframes pwaSplashLoading {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes pwaFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .pwa-flag-strip {
+            height: 3px;
+            background: linear-gradient(to right, 
+                #000000 0%, #000000 25%, 
+                #BB0000 25%, #BB0000 50%, 
+                #006600 50%, #006600 75%, 
+                #000000 75%, #000000 100%
+            );
+            width: 80%;
+            max-width: 300px;
+            margin-top: 20px;
+            border-radius: 2px;
         }
 
         .header {
@@ -1081,6 +1183,17 @@
     </style>
 </head>
 <body>
+
+    <!-- ===== PWA SPLASH SCREEN ===== -->
+    <div class="pwa-splash-overlay" id="pwaSplash">
+        <img src="/images/logo edited.ico" alt="Logo" style="width:80px; height:80px; margin-bottom:10px;">
+        <h1>CHANGARA <span>STAR</span></h1>
+        <div class="motto">"Nurturing Stars, Building Futures"</div>
+        <div class="loader"><div class="fill"></div></div>
+        <div class="pwa-flag-strip"></div>
+        <div class="version">Student Portal v2.0</div>
+    </div>
+
     <header class="header">
         <div class="header-container">
             <div class="logo">
@@ -1358,7 +1471,6 @@
         function switchTab(tab) {
             currentTab = tab;
             
-            // Update tab buttons
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             
@@ -1538,24 +1650,19 @@
                     }
                     currentStudent = data.student;
                     
-                    // Show nav tabs
                     navTabs.classList.add('show');
                     
-                    // Update profile
                     displayStudentInfo(currentStudent);
                     
-                    // Update filters
                     document.getElementById('assessmentGradeFilter').value = currentStudent.grade;
                     document.getElementById('assignmentGradeFilter').value = currentStudent.grade;
                     
-                    // Load all data
                     fetchStudentFees(studentId);
                     fetchStudentAssessment(studentId);
                     loadAssignmentsForStudent();
                     
                     showLoading(false);
                     
-                    // Switch to assessments tab
                     switchTab('assessments');
                 })
                 .catch(err => {
@@ -2007,6 +2114,40 @@
                 suggestions.classList.remove('active');
             }
         });
+
+        // ============================================
+        // PWA SPLASH SCREEN - HIDE AFTER LOAD
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const splash = document.getElementById('pwaSplash');
+                if (splash) {
+                    splash.classList.add('hidden');
+                    setTimeout(function() {
+                        splash.style.display = 'none';
+                    }, 600);
+                }
+            }, 2500);
+        });
+
+        // ============================================
+        // REGISTER SERVICE WORKER
+        // ============================================
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                    console.log('✅ Service Worker registered successfully');
+                })
+                .catch(function(error) {
+                    console.log('❌ Service Worker registration failed:', error);
+                });
+        }
+
+        // Check if running in standalone mode (PWA)
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('✅ Running as standalone PWA app');
+            document.body.classList.add('pwa-mode');
+        }
 
         // ============================================
         // INITIALIZE
