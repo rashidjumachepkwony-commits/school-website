@@ -1,22 +1,16 @@
-// ============================================
-// SERVICE WORKER - Offline & App-like Experience
-// ============================================
-
 const CACHE_NAME = 'changara-star-v1';
 const STATIC_ASSETS = [
-    'student-portal.html',
     'index.html',
+    'student-portal.html',
     'about.html',
     'academics.html',
     'contact.html',
     'portal.html',
     'manifest.json',
+    '/images/logo edited.ico',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
-// ============================================
-// INSTALL - Cache core assets
-// ============================================
 self.addEventListener('install', function(event) {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -34,9 +28,6 @@ self.addEventListener('install', function(event) {
     );
 });
 
-// ============================================
-// ACTIVATE - Clean old caches
-// ============================================
 self.addEventListener('activate', function(event) {
     event.waitUntil(
         caches.keys().then(function(cacheNames) {
@@ -56,11 +47,7 @@ self.addEventListener('activate', function(event) {
     );
 });
 
-// ============================================
-// FETCH - Serve from cache, fallback to network
-// ============================================
 self.addEventListener('fetch', function(event) {
-    // Skip cross-origin requests
     if (!event.request.url.startsWith(self.location.origin)) {
         return;
     }
@@ -69,14 +56,10 @@ self.addEventListener('fetch', function(event) {
         caches.match(event.request)
             .then(function(cachedResponse) {
                 if (cachedResponse) {
-                    // Return cached version (fast!)
                     return cachedResponse;
                 }
-                
-                // Try network and cache for future
                 return fetch(event.request)
                     .then(function(networkResponse) {
-                        // Only cache successful responses
                         if (networkResponse && networkResponse.status === 200) {
                             const responseClone = networkResponse.clone();
                             caches.open(CACHE_NAME)
@@ -87,7 +70,6 @@ self.addEventListener('fetch', function(event) {
                         return networkResponse;
                     })
                     .catch(function() {
-                        // Offline fallback
                         return new Response(
                             `
                             <!DOCTYPE html>
@@ -144,38 +126,5 @@ self.addEventListener('fetch', function(event) {
                         );
                     });
             })
-    );
-});
-
-// ============================================
-// PUSH NOTIFICATIONS (Optional)
-// ============================================
-self.addEventListener('push', function(event) {
-    const data = event.data ? event.data.json() : {};
-    const title = data.title || '📢 Changara Star Academy';
-    const options = {
-        body: data.body || 'New update from your school.',
-        icon: 'logo-192.png',
-        badge: 'logo-192.png',
-        vibrate: [200, 100, 200],
-        data: {
-            url: data.url || '/student-portal.html'
-        }
-    };
-    
-    event.waitUntil(
-        self.registration.showNotification(title, options)
-    );
-});
-
-// ============================================
-// NOTIFICATION CLICK
-// ============================================
-self.addEventListener('notificationclick', function(event) {
-    event.notification.close();
-    
-    const url = event.notification.data.url || '/student-portal.html';
-    event.waitUntil(
-        clients.openWindow(url)
     );
 });

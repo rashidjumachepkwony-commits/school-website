@@ -1,8 +1,8 @@
 {
-    "name": "Changara Star Academy - Student Portal",
+    "name": "Changara Star Academy",
     "short_name": "Changara Star",
-    "description": "Student Portal for Changara Star Academy - View Results, Assignments, and Fees",
-    "start_url": "student-portal.html",
+    "description": "Changara Star Academy - Excellence in Education",
+    "start_url": "index.html",
     "display": "standalone",
     "background_color": "#0A1628",
     "theme_color": "#0A1628",
@@ -21,35 +21,13 @@
             "purpose": "any maskable"
         }
     ],
-    "screenshots": [
-        {
-            "src": "/images/logo edited.ico",
-            "sizes": "1080x1920",
-            "type": "image/x-icon"
-        }
-    ],
-    "categories": ["education", "productivity"],
+    "categories": ["education"],
     "shortcuts": [
         {
-            "name": "My Results",
-            "short_name": "Results",
-            "description": "View your assessment results",
-            "url": "student-portal.html#assessments",
-            "icons": [{ "src": "/images/logo edited.ico", "sizes": "192x192" }]
-        },
-        {
-            "name": "Assignments",
-            "short_name": "Assignments",
-            "description": "Download holiday assignments",
-            "url": "student-portal.html#assignments",
-            "icons": [{ "src": "/images/logo edited.ico", "sizes": "192x192" }]
-        },
-        {
-            "name": "Fee Status",
-            "short_name": "Fees",
-            "description": "Check your fee balance",
-            "url": "student-portal.html#fees",
-            "icons": [{ "src": "/images/logo edited.ico", "sizes": "192x192" }]
+            "name": "Student Portal",
+            "short_name": "Portal",
+            "description": "Access your student portal",
+            "url": "student-portal.html"
         }
     ]
 }
