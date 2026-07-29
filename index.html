@@ -138,7 +138,7 @@
         }
 
         /* ========================================
-           HEADER - CLEAN, PROFESSIONAL
+           HEADER
            ======================================== */
         .main-header {
             background: rgba(10, 22, 40, 0.96);
@@ -224,6 +224,11 @@
             color: var(--school-gold);
         }
 
+        /* ========================================
+           HEADER BUTTONS - SEQUENCE: Admin, Enroll Now, Student Portal
+           ======================================== */
+
+        /* ===== ADMIN BUTTON (Gold, smaller) ===== */
         .main-header .nav-links a.portal-link {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
@@ -239,7 +244,31 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
 
-        /* ===== STUDENT PORTAL BUTTON - RAINBOW GRADIENT ===== */
+        /* ===== ENROLL NOW BUTTON (Red) ===== */
+        .main-header .nav-links a.enroll-now-link {
+            background: linear-gradient(135deg, #BB0000, #8B0000);
+            color: white;
+            font-weight: 700;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+            animation: pulseBadgeRed 1.5s infinite;
+        }
+        .main-header .nav-links a.enroll-now-link i {
+            margin-right: 6px;
+            font-size: 14px;
+        }
+        .main-header .nav-links a.enroll-now-link:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 30px rgba(187, 0, 0, 0.5);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .main-header .nav-links a.enroll-now-link::after { display: none; }
+
+        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING) ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
             background-size: 300% 300%;
@@ -279,30 +308,6 @@
         }
         .main-header .nav-links a.student-portal-link::after { display: none; }
 
-        /* ===== ENROLL NOW BUTTON - RED ===== */
-        .main-header .nav-links a.enroll-now-link {
-            background: linear-gradient(135deg, #BB0000, #8B0000);
-            color: white;
-            font-weight: 700;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-size: 13px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
-            border: 2px solid rgba(255,255,255,0.1);
-            animation: pulseBadgeRed 1.5s infinite;
-        }
-        .main-header .nav-links a.enroll-now-link i {
-            margin-right: 6px;
-            font-size: 14px;
-        }
-        .main-header .nav-links a.enroll-now-link:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 0 30px rgba(187, 0, 0, 0.5);
-            border-color: rgba(255,255,255,0.3);
-        }
-        .main-header .nav-links a.enroll-now-link::after { display: none; }
-
         .main-header .mobile-menu-btn {
             display: none;
             background: none;
@@ -313,7 +318,7 @@
         }
 
         /* ========================================
-           NOTICE ALERT BAR (MOVED BELOW HEADER)
+           NOTICE ALERT BAR
            ======================================== */
         .notice-alert-bar {
             background: linear-gradient(135deg, var(--kenya-red), #8B0000);
@@ -363,7 +368,7 @@
         .notice-alert-bar .notice-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
 
         /* ========================================
-           NEWS TICKER - REMOVED FROM HEADER, PLACED BELOW
+           NEWS TICKER
            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
@@ -592,7 +597,7 @@
         }
 
         /* ========================================
-           HERO SECTION - NO WHITE SPACE
+           HERO SECTION
            ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
@@ -1425,7 +1430,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HEADER - CLEAN, PROFESSIONAL -->
+    <!-- HEADER - SEQUENCE: Home, About, Student Portal (Rainbow), Enroll Now (Red), Admin, Contact -->
     <!-- ======================================== -->
     <header class="main-header">
         <div class="kenya-flag-strip"></div>
@@ -1441,14 +1446,15 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <!-- STUDENT PORTAL - RAINBOW GRADIENT (KEEP THIS ONE) -->
+                <!-- STUDENT PORTAL - RAINBOW GLOWING -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
-                <!-- ENROLL NOW - RED BUTTON (REPLACED THE DUPLICATE) -->
+                <!-- ENROLL NOW - RED -->
                 <a href="admissions.html" class="enroll-now-link">
                     <i class="fas fa-pen-fancy"></i> Enroll Now
                 </a>
+                <!-- ADMIN - GOLD -->
                 <a href="portal.html" class="portal-link">🔐 Admin</a>
                 <a href="contact.html">Contact</a>
             </nav>
@@ -1457,7 +1463,7 @@
     </header>
 
     <!-- ======================================== -->
-    <!-- NOTICE ALERT BAR (BELOW HEADER) -->
+    <!-- NOTICE ALERT BAR -->
     <!-- ======================================== -->
     <div class="notice-alert-bar" id="noticeAlertBar">
         <div class="container">
@@ -1471,7 +1477,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- NEWS TICKER (BELOW HEADER, CLEAN) -->
+    <!-- NEWS TICKER -->
     <!-- ======================================== -->
     <div class="news-ticker-section" id="newsTicker">
         <div class="container">
