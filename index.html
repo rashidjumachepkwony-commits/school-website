@@ -39,7 +39,7 @@
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-        /* ===== SPLASH SCREEN ===== */
+        /* ===== SPLASH SCREEN - Shows during Render.com spin-up ===== */
         #splash-screen {
             position: fixed;
             inset: 0;
@@ -58,12 +58,12 @@
             pointer-events: none;
         }
         .splash-card {
-            max-width: 700px;
+            max-width: 750px;
             width: 100%;
             background: rgba(255,255,255,0.04);
             backdrop-filter: blur(16px);
             border-radius: 32px;
-            padding: 40px 30px;
+            padding: 45px 35px;
             border: 1px solid rgba(212, 160, 23, 0.15);
             box-shadow: 0 30px 80px rgba(0,0,0,0.6);
             text-align: center;
@@ -77,7 +77,7 @@
         }
         .splash-card h1 {
             font-family: var(--font-primary);
-            font-size: 28px;
+            font-size: 30px;
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -96,62 +96,83 @@
             background: var(--school-gold);
             margin: 12px auto;
         }
+        /* LARGER SPLASH NEWS AREA - fills white space */
         .splash-news {
-            background: rgba(255,255,255,0.03);
+            background: rgba(255,255,255,0.05);
             border-radius: 20px;
-            padding: 16px 18px;
-            margin: 16px 0 20px;
-            border-left: 4px solid var(--school-gold);
+            padding: 24px 22px;
+            margin: 20px 0 24px;
+            border-left: 5px solid var(--school-gold);
             text-align: left;
+            min-height: 180px;
         }
         .splash-news .label {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 11px;
+            gap: 10px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--school-gold);
             letter-spacing: 1px;
             text-transform: uppercase;
+            margin-bottom: 8px;
         }
-        .splash-news .label i { font-size: 14px; }
+        .splash-news .label i { font-size: 16px; }
         .splash-news .headline {
-            font-size: 16px;
-            font-weight: 600;
-            margin-top: 4px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 6px;
             color: #fff;
+            line-height: 1.4;
         }
         .splash-news .meta {
-            font-size: 12px;
-            color: rgba(255,255,255,0.3);
-            margin-top: 4px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 8px;
         }
         .splash-news .badge {
             display: inline-block;
             background: var(--kenya-red);
             color: white;
-            font-size: 8px;
+            font-size: 9px;
             font-weight: 700;
-            padding: 2px 12px;
+            padding: 3px 14px;
             border-radius: 50px;
             letter-spacing: 1px;
             animation: pulseBadge 1.5s infinite;
         }
+        .splash-news .news-sub {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+        }
+        .splash-news .news-sub i {
+            color: var(--school-gold);
+            margin-right: 6px;
+        }
         .splash-loader {
             display: flex;
             justify-content: center;
-            gap: 6px;
-            margin-top: 6px;
+            gap: 8px;
+            margin-top: 8px;
         }
         .splash-loader .dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             background: var(--school-gold);
             border-radius: 50%;
             animation: splashDot 1.2s infinite ease-in-out;
         }
         .splash-loader .dot:nth-child(2) { animation-delay: 0.2s; }
         .splash-loader .dot:nth-child(3) { animation-delay: 0.4s; }
+        .splash-loading-text {
+            font-size: 11px;
+            color: rgba(255,255,255,0.2);
+            margin-top: 8px;
+            letter-spacing: 2px;
+        }
         @keyframes splashDot {
             0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
             40% { transform: scale(1); opacity: 1; }
@@ -1140,32 +1161,47 @@
         }
         .stat-item p { font-size:13px; opacity:0.6; color:white; font-weight:300; letter-spacing:1px; }
 
-        /* ===== NEWS SECTION (enlarged) ===== */
+        /* ===== ENLARGED NEWS SECTION - fills white space ===== */
         .news-section {
-            padding:60px 0 80px;
+            padding:70px 0 90px;
             background:#f0f2f5;
             scroll-margin-top:50px;
         }
         .news-grid {
             display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(340px,1fr));
-            gap:30px;
+            grid-template-columns:repeat(auto-fit, minmax(360px,1fr));
+            gap:35px;
         }
         .news-item {
             background:white;
-            padding:30px 28px;
-            border-radius:20px;
-            box-shadow:0 6px 30px rgba(0,0,0,0.05);
-            border-left:6px solid var(--school-gold);
+            padding:35px 32px;
+            border-radius:24px;
+            box-shadow:0 8px 35px rgba(0,0,0,0.06);
+            border-left:8px solid var(--school-gold);
             transition:all 0.3s ease;
+            min-height: 220px;
         }
         .news-item:hover {
-            transform:translateY(-6px);
-            box-shadow:0 16px 50px rgba(0,0,0,0.08);
+            transform:translateY(-8px);
+            box-shadow:0 20px 60px rgba(0,0,0,0.1);
         }
-        .news-item h4 { color:var(--school-blue-dark); font-size:20px; margin-bottom:10px; font-weight:700; }
-        .news-item p { color:#444; font-size:15px; line-height:1.7; }
-        .news-item .date { font-size:13px; color:#999; margin-top:12px; display:block; }
+        .news-item h4 {
+            color:var(--school-blue-dark);
+            font-size:22px;
+            margin-bottom:12px;
+            font-weight:700;
+        }
+        .news-item p {
+            color:#444;
+            font-size:16px;
+            line-height:1.8;
+        }
+        .news-item .date {
+            font-size:13px;
+            color:#999;
+            margin-top:14px;
+            display:block;
+        }
 
         /* ===== FOOTER ===== */
         .main-footer {
@@ -1266,6 +1302,8 @@
             .splash-card { padding:30px 18px; }
             .splash-card .school-icon-big { font-size:48px; }
             .splash-card h1 { font-size:22px; }
+            .splash-news .headline { font-size:17px; }
+            .splash-news { padding:18px 16px; min-height:140px; }
         }
         @media (max-width:480px) {
             .content-grid { grid-template-columns:1fr; }
@@ -1291,7 +1329,8 @@
 <body>
 
     <!-- ======================================== -->
-    <!-- SPLASH SCREEN (News for parents/teachers/students) -->
+    <!-- SPLASH SCREEN - Shows during Render.com spin-up time -->
+    <!-- Parents, teachers, and students read news here -->
     <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
@@ -1300,7 +1339,7 @@
             <div class="sub">ASSURANCE TO EXCELLENCE</div>
             <div class="divider"></div>
 
-            <!-- Splash News Area (enlarged) -->
+            <!-- LARGER SPLASH NEWS AREA - fills white space -->
             <div class="splash-news">
                 <div class="label">
                     <i class="fas fa-newspaper"></i> LATEST NEWS
@@ -1312,19 +1351,19 @@
                 <div class="meta" id="splashMeta">
                     📅 Posted: 25 August 2026 • 🕒 8:00 AM
                 </div>
-                <div style="margin-top:10px; font-size:13px; color:rgba(255,255,255,0.5); border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">
-                    <i class="fas fa-arrow-right" style="color:var(--school-gold);"></i>
-                    <span id="splashSub">Parents' Meeting on 20th September • Sports Day 15th September</span>
+                <div class="news-sub" id="splashSub">
+                    <i class="fas fa-arrow-right"></i>
+                    Parents' Meeting on 20th September • Sports Day 15th September • New Computer Lab Open!
                 </div>
             </div>
 
-            <!-- Loader -->
+            <!-- Loading indicator -->
             <div class="splash-loader">
                 <div class="dot"></div>
                 <div class="dot"></div>
                 <div class="dot"></div>
             </div>
-            <div style="font-size:10px; color:rgba(255,255,255,0.2); margin-top:6px;">Loading experience …</div>
+            <div class="splash-loading-text">Loading your school experience …</div>
         </div>
     </div>
 
@@ -1579,7 +1618,7 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- NEWS SECTION (enlarged) -->
+    <!-- ENLARGED NEWS SECTION - fills white space -->
     <!-- ======================================== -->
     <section class="news-section" id="slide-news">
         <div class="container">
@@ -1588,19 +1627,19 @@
             <div class="news-grid" id="newsGrid">
                 <div class="news-item" data-aos="fade-up" data-aos-delay="100">
                     <h4>📅 Term 3 Opening</h4>
-                    <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.</p>
+                    <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM. Parents are reminded to ensure all school fees are paid before the opening date.</p>
                     <span class="date">Posted: 25 August 2026</span>
                     <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="200">
                     <h4>🏆 Sports Day</h4>
-                    <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.</p>
+                    <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend and cheer for their children. Various competitions including athletics, ball games, and cultural events.</p>
                     <span class="date">Posted: 24 August 2026</span>
                     <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="300">
                     <h4>📚 Parents' Meeting</h4>
-                    <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall.</p>
+                    <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall. Important agenda items include academic performance, school development, and upcoming activities.</p>
                     <span class="date">Posted: 23 August 2026</span>
                     <a href="parents-corner.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
@@ -1669,33 +1708,25 @@
         // ===== INIT AOS =====
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
-        // ===== SPLASH SCREEN =====
+        // ===== SPLASH SCREEN - hides after 3.5s (Render.com spin-up time) =====
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
             splash.classList.add('hide-splash');
-            // Optionally remove from DOM after transition
             setTimeout(() => { splash.style.display = 'none'; }, 800);
         }
-        // Hide splash after 3.5s (simulate loading)
+        // Hide splash after 3.5 seconds - this covers the Render.com cold start
         setTimeout(hideSplash, 3500);
 
-        // ===== SPLASH DYNAMIC NEWS (can be updated via CMS later) =====
-        // For now, static content shown. But we can override from API.
+        // ===== SPLASH DYNAMIC NEWS =====
         async function updateSplashNews() {
             try {
                 const res = await fetch('/api/content');
                 const data = await res.json();
                 if (data.success && data.content) {
                     const c = data.content;
-                    if (c.splashHeadline) {
-                        document.getElementById('splashHeadline').textContent = c.splashHeadline;
-                    }
-                    if (c.splashMeta) {
-                        document.getElementById('splashMeta').textContent = c.splashMeta;
-                    }
-                    if (c.splashSub) {
-                        document.getElementById('splashSub').textContent = c.splashSub;
-                    }
+                    if (c.splashHeadline) document.getElementById('splashHeadline').textContent = c.splashHeadline;
+                    if (c.splashMeta) document.getElementById('splashMeta').textContent = c.splashMeta;
+                    if (c.splashSub) document.getElementById('splashSub').innerHTML = c.splashSub;
                 }
             } catch (e) { /* fallback to default */ }
         }
@@ -1776,7 +1807,7 @@
             breakpoints: { 640: { slidesPerView: 1 }, 768: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }
         });
 
-        // ===== CMS LOAD (optional) =====
+        // ===== CMS LOAD =====
         function stripHtml(html) { if (!html) return ''; const d = document.createElement('DIV'); d.innerHTML = html; return d.textContent || d.innerText || ''; }
         async function loadCMS() {
             try {
