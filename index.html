@@ -24,7 +24,7 @@
 
     <style>
         /* ============================================================
-           SPLASH SCREEN - SHOWS IMMEDIATELY WHILE SERVER WAKES UP
+           SPLASH SCREEN WITH LARGE NEWS AREA
            ============================================================ */
         #splashScreen {
             position: fixed;
@@ -40,6 +40,8 @@
             z-index: 99999;
             color: white;
             transition: opacity 0.8s ease, transform 0.8s ease;
+            overflow-y: auto;
+            padding: 20px;
         }
 
         #splashScreen.hidden {
@@ -48,38 +50,206 @@
             pointer-events: none;
         }
 
+        .splash-content {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            min-height: 80vh;
+            justify-content: center;
+        }
+
         #splashScreen .logo-img {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 10px;
-            border-radius: 20px;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 5px;
+            border-radius: 16px;
             animation: splashFloat 3s ease-in-out infinite;
         }
 
-        #splashScreen h1 {
-            font-size: 34px;
+        #splashScreen .splash-title {
+            font-size: 28px;
             font-weight: 700;
-            margin-top: 5px;
             letter-spacing: 1px;
         }
 
-        #splashScreen h1 span {
+        #splashScreen .splash-title span {
             color: #C9A84C;
         }
 
-        #splashScreen .motto {
+        #splashScreen .splash-motto {
             color: rgba(255,255,255,0.5);
             font-style: italic;
-            font-size: 15px;
-            margin-top: 5px;
+            font-size: 13px;
+            margin-top: 2px;
             letter-spacing: 2px;
         }
 
+        /* ===== LARGE NEWS SECTION - FILLS WHITE SPACE ===== */
+        .splash-news-section {
+            margin-top: 15px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 15px 18px;
+            border: 1px solid rgba(255,255,255,0.06);
+            flex: 1;
+            max-height: none;
+            min-height: 250px;
+            width: 100%;
+            overflow-y: auto;
+        }
+
+        .splash-news-section::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .splash-news-section::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+
+        .splash-news-section::-webkit-scrollbar-thumb {
+            background: #C9A84C;
+            border-radius: 10px;
+        }
+
+        .splash-news-section .news-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 8px;
+        }
+
+        .splash-news-section .news-label i {
+            color: #C9A84C;
+            font-size: 16px;
+        }
+
+        .splash-news-item {
+            padding: 10px 14px;
+            margin-bottom: 6px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border-left: 3px solid #C9A84C;
+            text-align: left;
+            transition: background 0.3s ease;
+        }
+
+        .splash-news-item:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .splash-news-item .news-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.4;
+        }
+
+        .splash-news-item .news-excerpt {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 4px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .splash-news-item .news-date {
+            font-size: 9px;
+            color: rgba(255,255,255,0.25);
+            margin-top: 4px;
+        }
+
+        .splash-news-item .news-tag {
+            display: inline-block;
+            font-size: 8px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            background: rgba(201, 168, 76, 0.15);
+            color: #C9A84C;
+            margin-right: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .splash-news-empty {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255,255,255,0.2);
+            font-size: 13px;
+        }
+
+        .splash-news-empty i {
+            display: block;
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.08);
+        }
+
+        /* ===== BIG STUDENT PORTAL BUTTON ===== */
+        .splash-student-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            width: 100%;
+            text-align: center;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 30px rgba(111, 66, 193, 0.3);
+            animation: pulseStudentBtn 2s infinite;
+        }
+
+        .splash-student-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(111, 66, 193, 0.5);
+        }
+
+        .splash-student-btn i {
+            margin-right: 10px;
+            font-size: 22px;
+        }
+
+        .splash-student-btn .btn-sub {
+            display: block;
+            font-size: 12px;
+            font-weight: 400;
+            opacity: 0.7;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes pulseStudentBtn {
+            0%, 100% { box-shadow: 0 8px 30px rgba(111, 66, 193, 0.3); }
+            50% { box-shadow: 0 8px 50px rgba(111, 66, 193, 0.6); }
+        }
+
+        /* ===== LOADER ===== */
         #splashScreen .loader-bar {
-            margin-top: 35px;
-            width: 250px;
-            height: 4px;
-            background: rgba(255,255,255,0.1);
+            margin-top: 12px;
+            width: 100%;
+            max-width: 250px;
+            height: 3px;
+            background: rgba(255,255,255,0.08);
             border-radius: 10px;
             overflow: hidden;
         }
@@ -93,27 +263,14 @@
         }
 
         #splashScreen .loading-text {
-            color: rgba(255,255,255,0.3);
-            font-size: 13px;
-            margin-top: 12px;
+            color: rgba(255,255,255,0.2);
+            font-size: 10px;
+            margin-top: 6px;
             letter-spacing: 1px;
         }
 
-        #splashScreen .loading-text .dots::after {
-            content: '';
-            animation: dots 1.5s steps(4, end) infinite;
-        }
-
-        @keyframes dots {
-            0% { content: ''; }
-            25% { content: '.'; }
-            50% { content: '..'; }
-            75% { content: '...'; }
-            100% { content: ''; }
-        }
-
         #splashScreen .flag-strip {
-            height: 3px;
+            height: 2px;
             background: linear-gradient(to right, 
                 #000000 0%, #000000 25%, 
                 #BB0000 25%, #BB0000 50%, 
@@ -121,15 +278,15 @@
                 #000000 75%, #000000 100%
             );
             width: 60%;
-            max-width: 280px;
-            margin-top: 18px;
+            max-width: 200px;
+            margin-top: 10px;
             border-radius: 2px;
         }
 
         #splashScreen .version {
-            color: rgba(255,255,255,0.12);
-            font-size: 10px;
-            margin-top: 12px;
+            color: rgba(255,255,255,0.08);
+            font-size: 8px;
+            margin-top: 8px;
             letter-spacing: 1px;
         }
 
@@ -141,7 +298,48 @@
 
         @keyframes splashFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* ========================================
+           RESPONSIVE FOR SPLASH
+           ======================================== */
+        @media (max-width: 768px) {
+            #splashScreen .splash-title { font-size: 22px; }
+            #splashScreen .logo-img { width: 65px; height: 65px; }
+            .splash-news-section { padding: 12px 14px; min-height: 200px; }
+            .splash-news-item .news-title { font-size: 13px; }
+            .splash-news-item .news-excerpt { font-size: 11px; }
+            #splashScreen .loader-bar { max-width: 200px; }
+            .splash-student-btn { 
+                font-size: 17px; 
+                padding: 14px 30px;
+            }
+            .splash-student-btn i { font-size: 18px; }
+            .splash-student-btn .btn-sub { font-size: 11px; }
+        }
+
+        @media (max-width: 480px) {
+            #splashScreen .splash-title { font-size: 18px; }
+            #splashScreen .logo-img { width: 55px; height: 55px; }
+            #splashScreen .splash-motto { font-size: 11px; }
+            .splash-news-section { 
+                padding: 10px 12px; 
+                min-height: 160px;
+                border-radius: 12px;
+            }
+            .splash-news-item { padding: 8px 10px; }
+            .splash-news-item .news-title { font-size: 12px; }
+            .splash-news-item .news-excerpt { font-size: 10px; }
+            #splashScreen .loader-bar { max-width: 160px; }
+            .splash-student-btn { 
+                font-size: 15px; 
+                padding: 12px 20px;
+                border-radius: 12px;
+            }
+            .splash-student-btn i { font-size: 16px; }
+            .splash-student-btn .btn-sub { font-size: 10px; }
+            .splash-news-section .news-label { font-size: 10px; }
         }
 
         /* ========================================
@@ -1631,9 +1829,15 @@
             .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
             .hero-video-play .play-text { font-size: 10px; }
 
-            #splashScreen h1 { font-size: 26px; }
-            #splashScreen .logo-img { width: 80px; height: 80px; }
-            #splashScreen .loader-bar { width: 200px; }
+            #splashScreen .splash-title { font-size: 22px; }
+            #splashScreen .logo-img { width: 65px; height: 65px; }
+            .splash-news-section { padding: 12px 14px; min-height: 200px; }
+            .splash-news-item .news-title { font-size: 13px; }
+            .splash-news-item .news-excerpt { font-size: 11px; }
+            #splashScreen .loader-bar { max-width: 200px; }
+            .splash-student-btn { font-size: 17px; padding: 14px 30px; }
+            .splash-student-btn i { font-size: 18px; }
+            .splash-student-btn .btn-sub { font-size: 11px; }
         }
 
         @media (max-width: 480px) {
@@ -1659,28 +1863,59 @@
             .top-nav-bar .nav-links a i {
                 font-size: 11px;
             }
-            #splashScreen h1 { font-size: 22px; }
-            #splashScreen .logo-img { width: 70px; height: 70px; }
-            #splashScreen .loader-bar { width: 180px; }
-            #splashScreen .motto { font-size: 12px; }
+            #splashScreen .splash-title { font-size: 18px; }
+            #splashScreen .logo-img { width: 55px; height: 55px; }
+            #splashScreen .splash-motto { font-size: 11px; }
+            .splash-news-section { padding: 10px 12px; min-height: 160px; border-radius: 12px; }
+            .splash-news-item { padding: 8px 10px; }
+            .splash-news-item .news-title { font-size: 12px; }
+            .splash-news-item .news-excerpt { font-size: 10px; }
+            #splashScreen .loader-bar { max-width: 160px; }
+            .splash-student-btn { font-size: 15px; padding: 12px 20px; border-radius: 12px; }
+            .splash-student-btn i { font-size: 16px; }
+            .splash-student-btn .btn-sub { font-size: 10px; }
+            .splash-news-section .news-label { font-size: 10px; }
         }
     </style>
 </head>
 <body>
 
     <!-- ============================================================
-    SPLASH SCREEN - SHOWS IMMEDIATELY WHILE SERVER WAKES UP
+    SPLASH SCREEN WITH LARGE NEWS AREA & BIG STUDENT PORTAL BUTTON
     ============================================================ -->
     <div id="splashScreen">
-        <img src="/images/logo edited.ico" alt="Changara Star Academy" class="logo-img">
-        <h1>CHANGARA <span>STAR</span></h1>
-        <div class="motto">"Assurance to Excellence"</div>
-        <div class="loader-bar">
-            <div class="fill"></div>
+        <div class="splash-content">
+            <img src="/images/logo edited.ico" alt="Changara Star Academy" class="logo-img">
+            <div class="splash-title">CHANGARA <span>STAR</span></div>
+            <div class="splash-motto">"Assurance to Excellence"</div>
+
+            <!-- ===== LARGE NEWS SECTION - FILLS WHITE SPACE ===== -->
+            <div class="splash-news-section" id="splashNews">
+                <div class="news-label">
+                    <i class="fas fa-newspaper"></i> School Updates
+                </div>
+                <div id="splashNewsList">
+                    <div class="splash-news-empty">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Loading latest news...
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BIG STUDENT PORTAL BUTTON ===== -->
+            <a href="student-portal.html" class="splash-student-btn">
+                <i class="fas fa-user-graduate"></i> Student Portal
+                <span class="btn-sub">🔐 Access your results, assignments & fees</span>
+            </a>
+
+            <!-- ===== LOADER ===== -->
+            <div class="loader-bar">
+                <div class="fill"></div>
+            </div>
+            <div class="loading-text">Loading <span class="dots"></span></div>
+            <div class="flag-strip"></div>
+            <div class="version">v2.0 • PWA Ready</div>
         </div>
-        <div class="loading-text">Loading <span class="dots"></span></div>
-        <div class="flag-strip"></div>
-        <div class="version">v2.0 • PWA Ready</div>
     </div>
 
     <!-- ======================================== -->
@@ -1953,6 +2188,7 @@
             <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
             <div class="content-grid">
+                <!-- Academics Card -->
                 <div class="content-card card-academics" id="slide-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
                         🔥 NEW
@@ -1966,6 +2202,7 @@
                     <span class="badge">📢 Explore</span>
                     <div class="card-cta">👆 Click to Explore</div>
                 </div>
+                <!-- Admissions Card -->
                 <div class="content-card card-admissions" id="slide-admissions" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130">
                     <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
                         📢 ENROLLING
@@ -1979,6 +2216,7 @@
                     <span class="badge">📢 Apply Now</span>
                     <div class="card-cta">👆 Apply Now</div>
                 </div>
+                <!-- Facilities Card -->
                 <div class="content-card card-facilities" id="slide-facilities" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
                     <div style="position: absolute; top: -8px; right: -8px; background: #17a2b8; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeBlue 2s infinite; box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4);">
                         🏫 MODERN
@@ -1992,6 +2230,7 @@
                     <span class="badge">🏗️ Explore</span>
                     <div class="card-cta">👆 View Facilities</div>
                 </div>
+                <!-- Performance Card -->
                 <div class="content-card card-performance" id="slide-performance" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
                     <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);">
                         🏆 EXCELLENCE
@@ -2005,6 +2244,7 @@
                     <span class="badge">🏆 Results</span>
                     <div class="card-cta">👆 See Results</div>
                 </div>
+                <!-- Parents Corner Card -->
                 <div class="content-card card-parents" id="slide-parents" onclick="window.location.href='parents-corner.html'" data-aos="fade-up" data-aos-delay="220">
                     <div style="position: absolute; top: -8px; right: -8px; background: #fd7e14; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(253, 126, 20, 0.4);">
                         👨‍👩‍👧‍👦 FAMILY
@@ -2018,6 +2258,7 @@
                     <span class="badge">📋 Info</span>
                     <div class="card-cta">👆 View Info</div>
                 </div>
+                <!-- Downloads Card -->
                 <div class="content-card card-downloads" id="slide-downloads" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
                     <div style="position: absolute; top: -8px; right: -8px; background: #20c997; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(32, 201, 151, 0.4);">
                         📥 DOWNLOAD
@@ -2031,6 +2272,7 @@
                     <span class="badge">📥 Get</span>
                     <div class="card-cta">👆 Download</div>
                 </div>
+                <!-- Fees Card -->
                 <div class="content-card card-fees" id="slide-fees" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
                     <div style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 2.2s infinite; box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);">
                         💰 AFFORDABLE
@@ -2044,6 +2286,7 @@
                     <span class="badge">💰 View</span>
                     <div class="card-cta">👆 View Fees</div>
                 </div>
+                <!-- Student Portal Card -->
                 <div class="content-card card-student-portal" onclick="window.location.href='student-portal.html'" data-aos="fade-up" data-aos-delay="310">
                     <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseStudentPortal 2s infinite; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.5);">
                         🎓 NEW
@@ -2206,9 +2449,88 @@
 
     <script>
         // ============================================================
+        // LOAD NEWS ON SPLASH SCREEN
+        // ============================================================
+        async function loadSplashNews() {
+            const newsList = document.getElementById('splashNewsList');
+            
+            try {
+                const response = await fetch('/api/content');
+                const data = await response.json();
+                
+                if (data.success && data.content && data.content.homeNews) {
+                    const news = data.content.homeNews;
+                    
+                    if (news.length > 0) {
+                        const allNews = news.slice(0, 8);
+                        
+                        let html = '';
+                        allNews.forEach(item => {
+                            const title = item.title || 'School Update';
+                            const content = item.content || '';
+                            const date = item.date ? new Date(item.date).toLocaleDateString('en-KE') : '';
+                            const category = item.category || 'Update';
+                            
+                            const excerpt = content.length > 80 ? content.substring(0, 80) + '...' : content;
+                            
+                            html += `
+                                <div class="splash-news-item">
+                                    <div>
+                                        <span class="news-tag">${category}</span>
+                                        <span class="news-title">${title}</span>
+                                    </div>
+                                    ${excerpt ? `<div class="news-excerpt">${excerpt}</div>` : ''}
+                                    ${date ? `<div class="news-date">📅 ${date}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                        
+                        newsList.innerHTML = html;
+                    } else {
+                        showDefaultNews();
+                    }
+                } else {
+                    showDefaultNews();
+                }
+            } catch (error) {
+                showDefaultNews();
+            }
+        }
+
+        function showDefaultNews() {
+            const newsList = document.getElementById('splashNewsList');
+            
+            const defaultNews = [
+                { title: 'School opens Term 3 on 1st September 2026', category: '📢 Announcement', excerpt: 'All students are expected to report by 7:30 AM.' },
+                { title: 'Sports Day on 15th September 2026', category: '🏆 Event', excerpt: 'Parents are invited to attend and support their children.' },
+                { title: 'Parents\' Meeting on 20th September 2026', category: '📚 Meeting', excerpt: 'Important meeting at 9:00 AM in the school hall.' },
+                { title: 'New computer lab now open!', category: '🎉 New', excerpt: 'Students can now access modern computer facilities.' },
+                { title: 'School Fees Payment Deadline', category: '💰 Fees', excerpt: 'Term 3 fees should be paid by 30th September 2026.' },
+                { title: 'School Closed on Public Holiday', category: '📅 Reminder', excerpt: 'School will be closed on 20th October 2026.' }
+            ];
+            
+            let html = '';
+            defaultNews.forEach(item => {
+                html += `
+                    <div class="splash-news-item">
+                        <div>
+                            <span class="news-tag">${item.category}</span>
+                            <span class="news-title">${item.title}</span>
+                        </div>
+                        <div class="news-excerpt">${item.excerpt}</div>
+                    </div>
+                `;
+            });
+            
+            newsList.innerHTML = html;
+        }
+
+        // ============================================================
         // SPLASH SCREEN - HIDE ONCE PAGE IS FULLY LOADED
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
+            loadSplashNews();
+            
             window.addEventListener('load', function() {
                 const splash = document.getElementById('splashScreen');
                 if (splash) {
@@ -2217,11 +2539,10 @@
                         setTimeout(function() {
                             splash.style.display = 'none';
                         }, 800);
-                    }, 500);
+                    }, 1000);
                 }
             });
 
-            // Fallback: Hide splash after 10 seconds
             setTimeout(function() {
                 const splash = document.getElementById('splashScreen');
                 if (splash && !splash.classList.contains('hidden')) {
@@ -2230,7 +2551,7 @@
                         splash.style.display = 'none';
                     }, 800);
                 }
-            }, 10000);
+            }, 12000);
         });
 
         // ============================================================
@@ -2247,7 +2568,7 @@
         }
 
         // ============================================================
-        // YOUR EXISTING JAVASCRIPT FUNCTIONS
+        // EXISTING JAVASCRIPT FUNCTIONS
         // ============================================================
         AOS.init({
             duration: 800,
