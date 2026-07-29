@@ -56,7 +56,6 @@
             visibility: hidden;
             pointer-events: none;
         }
-        /* Only show splash on first visit */
         #splash-screen.splash-done {
             display: none !important;
         }
@@ -172,7 +171,6 @@
             align-items: center;
             gap: 10px;
         }
-        /* ===== LOGO IMAGE - replaces the building emoji ===== */
         .main-header .logo-section .school-logo {
             width: 40px;
             height: 40px;
@@ -180,7 +178,7 @@
             display: block;
         }
         .main-header .logo-section .school-icon { 
-            display: none; /* Hide the emoji, use image instead */
+            display: none;
         }
         .main-header .logo-section h1 {
             font-family: var(--font-primary);
@@ -234,7 +232,6 @@
             color: var(--school-gold);
         }
 
-        /* ===== ADMIN BUTTON (smaller, gold) ===== */
         .main-header .nav-links a.portal-link {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
@@ -250,7 +247,6 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
 
-        /* ===== ENLARGED STUDENT PORTAL BUTTON - MUCH BIGGER & MORE COLORFUL ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #8B5CF6, #6D28D9, #4C1D95);
             color: white;
@@ -289,7 +285,6 @@
             cursor: pointer;
         }
 
-        /* ===== TOP NAV BAR - Student Portal button also big here ===== */
         .top-nav-bar .nav-links a.student-portal-link-top {
             background: linear-gradient(135deg, #8B5CF6, #6D28D9, #4C1D95);
             color: white;
@@ -314,7 +309,6 @@
         }
         .top-nav-bar .nav-links a.student-portal-link-top::after { display: none; }
 
-        /* ===== NOTICE BAR ===== */
         .notice-alert-bar {
             background: linear-gradient(135deg, var(--kenya-red), #8B0000);
             color: white;
@@ -362,7 +356,6 @@
         }
         .notice-alert-bar .notice-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
 
-        /* ===== NEWS TICKER ===== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
             color: white;
@@ -424,7 +417,6 @@
             font-weight: 600;
         }
 
-        /* ===== TOP NAV BAR ===== */
         .top-nav-bar {
             background: linear-gradient(135deg, #0A1628, #1a2a4a);
             padding: 8px 0;
@@ -506,7 +498,6 @@
         .top-nav-bar .nav-right .quick-link:hover { color: var(--school-gold); }
         .top-nav-bar .nav-right .quick-link i { margin-right: 4px; }
 
-        /* ===== SECTION TABS ===== */
         .section-tabs {
             background: white;
             padding: 8px 0;
@@ -566,7 +557,6 @@
             animation: pulseBadgeRed 1.5s infinite;
         }
 
-        /* ===== HERO ===== */
         .hero-section {
             min-height: calc(100vh - 62px);
             margin-top: 100px;
@@ -799,7 +789,6 @@
             animation:scrollDot 2s ease-in-out infinite;
         }
 
-        /* ===== VIDEO MODAL ===== */
         .video-modal {
             display:none;
             position:fixed;
@@ -850,7 +839,6 @@
             backdrop-filter:blur(10px);
         }
 
-        /* ===== ANIMATIONS ===== */
         @keyframes scrollDot {
             0%,100% { transform:translateY(0); opacity:1; }
             50% { transform:translateY(12px); opacity:0.3; }
@@ -899,7 +887,6 @@
             100% { transform:translateY(0); }
         }
 
-        /* ===== SECTIONS ===== */
         .section-title {
             font-family:var(--font-primary);
             font-size:32px;
@@ -919,7 +906,6 @@
         }
         .section-subtitle.light { color:rgba(255,255,255,0.6); }
 
-        /* ===== GALLERY ===== */
         .gallery-section {
             padding:60px 0;
             background:linear-gradient(135deg,#0A1628,#001F5c);
@@ -969,7 +955,6 @@
         .swiper-pagination-bullet { background:rgba(255,255,255,0.2) !important; width:8px !important; height:8px !important; }
         .swiper-pagination-bullet-active { background:var(--school-gold) !important; }
 
-        /* ===== CONTENT CARDS ===== */
         .content-cards-section {
             padding:50px 0;
             background:#f0f2f5;
@@ -1049,8 +1034,6 @@
             box-shadow:0 4px 15px rgba(212,160,23,0.25);
         }
         .content-card:hover .card-cta { transform:scale(1.05); }
-
-        /* Card styles */
         .card-academics { border-color:var(--school-gold) !important; background:linear-gradient(135deg,#ffffff,#fff8e7) !important; }
         .card-academics .badge { background:var(--kenya-red); color:white; animation:pulseBadgeRed 1.5s infinite; }
         .card-academics .card-cta { background:linear-gradient(135deg,var(--school-gold),var(--school-gold-dark)); color:var(--kenya-black); }
@@ -1078,7 +1061,6 @@
         .card-student-portal .icon { background:rgba(111,66,193,0.08); }
         .card-student-portal:hover .icon { background:#6f42c1; }
 
-        /* ===== FEATURES ===== */
         .features-section {
             padding:50px 0;
             background:linear-gradient(135deg,#000000,#1a0000,#0a1628);
@@ -1134,7 +1116,6 @@
         .read-more-btn i { font-size:10px; transition:transform 0.3s ease; }
         .read-more-btn:hover i { transform:translateX(3px); }
 
-        /* ===== STATS ===== */
         .stats-section {
             padding:50px 0;
             background:linear-gradient(135deg,var(--kenya-black),var(--school-blue-dark));
@@ -1167,7 +1148,6 @@
         }
         .stat-item p { font-size:13px; opacity:0.6; color:white; font-weight:300; letter-spacing:1px; }
 
-        /* ===== ENLARGED NEWS SECTION ===== */
         .news-section {
             padding:70px 0 90px;
             background:#f0f2f5;
@@ -1209,7 +1189,6 @@
             display:block;
         }
 
-        /* ===== FOOTER ===== */
         .main-footer {
             background:var(--kenya-black);
             color:white;
@@ -1268,7 +1247,6 @@
         }
         .main-footer .footer-social a:hover { color:var(--school-gold); border-color:var(--school-gold); transform:translateY(-2px); }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width:768px) {
             .main-header .nav-links { display:none; flex-direction:column; width:100%; padding:15px 0; gap:5px; }
             .main-header .nav-links.show { display:flex; }
@@ -1342,9 +1320,7 @@
 </head>
 <body>
 
-    <!-- ======================================== -->
-    <!-- SPLASH SCREEN - ONLY ON FIRST VISIT -->
-    <!-- ======================================== -->
+    <!-- ===== SPLASH SCREEN - ONLY ON FIRST VISIT ===== -->
     <div id="splash-screen">
         <div class="splash-card">
             <span class="school-icon-big">🏫</span>
@@ -1372,14 +1348,11 @@
         </div>
     </div>
 
-    <!-- ======================================== -->
-    <!-- HEADER -->
-    <!-- ======================================== -->
+    <!-- ===== HEADER ===== -->
     <header class="main-header">
         <div class="kenya-flag-strip"></div>
         <div class="container">
             <div class="logo-section">
-                <!-- ===== REPLACED EMOJI WITH YOUR LOGO IMAGE ===== -->
                 <img src="logo edited.ico" alt="Changara Star Academy Logo" class="school-logo" />
                 <span class="school-icon">🏫</span>
                 <div>
@@ -1390,11 +1363,9 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <!-- ENLARGED STUDENT PORTAL BUTTON -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
-                <!-- ADMIN BUTTON - smaller -->
                 <a href="portal.html" class="portal-link">🔐 Admin</a>
                 <a href="contact.html">Contact</a>
             </nav>
@@ -1402,9 +1373,7 @@
         </div>
     </header>
 
-    <!-- ======================================== -->
-    <!-- NOTICE ALERT BAR -->
-    <!-- ======================================== -->
+    <!-- ===== NOTICE ALERT BAR ===== -->
     <div class="notice-alert-bar" id="noticeAlertBar">
         <div class="container">
             <div class="notice-icon"><span class="bell">🔔</span><span style="font-weight:700;font-size:11px;">ALERT</span></div>
@@ -1416,9 +1385,7 @@
         </div>
     </div>
 
-    <!-- ======================================== -->
-    <!-- NEWS TICKER -->
-    <!-- ======================================== -->
+    <!-- ===== NEWS TICKER ===== -->
     <div class="news-ticker-section" id="newsTicker">
         <div class="container">
             <div class="ticker-label"><span class="icon">📰</span> News</div>
@@ -1433,9 +1400,7 @@
         </div>
     </div>
 
-    <!-- ======================================== -->
-    <!-- TOP NAV BAR -->
-    <!-- ======================================== -->
+    <!-- ===== TOP NAV BAR ===== -->
     <div class="top-nav-bar">
         <div class="container">
             <div class="nav-left">
@@ -1443,7 +1408,6 @@
             </div>
             <div class="nav-links">
                 <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                <!-- ===== STUDENT PORTAL - BIG & PURPLE (same style) ===== -->
                 <a href="student-portal.html" class="student-portal-link-top">
                     <i class="fas fa-user-graduate"></i> Student Portal <span class="badge-green">NEW</span>
                 </a>
@@ -1453,7 +1417,6 @@
                 <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;"><i class="fas fa-user-lock"></i> Admin</a>
             </div>
             <div class="nav-right">
-                <!-- ===== STUDENT PORTAL - BIG & PURPLE (same style) ===== -->
                 <a href="student-portal.html" class="quick-link" style="color:#8B5CF6;font-weight:700;font-size:14px;background:rgba(139,92,246,0.1);padding:6px 18px;border-radius:50px;border:2px solid rgba(139,92,246,0.2);">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
@@ -1461,9 +1424,7 @@
         </div>
     </div>
 
-    <!-- ======================================== -->
-    <!-- SECTION TABS -->
-    <!-- ======================================== -->
+    <!-- ===== SECTION TABS ===== -->
     <div class="section-tabs" id="sectionTabs">
         <div class="container">
             <button class="tab-btn active" onclick="scrollToSection('slide-academics')"><span class="tab-icon">📚</span> Academics <span class="tab-badge">🔥</span></button>
@@ -1477,9 +1438,7 @@
         </div>
     </div>
 
-    <!-- ======================================== -->
-    <!-- HERO -->
-    <!-- ======================================== -->
+    <!-- ===== HERO ===== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-video-bg">
             <video id="heroVideo" autoplay muted loop playsinline poster="/images/school-compound.jpg">
@@ -1512,9 +1471,7 @@
         </div>
     </section>
 
-    <!-- ======================================== -->
-    <!-- GALLERY -->
-    <!-- ======================================== -->
+    <!-- ===== GALLERY ===== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
@@ -1533,9 +1490,7 @@
         </div>
     </section>
 
-    <!-- ======================================== -->
-    <!-- CONTENT CARDS -->
-    <!-- ======================================== -->
+    <!-- ===== CONTENT CARDS ===== -->
     <section class="content-cards-section" id="slide-content">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
@@ -1601,9 +1556,7 @@
         </div>
     </section>
 
-    <!-- ======================================== -->
-    <!-- FEATURES -->
-    <!-- ======================================== -->
+    <!-- ===== FEATURES ===== -->
     <section class="features-section" id="slide-features">
         <div class="container">
             <h2 class="section-title light" data-aos="fade-up">🌟 Why <span style="color:var(--school-gold);">Choose Us</span></h2>
@@ -1617,9 +1570,7 @@
         </div>
     </section>
 
-    <!-- ======================================== -->
-    <!-- STATS -->
-    <!-- ======================================== -->
+    <!-- ===== STATS ===== -->
     <section class="stats-section" id="slide-stats">
         <div class="container">
             <div class="stats-grid" id="statsGrid">
@@ -1631,9 +1582,7 @@
         </div>
     </section>
 
-    <!-- ======================================== -->
-    <!-- ENLARGED NEWS SECTION -->
-    <!-- ======================================== -->
+    <!-- ===== ENLARGED NEWS SECTION ===== -->
     <section class="news-section" id="slide-news">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
@@ -1661,9 +1610,7 @@
         </div>
     </section>
 
-    <!-- ======================================== -->
-    <!-- FOOTER -->
-    <!-- ======================================== -->
+    <!-- ===== FOOTER ===== -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
@@ -1699,9 +1646,7 @@
         </div>
     </footer>
 
-    <!-- ======================================== -->
-    <!-- VIDEO MODAL -->
-    <!-- ======================================== -->
+    <!-- ===== VIDEO MODAL ===== -->
     <div class="video-modal" id="videoModal">
         <div class="modal-content">
             <video id="modalVideo" controls>
@@ -1712,44 +1657,30 @@
         </div>
     </div>
 
-    <!-- ======================================== -->
-    <!-- SCRIPTS -->
-    <!-- ======================================== -->
+    <!-- ===== SCRIPTS ===== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
-        // ========================================
-        // SPLASH SCREEN - ONLY ON FIRST VISIT
-        // Uses sessionStorage to track if user has already seen it
-        // ========================================
+        // ===== SPLASH SCREEN - ONLY ON FIRST VISIT =====
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
             splash.classList.add('hide-splash');
-            // Mark as seen so it won't show again in this session
             sessionStorage.setItem('splashSeen', 'true');
             setTimeout(() => { splash.style.display = 'none'; }, 800);
         }
 
-        // Check if splash has been seen in this session
         if (sessionStorage.getItem('splashSeen')) {
-            // Already seen - hide immediately
             document.getElementById('splash-screen').style.display = 'none';
         } else {
-            // First visit - show splash
-            // Hide after 60 seconds (covers Render.com spin-up)
             setTimeout(hideSplash, 60000);
-            // Also hide when page loads (whichever comes first)
             window.addEventListener('load', function() {
                 setTimeout(hideSplash, 800);
             });
         }
 
-        // ========================================
-        // SPLASH NEWS - Update from CMS if available
-        // ========================================
         async function updateSplashNews() {
             try {
                 const res = await fetch('/api/content');
@@ -1760,13 +1691,10 @@
                     if (c.splashMeta) document.getElementById('splashMeta').textContent = c.splashMeta;
                     if (c.splashSub) document.getElementById('splashSub').innerHTML = c.splashSub;
                 }
-            } catch (e) { /* fallback to default */ }
+            } catch (e) { /* fallback */ }
         }
         updateSplashNews();
 
-        // ========================================
-        // REST OF FUNCTIONS
-        // ========================================
         function toggleMobileMenu() {
             document.getElementById('navLinks').classList.toggle('show');
         }
