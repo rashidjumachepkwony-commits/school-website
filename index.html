@@ -38,7 +38,7 @@
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-        /* ===== SPLASH SCREEN ===== */
+        /* ===== SPLASH SCREEN - Stays until page fully loads (covers Render.com spin-up) ===== */
         #splash-screen {
             position: fixed;
             inset: 0;
@@ -237,7 +237,7 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
 
-        /* ===== ENLARGED STUDENT PORTAL BUTTON - MUCH BIGGER & MORE COLORFUL ===== */
+        /* ===== ENLARGED STUDENT PORTAL BUTTON ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #8B5CF6, #6D28D9, #4C1D95);
             color: white;
@@ -1127,7 +1127,7 @@
         }
         .stat-item p { font-size:13px; opacity:0.6; color:white; font-weight:300; letter-spacing:1px; }
 
-        /* ===== ENLARGED NEWS SECTION - fills white space ===== */
+        /* ===== ENLARGED NEWS SECTION ===== */
         .news-section {
             padding:70px 0 90px;
             background:#f0f2f5;
@@ -1301,7 +1301,8 @@
 <body>
 
     <!-- ======================================== -->
-    <!-- SPLASH SCREEN (unchanged - works for Render.com spin-up) -->
+    <!-- SPLASH SCREEN - Stays until page fully loads -->
+    <!-- This covers the full Render.com spin-up time (50+ seconds if needed) -->
     <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
@@ -1346,11 +1347,11 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <!-- ENLARGED STUDENT PORTAL BUTTON - much bigger, colorful, pulsing -->
+                <!-- ENLARGED STUDENT PORTAL BUTTON -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
-                <!-- ADMIN BUTTON - smaller, gold -->
+                <!-- ADMIN BUTTON - smaller -->
                 <a href="portal.html" class="portal-link">🔐 Admin</a>
                 <a href="contact.html">Contact</a>
             </nav>
@@ -1582,7 +1583,7 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- ENLARGED NEWS SECTION - fills white space -->
+    <!-- ENLARGED NEWS SECTION -->
     <!-- ======================================== -->
     <section class="news-section" id="slide-news">
         <div class="container">
@@ -1591,14 +1592,14 @@
             <div class="news-grid" id="newsGrid">
                 <div class="news-item" data-aos="fade-up" data-aos-delay="100">
                     <h4>📅 Term 3 Opening</h4>
-                    <p>School will open for Term 3 on 25th August 2026. All students are expected to report by 7:30 AM. Parents are reminded to ensure all school fees are paid before the opening date. New students are welcome to join us for the new term.</p>
-                    <span class="date">Posted: 29 July 2026</span>
+                    <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM. Parents are reminded to ensure all school fees are paid before the opening date. New students are welcome to join us for the new term.</p>
+                    <span class="date">Posted: 25 August 2026</span>
                     <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="200">
                     <h4>🏆 Sports Day</h4>
                     <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend and cheer for their children. Various competitions including athletics, ball games, and cultural events will be held throughout the day.</p>
-                    <span class="date">Posted: 24 July 2026</span>
+                    <span class="date">Posted: 24 August 2026</span>
                     <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="300">
@@ -1671,14 +1672,30 @@
     <script>
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
-        // ===== SPLASH SCREEN - hides after 3.5s (covers Render.com spin-up) =====
+        // ========================================
+        // SPLASH SCREEN - Stays until page fully loads
+        // This covers the entire Render.com spin-up time
+        // ========================================
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
             splash.classList.add('hide-splash');
             setTimeout(() => { splash.style.display = 'none'; }, 800);
         }
-        setTimeout(hideSplash, 3500);
 
+        // Wait for everything to load before hiding splash
+        // This includes all images, fonts, videos, and API calls
+        window.addEventListener('load', function() {
+            // Give a small extra delay to ensure everything is rendered
+            setTimeout(hideSplash, 500);
+        });
+
+        // Fallback: if page takes too long, still hide after 60 seconds
+        // (Render.com typically spins up within 50-60 seconds)
+        setTimeout(hideSplash, 60000);
+
+        // ========================================
+        // SPLASH NEWS - Update from CMS if available
+        // ========================================
         async function updateSplashNews() {
             try {
                 const res = await fetch('/api/content');
@@ -1689,10 +1706,13 @@
                     if (c.splashMeta) document.getElementById('splashMeta').textContent = c.splashMeta;
                     if (c.splashSub) document.getElementById('splashSub').innerHTML = c.splashSub;
                 }
-            } catch (e) { /* fallback */ }
+            } catch (e) { /* fallback to default */ }
         }
         updateSplashNews();
 
+        // ========================================
+        // REST OF FUNCTIONS
+        // ========================================
         function toggleMobileMenu() {
             document.getElementById('navLinks').classList.toggle('show');
         }
