@@ -8,7 +8,6 @@
     <link rel="shortcut icon" type="image/x-icon" href="images/logo edited.ico" />
     <meta name="description" content="Changara Star Academy – Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
 
-    <!-- ===== FONTS & EXTERNAL CSS ===== -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -47,10 +46,11 @@
             padding: 0 20px;
             width: 100%;
         }
-        .container-full {
+        /* ===== FULL WIDTH CONTAINER - NO WHITE SPACE ===== */
+        .container-news {
             max-width: 100% !important;
-            padding: 0 !important;
-            margin: 0 !important;
+            padding: 0 20px !important;
+            margin: 0 auto !important;
             width: 100% !important;
         }
 
@@ -1164,12 +1164,12 @@
            NEWS SECTION - FULL WIDTH, NO WHITE SPACE
            ======================================== */
         .news-section {
-            padding:60px 0 80px !important;
+            padding: 60px 0 80px !important;
             background: linear-gradient(180deg, #f8fbff 0%, #e8f0fe 100%) !important;
             scroll-margin-top: 50px;
             width: 100% !important;
         }
-        .news-section .container {
+        .news-section .container-news {
             max-width: 100% !important;
             padding: 0 20px !important;
             margin: 0 auto !important;
@@ -1334,7 +1334,7 @@
             .features-grid { grid-template-columns:1fr 1fr; }
             .stats-grid { grid-template-columns:1fr 1fr; }
             .news-grid { grid-template-columns:1fr !important; }
-            .news-section .container { padding: 0 15px !important; }
+            .news-section .container-news { padding: 0 15px !important; }
             .news-item { padding: 28px 22px !important; min-height: 200px !important; }
             .news-item h4 { font-size: 20px !important; }
             .news-item p { font-size: 15px !important; }
@@ -1378,7 +1378,7 @@
             .news-item { padding: 22px 18px !important; min-height: 180px !important; }
             .news-item h4 { font-size: 18px !important; }
             .news-item p { font-size: 14px !important; }
-            .news-section .container { padding: 0 10px !important; }
+            .news-section .container-news { padding: 0 10px !important; }
         }
     </style>
 </head>
@@ -1539,7 +1539,7 @@
             <p id="heroSubtitle">Nurturing young minds through quality education, discipline, innovation, and strong moral values. We provide a safe and supportive learning environment where every child is encouraged to discover their potential and achieve academic excellence.</p>
             <div class="btn-group">
                 <button class="btn-scroll-down" onclick="scrollToContent()"><span>Scroll Down</span><span class="arrow"><i class="fas fa-chevron-down"></i></span></button>
-                <a href="admissions.html" class="btn-outline"><i class="fas fa-pen-fancy"></i> Apply Now</a>
+                <a href="admissions.html" class="btn-outline" style="background:linear-gradient(135deg,#BB0000,#8B0000);color:white;border:none;"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
                 <a href="student-portal.html" class="btn-outline" style="border-color:#FF6B6B;background:rgba(255,107,107,0.2);animation:floatButton 2.5s ease-in-out infinite;"><i class="fas fa-user-graduate"></i> Student Portal</a>
             </div>
         </div>
@@ -1672,7 +1672,7 @@
     <!-- NEWS SECTION - FULL WIDTH, NO WHITE SPACE -->
     <!-- ======================================== -->
     <section class="news-section" id="slide-news">
-        <div class="container">
+        <div class="container-news">
             <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
             <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Stay updated with our latest news and events</p>
             <div class="news-grid" id="newsGrid">
