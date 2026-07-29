@@ -7,7 +7,6 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>" />
     <meta name="description" content="Changara Star Academy – Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
 
-    <!-- Fonts & CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -39,7 +38,7 @@
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-        /* ===== SPLASH SCREEN - Shows during Render.com spin-up ===== */
+        /* ===== SPLASH SCREEN ===== */
         #splash-screen {
             position: fixed;
             inset: 0;
@@ -69,12 +68,7 @@
             text-align: center;
             color: white;
         }
-        .splash-card .school-icon-big {
-            font-size: 72px;
-            margin-bottom: 6px;
-            display: block;
-            animation: float 3s ease-in-out infinite;
-        }
+        .splash-card .school-icon-big { font-size: 72px; margin-bottom: 6px; display: block; animation: float 3s ease-in-out infinite; }
         .splash-card h1 {
             font-family: var(--font-primary);
             font-size: 30px;
@@ -84,19 +78,8 @@
             background-clip: text;
             margin-bottom: 4px;
         }
-        .splash-card .sub {
-            color: rgba(255,255,255,0.3);
-            font-size: 12px;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-        }
-        .splash-card .divider {
-            width: 60px;
-            height: 2px;
-            background: var(--school-gold);
-            margin: 12px auto;
-        }
-        /* LARGER SPLASH NEWS AREA - fills white space */
+        .splash-card .sub { color: rgba(255,255,255,0.3); font-size: 12px; letter-spacing: 4px; text-transform: uppercase; }
+        .splash-card .divider { width: 60px; height: 2px; background: var(--school-gold); margin: 12px auto; }
         .splash-news {
             background: rgba(255,255,255,0.05);
             border-radius: 20px;
@@ -118,18 +101,8 @@
             margin-bottom: 8px;
         }
         .splash-news .label i { font-size: 16px; }
-        .splash-news .headline {
-            font-size: 20px;
-            font-weight: 700;
-            margin-top: 6px;
-            color: #fff;
-            line-height: 1.4;
-        }
-        .splash-news .meta {
-            font-size: 13px;
-            color: rgba(255,255,255,0.4);
-            margin-top: 8px;
-        }
+        .splash-news .headline { font-size: 20px; font-weight: 700; margin-top: 6px; color: #fff; line-height: 1.4; }
+        .splash-news .meta { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 8px; }
         .splash-news .badge {
             display: inline-block;
             background: var(--kenya-red);
@@ -148,31 +121,17 @@
             font-size: 14px;
             color: rgba(255,255,255,0.5);
         }
-        .splash-news .news-sub i {
-            color: var(--school-gold);
-            margin-right: 6px;
-        }
-        .splash-loader {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 8px;
-        }
+        .splash-news .news-sub i { color: var(--school-gold); margin-right: 6px; }
+        .splash-loader { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
         .splash-loader .dot {
-            width: 12px;
-            height: 12px;
+            width: 12px; height: 12px;
             background: var(--school-gold);
             border-radius: 50%;
             animation: splashDot 1.2s infinite ease-in-out;
         }
         .splash-loader .dot:nth-child(2) { animation-delay: 0.2s; }
         .splash-loader .dot:nth-child(3) { animation-delay: 0.4s; }
-        .splash-loading-text {
-            font-size: 11px;
-            color: rgba(255,255,255,0.2);
-            margin-top: 8px;
-            letter-spacing: 2px;
-        }
+        .splash-loading-text { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 8px; letter-spacing: 2px; }
         @keyframes splashDot {
             0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
             40% { transform: scale(1); opacity: 1; }
@@ -261,6 +220,8 @@
             background: rgba(212,160,23,0.12);
             color: var(--school-gold);
         }
+
+        /* ===== ADMIN BUTTON (smaller, gold) ===== */
         .main-header .nav-links a.portal-link {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
@@ -268,39 +229,44 @@
             padding: 5px 16px;
             border-radius: 50px;
             font-size: 11px;
+            transition: all 0.3s ease;
         }
         .main-header .nav-links a.portal-link:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(212,160,23,0.3);
         }
-        /* ===== ENLARGED STUDENT PORTAL BUTTON ===== */
+        .main-header .nav-links a.portal-link::after { display: none; }
+
+        /* ===== ENLARGED STUDENT PORTAL BUTTON - MUCH BIGGER & MORE COLORFUL ===== */
         .main-header .nav-links a.student-portal-link {
-            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9, #4C1D95);
             color: white;
-            font-weight: 700;
-            padding: 10px 28px;
+            font-weight: 800;
+            padding: 12px 32px;
             border-radius: 50px;
-            font-size: 16px;
+            font-size: 18px;
             transition: all 0.3s ease;
-            box-shadow: 0 0 0 0 rgba(111,66,193,0.4);
+            box-shadow: 0 0 20px rgba(107, 70, 193, 0.5), 0 0 60px rgba(107, 70, 193, 0.2);
             animation: pulseStudentPortal 2s infinite;
             letter-spacing: 0.5px;
-            border: 2px solid rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.15);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         .main-header .nav-links a.student-portal-link i {
-            margin-right: 8px;
-            font-size: 18px;
+            margin-right: 10px;
+            font-size: 20px;
         }
         .main-header .nav-links a.student-portal-link:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 40px rgba(111,66,193,0.5);
-            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 30px rgba(107, 70, 193, 0.7), 0 0 80px rgba(107, 70, 193, 0.3);
+            border-color: rgba(255,255,255,0.3);
         }
         .main-header .nav-links a.student-portal-link::after { display: none; }
         @keyframes pulseStudentPortal {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(111,66,193,0.4); }
-            50% { box-shadow: 0 0 0 12px rgba(111,66,193,0); }
+            0%, 100% { box-shadow: 0 0 20px rgba(107, 70, 193, 0.5), 0 0 60px rgba(107, 70, 193, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(107, 70, 193, 0.7), 0 0 80px rgba(107, 70, 193, 0.3); }
         }
+
         .main-header .mobile-menu-btn {
             display: none;
             background: none;
@@ -1169,17 +1135,17 @@
         }
         .news-grid {
             display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(360px,1fr));
+            grid-template-columns:repeat(auto-fit, minmax(380px,1fr));
             gap:35px;
         }
         .news-item {
             background:white;
-            padding:35px 32px;
+            padding:40px 35px;
             border-radius:24px;
             box-shadow:0 8px 35px rgba(0,0,0,0.06);
             border-left:8px solid var(--school-gold);
             transition:all 0.3s ease;
-            min-height: 220px;
+            min-height: 250px;
         }
         .news-item:hover {
             transform:translateY(-8px);
@@ -1187,19 +1153,19 @@
         }
         .news-item h4 {
             color:var(--school-blue-dark);
-            font-size:22px;
-            margin-bottom:12px;
-            font-weight:700;
+            font-size:24px;
+            margin-bottom:14px;
+            font-weight:800;
         }
         .news-item p {
             color:#444;
-            font-size:16px;
-            line-height:1.8;
+            font-size:17px;
+            line-height:1.9;
         }
         .news-item .date {
-            font-size:13px;
+            font-size:14px;
             color:#999;
-            margin-top:14px;
+            margin-top:16px;
             display:block;
         }
 
@@ -1267,7 +1233,7 @@
             .main-header .nav-links { display:none; flex-direction:column; width:100%; padding:15px 0; gap:5px; }
             .main-header .nav-links.show { display:flex; }
             .main-header .mobile-menu-btn { display:block; }
-            .main-header .nav-links a.student-portal-link { font-size:14px; padding:10px 20px; width:100%; justify-content:center; }
+            .main-header .nav-links a.student-portal-link { font-size:16px; padding:12px 24px; width:100%; justify-content:center; }
             .top-nav-bar .container { flex-direction:column; align-items:stretch; gap:8px; }
             .top-nav-bar .nav-left { justify-content:center; }
             .top-nav-bar .nav-links { justify-content:center; }
@@ -1304,6 +1270,9 @@
             .splash-card h1 { font-size:22px; }
             .splash-news .headline { font-size:17px; }
             .splash-news { padding:18px 16px; min-height:140px; }
+            .news-item { padding:28px 22px; min-height:200px; }
+            .news-item h4 { font-size:20px; }
+            .news-item p { font-size:15px; }
         }
         @media (max-width:480px) {
             .content-grid { grid-template-columns:1fr; }
@@ -1323,14 +1292,16 @@
             .hero-video-play { bottom:60px; }
             .top-nav-bar .nav-links a { font-size:10px; padding:3px 10px; }
             .top-nav-bar .nav-links a i { font-size:11px; }
+            .news-item { padding:22px 18px; min-height:180px; }
+            .news-item h4 { font-size:18px; }
+            .news-item p { font-size:14px; }
         }
     </style>
 </head>
 <body>
 
     <!-- ======================================== -->
-    <!-- SPLASH SCREEN - Shows during Render.com spin-up time -->
-    <!-- Parents, teachers, and students read news here -->
+    <!-- SPLASH SCREEN (unchanged - works for Render.com spin-up) -->
     <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
@@ -1338,26 +1309,18 @@
             <h1>Changara Star Academy</h1>
             <div class="sub">ASSURANCE TO EXCELLENCE</div>
             <div class="divider"></div>
-
-            <!-- LARGER SPLASH NEWS AREA - fills white space -->
             <div class="splash-news">
                 <div class="label">
                     <i class="fas fa-newspaper"></i> LATEST NEWS
                     <span class="badge">📢 ALERT</span>
                 </div>
-                <div class="headline" id="splashHeadline">
-                    🎉 School opens Term 3 on 1st September 2026
-                </div>
-                <div class="meta" id="splashMeta">
-                    📅 Posted: 25 August 2026 • 🕒 8:00 AM
-                </div>
+                <div class="headline" id="splashHeadline">🎉 School opens Term 3 on 1st September 2026</div>
+                <div class="meta" id="splashMeta">📅 Posted: 25 August 2026 • 🕒 8:00 AM</div>
                 <div class="news-sub" id="splashSub">
                     <i class="fas fa-arrow-right"></i>
                     Parents' Meeting on 20th September • Sports Day 15th September • New Computer Lab Open!
                 </div>
             </div>
-
-            <!-- Loading indicator -->
             <div class="splash-loader">
                 <div class="dot"></div>
                 <div class="dot"></div>
@@ -1383,10 +1346,11 @@
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
-                <!-- ENLARGED STUDENT PORTAL BUTTON -->
+                <!-- ENLARGED STUDENT PORTAL BUTTON - much bigger, colorful, pulsing -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
+                <!-- ADMIN BUTTON - smaller, gold -->
                 <a href="portal.html" class="portal-link">🔐 Admin</a>
                 <a href="contact.html">Contact</a>
             </nav>
@@ -1627,19 +1591,19 @@
             <div class="news-grid" id="newsGrid">
                 <div class="news-item" data-aos="fade-up" data-aos-delay="100">
                     <h4>📅 Term 3 Opening</h4>
-                    <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM. Parents are reminded to ensure all school fees are paid before the opening date.</p>
-                    <span class="date">Posted: 25 August 2026</span>
+                    <p>School will open for Term 3 on 25th August 2026. All students are expected to report by 7:30 AM. Parents are reminded to ensure all school fees are paid before the opening date. New students are welcome to join us for the new term.</p>
+                    <span class="date">Posted: 29 July 2026</span>
                     <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="200">
                     <h4>🏆 Sports Day</h4>
-                    <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend and cheer for their children. Various competitions including athletics, ball games, and cultural events.</p>
-                    <span class="date">Posted: 24 August 2026</span>
+                    <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend and cheer for their children. Various competitions including athletics, ball games, and cultural events will be held throughout the day.</p>
+                    <span class="date">Posted: 24 July 2026</span>
                     <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="news-item" data-aos="fade-up" data-aos-delay="300">
                     <h4>📚 Parents' Meeting</h4>
-                    <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall. Important agenda items include academic performance, school development, and upcoming activities.</p>
+                    <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall. Important agenda items include academic performance, school development, upcoming activities, and parent-teacher collaboration strategies.</p>
                     <span class="date">Posted: 23 August 2026</span>
                     <a href="parents-corner.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
@@ -1705,19 +1669,16 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        // ===== INIT AOS =====
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
-        // ===== SPLASH SCREEN - hides after 3.5s (Render.com spin-up time) =====
+        // ===== SPLASH SCREEN - hides after 3.5s (covers Render.com spin-up) =====
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
             splash.classList.add('hide-splash');
             setTimeout(() => { splash.style.display = 'none'; }, 800);
         }
-        // Hide splash after 3.5 seconds - this covers the Render.com cold start
         setTimeout(hideSplash, 3500);
 
-        // ===== SPLASH DYNAMIC NEWS =====
         async function updateSplashNews() {
             try {
                 const res = await fetch('/api/content');
@@ -1728,16 +1689,14 @@
                     if (c.splashMeta) document.getElementById('splashMeta').textContent = c.splashMeta;
                     if (c.splashSub) document.getElementById('splashSub').innerHTML = c.splashSub;
                 }
-            } catch (e) { /* fallback to default */ }
+            } catch (e) { /* fallback */ }
         }
         updateSplashNews();
 
-        // ===== MOBILE MENU =====
         function toggleMobileMenu() {
             document.getElementById('navLinks').classList.toggle('show');
         }
 
-        // ===== SCROLL TO CONTENT =====
         function scrollToContent() {
             const el = document.getElementById('slide-content');
             if (el) {
@@ -1746,7 +1705,6 @@
             }
         }
 
-        // ===== SECTION TABS =====
         function scrollToSection(id) {
             const el = document.getElementById(id);
             if (el) {
@@ -1761,7 +1719,6 @@
             }
         }
 
-        // ===== NOTICE =====
         function closeNotice() {
             const bar = document.getElementById('noticeAlertBar');
             bar.classList.remove('show');
@@ -1782,7 +1739,6 @@
             }
         })();
 
-        // ===== VIDEO MODAL =====
         function openVideoModal() {
             document.getElementById('videoModal').classList.add('show');
             document.getElementById('modalVideo').play();
@@ -1796,7 +1752,6 @@
             if (e.target === this) closeVideoModal();
         });
 
-        // ===== SWIPER =====
         new Swiper('.gallery-swiper', {
             slidesPerView: 1,
             spaceBetween: 16,
@@ -1807,7 +1762,6 @@
             breakpoints: { 640: { slidesPerView: 1 }, 768: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }
         });
 
-        // ===== CMS LOAD =====
         function stripHtml(html) { if (!html) return ''; const d = document.createElement('DIV'); d.innerHTML = html; return d.textContent || d.innerText || ''; }
         async function loadCMS() {
             try {
