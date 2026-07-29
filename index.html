@@ -86,7 +86,6 @@
             letter-spacing: 2px;
         }
 
-        /* ===== LARGE NEWS SECTION - FILLS WHITE SPACE ===== */
         .splash-news-section {
             margin-top: 15px;
             background: rgba(255,255,255,0.04);
@@ -103,12 +102,10 @@
         .splash-news-section::-webkit-scrollbar {
             width: 4px;
         }
-
         .splash-news-section::-webkit-scrollbar-track {
             background: rgba(255,255,255,0.05);
             border-radius: 10px;
         }
-
         .splash-news-section::-webkit-scrollbar-thumb {
             background: #C9A84C;
             border-radius: 10px;
@@ -198,7 +195,6 @@
             color: rgba(255,255,255,0.08);
         }
 
-        /* ===== BIG STUDENT PORTAL BUTTON ===== */
         .splash-student-btn {
             display: inline-block;
             margin-top: 15px;
@@ -243,7 +239,6 @@
             50% { box-shadow: 0 8px 50px rgba(111, 66, 193, 0.6); }
         }
 
-        /* ===== LOADER ===== */
         #splashScreen .loader-bar {
             margin-top: 12px;
             width: 100%;
@@ -301,9 +296,9 @@
             50% { transform: translateY(-8px); }
         }
 
-        /* ========================================
+        /* ============================================================
            RESPONSIVE FOR SPLASH
-           ======================================== */
+           ============================================================ */
         @media (max-width: 768px) {
             #splashScreen .splash-title { font-size: 22px; }
             #splashScreen .logo-img { width: 65px; height: 65px; }
@@ -311,10 +306,7 @@
             .splash-news-item .news-title { font-size: 13px; }
             .splash-news-item .news-excerpt { font-size: 11px; }
             #splashScreen .loader-bar { max-width: 200px; }
-            .splash-student-btn { 
-                font-size: 17px; 
-                padding: 14px 30px;
-            }
+            .splash-student-btn { font-size: 17px; padding: 14px 30px; }
             .splash-student-btn i { font-size: 18px; }
             .splash-student-btn .btn-sub { font-size: 11px; }
         }
@@ -323,25 +315,20 @@
             #splashScreen .splash-title { font-size: 18px; }
             #splashScreen .logo-img { width: 55px; height: 55px; }
             #splashScreen .splash-motto { font-size: 11px; }
-            .splash-news-section { 
-                padding: 10px 12px; 
-                min-height: 160px;
-                border-radius: 12px;
-            }
+            .splash-news-section { padding: 10px 12px; min-height: 160px; border-radius: 12px; }
             .splash-news-item { padding: 8px 10px; }
             .splash-news-item .news-title { font-size: 12px; }
             .splash-news-item .news-excerpt { font-size: 10px; }
             #splashScreen .loader-bar { max-width: 160px; }
-            .splash-student-btn { 
-                font-size: 15px; 
-                padding: 12px 20px;
-                border-radius: 12px;
-            }
+            .splash-student-btn { font-size: 15px; padding: 12px 20px; border-radius: 12px; }
             .splash-student-btn i { font-size: 16px; }
             .splash-student-btn .btn-sub { font-size: 10px; }
             .splash-news-section .news-label { font-size: 10px; }
         }
 
+        /* ============================================================
+           ALL YOUR EXISTING STYLES GO BELOW HERE
+           ============================================================ */
         /* ========================================
            ROOT VARIABLES
            ======================================== */
@@ -1766,6 +1753,9 @@
             transform: translateY(-2px);
         }
 
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
         @media (max-width: 768px) {
             .main-header .nav-links {
                 display: none;
@@ -1828,16 +1818,6 @@
             .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
             .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
             .hero-video-play .play-text { font-size: 10px; }
-
-            #splashScreen .splash-title { font-size: 22px; }
-            #splashScreen .logo-img { width: 65px; height: 65px; }
-            .splash-news-section { padding: 12px 14px; min-height: 200px; }
-            .splash-news-item .news-title { font-size: 13px; }
-            .splash-news-item .news-excerpt { font-size: 11px; }
-            #splashScreen .loader-bar { max-width: 200px; }
-            .splash-student-btn { font-size: 17px; padding: 14px 30px; }
-            .splash-student-btn i { font-size: 18px; }
-            .splash-student-btn .btn-sub { font-size: 11px; }
         }
 
         @media (max-width: 480px) {
@@ -1863,18 +1843,6 @@
             .top-nav-bar .nav-links a i {
                 font-size: 11px;
             }
-            #splashScreen .splash-title { font-size: 18px; }
-            #splashScreen .logo-img { width: 55px; height: 55px; }
-            #splashScreen .splash-motto { font-size: 11px; }
-            .splash-news-section { padding: 10px 12px; min-height: 160px; border-radius: 12px; }
-            .splash-news-item { padding: 8px 10px; }
-            .splash-news-item .news-title { font-size: 12px; }
-            .splash-news-item .news-excerpt { font-size: 10px; }
-            #splashScreen .loader-bar { max-width: 160px; }
-            .splash-student-btn { font-size: 15px; padding: 12px 20px; border-radius: 12px; }
-            .splash-student-btn i { font-size: 16px; }
-            .splash-student-btn .btn-sub { font-size: 10px; }
-            .splash-news-section .news-label { font-size: 10px; }
         }
     </style>
 </head>
@@ -2581,7 +2549,7 @@
         let bannerSlides = [];
         let bannerDots = [];
 
-        function escapeHtml(value = '') {
+        function escapeHtml(value) {
             return String(value)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
