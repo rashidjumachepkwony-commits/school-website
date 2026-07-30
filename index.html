@@ -431,7 +431,7 @@
         }
 
         /* ========================================
-           TOP NAV BAR - WITH RAINBOW STUDENT PORTAL (NO DULL ONES)
+           TOP NAV BAR - CLEAN: NO DULL STUDENT PORTAL BUTTONS
            ======================================== */
         .top-nav-bar {
             background: linear-gradient(135deg, #0A1628, #1a2a4a);
@@ -559,7 +559,12 @@
         }
         .top-nav-bar .nav-links a.student-portal-link-top::after { display: none; }
 
-        .top-nav-bar .nav-right { display: flex; align-items: center; gap: 12px; }
+        .top-nav-bar .nav-right { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        /* REMOVED the dull Student Portal button from nav-right */
         .top-nav-bar .nav-right .quick-link {
             color: rgba(255,255,255,0.4);
             font-size: 11px;
@@ -1530,8 +1535,8 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- TOP NAV BAR - Home, Fees, About, Contact, Admin (Yellow), Enroll Now (Red), Student Portal (RAINBOW) -->
-    <!-- NO DULL STUDENT PORTAL BUTTONS - ONLY RAINBOW GLOWING -->
+    <!-- TOP NAV BAR - CLEAN: NO DULL STUDENT PORTAL BUTTONS -->
+    <!-- ONLY RAINBOW GLOWING STUDENT PORTAL -->
     <!-- ======================================== -->
     <div class="top-nav-bar">
         <div class="container">
@@ -1547,12 +1552,12 @@
                 <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;"><i class="fas fa-user-lock"></i> Admin</a>
                 <!-- ENROLL NOW - RED -->
                 <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
-                <!-- STUDENT PORTAL - RAINBOW GLOWING (THE BEAUTIFUL ONE) -->
+                <!-- STUDENT PORTAL - RAINBOW GLOWING (THE BEAUTIFUL ONE) - NO DULL BUTTONS -->
                 <a href="student-portal.html" class="student-portal-link-top"><i class="fas fa-user-graduate"></i> Student Portal</a>
             </div>
             <div class="nav-right">
-                <!-- STUDENT PORTAL - RAINBOW GLOWING (THE BEAUTIFUL ONE) - NO DULL BUTTONS -->
-                <a href="student-portal.html" class="student-portal-link-top" style="padding:6px 18px;font-size:12px;"><i class="fas fa-user-graduate"></i> Student Portal</a>
+                <!-- REMOVED DULL STUDENT PORTAL BUTTON - ONLY CLEAN LINKS HERE -->
+                <a href="#" class="quick-link"><i class="fas fa-phone"></i> +254 721 556 252</a>
             </div>
         </div>
     </div>
@@ -1947,7 +1952,7 @@
                             div.className = 'news-item';
                             div.setAttribute('data-aos', 'fade-up');
                             div.setAttribute('data-aos-delay', (i + 1) * 100);
-                            div.innerHTML = `<h4>${n.title||'News'}</h4><p>${n.content||''}</p><span class="date">Posted: ${new Date().toLocaleDateString()}</span><a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>`;
+                            div.innerHTML = `<h4>${n.title||'News'}</h4><p>${n.content||''}</p><span class="date">Posted: ${new Date().toLocaleDateString()}</span><a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right</i></a>`;
                             grid.appendChild(div);
                         });
                     }
