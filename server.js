@@ -4589,47 +4589,6 @@ app.put('/api/content', async (req, res) => {
     }
 });
 
-// ============================================
-// UPLOAD ROUTE (for media files)
-// ============================================
-
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'No file uploaded' });
-        }
-        
-        let fileType = 'image';
-        let icon = '🖼️';
-        if (req.file.mimetype.startsWith('video/')) {
-            fileType = 'video';
-            icon = '🎬';
-        } else if (req.file.mimetype.startsWith('audio/')) {
-            fileType = 'audio';
-            icon = '🎵';
-        }
-        
-        // Return the file info
-        const filePath = `/${req.file.path.replace(/\\/g, '/')}`;
-        
-        res.json({ 
-            success: true, 
-            message: 'File uploaded successfully!', 
-            file: { 
-                filename: req.file.filename, 
-                originalname: req.file.originalname, 
-                path: filePath,
-                size: req.file.size, 
-                type: fileType, 
-                icon: icon, 
-                mimetype: req.file.mimetype 
-            } 
-        });
-    } catch (error) {
-        console.error('Upload error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
 
 // ============================================
 // REGISTER STATIC FILES
