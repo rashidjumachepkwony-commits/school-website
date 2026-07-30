@@ -55,7 +55,7 @@
         }
 
         /* ========================================
-           SPLASH SCREEN
+           SPLASH SCREEN - STAYS UNTIL PAGE FULLY LOADS
            ======================================== */
         #splash-screen {
             position: fixed;
@@ -1466,6 +1466,7 @@
 
     <!-- ======================================== -->
     <!-- SPLASH SCREEN - FIRST VISIT ONLY -->
+    <!-- STAYS UNTIL PAGE FULLY LOADS -->
     <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
@@ -1603,7 +1604,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HERO SECTION - CLEAN, NO <p> TAGS -->
+    <!-- HERO SECTION - NO <p> TAGS -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-video-bg">
@@ -1852,21 +1853,31 @@
     <script>
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
-        // ===== SPLASH SCREEN - ONLY ON FIRST VISIT =====
+        // ========================================
+        // SPLASH SCREEN - STAYS UNTIL PAGE FULLY LOADS
+        // ========================================
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
             splash.classList.add('hide-splash');
             sessionStorage.setItem('splashSeen', 'true');
-            setTimeout(() => { splash.style.display = 'none'; }, 800);
+            setTimeout(function() {
+                splash.style.display = 'none';
+            }, 800);
         }
 
+        // Check if splash was already seen in this session
         if (sessionStorage.getItem('splashSeen')) {
             document.getElementById('splash-screen').style.display = 'none';
         } else {
-            setTimeout(hideSplash, 60000);
+            // Wait for the page to fully load (including all assets, Render.com spin-up)
             window.addEventListener('load', function() {
-                setTimeout(hideSplash, 800);
+                // Give a small extra delay to ensure everything is rendered
+                setTimeout(hideSplash, 1000);
             });
+            
+            // Fallback: If page takes too long, hide after 15 seconds max
+            // This ensures it doesn't stay forever if something fails
+            setTimeout(hideSplash, 15000);
         }
 
         // ===== SPLASH NEWS - Update from CMS =====
