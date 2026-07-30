@@ -66,6 +66,18 @@
         .sidebar-menu .logout a { color: rgba(255,107,107,0.7); }
         .sidebar-menu .logout a:hover { color: #ff6b6b; background: rgba(255,107,107,0.1); }
 
+        /* NEW - CMS Badge */
+        .sidebar-menu a .cms-badge {
+            margin-left: auto;
+            background: linear-gradient(135deg, #D4A017, #f5c842);
+            color: #0A1628;
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 50px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
         .main-content { 
             margin-left: 260px; 
             padding: 25px 30px; 
@@ -441,6 +453,16 @@
             <div class="menu-label">Dashboard</div>
             <a class="active" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Dashboard</a>
             
+            <!-- ===== NEW CMS LINK ===== -->
+            <div class="menu-label" style="margin-top:10px;">Content Management</div>
+            <a onclick="window.location.href='admin-cms-ultimate.html'">
+                <i class="fas fa-rocket"></i> Ultimate CMS
+                <span class="cms-badge">NEW</span>
+            </a>
+            <a onclick="window.location.href='admin-cms.html'">
+                <i class="fas fa-edit"></i> Classic CMS
+            </a>
+            
             <div class="menu-label" style="margin-top:10px;">Staff Management</div>
             <a onclick="showSection('staff-management')"><i class="fas fa-users-cog"></i> Manage Staff</a>
             <a onclick="showSection('staff-attendance')"><i class="fas fa-user-check"></i> Staff Attendance</a>
@@ -493,6 +515,12 @@
             <h2>📊 Dashboard Overview</h2>
             <p class="desc">Welcome to the Admin Dashboard. Manage staff, students, visitors, finance, assessments, and view reports.</p>
             <div class="dashboard-cards">
+                <!-- NEW CMS Card -->
+                <div class="dashboard-card" onclick="window.location.href='admin-cms-ultimate.html'" style="border-color:#D4A017;background:linear-gradient(135deg,#fdf8ed,#fff);">
+                    <span class="icon">🚀</span>
+                    <h3 style="color:#D4A017;">Ultimate CMS</h3>
+                    <p>Powerful content management</p>
+                </div>
                 <div class="dashboard-card" onclick="showSection('staff-management')">
                     <span class="icon">👨‍💼</span>
                     <h3>Staff Management</h3>
