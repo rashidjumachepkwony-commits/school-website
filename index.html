@@ -1876,6 +1876,18 @@
             setTimeout(hideSplash, 15000);
         }
 
+        // ========================================
+        // STRIP HTML TAGS - REMOVES <p> FROM CMS DATA
+        // ========================================
+        function stripHtmlTags(html) {
+            if (!html) return '';
+            // Create a temporary element to parse HTML
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            // Get text content (strips all HTML tags)
+            return temp.textContent || temp.innerText || '';
+        }
+
         // ===== SPLASH NEWS - Update from CMS =====
         async function updateSplashNews() {
             try {
@@ -1883,8 +1895,8 @@
                 const data = await res.json();
                 if (data.success && data.content) {
                     const c = data.content;
-                    if (c.splashHeadline) document.getElementById('splashHeadline').textContent = c.splashHeadline;
-                    if (c.splashMeta) document.getElementById('splashMeta').textContent = c.splashMeta;
+                    if (c.splashHeadline) document.getElementById('splashHeadline').textContent = stripHtmlTags(c.splashHeadline);
+                    if (c.splashMeta) document.getElementById('splashMeta').textContent = stripHtmlTags(c.splashMeta);
                     if (c.splashSub) document.getElementById('splashSub').innerHTML = c.splashSub;
                 }
             } catch (e) { /* fallback */ }
@@ -1963,16 +1975,29 @@
             breakpoints: { 640: { slidesPerView: 1 }, 768: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }
         });
 
-        // ===== CMS LOAD =====
-        function stripHtml(html) { if (!html) return ''; const d = document.createElement('DIV'); d.innerHTML = html; return d.textContent || d.innerText || ''; }
+        // ========================================
+        // CMS LOAD - STRIPS <p> TAGS FROM HERO DESCRIPTION
+        // ========================================
+        function stripHtml(html) { 
+            if (!html) return ''; 
+            const d = document.createElement('DIV'); 
+            d.innerHTML = html; 
+            return d.textContent || d.innerText || ''; 
+        }
+        
         async function loadCMS() {
             try {
                 const res = await fetch('/api/content');
                 const data = await res.json();
                 if (data.success && data.content) {
                     const c = data.content;
+                    // Strip HTML tags from hero subtitle to remove <p> tags
                     if (c.heroTitle) document.getElementById('heroTitle').innerHTML = c.heroTitle;
-                    if (c.heroSubtitle) document.getElementById('heroSubtitle').textContent = c.heroSubtitle;
+                    if (c.heroSubtitle) {
+                        // Use textContent to strip all HTML tags
+                        const heroDesc = document.getElementById('heroSubtitle');
+                        heroDesc.textContent = stripHtml(c.heroSubtitle);
+                    }
                     if (c.performanceKcpe) document.getElementById('displayPerformance').textContent = stripHtml(c.performanceKcpe);
                     if (c.parentsCalendar) document.getElementById('displayParents').textContent = stripHtml(c.parentsCalendar);
                     if (c.downloads) document.getElementById('displayDownloads').textContent = stripHtml(c.downloads);
@@ -1986,7 +2011,7 @@
                             div.className = 'news-item';
                             div.setAttribute('data-aos', 'fade-up');
                             div.setAttribute('data-aos-delay', (i + 1) * 100);
-                            div.innerHTML = `<h4>${n.title||'News'}</h4><p>${n.content||''}</p><span class="date">Posted: ${new Date().toLocaleDateString()}</span><a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>`;
+                            div.innerHTML = `<h4>${stripHtml(n.title)||'News'}</h4><p>${stripHtml(n.content)||''}</p><span class="date">Posted: ${new Date().toLocaleDateString()}</span><a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>`;
                             grid.appendChild(div);
                         });
                     }
