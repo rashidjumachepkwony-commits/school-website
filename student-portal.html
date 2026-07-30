@@ -334,7 +334,7 @@
         }
 
         /* ======================================== */
-        /* ASSESSMENT TAB */
+        /* ASSESSMENT TAB - HIDDEN UNTIL STUDENT LOGS IN */
         /* ======================================== */
         .assessment-section {
             background: white;
@@ -342,6 +342,11 @@
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             margin-bottom: 25px;
+            display: none; /* HIDDEN BY DEFAULT */
+        }
+
+        .assessment-section.visible {
+            display: block; /* SHOWN AFTER STUDENT LOGS IN */
         }
 
         .assessment-section .section-header {
@@ -490,6 +495,11 @@
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 12px;
             text-align: center;
+            display: none;
+        }
+
+        .assessment-summary.visible {
+            display: grid;
         }
 
         .assessment-summary .stat .number {
@@ -829,6 +839,37 @@
         }
 
         /* ======================================== */
+        /* PROFILE TAB */
+        /* ======================================== */
+        .profile-tab-content {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .profile-tab-content .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            border-bottom: 3px solid #6f42c1;
+            padding-bottom: 12px;
+        }
+
+        .profile-tab-content .section-header h3 {
+            color: #0A1628;
+            font-size: 22px;
+        }
+
+        .profile-tab-content .section-header h3 i {
+            color: #6f42c1;
+            margin-right: 10px;
+        }
+
+        /* ======================================== */
         /* COMMON */
         /* ======================================== */
         .loading {
@@ -1042,6 +1083,12 @@
                 text-align: center;
                 gap: 10px;
             }
+
+            .profile-tab-content .section-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1149,7 +1196,7 @@
 
         <!-- ===== TAB: ASSESSMENTS ===== -->
         <div id="tabAssessments" class="tab-content active">
-            <div class="assessment-section">
+            <div class="assessment-section" id="assessmentSection">
                 <div class="section-header">
                     <h3><i class="fas fa-chart-bar"></i> 📊 Assessment Results</h3>
                     <button class="btn-download-report" onclick="downloadReport()">
@@ -1215,7 +1262,7 @@
                         Search for your profile to view results
                     </p>
                 </div>
-                <div id="assessmentSummary" class="assessment-summary" style="display:none;"></div>
+                <div id="assessmentSummary" class="assessment-summary"></div>
             </div>
         </div>
 
@@ -1308,9 +1355,11 @@
 
         <!-- ===== TAB: PROFILE ===== -->
         <div id="tabProfile" class="tab-content">
-            <div id="studentInfo" class="student-info" style="display:block; margin-bottom:0;">
-                <h3><i class="fas fa-user-graduate"></i> My Profile</h3>
-                <div class="info-grid" id="studentInfoGrid"></div>
+            <div class="profile-tab-content">
+                <div class="section-header">
+                    <h3><i class="fas fa-user-graduate"></i> 👤 My Profile</h3>
+                </div>
+                <div class="info-grid" id="studentInfoGridProfile"></div>
             </div>
         </div>
     </div>
@@ -1333,7 +1382,7 @@
         const infoMessage = document.getElementById('infoMessage');
         const studentInfo = document.getElementById('studentInfo');
         const studentInfoGrid = document.getElementById('studentInfoGrid');
-        const feeSection = document.getElementById('feeSection');
+        const studentInfoGridProfile = document.getElementById('studentInfoGridProfile');
         const feeCards = document.getElementById('feeCards');
         const feeStatus = document.getElementById('feeStatus');
         const paymentsContainer = document.getElementById('paymentsContainer');
@@ -1358,7 +1407,6 @@
         function switchTab(tab) {
             currentTab = tab;
             
-            // Update tab buttons
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             
@@ -1541,6 +1589,9 @@
                     // Show nav tabs
                     navTabs.classList.add('show');
                     
+                    // SHOW assessment section (was hidden before login)
+                    assessmentSection.classList.add('visible');
+                    
                     // Update profile
                     displayStudentInfo(currentStudent);
                     
@@ -1572,7 +1623,7 @@
             const typeIcon = student.type === 'Boarder' ? '🏠 Boarder' : '📖 Day Scholar';
             const genderIcon = student.gender === 'Male' ? '👨' : '👩';
 
-            studentInfoGrid.innerHTML = `
+            const infoHTML = `
                 <div class="info-item">
                     <div class="label">Student ID</div>
                     <div class="value">${student.studentId}</div>
@@ -1598,6 +1649,9 @@
                     <div class="value">${student.guardian || 'Not specified'}</div>
                 </div>
             `;
+
+            studentInfoGrid.innerHTML = infoHTML;
+            studentInfoGridProfile.innerHTML = infoHTML;
         }
 
         // ============================================
@@ -1718,7 +1772,7 @@
                                     No assessment records found
                                 </p>
                             `;
-                            assessmentSummary.style.display = 'none';
+                            assessmentSummary.classList.remove('visible');
                         }
                     } else {
                         showError(data.message || 'Error fetching assessment');
@@ -1760,6 +1814,8 @@
                         No assessment records found
                     </p>
                 `;
+                assessmentSummary.classList.remove('visible');
+                return;
             }
 
             const level = student.performanceLevel || 'Approaching Expectation';
@@ -1777,7 +1833,7 @@
                 'Below Expectation': '#dc3545'
             };
 
-            assessmentSummary.style.display = 'grid';
+            assessmentSummary.classList.add('visible');
             assessmentSummary.innerHTML = `
                 <div class="stat">
                     <div class="number" style="color: ${levelColors[level] || '#0A1628'}">
