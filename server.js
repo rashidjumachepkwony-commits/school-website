@@ -3039,6 +3039,65 @@ app.get('/api/assessments/download-class-pdf', async (req, res) => {
 });
 
 // ============================================
+// CLASS REPORT FOR PRINTING
+// ============================================
+
+app.get('/api/assessments/class-report', async (req, res) => {
+    try {
+        const { grade, type, term, year } = req.query;
+        
+        if (!grade) {
+            return res.status(400).json({ success: false, message: 'Grade is required' });
+        }
+        
+        const filter = { grade: grade };
+        if (type) filter.type = type;
+        if (term) filter.term = term;
+        if (year) filter.year = year;
+        
+        const allStudents = await StudentAssessment.find(filter).sort({ studentName: 1, createdAt: -1 });
+        
+        // Get unique students (latest record per student)
+        const uniqueStudents = {};
+        allStudents.forEach(student => {
+            const key = student.studentName;
+            if (!uniqueStudents[key] || new Date(student.createdAt) > new Date(uniqueStudents[key].createdAt)) {
+                uniqueStudents[key] = student;
+            }
+        });
+        
+        const students = Object.values(uniqueStudents).sort((a, b) => a.studentName.localeCompare(b.studentName));
+        
+        // Calculate summary
+        let total = students.length;
+        let exceeding = 0, meeting = 0, approaching = 0, below = 0;
+        
+        students.forEach(s => {
+            const level = s.performanceLevel || 'Approaching Expectation';
+            if (level === 'Exceeding Expectation') exceeding++;
+            else if (level === 'Meeting Expectation') meeting++;
+            else if (level === 'Approaching Expectation') approaching++;
+            else below++;
+        });
+        
+        res.json({
+            success: true,
+            students: students,
+            summary: {
+                totalStudents: total,
+                exceeding: exceeding,
+                meeting: meeting,
+                approaching: approaching,
+                below: below
+            }
+        });
+    } catch (error) {
+        console.error('Error generating class report:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
 // HOLIDAY ASSIGNMENTS - COMPLETE ROUTES
 // ============================================
 
@@ -4359,7 +4418,11 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     }
 });
 
-// Serve student portal page
+// ============================================
+// Serve HTML Pages
+// ============================================
+
+// Student Portal
 app.get('/student-portal', (req, res) => {
     console.log('📄 Serving student portal page');
     res.sendFile(path.join(__dirname, 'student-portal.html'));
@@ -4370,7 +4433,18 @@ app.get('/student-portal.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'student-portal.html'));
 });
 
-// Serve student report page
+// Admin Holiday Assignments
+app.get('/admin-holiday-assignments', (req, res) => {
+    console.log('📄 Serving admin holiday assignments page');
+    res.sendFile(path.join(__dirname, 'admin-holiday-assignments.html'));
+});
+
+app.get('/admin-holiday-assignments.html', (req, res) => {
+    console.log('📄 Serving admin holiday assignments page');
+    res.sendFile(path.join(__dirname, 'admin-holiday-assignments.html'));
+});
+
+// Student Report
 app.get('/student-report', (req, res) => {
     console.log('📄 Serving student report page');
     res.sendFile(path.join(__dirname, 'student_report.html'));
@@ -4380,6 +4454,10 @@ app.get('/student-report.html', (req, res) => {
     console.log('📄 Serving student report page');
     res.sendFile(path.join(__dirname, 'student_report.html'));
 });
+
+// ============================================
+// Debug routes
+// ============================================
 
 // Debug route - check if students exist
 app.get('/api/students/debug', async (req, res) => {
