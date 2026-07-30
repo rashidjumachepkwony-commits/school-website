@@ -226,7 +226,7 @@
         }
 
         /* ========================================
-           HEADER BUTTONS - SEQUENCE: Admin (Yellow), Enroll Now (Red), Student Portal (Rainbow)
+           HEADER BUTTONS
            ======================================== */
 
         /* ===== ADMIN BUTTON (Yellow/Gold) ===== */
@@ -270,7 +270,7 @@
         }
         .main-header .nav-links a.enroll-now-link::after { display: none; }
 
-        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING - THE BEAUTIFUL ONE) ===== */
+        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING) ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
             background-size: 300% 300%;
@@ -432,7 +432,7 @@
         }
 
         /* ========================================
-           TOP NAV BAR - CLEAN: NO DULL STUDENT PORTAL BUTTONS
+           TOP NAV BAR
            ======================================== */
         .top-nav-bar {
             background: linear-gradient(135deg, #0A1628, #1a2a4a);
@@ -593,28 +593,13 @@
         .top-nav-bar .nav-right .contact-link .whatsapp-icon {
             color: var(--whatsapp-green);
         }
-        .top-nav-bar .nav-right .contact-link .whatsapp-icon:hover {
-            animation: pulseWhatsApp 1.5s ease-in-out infinite;
-        }
-        .top-nav-bar .nav-right .contact-link .phone-icon:hover {
-            animation: pulsePhone 1.5s ease-in-out infinite;
-        }
         .top-nav-bar .nav-right .divider {
             color: rgba(255,255,255,0.15);
             font-size: 14px;
         }
 
-        @keyframes pulseWhatsApp {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); color: #25D366; }
-        }
-        @keyframes pulsePhone {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); color: var(--school-gold); }
-        }
-
         /* ========================================
-           SECTION TABS - REMOVED DULL STUDENT PORTAL TAB
+           SECTION TABS
            ======================================== */
         .section-tabs {
             background: white;
@@ -775,7 +760,7 @@
             -webkit-text-fill-color:transparent;
             background-clip:text;
         }
-        .hero-section p {
+        .hero-section .hero-description {
             font-size:18px;
             opacity:0.9;
             line-height:1.7;
@@ -1425,7 +1410,7 @@
             .top-nav-bar .nav-links a { font-size:11px; padding:4px 12px; }
             .hero-section { padding:80px 0 40px; }
             .hero-section h1 { font-size:32px; }
-            .hero-section p { font-size:16px; }
+            .hero-section .hero-description { font-size:16px; }
             .hero-section .btn-group { flex-direction:column; align-items:center; }
             .btn-scroll-down,.btn-outline { width:100%; justify-content:center; }
             .section-tabs { padding:6px 0; }
@@ -1461,6 +1446,7 @@
             .features-grid { grid-template-columns:1fr; }
             .stats-grid { grid-template-columns:1fr 1fr; }
             .hero-section h1 { font-size:26px; }
+            .hero-section .hero-description { font-size:14px; }
             .section-title { font-size:22px; }
             .section-tabs .tab-btn { font-size:8px; padding:3px 8px; }
             .section-tabs .tab-btn .tab-icon { font-size:10px; }
@@ -1509,7 +1495,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HEADER - Home, Fees, VIEW, About, Contact, Admin (Yellow), Enroll Now (Red), Student Portal (RAINBOW GLOWING) -->
+    <!-- HEADER -->
     <!-- ======================================== -->
     <header class="main-header">
         <div class="kenya-flag-strip"></div>
@@ -1527,13 +1513,10 @@
                 <a href="fees.html">Fees <span class="badge">VIEW</span></a>
                 <a href="about.html">About</a>
                 <a href="contact.html">Contact</a>
-                <!-- ADMIN - YELLOW -->
                 <a href="portal.html" class="portal-link">🔐 Admin</a>
-                <!-- ENROLL NOW - RED -->
                 <a href="admissions.html" class="enroll-now-link">
                     <i class="fas fa-pen-fancy"></i> Enroll Now
                 </a>
-                <!-- STUDENT PORTAL - RAINBOW GLOWING (THE BEAUTIFUL ONE) -->
                 <a href="student-portal.html" class="student-portal-link">
                     <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
@@ -1574,8 +1557,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- TOP NAV BAR - CLEAN: NO DULL STUDENT PORTAL BUTTONS -->
-    <!-- WITH PHONE AND WHATSAPP NUMBERS -->
+    <!-- TOP NAV BAR -->
     <!-- ======================================== -->
     <div class="top-nav-bar">
         <div class="container">
@@ -1587,21 +1569,16 @@
                 <a href="fees.html"><i class="fas fa-coins"></i> Fees <span class="badge">VIEW</span></a>
                 <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
                 <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
-                <!-- ADMIN - YELLOW -->
                 <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;"><i class="fas fa-user-lock"></i> Admin</a>
-                <!-- ENROLL NOW - RED -->
                 <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
-                <!-- STUDENT PORTAL - RAINBOW GLOWING (THE BEAUTIFUL ONE) -->
                 <a href="student-portal.html" class="student-portal-link-top"><i class="fas fa-user-graduate"></i> Student Portal</a>
             </div>
             <div class="nav-right">
-                <!-- Phone Number with icon -->
                 <a href="tel:+254721556252" class="contact-link">
                     <i class="fas fa-phone phone-icon"></i>
                     <span>+254 721 556 252</span>
                 </a>
                 <span class="divider">|</span>
-                <!-- WhatsApp Number with icon -->
                 <a href="https://wa.me/254740201441" target="_blank" class="contact-link">
                     <i class="fab fa-whatsapp whatsapp-icon"></i>
                     <span>+254 740 201 441</span>
@@ -1611,7 +1588,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- SECTION TABS - REMOVED DULL STUDENT PORTAL TAB -->
+    <!-- SECTION TABS -->
     <!-- ======================================== -->
     <div class="section-tabs" id="sectionTabs">
         <div class="container">
@@ -1626,7 +1603,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HERO -->
+    <!-- HERO SECTION - CLEAN, NO <p> TAGS -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-video-bg">
@@ -1643,7 +1620,9 @@
                 <span class="flag-text">🇰🇪 Proudly Kenyan</span>
             </div>
             <h1 id="heroTitle">Welcome to <br><span class="highlight">Changara Star Academy</span></h1>
-            <p id="heroSubtitle">Nurturing young minds through quality education, discipline, innovation, and strong moral values. We provide a safe and supportive learning environment where every child is encouraged to discover their potential and achieve academic excellence.</p>
+            <div class="hero-description" id="heroSubtitle">
+                Nurturing young minds through quality education, discipline, innovation, and strong moral values. We provide a safe and supportive learning environment where every child is encouraged to discover their potential and achieve academic excellence.
+            </div>
 
             <!-- VIDEO PLAY BUTTON -->
             <div class="hero-video-play" onclick="openVideoModal()">
