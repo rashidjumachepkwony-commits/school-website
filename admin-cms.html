@@ -40,15 +40,7 @@
         }
 
         /* ============================================
-           SCROLLBAR STYLING
-           ============================================ */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--gray-light); }
-        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--gold-light); }
-
-        /* ============================================
-           SIDEBAR - MODERN DARK
+           SIDEBAR
            ============================================ */
         .sidebar { 
             width: 280px; 
@@ -76,11 +68,6 @@
             font-size: 48px; 
             display: block; 
             margin-bottom: 8px;
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
         }
         .sidebar-brand h2 { 
             color: var(--gold-light); 
@@ -90,27 +77,6 @@
         }
         .sidebar-brand h2 span { color: white; }
         .sidebar-brand p { color: rgba(255,255,255,0.5); font-size: 12px; letter-spacing: 2px; }
-
-        .sidebar-search {
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        .sidebar-search input {
-            width: 100%;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.08);
-            color: white;
-            font-size: 13px;
-            transition: var(--transition);
-        }
-        .sidebar-search input::placeholder { color: rgba(255,255,255,0.3); }
-        .sidebar-search input:focus { 
-            outline: none; 
-            background: rgba(255,255,255,0.15);
-            box-shadow: 0 0 0 3px rgba(212,160,23,0.2);
-        }
 
         .sidebar-menu { padding: 10px 15px 20px; }
         .sidebar-menu .menu-label { 
@@ -215,14 +181,6 @@
             gap: 10px;
         }
         .top-bar .left h1 i { color: var(--gold); }
-        .top-bar .left .breadcrumb { 
-            color: var(--gray); 
-            font-size: 13px; 
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .top-bar .left .breadcrumb span { color: var(--gold); }
 
         .top-bar .right { 
             display: flex; 
@@ -295,8 +253,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
         }
         .toast.success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
         .toast.error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
@@ -307,7 +263,6 @@
             from { transform: translateX(100px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        .toast .toast-icon { font-size: 20px; }
         .toast .toast-close { 
             margin-left: auto; 
             background: none; 
@@ -361,7 +316,6 @@
             gap: 10px;
         }
         .editor-card .card-header h2 i { color: var(--gold); }
-        .editor-card .card-header .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .editor-card .desc { color: var(--gray); font-size: 14px; margin-bottom: 20px; }
 
         /* ============================================
@@ -428,13 +382,8 @@
         .btn-purple:hover { background: #5a32a3; transform: translateY(-2px); }
         .btn-secondary { background: var(--gray); color: white; }
         .btn-secondary:hover { background: #5a6268; transform: translateY(-2px); }
-        .btn-warning { background: var(--warning); color: var(--primary); }
-        .btn-warning:hover { background: #e0a800; transform: translateY(-2px); }
         .btn-sm { padding: 6px 14px; font-size: 12px; }
-        .btn-lg { padding: 14px 32px; font-size: 16px; }
         .btn-block { width: 100%; justify-content: center; }
-        .btn-outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); }
-        .btn-outline:hover { background: var(--gold); color: var(--primary); }
 
         /* ============================================
            QUILL EDITOR
@@ -455,131 +404,49 @@
         .ql-editor img:hover { border-color: var(--gold); }
         .ql-editor video { max-width: 100%; border-radius: 8px; }
         .ql-editor audio { width: 100%; }
-        .ql-editor table { border-collapse: collapse; width: 100%; }
-        .ql-editor table td, .ql-editor table th { border: 1px solid #ccc; padding: 8px; }
 
         /* ============================================
-           MEDIA TOOLBAR
+           ITEM BOXES
            ============================================ */
-        .media-toolbar { 
-            display: none; 
-            position: fixed; 
-            background: white; 
-            padding: 14px 24px; 
-            border-radius: 14px; 
-            box-shadow: 0 15px 50px rgba(0,0,0,0.25); 
-            z-index: 10000; 
-            border: 2px solid var(--gold); 
-            gap: 12px; 
-            align-items: center; 
-            flex-wrap: wrap; 
-        }
-        .media-toolbar.show { display: flex; }
-        .media-toolbar .size-input { 
-            width: 60px; 
-            padding: 4px 8px; 
+        .item-box { 
+            background: var(--gray-light); 
+            padding: 18px; 
+            border-radius: 12px; 
             border: 1px solid var(--border); 
-            border-radius: 6px; 
-            font-size: 13px; 
-        }
-
-        /* ============================================
-           MEDIA LIBRARY GRID
-           ============================================ */
-        .media-library {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            margin: 15px 0;
-        }
-        .media-item {
-            background: var(--gray-light);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid var(--border);
+            margin-bottom: 12px; 
+            position: relative; 
             transition: var(--transition);
-            cursor: pointer;
-            position: relative;
         }
-        .media-item:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        .media-item img, .media-item video { width: 100%; height: 120px; object-fit: cover; }
-        .media-item .media-info { padding: 10px; font-size: 12px; color: var(--gray); text-align: center; }
-        .media-item .media-info .name { font-weight: 600; color: var(--primary); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .media-item .media-check {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid var(--border);
+        .item-box:hover { border-color: var(--gold); }
+        .item-box .remove-btn { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: var(--danger); 
+            color: white; 
+            border: none; 
+            border-radius: 50%; 
+            width: 28px; 
+            height: 28px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: var(--transition);
         }
-        .media-item.selected .media-check { background: var(--gold); border-color: var(--gold); color: white; }
-        .media-item .media-remove {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            background: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: var(--transition);
-        }
-        .media-item:hover .media-remove { opacity: 1; }
+        .item-box .remove-btn:hover { transform: scale(1.1); }
 
         /* ============================================
-           DROP ZONE
+           EMPTY STATE
            ============================================ */
-        .drop-zone {
-            border: 3px dashed var(--gold);
-            border-radius: var(--radius);
-            padding: 40px 20px;
-            text-align: center;
-            transition: var(--transition);
-            background: var(--gray-light);
-            cursor: pointer;
-            margin-bottom: 20px;
+        .empty-state { 
+            text-align: center; 
+            padding: 50px 20px; 
+            color: var(--gray);
         }
-        .drop-zone:hover { background: white; border-color: var(--gold-light); }
-        .drop-zone.dragover { background: rgba(212,160,23,0.05); border-color: var(--gold-light); }
-        .drop-zone .icon { font-size: 48px; display: block; margin-bottom: 10px; }
-        .drop-zone h3 { color: var(--primary); }
-        .drop-zone p { color: var(--gray); }
-        .drop-zone .file-types { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
-        .drop-zone .file-types span { 
-            background: white; 
-            padding: 4px 14px; 
-            border-radius: 50px; 
-            font-size: 11px; 
-            border: 1px solid var(--border);
-        }
-
-        /* ============================================
-           PROGRESS BAR
-           ============================================ */
-        .upload-progress { display: none; margin-top: 15px; }
-        .progress-bar { background: var(--border); border-radius: 10px; height: 8px; overflow: hidden; }
-        .progress-bar .progress-fill { 
-            width: 0%; 
-            height: 100%; 
-            background: var(--gold-gradient); 
-            transition: width 0.3s; 
-            border-radius: 10px;
-        }
-        .upload-status { margin-top: 5px; color: var(--gray); font-size: 13px; }
+        .empty-state i { font-size: 48px; display: block; margin-bottom: 15px; color: var(--border); }
+        .empty-state h4 { color: var(--primary); margin-bottom: 5px; }
 
         /* ============================================
            PREVIEW MODAL
@@ -633,121 +500,20 @@
             padding-top: 20px; 
         }
 
-        /* ============================================
-           ITEM BOXES (for lists)
-           ============================================ */
-        .item-box { 
-            background: var(--gray-light); 
-            padding: 18px; 
-            border-radius: 12px; 
-            border: 1px solid var(--border); 
-            margin-bottom: 12px; 
-            position: relative; 
-            transition: var(--transition);
-        }
-        .item-box:hover { border-color: var(--gold); }
-        .item-box .remove-btn { 
-            position: absolute; 
-            top: 10px; 
-            right: 10px; 
-            background: var(--danger); 
-            color: white; 
-            border: none; 
-            border-radius: 50%; 
-            width: 28px; 
-            height: 28px; 
-            cursor: pointer; 
-            font-size: 14px; 
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .item-box .remove-btn:hover { transform: scale(1.1); }
-        .item-box .drag-handle {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: var(--gray);
-            cursor: grab;
-            font-size: 16px;
-        }
-        .item-box .file-preview { 
-            margin-top: 10px; 
-            padding: 10px; 
-            background: white; 
-            border-radius: 8px; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            flex-wrap: wrap; 
-            border: 1px solid var(--border);
-        }
-        .item-box .file-preview img, 
-        .item-box .file-preview video { max-width: 100px; max-height: 80px; border-radius: 6px; }
-        .item-box .file-preview audio { width: 150px; }
-
-        /* ============================================
-           EMPTY STATE
-           ============================================ */
-        .empty-state { 
-            text-align: center; 
-            padding: 50px 20px; 
-            color: var(--gray);
-        }
-        .empty-state i { font-size: 48px; display: block; margin-bottom: 15px; color: var(--border); }
-        .empty-state h4 { color: var(--primary); margin-bottom: 5px; }
-
-        /* ============================================
-           QUICK STATS
-           ============================================ */
-        .quick-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .quick-stat {
-            background: white;
-            padding: 20px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            text-align: center;
-            border: 1px solid var(--border);
-            transition: var(--transition);
-        }
-        .quick-stat:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
-        .quick-stat .number { font-size: 32px; font-weight: 800; color: var(--primary); }
-        .quick-stat .number.gold { color: var(--gold); }
-        .quick-stat .number.green { color: var(--success); }
-        .quick-stat .number.blue { color: var(--info); }
-        .quick-stat .number.purple { color: var(--purple); }
-        .quick-stat .label { font-size: 13px; color: var(--gray); margin-top: 4px; }
-
-        /* ============================================
-           RESPONSIVE
-           ============================================ */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); width: 280px; }
             .sidebar.open { transform: translateX(0); }
             .main-content { margin-left: 0; padding: 15px; }
             .form-row { grid-template-columns: 1fr; }
-            .top-bar .left h1 { font-size: 18px; }
-            .top-bar .left .breadcrumb { display: none; }
-            .quick-stats { grid-template-columns: 1fr 1fr; }
-            .media-library { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
         }
         @media (max-width: 576px) {
-            .quick-stats { grid-template-columns: 1fr; }
             .top-bar { flex-direction: column; align-items: stretch; text-align: center; }
             .top-bar .right { justify-content: center; flex-wrap: wrap; }
             .editor-card { padding: 18px; }
             .preview-modal { padding: 15px; }
             .preview-modal .preview-content { padding: 20px; }
-            .media-library { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
         }
 
-        /* Mobile hamburger */
         .hamburger {
             display: none;
             background: none;
@@ -768,6 +534,67 @@
             z-index: 999;
         }
         .sidebar-overlay.active { display: block; }
+
+        .upload-area {
+            border: 3px dashed var(--gold);
+            border-radius: var(--radius);
+            padding: 40px 20px;
+            text-align: center;
+            transition: var(--transition);
+            background: var(--gray-light);
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .upload-area:hover { background: white; border-color: var(--gold-light); }
+        .upload-area .icon { font-size: 48px; display: block; margin-bottom: 10px; }
+        .upload-area h3 { color: var(--primary); }
+        .upload-area p { color: var(--gray); }
+        .upload-area .file-types { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+        .upload-area .file-types span { background: white; padding: 4px 14px; border-radius: 50px; font-size: 11px; border: 1px solid var(--border); }
+
+        .upload-progress { display: none; margin-top: 15px; }
+        .progress-bar { background: var(--border); border-radius: 10px; height: 8px; overflow: hidden; }
+        .progress-bar .progress-fill { width: 0%; height: 100%; background: var(--gold-gradient); transition: width 0.3s; border-radius: 10px; }
+        .upload-status { margin-top: 5px; color: var(--gray); font-size: 13px; }
+
+        .media-library {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .media-item {
+            background: var(--gray-light);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+        .media-item:hover { border-color: var(--gold); transform: translateY(-3px); }
+        .media-item img, .media-item video { width: 100%; height: 120px; object-fit: cover; }
+        .media-item .media-info { padding: 10px; font-size: 12px; color: var(--gray); text-align: center; }
+        .media-item .media-info .name { font-weight: 600; color: var(--primary); display: block; }
+        .media-item .media-remove {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        .media-item:hover .media-remove { opacity: 1; }
     </style>
 </head>
 <body>
@@ -782,22 +609,17 @@
             <h2>STAR <span>CMS</span></h2>
             <p>Changara Star Academy</p>
         </div>
-        
-        <div class="sidebar-search">
-            <input type="text" placeholder="🔍 Search sections..." id="sidebarSearch" oninput="filterMenu(this.value)">
-        </div>
 
-        <div class="sidebar-menu" id="sidebarMenu">
+        <div class="sidebar-menu">
             <div class="menu-label">Dashboard</div>
             <a class="active" onclick="switchPanel('dashboard')"><i class="fas fa-home"></i> Dashboard</a>
             
             <div class="menu-label">Content</div>
-            <a onclick="switchPanel('pages')"><i class="fas fa-file-alt"></i> Pages</a>
             <a onclick="switchPanel('home')"><i class="fas fa-home"></i> Home Page</a>
             <a onclick="switchPanel('about')"><i class="fas fa-info-circle"></i> About Us</a>
             <a onclick="switchPanel('academics')"><i class="fas fa-book"></i> Academics</a>
             <a onclick="switchPanel('admissions')"><i class="fas fa-file-signature"></i> Admissions</a>
-            <a onclick="switchPanel('gallery')"><i class="fas fa-images"></i> Media Library <span class="badge" id="mediaBadge">0</span></a>
+            <a onclick="switchPanel('gallery')"><i class="fas fa-images"></i> Media Library</a>
             
             <div class="menu-label">Features</div>
             <a onclick="switchPanel('events')"><i class="fas fa-calendar-alt"></i> Events & News</a>
@@ -828,7 +650,6 @@
             <div class="left">
                 <button class="hamburger" onclick="toggleSidebar()">☰</button>
                 <h1 id="pageTitle"><i class="fas fa-home"></i> Dashboard</h1>
-                <div class="breadcrumb">/ <span id="breadcrumbText">Overview</span></div>
             </div>
             <div class="right">
                 <div class="admin-info">
@@ -841,7 +662,7 @@
                 <button class="btn-save-top" onclick="saveAllContent()">
                     <i class="fas fa-save"></i> Save All
                 </button>
-                <button class="btn-save-top" style="background:var(--info);color:white;" onclick="previewWebsite()">
+                <button class="btn-save-top" style="background:var(--info);color:white;" onclick="window.open('/','_blank')">
                     <i class="fas fa-eye"></i> Preview
                 </button>
             </div>
@@ -852,96 +673,31 @@
 
         <!-- ===== DASHBOARD PANEL ===== -->
         <div id="panel-dashboard" class="panel active">
-            <div class="quick-stats" id="dashboardStats">
-                <div class="quick-stat"><div class="number gold" id="statPages">0</div><div class="label">📄 Pages</div></div>
-                <div class="quick-stat"><div class="number blue" id="statMedia">0</div><div class="label">🖼️ Media Files</div></div>
-                <div class="quick-stat"><div class="number green" id="statEvents">0</div><div class="label">📰 Events</div></div>
-                <div class="quick-stat"><div class="number purple" id="statDownloads">0</div><div class="label">📥 Downloads</div></div>
-            </div>
-
             <div class="editor-card">
                 <div class="card-header">
                     <h2><i class="fas fa-rocket"></i> Welcome to STAR CMS</h2>
                     <span style="font-size:12px;color:var(--gray);">v2.0 - Ultimate Content Management</span>
                 </div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;margin-top:10px;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-top:10px;">
                     <div style="background:var(--gray-light);padding:20px;border-radius:12px;text-align:center;border:1px solid var(--border);">
                         <span style="font-size:32px;">📝</span>
                         <h4 style="color:var(--primary);margin:8px 0;">Rich Text Editor</h4>
-                        <p style="font-size:13px;color:var(--gray);">Full WYSIWYG with media embedding</p>
+                        <p style="font-size:13px;color:var(--gray);">Full WYSIWYG with media</p>
                     </div>
                     <div style="background:var(--gray-light);padding:20px;border-radius:12px;text-align:center;border:1px solid var(--border);">
                         <span style="font-size:32px;">🖼️</span>
                         <h4 style="color:var(--primary);margin:8px 0;">Media Library</h4>
-                        <p style="font-size:13px;color:var(--gray);">Upload & manage all media files</p>
+                        <p style="font-size:13px;color:var(--gray);">Upload & manage files</p>
                     </div>
                     <div style="background:var(--gray-light);padding:20px;border-radius:12px;text-align:center;border:1px solid var(--border);">
                         <span style="font-size:32px;">🔍</span>
                         <h4 style="color:var(--primary);margin:8px 0;">SEO Optimized</h4>
-                        <p style="font-size:13px;color:var(--gray);">Meta tags, descriptions, keywords</p>
+                        <p style="font-size:13px;color:var(--gray);">Meta tags & descriptions</p>
                     </div>
                     <div style="background:var(--gray-light);padding:20px;border-radius:12px;text-align:center;border:1px solid var(--border);">
-                        <span style="font-size:32px;">📊</span>
-                        <h4 style="color:var(--primary);margin:8px 0;">Analytics</h4>
-                        <p style="font-size:13px;color:var(--gray);">Content usage & performance</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="editor-card">
-                <div class="card-header">
-                    <h2><i class="fas fa-clock"></i> Recent Activity</h2>
-                </div>
-                <div id="recentActivity">
-                    <div style="padding:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-                        <span><i class="fas fa-save" style="color:var(--gold);"></i> Content saved</span>
-                        <span style="font-size:12px;color:var(--gray);">Just now</span>
-                    </div>
-                    <div style="padding:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-                        <span><i class="fas fa-upload" style="color:var(--info);"></i> Media uploaded</span>
-                        <span style="font-size:12px;color:var(--gray);">2 hours ago</span>
-                    </div>
-                    <div style="padding:12px;display:flex;justify-content:space-between;align-items:center;">
-                        <span><i class="fas fa-edit" style="color:var(--success);"></i> Page updated</span>
-                        <span style="font-size:12px;color:var(--gray);">Yesterday</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== PAGES PANEL ===== -->
-        <div id="panel-pages" class="panel">
-            <div class="editor-card">
-                <div class="card-header">
-                    <h2><i class="fas fa-file-alt"></i> All Pages</h2>
-                    <button class="btn btn-primary" onclick="showToast('Page manager coming soon!','info')">
-                        <i class="fas fa-plus"></i> New Page
-                    </button>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px;">
-                    <div style="background:var(--gray-light);padding:20px;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;gap:15px;cursor:pointer;" onclick="switchPanel('home')">
-                        <span style="font-size:28px;">🏠</span>
-                        <div><h4 style="color:var(--primary);">Home</h4><p style="font-size:12px;color:var(--gray);">Main landing page</p></div>
-                    </div>
-                    <div style="background:var(--gray-light);padding:20px;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;gap:15px;cursor:pointer;" onclick="switchPanel('about')">
-                        <span style="font-size:28px;">📖</span>
-                        <div><h4 style="color:var(--primary);">About Us</h4><p style="font-size:12px;color:var(--gray);">School information</p></div>
-                    </div>
-                    <div style="background:var(--gray-light);padding:20px;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;gap:15px;cursor:pointer;" onclick="switchPanel('academics')">
-                        <span style="font-size:28px;">📚</span>
-                        <div><h4 style="color:var(--primary);">Academics</h4><p style="font-size:12px;color:var(--gray);">Curriculum & grades</p></div>
-                    </div>
-                    <div style="background:var(--gray-light);padding:20px;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;gap:15px;cursor:pointer;" onclick="switchPanel('admissions')">
-                        <span style="font-size:28px;">📝</span>
-                        <div><h4 style="color:var(--primary);">Admissions</h4><p style="font-size:12px;color:var(--gray);">Requirements & process</p></div>
-                    </div>
-                    <div style="background:var(--gray-light);padding:20px;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;gap:15px;cursor:pointer;" onclick="switchPanel('contact')">
-                        <span style="font-size:28px;">📞</span>
-                        <div><h4 style="color:var(--primary);">Contact</h4><p style="font-size:12px;color:var(--gray);">Contact information</p></div>
-                    </div>
-                    <div style="background:var(--gray-light);padding:20px;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;gap:15px;cursor:pointer;" onclick="switchPanel('fees')">
-                        <span style="font-size:28px;">💰</span>
-                        <div><h4 style="color:var(--primary);">Fees</h4><p style="font-size:12px;color:var(--gray);">Fee structure</p></div>
+                        <span style="font-size:32px;">💰</span>
+                        <h4 style="color:var(--primary);margin:8px 0;">Fees Templates</h4>
+                        <p style="font-size:13px;color:var(--gray);">One-click fee tables</p>
                     </div>
                 </div>
             </div>
@@ -953,19 +709,16 @@
                 <div class="card-header">
                     <h2><i class="fas fa-home"></i> Home Page</h2>
                     <div class="card-actions">
-                        <button class="btn btn-sm btn-info" onclick="previewEditorContent('heroSubtitle')"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-sm btn-info" onclick="previewContent('heroSubtitle')"><i class="fas fa-eye"></i> Preview</button>
                     </div>
                 </div>
                 <p class="desc">Edit the main content displayed on the home page.</p>
 
-                <!-- Media Toolbar -->
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px;padding:12px;background:var(--gray-light);border-radius:10px;border:1px solid var(--border);align-items:center;">
                     <span style="font-weight:600;font-size:13px;color:var(--primary);">📎 Insert:</span>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('heroSubtitle','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('heroSubtitle','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('heroSubtitle','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-sm btn-info" onclick="insertImage('heroSubtitle')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-sm btn-info" onclick="insertVideo('heroSubtitle')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('heroSubtitle')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-sm btn-purple" onclick="openMediaLibrary('heroSubtitle')"><i class="fas fa-images"></i> Media Library</button>
                 </div>
 
                 <div class="form-group">
@@ -1011,18 +764,16 @@
                 <div class="card-header">
                     <h2><i class="fas fa-info-circle"></i> About Us</h2>
                     <div class="card-actions">
-                        <button class="btn btn-sm btn-info" onclick="previewEditorContent('aboutMission')"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-sm btn-info" onclick="previewContent('aboutMission')"><i class="fas fa-eye"></i> Preview</button>
                     </div>
                 </div>
-                <p class="desc">Edit the About Us page content with full formatting.</p>
+                <p class="desc">Edit the About Us page content.</p>
 
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px;padding:12px;background:var(--gray-light);border-radius:10px;border:1px solid var(--border);align-items:center;">
                     <span style="font-weight:600;font-size:13px;color:var(--primary);">📎 Insert:</span>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('aboutMission','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('aboutMission','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('aboutMission','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-sm btn-info" onclick="insertImage('aboutMission')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-sm btn-info" onclick="insertVideo('aboutMission')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('aboutMission')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-sm btn-purple" onclick="openMediaLibrary('aboutMission')"><i class="fas fa-images"></i> Media Library</button>
                 </div>
 
                 <div class="form-group">
@@ -1072,18 +823,16 @@
                 <div class="card-header">
                     <h2><i class="fas fa-file-signature"></i> Admissions</h2>
                     <div class="card-actions">
-                        <button class="btn btn-sm btn-info" onclick="previewEditorContent('admissionsRequirements')"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-sm btn-info" onclick="previewContent('admissionsRequirements')"><i class="fas fa-eye"></i> Preview</button>
                     </div>
                 </div>
                 <p class="desc">Edit admissions requirements and process.</p>
 
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px;padding:12px;background:var(--gray-light);border-radius:10px;border:1px solid var(--border);align-items:center;">
                     <span style="font-weight:600;font-size:13px;color:var(--primary);">📎 Insert:</span>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('admissionsRequirements','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('admissionsRequirements','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('admissionsRequirements','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-sm btn-info" onclick="insertImage('admissionsRequirements')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-sm btn-info" onclick="insertVideo('admissionsRequirements')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('admissionsRequirements')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-sm btn-purple" onclick="openMediaLibrary('admissionsRequirements')"><i class="fas fa-images"></i> Media Library</button>
                 </div>
 
                 <div class="form-group">
@@ -1109,30 +858,25 @@
             </div>
         </div>
 
-        <!-- ===== GALLERY / MEDIA LIBRARY PANEL ===== -->
+        <!-- ===== GALLERY PANEL ===== -->
         <div id="panel-gallery" class="panel">
             <div class="editor-card">
                 <div class="card-header">
                     <h2><i class="fas fa-images"></i> Media Library</h2>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <button class="btn btn-primary" onclick="document.getElementById('fileUpload').click()"><i class="fas fa-upload"></i> Upload</button>
-                        <button class="btn btn-success" onclick="refreshMediaLibrary()"><i class="fas fa-sync"></i> Refresh</button>
-                    </div>
                 </div>
-                <p class="desc">Upload and manage all images, videos, and audio files.</p>
+                <p class="desc">Manage images, videos, and audio files.</p>
 
-                <!-- Drop Zone -->
-                <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileUpload').click()">
+                <div class="upload-area" onclick="document.getElementById('fileUpload').click()">
                     <span class="icon">📤</span>
-                    <h3>Drop files here or click to upload</h3>
-                    <p>Supports images, videos, and audio files up to 100MB</p>
+                    <h3>Upload Media</h3>
+                    <p>Upload images, videos, or audio files</p>
                     <div class="file-types">
                         <span>🖼️ Images (JPG, PNG, GIF, WebP)</span>
-                        <span>🎬 Videos (MP4, WebM, OGG)</span>
-                        <span>🎵 Audio (MP3, WAV, OGG, WebM)</span>
+                        <span>🎬 Videos (MP4, WebM)</span>
+                        <span>🎵 Audio (MP3, WAV)</span>
                     </div>
                 </div>
-                <input type="file" id="fileUpload" accept="image/*,video/*,audio/*" style="display:none;" multiple onchange="uploadFiles()">
+                <input type="file" id="fileUpload" accept="image/*,video/*,audio/*" style="display:none;" onchange="uploadFile()">
 
                 <div class="upload-progress" id="uploadProgress">
                     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
@@ -1152,17 +896,7 @@
                     <h2><i class="fas fa-calendar-alt"></i> Events & News</h2>
                     <button class="btn btn-primary" onclick="addItem('eventsContainer','event')"><i class="fas fa-plus"></i> Add Event</button>
                 </div>
-                <p class="desc">Manage news and events with full formatting.</p>
-
-                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px;padding:12px;background:var(--gray-light);border-radius:10px;border:1px solid var(--border);align-items:center;">
-                    <span style="font-weight:600;font-size:13px;color:var(--primary);">📎 Insert:</span>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('eventsContent','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('eventsContent','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('eventsContent','audio')"><i class="fas fa-music"></i> Audio</button>
-                    <button class="btn btn-sm btn-secondary" onclick="insertTable('eventsContent')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-sm btn-purple" onclick="openMediaLibrary('eventsContent')"><i class="fas fa-images"></i> Media Library</button>
-                </div>
-
+                <p class="desc">Manage news and events.</p>
                 <div id="eventsContainer"></div>
             </div>
         </div>
@@ -1171,20 +905,10 @@
         <div id="panel-cocurricular" class="panel">
             <div class="editor-card">
                 <div class="card-header">
-                    <h2><i class="fas fa-futbol"></i> Co-curricular Activities</h2>
+                    <h2><i class="fas fa-futbol"></i> Co-curricular</h2>
                     <button class="btn btn-primary" onclick="addItem('cocurricularContainer','cocurricular')"><i class="fas fa-plus"></i> Add Activity</button>
                 </div>
-                <p class="desc">Manage co-curricular activities with full formatting.</p>
-
-                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px;padding:12px;background:var(--gray-light);border-radius:10px;border:1px solid var(--border);align-items:center;">
-                    <span style="font-weight:600;font-size:13px;color:var(--primary);">📎 Insert:</span>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('cocurricularContent','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('cocurricularContent','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('cocurricularContent','audio')"><i class="fas fa-music"></i> Audio</button>
-                    <button class="btn btn-sm btn-secondary" onclick="insertTable('cocurricularContent')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-sm btn-purple" onclick="openMediaLibrary('cocurricularContent')"><i class="fas fa-images"></i> Media Library</button>
-                </div>
-
+                <p class="desc">Manage co-curricular activities.</p>
                 <div id="cocurricularContainer"></div>
             </div>
         </div>
@@ -1195,18 +919,16 @@
                 <div class="card-header">
                     <h2><i class="fas fa-trophy"></i> Academic Performance</h2>
                     <div class="card-actions">
-                        <button class="btn btn-sm btn-info" onclick="previewEditorContent('performanceKcpe')"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-sm btn-info" onclick="previewContent('performanceKcpe')"><i class="fas fa-eye"></i> Preview</button>
                     </div>
                 </div>
                 <p class="desc">Edit academic performance information.</p>
 
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px;padding:12px;background:var(--gray-light);border-radius:10px;border:1px solid var(--border);align-items:center;">
                     <span style="font-weight:600;font-size:13px;color:var(--primary);">📎 Insert:</span>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('performanceKcpe','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('performanceKcpe','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('performanceKcpe','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-sm btn-info" onclick="insertImage('performanceKcpe')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-sm btn-info" onclick="insertVideo('performanceKcpe')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('performanceKcpe')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-sm btn-purple" onclick="openMediaLibrary('performanceKcpe')"><i class="fas fa-images"></i> Media Library</button>
                 </div>
 
                 <div class="form-group">
@@ -1226,18 +948,16 @@
                 <div class="card-header">
                     <h2><i class="fas fa-users"></i> Parents Corner</h2>
                     <div class="card-actions">
-                        <button class="btn btn-sm btn-info" onclick="previewEditorContent('parentsCalendar')"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-sm btn-info" onclick="previewContent('parentsCalendar')"><i class="fas fa-eye"></i> Preview</button>
                     </div>
                 </div>
                 <p class="desc">Edit parents corner information.</p>
 
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px;padding:12px;background:var(--gray-light);border-radius:10px;border:1px solid var(--border);align-items:center;">
                     <span style="font-weight:600;font-size:13px;color:var(--primary);">📎 Insert:</span>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('parentsCalendar','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('parentsCalendar','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('parentsCalendar','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-sm btn-info" onclick="insertImage('parentsCalendar')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-sm btn-info" onclick="insertVideo('parentsCalendar')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('parentsCalendar')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-sm btn-purple" onclick="openMediaLibrary('parentsCalendar')"><i class="fas fa-images"></i> Media Library</button>
                 </div>
 
                 <div class="form-group">
@@ -1273,20 +993,18 @@
                 <div class="card-header">
                     <h2><i class="fas fa-coins"></i> Fees Structure</h2>
                     <div class="card-actions">
-                        <button class="btn btn-sm btn-info" onclick="previewEditorContent('feesContent')"><i class="fas fa-eye"></i> Preview</button>
-                        <button class="btn btn-sm btn-success" onclick="insertFeesTable()"><i class="fas fa-table"></i> Insert Day Scholars</button>
-                        <button class="btn btn-sm btn-purple" onclick="insertBoardingTable()"><i class="fas fa-table"></i> Insert Boarding</button>
+                        <button class="btn btn-sm btn-info" onclick="previewContent('feesContent')"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn btn-sm btn-success" onclick="insertFeesTable()"><i class="fas fa-table"></i> Day Scholars</button>
+                        <button class="btn btn-sm btn-purple" onclick="insertBoardingTable()"><i class="fas fa-table"></i> Boarding</button>
                     </div>
                 </div>
-                <p class="desc">Edit the school fees structure for all grades.</p>
+                <p class="desc">Edit the school fees structure.</p>
 
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px;padding:12px;background:var(--gray-light);border-radius:10px;border:1px solid var(--border);align-items:center;">
                     <span style="font-weight:600;font-size:13px;color:var(--primary);">📎 Insert:</span>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('feesContent','image')"><i class="fas fa-image"></i> Image</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('feesContent','video')"><i class="fas fa-video"></i> Video</button>
-                    <button class="btn btn-sm btn-info" onclick="openMediaUpload('feesContent','audio')"><i class="fas fa-music"></i> Audio</button>
+                    <button class="btn btn-sm btn-info" onclick="insertImage('feesContent')"><i class="fas fa-image"></i> Image</button>
+                    <button class="btn btn-sm btn-info" onclick="insertVideo('feesContent')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('feesContent')"><i class="fas fa-table"></i> Table</button>
-                    <button class="btn btn-sm btn-purple" onclick="openMediaLibrary('feesContent')"><i class="fas fa-images"></i> Media Library</button>
                 </div>
 
                 <div class="form-group">
@@ -1344,22 +1062,19 @@
                 <div class="card-header">
                     <h2><i class="fas fa-search"></i> SEO & Metadata</h2>
                 </div>
-                <p class="desc">Edit search engine optimization settings for better visibility.</p>
+                <p class="desc">Edit search engine optimization settings.</p>
 
                 <div class="form-group">
                     <label>Page Title <span class="required">*</span></label>
-                    <input type="text" id="seoTitle" placeholder="SEO title - appears in browser tab">
-                    <small style="color:var(--gray);font-size:12px;">Recommended: 50-60 characters</small>
+                    <input type="text" id="seoTitle" placeholder="SEO title">
                 </div>
                 <div class="form-group">
                     <label>Meta Description <span class="required">*</span></label>
                     <textarea id="seoDescription" rows="3" placeholder="Brief description for search engines"></textarea>
-                    <small style="color:var(--gray);font-size:12px;">Recommended: 150-160 characters</small>
                 </div>
                 <div class="form-group">
                     <label>Keywords</label>
                     <input type="text" id="seoKeywords" placeholder="Keywords separated by commas">
-                    <small style="color:var(--gray);font-size:12px;">Separate keywords with commas</small>
                 </div>
             </div>
         </div>
@@ -1382,7 +1097,7 @@
                 <div class="card-header">
                     <h2><i class="fas fa-database"></i> Backup & Restore</h2>
                 </div>
-                <p class="desc">Backup your content or restore from a previous backup.</p>
+                <p class="desc">Backup your content or restore from a backup.</p>
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:15px;">
                     <div style="background:var(--gray-light);padding:25px;border-radius:12px;text-align:center;border:1px solid var(--border);">
@@ -1406,27 +1121,10 @@
            SAVE BUTTONS
            ============================================ -->
         <div style="display:flex;gap:15px;flex-wrap:wrap;margin-top:10px;">
-            <button class="btn btn-success btn-lg btn-block" onclick="saveAllContent()" style="flex:1;">
+            <button class="btn btn-success btn-block" onclick="saveAllContent()" style="flex:1;">
                 <i class="fas fa-save"></i> Save All Content
             </button>
-            <button class="btn btn-info btn-lg btn-block" onclick="previewWebsite()" style="flex:1;">
-                <i class="fas fa-eye"></i> Preview Website
-            </button>
         </div>
-    </div>
-
-    <!-- ===== MEDIA EDITOR TOOLBAR ===== -->
-    <div class="media-toolbar" id="mediaToolbar">
-        <span style="font-weight:600;font-size:13px;color:var(--primary);">✏️ Edit Media:</span>
-        <div style="display:flex;align-items:center;gap:5px;">
-            <span style="font-size:12px;">Width:</span>
-            <input type="number" class="size-input" id="mediaWidth" value="100" min="10" max="1000">
-            <span style="font-size:12px;">%</span>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="resizeMedia()"><i class="fas fa-expand"></i> Resize</button>
-        <button class="btn btn-info btn-sm" onclick="replaceMedia()"><i class="fas fa-exchange-alt"></i> Replace</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteMedia()"><i class="fas fa-trash"></i> Delete</button>
-        <button class="btn btn-secondary btn-sm" onclick="closeMediaEditor()"><i class="fas fa-times"></i> Close</button>
     </div>
 
     <!-- ===== PREVIEW MODAL ===== -->
@@ -1451,9 +1149,6 @@
         // ============================================
         let websiteContent = {};
         let quillEditors = {};
-        let activeQuillId = 'heroSubtitle';
-        let selectedMedia = null;
-        let uploadedFiles = [];
         let currentPanel = 'dashboard';
         let isSaving = false;
 
@@ -1476,12 +1171,7 @@
         // ============================================
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
-            const icons = {
-                success: '✅',
-                error: '❌',
-                info: 'ℹ️',
-                warning: '⚠️'
-            };
+            const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
@@ -1490,29 +1180,16 @@
                 <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
             `;
             container.appendChild(toast);
-            setTimeout(() => {
-                if (toast.parentElement) toast.remove();
-            }, 5000);
+            setTimeout(() => { if (toast.parentElement) toast.remove(); }, 5000);
             return toast;
         }
 
         // ============================================
-        // SIDEBAR TOGGLE (Mobile)
+        // SIDEBAR TOGGLE
         // ============================================
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-        }
-
-        function filterMenu(query) {
-            const items = document.querySelectorAll('#sidebarMenu a');
-            const q = query.toLowerCase().trim();
-            items.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = (!q || text.includes(q)) ? 'flex' : 'none';
-            });
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
         }
 
         // ============================================
@@ -1530,7 +1207,6 @@
                 const text = a.textContent.toLowerCase().trim();
                 const panelMap = {
                     'dashboard': 'dashboard',
-                    'pages': 'pages',
                     'home': 'home',
                     'about': 'about',
                     'academics': 'academics',
@@ -1551,10 +1227,8 @@
                 }
             });
 
-            // Update breadcrumb
             const titles = {
-                'dashboard': 'Overview',
-                'pages': 'All Pages',
+                'dashboard': 'Dashboard',
                 'home': 'Home Page',
                 'about': 'About Us',
                 'academics': 'Academics',
@@ -1570,20 +1244,15 @@
                 'downloads': 'Downloads',
                 'backup': 'Backup & Restore'
             };
-            document.getElementById('pageTitle').innerHTML = `<i class="fas fa-${panel === 'dashboard' ? 'home' : 'file-alt'}"></i> ${titles[panel] || panel.charAt(0).toUpperCase() + panel.slice(1)}`;
-            document.getElementById('breadcrumbText').textContent = titles[panel] || panel;
+            document.getElementById('pageTitle').innerHTML = `<i class="fas fa-${panel === 'dashboard' ? 'home' : 'file-alt'}"></i> ${titles[panel] || panel}`;
 
-            // Close mobile sidebar
             if (window.innerWidth <= 992) {
                 document.getElementById('sidebar').classList.remove('open');
                 document.getElementById('sidebarOverlay').classList.remove('active');
             }
 
-            // Load data for specific panels
             if (panel === 'gallery') refreshMediaLibrary();
-            if (panel === 'dashboard') updateDashboardStats();
 
-            // Re-initialize Quill editors if needed
             setTimeout(() => {
                 document.querySelectorAll('.quill-editor').forEach(el => {
                     if (quillEditors[el.id]) {
@@ -1605,7 +1274,7 @@
                 'performanceKcpe', 'performanceInternal',
                 'parentsCalendar', 'parentsHomework', 'parentsAttendance',
                 'parentsRules', 'parentsUniform', 'parentsFees',
-                'eventsContent', 'cocurricularContent', 'feesContent', 'feesInstructions'
+                'feesContent', 'feesInstructions'
             ];
 
             editorIds.forEach(id => {
@@ -1640,31 +1309,28 @@
         }
 
         // ============================================
-        // PREVIEW FUNCTIONS
+        // INSERT FUNCTIONS
         // ============================================
-        function previewEditorContent(editorId) {
-            const content = getQuillContent(editorId);
-            document.getElementById('previewBody').innerHTML = content || '<p style="color:#999;text-align:center;padding:40px;">No content to preview</p>';
-            document.getElementById('previewModal').classList.add('show');
+        function insertImage(editorId) {
+            const url = prompt('Enter image URL:');
+            if (url && quillEditors[editorId]) {
+                const range = quillEditors[editorId].getSelection();
+                const index = range ? range.index : 0;
+                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, `<img src="${url}" alt="Image" style="max-width:100%;border-radius:8px;cursor:pointer;">`);
+                showToast('✅ Image inserted!', 'success');
+            }
         }
 
-        function previewWebsite() {
-            showToast('🌐 Opening website preview in new tab...', 'info');
-            window.open('/', '_blank');
+        function insertVideo(editorId) {
+            const url = prompt('Enter video URL (MP4, WebM, etc.):');
+            if (url && quillEditors[editorId]) {
+                const range = quillEditors[editorId].getSelection();
+                const index = range ? range.index : 0;
+                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, `<video src="${url}" controls style="max-width:100%;border-radius:8px;"></video>`);
+                showToast('✅ Video inserted!', 'success');
+            }
         }
 
-        function closePreview() {
-            document.getElementById('previewModal').classList.remove('show');
-        }
-
-        function saveAndClosePreview() {
-            saveAllContent();
-            closePreview();
-        }
-
-        // ============================================
-        // INSERT TABLE
-        // ============================================
         function insertTable(editorId) {
             if (quillEditors[editorId]) {
                 const range = quillEditors[editorId].getSelection();
@@ -1699,41 +1365,11 @@
                 const tableHtml = `
                     <h3>📋 2026 FEES STRUCTURE - DAY SCHOLARS</h3>
                     <table style="border-collapse:collapse;width:100%;margin:10px 0;">
-                        <tr>
-                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">GRADE</th>
-                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 1</th>
-                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 2</th>
-                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 3</th>
-                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TOTAL</th>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">PLAYGROUP</td>
-                            <td style="border:1px solid #ccc;padding:8px;">6,000</td>
-                            <td style="border:1px solid #ccc;padding:8px;">5,350</td>
-                            <td style="border:1px solid #ccc;padding:8px;">4,100</td>
-                            <td style="border:1px solid #ccc;padding:8px;">15,450</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">PP1 - PP2</td>
-                            <td style="border:1px solid #ccc;padding:8px;">7,000</td>
-                            <td style="border:1px solid #ccc;padding:8px;">6,000</td>
-                            <td style="border:1px solid #ccc;padding:8px;">5,000</td>
-                            <td style="border:1px solid #ccc;padding:8px;">18,000</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">G1 - G3</td>
-                            <td style="border:1px solid #ccc;padding:8px;">7,500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">6,700</td>
-                            <td style="border:1px solid #ccc;padding:8px;">5,500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">19,700</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">G4 - G6</td>
-                            <td style="border:1px solid #ccc;padding:8px;">8,300</td>
-                            <td style="border:1px solid #ccc;padding:8px;">7,400</td>
-                            <td style="border:1px solid #ccc;padding:8px;">6,000</td>
-                            <td style="border:1px solid #ccc;padding:8px;">21,700</td>
-                        </tr>
+                        <tr><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">GRADE</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 1</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 2</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 3</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TOTAL</th></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">PLAYGROUP</td><td style="border:1px solid #ccc;padding:8px;">6,000</td><td style="border:1px solid #ccc;padding:8px;">5,350</td><td style="border:1px solid #ccc;padding:8px;">4,100</td><td style="border:1px solid #ccc;padding:8px;">15,450</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">PP1 - PP2</td><td style="border:1px solid #ccc;padding:8px;">7,000</td><td style="border:1px solid #ccc;padding:8px;">6,000</td><td style="border:1px solid #ccc;padding:8px;">5,000</td><td style="border:1px solid #ccc;padding:8px;">18,000</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">G1 - G3</td><td style="border:1px solid #ccc;padding:8px;">7,500</td><td style="border:1px solid #ccc;padding:8px;">6,700</td><td style="border:1px solid #ccc;padding:8px;">5,500</td><td style="border:1px solid #ccc;padding:8px;">19,700</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">G4 - G6</td><td style="border:1px solid #ccc;padding:8px;">8,300</td><td style="border:1px solid #ccc;padding:8px;">7,400</td><td style="border:1px solid #ccc;padding:8px;">6,000</td><td style="border:1px solid #ccc;padding:8px;">21,700</td></tr>
                     </table>
                     <p><strong>📌 Note:</strong> Admission Fee: 500/- for new learners from PP2-G6</p>
                     <p><strong>📌 Note:</strong> Interview Fee: 300/- for new learners</p>
@@ -1751,69 +1387,15 @@
                 const tableHtml = `
                     <h3>🏠 GRADE 3-6 BOARDING SECTION</h3>
                     <table style="border-collapse:collapse;width:100%;margin:10px 0;">
-                        <tr>
-                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">VOTE HEADS</th>
-                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 1</th>
-                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 2</th>
-                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 3</th>
-                            <th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TOTAL</th>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">BOARDING</td>
-                            <td style="border:1px solid #ccc;padding:8px;">3,500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">2,500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">1,500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">7,500</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">TUITION</td>
-                            <td style="border:1px solid #ccc;padding:8px;">4,000</td>
-                            <td style="border:1px solid #ccc;padding:8px;">3,000</td>
-                            <td style="border:1px solid #ccc;padding:8px;">2,000</td>
-                            <td style="border:1px solid #ccc;padding:8px;">9,000</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">MEALS</td>
-                            <td style="border:1px solid #ccc;padding:8px;">3,500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">3,000</td>
-                            <td style="border:1px solid #ccc;padding:8px;">2,500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">9,000</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">REMEDIALS</td>
-                            <td style="border:1px solid #ccc;padding:8px;">700</td>
-                            <td style="border:1px solid #ccc;padding:8px;">700</td>
-                            <td style="border:1px solid #ccc;padding:8px;">600</td>
-                            <td style="border:1px solid #ccc;padding:8px;">2,000</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">STATIONARIES</td>
-                            <td style="border:1px solid #ccc;padding:8px;">500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">1,500</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">ACTIVITY</td>
-                            <td style="border:1px solid #ccc;padding:8px;">400</td>
-                            <td style="border:1px solid #ccc;padding:8px;">200</td>
-                            <td style="border:1px solid #ccc;padding:8px;">100</td>
-                            <td style="border:1px solid #ccc;padding:8px;">1,000</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px;">ASSESSMENT</td>
-                            <td style="border:1px solid #ccc;padding:8px;">500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">300</td>
-                            <td style="border:1px solid #ccc;padding:8px;">300</td>
-                            <td style="border:1px solid #ccc;padding:8px;">1,100</td>
-                        </tr>
-                        <tr style="font-weight:bold;background:#f0f2f5;">
-                            <td style="border:1px solid #ccc;padding:8px;">TOTALS</td>
-                            <td style="border:1px solid #ccc;padding:8px;">13,100</td>
-                            <td style="border:1px solid #ccc;padding:8px;">10,200</td>
-                            <td style="border:1px solid #ccc;padding:8px;">7,500</td>
-                            <td style="border:1px solid #ccc;padding:8px;">31,100</td>
-                        </tr>
+                        <tr><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">VOTE HEADS</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 1</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 2</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TERM 3</th><th style="border:1px solid #ccc;padding:8px;background:#f0f2f5;">TOTAL</th></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">BOARDING</td><td style="border:1px solid #ccc;padding:8px;">3,500</td><td style="border:1px solid #ccc;padding:8px;">2,500</td><td style="border:1px solid #ccc;padding:8px;">1,500</td><td style="border:1px solid #ccc;padding:8px;">7,500</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">TUITION</td><td style="border:1px solid #ccc;padding:8px;">4,000</td><td style="border:1px solid #ccc;padding:8px;">3,000</td><td style="border:1px solid #ccc;padding:8px;">2,000</td><td style="border:1px solid #ccc;padding:8px;">9,000</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">MEALS</td><td style="border:1px solid #ccc;padding:8px;">3,500</td><td style="border:1px solid #ccc;padding:8px;">3,000</td><td style="border:1px solid #ccc;padding:8px;">2,500</td><td style="border:1px solid #ccc;padding:8px;">9,000</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">REMEDIALS</td><td style="border:1px solid #ccc;padding:8px;">700</td><td style="border:1px solid #ccc;padding:8px;">700</td><td style="border:1px solid #ccc;padding:8px;">600</td><td style="border:1px solid #ccc;padding:8px;">2,000</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">STATIONARIES</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">1,500</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">ACTIVITY</td><td style="border:1px solid #ccc;padding:8px;">400</td><td style="border:1px solid #ccc;padding:8px;">200</td><td style="border:1px solid #ccc;padding:8px;">100</td><td style="border:1px solid #ccc;padding:8px;">1,000</td></tr>
+                        <tr><td style="border:1px solid #ccc;padding:8px;">ASSESSMENT</td><td style="border:1px solid #ccc;padding:8px;">500</td><td style="border:1px solid #ccc;padding:8px;">300</td><td style="border:1px solid #ccc;padding:8px;">300</td><td style="border:1px solid #ccc;padding:8px;">1,100</td></tr>
+                        <tr style="font-weight:bold;background:#f0f2f5;"><td style="border:1px solid #ccc;padding:8px;">TOTALS</td><td style="border:1px solid #ccc;padding:8px;">13,100</td><td style="border:1px solid #ccc;padding:8px;">10,200</td><td style="border:1px solid #ccc;padding:8px;">7,500</td><td style="border:1px solid #ccc;padding:8px;">31,100</td></tr>
                     </table>
                 `;
                 quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, tableHtml);
@@ -1822,244 +1404,25 @@
         }
 
         // ============================================
-        // MEDIA EDITOR TOOLBAR
+        // PREVIEW FUNCTIONS
         // ============================================
-        function showMediaEditor(el) {
-            selectedMedia = el;
-            const toolbar = document.getElementById('mediaToolbar');
-            toolbar.classList.add('show');
-            const rect = el.getBoundingClientRect();
-            toolbar.style.top = Math.max(10, (rect.top - 70)) + 'px';
-            toolbar.style.left = Math.max(10, (rect.left + rect.width/2 - 200)) + 'px';
-            const parentWidth = el.parentElement?.offsetWidth || 600;
-            const currentPercent = Math.round((el.offsetWidth / parentWidth) * 100);
-            document.getElementById('mediaWidth').value = Math.min(100, Math.max(10, currentPercent));
+        function previewContent(editorId) {
+            const content = getQuillContent(editorId);
+            document.getElementById('previewBody').innerHTML = content || '<p style="color:#999;text-align:center;padding:40px;">No content to preview</p>';
+            document.getElementById('previewModal').classList.add('show');
         }
 
-        function closeMediaEditor() {
-            document.getElementById('mediaToolbar').classList.remove('show');
-            selectedMedia = null;
+        function closePreview() {
+            document.getElementById('previewModal').classList.remove('show');
         }
 
-        function resizeMedia() {
-            if (!selectedMedia) return;
-            const percent = parseInt(document.getElementById('mediaWidth').value) || 100;
-            const parentWidth = selectedMedia.parentElement?.offsetWidth || 600;
-            const newWidth = (parentWidth * percent) / 100;
-            selectedMedia.style.width = newWidth + 'px';
-            selectedMedia.style.height = 'auto';
-            showToast('✅ Media resized to ' + percent + '%', 'success');
-        }
-
-        function replaceMedia() {
-            if (!selectedMedia) return;
-            window.replaceMediaTarget = selectedMedia;
-            document.getElementById('fileUpload').click();
-        }
-
-        function deleteMedia() {
-            if (!selectedMedia) return;
-            if (confirm('Are you sure you want to delete this media?')) {
-                selectedMedia.remove();
-                closeMediaEditor();
-                showToast('✅ Media deleted', 'success');
-            }
+        function saveAndClosePreview() {
+            saveAllContent();
+            closePreview();
         }
 
         // ============================================
-        // MEDIA UPLOAD
-        // ============================================
-        let uploadQueue = [];
-        let currentUploadIndex = 0;
-
-        function openMediaUpload(editorId, mediaType) {
-            activeQuillId = editorId;
-            window.replaceMediaTarget = null;
-            const fileInput = document.getElementById('fileUpload');
-            if (mediaType === 'image') fileInput.accept = 'image/*';
-            else if (mediaType === 'video') fileInput.accept = 'video/*';
-            else if (mediaType === 'audio') fileInput.accept = 'audio/*';
-            else fileInput.accept = 'image/*,video/*,audio/*';
-            fileInput.click();
-        }
-
-        function openMediaLibrary(editorId) {
-            activeQuillId = editorId;
-            switchPanel('gallery');
-            showToast('📸 Select a media file from the library', 'info');
-        }
-
-        function insertMediaFromLibrary(filePath, fileType) {
-            if (quillEditors[activeQuillId]) {
-                const editor = quillEditors[activeQuillId];
-                const range = editor.getSelection();
-                const index = range ? range.index : 0;
-                let mediaHtml = '';
-                if (fileType === 'image') {
-                    mediaHtml = `<img src="${filePath}" alt="Media" style="max-width:100%;border-radius:8px;cursor:pointer;">`;
-                } else if (fileType === 'video') {
-                    mediaHtml = `<video src="${filePath}" controls style="max-width:100%;border-radius:8px;"></video>`;
-                } else if (fileType === 'audio') {
-                    mediaHtml = `<audio src="${filePath}" controls style="width:100%;"></audio>`;
-                }
-                if (mediaHtml) {
-                    editor.clipboard.dangerouslyPasteHTML(index, mediaHtml);
-                    showToast('✅ Media inserted!', 'success');
-                }
-            }
-        }
-
-        async function uploadFiles() {
-            const fileInput = document.getElementById('fileUpload');
-            const files = fileInput.files;
-            if (!files || files.length === 0) return;
-
-            const progress = document.getElementById('uploadProgress');
-            const fill = document.getElementById('progressFill');
-            const status = document.getElementById('uploadStatus');
-            progress.style.display = 'block';
-
-            let uploaded = 0;
-            const total = files.length;
-
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                if (file.size > 100 * 1024 * 1024) {
-                    showToast(`❌ ${file.name} is too large (max 100MB)`, 'error');
-                    continue;
-                }
-
-                const formData = new FormData();
-                formData.append('file', file);
-
-                try {
-                    const xhr = new XMLHttpRequest();
-                    const uploadPromise = new Promise((resolve, reject) => {
-                        xhr.upload.addEventListener('progress', (e) => {
-                            if (e.lengthComputable) {
-                                const pct = ((uploaded + (e.loaded / e.total)) / total) * 100;
-                                fill.style.width = Math.min(100, pct) + '%';
-                                status.textContent = `Uploading ${i+1}/${total}... ${Math.round(pct)}%`;
-                            }
-                        });
-                        xhr.onload = function() {
-                            if (xhr.status === 200) {
-                                resolve(JSON.parse(xhr.responseText));
-                            } else {
-                                reject(new Error('Upload failed'));
-                            }
-                        };
-                        xhr.onerror = function() { reject(new Error('Network error')); };
-                        xhr.open('POST', '/api/upload');
-                        xhr.send(formData);
-                    });
-
-                    const result = await uploadPromise;
-                    if (result.success) {
-                        uploaded++;
-                        uploadedFiles.push(result.file);
-                        showToast(`✅ ${file.name} uploaded successfully!`, 'success');
-                    }
-                } catch (error) {
-                    console.error('Upload error:', error);
-                    showToast(`❌ Failed to upload ${file.name}`, 'error');
-                }
-            }
-
-            progress.style.display = 'none';
-            fill.style.width = '0%';
-            fileInput.value = '';
-
-            if (uploaded > 0) {
-                refreshMediaLibrary();
-                updateDashboardStats();
-
-                // If replace media, insert the uploaded file
-                if (window.replaceMediaTarget && uploadedFiles.length > 0) {
-                    const lastFile = uploadedFiles[uploadedFiles.length - 1];
-                    const target = window.replaceMediaTarget;
-                    if (target.tagName === 'IMG') {
-                        target.src = lastFile.path;
-                    } else if (target.tagName === 'VIDEO' || target.tagName === 'AUDIO') {
-                        target.src = lastFile.path;
-                    }
-                    closeMediaEditor();
-                    window.replaceMediaTarget = null;
-                    showToast('✅ Media replaced successfully!', 'success');
-                } else if (activeQuillId && quillEditors[activeQuillId] && uploadedFiles.length > 0) {
-                    const lastFile = uploadedFiles[uploadedFiles.length - 1];
-                    insertMediaFromLibrary(lastFile.path, lastFile.type);
-                }
-            }
-        }
-
-        // ============================================
-        // MEDIA LIBRARY
-        // ============================================
-        async function refreshMediaLibrary() {
-            try {
-                const response = await fetch('/api/content');
-                const data = await response.json();
-                if (data.success) {
-                    const gallery = data.content.gallery || [];
-                    const grid = document.getElementById('mediaLibraryGrid');
-                    document.getElementById('mediaBadge').textContent = gallery.length;
-
-                    if (gallery.length === 0) {
-                        grid.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i><h4>No media files</h4><p>Upload your first file to get started.</p></div>`;
-                        return;
-                    }
-
-                    grid.innerHTML = '';
-                    gallery.forEach((item, index) => {
-                        const div = document.createElement('div');
-                        div.className = 'media-item';
-                        let preview = '';
-                        if (item.type === 'image') {
-                            preview = `<img src="${item.file}" alt="${item.title || 'Media'}">`;
-                        } else if (item.type === 'video') {
-                            preview = `<video src="${item.file}" muted></video>`;
-                        } else if (item.type === 'audio') {
-                            preview = `<div style="height:120px;display:flex;align-items:center;justify-content:center;background:var(--gray-light);font-size:48px;">🎵</div>`;
-                        }
-                        div.innerHTML = `
-                            ${preview}
-                            <div class="media-info">
-                                <span class="name">${item.title || 'Untitled'}</span>
-                                <span>${item.type || 'image'}</span>
-                            </div>
-                            <button class="media-remove" onclick="removeMedia(${index})">✕</button>
-                            <button class="media-check" onclick="selectMediaForInsert(${index})">+</button>
-                        `;
-                        grid.appendChild(div);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading media library:', error);
-            }
-        }
-
-        function selectMediaForInsert(index) {
-            const gallery = websiteContent.gallery || [];
-            const item = gallery[index];
-            if (item) {
-                insertMediaFromLibrary(item.file, item.type);
-                showToast(`✅ Inserted: ${item.title || 'Media'}`, 'success');
-            }
-        }
-
-        async function removeMedia(index) {
-            if (!confirm('Are you sure you want to remove this media?')) return;
-            const gallery = websiteContent.gallery || [];
-            gallery.splice(index, 1);
-            websiteContent.gallery = gallery;
-            await saveAllContent();
-            refreshMediaLibrary();
-            showToast('✅ Media removed', 'success');
-        }
-
-        // ============================================
-        // ITEMS MANAGEMENT (Carousel, Features, etc.)
+        // ITEMS MANAGEMENT
         // ============================================
         function addItem(containerId, type) {
             const container = document.getElementById(containerId);
@@ -2118,16 +1481,6 @@
                         <div class="form-group"><label>Learning Approach</label><input type="text" class="field-approach" placeholder="Child-centered learning"></div>
                         <div class="form-group"><label>Activities</label><input type="text" class="field-activities" placeholder="Group discussions, Projects"></div>
                         <div class="form-group"><label>Teacher Support</label><input type="text" class="field-support" placeholder="Individual attention"></div>
-                    `;
-                    break;
-                case 'facility':
-                    fieldsHtml = `
-                        <button class="remove-btn" onclick="removeItem(this)">✕</button>
-                        <div class="form-row">
-                            <div class="form-group"><label>Name</label><input type="text" class="field-name" placeholder="Facility name"></div>
-                            <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="Facility description"></div>
-                        </div>
-                        <div class="form-group"><label>Image URL</label><input type="text" class="field-image" placeholder="/uploads/images/facility.jpg"></div>
                     `;
                     break;
                 case 'event':
@@ -2223,13 +1576,6 @@
                             teacherSupport: box.querySelector('.field-support')?.value || ''
                         };
                         break;
-                    case 'facility':
-                        item = {
-                            name: box.querySelector('.field-name')?.value || '',
-                            description: box.querySelector('.field-description')?.value || '',
-                            image: box.querySelector('.field-image')?.value || ''
-                        };
-                        break;
                     case 'event':
                         item = {
                             title: box.querySelector('.field-title')?.value || '',
@@ -2258,9 +1604,6 @@
             return items;
         }
 
-        // ============================================
-        // RENDER ITEMS
-        // ============================================
         function renderItems(containerId, items, type) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
@@ -2369,14 +1712,13 @@
                 if (data.success) {
                     websiteContent = data.content;
                     populateAllFields(websiteContent);
-                    updateDashboardStats();
                     if (document.getElementById('panel-gallery').classList.contains('active')) {
                         refreshMediaLibrary();
                     }
                 }
             } catch (error) {
                 console.error('Error loading content:', error);
-                showToast('❌ Error loading content', 'error');
+                showToast('❌ Error loading content. Make sure server is running.', 'error');
             }
         }
 
@@ -2453,25 +1795,119 @@
             // Gallery
             if (c.gallery) {
                 websiteContent.gallery = c.gallery;
-                document.getElementById('mediaBadge').textContent = c.gallery.length || 0;
             }
         }
 
         // ============================================
-        // UPDATE DASHBOARD STATS
+        // MEDIA LIBRARY
         // ============================================
-        function updateDashboardStats() {
-            const c = websiteContent;
-            const pageCount = document.querySelectorAll('.panel').length - 1; // minus dashboard
-            const mediaCount = (c.gallery || []).length;
-            const eventCount = (c.events || []).length;
-            const downloadCount = (c.downloads || []).length;
+        let uploadedFiles = [];
 
-            document.getElementById('statPages').textContent = pageCount;
-            document.getElementById('statMedia').textContent = mediaCount;
-            document.getElementById('statEvents').textContent = eventCount;
-            document.getElementById('statDownloads').textContent = downloadCount;
-            document.getElementById('mediaBadge').textContent = mediaCount;
+        function refreshMediaLibrary() {
+            const gallery = websiteContent.gallery || [];
+            const grid = document.getElementById('mediaLibraryGrid');
+
+            if (gallery.length === 0) {
+                grid.innerHTML = `<div class="empty-state"><i class="fas fa-images"></i><h4>No media files</h4><p>Upload your first file to get started.</p></div>`;
+                return;
+            }
+
+            grid.innerHTML = '';
+            gallery.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'media-item';
+                let preview = '';
+                if (item.type === 'image') {
+                    preview = `<img src="${item.file}" alt="${item.title || 'Media'}">`;
+                } else if (item.type === 'video') {
+                    preview = `<video src="${item.file}" muted></video>`;
+                } else if (item.type === 'audio') {
+                    preview = `<div style="height:120px;display:flex;align-items:center;justify-content:center;background:var(--gray-light);font-size:48px;">🎵</div>`;
+                }
+                div.innerHTML = `
+                    ${preview}
+                    <div class="media-info">
+                        <span class="name">${item.title || 'Untitled'}</span>
+                        <span>${item.type || 'image'}</span>
+                    </div>
+                    <button class="media-remove" onclick="removeMedia(${index})">✕</button>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function removeMedia(index) {
+            if (!confirm('Are you sure you want to remove this media?')) return;
+            const gallery = websiteContent.gallery || [];
+            gallery.splice(index, 1);
+            websiteContent.gallery = gallery;
+            saveAllContent();
+            refreshMediaLibrary();
+            showToast('✅ Media removed', 'success');
+        }
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileUpload');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            if (file.size > 100 * 1024 * 1024) {
+                showToast('❌ File is too large (max 100MB)', 'error');
+                return;
+            }
+
+            const progress = document.getElementById('uploadProgress');
+            const fill = document.getElementById('progressFill');
+            const status = document.getElementById('uploadStatus');
+            progress.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const xhr = new XMLHttpRequest();
+                const uploadPromise = new Promise((resolve, reject) => {
+                    xhr.upload.addEventListener('progress', (e) => {
+                        if (e.lengthComputable) {
+                            const pct = Math.round((e.loaded / e.total) * 100);
+                            fill.style.width = pct + '%';
+                            status.textContent = `Uploading... ${pct}%`;
+                        }
+                    });
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            resolve(JSON.parse(xhr.responseText));
+                        } else {
+                            reject(new Error('Upload failed'));
+                        }
+                    };
+                    xhr.onerror = function() { reject(new Error('Network error')); };
+                    xhr.open('POST', '/api/upload');
+                    xhr.send(formData);
+                });
+
+                const result = await uploadPromise;
+                if (result.success) {
+                    const gallery = websiteContent.gallery || [];
+                    gallery.push({
+                        title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+                        category: 'General',
+                        file: result.file.path,
+                        type: result.file.type || 'image'
+                    });
+                    websiteContent.gallery = gallery;
+                    await saveAllContent();
+                    refreshMediaLibrary();
+                    showToast('✅ File uploaded successfully!', 'success');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showToast('❌ Upload failed: ' + error.message, 'error');
+            }
+
+            progress.style.display = 'none';
+            fill.style.width = '0%';
+            fileInput.value = '';
         }
 
         // ============================================
@@ -2482,7 +1918,6 @@
             isSaving = true;
             showToast('💾 Saving content...', 'info');
 
-            // Gather all data
             const data = {
                 heroTitle: document.getElementById('heroTitle').value,
                 heroSubtitle: getQuillContent('heroSubtitle'),
@@ -2550,7 +1985,6 @@
                 if (result.success) {
                     websiteContent = result.content;
                     showToast('✅ All content saved successfully!', 'success');
-                    updateDashboardStats();
                     refreshMediaLibrary();
                 } else {
                     showToast('❌ Error: ' + result.message, 'error');
@@ -2605,51 +2039,9 @@
         }
 
         // ============================================
-        // DRAG AND DROP FOR UPLOADS
+        // INIT
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            const dropZone = document.getElementById('dropZone');
-            if (dropZone) {
-                dropZone.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    this.classList.add('dragover');
-                });
-                dropZone.addEventListener('dragleave', function(e) {
-                    e.preventDefault();
-                    this.classList.remove('dragover');
-                });
-                dropZone.addEventListener('drop', function(e) {
-                    e.preventDefault();
-                    this.classList.remove('dragover');
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0) {
-                        const fileInput = document.getElementById('fileUpload');
-                        const dt = new DataTransfer();
-                        for (let f of files) dt.items.add(f);
-                        fileInput.files = dt.files;
-                        uploadFiles();
-                    }
-                });
-            }
-
-            // Click on media items in library for selection
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.media-item') && !e.target.closest('.media-remove') && !e.target.closest('.media-check')) {
-                    const item = e.target.closest('.media-item');
-                    const index = Array.from(item.parentElement.children).indexOf(item);
-                    selectMediaForInsert(index);
-                }
-            });
-
-            // Click on images/videos in Quill editor
-            document.addEventListener('click', function(e) {
-                if ((e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') && 
-                    e.target.closest('.ql-editor')) {
-                    showMediaEditor(e.target);
-                }
-            });
-
-            // Initialize Quill editors and load content
             initQuillEditors();
             loadContent();
 
@@ -2661,7 +2053,6 @@
             }, 30000);
 
             console.log('🚀 STAR CMS v2.0 loaded successfully!');
-            console.log('📊 ' + Object.keys(quillEditors).length + ' editors initialized');
         });
     </script>
 </body>
