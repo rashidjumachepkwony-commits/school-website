@@ -762,7 +762,6 @@
             -webkit-text-fill-color:transparent;
             background-clip:text;
         }
-        /* HERO DESCRIPTION - NO <p> TAG */
         .hero-section .hero-description {
             font-size:18px;
             opacity:0.9;
@@ -974,281 +973,413 @@
         @keyframes tickerScroll { 0%,20% { transform:translateY(0); } 25%,45% { transform:translateY(-22px); } 50%,70% { transform:translateY(-44px); } 75%,95% { transform:translateY(-66px); } 100% { transform:translateY(0); } }
 
         /* ========================================
+           GALLERY SECTION - FIXED FOR ALL SCREENS
+           ======================================== */
+        .gallery-section {
+            padding: 60px 0;
+            background: linear-gradient(135deg, #0A1628, #001F5c);
+            scroll-margin-top: 50px;
+            overflow: hidden;
+        }
+        .gallery-section .section-title.light {
+            color: white;
+            text-align: center;
+            font-family: var(--font-primary);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .gallery-section .section-title.light span {
+            color: var(--school-gold);
+        }
+        .gallery-section .section-subtitle.light {
+            text-align: center;
+            font-size: 16px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+        .gallery-swiper {
+            padding: 15px 0 40px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .gallery-swiper .swiper-wrapper {
+            display: flex;
+            align-items: stretch;
+        }
+        .gallery-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .gallery-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .gallery-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            display: block;
+        }
+        .gallery-card:hover img {
+            transform: scale(1.05);
+        }
+        .gallery-card .gallery-content {
+            padding: 18px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .gallery-card .gallery-content h4 {
+            color: var(--school-blue-dark);
+            font-size: 16px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .gallery-card .gallery-content p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+            flex: 1;
+        }
+        .gallery-card .gallery-content .tag {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 9px;
+            font-weight: 700;
+            margin-top: 8px;
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            align-self: flex-start;
+        }
+        .gallery-card .gallery-content .read-more-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 4px 16px;
+            background: transparent;
+            color: var(--school-gold);
+            border: 2px solid var(--school-gold);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 11px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+        .gallery-card .gallery-content .read-more-btn:hover {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            transform: translateX(4px);
+        }
+
+        /* Swiper Navigation */
+        .gallery-swiper .swiper-button-next,
+        .gallery-swiper .swiper-button-prev {
+            color: var(--school-gold) !important;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 50% !important;
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.3s ease;
+        }
+        .gallery-swiper .swiper-button-next:hover,
+        .gallery-swiper .swiper-button-prev:hover {
+            background: rgba(212,160,23,0.25);
+            border-color: var(--school-gold);
+            transform: scale(1.05);
+        }
+        .gallery-swiper .swiper-button-next::after,
+        .gallery-swiper .swiper-button-prev::after {
+            font-size: 16px !important;
+            font-weight: 700;
+        }
+        .gallery-swiper .swiper-pagination-bullet {
+            background: rgba(255,255,255,0.3) !important;
+            width: 10px !important;
+            height: 10px !important;
+            opacity: 0.6;
+        }
+        .gallery-swiper .swiper-pagination-bullet-active {
+            background: var(--school-gold) !important;
+            opacity: 1;
+        }
+        .gallery-swiper .swiper-pagination {
+            position: relative;
+            margin-top: 15px;
+        }
+
+        /* ========================================
+           RESPONSIVE - GALLERY FIX
+           ======================================== */
+        @media (max-width: 1024px) {
+            .gallery-card img {
+                height: 200px;
+            }
+        }
+        @media (max-width: 768px) {
+            .gallery-card img {
+                height: 180px;
+            }
+            .gallery-swiper .swiper-button-next,
+            .gallery-swiper .swiper-button-prev {
+                display: none !important;
+            }
+            .gallery-swiper .swiper-pagination {
+                display: block !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .gallery-card img {
+                height: 160px;
+            }
+            .gallery-section .section-title.light {
+                font-size: 24px;
+            }
+            .gallery-section .section-subtitle.light {
+                font-size: 14px;
+            }
+        }
+
+        /* ========================================
            SECTIONS
            ======================================== */
         .section-title {
-            font-family:var(--font-primary);
-            font-size:32px;
-            font-weight:700;
-            text-align:center;
-            margin-bottom:5px;
-            color:var(--school-blue-dark);
+            font-family: var(--font-primary);
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+            color: var(--school-blue-dark);
         }
-        .section-title .highlight { color:var(--school-gold); }
-        .section-title.light { color:white; }
+        .section-title .highlight { color: var(--school-gold); }
+        .section-title.light { color: white; }
         .section-subtitle {
-            text-align:center;
-            font-size:16px;
-            color:#666;
-            margin-bottom:30px;
-            font-weight:300;
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: 300;
         }
-        .section-subtitle.light { color:rgba(255,255,255,0.6); }
-
-        /* ========================================
-           GALLERY
-           ======================================== */
-        .gallery-section {
-            padding:60px 0;
-            background:linear-gradient(135deg,#0A1628,#001F5c);
-            scroll-margin-top:50px;
-        }
-        .gallery-swiper { padding:15px 0; }
-        .gallery-card {
-            background:white;
-            border-radius:16px;
-            overflow:hidden;
-            box-shadow:0 10px 40px rgba(0,0,0,0.2);
-            transition:all 0.3s ease;
-            height:100%;
-        }
-        .gallery-card:hover { transform:translateY(-5px); box-shadow:0 20px 50px rgba(0,0,0,0.3); }
-        .gallery-card img { width:100%; height:200px; object-fit:cover; transition:transform 0.5s ease; }
-        .gallery-card:hover img { transform:scale(1.05); }
-        .gallery-card .gallery-content { padding:18px; }
-        .gallery-card .gallery-content h4 { color:var(--school-blue-dark); font-size:16px; margin-bottom:5px; font-weight:700; }
-        .gallery-card .gallery-content p { color:#666; font-size:13px; line-height:1.5; }
-        .gallery-card .gallery-content .tag {
-            display:inline-block;
-            padding:2px 12px;
-            border-radius:50px;
-            font-size:9px;
-            font-weight:700;
-            margin-top:8px;
-            background:var(--school-gold);
-            color:var(--kenya-black);
-            text-transform:uppercase;
-            letter-spacing:0.5px;
-        }
-        .swiper-button-next,.swiper-button-prev {
-            color:var(--school-gold) !important;
-            background:rgba(255,255,255,0.05);
-            backdrop-filter:blur(10px);
-            width:40px !important; height:40px !important;
-            border-radius:50% !important;
-            border:1px solid rgba(255,255,255,0.1);
-            transition:all 0.3s ease;
-        }
-        .swiper-button-next:hover,.swiper-button-prev:hover {
-            background:rgba(212,160,23,0.2);
-            border-color:var(--school-gold);
-        }
-        .swiper-button-next::after,.swiper-button-prev::after { font-size:14px !important; }
-        .swiper-pagination-bullet { background:rgba(255,255,255,0.2) !important; width:8px !important; height:8px !important; }
-        .swiper-pagination-bullet-active { background:var(--school-gold) !important; }
+        .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
         /* ========================================
            CONTENT CARDS
            ======================================== */
         .content-cards-section {
-            padding:50px 0;
-            background:#f0f2f5;
-            scroll-margin-top:50px;
+            padding: 50px 0;
+            background: #f0f2f5;
+            scroll-margin-top: 50px;
         }
         .content-grid {
-            display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
-            gap:25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
         }
         .content-card {
-            background:white;
-            padding:28px 20px;
-            border-radius:18px;
-            text-align:center;
-            transition:all 0.4s ease;
-            border:2px solid #e8ecf1;
-            box-shadow:0 4px 20px rgba(0,0,0,0.04);
-            text-decoration:none;
-            color:inherit;
-            display:block;
-            cursor:pointer;
-            position:relative;
-            overflow:hidden;
+            background: white;
+            padding: 28px 20px;
+            border-radius: 18px;
+            text-align: center;
+            transition: all 0.4s ease;
+            border: 2px solid #e8ecf1;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
         .content-card::before {
-            content:'';
-            position:absolute;
-            top:0; left:0; right:0;
-            height:4px;
-            background:linear-gradient(90deg, var(--school-gold), var(--school-gold-light), var(--school-gold-dark));
-            opacity:0;
-            transition:opacity 0.4s ease;
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--school-gold), var(--school-gold-light), var(--school-gold-dark));
+            opacity: 0;
+            transition: opacity 0.4s ease;
         }
-        .content-card:hover::before { opacity:1; }
+        .content-card:hover::before { opacity: 1; }
         .content-card:hover {
-            transform:translateY(-8px);
-            border-color:var(--school-gold);
-            box-shadow:0 16px 50px rgba(212,160,23,0.15);
+            transform: translateY(-8px);
+            border-color: var(--school-gold);
+            box-shadow: 0 16px 50px rgba(212,160,23,0.15);
         }
         .content-card .icon {
-            font-size:40px;
-            display:block;
-            margin-bottom:10px;
-            background:rgba(212,160,23,0.08);
-            width:65px; height:65px;
-            line-height:65px;
-            border-radius:50%;
-            margin-left:auto;
-            margin-right:auto;
-            transition:all 0.4s ease;
+            font-size: 40px;
+            display: block;
+            margin-bottom: 10px;
+            background: rgba(212,160,23,0.08);
+            width: 65px; height: 65px;
+            line-height: 65px;
+            border-radius: 50%;
+            margin-left: auto;
+            margin-right: auto;
+            transition: all 0.4s ease;
         }
         .content-card:hover .icon {
-            background:var(--school-gold);
-            transform:scale(1.1) rotate(-5deg);
+            background: var(--school-gold);
+            transform: scale(1.1) rotate(-5deg);
         }
-        .content-card h3 { color:var(--school-blue-dark); font-size:17px; margin-bottom:6px; font-weight:700; }
-        .content-card p { color:#666; font-size:13px; line-height:1.6; }
+        .content-card h3 { color: var(--school-blue-dark); font-size: 17px; margin-bottom: 6px; font-weight: 700; }
+        .content-card p { color: #666; font-size: 13px; line-height: 1.6; }
         .content-card .badge {
-            display:inline-block;
-            padding:3px 14px;
-            border-radius:50px;
-            font-size:9px;
-            font-weight:700;
-            margin-top:10px;
-            text-transform:uppercase;
-            letter-spacing:0.5px;
+            display: inline-block;
+            padding: 3px 14px;
+            border-radius: 50px;
+            font-size: 9px;
+            font-weight: 700;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .card-cta {
-            margin-top:10px;
-            padding:6px 18px;
-            border-radius:50px;
-            font-weight:700;
-            font-size:11px;
-            display:inline-block;
-            transition:all 0.3s ease;
-            box-shadow:0 4px 15px rgba(212,160,23,0.25);
+            margin-top: 10px;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 11px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212,160,23,0.25);
         }
-        .content-card:hover .card-cta { transform:scale(1.05); }
+        .content-card:hover .card-cta { transform: scale(1.05); }
 
-        .card-academics { border-color:var(--school-gold) !important; background:linear-gradient(135deg,#ffffff,#fff8e7) !important; }
-        .card-academics .badge { background:var(--kenya-red); color:white; animation:pulseBadgeRed 1.5s infinite; }
-        .card-academics .card-cta { background:linear-gradient(135deg,var(--school-gold),var(--school-gold-dark)); color:var(--kenya-black); }
-        .card-admissions { border-color:var(--kenya-green) !important; background:linear-gradient(135deg,#ffffff,#f0fff4) !important; }
-        .card-admissions .badge { background:var(--kenya-green); color:white; animation:pulseBadgeGreen 1.8s infinite; }
-        .card-admissions .card-cta { background:linear-gradient(135deg,var(--kenya-green),#004d00); color:white; }
-        .card-facilities { border-color:#17a2b8 !important; background:linear-gradient(135deg,#ffffff,#f0faff) !important; }
-        .card-facilities .badge { background:#17a2b8; color:white; }
-        .card-facilities .card-cta { background:linear-gradient(135deg,#17a2b8,#0d6e7a); color:white; }
-        .card-performance { border-color:#6f42c1 !important; background:linear-gradient(135deg,#ffffff,#f8f0ff) !important; }
-        .card-performance .badge { background:#6f42c1; color:white; }
-        .card-performance .card-cta { background:linear-gradient(135deg,#6f42c1,#4a2a8a); color:white; }
-        .card-parents { border-color:#fd7e14 !important; background:linear-gradient(135deg,#ffffff,#fff5eb) !important; }
-        .card-parents .badge { background:#fd7e14; color:white; }
-        .card-parents .card-cta { background:linear-gradient(135deg,#fd7e14,#c96a0a); color:white; }
-        .card-downloads { border-color:#20c997 !important; background:linear-gradient(135deg,#ffffff,#f0fff8) !important; }
-        .card-downloads .badge { background:#20c997; color:white; }
-        .card-downloads .card-cta { background:linear-gradient(135deg,#20c997,#128f6e); color:white; }
-        .card-fees { border-color:#dc3545 !important; background:linear-gradient(135deg,#ffffff,#fff0f0) !important; }
-        .card-fees .badge { background:#dc3545; color:white; animation:pulseBadgeRed 2.2s infinite; }
-        .card-fees .card-cta { background:linear-gradient(135deg,#dc3545,#a71d2a); color:white; }
-        .card-student-portal { border-color:#6f42c1 !important; background:linear-gradient(135deg,#ffffff,#f5f0ff) !important; }
-        .card-student-portal .badge { background:#6f42c1; color:white; animation:pulseStudentPortal 2s infinite; }
-        .card-student-portal .card-cta { background:linear-gradient(135deg,#6f42c1,#4a2a8a); color:white; }
-        .card-student-portal .icon { background:rgba(111,66,193,0.08); }
-        .card-student-portal:hover .icon { background:#6f42c1; }
+        .card-academics { border-color: var(--school-gold) !important; background: linear-gradient(135deg, #ffffff, #fff8e7) !important; }
+        .card-academics .badge { background: var(--kenya-red); color: white; animation: pulseBadgeRed 1.5s infinite; }
+        .card-academics .card-cta { background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark)); color: var(--kenya-black); }
+        .card-admissions { border-color: var(--kenya-green) !important; background: linear-gradient(135deg, #ffffff, #f0fff4) !important; }
+        .card-admissions .badge { background: var(--kenya-green); color: white; animation: pulseBadgeGreen 1.8s infinite; }
+        .card-admissions .card-cta { background: linear-gradient(135deg, var(--kenya-green), #004d00); color: white; }
+        .card-facilities { border-color: #17a2b8 !important; background: linear-gradient(135deg, #ffffff, #f0faff) !important; }
+        .card-facilities .badge { background: #17a2b8; color: white; }
+        .card-facilities .card-cta { background: linear-gradient(135deg, #17a2b8, #0d6e7a); color: white; }
+        .card-performance { border-color: #6f42c1 !important; background: linear-gradient(135deg, #ffffff, #f8f0ff) !important; }
+        .card-performance .badge { background: #6f42c1; color: white; }
+        .card-performance .card-cta { background: linear-gradient(135deg, #6f42c1, #4a2a8a); color: white; }
+        .card-parents { border-color: #fd7e14 !important; background: linear-gradient(135deg, #ffffff, #fff5eb) !important; }
+        .card-parents .badge { background: #fd7e14; color: white; }
+        .card-parents .card-cta { background: linear-gradient(135deg, #fd7e14, #c96a0a); color: white; }
+        .card-downloads { border-color: #20c997 !important; background: linear-gradient(135deg, #ffffff, #f0fff8) !important; }
+        .card-downloads .badge { background: #20c997; color: white; }
+        .card-downloads .card-cta { background: linear-gradient(135deg, #20c997, #128f6e); color: white; }
+        .card-fees { border-color: #dc3545 !important; background: linear-gradient(135deg, #ffffff, #fff0f0) !important; }
+        .card-fees .badge { background: #dc3545; color: white; animation: pulseBadgeRed 2.2s infinite; }
+        .card-fees .card-cta { background: linear-gradient(135deg, #dc3545, #a71d2a); color: white; }
+        .card-student-portal { border-color: #6f42c1 !important; background: linear-gradient(135deg, #ffffff, #f5f0ff) !important; }
+        .card-student-portal .badge { background: #6f42c1; color: white; animation: pulseStudentPortal 2s infinite; }
+        .card-student-portal .card-cta { background: linear-gradient(135deg, #6f42c1, #4a2a8a); color: white; }
+        .card-student-portal .icon { background: rgba(111,66,193,0.08); }
+        .card-student-portal:hover .icon { background: #6f42c1; }
 
         /* ========================================
            FEATURES
            ======================================== */
         .features-section {
-            padding:50px 0;
-            background:linear-gradient(135deg,#000000,#1a0000,#0a1628);
-            position:relative;
-            overflow:hidden;
-            scroll-margin-top:50px;
+            padding: 50px 0;
+            background: linear-gradient(135deg, #000000, #1a0000, #0a1628);
+            position: relative;
+            overflow: hidden;
+            scroll-margin-top: 50px;
         }
         .features-grid {
-            display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
-            gap:20px;
-            position:relative;
-            z-index:1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            position: relative;
+            z-index: 1;
         }
         .feature-item {
-            text-align:center;
-            padding:25px 15px;
-            background:rgba(255,255,255,0.04);
-            backdrop-filter:blur(10px);
-            border-radius:16px;
-            border:1px solid rgba(255,255,255,0.06);
-            transition:all 0.3s ease;
+            text-align: center;
+            padding: 25px 15px;
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s ease;
         }
         .feature-item:hover {
-            transform:translateY(-4px);
-            background:rgba(255,255,255,0.08);
-            border-color:rgba(212,160,23,0.15);
+            transform: translateY(-4px);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(212,160,23,0.15);
         }
-        .feature-item .icon { font-size:36px; display:block; margin-bottom:10px; }
-        .feature-item h4 { color:white; font-size:16px; margin-bottom:6px; font-weight:600; }
-        .feature-item p { color:rgba(255,255,255,0.5); font-size:13px; line-height:1.5; }
+        .feature-item .icon { font-size: 36px; display: block; margin-bottom: 10px; }
+        .feature-item h4 { color: white; font-size: 16px; margin-bottom: 6px; font-weight: 600; }
+        .feature-item p { color: rgba(255,255,255,0.5); font-size: 13px; line-height: 1.5; }
         .read-more-btn {
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-            margin-top:8px;
-            padding:4px 16px;
-            background:transparent;
-            color:var(--school-gold);
-            border:2px solid var(--school-gold);
-            border-radius:50px;
-            font-weight:600;
-            font-size:11px;
-            text-decoration:none;
-            transition:all 0.3s ease;
-            cursor:pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 4px 16px;
+            background: transparent;
+            color: var(--school-gold);
+            border: 2px solid var(--school-gold);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 11px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
         .read-more-btn:hover {
-            background:var(--school-gold);
-            color:var(--kenya-black);
-            transform:translateX(4px);
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            transform: translateX(4px);
         }
-        .read-more-btn i { font-size:10px; transition:transform 0.3s ease; }
-        .read-more-btn:hover i { transform:translateX(3px); }
+        .read-more-btn i { font-size: 10px; transition: transform 0.3s ease; }
+        .read-more-btn:hover i { transform: translateX(3px); }
 
         /* ========================================
            STATS
            ======================================== */
         .stats-section {
-            padding:50px 0;
-            background:linear-gradient(135deg,var(--kenya-black),var(--school-blue-dark));
-            position:relative;
-            overflow:hidden;
-            scroll-margin-top:50px;
+            padding: 50px 0;
+            background: linear-gradient(135deg, var(--kenya-black), var(--school-blue-dark));
+            position: relative;
+            overflow: hidden;
+            scroll-margin-top: 50px;
         }
         .stats-grid {
-            display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
-            gap:20px;
-            text-align:center;
-            position:relative;
-            z-index:1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
         }
         .stat-item {
-            padding:20px;
-            background:rgba(255,255,255,0.03);
-            border-radius:12px;
-            border:1px solid rgba(255,255,255,0.05);
-            transition:all 0.3s ease;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
         }
-        .stat-item:hover { background:rgba(255,255,255,0.06); transform:scale(1.02); }
+        .stat-item:hover { background: rgba(255,255,255,0.06); transform: scale(1.02); }
         .stat-item h3 {
-            font-family:var(--font-primary);
-            font-size:34px;
-            color:var(--school-gold);
-            margin-bottom:3px;
-            font-weight:700;
+            font-family: var(--font-primary);
+            font-size: 34px;
+            color: var(--school-gold);
+            margin-bottom: 3px;
+            font-weight: 700;
         }
-        .stat-item p { font-size:13px; opacity:0.6; color:white; font-weight:300; letter-spacing:1px; }
+        .stat-item p { font-size: 13px; opacity: 0.6; color: white; font-weight: 300; letter-spacing: 1px; }
 
         /* ========================================
            NEWS SECTION - FULL WIDTH
@@ -1330,30 +1461,30 @@
            FOOTER
            ======================================== */
         .main-footer {
-            background:var(--kenya-black);
-            color:white;
-            padding:25px 0 12px;
-            position:relative;
+            background: var(--kenya-black);
+            color: white;
+            padding: 25px 0 12px;
+            position: relative;
         }
         .main-footer::before {
-            content:'';
-            position:absolute;
-            top:0; left:0; right:0;
-            height:3px;
-            background:linear-gradient(90deg, var(--kenya-black), var(--kenya-red), var(--kenya-green), var(--kenya-black));
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--kenya-black), var(--kenya-red), var(--kenya-green), var(--kenya-black));
         }
         .main-footer .footer-content {
-            display:grid;
-            grid-template-columns:2fr 1fr 1fr;
-            gap:25px;
-            padding-bottom:15px;
-            border-bottom:1px solid rgba(255,255,255,0.05);
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         .main-footer .footer-info h3 {
-            font-family:var(--font-primary);
-            font-size:18px;
-            margin-bottom:6px;
-            color:var(--school-gold);
+            font-family: var(--font-primary);
+            font-size: 18px;
+            margin-bottom: 6px;
+            color: var(--school-gold);
         }
         .main-footer .footer-info .footer-logo {
             width: 50px;
@@ -1364,100 +1495,99 @@
             background: rgba(255,255,255,0.05);
             padding: 4px;
         }
-        .main-footer .footer-info p { color:rgba(255,255,255,0.4); line-height:1.6; font-size:12px; }
+        .main-footer .footer-info p { color: rgba(255,255,255,0.4); line-height: 1.6; font-size: 12px; }
         .main-footer .footer-info .ministry-badge {
-            display:inline-block;
-            background:rgba(255,255,255,0.04);
-            padding:4px 14px;
-            border-radius:6px;
-            margin-top:8px;
-            font-size:10px;
-            color:rgba(255,255,255,0.35);
-            border:1px solid rgba(255,255,255,0.04);
+            display: inline-block;
+            background: rgba(255,255,255,0.04);
+            padding: 4px 14px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.35);
+            border: 1px solid rgba(255,255,255,0.04);
         }
-        .main-footer .footer-info .ministry-badge i { color:var(--school-gold); margin-right:6px; }
-        .main-footer .footer-links h4 { color:white; font-size:13px; margin-bottom:8px; font-weight:600; }
-        .main-footer .footer-links { display:flex; flex-direction:column; gap:4px; }
-        .main-footer .footer-links a { color:rgba(255,255,255,0.3); text-decoration:none; font-size:12px; transition:all 0.3s ease; }
-        .main-footer .footer-links a:hover { color:var(--school-gold); padding-left:4px; }
-        .main-footer .footer-bottom { text-align:center; padding-top:12px; color:rgba(255,255,255,0.2); font-size:11px; }
-        .main-footer .footer-social { display:flex; gap:8px; margin-top:8px; }
+        .main-footer .footer-info .ministry-badge i { color: var(--school-gold); margin-right: 6px; }
+        .main-footer .footer-links h4 { color: white; font-size: 13px; margin-bottom: 8px; font-weight: 600; }
+        .main-footer .footer-links { display: flex; flex-direction: column; gap: 4px; }
+        .main-footer .footer-links a { color: rgba(255,255,255,0.3); text-decoration: none; font-size: 12px; transition: all 0.3s ease; }
+        .main-footer .footer-links a:hover { color: var(--school-gold); padding-left: 4px; }
+        .main-footer .footer-bottom { text-align: center; padding-top: 12px; color: rgba(255,255,255,0.2); font-size: 11px; }
+        .main-footer .footer-social { display: flex; gap: 8px; margin-top: 8px; }
         .main-footer .footer-social a {
-            color:rgba(255,255,255,0.25);
-            font-size:14px;
-            transition:all 0.3s ease;
-            width:30px; height:30px;
-            border-radius:50%;
-            border:1px solid rgba(255,255,255,0.04);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            text-decoration:none;
+            color: rgba(255,255,255,0.25);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
         }
-        .main-footer .footer-social a:hover { color:var(--school-gold); border-color:var(--school-gold); transform:translateY(-2px); }
+        .main-footer .footer-social a:hover { color: var(--school-gold); border-color: var(--school-gold); transform: translateY(-2px); }
 
         /* ========================================
            RESPONSIVE
            ======================================== */
-        @media (max-width:768px) {
-            .main-header .nav-links { display:none; flex-direction:column; width:100%; padding:15px 0; gap:5px; }
-            .main-header .nav-links.show { display:flex; }
-            .main-header .mobile-menu-btn { display:block; }
-            .main-header .nav-links a.student-portal-link { font-size:16px; padding:12px 24px; width:100%; justify-content:center; }
-            .main-header .nav-links a.enroll-now-link { width:100%; justify-content:center; }
-            .main-header .nav-links a.portal-link { width:100%; justify-content:center; }
-            .top-nav-bar .container { flex-direction:column; align-items:stretch; gap:8px; }
-            .top-nav-bar .nav-left { justify-content:center; }
-            .top-nav-bar .nav-links { justify-content:center; }
-            .top-nav-bar .nav-right { justify-content:center; flex-wrap:wrap; }
-            .top-nav-bar .nav-links a { font-size:11px; padding:4px 12px; }
-            .hero-section { padding:80px 0 40px; }
-            .hero-section h1 { font-size:32px; }
-            .hero-section .hero-description { font-size:16px; }
-            .hero-section .btn-group { flex-direction:column; align-items:center; }
-            .btn-scroll-down,.btn-outline { width:100%; justify-content:center; }
-            .section-tabs { padding:6px 0; }
-            .section-title { font-size:26px; }
-            .content-grid { grid-template-columns:1fr 1fr; }
-            .features-grid { grid-template-columns:1fr 1fr; }
-            .stats-grid { grid-template-columns:1fr 1fr; }
-            .news-grid { grid-template-columns:1fr !important; }
+        @media (max-width: 768px) {
+            .main-header .nav-links { display: none; flex-direction: column; width: 100%; padding: 15px 0; gap: 5px; }
+            .main-header .nav-links.show { display: flex; }
+            .main-header .mobile-menu-btn { display: block; }
+            .main-header .nav-links a.student-portal-link { font-size: 16px; padding: 12px 24px; width: 100%; justify-content: center; }
+            .main-header .nav-links a.enroll-now-link { width: 100%; justify-content: center; }
+            .main-header .nav-links a.portal-link { width: 100%; justify-content: center; }
+            .top-nav-bar .container { flex-direction: column; align-items: stretch; gap: 8px; }
+            .top-nav-bar .nav-left { justify-content: center; }
+            .top-nav-bar .nav-links { justify-content: center; }
+            .top-nav-bar .nav-right { justify-content: center; flex-wrap: wrap; }
+            .top-nav-bar .nav-links a { font-size: 11px; padding: 4px 12px; }
+            .hero-section { padding: 80px 0 40px; }
+            .hero-section h1 { font-size: 32px; }
+            .hero-section .hero-description { font-size: 16px; }
+            .hero-section .btn-group { flex-direction: column; align-items: center; }
+            .btn-scroll-down, .btn-outline { width: 100%; justify-content: center; }
+            .section-tabs { padding: 6px 0; }
+            .section-title { font-size: 26px; }
+            .content-grid { grid-template-columns: 1fr 1fr; }
+            .features-grid { grid-template-columns: 1fr 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .news-grid { grid-template-columns: 1fr !important; }
             .news-section .container-news { padding: 0 15px !important; }
             .news-item { padding: 28px 22px !important; min-height: 200px !important; }
             .news-item h4 { font-size: 20px !important; }
             .news-item p { font-size: 15px !important; }
-            .main-footer .footer-content { grid-template-columns:1fr; gap:15px; }
-            .notice-alert-bar .container { flex-direction:column; text-align:center; }
-            .gallery-card img { height:160px; }
-            .main-header .logo-section h1 { font-size:16px; }
-            .main-header .logo-section .school-logo { width:32px; height:32px; }
-            .news-ticker-section .ticker-label { font-size:8px; padding:2px 10px; }
-            .news-ticker-section .ticker-content .ticker-item { font-size:11px; white-space:normal; }
-            .video-modal { padding:20px; }
-            .video-modal .close-modal { top:-40px; font-size:20px; width:36px; height:36px; }
-            .hero-video-play { padding:8px 16px 8px 8px; }
-            .hero-video-play .play-icon { width:32px; height:32px; font-size:14px; }
-            .hero-video-play .play-text { font-size:12px; }
-            .splash-card { padding:30px 18px; }
-            .splash-card .splash-logo { width:60px; height:60px; }
-            .splash-card h1 { font-size:22px; }
-            .splash-news .headline { font-size:17px; }
-            .splash-news { padding:18px 16px; min-height:140px; }
+            .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
+            .notice-alert-bar .container { flex-direction: column; text-align: center; }
+            .main-header .logo-section h1 { font-size: 16px; }
+            .main-header .logo-section .school-logo { width: 32px; height: 32px; }
+            .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
+            .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
+            .video-modal { padding: 20px; }
+            .video-modal .close-modal { top: -40px; font-size: 20px; width: 36px; height: 36px; }
+            .hero-video-play { padding: 8px 16px 8px 8px; }
+            .hero-video-play .play-icon { width: 32px; height: 32px; font-size: 14px; }
+            .hero-video-play .play-text { font-size: 12px; }
+            .splash-card { padding: 30px 18px; }
+            .splash-card .splash-logo { width: 60px; height: 60px; }
+            .splash-card h1 { font-size: 22px; }
+            .splash-news .headline { font-size: 17px; }
+            .splash-news { padding: 18px 16px; min-height: 140px; }
         }
-        @media (max-width:480px) {
-            .content-grid { grid-template-columns:1fr; }
-            .features-grid { grid-template-columns:1fr; }
-            .stats-grid { grid-template-columns:1fr 1fr; }
-            .hero-section h1 { font-size:26px; }
-            .hero-section .hero-description { font-size:14px; }
-            .section-title { font-size:22px; }
-            .section-tabs .tab-btn { font-size:8px; padding:3px 8px; }
-            .section-tabs .tab-btn .tab-icon { font-size:10px; }
-            .main-header .logo-section h1 { font-size:14px; }
-            .main-header .logo-section .school-logo { width:28px; height:28px; }
-            .hero-section { padding:70px 0 30px; }
-            .top-nav-bar .nav-links a { font-size:10px; padding:3px 10px; }
-            .top-nav-bar .nav-links a i { font-size:11px; }
+        @media (max-width: 480px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .hero-section h1 { font-size: 26px; }
+            .hero-section .hero-description { font-size: 14px; }
+            .section-title { font-size: 22px; }
+            .section-tabs .tab-btn { font-size: 8px; padding: 3px 8px; }
+            .section-tabs .tab-btn .tab-icon { font-size: 10px; }
+            .main-header .logo-section h1 { font-size: 14px; }
+            .main-header .logo-section .school-logo { width: 28px; height: 28px; }
+            .hero-section { padding: 70px 0 30px; }
+            .top-nav-bar .nav-links a { font-size: 10px; padding: 3px 10px; }
+            .top-nav-bar .nav-links a i { font-size: 11px; }
             .news-item { padding: 22px 18px !important; min-height: 180px !important; }
             .news-item h4 { font-size: 18px !important; }
             .news-item p { font-size: 14px !important; }
@@ -1606,7 +1736,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HERO SECTION - NO <p> TAGS -->
+    <!-- HERO SECTION -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-video-bg">
@@ -1627,7 +1757,6 @@
                 Nurturing young minds through quality education, discipline, innovation, and strong moral values. We provide a safe and supportive learning environment where every child is encouraged to discover their potential and achieve academic excellence.
             </div>
 
-            <!-- VIDEO PLAY BUTTON -->
             <div class="hero-video-play" onclick="openVideoModal()">
                 <div class="play-icon"><i class="fas fa-play"></i></div>
                 <span class="play-text">▶ Watch Our Story</span>
@@ -1646,7 +1775,7 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- GALLERY -->
+    <!-- GALLERY SECTION - FIXED -->
     <!-- ======================================== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
@@ -1654,10 +1783,50 @@
             <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">Explore our school facilities and activities</p>
             <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide"><div class="gallery-card"><img src="images/school-compound.jpg" alt="School Compound"><div class="gallery-content"><h4>🏫 School Compound</h4><p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
-                    <div class="swiper-slide"><div class="gallery-card"><img src="images/ecde-section.jpg" alt="ECDE Section"><div class="gallery-content"><h4>🧸 E.C.D.E Section</h4><p>Our Early Childhood Development Education section where young learners begin.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
-                    <div class="swiper-slide"><div class="gallery-card"><img src="images/classroom-learning.jpg" alt="Classroom"><div class="gallery-content"><h4>📚 Classroom Learning</h4><p>Pupils engaged in active learning in our well-equipped classrooms.</p><span class="tag">Academics</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
-                    <div class="swiper-slide"><div class="gallery-card"><img src="images/computer-lab.jpg" alt="Computer Lab"><div class="gallery-content"><h4>💻 Computer Lab</h4><p>Students learning essential computer skills in our modern computer laboratory.</p><span class="tag">Facilities</span><a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a></div></div></div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <img src="images/school-compound.jpg" alt="School Compound" loading="lazy" />
+                            <div class="gallery-content">
+                                <h4>🏫 School Compound</h4>
+                                <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
+                                <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <img src="images/ecde-section.jpg" alt="ECDE Section" loading="lazy" />
+                            <div class="gallery-content">
+                                <h4>🧸 E.C.D.E Section</h4>
+                                <p>Our Early Childhood Development Education section where young learners begin.</p>
+                                <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <img src="images/classroom-learning.jpg" alt="Classroom" loading="lazy" />
+                            <div class="gallery-content">
+                                <h4>📚 Classroom Learning</h4>
+                                <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
+                                <span class="tag">Academics</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <img src="images/computer-lab.jpg" alt="Computer Lab" loading="lazy" />
+                            <div class="gallery-content">
+                                <h4>💻 Computer Lab</h4>
+                                <p>Students learning essential computer skills in our modern computer laboratory.</p>
+                                <span class="tag">Facilities</span>
+                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="swiper-button-next"></div>
                 <div class="swiper-button-prev"></div>
@@ -1877,14 +2046,12 @@
         }
 
         // ========================================
-        // STRIP HTML TAGS - REMOVES <p> FROM CMS DATA
+        // STRIP HTML TAGS
         // ========================================
         function stripHtmlTags(html) {
             if (!html) return '';
-            // Create a temporary element to parse HTML
             const temp = document.createElement('div');
             temp.innerHTML = html;
-            // Get text content (strips all HTML tags)
             return temp.textContent || temp.innerText || '';
         }
 
@@ -1964,20 +2131,59 @@
             if (e.target === this) closeVideoModal();
         });
 
-        // ===== SWIPER =====
-        new Swiper('.gallery-swiper', {
+        // ========================================
+        // GALLERY SWIPER - FIXED FOR ALL SCREENS
+        // ========================================
+        const gallerySwiper = new Swiper('.gallery-swiper', {
             slidesPerView: 1,
-            spaceBetween: 16,
+            spaceBetween: 20,
             loop: true,
-            autoplay: { delay: 4000, disableOnInteraction: false },
-            pagination: { el: '.swiper-pagination', clickable: true },
-            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-            breakpoints: { 640: { slidesPerView: 1 }, 768: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+                dynamicBullets: true
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev'
+            },
+            breakpoints: {
+                480: {
+                    slidesPerView: 1,
+                    spaceBetween: 15,
+                },
+                640: {
+                    slidesPerView: 1.5,
+                    spaceBetween: 16,
+                },
+                768: {
+                    slidesPerView: 2,
+                    spaceBetween: 20,
+                },
+                1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 25,
+                }
+            },
+            watchSlidesProgress: true,
+            watchSlidesVisibility: true,
         });
 
-        // ========================================
-        // CMS LOAD - STRIPS <p> TAGS FROM HERO DESCRIPTION
-        // ========================================
+        // Re-initialize swiper on window resize to ensure proper display
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                gallerySwiper.update();
+            }, 250);
+        });
+
+        // ===== CMS LOAD =====
         function stripHtml(html) { 
             if (!html) return ''; 
             const d = document.createElement('DIV'); 
@@ -1991,10 +2197,8 @@
                 const data = await res.json();
                 if (data.success && data.content) {
                     const c = data.content;
-                    // Strip HTML tags from hero subtitle to remove <p> tags
                     if (c.heroTitle) document.getElementById('heroTitle').innerHTML = c.heroTitle;
                     if (c.heroSubtitle) {
-                        // Use textContent to strip all HTML tags
                         const heroDesc = document.getElementById('heroSubtitle');
                         heroDesc.textContent = stripHtml(c.heroSubtitle);
                     }
