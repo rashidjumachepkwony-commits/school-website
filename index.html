@@ -30,6 +30,7 @@
             --school-blue-dark: #0A1628;
             --font-primary: 'Playfair Display', serif;
             --font-secondary: 'Poppins', sans-serif;
+            --whatsapp-green: #25D366;
         }
         html { scroll-behavior: smooth; }
         body {
@@ -562,17 +563,55 @@
         .top-nav-bar .nav-right { 
             display: flex; 
             align-items: center; 
-            gap: 12px; 
+            gap: 15px; 
         }
-        /* REMOVED the dull Student Portal button from nav-right */
-        .top-nav-bar .nav-right .quick-link {
-            color: rgba(255,255,255,0.4);
+        .top-nav-bar .nav-right .contact-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.6);
             font-size: 11px;
             text-decoration: none;
             transition: all 0.3s ease;
+            padding: 4px 12px;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
         }
-        .top-nav-bar .nav-right .quick-link:hover { color: var(--school-gold); }
-        .top-nav-bar .nav-right .quick-link i { margin-right: 4px; }
+        .top-nav-bar .nav-right .contact-link:hover {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(212,160,23,0.2);
+            transform: translateY(-2px);
+        }
+        .top-nav-bar .nav-right .contact-link i {
+            font-size: 14px;
+        }
+        .top-nav-bar .nav-right .contact-link .phone-icon {
+            color: var(--school-gold);
+        }
+        .top-nav-bar .nav-right .contact-link .whatsapp-icon {
+            color: var(--whatsapp-green);
+        }
+        .top-nav-bar .nav-right .contact-link .whatsapp-icon:hover {
+            animation: pulseWhatsApp 1.5s ease-in-out infinite;
+        }
+        .top-nav-bar .nav-right .contact-link .phone-icon:hover {
+            animation: pulsePhone 1.5s ease-in-out infinite;
+        }
+        .top-nav-bar .nav-right .divider {
+            color: rgba(255,255,255,0.15);
+            font-size: 14px;
+        }
+
+        @keyframes pulseWhatsApp {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); color: #25D366; }
+        }
+        @keyframes pulsePhone {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); color: var(--school-gold); }
+        }
 
         /* ========================================
            SECTION TABS - REMOVED DULL STUDENT PORTAL TAB
@@ -1382,7 +1421,7 @@
             .top-nav-bar .container { flex-direction:column; align-items:stretch; gap:8px; }
             .top-nav-bar .nav-left { justify-content:center; }
             .top-nav-bar .nav-links { justify-content:center; }
-            .top-nav-bar .nav-right { justify-content:center; }
+            .top-nav-bar .nav-right { justify-content:center; flex-wrap:wrap; }
             .top-nav-bar .nav-links a { font-size:11px; padding:4px 12px; }
             .hero-section { padding:80px 0 40px; }
             .hero-section h1 { font-size:32px; }
@@ -1536,7 +1575,7 @@
 
     <!-- ======================================== -->
     <!-- TOP NAV BAR - CLEAN: NO DULL STUDENT PORTAL BUTTONS -->
-    <!-- ONLY RAINBOW GLOWING STUDENT PORTAL -->
+    <!-- WITH PHONE AND WHATSAPP NUMBERS -->
     <!-- ======================================== -->
     <div class="top-nav-bar">
         <div class="container">
@@ -1552,12 +1591,21 @@
                 <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;"><i class="fas fa-user-lock"></i> Admin</a>
                 <!-- ENROLL NOW - RED -->
                 <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
-                <!-- STUDENT PORTAL - RAINBOW GLOWING (THE BEAUTIFUL ONE) - NO DULL BUTTONS -->
+                <!-- STUDENT PORTAL - RAINBOW GLOWING (THE BEAUTIFUL ONE) -->
                 <a href="student-portal.html" class="student-portal-link-top"><i class="fas fa-user-graduate"></i> Student Portal</a>
             </div>
             <div class="nav-right">
-                <!-- REMOVED DULL STUDENT PORTAL BUTTON - ONLY CLEAN LINKS HERE -->
-                <a href="#" class="quick-link"><i class="fas fa-phone"></i> +254 721 556 252</a>
+                <!-- Phone Number with icon -->
+                <a href="tel:+254721556252" class="contact-link">
+                    <i class="fas fa-phone phone-icon"></i>
+                    <span>+254 721 556 252</span>
+                </a>
+                <span class="divider">|</span>
+                <!-- WhatsApp Number with icon -->
+                <a href="https://wa.me/254740201441" target="_blank" class="contact-link">
+                    <i class="fab fa-whatsapp whatsapp-icon"></i>
+                    <span>+254 740 201 441</span>
+                </a>
             </div>
         </div>
     </div>
@@ -1952,7 +2000,7 @@
                             div.className = 'news-item';
                             div.setAttribute('data-aos', 'fade-up');
                             div.setAttribute('data-aos-delay', (i + 1) * 100);
-                            div.innerHTML = `<h4>${n.title||'News'}</h4><p>${n.content||''}</p><span class="date">Posted: ${new Date().toLocaleDateString()}</span><a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right</i></a>`;
+                            div.innerHTML = `<h4>${n.title||'News'}</h4><p>${n.content||''}</p><span class="date">Posted: ${new Date().toLocaleDateString()}</span><a href="#" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>`;
                             grid.appendChild(div);
                         });
                     }
