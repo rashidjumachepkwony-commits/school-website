@@ -973,7 +973,7 @@
         @keyframes tickerScroll { 0%,20% { transform:translateY(0); } 25%,45% { transform:translateY(-22px); } 50%,70% { transform:translateY(-44px); } 75%,95% { transform:translateY(-66px); } 100% { transform:translateY(0); } }
 
         /* ========================================
-           GALLERY SECTION - FIXED FOR ALL SCREENS
+           GALLERY SECTION - FIXED
            ======================================== */
         .gallery-section {
             padding: 60px 0;
@@ -999,15 +999,25 @@
             margin-bottom: 30px;
             font-weight: 300;
         }
+
+        /* Swiper Container - Critical Fix */
         .gallery-swiper {
-            padding: 15px 0 40px;
             width: 100%;
+            padding: 15px 0 50px;
             overflow: hidden;
+            position: relative;
         }
         .gallery-swiper .swiper-wrapper {
             display: flex;
             align-items: stretch;
+            transition-timing-function: ease-in-out;
         }
+        .gallery-swiper .swiper-slide {
+            height: auto;
+            display: flex;
+            flex-shrink: 0;
+        }
+
         .gallery-card {
             background: white;
             border-radius: 16px;
@@ -1017,6 +1027,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            width: 100%;
         }
         .gallery-card:hover {
             transform: translateY(-5px);
@@ -1028,6 +1039,7 @@
             object-fit: cover;
             transition: transform 0.5s ease;
             display: block;
+            background: #1a2a4a;
         }
         .gallery-card:hover img {
             transform: scale(1.05);
@@ -1086,42 +1098,56 @@
             transform: translateX(4px);
         }
 
-        /* Swiper Navigation */
+        /* Swiper Navigation - Desktop */
         .gallery-swiper .swiper-button-next,
         .gallery-swiper .swiper-button-prev {
             color: var(--school-gold) !important;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
             backdrop-filter: blur(10px);
             width: 44px !important;
             height: 44px !important;
             border-radius: 50% !important;
             border: 1px solid rgba(255,255,255,0.15);
             transition: all 0.3s ease;
+            top: 50%;
+            transform: translateY(-50%);
         }
         .gallery-swiper .swiper-button-next:hover,
         .gallery-swiper .swiper-button-prev:hover {
-            background: rgba(212,160,23,0.25);
+            background: rgba(212,160,23,0.3);
             border-color: var(--school-gold);
-            transform: scale(1.05);
         }
         .gallery-swiper .swiper-button-next::after,
         .gallery-swiper .swiper-button-prev::after {
             font-size: 16px !important;
             font-weight: 700;
         }
+        .gallery-swiper .swiper-button-next {
+            right: 10px;
+        }
+        .gallery-swiper .swiper-button-prev {
+            left: 10px;
+        }
+
+        /* Swiper Pagination */
+        .gallery-swiper .swiper-pagination {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 10px 0;
+        }
         .gallery-swiper .swiper-pagination-bullet {
             background: rgba(255,255,255,0.3) !important;
             width: 10px !important;
             height: 10px !important;
             opacity: 0.6;
+            margin: 0 5px !important;
         }
         .gallery-swiper .swiper-pagination-bullet-active {
             background: var(--school-gold) !important;
             opacity: 1;
-        }
-        .gallery-swiper .swiper-pagination {
-            position: relative;
-            margin-top: 15px;
         }
 
         /* ========================================
@@ -1130,6 +1156,11 @@
         @media (max-width: 1024px) {
             .gallery-card img {
                 height: 200px;
+            }
+            .gallery-swiper .swiper-button-next,
+            .gallery-swiper .swiper-button-prev {
+                width: 38px !important;
+                height: 38px !important;
             }
         }
         @media (max-width: 768px) {
@@ -1153,6 +1184,9 @@
             }
             .gallery-section .section-subtitle.light {
                 font-size: 14px;
+            }
+            .gallery-swiper {
+                padding: 10px 0 40px;
             }
         }
 
@@ -2134,53 +2168,82 @@
         // ========================================
         // GALLERY SWIPER - FIXED FOR ALL SCREENS
         // ========================================
-        const gallerySwiper = new Swiper('.gallery-swiper', {
-            slidesPerView: 1,
-            spaceBetween: 20,
-            loop: true,
-            autoplay: {
-                delay: 5000,
-                disableOnInteraction: false,
-                pauseOnMouseEnter: true
-            },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-                dynamicBullets: true
-            },
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev'
-            },
-            breakpoints: {
-                480: {
-                    slidesPerView: 1,
-                    spaceBetween: 15,
-                },
-                640: {
-                    slidesPerView: 1.5,
-                    spaceBetween: 16,
-                },
-                768: {
-                    slidesPerView: 2,
-                    spaceBetween: 20,
-                },
-                1024: {
-                    slidesPerView: 3,
-                    spaceBetween: 25,
-                }
-            },
-            watchSlidesProgress: true,
-            watchSlidesVisibility: true,
-        });
+        // Wait for DOM to be fully loaded before initializing Swiper
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if swiper container exists
+            const swiperContainer = document.querySelector('.gallery-swiper');
+            if (!swiperContainer) return;
 
-        // Re-initialize swiper on window resize to ensure proper display
-        let resizeTimer;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function() {
-                gallerySwiper.update();
-            }, 250);
+            // Initialize Swiper with proper configuration
+            const gallerySwiper = new Swiper('.gallery-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 4000,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                    dynamicBullets: true
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev'
+                },
+                breakpoints: {
+                    480: {
+                        slidesPerView: 1,
+                        spaceBetween: 15,
+                    },
+                    640: {
+                        slidesPerView: 1.5,
+                        spaceBetween: 16,
+                    },
+                    768: {
+                        slidesPerView: 2,
+                        spaceBetween: 20,
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                        spaceBetween: 25,
+                    }
+                },
+                watchSlidesProgress: true,
+                watchSlidesVisibility: true,
+                // Ensure slides are properly rendered
+                on: {
+                    init: function() {
+                        // Force a re-check of slide sizes
+                        this.update();
+                    }
+                }
+            });
+
+            // Re-initialize swiper on window resize to ensure proper display
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    if (gallerySwiper) {
+                        gallerySwiper.update();
+                    }
+                }, 300);
+            });
+
+            // Handle orientation change on mobile
+            window.addEventListener('orientationchange', function() {
+                setTimeout(function() {
+                    if (gallerySwiper) {
+                        gallerySwiper.update();
+                    }
+                }, 500);
+            });
+
+            // Expose swiper instance to window for debugging if needed
+            window.gallerySwiper = gallerySwiper;
         });
 
         // ===== CMS LOAD =====
