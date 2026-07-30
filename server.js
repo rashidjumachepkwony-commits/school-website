@@ -104,11 +104,6 @@ function formatKenyaDate(date) {
 // ============================================
 // PERFORMANCE RUBRIC - CBC CORRECT (APPLIES TO ALL CLASSES)
 // ============================================
-// Exceeding Expectations (EE): 75-100% = Rating 4
-// Meeting Expectations (ME): 41-74% = Rating 3
-// Approaching Expectations (AE): 21-40% = Rating 2
-// Below Expectations (BE): 0-20% = Rating 1
-
 function calculatePerformanceLevel(percentage) {
     if (percentage >= 75) return 'Exceeding Expectation';
     if (percentage >= 41) return 'Meeting Expectation';
@@ -159,9 +154,6 @@ function calculateAssessmentPerformance(score, maxScore) {
     };
 }
 
-// ============================================
-// CBC STUDENT OVERALL - CORRECT CBC METHOD (APPLIES TO ALL CLASSES)
-// ============================================
 function calculateStudentOverall(assessments) {
     if (!assessments || assessments.length === 0) {
         return { 
@@ -216,9 +208,6 @@ function calculateStudentOverall(assessments) {
     };
 }
 
-// ============================================
-// RECALCULATE STUDENT DATA - CBC METHOD
-// ============================================
 function recalculateStudentData(student) {
     if (!student) return student;
     
@@ -255,9 +244,6 @@ function recalculateStudentData(student) {
     return studentData;
 }
 
-// ============================================
-// GENERATE REPORT HTML - FOR VIEWING
-// ============================================
 function generateReportHTML(student) {
     if (!student) return '<p>No student data available</p>';
     
@@ -414,9 +400,46 @@ function generateReportHTML(student) {
     return html;
 }
 
-// ============================================
-// CLOUDINARY UPLOAD HELPER
-// ============================================
+function generateTeacherFeedback(student) {
+    const level = student.performanceLevel || 'Approaching Expectation';
+    
+    let feedback = '';
+    
+    if (level === 'Exceeding Expectation') {
+        feedback = `Excellent performance! ${student.studentName || 'The student'} is demonstrating outstanding mastery of the learning outcomes. `;
+    } else if (level === 'Meeting Expectation') {
+        feedback = `Good progress! ${student.studentName || 'The student'} is meeting the expected learning outcomes. `;
+    } else if (level === 'Approaching Expectation') {
+        feedback = `${student.studentName || 'The student'} is making progress and approaching the expected learning outcomes. `;
+    } else {
+        feedback = `${student.studentName || 'The student'} needs additional support to meet the expected learning outcomes. `;
+    }
+    
+    const strengths = (student.assessments || [])
+        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
+        .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100));
+    
+    if (strengths.length > 0) {
+        feedback += `Strong performance in ${strengths.slice(0, 3).map(s => s.subject).join(', ')}. `;
+    }
+    
+    const weaknesses = (student.assessments || [])
+        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 41)
+        .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100));
+    
+    if (weaknesses.length > 0) {
+        feedback += `Areas for improvement: ${weaknesses.slice(0, 3).map(s => s.subject).join(', ')}. `;
+    }
+    
+    if (level === 'Exceeding Expectation' || level === 'Meeting Expectation') {
+        feedback += `Continue the excellent work. We are proud of your progress!`;
+    } else {
+        feedback += `With continued effort and practice, we are confident you will achieve the expected learning outcomes.`;
+    }
+    
+    return feedback;
+}
+
 async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') {
     return new Promise((resolve, reject) => {
         console.log(`📤 Uploading to Cloudinary: ${filename}`);
@@ -457,18 +480,12 @@ async function uploadToCloudinary(fileBuffer, filename, folder = 'assignments') 
     });
 }
 
-// ============================================
-// FUNCTION TO CHECK IF CLOUDINARY IS CONFIGURED
-// ============================================
 function isCloudinaryConfigured() {
     return process.env.CLOUDINARY_CLOUD_NAME && 
            process.env.CLOUDINARY_API_KEY && 
            process.env.CLOUDINARY_API_SECRET;
 }
 
-// ============================================
-// STAFF REPORT PDF
-// ============================================
 function generateStaffReportPDF(report, periodLabel) {
     return new Promise((resolve, reject) => {
         try {
@@ -598,9 +615,6 @@ function generateStaffReportPDF(report, periodLabel) {
     });
 }
 
-// ============================================
-// PROFESSIONAL CBC STUDENT REPORT - PDFKIT ONLY
-// ============================================
 function generateStudentReportPDF(student) {
     return new Promise((resolve, reject) => {
         try {
@@ -892,52 +906,6 @@ function generateStudentReportPDF(student) {
     });
 }
 
-// ============================================
-// HELPER: Generate Teacher Feedback
-// ============================================
-function generateTeacherFeedback(student) {
-    const level = student.performanceLevel || 'Approaching Expectation';
-    
-    let feedback = '';
-    
-    if (level === 'Exceeding Expectation') {
-        feedback = `Excellent performance! ${student.studentName || 'The student'} is demonstrating outstanding mastery of the learning outcomes. `;
-    } else if (level === 'Meeting Expectation') {
-        feedback = `Good progress! ${student.studentName || 'The student'} is meeting the expected learning outcomes. `;
-    } else if (level === 'Approaching Expectation') {
-        feedback = `${student.studentName || 'The student'} is making progress and approaching the expected learning outcomes. `;
-    } else {
-        feedback = `${student.studentName || 'The student'} needs additional support to meet the expected learning outcomes. `;
-    }
-    
-    const strengths = (student.assessments || [])
-        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) >= 50)
-        .sort((a, b) => ((b.score / b.maxScore) * 100) - ((a.score / a.maxScore) * 100));
-    
-    if (strengths.length > 0) {
-        feedback += `Strong performance in ${strengths.slice(0, 3).map(s => s.subject).join(', ')}. `;
-    }
-    
-    const weaknesses = (student.assessments || [])
-        .filter(a => a.maxScore > 0 && ((a.score / a.maxScore) * 100) < 41)
-        .sort((a, b) => ((a.score / a.maxScore) * 100) - ((b.score / b.maxScore) * 100));
-    
-    if (weaknesses.length > 0) {
-        feedback += `Areas for improvement: ${weaknesses.slice(0, 3).map(s => s.subject).join(', ')}. `;
-    }
-    
-    if (level === 'Exceeding Expectation' || level === 'Meeting Expectation') {
-        feedback += `Continue the excellent work. We are proud of your progress!`;
-    } else {
-        feedback += `With continued effort and practice, we are confident you will achieve the expected learning outcomes.`;
-    }
-    
-    return feedback;
-}
-
-// ============================================
-// PROFESSIONAL CLASS REPORT - CBC STYLE (APPLIES TO ALL CLASSES)
-// ============================================
 function generateClassReportPDF(students, grade, type, term, year, period) {
     return new Promise((resolve, reject) => {
         try {
@@ -1275,9 +1243,6 @@ function generateClassReportPDF(students, grade, type, term, year, period) {
     });
 }
 
-// ============================================
-// FIX PAST RECORDS
-// ============================================
 async function fixPastRecords() {
     return { fixed: 0 };
 }
@@ -1759,7 +1724,7 @@ function getFeeStructure(grade, type) {
 }
 
 // ============================================
-// API ROUTES - CONTENT
+// API ROUTES - CONTENT  (MOVED HERE - BEFORE STATIC FILES)
 // ============================================
 
 app.get('/api/content', async (req, res) => {
@@ -1831,6 +1796,43 @@ app.delete('/api/content/notice', async (req, res) => {
         await content.save();
         res.json({ success: true, message: 'Notice dismissed successfully' });
     } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// UPLOAD ROUTE (for media files)
+// ============================================
+
+app.post('/api/upload', upload.single('file'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' });
+        }
+        let fileType = 'image';
+        let icon = '🖼️';
+        if (req.file.mimetype.startsWith('video/')) {
+            fileType = 'video';
+            icon = '🎬';
+        } else if (req.file.mimetype.startsWith('audio/')) {
+            fileType = 'audio';
+            icon = '🎵';
+        }
+        res.json({ 
+            success: true, 
+            message: 'File uploaded successfully!', 
+            file: { 
+                filename: req.file.filename, 
+                originalname: req.file.originalname, 
+                path: `/${req.file.path.replace(/\\/g, '/')}`,
+                size: req.file.size, 
+                type: fileType, 
+                icon: icon, 
+                mimetype: req.file.mimetype 
+            } 
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -3993,27 +3995,6 @@ app.post('/api/fix-past-times', async (req, res) => {
     res.status(410).json({ success: false, message: 'Bulk time shifting has been retired to protect record accuracy.' });
 });
 
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'No file uploaded' });
-        }
-        let fileType = 'image';
-        let icon = '🖼️';
-        if (req.file.mimetype.startsWith('video/')) {
-            fileType = 'video';
-            icon = '🎬';
-        } else if (req.file.mimetype.startsWith('audio/')) {
-            fileType = 'audio';
-            icon = '🎵';
-        }
-        res.json({ success: true, message: 'File uploaded successfully!', file: { filename: req.file.filename, originalname: req.file.originalname, path: `/${req.file.path.replace(/\\/g, '/')}`, size: req.file.size, type: fileType, icon: icon, mimetype: req.file.mimetype } });
-    } catch (error) {
-        console.error('Upload error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
 // ============================================
 // TEST ROUTE
 // ============================================
@@ -4419,7 +4400,7 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
 });
 
 // ============================================
-// Serve HTML Pages
+// SERVE HTML PAGES (BEFORE STATIC FILES)
 // ============================================
 
 // Student Portal
@@ -4456,7 +4437,7 @@ app.get('/student-report.html', (req, res) => {
 });
 
 // ============================================
-// Debug routes
+// DEBUG ROUTES
 // ============================================
 
 // Debug route - check if students exist
@@ -4603,7 +4584,7 @@ app.get('/api/students/portal/assignments/filtered', async (req, res) => {
 });
 
 // ============================================
-// REGISTER STATIC FILES
+// REGISTER STATIC FILES - MUST BE AFTER ALL API ROUTES
 // ============================================
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -4614,7 +4595,7 @@ app.get('/', (req, res) => {
 });
 
 // ============================================
-// 404 handler - MUST BE LAST
+// 404 HANDLER - MUST BE ABSOLUTELY LAST
 // ============================================
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
