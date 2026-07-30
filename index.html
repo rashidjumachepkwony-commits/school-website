@@ -55,7 +55,7 @@
         }
 
         /* ========================================
-           SPLASH SCREEN - STAYS UNTIL PAGE FULLY LOADS
+           SPLASH SCREEN
            ======================================== */
         #splash-screen {
             position: fixed;
@@ -564,9 +564,10 @@
             display: flex; 
             align-items: center; 
             gap: 15px; 
+            flex-wrap: wrap;
         }
         .top-nav-bar .nav-right .contact-link {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
             color: rgba(255,255,255,0.6);
@@ -577,6 +578,7 @@
             border-radius: 50px;
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.06);
+            white-space: nowrap;
         }
         .top-nav-bar .nav-right .contact-link:hover {
             color: white;
@@ -760,6 +762,7 @@
             -webkit-text-fill-color:transparent;
             background-clip:text;
         }
+        /* HERO DESCRIPTION - NO <p> TAG */
         .hero-section .hero-description {
             font-size:18px;
             opacity:0.9;
@@ -1466,7 +1469,6 @@
 
     <!-- ======================================== -->
     <!-- SPLASH SCREEN - FIRST VISIT ONLY -->
-    <!-- STAYS UNTIL PAGE FULLY LOADS -->
     <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
@@ -1865,18 +1867,12 @@
             }, 800);
         }
 
-        // Check if splash was already seen in this session
         if (sessionStorage.getItem('splashSeen')) {
             document.getElementById('splash-screen').style.display = 'none';
         } else {
-            // Wait for the page to fully load (including all assets, Render.com spin-up)
             window.addEventListener('load', function() {
-                // Give a small extra delay to ensure everything is rendered
                 setTimeout(hideSplash, 1000);
             });
-            
-            // Fallback: If page takes too long, hide after 15 seconds max
-            // This ensures it doesn't stay forever if something fails
             setTimeout(hideSplash, 15000);
         }
 
