@@ -4523,6 +4523,113 @@ app.get('/api/students/portal/assignments/filtered', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+// ============================================
+// CONTENT MANAGEMENT API ROUTES
+// ============================================
+
+// GET content
+app.get('/api/content', async (req, res) => {
+    try {
+        const content = await Content.findOne();
+        if (!content) {
+            // Create default content if none exists
+            const defaultContent = new Content({});
+            await defaultContent.save();
+            return res.json({ success: true, content: defaultContent });
+        }
+        res.json({ success: true, content });
+    } catch (error) {
+        console.error('Error fetching content:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// PUT - Update content
+app.put('/api/content', async (req, res) => {
+    try {
+        let content = await Content.findOne();
+        if (!content) {
+            content = new Content({});
+        }
+        
+        // Update all fields from request body
+        const allowedFields = [
+            'heroTitle', 'heroSubtitle', 'heroButtonText', 'heroButtonLink',
+            'homeCarousel', 'homeFeatures', 'homeStats', 'homeNews',
+            'aboutMission', 'aboutVision', 'aboutValues', 'aboutHistory', 'aboutMotto', 'aboutWhy',
+            'academics', 'academicsIntro',
+            'admissionsRequirements', 'admissionsAge', 'admissionsDocuments', 
+            'admissionsProcess', 'admissionsFees',
+            'facilities', 'gallery',
+            'events', 'coCurricular',
+            'performanceKcpe', 'performanceInternal',
+            'parentsCalendar', 'parentsHomework', 'parentsAttendance',
+            'parentsRules', 'parentsUniform', 'parentsFees',
+            'downloads',
+            'feesContent', 'feesPaybill', 'feesInstructions',
+            'contactAddress', 'contactPhone', 'contactEmail', 'contactHours', 'contactMap',
+            'seoTitle', 'seoDescription', 'seoKeywords',
+            'footerText', 'noticeAlert', 'noticeType'
+        ];
+        
+        allowedFields.forEach(field => {
+            if (req.body[field] !== undefined) {
+                content[field] = req.body[field];
+            }
+        });
+        
+        content.lastUpdated = new Date();
+        content.updatedBy = req.body.updatedBy || 'Admin';
+        
+        await content.save();
+        res.json({ success: true, message: 'Content updated successfully!', content });
+    } catch (error) {
+        console.error('Error updating content:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ============================================
+// UPLOAD ROUTE (for media files)
+// ============================================
+
+app.post('/api/upload', upload.single('file'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' });
+        }
+        
+        let fileType = 'image';
+        let icon = '🖼️';
+        if (req.file.mimetype.startsWith('video/')) {
+            fileType = 'video';
+            icon = '🎬';
+        } else if (req.file.mimetype.startsWith('audio/')) {
+            fileType = 'audio';
+            icon = '🎵';
+        }
+        
+        // Return the file info
+        const filePath = `/${req.file.path.replace(/\\/g, '/')}`;
+        
+        res.json({ 
+            success: true, 
+            message: 'File uploaded successfully!', 
+            file: { 
+                filename: req.file.filename, 
+                originalname: req.file.originalname, 
+                path: filePath,
+                size: req.file.size, 
+                type: fileType, 
+                icon: icon, 
+                mimetype: req.file.mimetype 
+            } 
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 // ============================================
 // REGISTER STATIC FILES
