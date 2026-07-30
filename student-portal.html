@@ -260,7 +260,7 @@
         /* ===== BIG NAVIGATION TABS ===== */
         .nav-tabs {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin-bottom: 25px;
             display: none;
@@ -304,6 +304,11 @@
             font-size: 13px;
         }
 
+        .nav-tab.assessments-tab.active {
+            border-color: #1a8a3f;
+            background: #f0fff4;
+        }
+
         .nav-tab.assignments-tab.active {
             border-color: #0d6efd;
             background: #f0f7ff;
@@ -326,6 +331,200 @@
 
         .tab-content.active {
             display: block;
+        }
+
+        /* ======================================== */
+        /* ASSESSMENT TAB */
+        /* ======================================== */
+        .assessment-section {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .assessment-section .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            border-bottom: 3px solid #1a8a3f;
+            padding-bottom: 12px;
+        }
+
+        .assessment-section .section-header h3 {
+            color: #0A1628;
+            font-size: 22px;
+        }
+
+        .assessment-section .section-header h3 i {
+            color: #1a8a3f;
+            margin-right: 10px;
+        }
+
+        /* Simple Filters - Big and Easy */
+        .simple-filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e8ecf1;
+        }
+
+        .simple-filters .filter-group {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .simple-filters .filter-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+        .simple-filters .filter-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .simple-filters .filter-group select:focus {
+            border-color: #1a8a3f;
+            outline: none;
+        }
+
+        .simple-filters .btn-apply {
+            padding: 10px 25px;
+            background: #1a8a3f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+            align-self: flex-end;
+        }
+
+        .simple-filters .btn-apply:hover {
+            background: #136e32;
+            transform: translateY(-2px);
+        }
+
+        .simple-filters .btn-reset {
+            padding: 10px 25px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+            align-self: flex-end;
+        }
+
+        .simple-filters .btn-reset:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .assessment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .assessment-card {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 5px solid #C9A84C;
+        }
+
+        .assessment-card .subject {
+            font-weight: 600;
+            color: #0A1628;
+            font-size: 15px;
+        }
+
+        .assessment-card .score {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 4px 0;
+        }
+
+        .assessment-card .score .max {
+            font-size: 14px;
+            font-weight: 400;
+            color: #6c757d;
+        }
+
+        .assessment-card .level {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .assessment-card .level.EE { color: #1a8a3f; }
+        .assessment-card .level.ME { color: #0d6efd; }
+        .assessment-card .level.AE { color: #e6a800; }
+        .assessment-card .level.BE { color: #dc3545; }
+
+        .assessment-summary {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            text-align: center;
+        }
+
+        .assessment-summary .stat .number {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0A1628;
+        }
+
+        .assessment-summary .stat .label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .btn-download-report {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #1a8a3f, #136e32);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 12px;
+            text-decoration: none;
+        }
+
+        .btn-download-report:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(26, 138, 63, 0.4);
+        }
+
+        .btn-download-report i {
+            margin-right: 8px;
         }
 
         /* ======================================== */
@@ -630,245 +829,6 @@
         }
 
         /* ======================================== */
-        /* PROFILE TAB - with Assessment Results */
-        /* ======================================== */
-        .profile-section {
-            background: white;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            margin-bottom: 25px;
-        }
-
-        .profile-section .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 18px;
-            border-bottom: 3px solid #6f42c1;
-            padding-bottom: 12px;
-        }
-
-        .profile-section .section-header h3 {
-            color: #0A1628;
-            font-size: 22px;
-        }
-
-        .profile-section .section-header h3 i {
-            color: #6f42c1;
-            margin-right: 10px;
-        }
-
-        .btn-download-report {
-            display: inline-block;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #1a8a3f, #136e32);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-
-        .btn-download-report:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(26, 138, 63, 0.4);
-        }
-
-        .btn-download-report i {
-            margin-right: 8px;
-        }
-
-        .btn-download-report:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Assessment results inside profile - HIDDEN until student logs in */
-        .profile-assessment-section {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 2px solid #e8ecf1;
-            display: none;
-        }
-
-        .profile-assessment-section.visible {
-            display: block;
-        }
-
-        .profile-assessment-section h4 {
-            color: #0A1628;
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-
-        .profile-assessment-section h4 i {
-            color: #1a8a3f;
-            margin-right: 8px;
-        }
-
-        .assessment-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .assessment-card {
-            background: #f8f9fa;
-            padding: 16px;
-            border-radius: 12px;
-            border-left: 5px solid #C9A84C;
-        }
-
-        .assessment-card .subject {
-            font-weight: 600;
-            color: #0A1628;
-            font-size: 15px;
-        }
-
-        .assessment-card .score {
-            font-size: 22px;
-            font-weight: 700;
-            margin: 4px 0;
-        }
-
-        .assessment-card .score .max {
-            font-size: 14px;
-            font-weight: 400;
-            color: #6c757d;
-        }
-
-        .assessment-card .level {
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .assessment-card .level.EE { color: #1a8a3f; }
-        .assessment-card .level.ME { color: #0d6efd; }
-        .assessment-card .level.AE { color: #e6a800; }
-        .assessment-card .level.BE { color: #dc3545; }
-
-        .assessment-summary {
-            background: #f8f9fa;
-            padding: 18px;
-            border-radius: 12px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            text-align: center;
-            display: none;
-        }
-
-        .assessment-summary.visible {
-            display: grid;
-        }
-
-        .assessment-summary .stat .number {
-            font-size: 22px;
-            font-weight: 700;
-            color: #0A1628;
-        }
-
-        .assessment-summary .stat .label {
-            font-size: 12px;
-            color: #6c757d;
-        }
-
-        /* Assessment filters */
-        .assessment-filters {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 1px solid #e8ecf1;
-        }
-
-        .assessment-filters .filter-group {
-            flex: 1;
-            min-width: 120px;
-        }
-
-        .assessment-filters .filter-group label {
-            display: block;
-            font-weight: 600;
-            font-size: 12px;
-            color: #555;
-            margin-bottom: 3px;
-        }
-
-        .assessment-filters .filter-group select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            background: white;
-            cursor: pointer;
-        }
-
-        .assessment-filters .filter-group select:focus {
-            border-color: #1a8a3f;
-            outline: none;
-        }
-
-        .assessment-filters .btn-apply {
-            padding: 10px 25px;
-            background: #1a8a3f;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 15px;
-            transition: all 0.3s;
-            align-self: flex-end;
-        }
-
-        .assessment-filters .btn-apply:hover {
-            background: #136e32;
-            transform: translateY(-2px);
-        }
-
-        .assessment-filters .btn-reset {
-            padding: 10px 25px;
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 15px;
-            transition: all 0.3s;
-            align-self: flex-end;
-        }
-
-        .assessment-filters .btn-reset:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-
-        .no-assessment-data {
-            text-align: center;
-            padding: 20px;
-            color: #6c757d;
-        }
-
-        .no-assessment-data .icon {
-            font-size: 36px;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        /* ======================================== */
         /* COMMON */
         /* ======================================== */
         .loading {
@@ -1004,6 +964,20 @@
                 grid-template-columns: 1fr;
             }
 
+            .simple-filters {
+                flex-direction: column;
+            }
+
+            .simple-filters .filter-group {
+                min-width: 100%;
+            }
+
+            .simple-filters .btn-apply,
+            .simple-filters .btn-reset {
+                width: 100%;
+                text-align: center;
+            }
+
             .assign-filters {
                 flex-direction: column;
             }
@@ -1018,18 +992,8 @@
                 text-align: center;
             }
 
-            .assessment-filters {
-                flex-direction: column;
-            }
-
-            .assessment-filters .filter-group {
-                min-width: 100%;
-            }
-
-            .assessment-filters .btn-apply,
-            .assessment-filters .btn-reset {
-                width: 100%;
-                text-align: center;
+            .assessment-grid {
+                grid-template-columns: 1fr;
             }
 
             .fee-cards {
@@ -1061,7 +1025,7 @@
                 padding: 6px 8px;
             }
 
-            .fee-section .section-header {
+            .assessment-section .section-header {
                 flex-direction: column;
                 text-align: center;
                 gap: 10px;
@@ -1073,19 +1037,10 @@
                 gap: 10px;
             }
 
-            .profile-section .section-header {
+            .fee-section .section-header {
                 flex-direction: column;
                 text-align: center;
                 gap: 10px;
-            }
-
-            .btn-download-report {
-                width: 100%;
-                text-align: center;
-            }
-
-            .assessment-grid {
-                grid-template-columns: 1fr;
             }
         }
 
@@ -1107,6 +1062,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .assessment-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+
             .search-section {
                 padding: 20px;
             }
@@ -1117,10 +1076,6 @@
 
             .student-info .info-item .value {
                 font-size: 16px;
-            }
-
-            .assessment-summary {
-                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -1143,7 +1098,7 @@
         <!-- Welcome -->
         <div style="background: linear-gradient(135deg, #1a8a3f 0%, #0d6efd 100%); color: white; padding: 20px 25px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
             <h2 style="font-size: 22px; font-weight: 600;">👋 Welcome to Student Portal</h2>
-            <p style="opacity: 0.9; margin-top: 4px; font-size: 15px;">Search for your name to download assignments, check fee status, and view your assessment results.</p>
+            <p style="opacity: 0.9; margin-top: 4px; font-size: 15px;">Search for your name to view assessment results, download assignments, and check fee status.</p>
         </div>
 
         <div id="errorMessage" class="error-message"></div>
@@ -1174,7 +1129,11 @@
 
         <!-- ===== BIG NAVIGATION TABS ===== -->
         <div class="nav-tabs" id="navTabs">
-            <div class="nav-tab assignments-tab active" onclick="switchTab('assignments')">
+            <div class="nav-tab assessments-tab active" onclick="switchTab('assessments')">
+                <span class="tab-icon">📊</span>
+                <span class="tab-label">📊 Results</span>
+            </div>
+            <div class="nav-tab assignments-tab" onclick="switchTab('assignments')">
                 <span class="tab-icon">📝</span>
                 <span class="tab-label">📝 Assignments</span>
             </div>
@@ -1188,8 +1147,80 @@
             </div>
         </div>
 
+        <!-- ===== TAB: ASSESSMENTS ===== -->
+        <div id="tabAssessments" class="tab-content active">
+            <div class="assessment-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-chart-bar"></i> 📊 Assessment Results</h3>
+                    <button class="btn-download-report" onclick="downloadReport()">
+                        <i class="fas fa-file-pdf"></i> Download Full Report
+                    </button>
+                </div>
+
+                <!-- Simple Filters -->
+                <div class="simple-filters">
+                    <div class="filter-group">
+                        <label><i class="fas fa-graduation-cap"></i> Grade</label>
+                        <select id="assessmentGradeFilter">
+                            <option value="">All Grades</option>
+                            <option value="Playgroup">Playgroup</option>
+                            <option value="PP1">PP1</option>
+                            <option value="PP2">PP2</option>
+                            <option value="Grade 1">Grade 1</option>
+                            <option value="Grade 2">Grade 2</option>
+                            <option value="Grade 3">Grade 3</option>
+                            <option value="Grade 4">Grade 4</option>
+                            <option value="Grade 5">Grade 5</option>
+                            <option value="Grade 6">Grade 6</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar-alt"></i> Period</label>
+                        <select id="assessmentPeriodFilter">
+                            <option value="">All Periods</option>
+                            <option value="Week 1">Week 1</option>
+                            <option value="Week 2">Week 2</option>
+                            <option value="Week 3">Week 3</option>
+                            <option value="Week 4">Week 4</option>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar-check"></i> Term</label>
+                        <select id="assessmentTermFilter">
+                            <option value="">All Terms</option>
+                            <option value="Term 1">Term 1</option>
+                            <option value="Term 2">Term 2</option>
+                            <option value="Term 3">Term 3</option>
+                        </select>
+                    </div>
+                    <button class="btn-apply" onclick="applyAssessmentFilters()"><i class="fas fa-filter"></i> Apply</button>
+                    <button class="btn-reset" onclick="resetAssessmentFilters()"><i class="fas fa-undo"></i> Reset</button>
+                </div>
+
+                <div id="assessmentGrid" class="assessment-grid">
+                    <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
+                        <i class="fas fa-search" style="font-size: 28px; display: block; margin-bottom: 10px;"></i>
+                        Search for your profile to view results
+                    </p>
+                </div>
+                <div id="assessmentSummary" class="assessment-summary" style="display:none;"></div>
+            </div>
+        </div>
+
         <!-- ===== TAB: ASSIGNMENTS ===== -->
-        <div id="tabAssignments" class="tab-content active">
+        <div id="tabAssignments" class="tab-content">
             <div class="assignments-section">
                 <div class="section-header">
                     <h3><i class="fas fa-file-alt"></i> 📝 Holiday Assignments</h3>
@@ -1277,64 +1308,9 @@
 
         <!-- ===== TAB: PROFILE ===== -->
         <div id="tabProfile" class="tab-content">
-            <div class="profile-section">
-                <div class="section-header">
-                    <h3><i class="fas fa-user-graduate"></i> 👤 My Profile</h3>
-                    <button class="btn-download-report" id="downloadReportBtn" onclick="downloadReport()">
-                        <i class="fas fa-file-pdf"></i> Download Assessment Report
-                    </button>
-                </div>
-                <div class="info-grid" id="studentInfoGridProfile"></div>
-                
-                <!-- Assessment Results - HIDDEN until student logs in -->
-                <div class="profile-assessment-section" id="profileAssessmentSection">
-                    <h4><i class="fas fa-chart-bar"></i> 📊 Assessment Results</h4>
-                    
-                    <!-- Assessment Filters -->
-                    <div class="assessment-filters">
-                        <div class="filter-group">
-                            <label><i class="fas fa-calendar-alt"></i> Period</label>
-                            <select id="assessmentPeriodFilter">
-                                <option value="">All Periods</option>
-                                <option value="Week 1">Week 1</option>
-                                <option value="Week 2">Week 2</option>
-                                <option value="Week 3">Week 3</option>
-                                <option value="Week 4">Week 4</option>
-                                <option value="January">January</option>
-                                <option value="February">February</option>
-                                <option value="March">March</option>
-                                <option value="April">April</option>
-                                <option value="May">May</option>
-                                <option value="June">June</option>
-                                <option value="July">July</option>
-                                <option value="August">August</option>
-                                <option value="September">September</option>
-                                <option value="October">October</option>
-                                <option value="November">November</option>
-                                <option value="December">December</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label><i class="fas fa-calendar-check"></i> Term</label>
-                            <select id="assessmentTermFilter">
-                                <option value="">All Terms</option>
-                                <option value="Term 1">Term 1</option>
-                                <option value="Term 2">Term 2</option>
-                                <option value="Term 3">Term 3</option>
-                            </select>
-                        </div>
-                        <button class="btn-apply" onclick="applyAssessmentFilters()"><i class="fas fa-filter"></i> Apply</button>
-                        <button class="btn-reset" onclick="resetAssessmentFilters()"><i class="fas fa-undo"></i> Reset</button>
-                    </div>
-
-                    <div id="assessmentGrid" class="assessment-grid">
-                        <div class="no-assessment-data">
-                            <span class="icon">🔍</span>
-                            <p>Search for your profile to view assessment results</p>
-                        </div>
-                    </div>
-                    <div id="assessmentSummary" class="assessment-summary"></div>
-                </div>
+            <div id="studentInfo" class="student-info" style="display:block; margin-bottom:0;">
+                <h3><i class="fas fa-user-graduate"></i> My Profile</h3>
+                <div class="info-grid" id="studentInfoGrid"></div>
             </div>
         </div>
     </div>
@@ -1357,23 +1333,21 @@
         const infoMessage = document.getElementById('infoMessage');
         const studentInfo = document.getElementById('studentInfo');
         const studentInfoGrid = document.getElementById('studentInfoGrid');
-        const studentInfoGridProfile = document.getElementById('studentInfoGridProfile');
+        const feeSection = document.getElementById('feeSection');
         const feeCards = document.getElementById('feeCards');
         const feeStatus = document.getElementById('feeStatus');
         const paymentsContainer = document.getElementById('paymentsContainer');
-        const navTabs = document.getElementById('navTabs');
-        const downloadReportBtn = document.getElementById('downloadReportBtn');
-        const profileAssessmentSection = document.getElementById('profileAssessmentSection');
+        const assessmentSection = document.getElementById('assessmentSection');
         const assessmentGrid = document.getElementById('assessmentGrid');
         const assessmentSummary = document.getElementById('assessmentSummary');
+        const navTabs = document.getElementById('navTabs');
 
         let currentStudent = null;
-        let currentStudentId = null;
         let allStudents = [];
         let allAssignments = [];
         let currentAssessmentData = null;
-        let currentTab = 'assignments';
         let searchTimeout = null;
+        let currentTab = 'assessments';
 
         document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -1384,10 +1358,14 @@
         function switchTab(tab) {
             currentTab = tab;
             
+            // Update tab buttons
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             
-            if (tab === 'assignments') {
+            if (tab === 'assessments') {
+                document.querySelector('.assessments-tab').classList.add('active');
+                document.getElementById('tabAssessments').classList.add('active');
+            } else if (tab === 'assignments') {
                 document.querySelector('.assignments-tab').classList.add('active');
                 document.getElementById('tabAssignments').classList.add('active');
             } else if (tab === 'fees') {
@@ -1550,8 +1528,6 @@
             hideError();
             hideInfo();
 
-            currentStudentId = studentId;
-
             fetch(`/api/students/${studentId}`)
                 .then(res => res.json())
                 .then(data => {
@@ -1565,17 +1541,12 @@
                     // Show nav tabs
                     navTabs.classList.add('show');
                     
-                    // Enable download button
-                    downloadReportBtn.disabled = false;
-                    
                     // Update profile
                     displayStudentInfo(currentStudent);
                     
-                    // Update assignment filter
+                    // Update filters
+                    document.getElementById('assessmentGradeFilter').value = currentStudent.grade;
                     document.getElementById('assignmentGradeFilter').value = currentStudent.grade;
-                    
-                    // SHOW assessment section (now hidden until student logs in)
-                    profileAssessmentSection.classList.add('visible');
                     
                     // Load all data
                     fetchStudentFees(studentId);
@@ -1584,8 +1555,8 @@
                     
                     showLoading(false);
                     
-                    // Switch to profile tab so student sees their results
-                    switchTab('profile');
+                    // Switch to assessments tab
+                    switchTab('assessments');
                 })
                 .catch(err => {
                     showError('Error fetching student data: ' + err.message);
@@ -1601,7 +1572,7 @@
             const typeIcon = student.type === 'Boarder' ? '🏠 Boarder' : '📖 Day Scholar';
             const genderIcon = student.gender === 'Male' ? '👨' : '👩';
 
-            const infoHTML = `
+            studentInfoGrid.innerHTML = `
                 <div class="info-item">
                     <div class="label">Student ID</div>
                     <div class="value">${student.studentId}</div>
@@ -1627,9 +1598,6 @@
                     <div class="value">${student.guardian || 'Not specified'}</div>
                 </div>
             `;
-
-            studentInfoGrid.innerHTML = infoHTML;
-            studentInfoGridProfile.innerHTML = infoHTML;
         }
 
         // ============================================
@@ -1725,12 +1693,13 @@
         // ============================================
 
         function fetchStudentAssessment(studentId) {
+            const grade = document.getElementById('assessmentGradeFilter').value || currentStudent?.grade || '';
             const period = document.getElementById('assessmentPeriodFilter').value || '';
             const term = document.getElementById('assessmentTermFilter').value || '';
             
             let url = `/api/students/portal/assessments/filtered/${studentId}?`;
             const params = [];
-            if (currentStudent) params.push(`grade=${encodeURIComponent(currentStudent.grade)}`);
+            if (grade) params.push(`grade=${encodeURIComponent(grade)}`);
             if (period) params.push(`period=${encodeURIComponent(period)}`);
             if (term) params.push(`term=${encodeURIComponent(term)}`);
             url += params.join('&');
@@ -1744,32 +1713,19 @@
                             displayAssessment(data.assessment);
                         } else {
                             assessmentGrid.innerHTML = `
-                                <div class="no-assessment-data">
-                                    <span class="icon">📭</span>
-                                    <p>No assessment records found for this student</p>
-                                </div>
+                                <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
+                                    <i class="fas fa-info-circle" style="font-size: 28px; display: block; margin-bottom: 10px;"></i>
+                                    No assessment records found
+                                </p>
                             `;
-                            assessmentSummary.classList.remove('visible');
+                            assessmentSummary.style.display = 'none';
                         }
                     } else {
-                        assessmentGrid.innerHTML = `
-                            <div class="no-assessment-data">
-                                <span class="icon">❌</span>
-                                <p>${data.message || 'Error fetching assessment'}</p>
-                            </div>
-                        `;
-                        assessmentSummary.classList.remove('visible');
+                        showError(data.message || 'Error fetching assessment');
                     }
                 })
                 .catch(err => {
                     console.error('Error fetching assessment:', err);
-                    assessmentGrid.innerHTML = `
-                        <div class="no-assessment-data">
-                            <span class="icon">⚠️</span>
-                            <p>Error loading assessment data</p>
-                        </div>
-                    `;
-                    assessmentSummary.classList.remove('visible');
                 });
         }
 
@@ -1799,13 +1755,11 @@
                 }).join('');
             } else {
                 assessmentGrid.innerHTML = `
-                    <div class="no-assessment-data">
-                        <span class="icon">📭</span>
-                        <p>No assessment records found</p>
-                    </div>
+                    <p style="color: #6c757d; text-align: center; grid-column: 1 / -1; padding: 20px;">
+                        <i class="fas fa-info-circle" style="font-size: 28px; display: block; margin-bottom: 10px;"></i>
+                        No assessment records found
+                    </p>
                 `;
-                assessmentSummary.classList.remove('visible');
-                return;
             }
 
             const level = student.performanceLevel || 'Approaching Expectation';
@@ -1823,7 +1777,7 @@
                 'Below Expectation': '#dc3545'
             };
 
-            assessmentSummary.classList.add('visible');
+            assessmentSummary.style.display = 'grid';
             assessmentSummary.innerHTML = `
                 <div class="stat">
                     <div class="number" style="color: ${levelColors[level] || '#0A1628'}">
@@ -1859,10 +1813,11 @@
                 showError('Please search for your profile first');
                 return;
             }
-            fetchStudentAssessment(currentStudent.studentId);
+            fetchStudentData(currentStudent.studentId);
         }
 
         function resetAssessmentFilters() {
+            document.getElementById('assessmentGradeFilter').value = currentStudent ? currentStudent.grade : '';
             document.getElementById('assessmentPeriodFilter').value = '';
             document.getElementById('assessmentTermFilter').value = '';
             applyAssessmentFilters();
@@ -1874,42 +1829,24 @@
 
         function downloadReport() {
             if (!currentStudent) {
-                showError('No student selected. Please search for your profile first.');
+                showError('No student selected');
                 return;
             }
 
-            downloadReportBtn.disabled = true;
-            downloadReportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-
-            const studentName = encodeURIComponent(currentStudent.name);
-            
-            fetch(`/api/assessments/comprehensive-report/${studentName}`)
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(err => { throw new Error(err.message || 'Failed to generate report'); });
+            fetch(`/api/assessments/search?name=${encodeURIComponent(currentStudent.name)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.students && data.students.length > 0) {
+                        const latest = data.students.sort((a, b) =>
+                            new Date(b.createdAt) - new Date(a.createdAt)
+                        )[0];
+                        window.location.href = `/api/assessments/download-report/${latest._id}`;
+                    } else {
+                        showError('No assessment report found for this student');
                     }
-                    return response.blob();
-                })
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `assessment_report_${currentStudent.name.replace(/\s/g, '_')}.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                    
-                    showInfo('✅ Report downloaded successfully!');
-                    setTimeout(hideInfo, 5000);
                 })
                 .catch(err => {
-                    console.error('Error downloading report:', err);
-                    showError('Error downloading report: ' + err.message);
-                })
-                .finally(() => {
-                    downloadReportBtn.disabled = false;
-                    downloadReportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Download Assessment Report';
+                    showError('Error generating report: ' + err.message);
                 });
         }
 
