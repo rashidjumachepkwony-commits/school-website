@@ -255,6 +255,37 @@
         .quick-actions .label i { color: #D4A017; }
 
         /* ============================================
+           LIVE PREVIEW BAR - NEW
+           ============================================ */
+        .live-preview-bar {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #28a745;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .live-preview-bar .label {
+            font-weight: 700;
+            color: #0A1628;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .live-preview-bar .label i { color: #28a745; }
+        .live-preview-bar .info-text {
+            font-size: 12px;
+            color: #555;
+            margin-left: 10px;
+        }
+        .live-preview-bar .info-text i { margin-right: 4px; }
+
+        /* ============================================
            TOAST NOTIFICATIONS
            ============================================ */
         .toast-container {
@@ -538,6 +569,8 @@
             .preview-modal { padding: 15px; }
             .preview-modal .preview-content { padding: 20px; }
             .quick-actions { justify-content: center; }
+            .live-preview-bar { justify-content: center; }
+            .live-preview-bar .info-text { display: none; }
         }
 
         .hamburger {
@@ -705,6 +738,20 @@
             <button class="btn btn-sm" style="background:#dc3545;color:white;" onclick="switchPanel('fees')"><i class="fas fa-coins"></i> Fees</button>
             <button class="btn btn-sm btn-success" onclick="saveAllContent()"><i class="fas fa-save"></i> Save All</button>
             <button class="btn btn-sm btn-info" onclick="window.open('/','_blank')"><i class="fas fa-eye"></i> Preview</button>
+        </div>
+
+        <!-- ===== LIVE PREVIEW BAR - NEW ===== -->
+        <div class="live-preview-bar">
+            <span class="label"><i class="fas fa-eye"></i> Live Preview Mode:</span>
+            <button class="btn btn-success btn-sm" onclick="openLivePreview()" style="padding: 8px 20px; font-size: 13px;">
+                <i class="fas fa-external-link-alt"></i> View Live Website
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="openLivePreviewWithEdit()" style="padding: 8px 20px; font-size: 13px; background: linear-gradient(135deg, #D4A017, #f5c842); color: #0A1628;">
+                <i class="fas fa-edit"></i> Preview & Edit
+            </button>
+            <span class="info-text">
+                <i class="fas fa-info-circle"></i> Click "Preview & Edit" to see your content as it appears on the live site
+            </span>
         </div>
 
         <!-- Toast Container -->
@@ -2033,6 +2080,33 @@
                 showToast('❌ Error saving content: ' + error.message, 'error');
             }
             isSaving = false;
+        }
+
+        // ============================================
+        // LIVE PREVIEW & EDIT MODE - NEW
+        // ============================================
+
+        // Open live website in new tab
+        function openLivePreview() {
+            window.open('/', '_blank');
+            showToast('🌐 Opening live website...', 'info');
+        }
+
+        // Open live website with edit mode (highlights editable areas)
+        function openLivePreviewWithEdit() {
+            // First save content
+            saveAllContent();
+            
+            // Open with edit mode parameter
+            const url = `/?edit=true&t=${Date.now()}`;
+            const win = window.open(url, '_blank', 'width=1200,height=800');
+            
+            // Show instructions
+            setTimeout(() => {
+                showToast('📝 Edit mode active! Click on any text to edit it.', 'success');
+            }, 2000);
+            
+            return win;
         }
 
         // ============================================
