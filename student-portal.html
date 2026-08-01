@@ -90,6 +90,7 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             margin-bottom: 25px;
             text-align: center;
+            position: relative;
         }
 
         .search-section h2 {
@@ -115,6 +116,7 @@
             justify-content: center;
             max-width: 650px;
             margin: 0 auto;
+            position: relative;
         }
 
         .search-box input {
@@ -155,6 +157,13 @@
             margin-top: 10px;
         }
 
+        /* ===== SUGGESTIONS - NOW ABOVE SEARCH INPUT ===== */
+        .suggestions-wrapper {
+            position: relative;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
         .suggestions {
             background: white;
             border: 1px solid #e0e0e0;
@@ -162,11 +171,13 @@
             max-height: 220px;
             overflow-y: auto;
             display: none;
-            margin-top: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            max-width: 650px;
-            margin-left: auto;
-            margin-right: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            margin-bottom: 4px;
         }
 
         .suggestions.active {
@@ -334,7 +345,7 @@
         }
 
         /* ======================================== */
-        /* ASSESSMENT TAB - HIDDEN UNTIL STUDENT LOGS IN */
+        /* ASSESSMENT TAB */
         /* ======================================== */
         .assessment-section {
             background: white;
@@ -342,11 +353,11 @@
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             margin-bottom: 25px;
-            display: none; /* HIDDEN BY DEFAULT */
+            display: none;
         }
 
         .assessment-section.visible {
-            display: block; /* SHOWN AFTER STUDENT LOGS IN */
+            display: block;
         }
 
         .assessment-section .section-header {
@@ -369,7 +380,7 @@
             margin-right: 10px;
         }
 
-        /* Simple Filters - Big and Easy */
+        /* Simple Filters */
         .simple-filters {
             display: flex;
             gap: 12px;
@@ -513,28 +524,36 @@
             color: #6c757d;
         }
 
+        /* ===== DOWNLOAD REPORT BUTTON - AT BOTTOM ===== */
+        .download-report-bottom {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e8ecf1;
+            text-align: center;
+        }
+
         .btn-download-report {
             display: inline-block;
-            padding: 12px 30px;
+            padding: 14px 40px;
             background: linear-gradient(135deg, #1a8a3f, #136e32);
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 12px;
             text-decoration: none;
+            box-shadow: 0 4px 15px rgba(26, 138, 63, 0.3);
         }
 
         .btn-download-report:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(26, 138, 63, 0.4);
+            box-shadow: 0 8px 30px rgba(26, 138, 63, 0.5);
         }
 
         .btn-download-report i {
-            margin-right: 8px;
+            margin-right: 10px;
         }
 
         /* ======================================== */
@@ -568,7 +587,6 @@
             margin-right: 10px;
         }
 
-        /* Simple Filters for Assignments */
         .assign-filters {
             display: flex;
             gap: 12px;
@@ -1155,12 +1173,17 @@
         <div class="search-section">
             <h2><i class="fas fa-search"></i> Find Your Profile</h2>
             <p class="sub-text">Type your name or Student ID to get started</p>
+
+            <!-- Suggestions appear ABOVE the search input -->
+            <div class="suggestions-wrapper">
+                <div id="suggestions" class="suggestions"></div>
+            </div>
+
             <div class="search-box">
                 <input type="text" id="studentSearch" placeholder="e.g., John Doe or ST001" autocomplete="off">
                 <button id="searchBtn"><i class="fas fa-arrow-right"></i> Search</button>
             </div>
-            <div class="search-hint">💡 Start typing to see suggestions</div>
-            <div id="suggestions" class="suggestions"></div>
+            <div class="search-hint">💡 Start typing to see suggestions above</div>
         </div>
 
         <div id="loading" class="loading">
@@ -1199,9 +1222,6 @@
             <div class="assessment-section" id="assessmentSection">
                 <div class="section-header">
                     <h3><i class="fas fa-chart-bar"></i> 📊 Assessment Results</h3>
-                    <button class="btn-download-report" onclick="downloadReport()">
-                        <i class="fas fa-file-pdf"></i> Download Full Report
-                    </button>
                 </div>
 
                 <!-- Simple Filters -->
@@ -1263,6 +1283,16 @@
                     </p>
                 </div>
                 <div id="assessmentSummary" class="assessment-summary"></div>
+
+                <!-- ===== DOWNLOAD REPORT BUTTON - AT BOTTOM ===== -->
+                <div class="download-report-bottom">
+                    <button class="btn-download-report" onclick="downloadReport()">
+                        <i class="fas fa-file-pdf"></i> Download Full Report
+                    </button>
+                    <p style="font-size: 12px; color: #6c757d; margin-top: 8px;">
+                        <i class="fas fa-info-circle"></i> Download your complete assessment report as PDF
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -1459,7 +1489,7 @@
         }
 
         // ============================================
-        // SEARCH / AUTOCOMPLETE
+        // SEARCH / AUTOCOMPLETE - WITH SUGGESTIONS ABOVE
         // ============================================
 
         searchInput.addEventListener('input', function() {
@@ -1493,6 +1523,20 @@
                 if (query.length > 0) {
                     suggestions.classList.remove('active');
                     searchStudent(query);
+                }
+            }
+        });
+
+        // Focus on input - show suggestions if there's a query
+        searchInput.addEventListener('focus', function() {
+            const query = this.value.trim().toLowerCase();
+            if (query.length >= 2) {
+                const matches = allStudents.filter(s =>
+                    s.name.toLowerCase().includes(query) ||
+                    (s.studentId || '').toLowerCase().includes(query)
+                ).slice(0, 10);
+                if (matches.length > 0) {
+                    renderSuggestions(matches);
                 }
             }
         });
@@ -1589,7 +1633,7 @@
                     // Show nav tabs
                     navTabs.classList.add('show');
                     
-                    // SHOW assessment section (was hidden before login)
+                    // SHOW assessment section
                     assessmentSection.classList.add('visible');
                     
                     // Update profile
