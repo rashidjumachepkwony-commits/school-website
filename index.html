@@ -8,7 +8,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="images/logo edited.ico" />
     <meta name="description" content="Changara Star Academy – Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -242,7 +242,6 @@
             color: var(--school-gold);
         }
 
-        /* Header Buttons */
         .main-header .nav-links a.portal-link {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
@@ -332,54 +331,8 @@
         }
 
         /* ========================================
-           NOTICE ALERT BAR
+           NOTICE ALERT BAR - REMOVED
            ======================================== */
-        .notice-alert-bar {
-            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
-            color: white;
-            padding: 4px 0;
-            position: relative;
-            z-index: 999;
-            border-bottom: 2px solid var(--school-gold);
-            display: none;
-            animation: slideDownNotice 0.6s ease forwards;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-        .notice-alert-bar.show { display: block; }
-        .notice-alert-bar .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-        .notice-alert-bar .notice-icon { font-size: 16px; animation: pulseBell 1.5s infinite; display: flex; align-items: center; gap: 4px; }
-        .notice-alert-bar .notice-content { flex:1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .notice-alert-bar .notice-content .badge {
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            padding: 2px 10px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            animation: pulseBadge 1.5s infinite;
-        }
-        .notice-alert-bar .notice-content .message { font-size: 12px; font-weight: 500; flex:1; }
-        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
-        .notice-alert-bar .notice-close {
-            background: rgba(255,255,255,0.15);
-            border: none;
-            color: white;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s ease;
-        }
-        .notice-alert-bar .notice-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
 
         /* ========================================
            NEWS TICKER - FIXED
@@ -980,8 +933,6 @@
         @keyframes bounceArrow { 0%,100% { transform:translateY(0); } 50% { transform:translateY(8px); } }
         @keyframes arrowDown { 0%,100% { transform:translateY(0); } 50% { transform:translateY(5px); } }
         @keyframes float { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(-6px); } }
-        @keyframes slideDownNotice { from { transform:translateY(-100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
-        @keyframes pulseBell { 0%,100% { transform:scale(1); } 50% { transform:scale(1.15); } }
         @keyframes pulseBadge { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
         @keyframes pulseBadgeRed { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(187,0,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(187,0,0,0.7); } }
         @keyframes pulseBadgeGreen { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(0,102,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(0,102,0,0.7); } }
@@ -1564,7 +1515,6 @@
             .news-item h4 { font-size: 20px !important; }
             .news-item p { font-size: 15px !important; }
             .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
-            .notice-alert-bar .container { flex-direction: column; text-align: center; }
             .main-header .logo-section h1 { font-size: 16px; }
             .main-header .logo-section .school-logo { width: 32px; height: 32px; }
             .news-ticker-section .ticker-label { font-size: 7px; padding: 2px 8px; }
@@ -1718,16 +1668,7 @@
             </div>
         </header>
 
-        <!-- ===== NOTICE ALERT BAR ===== -->
-        <div class="notice-alert-bar" id="noticeAlertBar">
-            <div class="container">
-                <div class="notice-icon"><i class="fas fa-bullhorn"></i> <span class="badge" style="background:var(--school-gold);color:var(--kenya-black);padding:2px 8px;border-radius:50px;font-size:8px;font-weight:700;">📢 NEW</span></div>
-                <div class="notice-content">
-                    <span class="message" id="noticeMessage"><strong>🎓</strong> Enroll now for Term 3! Limited slots available.</span>
-                </div>
-                <button class="notice-close" onclick="this.closest('.notice-alert-bar').classList.remove('show')">✕</button>
-            </div>
-        </div>
+        <!-- ===== NOTICE ALERT BAR - REMOVED ===== -->
 
         <!-- ===== NEWS TICKER - FIXED ===== -->
         <div class="news-ticker-section" id="newsTicker">
@@ -2283,13 +2224,6 @@
                             grid.appendChild(div);
                         });
                     }
-                    // Notice Alert Bar
-                    if (c.noticeAlert) {
-                        const noticeBar = document.getElementById('noticeAlertBar');
-                        const noticeMsg = document.getElementById('noticeMessage');
-                        if (noticeMsg) noticeMsg.innerHTML = c.noticeAlert;
-                        if (noticeBar) noticeBar.classList.add('show');
-                    }
                     // Ticker Items
                     if (c.tickerItems && c.tickerItems.length) {
                         const tickerContent = document.getElementById('tickerContent');
@@ -2349,8 +2283,7 @@
             'contactMap': 'contactMap',
             'seoTitle': 'seoTitle',
             'seoDescription': 'seoDescription',
-            'seoKeywords': 'seoKeywords',
-            'noticeAlert': 'noticeAlert'
+            'seoKeywords': 'seoKeywords'
         };
 
         if (window.location.search.includes('edit=true')) {
@@ -2402,7 +2335,7 @@
             `;
             document.body.insertBefore(editBar, document.body.firstChild);
             
-            const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, .hero-description, .section-title, .subtitle, .welcome-text, .feature-item p, .news-item p, .notice-content .message');
+            const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, .hero-description, .section-title, .subtitle, .welcome-text, .feature-item p, .news-item p');
             
             elements.forEach(el => {
                 if (el.closest('nav') || el.closest('footer') || el.closest('.sidebar') || el.closest('.navbar')) return;
