@@ -139,18 +139,35 @@
         }
 
         /* ========================================
+           FIXED HEADER WRAPPER - ALL STAYS WHEN SCROLLING
+           ======================================== */
+        .fixed-header-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 22, 40, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 3px solid var(--school-gold);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+            padding: 0;
+        }
+
+        .fixed-header-wrapper .kenya-flag-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+        }
+
+        /* ========================================
            HEADER
            ======================================== */
         .main-header {
-            background: rgba(10, 22, 40, 0.96);
-            backdrop-filter: blur(20px);
             color: white;
-            padding: 8px 0;
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(212,160,23,0.15);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+            padding: 6px 0 4px;
         }
         .main-header .container {
             display: flex;
@@ -172,7 +189,6 @@
             background: rgba(255,255,255,0.05);
             padding: 3px;
         }
-        .main-header .logo-section .school-icon { display: none; }
         .main-header .logo-section h1 {
             font-family: var(--font-primary);
             font-size: 18px;
@@ -200,11 +216,12 @@
             color: rgba(255,255,255,0.7);
             text-decoration: none;
             font-weight: 500;
-            padding: 5px 14px;
+            padding: 4px 12px;
             border-radius: 50px;
             transition: all 0.3s ease;
-            font-size: 12px;
+            font-size: 11px;
             position: relative;
+            border: 1px solid transparent;
         }
         .main-header .nav-links a::after {
             content: '';
@@ -225,18 +242,14 @@
             color: var(--school-gold);
         }
 
-        /* ========================================
-           HEADER BUTTONS
-           ======================================== */
-
-        /* ===== ADMIN BUTTON (Yellow/Gold) ===== */
+        /* Header Buttons */
         .main-header .nav-links a.portal-link {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
             font-weight: 700;
-            padding: 6px 18px;
+            padding: 4px 16px;
             border-radius: 50px;
-            font-size: 12px;
+            font-size: 11px;
             transition: all 0.3s ease;
             border: 2px solid rgba(255,255,255,0.1);
         }
@@ -246,22 +259,21 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
 
-        /* ===== ENROLL NOW BUTTON (Red) ===== */
         .main-header .nav-links a.enroll-now-link {
             background: linear-gradient(135deg, #BB0000, #8B0000);
             color: white;
             font-weight: 700;
-            padding: 6px 18px;
+            padding: 4px 16px;
             border-radius: 50px;
-            font-size: 12px;
+            font-size: 11px;
             transition: all 0.3s ease;
             box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
             border: 2px solid rgba(255,255,255,0.1);
             animation: pulseBadgeRed 1.5s infinite;
         }
         .main-header .nav-links a.enroll-now-link i {
-            margin-right: 6px;
-            font-size: 13px;
+            margin-right: 4px;
+            font-size: 12px;
         }
         .main-header .nav-links a.enroll-now-link:hover {
             transform: translateY(-3px) scale(1.03);
@@ -270,15 +282,14 @@
         }
         .main-header .nav-links a.enroll-now-link::after { display: none; }
 
-        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING) ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
             background-size: 300% 300%;
             color: white;
             font-weight: 800;
-            padding: 6px 22px;
+            padding: 4px 18px;
             border-radius: 50px;
-            font-size: 13px;
+            font-size: 11px;
             transition: all 0.4s ease;
             box-shadow: 0 0 15px rgba(255, 107, 107, 0.4), 0 0 40px rgba(255, 180, 70, 0.2);
             animation: rainbowPulse 3s ease infinite, floatButton 2.5s ease-in-out infinite;
@@ -299,8 +310,8 @@
             animation: shimmer 4s ease-in-out infinite;
         }
         .main-header .nav-links a.student-portal-link i {
-            margin-right: 6px;
-            font-size: 14px;
+            margin-right: 4px;
+            font-size: 13px;
             animation: bounceIcon 2s ease-in-out infinite;
         }
         .main-header .nav-links a.student-portal-link:hover {
@@ -315,8 +326,9 @@
             background: none;
             border: none;
             color: white;
-            font-size: 24px;
+            font-size: 22px;
             cursor: pointer;
+            padding: 4px 8px;
         }
 
         /* ========================================
@@ -325,14 +337,13 @@
         .notice-alert-bar {
             background: linear-gradient(135deg, var(--kenya-red), #8B0000);
             color: white;
-            padding: 6px 0;
+            padding: 4px 0;
             position: relative;
             z-index: 999;
-            border-bottom: 3px solid var(--school-gold);
+            border-bottom: 2px solid var(--school-gold);
             display: none;
             animation: slideDownNotice 0.6s ease forwards;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            margin-top: 62px;
         }
         .notice-alert-bar.show { display: block; }
         .notice-alert-bar .container {
@@ -340,42 +351,43 @@
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 4px;
         }
-        .notice-alert-bar .notice-icon { font-size: 18px; animation: pulseBell 1.5s infinite; display: flex; align-items: center; gap: 6px; }
-        .notice-alert-bar .notice-content { flex:1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .notice-alert-bar .notice-icon { font-size: 16px; animation: pulseBell 1.5s infinite; display: flex; align-items: center; gap: 4px; }
+        .notice-alert-bar .notice-content { flex:1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .notice-alert-bar .notice-content .badge {
             background: var(--school-gold);
             color: var(--kenya-black);
-            padding: 2px 12px;
+            padding: 2px 10px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 9px;
+            font-size: 8px;
             text-transform: uppercase;
             letter-spacing: 1px;
             animation: pulseBadge 1.5s infinite;
         }
-        .notice-alert-bar .notice-content .message { font-size: 13px; font-weight: 500; flex:1; }
+        .notice-alert-bar .notice-content .message { font-size: 12px; font-weight: 500; flex:1; }
         .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
         .notice-alert-bar .notice-close {
             background: rgba(255,255,255,0.15);
             border: none;
             color: white;
-            width: 24px; height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             transition: all 0.3s ease;
         }
         .notice-alert-bar .notice-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
 
         /* ========================================
-           NEWS TICKER
+           NEWS TICKER - FIXED
            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
             color: white;
-            padding: 4px 0;
+            padding: 3px 0;
             border-bottom: 2px solid var(--school-gold);
             position: relative;
             z-index: 998;
@@ -384,26 +396,26 @@
         .news-ticker-section .container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
         .news-ticker-section .ticker-label {
             background: var(--kenya-red);
             color: white;
-            padding: 2px 14px;
+            padding: 2px 12px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 9px;
+            font-size: 8px;
             text-transform: uppercase;
             white-space: nowrap;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             letter-spacing: 1px;
         }
         .news-ticker-section .ticker-wrapper {
             flex: 1;
             overflow: hidden;
-            height: 22px;
+            height: 20px;
             position: relative;
         }
         .news-ticker-section .ticker-content {
@@ -412,31 +424,31 @@
             animation: tickerScroll 16s infinite;
         }
         .news-ticker-section .ticker-content .ticker-item {
-            height: 22px;
+            height: 20px;
             display: flex;
             align-items: center;
-            padding: 0 8px;
-            font-size: 12px;
+            padding: 0 6px;
+            font-size: 11px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .news-ticker-section .ticker-content .ticker-item .tag {
             background: rgba(255,255,255,0.12);
-            padding: 1px 8px;
+            padding: 1px 6px;
             border-radius: 20px;
-            font-size: 8px;
-            margin-right: 6px;
+            font-size: 7px;
+            margin-right: 4px;
             color: var(--school-gold);
             font-weight: 600;
         }
 
         /* ========================================
-           TOP NAV BAR
+           TOP NAV BAR - FIXED
            ======================================== */
         .top-nav-bar {
             background: linear-gradient(135deg, #0A1628, #1a2a4a);
-            padding: 8px 0;
+            padding: 4px 0;
             border-bottom: 2px solid var(--school-gold);
             position: relative;
             z-index: 100;
@@ -446,31 +458,31 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 6px;
         }
-        .top-nav-bar .nav-left { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .top-nav-bar .nav-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .top-nav-bar .nav-left .welcome-text {
             color: rgba(255,255,255,0.5);
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 300;
         }
-        .top-nav-bar .nav-left .welcome-text i { color: var(--school-gold); margin-right: 4px; }
+        .top-nav-bar .nav-left .welcome-text i { color: var(--school-gold); margin-right: 3px; }
         .top-nav-bar .nav-links {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             flex-wrap: wrap;
             align-items: center;
         }
         .top-nav-bar .nav-links a {
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 16px;
+            gap: 4px;
+            padding: 4px 12px;
             border-radius: 50px;
             color: rgba(255,255,255,0.7);
             text-decoration: none;
             font-weight: 500;
-            font-size: 12px;
+            font-size: 10px;
             transition: all 0.3s ease;
             border: 1px solid transparent;
         }
@@ -485,33 +497,32 @@
             color: var(--school-gold);
             border-color: var(--school-gold);
         }
-        .top-nav-bar .nav-links a i { font-size: 13px; }
+        .top-nav-bar .nav-links a i { font-size: 11px; }
         .top-nav-bar .nav-links a .badge {
             background: var(--kenya-red);
             color: white;
-            font-size: 7px;
-            padding: 1px 7px;
+            font-size: 6px;
+            padding: 1px 5px;
             border-radius: 50px;
             font-weight: 700;
             animation: pulseBadge 1.5s infinite;
         }
 
-        /* ===== ENROLL NOW BUTTON (Red) - TOP NAV ===== */
         .top-nav-bar .nav-links a.enroll-now-link {
             background: linear-gradient(135deg, #BB0000, #8B0000);
             color: white;
             font-weight: 700;
-            padding: 6px 18px;
+            padding: 4px 14px;
             border-radius: 50px;
-            font-size: 12px;
+            font-size: 10px;
             transition: all 0.3s ease;
             box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
             border: 2px solid rgba(255,255,255,0.1);
             animation: pulseBadgeRed 1.5s infinite;
         }
         .top-nav-bar .nav-links a.enroll-now-link i {
-            margin-right: 6px;
-            font-size: 13px;
+            margin-right: 4px;
+            font-size: 11px;
         }
         .top-nav-bar .nav-links a.enroll-now-link:hover {
             transform: translateY(-3px) scale(1.03);
@@ -520,15 +531,14 @@
         }
         .top-nav-bar .nav-links a.enroll-now-link::after { display: none; }
 
-        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING) - TOP NAV ===== */
         .top-nav-bar .nav-links a.student-portal-link-top {
             background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
             background-size: 300% 300%;
             color: white;
             font-weight: 800;
-            padding: 6px 22px;
+            padding: 4px 16px;
             border-radius: 50px;
-            font-size: 13px;
+            font-size: 10px;
             transition: all 0.4s ease;
             box-shadow: 0 0 15px rgba(255, 107, 107, 0.4), 0 0 40px rgba(255, 180, 70, 0.2);
             animation: rainbowPulse 3s ease infinite, floatButton 2.5s ease-in-out infinite;
@@ -549,8 +559,8 @@
             animation: shimmer 4s ease-in-out infinite;
         }
         .top-nav-bar .nav-links a.student-portal-link-top i {
-            margin-right: 6px;
-            font-size: 14px;
+            margin-right: 4px;
+            font-size: 12px;
             animation: bounceIcon 2s ease-in-out infinite;
         }
         .top-nav-bar .nav-links a.student-portal-link-top:hover {
@@ -563,31 +573,31 @@
         .top-nav-bar .nav-right { 
             display: flex; 
             align-items: center; 
-            gap: 15px; 
+            gap: 10px; 
             flex-wrap: wrap;
         }
         .top-nav-bar .nav-right .contact-link {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            color: rgba(255,255,255,0.6);
-            font-size: 11px;
+            gap: 4px;
+            color: rgba(255,255,255,0.5);
+            font-size: 10px;
             text-decoration: none;
             transition: all 0.3s ease;
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 50px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.04);
             white-space: nowrap;
         }
         .top-nav-bar .nav-right .contact-link:hover {
             color: white;
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(212,160,23,0.2);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(212,160,23,0.15);
             transform: translateY(-2px);
         }
         .top-nav-bar .nav-right .contact-link i {
-            font-size: 14px;
+            font-size: 12px;
         }
         .top-nav-bar .nav-right .contact-link .phone-icon {
             color: var(--school-gold);
@@ -596,18 +606,18 @@
             color: var(--whatsapp-green);
         }
         .top-nav-bar .nav-right .divider {
-            color: rgba(255,255,255,0.15);
-            font-size: 14px;
+            color: rgba(255,255,255,0.1);
+            font-size: 12px;
         }
 
         /* ========================================
-           SECTION TABS
+           SECTION TABS - FIXED
            ======================================== */
         .section-tabs {
             background: white;
-            padding: 8px 0;
+            padding: 6px 0;
             position: relative;
-            z-index: 100;
+            z-index: 997;
             box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             border-bottom: 2px solid var(--school-gold);
             overflow-x: auto;
@@ -617,7 +627,7 @@
         .section-tabs::-webkit-scrollbar { display: none; }
         .section-tabs .container {
             display: flex;
-            gap: 4px;
+            gap: 3px;
             flex-wrap: nowrap;
             justify-content: center;
             align-items: center;
@@ -625,13 +635,13 @@
         .section-tabs .tab-btn {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 5px 14px;
+            gap: 4px;
+            padding: 4px 12px;
             border: 2px solid transparent;
             border-radius: 50px;
             background: transparent;
             color: #555;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -650,15 +660,22 @@
             border-color: var(--school-gold);
             box-shadow: 0 4px 15px rgba(212,160,23,0.3);
         }
-        .section-tabs .tab-btn .tab-icon { font-size: 13px; }
+        .section-tabs .tab-btn .tab-icon { font-size: 11px; }
         .section-tabs .tab-btn .tab-badge {
             background: var(--kenya-red);
             color: white;
-            font-size: 7px;
-            padding: 1px 7px;
+            font-size: 6px;
+            padding: 1px 5px;
             border-radius: 50px;
             font-weight: 700;
             animation: pulseBadgeRed 1.5s infinite;
+        }
+
+        /* ========================================
+           MAIN CONTENT WRAPPER - PUSHED DOWN
+           ======================================== */
+        .main-content-wrapper {
+            padding-top: 155px;
         }
 
         /* ========================================
@@ -774,7 +791,6 @@
             animation:fadeInUp 1.4s ease forwards;
         }
 
-        /* ===== HERO BUTTONS ===== */
         .hero-section .btn-group {
             display:flex;
             gap:12px;
@@ -828,7 +844,6 @@
             transform:translateY(-3px);
         }
 
-        /* ===== HERO VIDEO PLAY BUTTON ===== */
         .hero-video-play {
             display:inline-flex;
             align-items:center;
@@ -970,10 +985,10 @@
         @keyframes pulseBadge { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
         @keyframes pulseBadgeRed { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(187,0,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(187,0,0,0.7); } }
         @keyframes pulseBadgeGreen { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(0,102,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(0,102,0,0.7); } }
-        @keyframes tickerScroll { 0%,20% { transform:translateY(0); } 25%,45% { transform:translateY(-22px); } 50%,70% { transform:translateY(-44px); } 75%,95% { transform:translateY(-66px); } 100% { transform:translateY(0); } }
+        @keyframes tickerScroll { 0%,20% { transform:translateY(0); } 25%,45% { transform:translateY(-20px); } 50%,70% { transform:translateY(-40px); } 75%,95% { transform:translateY(-60px); } 100% { transform:translateY(0); } }
 
         /* ========================================
-           GALLERY SECTION - FIXED
+           GALLERY SECTION
            ======================================== */
         .gallery-section {
             padding: 60px 0;
@@ -1000,7 +1015,6 @@
             font-weight: 300;
         }
 
-        /* Swiper Container - Critical Fix */
         .gallery-swiper {
             width: 100%;
             padding: 15px 0 50px;
@@ -1098,7 +1112,6 @@
             transform: translateX(4px);
         }
 
-        /* Swiper Navigation - Desktop */
         .gallery-swiper .swiper-button-next,
         .gallery-swiper .swiper-button-prev {
             color: var(--school-gold) !important;
@@ -1129,7 +1142,6 @@
             left: 10px;
         }
 
-        /* Swiper Pagination */
         .gallery-swiper .swiper-pagination {
             position: absolute;
             bottom: 0;
@@ -1148,46 +1160,6 @@
         .gallery-swiper .swiper-pagination-bullet-active {
             background: var(--school-gold) !important;
             opacity: 1;
-        }
-
-        /* ========================================
-           RESPONSIVE - GALLERY FIX
-           ======================================== */
-        @media (max-width: 1024px) {
-            .gallery-card img {
-                height: 200px;
-            }
-            .gallery-swiper .swiper-button-next,
-            .gallery-swiper .swiper-button-prev {
-                width: 38px !important;
-                height: 38px !important;
-            }
-        }
-        @media (max-width: 768px) {
-            .gallery-card img {
-                height: 180px;
-            }
-            .gallery-swiper .swiper-button-next,
-            .gallery-swiper .swiper-button-prev {
-                display: none !important;
-            }
-            .gallery-swiper .swiper-pagination {
-                display: block !important;
-            }
-        }
-        @media (max-width: 480px) {
-            .gallery-card img {
-                height: 160px;
-            }
-            .gallery-section .section-title.light {
-                font-size: 24px;
-            }
-            .gallery-section .section-subtitle.light {
-                font-size: 14px;
-            }
-            .gallery-swiper {
-                padding: 10px 0 40px;
-            }
         }
 
         /* ========================================
@@ -1565,23 +1537,23 @@
            RESPONSIVE
            ======================================== */
         @media (max-width: 768px) {
-            .main-header .nav-links { display: none; flex-direction: column; width: 100%; padding: 15px 0; gap: 5px; }
+            .main-header .nav-links { display: none; flex-direction: column; width: 100%; padding: 10px 0; gap: 4px; }
             .main-header .nav-links.show { display: flex; }
             .main-header .mobile-menu-btn { display: block; }
-            .main-header .nav-links a.student-portal-link { font-size: 16px; padding: 12px 24px; width: 100%; justify-content: center; }
+            .main-header .nav-links a.student-portal-link { font-size: 14px; padding: 10px 20px; width: 100%; justify-content: center; }
             .main-header .nav-links a.enroll-now-link { width: 100%; justify-content: center; }
             .main-header .nav-links a.portal-link { width: 100%; justify-content: center; }
-            .top-nav-bar .container { flex-direction: column; align-items: stretch; gap: 8px; }
+            .top-nav-bar .container { flex-direction: column; align-items: stretch; gap: 6px; }
             .top-nav-bar .nav-left { justify-content: center; }
             .top-nav-bar .nav-links { justify-content: center; }
             .top-nav-bar .nav-right { justify-content: center; flex-wrap: wrap; }
-            .top-nav-bar .nav-links a { font-size: 11px; padding: 4px 12px; }
+            .top-nav-bar .nav-links a { font-size: 10px; padding: 3px 10px; }
             .hero-section { padding: 80px 0 40px; }
             .hero-section h1 { font-size: 32px; }
             .hero-section .hero-description { font-size: 16px; }
             .hero-section .btn-group { flex-direction: column; align-items: center; }
             .btn-scroll-down, .btn-outline { width: 100%; justify-content: center; }
-            .section-tabs { padding: 6px 0; }
+            .section-tabs { padding: 4px 0; }
             .section-title { font-size: 26px; }
             .content-grid { grid-template-columns: 1fr 1fr; }
             .features-grid { grid-template-columns: 1fr 1fr; }
@@ -1595,8 +1567,8 @@
             .notice-alert-bar .container { flex-direction: column; text-align: center; }
             .main-header .logo-section h1 { font-size: 16px; }
             .main-header .logo-section .school-logo { width: 32px; height: 32px; }
-            .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
-            .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
+            .news-ticker-section .ticker-label { font-size: 7px; padding: 2px 8px; }
+            .news-ticker-section .ticker-content .ticker-item { font-size: 10px; white-space: normal; }
             .video-modal { padding: 20px; }
             .video-modal .close-modal { top: -40px; font-size: 20px; width: 36px; height: 36px; }
             .hero-video-play { padding: 8px 16px 8px 8px; }
@@ -1607,32 +1579,81 @@
             .splash-card h1 { font-size: 22px; }
             .splash-news .headline { font-size: 17px; }
             .splash-news { padding: 18px 16px; min-height: 140px; }
+            .gallery-card img { height: 180px; }
+            .gallery-swiper .swiper-button-next,
+            .gallery-swiper .swiper-button-prev { display: none !important; }
+            .gallery-swiper .swiper-pagination { display: block !important; }
         }
+
         @media (max-width: 480px) {
+            .main-header .logo-section h1 { font-size: 13px; }
+            .main-header .logo-section .school-logo { width: 28px; height: 28px; }
+            .main-header .logo-section .subtitle { font-size: 6px; }
+            .top-nav-bar .nav-links a { font-size: 8px; padding: 2px 6px; }
+            .top-nav-bar .nav-links a.enroll-now-link { font-size: 8px; padding: 2px 10px; }
+            .top-nav-bar .nav-links a.student-portal-link-top { font-size: 8px; padding: 2px 10px; }
+            .top-nav-bar .nav-right .contact-link { font-size: 8px; padding: 2px 6px; }
+            .top-nav-bar .nav-right .divider { display: none; }
+            .main-content-wrapper { padding-top: 145px; }
+            .hero-section h1 { font-size: 24px; }
+            .hero-section .hero-description { font-size: 13px; }
+            .section-tabs .tab-btn { font-size: 8px; padding: 3px 6px; }
+            .section-tabs .tab-btn .tab-icon { font-size: 9px; }
             .content-grid { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
-            .hero-section h1 { font-size: 26px; }
-            .hero-section .hero-description { font-size: 14px; }
-            .section-title { font-size: 22px; }
-            .section-tabs .tab-btn { font-size: 8px; padding: 3px 8px; }
-            .section-tabs .tab-btn .tab-icon { font-size: 10px; }
-            .main-header .logo-section h1 { font-size: 14px; }
-            .main-header .logo-section .school-logo { width: 28px; height: 28px; }
-            .hero-section { padding: 70px 0 30px; }
-            .top-nav-bar .nav-links a { font-size: 10px; padding: 3px 10px; }
-            .top-nav-bar .nav-links a i { font-size: 11px; }
-            .news-item { padding: 22px 18px !important; min-height: 180px !important; }
-            .news-item h4 { font-size: 18px !important; }
-            .news-item p { font-size: 14px !important; }
-            .news-section .container-news { padding: 0 10px !important; }
+            .news-item { padding: 20px 16px !important; min-height: 160px !important; }
+            .news-item h4 { font-size: 17px !important; }
+            .news-item p { font-size: 13px !important; }
+        }
+
+        /* ========================================
+           EDIT MODE STYLES
+           ======================================== */
+        .edit-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 13px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 999999;
+            animation: slideInRight 0.4s ease;
+            max-width: 350px;
+            border-left: 4px solid #17a2b8;
+        }
+        .edit-toast.success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+        .edit-toast.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+        .edit-toast.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left-color: #17a2b8;
+        }
+        .edit-toast.fade-out {
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
     </style>
 </head>
 <body>
 
     <!-- ======================================== -->
-    <!-- SPLASH SCREEN - FIRST VISIT ONLY -->
+    <!-- SPLASH SCREEN -->
     <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
@@ -1662,379 +1683,384 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HEADER -->
+    <!-- FIXED HEADER WRAPPER - ALL STAYS WHEN SCROLLING -->
     <!-- ======================================== -->
-    <header class="main-header">
+    <div class="fixed-header-wrapper">
+
+        <!-- Kenya Flag Strip -->
         <div class="kenya-flag-strip"></div>
-        <div class="container">
-            <div class="logo-section">
-                <img src="images/logo edited.ico" alt="Changara Star Academy Logo" class="school-logo" />
-                <span class="school-icon">🏫</span>
-                <div>
-                    <h1>Changara Star Academy</h1>
-                    <span class="subtitle">Assurance to Excellence</span>
+
+        <!-- ===== MAIN HEADER ===== -->
+        <header class="main-header">
+            <div class="container">
+                <div class="logo-section">
+                    <img src="images/logo edited.ico" alt="Changara Star Academy Logo" class="school-logo" />
+                    <div>
+                        <h1>Changara Star Academy</h1>
+                        <span class="subtitle">Assurance to Excellence</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="nav-links" id="navLinks">
+                    <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+                    <a href="fees.html"><i class="fas fa-coins"></i> Fees</a>
+                    <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
+                    <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
+                    <a href="portal.html" class="portal-link"><i class="fas fa-user-lock"></i> Admin</a>
+                    <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
+                    <a href="student-portal.html" class="student-portal-link"><i class="fas fa-user-graduate"></i> Student Portal</a>
+                </div>
+
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ===== NOTICE ALERT BAR ===== -->
+        <div class="notice-alert-bar" id="noticeAlertBar">
+            <div class="container">
+                <div class="notice-icon"><i class="fas fa-bullhorn"></i> <span class="badge" style="background:var(--school-gold);color:var(--kenya-black);padding:2px 8px;border-radius:50px;font-size:8px;font-weight:700;">📢 NEW</span></div>
+                <div class="notice-content">
+                    <span class="message" id="noticeMessage"><strong>🎓</strong> Enroll now for Term 3! Limited slots available.</span>
+                </div>
+                <button class="notice-close" onclick="this.closest('.notice-alert-bar').classList.remove('show')">✕</button>
+            </div>
+        </div>
+
+        <!-- ===== NEWS TICKER - FIXED ===== -->
+        <div class="news-ticker-section" id="newsTicker">
+            <div class="container">
+                <div class="ticker-label"><span class="icon">📰</span> News</div>
+                <div class="ticker-wrapper">
+                    <div class="ticker-content" id="tickerContent">
+                        <div class="ticker-item"><span class="tag">🎉 NEW</span> School opens Term 3 on 1st September 2026</div>
+                        <div class="ticker-item"><span class="tag">🏆 EVENT</span> Sports Day on 15th September 2026</div>
+                        <div class="ticker-item"><span class="tag">📚 MEETING</span> Parents' Meeting on 20th September 2026</div>
+                        <div class="ticker-item"><span class="tag">📢 ANNOUNCEMENT</span> New computer lab now open!</div>
+                    </div>
                 </div>
             </div>
-            <nav class="nav-links" id="navLinks">
-                <a href="index.html" class="active">Home</a>
-                <a href="fees.html">Fees <span class="badge">VIEW</span></a>
-                <a href="about.html">About</a>
-                <a href="contact.html">Contact</a>
-                <a href="portal.html" class="portal-link">🔐 Admin</a>
-                <a href="admissions.html" class="enroll-now-link">
-                    <i class="fas fa-pen-fancy"></i> Enroll Now
-                </a>
-                <a href="student-portal.html" class="student-portal-link">
-                    <i class="fas fa-user-graduate"></i> Student Portal
-                </a>
-            </nav>
-            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         </div>
-    </header>
 
-    <!-- ======================================== -->
-    <!-- NOTICE ALERT BAR -->
-    <!-- ======================================== -->
-    <div class="notice-alert-bar" id="noticeAlertBar">
-        <div class="container">
-            <div class="notice-icon"><span class="bell">🔔</span><span style="font-weight:700;font-size:11px;">ALERT</span></div>
-            <div class="notice-content">
-                <span class="badge">⚠️ STAFF NOTICE</span>
-                <span class="message" id="noticeMessage"><strong>📢 Important:</strong> Staff meeting on Friday at 4:00 PM in the staff room.</span>
-            </div>
-            <button class="notice-close" onclick="closeNotice()">✕</button>
-        </div>
-    </div>
-
-    <!-- ======================================== -->
-    <!-- NEWS TICKER -->
-    <!-- ======================================== -->
-    <div class="news-ticker-section" id="newsTicker">
-        <div class="container">
-            <div class="ticker-label"><span class="icon">📰</span> News</div>
-            <div class="ticker-wrapper">
-                <div class="ticker-content" id="tickerContent">
-                    <div class="ticker-item"><span class="tag">🎉 NEW</span> School opens Term 3 on 1st September 2026</div>
-                    <div class="ticker-item"><span class="tag">🏆 EVENT</span> Sports Day on 15th September 2026</div>
-                    <div class="ticker-item"><span class="tag">📚 MEETING</span> Parents' Meeting on 20th September 2026</div>
-                    <div class="ticker-item"><span class="tag">📢 ANNOUNCEMENT</span> New computer lab now open!</div>
+        <!-- ===== TOP NAV BAR - FIXED (Phone numbers included) ===== -->
+        <div class="top-nav-bar" id="topNavBar">
+            <div class="container">
+                <div class="nav-left">
+                    <span class="welcome-text"><i class="fas fa-graduation-cap"></i> Welcome to Changara Star Academy</span>
+                </div>
+                <div class="nav-links" id="topNavLinks">
+                    <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+                    <a href="fees.html"><i class="fas fa-coins"></i> Fees <span class="badge">VIEW</span></a>
+                    <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
+                    <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
+                    <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:4px 14px;border-radius:50px;font-weight:700;font-size:10px;border:1px solid rgba(255,255,255,0.1);"><i class="fas fa-user-lock"></i> Admin</a>
+                    <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
+                    <a href="student-portal.html" class="student-portal-link-top"><i class="fas fa-user-graduate"></i> Student Portal</a>
+                </div>
+                <div class="nav-right">
+                    <a href="tel:+254721556252" class="contact-link">
+                        <i class="fas fa-phone phone-icon"></i>
+                        <span>+254 721 556 252</span>
+                    </a>
+                    <span class="divider">|</span>
+                    <a href="https://wa.me/254740201441" target="_blank" class="contact-link">
+                        <i class="fab fa-whatsapp whatsapp-icon"></i>
+                        <span>+254 740 201 441</span>
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ======================================== -->
-    <!-- TOP NAV BAR -->
-    <!-- ======================================== -->
-    <div class="top-nav-bar">
-        <div class="container">
-            <div class="nav-left">
-                <span class="welcome-text"><i class="fas fa-graduation-cap"></i> Welcome to Changara Star Academy</span>
-            </div>
-            <div class="nav-links">
-                <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                <a href="fees.html"><i class="fas fa-coins"></i> Fees <span class="badge">VIEW</span></a>
-                <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
-                <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
-                <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;"><i class="fas fa-user-lock"></i> Admin</a>
-                <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
-                <a href="student-portal.html" class="student-portal-link-top"><i class="fas fa-user-graduate"></i> Student Portal</a>
-            </div>
-            <div class="nav-right">
-                <a href="tel:+254721556252" class="contact-link">
-                    <i class="fas fa-phone phone-icon"></i>
-                    <span>+254 721 556 252</span>
-                </a>
-                <span class="divider">|</span>
-                <a href="https://wa.me/254740201441" target="_blank" class="contact-link">
-                    <i class="fab fa-whatsapp whatsapp-icon"></i>
-                    <span>+254 740 201 441</span>
-                </a>
+        <!-- ===== SECTION TABS - FIXED ===== -->
+        <div class="section-tabs" id="sectionTabs">
+            <div class="container">
+                <button class="tab-btn active" onclick="scrollToSection('slide-academics')"><span class="tab-icon">📚</span> Academics <span class="tab-badge">🔥</span></button>
+                <button class="tab-btn" onclick="scrollToSection('slide-admissions')"><span class="tab-icon">📝</span> Admissions</button>
+                <button class="tab-btn" onclick="scrollToSection('slide-facilities')"><span class="tab-icon">🏫</span> Facilities</button>
+                <button class="tab-btn" onclick="scrollToSection('slide-performance')"><span class="tab-icon">🏆</span> Performance</button>
+                <button class="tab-btn" onclick="scrollToSection('slide-parents')"><span class="tab-icon">👨‍👩‍👧‍👦</span> Parents</button>
+                <button class="tab-btn" onclick="scrollToSection('slide-downloads')"><span class="tab-icon">📥</span> Downloads</button>
+                <button class="tab-btn" onclick="scrollToSection('slide-fees')"><span class="tab-icon">💰</span> Fees</button>
             </div>
         </div>
-    </div>
+
+    </div><!-- end fixed-header-wrapper -->
 
     <!-- ======================================== -->
-    <!-- SECTION TABS -->
+    <!-- MAIN CONTENT WRAPPER - PUSHED DOWN -->
     <!-- ======================================== -->
-    <div class="section-tabs" id="sectionTabs">
-        <div class="container">
-            <button class="tab-btn active" onclick="scrollToSection('slide-academics')"><span class="tab-icon">📚</span> Academics <span class="tab-badge">🔥</span></button>
-            <button class="tab-btn" onclick="scrollToSection('slide-admissions')"><span class="tab-icon">📝</span> Admissions</button>
-            <button class="tab-btn" onclick="scrollToSection('slide-facilities')"><span class="tab-icon">🏫</span> Facilities</button>
-            <button class="tab-btn" onclick="scrollToSection('slide-performance')"><span class="tab-icon">🏆</span> Performance</button>
-            <button class="tab-btn" onclick="scrollToSection('slide-parents')"><span class="tab-icon">👨‍👩‍👧‍👦</span> Parents</button>
-            <button class="tab-btn" onclick="scrollToSection('slide-downloads')"><span class="tab-icon">📥</span> Downloads</button>
-            <button class="tab-btn" onclick="scrollToSection('slide-fees')"><span class="tab-icon">💰</span> Fees</button>
-        </div>
-    </div>
+    <div class="main-content-wrapper">
 
-    <!-- ======================================== -->
-    <!-- HERO SECTION -->
-    <!-- ======================================== -->
-    <section class="hero-section" id="slide-hero">
-        <div class="hero-video-bg">
-            <video id="heroVideo" autoplay muted loop playsinline poster="images/school-compound.jpg">
-                <source src="videos/school-hero.mp4" type="video/mp4">
-            </video>
-            <div class="video-overlay"></div>
-            <div class="video-overlay-kenya"></div>
-        </div>
-        <div class="hero-bg-pattern"></div>
-        <div class="hero-content">
-            <div class="hero-flag-badge">
-                <div class="flag-strip"><span class="b"></span><span class="r"></span><span class="g"></span><span class="w"></span></div>
-                <span class="flag-text">🇰🇪 Proudly Kenyan</span>
+        <!-- ======================================== -->
+        <!-- HERO SECTION -->
+        <!-- ======================================== -->
+        <section class="hero-section" id="slide-hero">
+            <div class="hero-video-bg">
+                <video id="heroVideo" autoplay muted loop playsinline poster="images/school-compound.jpg">
+                    <source src="videos/school-hero.mp4" type="video/mp4">
+                </video>
+                <div class="video-overlay"></div>
+                <div class="video-overlay-kenya"></div>
             </div>
-            <h1 id="heroTitle">Welcome to <br><span class="highlight">Changara Star Academy</span></h1>
-            <div class="hero-description" id="heroSubtitle">
-                Nurturing young minds through quality education, discipline, innovation, and strong moral values. We provide a safe and supportive learning environment where every child is encouraged to discover their potential and achieve academic excellence.
-            </div>
+            <div class="hero-bg-pattern"></div>
+            <div class="hero-content">
+                <div class="hero-flag-badge">
+                    <div class="flag-strip"><span class="b"></span><span class="r"></span><span class="g"></span><span class="w"></span></div>
+                    <span class="flag-text">🇰🇪 Proudly Kenyan</span>
+                </div>
+                <h1 id="heroTitle">Welcome to <br><span class="highlight">Changara Star Academy</span></h1>
+                <div class="hero-description" id="heroSubtitle">
+                    Nurturing young minds through quality education, discipline, innovation, and strong moral values. We provide a safe and supportive learning environment where every child is encouraged to discover their potential and achieve academic excellence.
+                </div>
 
-            <div class="hero-video-play" onclick="openVideoModal()">
-                <div class="play-icon"><i class="fas fa-play"></i></div>
-                <span class="play-text">▶ Watch Our Story</span>
-            </div>
+                <div class="hero-video-play" onclick="openVideoModal()">
+                    <div class="play-icon"><i class="fas fa-play"></i></div>
+                    <span class="play-text">▶ Watch Our Story</span>
+                </div>
 
-            <div class="btn-group">
-                <button class="btn-scroll-down" onclick="scrollToContent()"><span>Scroll Down</span><span class="arrow"><i class="fas fa-chevron-down"></i></span></button>
-                <a href="admissions.html" class="btn-outline" style="background:linear-gradient(135deg,#BB0000,#8B0000);color:white;border:none;"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
-                <a href="student-portal.html" class="btn-outline" style="border-color:#FF6B6B;background:rgba(255,107,107,0.2);animation:floatButton 2.5s ease-in-out infinite;"><i class="fas fa-user-graduate"></i> Student Portal</a>
+                <div class="btn-group">
+                    <button class="btn-scroll-down" onclick="scrollToContent()"><span>Scroll Down</span><span class="arrow"><i class="fas fa-chevron-down"></i></span></button>
+                    <a href="admissions.html" class="btn-outline" style="background:linear-gradient(135deg,#BB0000,#8B0000);color:white;border:none;"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
+                    <a href="student-portal.html" class="btn-outline" style="border-color:#FF6B6B;background:rgba(255,107,107,0.2);animation:floatButton 2.5s ease-in-out infinite;"><i class="fas fa-user-graduate"></i> Student Portal</a>
+                </div>
             </div>
-        </div>
-        <div class="scroll-indicator">
-            <div class="mouse"><div class="dot"></div></div>
-            <span>Scroll</span>
-        </div>
-    </section>
+            <div class="scroll-indicator">
+                <div class="mouse"><div class="dot"></div></div>
+                <span>Scroll</span>
+            </div>
+        </section>
 
-    <!-- ======================================== -->
-    <!-- GALLERY SECTION - FIXED -->
-    <!-- ======================================== -->
-    <section class="gallery-section" id="slide-gallery">
-        <div class="container">
-            <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
-            <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">Explore our school facilities and activities</p>
-            <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
-                <div class="swiper-wrapper">
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="images/school-compound.jpg" alt="School Compound" loading="lazy" />
-                            <div class="gallery-content">
-                                <h4>🏫 School Compound</h4>
-                                <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+        <!-- ======================================== -->
+        <!-- GALLERY SECTION -->
+        <!-- ======================================== -->
+        <section class="gallery-section" id="slide-gallery">
+            <div class="container">
+                <h2 class="section-title light" data-aos="fade-up">🖼️ School <span style="color:var(--school-gold);">Gallery</span></h2>
+                <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">Explore our school facilities and activities</p>
+                <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="images/school-compound.jpg" alt="School Compound" loading="lazy" />
+                                <div class="gallery-content">
+                                    <h4>🏫 School Compound</h4>
+                                    <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
+                                    <span class="tag">Facilities</span>
+                                    <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="images/ecde-section.jpg" alt="ECDE Section" loading="lazy" />
+                                <div class="gallery-content">
+                                    <h4>🧸 E.C.D.E Section</h4>
+                                    <p>Our Early Childhood Development Education section where young learners begin.</p>
+                                    <span class="tag">Facilities</span>
+                                    <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="images/classroom-learning.jpg" alt="Classroom" loading="lazy" />
+                                <div class="gallery-content">
+                                    <h4>📚 Classroom Learning</h4>
+                                    <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
+                                    <span class="tag">Academics</span>
+                                    <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="gallery-card">
+                                <img src="images/computer-lab.jpg" alt="Computer Lab" loading="lazy" />
+                                <div class="gallery-content">
+                                    <h4>💻 Computer Lab</h4>
+                                    <p>Students learning essential computer skills in our modern computer laboratory.</p>
+                                    <span class="tag">Facilities</span>
+                                    <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="images/ecde-section.jpg" alt="ECDE Section" loading="lazy" />
-                            <div class="gallery-content">
-                                <h4>🧸 E.C.D.E Section</h4>
-                                <p>Our Early Childhood Development Education section where young learners begin.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- CONTENT CARDS -->
+        <!-- ======================================== -->
+        <section class="content-cards-section" id="slide-content">
+            <div class="container">
+                <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
+                <div class="content-grid">
+                    <div class="content-card card-academics" id="slide-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
+                        <div style="position:absolute;top:-8px;right:-8px;background:var(--kenya-red);color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseBadgeRed 1.5s infinite;box-shadow:0 4px 20px rgba(187,0,0,0.5);">🔥 NEW</div>
+                        <span class="icon">📚</span><h3>Academics</h3>
+                        <p style="font-weight:600;color:#1a1a2e;font-size:13px;">📖 Playgroup to Grade 6 • CBC Curriculum</p>
+                        <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Qualified Teachers</span> • <span>✅ Modern Facilities</span> • <span>✅ CBC</span></div>
+                        <span class="badge">📢 Explore</span><div class="card-cta">👆 Click to Explore</div>
+                    </div>
+                    <div class="content-card card-admissions" id="slide-admissions" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130">
+                        <div style="position:absolute;top:-8px;right:-8px;background:var(--kenya-green);color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseBadgeGreen 1.8s infinite;box-shadow:0 4px 20px rgba(0,102,0,0.4);">📢 ENROLLING</div>
+                        <span class="icon">📝</span><h3>Admissions</h3>
+                        <p style="font-weight:600;color:#1a1a2e;font-size:13px;">📋 Open • Playgroup to Grade 6</p>
+                        <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Simple Process</span> • <span>✅ Affordable Fees</span> • <span>✅ Quality</span></div>
+                        <span class="badge">📢 Apply Now</span><div class="card-cta">👆 Apply Now</div>
+                    </div>
+                    <div class="content-card card-facilities" id="slide-facilities" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
+                        <div style="position:absolute;top:-8px;right:-8px;background:#17a2b8;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(23,162,184,0.4);">🏫 MODERN</div>
+                        <span class="icon">🏫</span><h3>School Facilities</h3>
+                        <p style="font-weight:600;color:#1a1a2e;font-size:13px;">🏗️ Modern Classrooms • Computer Lab • Library</p>
+                        <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Safe Environment</span> • <span>✅ Sports Facilities</span> • <span>✅ Meals</span></div>
+                        <span class="badge">🏗️ Explore</span><div class="card-cta">👆 View Facilities</div>
+                    </div>
+                    <div class="content-card card-performance" id="slide-performance" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
+                        <div style="position:absolute;top:-8px;right:-8px;background:#6f42c1;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(111,66,193,0.4);">🏆 EXCELLENCE</div>
+                        <span class="icon">🏆</span><h3>Performance</h3>
+                        <p id="displayPerformance" style="font-weight:500;">Excellent academic performance in national examinations with top-performing students.</p>
+                        <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Top Grades</span> • <span>✅ National Exams</span> • <span>✅ Track Record</span></div>
+                        <span class="badge">🏆 Results</span><div class="card-cta">👆 See Results</div>
+                    </div>
+                    <div class="content-card card-parents" id="slide-parents" onclick="window.location.href='parents-corner.html'" data-aos="fade-up" data-aos-delay="220">
+                        <div style="position:absolute;top:-8px;right:-8px;background:#fd7e14;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(253,126,20,0.4);">👨‍👩‍👧‍👦 FAMILY</div>
+                        <span class="icon">👨‍👩‍👧‍👦</span><h3>Parents Corner</h3>
+                        <p id="displayParents" style="font-weight:500;">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
+                        <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Calendar</span> • <span>✅ Policies</span> • <span>✅ Communication</span></div>
+                        <span class="badge">📋 Info</span><div class="card-cta">👆 View Info</div>
+                    </div>
+                    <div class="content-card card-downloads" id="slide-downloads" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
+                        <div style="position:absolute;top:-8px;right:-8px;background:#20c997;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(32,201,151,0.4);">📥 DOWNLOAD</div>
+                        <span class="icon">📄</span><h3>Downloads</h3>
+                        <p id="displayDownloads" style="font-weight:500;">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
+                        <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Forms</span> • <span>✅ Calendar</span> • <span>✅ Documents</span></div>
+                        <span class="badge">📥 Get</span><div class="card-cta">👆 Download</div>
+                    </div>
+                    <div class="content-card card-fees" id="slide-fees" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
+                        <div style="position:absolute;top:-8px;right:-8px;background:#dc3545;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseBadgeRed 2.2s infinite;box-shadow:0 4px 20px rgba(220,53,69,0.4);">💰 AFFORDABLE</div>
+                        <span class="icon">💰</span><h3>Fees Structure</h3>
+                        <p id="displayFees" style="font-weight:500;">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
+                        <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Affordable</span> • <span>✅ Day Scholars</span> • <span>✅ Boarding</span></div>
+                        <span class="badge">💰 View</span><div class="card-cta">👆 View Fees</div>
+                    </div>
+                    <div class="content-card card-student-portal" onclick="window.location.href='student-portal.html'" data-aos="fade-up" data-aos-delay="310">
+                        <div style="position:absolute;top:-8px;right:-8px;background:#FF6B6B;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseStudentPortal 2s infinite;box-shadow:0 4px 20px rgba(255,107,107,0.5);">🎓 NEW</div>
+                        <span class="icon">🎓</span><h3>Student Portal</h3>
+                        <p style="font-weight:600;color:#1a1a2e;font-size:13px;">📋 View Profile • Fees • Attendance</p>
+                        <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Check Results</span> • <span>✅ View Fees</span> • <span>✅ Download Reports</span></div>
+                        <span class="badge">🎓 Login</span><div class="card-cta">👆 Access Portal</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- FEATURES -->
+        <!-- ======================================== -->
+        <section class="features-section" id="slide-features">
+            <div class="container">
+                <h2 class="section-title light" data-aos="fade-up">🌟 Why <span style="color:var(--school-gold);">Choose Us</span></h2>
+                <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">We provide holistic education that nurtures talent and builds character for a successful future.</p>
+                <div class="features-grid" id="featuresGrid">
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="100"><span class="icon">👨‍🏫</span><h4>Qualified Teachers</h4><p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p><a href="about.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="200"><span class="icon">🏆</span><h4>Excellence in Performance</h4><p>We consistently produce top-performing students in national examinations and co-curricular activities.</p><a href="performance.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="300"><span class="icon">🏫</span><h4>Modern Facilities</h4><p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p><a href="facilities.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
+                    <div class="feature-item" data-aos="zoom-in" data-aos-delay="400"><span class="icon">💡</span><h4>Innovative Learning</h4><p>We use modern teaching methods including technology integration and hands-on learning experiences.</p><a href="academics.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- STATS -->
+        <!-- ======================================== -->
+        <section class="stats-section" id="slide-stats">
+            <div class="container">
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="100"><h3 id="stat1Number">500+</h3><p>Students</p></div>
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="200"><h3 id="stat2Number">50+</h3><p>Staff Members</p></div>
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="300"><h3 id="stat3Number">98%</h3><p>Attendance Rate</p></div>
+                    <div class="stat-item" data-aos="flip-up" data-aos-delay="400"><h3 id="stat4Number">15+</h3><p>Years of Excellence</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- NEWS SECTION -->
+        <!-- ======================================== -->
+        <section class="news-section" id="slide-news">
+            <div class="container-news">
+                <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Stay updated with our latest news and events</p>
+                <div class="news-grid" id="newsGrid">
+                    <div class="news-item" data-aos="fade-up" data-aos-delay="100">
+                        <h4>📅 Term 3 Opening</h4>
+                        <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM. Parents are reminded to ensure all school fees are paid before the opening date. New students are welcome to join us for the new term.</p>
+                        <span class="date">Posted: 25 August 2026</span>
+                        <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="news-item" data-aos="fade-up" data-aos-delay="200">
+                        <h4>🏆 Sports Day</h4>
+                        <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend and cheer for their children. Various competitions including athletics, ball games, and cultural events will be held throughout the day.</p>
+                        <span class="date">Posted: 24 August 2026</span>
+                        <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="news-item" data-aos="fade-up" data-aos-delay="300">
+                        <h4>📚 Parents' Meeting</h4>
+                        <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall. Important agenda items include academic performance, school development, upcoming activities, and parent-teacher collaboration strategies.</p>
+                        <span class="date">Posted: 23 August 2026</span>
+                        <a href="parents-corner.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- FOOTER -->
+        <!-- ======================================== -->
+        <footer class="main-footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-info">
+                        <img src="images/logo edited.ico" alt="Changara Star Academy" class="footer-logo" />
+                        <h3>🏫 Changara Star Academy</h3>
+                        <p>Changara Market, Teso North Sub-County, Busia County, Kenya</p>
+                        <p>📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                        <div class="footer-social">
+                            <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                            <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
                         </div>
+                        <div class="ministry-badge"><i class="fas fa-certificate"></i> Registered under Ministry of Education, Kenya</div>
                     </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="images/classroom-learning.jpg" alt="Classroom" loading="lazy" />
-                            <div class="gallery-content">
-                                <h4>📚 Classroom Learning</h4>
-                                <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
-                                <span class="tag">Academics</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
+                    <div class="footer-links">
+                        <h4>Quick Links</h4>
+                        <a href="index.html">🏠 Home</a>
+                        <a href="about.html">📖 About Us</a>
+                        <a href="student-portal.html">🎓 Student Portal</a>
+                        <a href="admissions.html">📝 Admissions</a>
+                        <a href="contact.html">📞 Contact</a>
                     </div>
-                    <div class="swiper-slide">
-                        <div class="gallery-card">
-                            <img src="images/computer-lab.jpg" alt="Computer Lab" loading="lazy" />
-                            <div class="gallery-content">
-                                <h4>💻 Computer Lab</h4>
-                                <p>Students learning essential computer skills in our modern computer laboratory.</p>
-                                <span class="tag">Facilities</span>
-                                <a href="gallery.html" class="read-more-btn">View Gallery <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
+                    <div class="footer-links">
+                        <h4>Resources</h4>
+                        <a href="gallery.html">🖼️ Gallery</a>
+                        <a href="events.html">📰 Events</a>
+                        <a href="downloads.html">📄 Downloads</a>
+                        <a href="fees.html">💰 Fees</a>
                     </div>
                 </div>
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-pagination"></div>
+                <div class="footer-bottom"><p>&copy; 2026 Changara Star Academy. All rights reserved. | <span style="color:var(--school-gold);">🇰🇪 Proudly Kenyan</span></p></div>
             </div>
-        </div>
-    </section>
+        </footer>
 
-    <!-- ======================================== -->
-    <!-- CONTENT CARDS -->
-    <!-- ======================================== -->
-    <section class="content-cards-section" id="slide-content">
-        <div class="container">
-            <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
-            <div class="content-grid">
-                <div class="content-card card-academics" id="slide-academics" onclick="window.location.href='academics.html'" data-aos="fade-up" data-aos-delay="100">
-                    <div style="position:absolute;top:-8px;right:-8px;background:var(--kenya-red);color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseBadgeRed 1.5s infinite;box-shadow:0 4px 20px rgba(187,0,0,0.5);">🔥 NEW</div>
-                    <span class="icon">📚</span><h3>Academics</h3>
-                    <p style="font-weight:600;color:#1a1a2e;font-size:13px;">📖 Playgroup to Grade 6 • CBC Curriculum</p>
-                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Qualified Teachers</span> • <span>✅ Modern Facilities</span> • <span>✅ CBC</span></div>
-                    <span class="badge">📢 Explore</span><div class="card-cta">👆 Click to Explore</div>
-                </div>
-                <div class="content-card card-admissions" id="slide-admissions" onclick="window.location.href='admissions.html'" data-aos="fade-up" data-aos-delay="130">
-                    <div style="position:absolute;top:-8px;right:-8px;background:var(--kenya-green);color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseBadgeGreen 1.8s infinite;box-shadow:0 4px 20px rgba(0,102,0,0.4);">📢 ENROLLING</div>
-                    <span class="icon">📝</span><h3>Admissions</h3>
-                    <p style="font-weight:600;color:#1a1a2e;font-size:13px;">📋 Open • Playgroup to Grade 6</p>
-                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Simple Process</span> • <span>✅ Affordable Fees</span> • <span>✅ Quality</span></div>
-                    <span class="badge">📢 Apply Now</span><div class="card-cta">👆 Apply Now</div>
-                </div>
-                <div class="content-card card-facilities" id="slide-facilities" onclick="window.location.href='facilities.html'" data-aos="fade-up" data-aos-delay="160">
-                    <div style="position:absolute;top:-8px;right:-8px;background:#17a2b8;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(23,162,184,0.4);">🏫 MODERN</div>
-                    <span class="icon">🏫</span><h3>School Facilities</h3>
-                    <p style="font-weight:600;color:#1a1a2e;font-size:13px;">🏗️ Modern Classrooms • Computer Lab • Library</p>
-                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Safe Environment</span> • <span>✅ Sports Facilities</span> • <span>✅ Meals</span></div>
-                    <span class="badge">🏗️ Explore</span><div class="card-cta">👆 View Facilities</div>
-                </div>
-                <div class="content-card card-performance" id="slide-performance" onclick="window.location.href='performance.html'" data-aos="fade-up" data-aos-delay="190">
-                    <div style="position:absolute;top:-8px;right:-8px;background:#6f42c1;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(111,66,193,0.4);">🏆 EXCELLENCE</div>
-                    <span class="icon">🏆</span><h3>Performance</h3>
-                    <p id="displayPerformance" style="font-weight:500;">Excellent academic performance in national examinations with top-performing students.</p>
-                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Top Grades</span> • <span>✅ National Exams</span> • <span>✅ Track Record</span></div>
-                    <span class="badge">🏆 Results</span><div class="card-cta">👆 See Results</div>
-                </div>
-                <div class="content-card card-parents" id="slide-parents" onclick="window.location.href='parents-corner.html'" data-aos="fade-up" data-aos-delay="220">
-                    <div style="position:absolute;top:-8px;right:-8px;background:#fd7e14;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(253,126,20,0.4);">👨‍👩‍👧‍👦 FAMILY</div>
-                    <span class="icon">👨‍👩‍👧‍👦</span><h3>Parents Corner</h3>
-                    <p id="displayParents" style="font-weight:500;">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
-                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Calendar</span> • <span>✅ Policies</span> • <span>✅ Communication</span></div>
-                    <span class="badge">📋 Info</span><div class="card-cta">👆 View Info</div>
-                </div>
-                <div class="content-card card-downloads" id="slide-downloads" onclick="window.location.href='downloads.html'" data-aos="fade-up" data-aos-delay="250">
-                    <div style="position:absolute;top:-8px;right:-8px;background:#20c997;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;box-shadow:0 4px 20px rgba(32,201,151,0.4);">📥 DOWNLOAD</div>
-                    <span class="icon">📄</span><h3>Downloads</h3>
-                    <p id="displayDownloads" style="font-weight:500;">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
-                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Forms</span> • <span>✅ Calendar</span> • <span>✅ Documents</span></div>
-                    <span class="badge">📥 Get</span><div class="card-cta">👆 Download</div>
-                </div>
-                <div class="content-card card-fees" id="slide-fees" onclick="window.location.href='fees.html'" data-aos="fade-up" data-aos-delay="280">
-                    <div style="position:absolute;top:-8px;right:-8px;background:#dc3545;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseBadgeRed 2.2s infinite;box-shadow:0 4px 20px rgba(220,53,69,0.4);">💰 AFFORDABLE</div>
-                    <span class="icon">💰</span><h3>Fees Structure</h3>
-                    <p id="displayFees" style="font-weight:500;">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
-                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Affordable</span> • <span>✅ Day Scholars</span> • <span>✅ Boarding</span></div>
-                    <span class="badge">💰 View</span><div class="card-cta">👆 View Fees</div>
-                </div>
-                <div class="content-card card-student-portal" onclick="window.location.href='student-portal.html'" data-aos="fade-up" data-aos-delay="310">
-                    <div style="position:absolute;top:-8px;right:-8px;background:#FF6B6B;color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:50px;animation:pulseStudentPortal 2s infinite;box-shadow:0 4px 20px rgba(255,107,107,0.5);">🎓 NEW</div>
-                    <span class="icon">🎓</span><h3>Student Portal</h3>
-                    <p style="font-weight:600;color:#1a1a2e;font-size:13px;">📋 View Profile • Fees • Attendance</p>
-                    <div style="margin:8px 0;font-size:11px;color:#555;line-height:1.6;"><span>✅ Check Results</span> • <span>✅ View Fees</span> • <span>✅ Download Reports</span></div>
-                    <span class="badge">🎓 Login</span><div class="card-cta">👆 Access Portal</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ======================================== -->
-    <!-- FEATURES -->
-    <!-- ======================================== -->
-    <section class="features-section" id="slide-features">
-        <div class="container">
-            <h2 class="section-title light" data-aos="fade-up">🌟 Why <span style="color:var(--school-gold);">Choose Us</span></h2>
-            <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">We provide holistic education that nurtures talent and builds character for a successful future.</p>
-            <div class="features-grid" id="featuresGrid">
-                <div class="feature-item" data-aos="zoom-in" data-aos-delay="100"><span class="icon">👨‍🏫</span><h4>Qualified Teachers</h4><p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p><a href="about.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
-                <div class="feature-item" data-aos="zoom-in" data-aos-delay="200"><span class="icon">🏆</span><h4>Excellence in Performance</h4><p>We consistently produce top-performing students in national examinations and co-curricular activities.</p><a href="performance.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
-                <div class="feature-item" data-aos="zoom-in" data-aos-delay="300"><span class="icon">🏫</span><h4>Modern Facilities</h4><p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p><a href="facilities.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
-                <div class="feature-item" data-aos="zoom-in" data-aos-delay="400"><span class="icon">💡</span><h4>Innovative Learning</h4><p>We use modern teaching methods including technology integration and hands-on learning experiences.</p><a href="academics.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ======================================== -->
-    <!-- STATS -->
-    <!-- ======================================== -->
-    <section class="stats-section" id="slide-stats">
-        <div class="container">
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-item" data-aos="flip-up" data-aos-delay="100"><h3 id="stat1Number">500+</h3><p>Students</p></div>
-                <div class="stat-item" data-aos="flip-up" data-aos-delay="200"><h3 id="stat2Number">50+</h3><p>Staff Members</p></div>
-                <div class="stat-item" data-aos="flip-up" data-aos-delay="300"><h3 id="stat3Number">98%</h3><p>Attendance Rate</p></div>
-                <div class="stat-item" data-aos="flip-up" data-aos-delay="400"><h3 id="stat4Number">15+</h3><p>Years of Excellence</p></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ======================================== -->
-    <!-- NEWS SECTION - FULL WIDTH -->
-    <!-- ======================================== -->
-    <section class="news-section" id="slide-news">
-        <div class="container-news">
-            <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Stay updated with our latest news and events</p>
-            <div class="news-grid" id="newsGrid">
-                <div class="news-item" data-aos="fade-up" data-aos-delay="100">
-                    <h4>📅 Term 3 Opening</h4>
-                    <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM. Parents are reminded to ensure all school fees are paid before the opening date. New students are welcome to join us for the new term.</p>
-                    <span class="date">Posted: 25 August 2026</span>
-                    <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                </div>
-                <div class="news-item" data-aos="fade-up" data-aos-delay="200">
-                    <h4>🏆 Sports Day</h4>
-                    <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend and cheer for their children. Various competitions including athletics, ball games, and cultural events will be held throughout the day.</p>
-                    <span class="date">Posted: 24 August 2026</span>
-                    <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                </div>
-                <div class="news-item" data-aos="fade-up" data-aos-delay="300">
-                    <h4>📚 Parents' Meeting</h4>
-                    <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall. Important agenda items include academic performance, school development, upcoming activities, and parent-teacher collaboration strategies.</p>
-                    <span class="date">Posted: 23 August 2026</span>
-                    <a href="parents-corner.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ======================================== -->
-    <!-- FOOTER -->
-    <!-- ======================================== -->
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-info">
-                    <img src="images/logo edited.ico" alt="Changara Star Academy" class="footer-logo" />
-                    <h3>🏫 Changara Star Academy</h3>
-                    <p>Changara Market, Teso North Sub-County, Busia County, Kenya</p>
-                    <p>📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
-                    <div class="footer-social">
-                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
-                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-                    </div>
-                    <div class="ministry-badge"><i class="fas fa-certificate"></i> Registered under Ministry of Education, Kenya</div>
-                </div>
-                <div class="footer-links">
-                    <h4>Quick Links</h4>
-                    <a href="index.html">🏠 Home</a>
-                    <a href="about.html">📖 About Us</a>
-                    <a href="student-portal.html">🎓 Student Portal</a>
-                    <a href="admissions.html">📝 Admissions</a>
-                    <a href="contact.html">📞 Contact</a>
-                </div>
-                <div class="footer-links">
-                    <h4>Resources</h4>
-                    <a href="gallery.html">🖼️ Gallery</a>
-                    <a href="events.html">📰 Events</a>
-                    <a href="downloads.html">📄 Downloads</a>
-                    <a href="fees.html">💰 Fees</a>
-                </div>
-            </div>
-            <div class="footer-bottom"><p>&copy; 2026 Changara Star Academy. All rights reserved. | <span style="color:var(--school-gold);">🇰🇪 Proudly Kenyan</span></p></div>
-        </div>
-    </footer>
+    </div><!-- end main-content-wrapper -->
 
     <!-- ======================================== -->
     <!-- VIDEO MODAL -->
@@ -2055,11 +2081,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <!-- ======================================== -->
+    <!-- MAIN APPLICATION SCRIPT -->
+    <!-- ======================================== -->
     <script>
+        // ========================================
+        // AOS INIT
+        // ========================================
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
         // ========================================
-        // SPLASH SCREEN - STAYS UNTIL PAGE FULLY LOADS
+        // SPLASH SCREEN
         // ========================================
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
@@ -2089,7 +2122,9 @@
             return temp.textContent || temp.innerText || '';
         }
 
-        // ===== SPLASH NEWS - Update from CMS =====
+        // ========================================
+        // SPLASH NEWS - Update from CMS
+        // ========================================
         async function updateSplashNews() {
             try {
                 const res = await fetch('/api/content');
@@ -2104,12 +2139,17 @@
         }
         updateSplashNews();
 
-        // ===== MOBILE MENU =====
+        // ========================================
+        // MOBILE MENU
+        // ========================================
         function toggleMobileMenu() {
-            document.getElementById('navLinks').classList.toggle('show');
+            const nav = document.getElementById('navLinks');
+            nav.classList.toggle('show');
         }
 
-        // ===== SCROLL TO CONTENT =====
+        // ========================================
+        // SCROLL TO CONTENT
+        // ========================================
         function scrollToContent() {
             const el = document.getElementById('slide-content');
             if (el) {
@@ -2118,7 +2158,9 @@
             }
         }
 
-        // ===== SECTION TABS =====
+        // ========================================
+        // SECTION TABS SCROLL
+        // ========================================
         function scrollToSection(id) {
             const el = document.getElementById(id);
             if (el) {
@@ -2133,25 +2175,9 @@
             }
         }
 
-        // ===== NOTICE =====
-        function closeNotice() {
-            const bar = document.getElementById('noticeAlertBar');
-            bar.classList.remove('show');
-            localStorage.setItem('noticeClosed', 'true');
-        }
-        function showNotice(msg) {
-            const bar = document.getElementById('noticeAlertBar');
-            if (msg) document.getElementById('noticeMessage').innerHTML = msg;
-            bar.classList.add('show');
-            localStorage.removeItem('noticeClosed');
-        }
-        (function checkNotice() {
-            if (!localStorage.getItem('noticeClosed')) {
-                document.getElementById('noticeAlertBar').classList.add('show');
-            }
-        })();
-
-        // ===== VIDEO MODAL =====
+        // ========================================
+        // VIDEO MODAL
+        // ========================================
         function openVideoModal() {
             document.getElementById('videoModal').classList.add('show');
             document.getElementById('modalVideo').play();
@@ -2166,15 +2192,12 @@
         });
 
         // ========================================
-        // GALLERY SWIPER - FIXED FOR ALL SCREENS
+        // GALLERY SWIPER
         // ========================================
-        // Wait for DOM to be fully loaded before initializing Swiper
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if swiper container exists
             const swiperContainer = document.querySelector('.gallery-swiper');
             if (!swiperContainer) return;
 
-            // Initialize Swiper with proper configuration
             const gallerySwiper = new Swiper('.gallery-swiper', {
                 slidesPerView: 1,
                 spaceBetween: 20,
@@ -2194,59 +2217,38 @@
                     prevEl: '.swiper-button-prev'
                 },
                 breakpoints: {
-                    480: {
-                        slidesPerView: 1,
-                        spaceBetween: 15,
-                    },
-                    640: {
-                        slidesPerView: 1.5,
-                        spaceBetween: 16,
-                    },
-                    768: {
-                        slidesPerView: 2,
-                        spaceBetween: 20,
-                    },
-                    1024: {
-                        slidesPerView: 3,
-                        spaceBetween: 25,
-                    }
+                    480: { slidesPerView: 1, spaceBetween: 15 },
+                    640: { slidesPerView: 1.5, spaceBetween: 16 },
+                    768: { slidesPerView: 2, spaceBetween: 20 },
+                    1024: { slidesPerView: 3, spaceBetween: 25 }
                 },
                 watchSlidesProgress: true,
                 watchSlidesVisibility: true,
-                // Ensure slides are properly rendered
                 on: {
-                    init: function() {
-                        // Force a re-check of slide sizes
-                        this.update();
-                    }
+                    init: function() { this.update(); }
                 }
             });
 
-            // Re-initialize swiper on window resize to ensure proper display
             let resizeTimer;
             window.addEventListener('resize', function() {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(function() {
-                    if (gallerySwiper) {
-                        gallerySwiper.update();
-                    }
+                    if (gallerySwiper) gallerySwiper.update();
                 }, 300);
             });
 
-            // Handle orientation change on mobile
             window.addEventListener('orientationchange', function() {
                 setTimeout(function() {
-                    if (gallerySwiper) {
-                        gallerySwiper.update();
-                    }
+                    if (gallerySwiper) gallerySwiper.update();
                 }, 500);
             });
 
-            // Expose swiper instance to window for debugging if needed
             window.gallerySwiper = gallerySwiper;
         });
 
-        // ===== CMS LOAD =====
+        // ========================================
+        // CMS LOAD
+        // ========================================
         function stripHtml(html) { 
             if (!html) return ''; 
             const d = document.createElement('DIV'); 
@@ -2269,7 +2271,6 @@
                     if (c.parentsCalendar) document.getElementById('displayParents').textContent = stripHtml(c.parentsCalendar);
                     if (c.downloads) document.getElementById('displayDownloads').textContent = stripHtml(c.downloads);
                     if (c.feesContent) document.getElementById('displayFees').textContent = stripHtml(c.feesContent);
-                    if (c.noticeAlert) showNotice(c.noticeAlert);
                     if (c.homeNews && c.homeNews.length) {
                         const grid = document.getElementById('newsGrid');
                         grid.innerHTML = '';
@@ -2282,10 +2283,430 @@
                             grid.appendChild(div);
                         });
                     }
+                    // Notice Alert Bar
+                    if (c.noticeAlert) {
+                        const noticeBar = document.getElementById('noticeAlertBar');
+                        const noticeMsg = document.getElementById('noticeMessage');
+                        if (noticeMsg) noticeMsg.innerHTML = c.noticeAlert;
+                        if (noticeBar) noticeBar.classList.add('show');
+                    }
+                    // Ticker Items
+                    if (c.tickerItems && c.tickerItems.length) {
+                        const tickerContent = document.getElementById('tickerContent');
+                        if (tickerContent) {
+                            tickerContent.innerHTML = '';
+                            c.tickerItems.forEach((item, i) => {
+                                const div = document.createElement('div');
+                                div.className = 'ticker-item';
+                                div.innerHTML = `<span class="tag">${item.tag || '📢'}</span> ${stripHtml(item.text) || ''}`;
+                                tickerContent.appendChild(div);
+                            });
+                        }
+                    }
                 }
             } catch (e) { /* fallback */ }
         }
         document.addEventListener('DOMContentLoaded', loadCMS);
+
+        // ================================================================
+        // LIVE EDIT MODE - CMS
+        // ================================================================
+        let editModeActive = false;
+        let editedElements = [];
+        let editToast = null;
+
+        const FIELD_MAP = {
+            'heroTitle': 'heroTitle',
+            'heroSubtitle': 'heroSubtitle',
+            'heroButtonText': 'heroButtonText',
+            'heroButtonLink': 'heroButtonLink',
+            'aboutMission': 'aboutMission',
+            'aboutVision': 'aboutVision',
+            'aboutValues': 'aboutValues',
+            'aboutHistory': 'aboutHistory',
+            'aboutMotto': 'aboutMotto',
+            'aboutWhy': 'aboutWhy',
+            'admissionsRequirements': 'admissionsRequirements',
+            'admissionsAge': 'admissionsAge',
+            'admissionsDocuments': 'admissionsDocuments',
+            'admissionsProcess': 'admissionsProcess',
+            'admissionsFees': 'admissionsFees',
+            'performanceKcpe': 'performanceKcpe',
+            'performanceInternal': 'performanceInternal',
+            'parentsCalendar': 'parentsCalendar',
+            'parentsHomework': 'parentsHomework',
+            'parentsAttendance': 'parentsAttendance',
+            'parentsRules': 'parentsRules',
+            'parentsUniform': 'parentsUniform',
+            'parentsFees': 'parentsFees',
+            'feesContent': 'feesContent',
+            'feesPaybill': 'feesPaybill',
+            'feesInstructions': 'feesInstructions',
+            'contactAddress': 'contactAddress',
+            'contactPhone': 'contactPhone',
+            'contactEmail': 'contactEmail',
+            'contactHours': 'contactHours',
+            'contactMap': 'contactMap',
+            'seoTitle': 'seoTitle',
+            'seoDescription': 'seoDescription',
+            'seoKeywords': 'seoKeywords',
+            'noticeAlert': 'noticeAlert'
+        };
+
+        if (window.location.search.includes('edit=true')) {
+            setTimeout(enableEditMode, 800);
+        }
+
+        function enableEditMode() {
+            editModeActive = true;
+            
+            const editBar = document.createElement('div');
+            editBar.id = 'editToolbar';
+            editBar.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: #0A1628;
+                color: white;
+                padding: 8px 15px;
+                z-index: 999999;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 8px;
+                border-bottom: 3px solid #D4A017;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                font-size: 12px;
+            `;
+            editBar.innerHTML = `
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-weight:700;color:#D4A017;font-size:13px;">✏️ EDIT MODE</span>
+                    <span style="font-size:11px;opacity:0.7;">Click any text or image to edit</span>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button onclick="saveEdits()" style="background:#28a745;color:white;border:none;padding:5px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px;">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <button onclick="exitEditMode()" style="background:#dc3545;color:white;border:none;padding:5px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px;">
+                        <i class="fas fa-times"></i> Exit
+                    </button>
+                    <button onclick="editImage()" style="background:#17a2b8;color:white;border:none;padding:5px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px;">
+                        <i class="fas fa-image"></i>
+                    </button>
+                    <button onclick="editVideo()" style="background:#6f42c1;color:white;border:none;padding:5px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px;">
+                        <i class="fas fa-video"></i>
+                    </button>
+                </div>
+            `;
+            document.body.insertBefore(editBar, document.body.firstChild);
+            
+            const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, .hero-description, .section-title, .subtitle, .welcome-text, .feature-item p, .news-item p, .notice-content .message');
+            
+            elements.forEach(el => {
+                if (el.closest('nav') || el.closest('footer') || el.closest('.sidebar') || el.closest('.navbar')) return;
+                if (!el.textContent.trim()) return;
+                
+                let id = el.id;
+                if (!id) {
+                    for (const [fieldId] of Object.entries(FIELD_MAP)) {
+                        const fieldEl = document.getElementById(fieldId);
+                        if (fieldEl && fieldEl === el) {
+                            id = fieldId;
+                            break;
+                        }
+                    }
+                    if (!id) {
+                        id = 'el-' + Math.random().toString(36).substr(2, 6);
+                        el.id = id;
+                    }
+                }
+                
+                if (!window._originalContent) window._originalContent = {};
+                window._originalContent[id] = el.innerHTML;
+                
+                el.style.cursor = 'pointer';
+                el.style.border = '2px dashed transparent';
+                el.style.padding = '4px 6px';
+                el.style.borderRadius = '4px';
+                el.style.transition = 'all 0.2s';
+                
+                el.addEventListener('mouseenter', function() {
+                    if (editModeActive) {
+                        this.style.borderColor = '#D4A017';
+                        this.style.background = 'rgba(212,160,23,0.05)';
+                    }
+                });
+                
+                el.addEventListener('mouseleave', function() {
+                    if (editModeActive) {
+                        this.style.borderColor = 'transparent';
+                        this.style.background = 'transparent';
+                    }
+                });
+                
+                el.addEventListener('click', function(e) {
+                    if (!editModeActive) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const currentText = this.innerHTML;
+                    const newText = prompt('✏️ Edit this text:', currentText);
+                    
+                    if (newText !== null && newText !== currentText) {
+                        this.innerHTML = newText;
+                        this.style.borderColor = '#28a745';
+                        this.style.background = 'rgba(40,167,69,0.1)';
+                        
+                        if (!editedElements.includes(id)) {
+                            editedElements.push(id);
+                        }
+                        
+                        showEditToast('✅ Text updated! Click "Save" to save changes.', 'success');
+                    }
+                });
+            });
+            
+            document.querySelectorAll('img:not(.logo):not(.school-logo):not(.footer-logo)').forEach(img => {
+                img.style.cursor = 'pointer';
+                img.style.border = '3px solid transparent';
+                img.style.borderRadius = '6px';
+                img.style.transition = 'all 0.2s';
+                
+                img.addEventListener('mouseenter', function() {
+                    if (editModeActive) {
+                        this.style.borderColor = '#D4A017';
+                        this.style.boxShadow = '0 0 20px rgba(212,160,23,0.3)';
+                    }
+                });
+                
+                img.addEventListener('mouseleave', function() {
+                    if (editModeActive) {
+                        this.style.borderColor = 'transparent';
+                        this.style.boxShadow = 'none';
+                    }
+                });
+                
+                img.addEventListener('click', function(e) {
+                    if (!editModeActive) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const action = confirm('OK = Change Image URL\nCancel = Delete Image');
+                    if (action) {
+                        const newUrl = prompt('Enter new image URL:', this.src);
+                        if (newUrl && newUrl.trim() !== '') {
+                            this.src = newUrl.trim();
+                            this.style.borderColor = '#28a745';
+                            const imgId = img.id || 'img-' + Math.random().toString(36).substr(2, 6);
+                            if (!img.id) img.id = imgId;
+                            if (!editedElements.includes(imgId)) {
+                                editedElements.push(imgId);
+                            }
+                            showEditToast('✅ Image updated! Click "Save" to save.', 'success');
+                        }
+                    } else {
+                        if (confirm('Delete this image?')) {
+                            this.style.display = 'none';
+                            const imgId = img.id || 'img-' + Math.random().toString(36).substr(2, 6);
+                            if (!img.id) img.id = imgId;
+                            if (!editedElements.includes(imgId)) {
+                                editedElements.push(imgId);
+                            }
+                            showEditToast('✅ Image removed! Click "Save" to save.', 'success');
+                        }
+                    }
+                });
+            });
+            
+            showEditToast('✏️ Edit mode enabled! Click any text or image to edit.', 'info');
+        }
+
+        function exitEditMode() {
+            editModeActive = false;
+            const toolbar = document.getElementById('editToolbar');
+            if (toolbar) toolbar.remove();
+            
+            document.querySelectorAll('[style*="cursor: pointer;"]').forEach(el => {
+                el.style.cursor = '';
+                el.style.border = '';
+                el.style.padding = '';
+                el.style.borderRadius = '';
+                el.style.background = '';
+                el.style.boxShadow = '';
+            });
+            
+            document.querySelectorAll('img').forEach(img => {
+                img.style.cursor = '';
+                img.style.border = '';
+                img.style.borderRadius = '';
+                img.style.boxShadow = '';
+            });
+            
+            if (editToast) { editToast.remove(); editToast = null; }
+            showEditToast('📝 Edit mode disabled.', 'info');
+        }
+
+        function editImage() {
+            const url = prompt('Enter image URL:');
+            if (url && url.trim() !== '') {
+                const container = prompt('Where to insert? (selector like #content or .main-content)') || '#content';
+                const target = document.querySelector(container) || document.body;
+                
+                const img = document.createElement('img');
+                img.src = url.trim();
+                img.style.maxWidth = '100%';
+                img.style.borderRadius = '8px';
+                img.style.margin = '10px 0';
+                img.alt = 'Inserted image';
+                target.appendChild(img);
+                showEditToast('✅ Image inserted! Click "Save" to save.', 'success');
+            }
+        }
+
+        function editVideo() {
+            const url = prompt('Enter video URL (MP4, YouTube, etc.):');
+            if (url && url.trim() !== '') {
+                let videoHtml = '';
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
+                    if (videoId) {
+                        videoHtml = `<iframe width="100%" height="300" src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen style="border-radius:12px;margin:10px 0;"></iframe>`;
+                    }
+                } else if (url.includes('vimeo.com')) {
+                    const videoId = url.match(/vimeo\.com\/(\d+)/);
+                    if (videoId) {
+                        videoHtml = `<iframe width="100%" height="300" src="https://player.vimeo.com/video/${videoId[1]}" frameborder="0" allowfullscreen style="border-radius:12px;margin:10px 0;"></iframe>`;
+                    }
+                } else {
+                    videoHtml = `<video src="${url.trim()}" controls style="width:100%;border-radius:12px;margin:10px 0;"></video>`;
+                }
+                
+                if (videoHtml) {
+                    const container = prompt('Where to insert? (selector like #content or .main-content)') || '#content';
+                    const target = document.querySelector(container) || document.body;
+                    target.innerHTML += videoHtml;
+                    showEditToast('✅ Video inserted! Click "Save" to save.', 'success');
+                }
+            }
+        }
+
+        function saveEdits() {
+            if (editedElements.length === 0) {
+                showEditToast('ℹ️ No changes to save.', 'info');
+                return;
+            }
+            
+            showEditToast('💾 Saving changes...', 'info');
+            
+            const changes = {};
+            let hasValidChanges = false;
+            
+            editedElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (el.tagName === 'IMG') {
+                        if (el.style.display !== 'none') {
+                            changes[id] = el.src;
+                            hasValidChanges = true;
+                        } else {
+                            changes[id] = '__DELETED__';
+                            hasValidChanges = true;
+                        }
+                    } else {
+                        changes[id] = el.innerHTML;
+                        hasValidChanges = true;
+                    }
+                }
+            });
+            
+            if (!hasValidChanges || Object.keys(changes).length === 0) {
+                showEditToast('ℹ️ No valid changes to save.', 'info');
+                return;
+            }
+            
+            fetch('/api/content')
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) throw new Error('Failed to load current content: ' + (data.message || 'Unknown error'));
+                    
+                    const content = data.content;
+                    let updatedCount = 0;
+                    const updatedFields = [];
+                    
+                    for (const [id, newContent] of Object.entries(changes)) {
+                        const fieldName = FIELD_MAP[id];
+                        if (fieldName && content[fieldName] !== undefined) {
+                            if (newContent === '__DELETED__') {
+                                content[fieldName] = '';
+                            } else {
+                                content[fieldName] = newContent;
+                            }
+                            updatedCount++;
+                            updatedFields.push(fieldName);
+                            console.log(`✅ Updated field "${fieldName}" from element "${id}"`);
+                        } else {
+                            console.log(`⚠️ No matching field for element "${id}"`);
+                        }
+                    }
+                    
+                    if (updatedCount === 0) {
+                        showEditToast('ℹ️ No matching content fields found to update. Make sure you\'re editing content with proper IDs.', 'info');
+                        return;
+                    }
+                    
+                    console.log(`📝 Updating ${updatedCount} fields:`, updatedFields);
+                    
+                    return fetch('/api/content', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(content)
+                    });
+                })
+                .then(response => {
+                    if (!response) return;
+                    return response.json();
+                })
+                .then(result => {
+                    if (result && result.success) {
+                        editedElements = [];
+                        showEditToast('✅ All changes saved successfully!', 'success');
+                        
+                        document.querySelectorAll('[style*="border-color: #28a745"]').forEach(el => {
+                            el.style.borderColor = 'transparent';
+                            el.style.background = 'transparent';
+                        });
+                    } else if (result) {
+                        showEditToast('❌ Error saving: ' + (result.message || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Save error:', err);
+                    showEditToast('❌ Error saving changes: ' + err.message, 'error');
+                });
+        }
+
+        function showEditToast(message, type) {
+            if (editToast) { editToast.remove(); editToast = null; }
+            
+            const toast = document.createElement('div');
+            toast.className = 'edit-toast ' + (type || 'info');
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            editToast = toast;
+            
+            setTimeout(() => {
+                if (toast) {
+                    toast.classList.add('fade-out');
+                    setTimeout(() => { if (toast.parentElement) toast.remove(); }, 400);
+                }
+            }, 4000);
+        }
+
+        console.log('✏️ Edit Mode Ready! Add ?edit=true to URL to enable.');
+        console.log('📋 Field Map:', Object.keys(FIELD_MAP).length, 'fields mapped.');
+        console.log('🚀 Changara Star Academy loaded successfully!');
     </script>
 </body>
 </html>
