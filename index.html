@@ -142,7 +142,7 @@
         }
 
         /* ========================================
-           FIXED TOP HEADER - STAYS WHEN SCROLLING
+           FIXED TOP HEADER - COMPLETELY STAYS WHEN SCROLLING
            ======================================== */
         .top-header {
             position: fixed;
@@ -153,7 +153,7 @@
             background: linear-gradient(135deg, #0A1628 0%, #1a2a4a 100%);
             border-bottom: 3px solid var(--school-gold);
             box-shadow: 0 4px 30px rgba(0,0,0,0.4);
-            padding: 10px 0 8px;
+            padding: 8px 0 6px;
         }
 
         /* Kenya Flag Strip inside fixed header */
@@ -169,7 +169,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             padding-top: 4px;
         }
 
@@ -180,10 +180,11 @@
             justify-content: center;
             gap: 12px;
             width: 100%;
+            position: relative;
         }
         .top-header .logo-row .school-logo {
-            width: 45px;
-            height: 45px;
+            width: 42px;
+            height: 42px;
             object-fit: contain;
             border-radius: 8px;
             background: rgba(255,255,255,0.08);
@@ -198,7 +199,7 @@
         }
         .top-header .logo-row .logo-text h1 {
             font-family: var(--font-primary);
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
             -webkit-background-clip: text;
@@ -207,11 +208,26 @@
             letter-spacing: 0.5px;
         }
         .top-header .logo-row .logo-text .subtitle {
-            font-size: 10px;
+            font-size: 9px;
             color: rgba(255,255,255,0.4);
             letter-spacing: 4px;
             text-transform: uppercase;
             -webkit-text-fill-color: rgba(255,255,255,0.4);
+        }
+
+        /* Mobile Menu Button */
+        .top-header .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 5px 10px;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         /* Navigation Row */
@@ -219,7 +235,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 3px;
             flex-wrap: wrap;
             width: 100%;
         }
@@ -227,12 +243,12 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            padding: 5px 14px;
+            padding: 4px 12px;
             border-radius: 50px;
             color: rgba(255,255,255,0.7);
             text-decoration: none;
             font-weight: 500;
-            font-size: 12px;
+            font-size: 11px;
             transition: all 0.3s ease;
             border: 1px solid transparent;
             white-space: nowrap;
@@ -248,12 +264,12 @@
             color: var(--school-gold);
             border-color: var(--school-gold);
         }
-        .top-header .nav-row a i { font-size: 12px; }
+        .top-header .nav-row a i { font-size: 11px; }
         .top-header .nav-row a .badge {
             background: var(--kenya-red);
             color: white;
-            font-size: 7px;
-            padding: 1px 7px;
+            font-size: 6px;
+            padding: 1px 6px;
             border-radius: 50px;
             font-weight: 700;
             animation: pulseBadge 1.5s infinite;
@@ -264,7 +280,7 @@
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
             font-weight: 700;
-            padding: 5px 16px;
+            padding: 4px 14px;
             border-radius: 50px;
             border: 1px solid rgba(255,255,255,0.1);
         }
@@ -278,7 +294,7 @@
             background: linear-gradient(135deg, #BB0000, #8B0000);
             color: white;
             font-weight: 700;
-            padding: 5px 18px;
+            padding: 4px 16px;
             border-radius: 50px;
             box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
             border: 1px solid rgba(255,255,255,0.1);
@@ -295,9 +311,9 @@
             background-size: 300% 300%;
             color: white;
             font-weight: 800;
-            padding: 5px 22px;
+            padding: 4px 18px;
             border-radius: 50px;
-            font-size: 12px;
+            font-size: 11px;
             box-shadow: 0 0 15px rgba(255, 107, 107, 0.4), 0 0 40px rgba(255, 180, 70, 0.2);
             animation: rainbowPulse 3s ease infinite, floatButton 2.5s ease-in-out infinite;
             border: 1px solid rgba(255,255,255,0.2);
@@ -328,7 +344,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 16px;
+            gap: 14px;
             flex-wrap: wrap;
             width: 100%;
             padding-top: 2px;
@@ -338,12 +354,12 @@
         .top-header .contact-row .contact-link {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             color: rgba(255,255,255,0.5);
-            font-size: 11px;
+            font-size: 10px;
             text-decoration: none;
             transition: all 0.3s ease;
-            padding: 3px 12px;
+            padding: 2px 10px;
             border-radius: 50px;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.04);
@@ -355,7 +371,7 @@
             transform: translateY(-2px);
         }
         .top-header .contact-row .contact-link i {
-            font-size: 13px;
+            font-size: 12px;
         }
         .top-header .contact-row .contact-link .phone-icon {
             color: var(--school-gold);
@@ -365,22 +381,7 @@
         }
         .top-header .contact-row .divider {
             color: rgba(255,255,255,0.1);
-            font-size: 14px;
-        }
-
-        /* Mobile Menu Button */
-        .top-header .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 5px 10px;
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
+            font-size: 12px;
         }
 
         /* Mobile Menu Dropdown */
@@ -388,15 +389,16 @@
             display: flex !important;
             flex-direction: column;
             width: 100%;
-            padding: 10px 0;
-            gap: 6px;
+            padding: 8px 0;
+            gap: 4px;
             background: rgba(10,22,40,0.98);
             border-radius: 12px;
-            margin-top: 4px;
+            margin-top: 2px;
         }
         .top-header .nav-row.mobile-open a {
             width: 100%;
             justify-content: center;
+            padding: 6px 12px;
         }
 
         /* ========================================
@@ -416,7 +418,7 @@
         @keyframes arrowDown { 0%,100% { transform:translateY(0); } 50% { transform:translateY(5px); } }
 
         /* ========================================
-           NEWS TICKER
+           NEWS TICKER - PUSHED DOWN BY FIXED HEADER
            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
@@ -1364,10 +1366,12 @@
             .hero-section h1 { font-size: 40px; }
         }
         @media (max-width: 768px) {
-            .top-header .logo-row .logo-text h1 { font-size: 17px; }
-            .top-header .logo-row .school-logo { width: 36px; height: 36px; }
-            .top-header .contact-row .contact-link { font-size: 10px; padding: 2px 10px; }
-            .top-header .contact-row { gap: 10px; }
+            .top-header .logo-row .logo-text h1 { font-size: 16px; }
+            .top-header .logo-row .school-logo { width: 34px; height: 34px; }
+            .top-header .logo-row .logo-text .subtitle { font-size: 8px; letter-spacing: 2px; }
+            .top-header .contact-row .contact-link { font-size: 9px; padding: 2px 8px; }
+            .top-header .contact-row { gap: 8px; }
+            .top-header .nav-row a { font-size: 10px; padding: 3px 10px; }
             .news-ticker-section { margin-top: 130px; }
             .hero-section { padding: 60px 0 30px; }
             .hero-section h1 { font-size: 32px; }
@@ -1403,11 +1407,14 @@
             .gallery-swiper .swiper-pagination { display: block !important; }
         }
         @media (max-width: 480px) {
-            .top-header .logo-row .logo-text h1 { font-size: 14px; }
-            .top-header .logo-row .school-logo { width: 30px; height: 30px; }
-            .top-header .logo-row .logo-text .subtitle { font-size: 7px; letter-spacing: 2px; }
-            .top-header .contact-row .contact-link { font-size: 9px; padding: 2px 8px; }
+            .top-header .logo-row .logo-text h1 { font-size: 13px; }
+            .top-header .logo-row .school-logo { width: 28px; height: 28px; }
+            .top-header .logo-row .logo-text .subtitle { font-size: 6px; letter-spacing: 1px; }
+            .top-header .contact-row .contact-link { font-size: 8px; padding: 1px 6px; }
             .top-header .contact-row .divider { display: none; }
+            .top-header .nav-row a { font-size: 9px; padding: 2px 8px; }
+            .top-header .nav-row a.enroll-link { padding: 3px 12px; font-size: 9px; }
+            .top-header .nav-row a.student-portal-link { padding: 3px 12px; font-size: 9px; }
             .news-ticker-section { margin-top: 140px; }
             .content-grid { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
@@ -1504,7 +1511,8 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- FIXED TOP HEADER - STAYS WHEN SCROLLING -->
+    <!-- FIXED TOP HEADER - COMPLETELY STAYS WHEN SCROLLING -->
+    <!-- ALL NAVIGATION LINKS + PHONE NUMBERS STAY FIXED -->
     <!-- ======================================== -->
     <header class="top-header">
         <!-- Kenya Flag Strip -->
@@ -1523,7 +1531,7 @@
                 </button>
             </div>
 
-            <!-- Navigation Row -->
+            <!-- Navigation Row - ALL LINKS STAY FIXED -->
             <div class="nav-row" id="navCenter">
                 <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
                 <a href="fees.html"><i class="fas fa-coins"></i> Fees <span class="badge">VIEW</span></a>
@@ -1534,7 +1542,7 @@
                 <a href="student-portal.html" class="student-portal-link"><i class="fas fa-user-graduate"></i> Student Portal</a>
             </div>
 
-            <!-- Contact Row - Phone Numbers at Bottom Center -->
+            <!-- Contact Row - PHONE NUMBERS STAY FIXED AT BOTTOM CENTER -->
             <div class="contact-row">
                 <a href="tel:+254721556252" class="contact-link">
                     <i class="fas fa-phone phone-icon"></i>
@@ -1550,7 +1558,7 @@
     </header>
 
     <!-- ======================================== -->
-    <!-- NEWS TICKER -->
+    <!-- NEWS TICKER - PUSHED DOWN BY FIXED HEADER -->
     <!-- ======================================== -->
     <div class="news-ticker-section" id="newsTicker">
         <div class="container">
@@ -1582,7 +1590,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HERO SECTION -->
+    <!-- HERO SECTION - THIS MOVES WHEN SCROLLING -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-video-bg">
