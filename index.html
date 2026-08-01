@@ -1521,8 +1521,6 @@
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background: #d1ecf1;
-            color: #0c5460;
             padding: 15px 25px;
             border-radius: 10px;
             font-weight: 500;
@@ -2178,18 +2176,71 @@
         document.addEventListener('DOMContentLoaded', loadCMS);
 
         // ================================================================
-        // LIVE EDIT MODE - FULL WORKING VERSION
+        // LIVE EDIT MODE - FULLY WORKING WITH PROPER FIELD MAPPING
         // ================================================================
         // This enables editing when ?edit=true is in the URL
-        // To use: Go to CMS and click "Edit Live Website" which opens with ?edit=true
+        // The fieldMap below matches element IDs to your database fields
 
         let editModeActive = false;
         let editedElements = [];
         let editToast = null;
 
+        // COMPLETE FIELD MAPPING - matches element IDs to database fields
+        const FIELD_MAP = {
+            // Home Page
+            'heroTitle': 'heroTitle',
+            'heroSubtitle': 'heroSubtitle',
+            'heroButtonText': 'heroButtonText',
+            'heroButtonLink': 'heroButtonLink',
+            
+            // About Page
+            'aboutMission': 'aboutMission',
+            'aboutVision': 'aboutVision',
+            'aboutValues': 'aboutValues',
+            'aboutHistory': 'aboutHistory',
+            'aboutMotto': 'aboutMotto',
+            'aboutWhy': 'aboutWhy',
+            
+            // Admissions
+            'admissionsRequirements': 'admissionsRequirements',
+            'admissionsAge': 'admissionsAge',
+            'admissionsDocuments': 'admissionsDocuments',
+            'admissionsProcess': 'admissionsProcess',
+            'admissionsFees': 'admissionsFees',
+            
+            // Performance
+            'performanceKcpe': 'performanceKcpe',
+            'performanceInternal': 'performanceInternal',
+            
+            // Parents Corner
+            'parentsCalendar': 'parentsCalendar',
+            'parentsHomework': 'parentsHomework',
+            'parentsAttendance': 'parentsAttendance',
+            'parentsRules': 'parentsRules',
+            'parentsUniform': 'parentsUniform',
+            'parentsFees': 'parentsFees',
+            
+            // Fees
+            'feesContent': 'feesContent',
+            'feesPaybill': 'feesPaybill',
+            'feesInstructions': 'feesInstructions',
+            
+            // Contact
+            'contactAddress': 'contactAddress',
+            'contactPhone': 'contactPhone',
+            'contactEmail': 'contactEmail',
+            'contactHours': 'contactHours',
+            'contactMap': 'contactMap',
+            
+            // SEO
+            'seoTitle': 'seoTitle',
+            'seoDescription': 'seoDescription',
+            'seoKeywords': 'seoKeywords'
+        };
+
         // Check if edit mode is enabled from URL
         if (window.location.search.includes('edit=true')) {
-            setTimeout(enableEditMode, 500);
+            setTimeout(enableEditMode, 800);
         }
 
         function enableEditMode() {
@@ -2238,7 +2289,7 @@
             document.body.insertBefore(editBar, document.body.firstChild);
             
             // Make all text content editable
-            const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, .hero-description, .section-title, .subtitle, .welcome-text, .feature-item p, .news-item p');
+            const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, .hero-description, .section-title, .subtitle, .welcome-text, .feature-item p, .news-item p, .hero-description');
             
             elements.forEach(el => {
                 // Skip navigation, footer, sidebar
@@ -2249,9 +2300,27 @@
                 // Skip empty elements
                 if (!el.textContent.trim()) return;
                 
+                // Generate a unique ID if none exists
+                let id = el.id;
+                if (!id) {
+                    // Try to find a matching field name from content
+                    const text = el.textContent.trim().substring(0, 30);
+                    for (const [fieldId, fieldName] of Object.entries(FIELD_MAP)) {
+                        const fieldEl = document.getElementById(fieldId);
+                        if (fieldEl && fieldEl === el) {
+                            id = fieldId;
+                            break;
+                        }
+                    }
+                    if (!id) {
+                        id = 'el-' + Math.random().toString(36).substr(2, 6);
+                        el.id = id;
+                    }
+                }
+                
                 // Store original content
-                const id = el.id || 'el-' + Math.random().toString(36).substr(2, 6);
-                if (!el.id) el.id = id;
+                if (!window._originalContent) window._originalContent = {};
+                window._originalContent[id] = el.innerHTML;
                 
                 // Make editable
                 el.style.cursor = 'pointer';
@@ -2351,6 +2420,7 @@
             });
             
             showEditToast('✏️ Edit mode enabled! Click any text or image to edit.', 'info');
+            console.log('✏️ Edit mode enabled! Editable elements:', elements.length);
         }
 
         function exitEditMode() {
@@ -2462,44 +2532,19 @@
                 return;
             }
             
-            // Send to server using the existing /api/content endpoint
-            // First, get current content, update it, then save
+            // First, get current content
             fetch('/api/content')
                 .then(res => res.json())
                 .then(data => {
-                    if (!data.success) throw new Error('Failed to load current content');
+                    if (!data.success) throw new Error('Failed to load current content: ' + (data.message || 'Unknown error'));
                     
                     const content = data.content;
-                    
-                    // Map element IDs to content fields
-                    const fieldMap = {
-                        'heroTitle': 'heroTitle',
-                        'heroSubtitle': 'heroSubtitle',
-                        'aboutMission': 'aboutMission',
-                        'aboutVision': 'aboutVision',
-                        'aboutValues': 'aboutValues',
-                        'aboutHistory': 'aboutHistory',
-                        'aboutWhy': 'aboutWhy',
-                        'admissionsRequirements': 'admissionsRequirements',
-                        'admissionsAge': 'admissionsAge',
-                        'admissionsDocuments': 'admissionsDocuments',
-                        'admissionsProcess': 'admissionsProcess',
-                        'admissionsFees': 'admissionsFees',
-                        'performanceKcpe': 'performanceKcpe',
-                        'performanceInternal': 'performanceInternal',
-                        'parentsCalendar': 'parentsCalendar',
-                        'parentsHomework': 'parentsHomework',
-                        'parentsAttendance': 'parentsAttendance',
-                        'parentsRules': 'parentsRules',
-                        'parentsUniform': 'parentsUniform',
-                        'parentsFees': 'parentsFees',
-                        'feesContent': 'feesContent',
-                        'feesInstructions': 'feesInstructions'
-                    };
-                    
                     let updatedCount = 0;
+                    const updatedFields = [];
+                    
                     for (const [id, newContent] of Object.entries(changes)) {
-                        const fieldName = fieldMap[id];
+                        // Check if this ID maps to a field in our database
+                        const fieldName = FIELD_MAP[id];
                         if (fieldName && content[fieldName] !== undefined) {
                             if (newContent === '__DELETED__') {
                                 content[fieldName] = '';
@@ -2507,13 +2552,19 @@
                                 content[fieldName] = newContent;
                             }
                             updatedCount++;
+                            updatedFields.push(fieldName);
+                            console.log(`✅ Updated field "${fieldName}" from element "${id}"`);
+                        } else {
+                            console.log(`⚠️ No matching field for element "${id}"`);
                         }
                     }
                     
                     if (updatedCount === 0) {
-                        showEditToast('ℹ️ No matching content fields found to update.', 'info');
+                        showEditToast('ℹ️ No matching content fields found to update. Make sure you\'re editing content with proper IDs.', 'info');
                         return;
                     }
+                    
+                    console.log(`📝 Updating ${updatedCount} fields:`, updatedFields);
                     
                     // Save the updated content
                     return fetch('/api/content', {
@@ -2565,6 +2616,7 @@
         }
 
         console.log('✏️ Edit Mode Ready! Add ?edit=true to URL to enable.');
+        console.log('📋 Field Map:', Object.keys(FIELD_MAP).length, 'fields mapped.');
         console.log('🚀 Changara Star Academy loaded successfully!');
     </script>
 </body>
