@@ -66,7 +66,7 @@
         .sidebar-menu .logout a { color: rgba(255,107,107,0.7); }
         .sidebar-menu .logout a:hover { color: #ff6b6b; background: rgba(255,107,107,0.1); }
 
-        /* NEW - CMS Badge */
+        /* CMS Badge */
         .sidebar-menu a .cms-badge {
             margin-left: auto;
             background: linear-gradient(135deg, #D4A017, #f5c842);
@@ -453,15 +453,12 @@
             <div class="menu-label">Dashboard</div>
             <a class="active" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Dashboard</a>
             
-            <!-- ===== NEW CMS LINK ===== -->
+            <!-- ===== CMS LINK - FIXED ===== -->
             <div class="menu-label" style="margin-top:10px;">Content Management</div>
-           <a onclick="window.location.href='admin-cms.html'">
-    <i class="fas fa-rocket"></i> CMS
-    <span class="cms-badge">NEW</span>
-</a>
-<a onclick="window.location.href='admin-cms.html'">
-    <i class="fas fa-edit"></i> Classic CMS
-</a>
+            <a onclick="window.location.href='admin-cms.html'">
+                <i class="fas fa-rocket"></i> CMS
+                <span class="cms-badge">NEW</span>
+            </a>
             
             <div class="menu-label" style="margin-top:10px;">Staff Management</div>
             <a onclick="showSection('staff-management')"><i class="fas fa-users-cog"></i> Manage Staff</a>
@@ -515,12 +512,12 @@
             <h2>📊 Dashboard Overview</h2>
             <p class="desc">Welcome to the Admin Dashboard. Manage staff, students, visitors, finance, assessments, and view reports.</p>
             <div class="dashboard-cards">
-                <!-- NEW CMS Card -->
+                <!-- CMS Card - FIXED -->
                 <div class="dashboard-card" onclick="window.location.href='admin-cms.html'" style="border-color:#D4A017;background:linear-gradient(135deg,#fdf8ed,#fff);">
-    <span class="icon">🚀</span>
-    <h3 style="color:#D4A017;">CMS</h3>
-    <p>Powerful content management</p>
-</div>
+                    <span class="icon">🚀</span>
+                    <h3 style="color:#D4A017;">CMS</h3>
+                    <p>Powerful content management</p>
+                </div>
                 <div class="dashboard-card" onclick="showSection('staff-management')">
                     <span class="icon">👨‍💼</span>
                     <h3>Staff Management</h3>
@@ -850,11 +847,6 @@
         // ============================================
         // PERFORMANCE RUBRIC - FRONTEND (CORRECTED CBC)
         // ============================================
-        // Exceeding Expectations (EE): 75-100%
-        // Meeting Expectations (ME): 41-74%
-        // Approaching Expectations (AE): 21-40%
-        // Below Expectations (BE): 0-20%
-
         function getPerformanceLevel(percentage) {
             if (percentage >= 75) return 'Exceeding Expectation';
             if (percentage >= 41) return 'Meeting Expectation';
@@ -1576,7 +1568,7 @@
         }
 
         // ============================================
-        // CLASS ASSESSMENT RESULTS - FIXED WITH CBC
+        // CLASS ASSESSMENT RESULTS
         // ============================================
         async function loadClassResults() {
             const grade = document.getElementById('classGradeFilter').value;
@@ -1595,11 +1587,7 @@
                 if (data.success) {
                     let students = data.students || [];
                     
-                    // ============================================
-                    // ✅ RECALCULATE WITH CORRECT CBC RUBRIC
-                    // ============================================
                     students = students.map(student => {
-                        // Recalculate each subject's performance level with correct rubric
                         if (student.assessments) {
                             student.assessments = student.assessments.map(a => {
                                 const percentage = a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0;
@@ -1614,7 +1602,6 @@
                             });
                         }
                         
-                        // Recalculate overall using CBC method (average of ratings)
                         const overall = calculateStudentOverall(student.assessments || []);
                         student.totalScore = overall.totalScore;
                         student.averageScore = overall.averageScore;
@@ -1658,7 +1645,6 @@
                         const short = getPerformanceShort(level);
                         const rating = student.overallRating || 2;
                         
-                        // Color based on performance level
                         let color = '#0A1628';
                         if (level === 'Exceeding Expectation') color = '#28a745';
                         else if (level === 'Meeting Expectation') color = '#0d6efd';

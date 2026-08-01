@@ -53,7 +53,7 @@
             left: 0; 
             bottom: 0; 
             overflow-y: auto; 
-            z-index: 1000;
+            z-index: 1000; 
             transition: var(--transition);
             box-shadow: 4px 0 30px rgba(0,0,0,0.2);
         }
@@ -228,6 +228,31 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(212,160,23,0.4);
         }
+
+        /* ============================================
+           QUICK ACTION TOOLBAR
+           ============================================ */
+        .quick-actions {
+            background: linear-gradient(135deg, #f8f9fc, #f0f2f5);
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #e8ecf1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .quick-actions .label {
+            font-weight: 700;
+            color: #0A1628;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .quick-actions .label i { color: #D4A017; }
 
         /* ============================================
            TOAST NOTIFICATIONS
@@ -512,6 +537,7 @@
             .editor-card { padding: 18px; }
             .preview-modal { padding: 15px; }
             .preview-modal .preview-content { padding: 20px; }
+            .quick-actions { justify-content: center; }
         }
 
         .hamburger {
@@ -666,6 +692,19 @@
                     <i class="fas fa-eye"></i> Preview
                 </button>
             </div>
+        </div>
+
+        <!-- ===== QUICK ACTION TOOLBAR ===== -->
+        <div class="quick-actions">
+            <span class="label"><i class="fas fa-bolt"></i> Quick Actions:</span>
+            <button class="btn btn-sm btn-primary" onclick="switchPanel('home')"><i class="fas fa-home"></i> Home</button>
+            <button class="btn btn-sm btn-success" onclick="switchPanel('about')"><i class="fas fa-info-circle"></i> About</button>
+            <button class="btn btn-sm btn-info" onclick="switchPanel('academics')"><i class="fas fa-book"></i> Academics</button>
+            <button class="btn btn-sm btn-purple" onclick="switchPanel('admissions')"><i class="fas fa-file-signature"></i> Admissions</button>
+            <button class="btn btn-sm" style="background:#fd7e14;color:white;" onclick="switchPanel('gallery')"><i class="fas fa-images"></i> Media</button>
+            <button class="btn btn-sm" style="background:#dc3545;color:white;" onclick="switchPanel('fees')"><i class="fas fa-coins"></i> Fees</button>
+            <button class="btn btn-sm btn-success" onclick="saveAllContent()"><i class="fas fa-save"></i> Save All</button>
+            <button class="btn btn-sm btn-info" onclick="window.open('/','_blank')"><i class="fas fa-eye"></i> Preview</button>
         </div>
 
         <!-- Toast Container -->

@@ -1407,7 +1407,13 @@ const contentSchema = new mongoose.Schema({
     noticeType: { type: String, default: '' },
     noticeDate: { type: Date },
     lastUpdated: { type: Date, default: Date.now },
-    updatedBy: { type: String, default: 'Admin' }
+    updatedBy: { type: String, default: 'Admin' },
+    // NEW: Social Media Fields
+    socialFacebook: { type: String, default: '' },
+    socialTwitter: { type: String, default: '' },
+    socialInstagram: { type: String, default: '' },
+    socialYouTube: { type: String, default: '' },
+    socialLinkedIn: { type: String, default: '' }
 });
 
 contentSchema.statics.getContent = async function() {
@@ -1420,16 +1426,31 @@ contentSchema.statics.getContent = async function() {
 
 const Content = mongoose.model('Content', contentSchema);
 
-// Admin Schema
+// Admin Schema with Roles
 const adminSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     fullName: { type: String, required: true },
-    role: { type: String, default: 'Admin' },
+    role: { 
+        type: String, 
+        enum: ['Super Admin', 'Admin', 'Editor', 'Author', 'Contributor'],
+        default: 'Editor'
+    },
+    permissions: {
+        canEditContent: { type: Boolean, default: true },
+        canManageUsers: { type: Boolean, default: false },
+        canManageMedia: { type: Boolean, default: true },
+        canManageSettings: { type: Boolean, default: false },
+        canDeleteContent: { type: Boolean, default: false },
+        canPublishContent: { type: Boolean, default: true }
+    },
+    avatar: { type: String, default: '' },
+    lastLogin: { type: Date },
     isActive: { type: Boolean, default: true },
-    lastLogin: Date
-}, { timestamps: true });
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+});
 
 const Admin = mongoose.model('Admin', adminSchema);
 
@@ -1724,7 +1745,7 @@ function getFeeStructure(grade, type) {
 }
 
 // ============================================
-// API ROUTES - CONTENT  (MOVED HERE - BEFORE STATIC FILES)
+// API ROUTES - CONTENT
 // ============================================
 
 app.get('/api/content', async (req, res) => {
@@ -2269,7 +2290,6 @@ app.get('/api/visitors/today', async (req, res) => {
 // STUDENT MANAGEMENT API ROUTES
 // ============================================
 
-// GET all students (Admin only)
 app.get('/api/students', async (req, res) => {
     try {
         const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
@@ -2280,7 +2300,6 @@ app.get('/api/students', async (req, res) => {
     }
 });
 
-// GET student by ID (Admin only)
 app.get('/api/students/:id', async (req, res) => {
     try {
         const student = await Student.findOne({ studentId: req.params.id });
@@ -2293,7 +2312,6 @@ app.get('/api/students/:id', async (req, res) => {
     }
 });
 
-// POST - Add new student (Admin only)
 app.post('/api/students', async (req, res) => {
     try {
         const { name, grade, gender, type, guardian, pin } = req.body;
@@ -2324,7 +2342,6 @@ app.post('/api/students', async (req, res) => {
     }
 });
 
-// PUT - Update student (Admin only)
 app.put('/api/students/:id', async (req, res) => {
     try {
         const { name, grade, gender, type, guardian, pin } = req.body;
@@ -2351,7 +2368,6 @@ app.put('/api/students/:id', async (req, res) => {
     }
 });
 
-// DELETE - Delete student (Admin only)
 app.delete('/api/students/:id', async (req, res) => {
     try {
         const student = await Student.findOne({ studentId: req.params.id });
@@ -2370,7 +2386,6 @@ app.delete('/api/students/:id', async (req, res) => {
     }
 });
 
-// DELETE - Clear all students (Admin only)
 app.delete('/api/students/clear', async (req, res) => {
     try {
         await Student.deleteMany({});
@@ -2380,7 +2395,6 @@ app.delete('/api/students/clear', async (req, res) => {
     }
 });
 
-// POST - Student login (PIN protected)
 app.post('/api/student/login', async (req, res) => {
     try {
         const { studentId, pin } = req.body;
@@ -2421,7 +2435,7 @@ app.post('/api/student/login', async (req, res) => {
 });
 
 // ============================================
-// STUDENT FEE MANAGEMENT ROUTES (Admin only)
+// STUDENT FEE MANAGEMENT ROUTES
 // ============================================
 
 app.get('/api/students/fees', async (req, res) => {
@@ -2551,7 +2565,7 @@ app.get('/api/assessments/students/:grade', async (req, res) => {
 });
 
 // ============================================
-// SUBJECT CONFIG ROUTES (WORKING)
+// SUBJECT CONFIG ROUTES
 // ============================================
 
 app.get('/api/assessments/subjects/:grade', async (req, res) => {
@@ -3103,7 +3117,6 @@ app.get('/api/assessments/class-report', async (req, res) => {
 // HOLIDAY ASSIGNMENTS - COMPLETE ROUTES
 // ============================================
 
-// GET all assignments
 app.get('/api/holiday-assignments/all', async (req, res) => {
     try {
         console.log('📡 GET /api/holiday-assignments/all');
@@ -3116,7 +3129,6 @@ app.get('/api/holiday-assignments/all', async (req, res) => {
     }
 });
 
-// GET assignments by grade
 app.get('/api/holiday-assignments/:grade', async (req, res) => {
     try {
         const grade = req.params.grade;
@@ -3134,7 +3146,6 @@ app.get('/api/holiday-assignments/:grade', async (req, res) => {
     }
 });
 
-// GET single assignment by ID
 app.get('/api/holiday-assignments/id/:id', async (req, res) => {
     try {
         const assignment = await HolidayAssignment.findById(req.params.id);
@@ -3148,7 +3159,6 @@ app.get('/api/holiday-assignments/id/:id', async (req, res) => {
     }
 });
 
-// POST - Upload assignment (Stored in Database as Base64)
 app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => {
     try {
         console.log('📤 POST /api/holiday-assignments');
@@ -3204,7 +3214,6 @@ app.post('/api/holiday-assignments', upload.single('file'), async (req, res) => 
     }
 });
 
-// PUT - Update assignment
 app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) => {
     try {
         const assignment = await HolidayAssignment.findById(req.params.id);
@@ -3239,7 +3248,6 @@ app.put('/api/holiday-assignments/:id', upload.single('file'), async (req, res) 
     }
 });
 
-// DOWNLOAD assignment file - FROM DATABASE
 app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     try {
         console.log('📥 GET /api/holiday-assignments/download/', req.params.id);
@@ -3270,7 +3278,6 @@ app.get('/api/holiday-assignments/download/:id', async (req, res) => {
     }
 });
 
-// DELETE - Delete assignment with confirmation
 app.delete('/api/holiday-assignments/:id', async (req, res) => {
     try {
         const { confirm } = req.query;
@@ -3289,7 +3296,6 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
     }
 });
 
-// GET assignments with filters (search)
 app.get('/api/holiday-assignments/search', async (req, res) => {
     try {
         const { grade, title, subject } = req.query;
@@ -3305,7 +3311,6 @@ app.get('/api/holiday-assignments/search', async (req, res) => {
     }
 });
 
-// GET all grades that have assignments
 app.get('/api/holiday-assignments/grades/list', async (req, res) => {
     try {
         const grades = await HolidayAssignment.distinct('grade', { isActive: true });
@@ -3316,7 +3321,6 @@ app.get('/api/holiday-assignments/grades/list', async (req, res) => {
     }
 });
 
-// GET assignment statistics
 app.get('/api/holiday-assignments/stats', async (req, res) => {
     try {
         const total = await HolidayAssignment.countDocuments({ isActive: true });
@@ -3356,7 +3360,6 @@ app.get('/api/holiday-assignments/test', (req, res) => {
 // STAFF & VISITOR REPORTS
 // ============================================
 
-// GET staff attendance report
 app.get('/api/reports/staff/attendance', async (req, res) => {
     try {
         console.log('📡 GET /api/reports/staff/attendance');
@@ -3429,7 +3432,6 @@ app.get('/api/reports/staff/attendance', async (req, res) => {
     }
 });
 
-// GET staff report PDF download
 app.get('/api/reports/staff/download-pdf', async (req, res) => {
     try {
         const { period, date, department } = req.query;
@@ -3506,7 +3508,6 @@ app.get('/api/reports/staff/download-pdf', async (req, res) => {
     }
 });
 
-// GET visitor report
 app.get('/api/reports/visitors', async (req, res) => {
     try {
         console.log('📡 GET /api/reports/visitors');
@@ -3559,7 +3560,6 @@ app.get('/api/reports/visitors', async (req, res) => {
     }
 });
 
-// GET visitor report PDF download
 app.get('/api/reports/visitors/download-pdf', async (req, res) => {
     try {
         const { period, date, purpose } = req.query;
@@ -4425,14 +4425,25 @@ app.get('/admin-holiday-assignments.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin-holiday-assignments.html'));
 });
 
-// Admin CMS
+// Admin CMS - Ultimate CMS (redirect to admin-cms.html since file doesn't exist)
+app.get('/admin-cms-ultimate', (req, res) => {
+    console.log('📄 Redirecting Ultimate CMS to Classic CMS');
+    res.sendFile(path.join(__dirname, 'admin-cms.html'));
+});
+
+app.get('/admin-cms-ultimate.html', (req, res) => {
+    console.log('📄 Redirecting Ultimate CMS to Classic CMS');
+    res.sendFile(path.join(__dirname, 'admin-cms.html'));
+});
+
+// Admin CMS - Classic CMS
 app.get('/admin-cms', (req, res) => {
-    console.log('📄 Serving CMS page');
+    console.log('📄 Serving Classic CMS page');
     res.sendFile(path.join(__dirname, 'admin-cms.html'));
 });
 
 app.get('/admin-cms.html', (req, res) => {
-    console.log('📄 Serving CMS page');
+    console.log('📄 Serving Classic CMS page');
     res.sendFile(path.join(__dirname, 'admin-cms.html'));
 });
 
@@ -4451,7 +4462,6 @@ app.get('/student-report.html', (req, res) => {
 // DEBUG ROUTES
 // ============================================
 
-// Debug route - check if students exist
 app.get('/api/students/debug', async (req, res) => {
     try {
         console.log('📡 GET /api/students/debug');
@@ -4465,7 +4475,6 @@ app.get('/api/students/debug', async (req, res) => {
     }
 });
 
-// Debug route for assignments
 app.get('/api/debug/assignments', async (req, res) => {
     try {
         const total = await HolidayAssignment.countDocuments();
