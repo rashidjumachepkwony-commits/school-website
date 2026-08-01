@@ -4425,6 +4425,28 @@ app.get('/admin-holiday-assignments.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin-holiday-assignments.html'));
 });
 
+// Admin CMS - Ultimate CMS
+app.get('/admin-cms-ultimate', (req, res) => {
+    console.log('📄 Serving Ultimate CMS page');
+    res.sendFile(path.join(__dirname, 'admin-cms-ultimate.html'));
+});
+
+app.get('/admin-cms-ultimate.html', (req, res) => {
+    console.log('📄 Serving Ultimate CMS page');
+    res.sendFile(path.join(__dirname, 'admin-cms-ultimate.html'));
+});
+
+// Admin CMS - Classic CMS
+app.get('/admin-cms', (req, res) => {
+    console.log('📄 Serving Classic CMS page');
+    res.sendFile(path.join(__dirname, 'admin-cms.html'));
+});
+
+app.get('/admin-cms.html', (req, res) => {
+    console.log('📄 Serving Classic CMS page');
+    res.sendFile(path.join(__dirname, 'admin-cms.html'));
+});
+
 // Student Report
 app.get('/student-report', (req, res) => {
     console.log('📄 Serving student report page');
@@ -4435,6 +4457,7 @@ app.get('/student-report.html', (req, res) => {
     console.log('📄 Serving student report page');
     res.sendFile(path.join(__dirname, 'student_report.html'));
 });
+
 
 // ============================================
 // DEBUG ROUTES
