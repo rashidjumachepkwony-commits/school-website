@@ -55,7 +55,7 @@
         }
 
         /* ========================================
-           SPLASH SCREEN
+           SPLASH SCREEN - STAYS FOR RENDER.COM SPIN-UP
            ======================================== */
         #splash-screen {
             position: fixed;
@@ -68,13 +68,14 @@
             flex-direction: column;
             padding: 20px;
             transition: opacity 0.8s ease, visibility 0.8s ease;
+            opacity: 1;
+            visibility: visible;
         }
         #splash-screen.hide-splash {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
-        #splash-screen.splash-done { display: none !important; }
         .splash-card {
             max-width: 750px;
             width: 100%;
@@ -126,7 +127,12 @@
         .splash-loader .dot:nth-child(2) { animation-delay: 0.2s; }
         .splash-loader .dot:nth-child(3) { animation-delay: 0.4s; }
         .splash-loading-text { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 6px; letter-spacing: 2px; }
+
+        /* ========================================
+           SPLASH SCREEN ANIMATIONS
+           ======================================== */
         @keyframes splashDot { 0%,80%,100% { transform: scale(0.4); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
+        @keyframes float { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(-6px); } }
 
         /* ========================================
            KENYA FLAG STRIP
@@ -320,56 +326,6 @@
         }
 
         /* ========================================
-           NOTICE ALERT BAR
-           ======================================== */
-        .notice-alert-bar {
-            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
-            color: white;
-            padding: 6px 0;
-            position: relative;
-            z-index: 999;
-            border-bottom: 3px solid var(--school-gold);
-            display: none;
-            animation: slideDownNotice 0.6s ease forwards;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            margin-top: 62px;
-        }
-        .notice-alert-bar.show { display: block; }
-        .notice-alert-bar .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .notice-alert-bar .notice-icon { font-size: 18px; animation: pulseBell 1.5s infinite; display: flex; align-items: center; gap: 6px; }
-        .notice-alert-bar .notice-content { flex:1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .notice-alert-bar .notice-content .badge {
-            background: var(--school-gold);
-            color: var(--kenya-black);
-            padding: 2px 12px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            animation: pulseBadge 1.5s infinite;
-        }
-        .notice-alert-bar .notice-content .message { font-size: 13px; font-weight: 500; flex:1; }
-        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
-        .notice-alert-bar .notice-close {
-            background: rgba(255,255,255,0.15);
-            border: none;
-            color: white;
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        .notice-alert-bar .notice-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
-
-        /* ========================================
            NEWS TICKER
            ======================================== */
         .news-ticker-section {
@@ -440,6 +396,7 @@
             border-bottom: 2px solid var(--school-gold);
             position: relative;
             z-index: 100;
+            margin-top: 62px;
         }
         .top-nav-bar .container {
             display: flex;
@@ -964,7 +921,6 @@
         @keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
         @keyframes bounceArrow { 0%,100% { transform:translateY(0); } 50% { transform:translateY(8px); } }
         @keyframes arrowDown { 0%,100% { transform:translateY(0); } 50% { transform:translateY(5px); } }
-        @keyframes float { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(-6px); } }
         @keyframes slideDownNotice { from { transform:translateY(-100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
         @keyframes pulseBell { 0%,100% { transform:scale(1); } 50% { transform:scale(1.15); } }
         @keyframes pulseBadge { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
@@ -973,7 +929,7 @@
         @keyframes tickerScroll { 0%,20% { transform:translateY(0); } 25%,45% { transform:translateY(-22px); } 50%,70% { transform:translateY(-44px); } 75%,95% { transform:translateY(-66px); } 100% { transform:translateY(0); } }
 
         /* ========================================
-           GALLERY SECTION - FIXED
+           GALLERY SECTION
            ======================================== */
         .gallery-section {
             padding: 60px 0;
@@ -1000,7 +956,6 @@
             font-weight: 300;
         }
 
-        /* Swiper Container - Critical Fix */
         .gallery-swiper {
             width: 100%;
             padding: 15px 0 50px;
@@ -1098,7 +1053,6 @@
             transform: translateX(4px);
         }
 
-        /* Swiper Navigation - Desktop */
         .gallery-swiper .swiper-button-next,
         .gallery-swiper .swiper-button-prev {
             color: var(--school-gold) !important;
@@ -1129,7 +1083,6 @@
             left: 10px;
         }
 
-        /* Swiper Pagination */
         .gallery-swiper .swiper-pagination {
             position: absolute;
             bottom: 0;
@@ -1149,68 +1102,6 @@
             background: var(--school-gold) !important;
             opacity: 1;
         }
-
-        /* ========================================
-           RESPONSIVE - GALLERY FIX
-           ======================================== */
-        @media (max-width: 1024px) {
-            .gallery-card img {
-                height: 200px;
-            }
-            .gallery-swiper .swiper-button-next,
-            .gallery-swiper .swiper-button-prev {
-                width: 38px !important;
-                height: 38px !important;
-            }
-        }
-        @media (max-width: 768px) {
-            .gallery-card img {
-                height: 180px;
-            }
-            .gallery-swiper .swiper-button-next,
-            .gallery-swiper .swiper-button-prev {
-                display: none !important;
-            }
-            .gallery-swiper .swiper-pagination {
-                display: block !important;
-            }
-        }
-        @media (max-width: 480px) {
-            .gallery-card img {
-                height: 160px;
-            }
-            .gallery-section .section-title.light {
-                font-size: 24px;
-            }
-            .gallery-section .section-subtitle.light {
-                font-size: 14px;
-            }
-            .gallery-swiper {
-                padding: 10px 0 40px;
-            }
-        }
-
-        /* ========================================
-           SECTIONS
-           ======================================== */
-        .section-title {
-            font-family: var(--font-primary);
-            font-size: 32px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 5px;
-            color: var(--school-blue-dark);
-        }
-        .section-title .highlight { color: var(--school-gold); }
-        .section-title.light { color: white; }
-        .section-subtitle {
-            text-align: center;
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 30px;
-            font-weight: 300;
-        }
-        .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
         /* ========================================
            CONTENT CARDS
@@ -1571,6 +1462,7 @@
             .main-header .nav-links a.student-portal-link { font-size: 16px; padding: 12px 24px; width: 100%; justify-content: center; }
             .main-header .nav-links a.enroll-now-link { width: 100%; justify-content: center; }
             .main-header .nav-links a.portal-link { width: 100%; justify-content: center; }
+            .top-nav-bar { margin-top: 62px; }
             .top-nav-bar .container { flex-direction: column; align-items: stretch; gap: 8px; }
             .top-nav-bar .nav-left { justify-content: center; }
             .top-nav-bar .nav-links { justify-content: center; }
@@ -1592,7 +1484,6 @@
             .news-item h4 { font-size: 20px !important; }
             .news-item p { font-size: 15px !important; }
             .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
-            .notice-alert-bar .container { flex-direction: column; text-align: center; }
             .main-header .logo-section h1 { font-size: 16px; }
             .main-header .logo-section .school-logo { width: 32px; height: 32px; }
             .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
@@ -1607,6 +1498,10 @@
             .splash-card h1 { font-size: 22px; }
             .splash-news .headline { font-size: 17px; }
             .splash-news { padding: 18px 16px; min-height: 140px; }
+            .gallery-card img { height: 180px; }
+            .gallery-swiper .swiper-button-next,
+            .gallery-swiper .swiper-button-prev { display: none !important; }
+            .gallery-swiper .swiper-pagination { display: block !important; }
         }
         @media (max-width: 480px) {
             .content-grid { grid-template-columns: 1fr; }
@@ -1626,13 +1521,17 @@
             .news-item h4 { font-size: 18px !important; }
             .news-item p { font-size: 14px !important; }
             .news-section .container-news { padding: 0 10px !important; }
+            .gallery-card img { height: 160px; }
+            .gallery-section .section-title.light { font-size: 24px; }
+            .gallery-section .section-subtitle.light { font-size: 14px; }
+            .gallery-swiper { padding: 10px 0 40px; }
         }
     </style>
 </head>
 <body>
 
     <!-- ======================================== -->
-    <!-- SPLASH SCREEN - FIRST VISIT ONLY -->
+    <!-- SPLASH SCREEN - REPLACES RENDER.COM SPIN-UP -->
     <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
@@ -1691,20 +1590,6 @@
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         </div>
     </header>
-
-    <!-- ======================================== -->
-    <!-- NOTICE ALERT BAR -->
-    <!-- ======================================== -->
-    <div class="notice-alert-bar" id="noticeAlertBar">
-        <div class="container">
-            <div class="notice-icon"><span class="bell">🔔</span><span style="font-weight:700;font-size:11px;">ALERT</span></div>
-            <div class="notice-content">
-                <span class="badge">⚠️ STAFF NOTICE</span>
-                <span class="message" id="noticeMessage"><strong>📢 Important:</strong> Staff meeting on Friday at 4:00 PM in the staff room.</span>
-            </div>
-            <button class="notice-close" onclick="closeNotice()">✕</button>
-        </div>
-    </div>
 
     <!-- ======================================== -->
     <!-- NEWS TICKER -->
@@ -1809,7 +1694,7 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- GALLERY SECTION - FIXED -->
+    <!-- GALLERY SECTION -->
     <!-- ======================================== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
@@ -2055,11 +1940,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <!-- ======================================== -->
+    <!-- MAIN APPLICATION SCRIPT -->
+    <!-- ======================================== -->
     <script>
+        // ========================================
+        // AOS INIT
+        // ========================================
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
         // ========================================
-        // SPLASH SCREEN - STAYS UNTIL PAGE FULLY LOADS
+        // SPLASH SCREEN - REPLACES RENDER.COM SPIN-UP
         // ========================================
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
@@ -2070,12 +1962,18 @@
             }, 800);
         }
 
+        // Check if splash was already seen in this session
         if (sessionStorage.getItem('splashSeen')) {
             document.getElementById('splash-screen').style.display = 'none';
         } else {
+            // Wait for the page to fully load (including all assets, Render.com spin-up)
             window.addEventListener('load', function() {
+                // Give a small extra delay to ensure everything is rendered
                 setTimeout(hideSplash, 1000);
             });
+            
+            // Fallback: If page takes too long, hide after 15 seconds max
+            // This ensures it doesn't stay forever if something fails
             setTimeout(hideSplash, 15000);
         }
 
@@ -2089,7 +1987,9 @@
             return temp.textContent || temp.innerText || '';
         }
 
-        // ===== SPLASH NEWS - Update from CMS =====
+        // ========================================
+        // SPLASH NEWS - Update from CMS
+        // ========================================
         async function updateSplashNews() {
             try {
                 const res = await fetch('/api/content');
@@ -2104,12 +2004,16 @@
         }
         updateSplashNews();
 
-        // ===== MOBILE MENU =====
+        // ========================================
+        // MOBILE MENU
+        // ========================================
         function toggleMobileMenu() {
             document.getElementById('navLinks').classList.toggle('show');
         }
 
-        // ===== SCROLL TO CONTENT =====
+        // ========================================
+        // SCROLL TO CONTENT
+        // ========================================
         function scrollToContent() {
             const el = document.getElementById('slide-content');
             if (el) {
@@ -2118,7 +2022,9 @@
             }
         }
 
-        // ===== SECTION TABS =====
+        // ========================================
+        // SECTION TABS
+        // ========================================
         function scrollToSection(id) {
             const el = document.getElementById(id);
             if (el) {
@@ -2133,25 +2039,9 @@
             }
         }
 
-        // ===== NOTICE =====
-        function closeNotice() {
-            const bar = document.getElementById('noticeAlertBar');
-            bar.classList.remove('show');
-            localStorage.setItem('noticeClosed', 'true');
-        }
-        function showNotice(msg) {
-            const bar = document.getElementById('noticeAlertBar');
-            if (msg) document.getElementById('noticeMessage').innerHTML = msg;
-            bar.classList.add('show');
-            localStorage.removeItem('noticeClosed');
-        }
-        (function checkNotice() {
-            if (!localStorage.getItem('noticeClosed')) {
-                document.getElementById('noticeAlertBar').classList.add('show');
-            }
-        })();
-
-        // ===== VIDEO MODAL =====
+        // ========================================
+        // VIDEO MODAL
+        // ========================================
         function openVideoModal() {
             document.getElementById('videoModal').classList.add('show');
             document.getElementById('modalVideo').play();
@@ -2166,15 +2056,12 @@
         });
 
         // ========================================
-        // GALLERY SWIPER - FIXED FOR ALL SCREENS
+        // GALLERY SWIPER - FIXED
         // ========================================
-        // Wait for DOM to be fully loaded before initializing Swiper
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if swiper container exists
             const swiperContainer = document.querySelector('.gallery-swiper');
             if (!swiperContainer) return;
 
-            // Initialize Swiper with proper configuration
             const gallerySwiper = new Swiper('.gallery-swiper', {
                 slidesPerView: 1,
                 spaceBetween: 20,
@@ -2194,59 +2081,38 @@
                     prevEl: '.swiper-button-prev'
                 },
                 breakpoints: {
-                    480: {
-                        slidesPerView: 1,
-                        spaceBetween: 15,
-                    },
-                    640: {
-                        slidesPerView: 1.5,
-                        spaceBetween: 16,
-                    },
-                    768: {
-                        slidesPerView: 2,
-                        spaceBetween: 20,
-                    },
-                    1024: {
-                        slidesPerView: 3,
-                        spaceBetween: 25,
-                    }
+                    480: { slidesPerView: 1, spaceBetween: 15 },
+                    640: { slidesPerView: 1.5, spaceBetween: 16 },
+                    768: { slidesPerView: 2, spaceBetween: 20 },
+                    1024: { slidesPerView: 3, spaceBetween: 25 }
                 },
                 watchSlidesProgress: true,
                 watchSlidesVisibility: true,
-                // Ensure slides are properly rendered
                 on: {
-                    init: function() {
-                        // Force a re-check of slide sizes
-                        this.update();
-                    }
+                    init: function() { this.update(); }
                 }
             });
 
-            // Re-initialize swiper on window resize to ensure proper display
             let resizeTimer;
             window.addEventListener('resize', function() {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(function() {
-                    if (gallerySwiper) {
-                        gallerySwiper.update();
-                    }
+                    if (gallerySwiper) gallerySwiper.update();
                 }, 300);
             });
 
-            // Handle orientation change on mobile
             window.addEventListener('orientationchange', function() {
                 setTimeout(function() {
-                    if (gallerySwiper) {
-                        gallerySwiper.update();
-                    }
+                    if (gallerySwiper) gallerySwiper.update();
                 }, 500);
             });
 
-            // Expose swiper instance to window for debugging if needed
             window.gallerySwiper = gallerySwiper;
         });
 
-        // ===== CMS LOAD =====
+        // ========================================
+        // CMS LOAD
+        // ========================================
         function stripHtml(html) { 
             if (!html) return ''; 
             const d = document.createElement('DIV'); 
@@ -2269,7 +2135,6 @@
                     if (c.parentsCalendar) document.getElementById('displayParents').textContent = stripHtml(c.parentsCalendar);
                     if (c.downloads) document.getElementById('displayDownloads').textContent = stripHtml(c.downloads);
                     if (c.feesContent) document.getElementById('displayFees').textContent = stripHtml(c.feesContent);
-                    if (c.noticeAlert) showNotice(c.noticeAlert);
                     if (c.homeNews && c.homeNews.length) {
                         const grid = document.getElementById('newsGrid');
                         grid.innerHTML = '';
@@ -2286,6 +2151,345 @@
             } catch (e) { /* fallback */ }
         }
         document.addEventListener('DOMContentLoaded', loadCMS);
+
+        // ========================================
+        // LIVE EDIT MODE - FULL WORKING VERSION
+        // ========================================
+        
+        let editModeActive = false;
+        let editedElements = [];
+        let originalContent = {};
+
+        // Check if edit mode is enabled from URL
+        if (window.location.search.includes('edit=true')) {
+            setTimeout(enableEditMode, 500);
+        }
+
+        function enableEditMode() {
+            editModeActive = true;
+            
+            // Create edit toolbar
+            const editBar = document.createElement('div');
+            editBar.id = 'editToolbar';
+            editBar.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: #0A1628;
+                color: white;
+                padding: 10px 20px;
+                z-index: 999999;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+                border-bottom: 3px solid #D4A017;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            `;
+            editBar.innerHTML = `
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <span style="font-weight:700;color:#D4A017;">✏️ EDIT MODE</span>
+                    <span style="font-size:12px;opacity:0.7;">Click any text to edit</span>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button onclick="saveEdits()" style="background:#28a745;color:white;border:none;padding:6px 18px;border-radius:6px;font-weight:600;cursor:pointer;">
+                        <i class="fas fa-save"></i> Save All
+                    </button>
+                    <button onclick="exitEditMode()" style="background:#dc3545;color:white;border:none;padding:6px 18px;border-radius:6px;font-weight:600;cursor:pointer;">
+                        <i class="fas fa-times"></i> Exit
+                    </button>
+                    <button onclick="editImage()" style="background:#17a2b8;color:white;border:none;padding:6px 18px;border-radius:6px;font-weight:600;cursor:pointer;">
+                        <i class="fas fa-image"></i> Image
+                    </button>
+                    <button onclick="editVideo()" style="background:#6f42c1;color:white;border:none;padding:6px 18px;border-radius:6px;font-weight:600;cursor:pointer;">
+                        <i class="fas fa-video"></i> Video
+                    </button>
+                </div>
+            `;
+            document.body.insertBefore(editBar, document.body.firstChild);
+            
+            // Make all text content editable
+            const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, .hero-description, .section-title, .subtitle, .welcome-text, .feature-item p, .news-item p, .editor-card .desc');
+            
+            elements.forEach(el => {
+                // Skip navigation, footer, sidebar
+                if (el.closest('nav') || el.closest('footer') || el.closest('.sidebar') || el.closest('.navbar')) {
+                    return;
+                }
+                
+                // Skip empty elements
+                if (!el.textContent.trim()) return;
+                
+                // Store original content
+                const id = el.id || 'el-' + Math.random().toString(36).substr(2, 6);
+                if (!el.id) el.id = id;
+                originalContent[id] = el.innerHTML;
+                
+                // Make editable
+                el.style.cursor = 'pointer';
+                el.style.border = '2px dashed transparent';
+                el.style.padding = '4px 8px';
+                el.style.borderRadius = '4px';
+                el.style.transition = 'all 0.2s';
+                
+                el.addEventListener('mouseenter', function() {
+                    if (editModeActive) {
+                        this.style.borderColor = '#D4A017';
+                        this.style.background = 'rgba(212,160,23,0.05)';
+                    }
+                });
+                
+                el.addEventListener('mouseleave', function() {
+                    if (editModeActive) {
+                        this.style.borderColor = 'transparent';
+                        this.style.background = 'transparent';
+                    }
+                });
+                
+                el.addEventListener('click', function(e) {
+                    if (!editModeActive) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const currentText = this.innerHTML;
+                    const newText = prompt('✏️ Edit this text:', currentText);
+                    
+                    if (newText !== null && newText !== currentText) {
+                        this.innerHTML = newText;
+                        this.style.borderColor = '#28a745';
+                        this.style.background = 'rgba(40,167,69,0.1)';
+                        
+                        // Track edited element
+                        if (!editedElements.includes(id)) {
+                            editedElements.push(id);
+                        }
+                        
+                        showToast('✅ Text updated! Click "Save All" to save changes.');
+                    }
+                });
+            });
+            
+            // Make images editable
+            document.querySelectorAll('img:not(.logo):not(.school-logo):not(.footer-logo)').forEach(img => {
+                img.style.cursor = 'pointer';
+                img.style.border = '3px solid transparent';
+                img.style.borderRadius = '8px';
+                img.style.transition = 'all 0.2s';
+                
+                img.addEventListener('mouseenter', function() {
+                    if (editModeActive) {
+                        this.style.borderColor = '#D4A017';
+                        this.style.boxShadow = '0 0 20px rgba(212,160,23,0.3)';
+                    }
+                });
+                
+                img.addEventListener('mouseleave', function() {
+                    if (editModeActive) {
+                        this.style.borderColor = 'transparent';
+                        this.style.boxShadow = 'none';
+                    }
+                });
+                
+                img.addEventListener('click', function(e) {
+                    if (!editModeActive) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const action = confirm('What do you want to do?\n\nOK = Change Image URL\nCancel = Delete Image');
+                    if (action) {
+                        const newUrl = prompt('Enter new image URL:', this.src);
+                        if (newUrl) {
+                            this.src = newUrl;
+                            this.style.borderColor = '#28a745';
+                            if (!editedElements.includes(img.id || 'img-' + Math.random())) {
+                                editedElements.push(img.id || 'img-' + Math.random());
+                            }
+                            showToast('✅ Image updated! Click "Save All" to save.');
+                        }
+                    } else {
+                        if (confirm('Delete this image?')) {
+                            this.style.display = 'none';
+                            showToast('✅ Image removed! Click "Save All" to save.');
+                        }
+                    }
+                });
+            });
+            
+            showToast('✏️ Edit mode enabled! Click any text or image to edit.');
+        }
+
+        function exitEditMode() {
+            editModeActive = false;
+            const toolbar = document.getElementById('editToolbar');
+            if (toolbar) toolbar.remove();
+            
+            // Reset styles
+            document.querySelectorAll('[style*="cursor: pointer;"]').forEach(el => {
+                el.style.cursor = '';
+                el.style.border = '';
+                el.style.padding = '';
+                el.style.borderRadius = '';
+                el.style.background = '';
+                el.style.boxShadow = '';
+            });
+            
+            // Reset images
+            document.querySelectorAll('img').forEach(img => {
+                img.style.cursor = '';
+                img.style.border = '';
+                img.style.borderRadius = '';
+                img.style.boxShadow = '';
+            });
+            
+            showToast('📝 Edit mode disabled.');
+        }
+
+        function editImage() {
+            const url = prompt('Enter image URL:');
+            if (url) {
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.maxWidth = '100%';
+                img.style.borderRadius = '8px';
+                img.style.margin = '10px 0';
+                
+                const container = prompt('Where to insert? (selector like #content or .main-content)') || '#content';
+                const target = document.querySelector(container) || document.body;
+                target.appendChild(img);
+                
+                showToast('✅ Image inserted!');
+            }
+        }
+
+        function editVideo() {
+            const url = prompt('Enter video URL (MP4, YouTube, etc.):');
+            if (url) {
+                let videoHtml = '';
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
+                    if (videoId) {
+                        videoHtml = `<iframe width="100%" height="400" src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen style="border-radius:12px;margin:10px 0;"></iframe>`;
+                    }
+                } else if (url.includes('vimeo.com')) {
+                    const videoId = url.match(/vimeo\.com\/(\d+)/);
+                    if (videoId) {
+                        videoHtml = `<iframe width="100%" height="400" src="https://player.vimeo.com/video/${videoId[1]}" frameborder="0" allowfullscreen style="border-radius:12px;margin:10px 0;"></iframe>`;
+                    }
+                } else {
+                    videoHtml = `<video src="${url}" controls style="width:100%;border-radius:12px;margin:10px 0;"></video>`;
+                }
+                
+                if (videoHtml) {
+                    const container = prompt('Where to insert? (selector like #content or .main-content)') || '#content';
+                    const target = document.querySelector(container) || document.body;
+                    target.innerHTML += videoHtml;
+                    showToast('✅ Video inserted!');
+                }
+            }
+        }
+
+        function saveEdits() {
+            if (editedElements.length === 0) {
+                showToast('ℹ️ No changes to save.');
+                return;
+            }
+            
+            showToast('💾 Saving changes...');
+            
+            // Collect all changes
+            const changes = {};
+            editedElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    changes[id] = el.innerHTML;
+                }
+            });
+            
+            // Send to server
+            fetch('/api/content/live-save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ changes: changes })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    editedElements = [];
+                    showToast('✅ All changes saved successfully!');
+                    
+                    // Reset styles
+                    document.querySelectorAll('[style*="border-color: #28a745"]').forEach(el => {
+                        el.style.borderColor = 'transparent';
+                        el.style.background = 'transparent';
+                    });
+                } else {
+                    showToast('❌ Error saving: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error('Save error:', err);
+                showToast('❌ Error saving changes: ' + err.message);
+            });
+        }
+
+        function showToast(message) {
+            const colors = {
+                success: '#d4edda',
+                error: '#f8d7da',
+                info: '#d1ecf1'
+            };
+            const textColors = {
+                success: '#155724',
+                error: '#721c24',
+                info: '#0c5460'
+            };
+            
+            // Remove existing toast
+            const existing = document.querySelector('.edit-toast');
+            if (existing) existing.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = 'edit-toast';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                background: ${colors.info || '#fff'};
+                color: ${textColors.info || '#333'};
+                padding: 15px 25px;
+                border-radius: 10px;
+                font-weight: 500;
+                font-size: 14px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                z-index: 999999;
+                animation: slideInRight 0.4s ease;
+                max-width: 400px;
+                border-left: 4px solid #17a2b8;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.4s';
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        // Add CSS for toast animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log('✏️ Edit Mode Ready! Add ?edit=true to URL to enable.');
+        console.log('🚀 Changara Star Academy loaded successfully!');
     </script>
 </body>
 </html>

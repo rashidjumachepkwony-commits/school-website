@@ -4602,6 +4602,67 @@ app.get('/api/students/portal/assignments/filtered', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+// ============================================
+// LIVE SAVE - Save inline edits
+// ============================================
+app.post('/api/content/live-save', async (req, res) => {
+    try {
+        const { changes } = req.body;
+        const content = await Content.getContent();
+        
+        if (!changes || Object.keys(changes).length === 0) {
+            return res.status(400).json({ success: false, message: 'No changes provided' });
+        }
+        
+        let updatedFields = 0;
+        
+        // Map element IDs to content fields
+        const idMap = {
+            'heroTitle': 'heroTitle',
+            'heroSubtitle': 'heroSubtitle',
+            'aboutMission': 'aboutMission',
+            'aboutVision': 'aboutVision',
+            'aboutValues': 'aboutValues',
+            'aboutHistory': 'aboutHistory',
+            'aboutWhy': 'aboutWhy',
+            'admissionsRequirements': 'admissionsRequirements',
+            'admissionsAge': 'admissionsAge',
+            'admissionsDocuments': 'admissionsDocuments',
+            'admissionsProcess': 'admissionsProcess',
+            'admissionsFees': 'admissionsFees',
+            'performanceKcpe': 'performanceKcpe',
+            'performanceInternal': 'performanceInternal',
+            'parentsCalendar': 'parentsCalendar',
+            'parentsHomework': 'parentsHomework',
+            'parentsAttendance': 'parentsAttendance',
+            'parentsRules': 'parentsRules',
+            'parentsUniform': 'parentsUniform',
+            'parentsFees': 'parentsFees',
+            'feesContent': 'feesContent',
+            'feesInstructions': 'feesInstructions'
+        };
+        
+        for (const [id, newContent] of Object.entries(changes)) {
+            const fieldName = idMap[id];
+            if (fieldName && content[fieldName] !== undefined) {
+                content[fieldName] = newContent;
+                updatedFields++;
+            }
+        }
+        
+        if (updatedFields > 0) {
+            content.lastUpdated = new Date();
+            content.updatedBy = 'Live Edit';
+            await content.save();
+            res.json({ success: true, message: `Updated ${updatedFields} fields`, updatedFields });
+        } else {
+            res.json({ success: true, message: 'No matching fields found', updatedFields: 0 });
+        }
+    } catch (error) {
+        console.error('Live save error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 // ============================================
 // REGISTER STATIC FILES - MUST BE AFTER ALL API ROUTES
