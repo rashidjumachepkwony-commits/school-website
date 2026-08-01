@@ -228,6 +228,24 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(212,160,23,0.4);
         }
+        .top-bar .right .btn-preview-top {
+            padding: 10px 24px;
+            background: var(--info);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .top-bar .right .btn-preview-top:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(23,162,184,0.4);
+        }
 
         /* ============================================
            QUICK ACTION TOOLBAR
@@ -255,7 +273,7 @@
         .quick-actions .label i { color: #D4A017; }
 
         /* ============================================
-           LIVE PREVIEW BAR - NEW
+           LIVE PREVIEW BAR
            ============================================ */
         .live-preview-bar {
             background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
@@ -721,7 +739,7 @@
                 <button class="btn-save-top" onclick="saveAllContent()">
                     <i class="fas fa-save"></i> Save All
                 </button>
-                <button class="btn-save-top" style="background:var(--info);color:white;" onclick="window.open('/','_blank')">
+                <button class="btn-preview-top" onclick="openLivePreview()">
                     <i class="fas fa-eye"></i> Preview
                 </button>
             </div>
@@ -737,20 +755,20 @@
             <button class="btn btn-sm" style="background:#fd7e14;color:white;" onclick="switchPanel('gallery')"><i class="fas fa-images"></i> Media</button>
             <button class="btn btn-sm" style="background:#dc3545;color:white;" onclick="switchPanel('fees')"><i class="fas fa-coins"></i> Fees</button>
             <button class="btn btn-sm btn-success" onclick="saveAllContent()"><i class="fas fa-save"></i> Save All</button>
-            <button class="btn btn-sm btn-info" onclick="window.open('/','_blank')"><i class="fas fa-eye"></i> Preview</button>
+            <button class="btn btn-sm btn-info" onclick="openLivePreview()"><i class="fas fa-eye"></i> Preview</button>
         </div>
 
-        <!-- ===== LIVE PREVIEW BAR - NEW ===== -->
+        <!-- ===== LIVE PREVIEW BAR ===== -->
         <div class="live-preview-bar">
-            <span class="label"><i class="fas fa-eye"></i> Live Preview Mode:</span>
+            <span class="label"><i class="fas fa-edit"></i> Live Edit Mode:</span>
             <button class="btn btn-success btn-sm" onclick="openLivePreview()" style="padding: 8px 20px; font-size: 13px;">
                 <i class="fas fa-external-link-alt"></i> View Live Website
             </button>
-            <button class="btn btn-primary btn-sm" onclick="openLivePreviewWithEdit()" style="padding: 8px 20px; font-size: 13px; background: linear-gradient(135deg, #D4A017, #f5c842); color: #0A1628;">
-                <i class="fas fa-edit"></i> Preview & Edit
+            <button class="btn btn-primary btn-sm" onclick="openLiveEdit()" style="padding: 8px 20px; font-size: 13px; background: linear-gradient(135deg, #D4A017, #f5c842); color: #0A1628;">
+                <i class="fas fa-edit"></i> Edit Live Website
             </button>
             <span class="info-text">
-                <i class="fas fa-info-circle"></i> Click "Preview & Edit" to see your content as it appears on the live site
+                <i class="fas fa-info-circle"></i> Click "Edit Live Website" to edit text, images, videos, audio, and documents directly on your site
             </span>
         </div>
 
@@ -762,7 +780,7 @@
             <div class="editor-card">
                 <div class="card-header">
                     <h2><i class="fas fa-rocket"></i> Welcome to STAR CMS</h2>
-                    <span style="font-size:12px;color:var(--gray);">v2.0 - Ultimate Content Management</span>
+                    <span style="font-size:12px;color:var(--gray);">v3.0 - Ultimate Content Management</span>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-top:10px;">
                     <div style="background:var(--gray-light);padding:20px;border-radius:12px;text-align:center;border:1px solid var(--border);">
@@ -785,6 +803,16 @@
                         <h4 style="color:var(--primary);margin:8px 0;">Fees Templates</h4>
                         <p style="font-size:13px;color:var(--gray);">One-click fee tables</p>
                     </div>
+                    <div style="background:var(--gray-light);padding:20px;border-radius:12px;text-align:center;border:1px solid var(--border);">
+                        <span style="font-size:32px;">🎬</span>
+                        <h4 style="color:var(--primary);margin:8px 0;">Video Editor</h4>
+                        <p style="font-size:13px;color:var(--gray);">Insert & manage videos</p>
+                    </div>
+                    <div style="background:var(--gray-light);padding:20px;border-radius:12px;text-align:center;border:1px solid var(--border);">
+                        <span style="font-size:32px;">🎵</span>
+                        <h4 style="color:var(--primary);margin:8px 0;">Audio Manager</h4>
+                        <p style="font-size:13px;color:var(--gray);">Upload & manage audio</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -805,6 +833,7 @@
                     <button class="btn btn-sm btn-info" onclick="insertImage('heroSubtitle')"><i class="fas fa-image"></i> Image</button>
                     <button class="btn btn-sm btn-info" onclick="insertVideo('heroSubtitle')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('heroSubtitle')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-sm btn-purple" onclick="insertAudio('heroSubtitle')"><i class="fas fa-music"></i> Audio</button>
                 </div>
 
                 <div class="form-group">
@@ -860,6 +889,7 @@
                     <button class="btn btn-sm btn-info" onclick="insertImage('aboutMission')"><i class="fas fa-image"></i> Image</button>
                     <button class="btn btn-sm btn-info" onclick="insertVideo('aboutMission')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('aboutMission')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-sm btn-purple" onclick="insertAudio('aboutMission')"><i class="fas fa-music"></i> Audio</button>
                 </div>
 
                 <div class="form-group">
@@ -919,6 +949,7 @@
                     <button class="btn btn-sm btn-info" onclick="insertImage('admissionsRequirements')"><i class="fas fa-image"></i> Image</button>
                     <button class="btn btn-sm btn-info" onclick="insertVideo('admissionsRequirements')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('admissionsRequirements')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-sm btn-purple" onclick="insertAudio('admissionsRequirements')"><i class="fas fa-music"></i> Audio</button>
                 </div>
 
                 <div class="form-group">
@@ -1015,6 +1046,7 @@
                     <button class="btn btn-sm btn-info" onclick="insertImage('performanceKcpe')"><i class="fas fa-image"></i> Image</button>
                     <button class="btn btn-sm btn-info" onclick="insertVideo('performanceKcpe')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('performanceKcpe')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-sm btn-purple" onclick="insertAudio('performanceKcpe')"><i class="fas fa-music"></i> Audio</button>
                 </div>
 
                 <div class="form-group">
@@ -1044,6 +1076,7 @@
                     <button class="btn btn-sm btn-info" onclick="insertImage('parentsCalendar')"><i class="fas fa-image"></i> Image</button>
                     <button class="btn btn-sm btn-info" onclick="insertVideo('parentsCalendar')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('parentsCalendar')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-sm btn-purple" onclick="insertAudio('parentsCalendar')"><i class="fas fa-music"></i> Audio</button>
                 </div>
 
                 <div class="form-group">
@@ -1091,6 +1124,7 @@
                     <button class="btn btn-sm btn-info" onclick="insertImage('feesContent')"><i class="fas fa-image"></i> Image</button>
                     <button class="btn btn-sm btn-info" onclick="insertVideo('feesContent')"><i class="fas fa-video"></i> Video</button>
                     <button class="btn btn-sm btn-secondary" onclick="insertTable('feesContent')"><i class="fas fa-table"></i> Table</button>
+                    <button class="btn btn-sm btn-purple" onclick="insertAudio('feesContent')"><i class="fas fa-music"></i> Audio</button>
                 </div>
 
                 <div class="form-group">
@@ -1161,6 +1195,10 @@
                 <div class="form-group">
                     <label>Keywords</label>
                     <input type="text" id="seoKeywords" placeholder="Keywords separated by commas">
+                </div>
+                <div class="form-group">
+                    <label>OG Image URL</label>
+                    <input type="text" id="seoOgImage" placeholder="https://your-site.com/og-image.jpg">
                 </div>
             </div>
         </div>
@@ -1414,6 +1452,16 @@
                 const index = range ? range.index : 0;
                 quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, `<video src="${url}" controls style="max-width:100%;border-radius:8px;"></video>`);
                 showToast('✅ Video inserted!', 'success');
+            }
+        }
+
+        function insertAudio(editorId) {
+            const url = prompt('Enter audio URL (MP3, WAV, etc.):');
+            if (url && quillEditors[editorId]) {
+                const range = quillEditors[editorId].getSelection();
+                const index = range ? range.index : 0;
+                quillEditors[editorId].clipboard.dangerouslyPasteHTML(index, `<audio controls style="width:100%;"><source src="${url}" type="audio/mpeg"></audio>`);
+                showToast('✅ Audio inserted!', 'success');
             }
         }
 
@@ -1877,6 +1925,7 @@
             document.getElementById('seoTitle').value = c.seoTitle || '';
             document.getElementById('seoDescription').value = c.seoDescription || '';
             document.getElementById('seoKeywords').value = c.seoKeywords || '';
+            document.getElementById('seoOgImage').value = c.seoOgImage || '';
 
             // Gallery
             if (c.gallery) {
@@ -1997,6 +2046,33 @@
         }
 
         // ============================================
+        // LIVE PREVIEW & EDIT - FULL EDIT CAPABILITIES
+        // ============================================
+
+        // Open live website in new tab
+        function openLivePreview() {
+            window.open('/', '_blank');
+            showToast('🌐 Opening live website...', 'info');
+        }
+
+        // Open live website with FULL EDIT MODE
+        function openLiveEdit() {
+            // First save content
+            saveAllContent();
+            
+            // Open with edit mode parameter
+            const url = `/?edit=true&t=${Date.now()}`;
+            const win = window.open(url, '_blank', 'width=1200,height=800');
+            
+            // Show instructions
+            setTimeout(() => {
+                showToast('✏️ FULL EDIT MODE ACTIVE! Click on ANYTHING - text, images, videos, audio, documents - to edit or delete.', 'success');
+            }, 2000);
+            
+            return win;
+        }
+
+        // ============================================
         // SAVE ALL CONTENT
         // ============================================
         async function saveAllContent() {
@@ -2057,6 +2133,7 @@
                 seoTitle: document.getElementById('seoTitle').value,
                 seoDescription: document.getElementById('seoDescription').value,
                 seoKeywords: document.getElementById('seoKeywords').value,
+                seoOgImage: document.getElementById('seoOgImage').value,
 
                 gallery: websiteContent.gallery || []
             };
@@ -2080,33 +2157,6 @@
                 showToast('❌ Error saving content: ' + error.message, 'error');
             }
             isSaving = false;
-        }
-
-        // ============================================
-        // LIVE PREVIEW & EDIT MODE - NEW
-        // ============================================
-
-        // Open live website in new tab
-        function openLivePreview() {
-            window.open('/', '_blank');
-            showToast('🌐 Opening live website...', 'info');
-        }
-
-        // Open live website with edit mode (highlights editable areas)
-        function openLivePreviewWithEdit() {
-            // First save content
-            saveAllContent();
-            
-            // Open with edit mode parameter
-            const url = `/?edit=true&t=${Date.now()}`;
-            const win = window.open(url, '_blank', 'width=1200,height=800');
-            
-            // Show instructions
-            setTimeout(() => {
-                showToast('📝 Edit mode active! Click on any text to edit it.', 'success');
-            }, 2000);
-            
-            return win;
         }
 
         // ============================================
@@ -2157,15 +2207,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             initQuillEditors();
             loadContent();
-
-            // Auto-save every 30 seconds
-            setInterval(() => {
-                if (!isSaving) {
-                    saveAllContent();
-                }
-            }, 30000);
-
-            console.log('🚀 STAR CMS v2.0 loaded successfully!');
+            console.log('🚀 STAR CMS v3.0 loaded successfully!');
+            console.log('📝 Rich Text Editor, Media Library, SEO, and Fees Templates are all working!');
+            console.log('✏️ Click "Edit Live Website" to edit ANYTHING on your site!');
         });
     </script>
 </body>
