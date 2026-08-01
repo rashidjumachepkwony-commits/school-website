@@ -128,9 +128,6 @@
         .splash-loader .dot:nth-child(3) { animation-delay: 0.4s; }
         .splash-loading-text { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 6px; letter-spacing: 2px; }
 
-        /* ========================================
-           SPLASH SCREEN ANIMATIONS
-           ======================================== */
         @keyframes splashDot { 0%,80%,100% { transform: scale(0.4); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
         @keyframes float { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(-6px); } }
 
@@ -234,8 +231,6 @@
         /* ========================================
            HEADER BUTTONS
            ======================================== */
-
-        /* ===== ADMIN BUTTON (Yellow/Gold) ===== */
         .main-header .nav-links a.portal-link {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
@@ -252,7 +247,6 @@
         }
         .main-header .nav-links a.portal-link::after { display: none; }
 
-        /* ===== ENROLL NOW BUTTON (Red) ===== */
         .main-header .nav-links a.enroll-now-link {
             background: linear-gradient(135deg, #BB0000, #8B0000);
             color: white;
@@ -276,7 +270,6 @@
         }
         .main-header .nav-links a.enroll-now-link::after { display: none; }
 
-        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING) ===== */
         .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
             background-size: 300% 300%;
@@ -453,7 +446,6 @@
             animation: pulseBadge 1.5s infinite;
         }
 
-        /* ===== ENROLL NOW BUTTON (Red) - TOP NAV ===== */
         .top-nav-bar .nav-links a.enroll-now-link {
             background: linear-gradient(135deg, #BB0000, #8B0000);
             color: white;
@@ -477,7 +469,6 @@
         }
         .top-nav-bar .nav-links a.enroll-now-link::after { display: none; }
 
-        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING) - TOP NAV ===== */
         .top-nav-bar .nav-links a.student-portal-link-top {
             background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
             background-size: 300% 300%;
@@ -731,7 +722,6 @@
             animation:fadeInUp 1.4s ease forwards;
         }
 
-        /* ===== HERO BUTTONS ===== */
         .hero-section .btn-group {
             display:flex;
             gap:12px;
@@ -785,7 +775,6 @@
             transform:translateY(-3px);
         }
 
-        /* ===== HERO VIDEO PLAY BUTTON ===== */
         .hero-video-play {
             display:inline-flex;
             align-items:center;
@@ -921,8 +910,6 @@
         @keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
         @keyframes bounceArrow { 0%,100% { transform:translateY(0); } 50% { transform:translateY(8px); } }
         @keyframes arrowDown { 0%,100% { transform:translateY(0); } 50% { transform:translateY(5px); } }
-        @keyframes slideDownNotice { from { transform:translateY(-100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
-        @keyframes pulseBell { 0%,100% { transform:scale(1); } 50% { transform:scale(1.15); } }
         @keyframes pulseBadge { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
         @keyframes pulseBadgeRed { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(187,0,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(187,0,0,0.7); } }
         @keyframes pulseBadgeGreen { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(0,102,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(0,102,0,0.7); } }
@@ -1307,7 +1294,7 @@
         .stat-item p { font-size: 13px; opacity: 0.6; color: white; font-weight: 300; letter-spacing: 1px; }
 
         /* ========================================
-           NEWS SECTION - FULL WIDTH
+           NEWS SECTION
            ======================================== */
         .news-section {
             padding: 60px 0 80px !important;
@@ -1525,6 +1512,50 @@
             .gallery-section .section-title.light { font-size: 24px; }
             .gallery-section .section-subtitle.light { font-size: 14px; }
             .gallery-swiper { padding: 10px 0 40px; }
+        }
+
+        /* ========================================
+           EDIT MODE STYLES
+           ======================================== */
+        .edit-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 999999;
+            animation: slideInRight 0.4s ease;
+            max-width: 400px;
+            border-left: 4px solid #17a2b8;
+        }
+        .edit-toast.success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+        .edit-toast.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+        .edit-toast.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left-color: #17a2b8;
+        }
+        .edit-toast.fade-out {
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
     </style>
 </head>
@@ -1853,7 +1884,7 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- NEWS SECTION - FULL WIDTH -->
+    <!-- NEWS SECTION -->
     <!-- ======================================== -->
     <section class="news-section" id="slide-news">
         <div class="container-news">
@@ -1962,18 +1993,12 @@
             }, 800);
         }
 
-        // Check if splash was already seen in this session
         if (sessionStorage.getItem('splashSeen')) {
             document.getElementById('splash-screen').style.display = 'none';
         } else {
-            // Wait for the page to fully load (including all assets, Render.com spin-up)
             window.addEventListener('load', function() {
-                // Give a small extra delay to ensure everything is rendered
                 setTimeout(hideSplash, 1000);
             });
-            
-            // Fallback: If page takes too long, hide after 15 seconds max
-            // This ensures it doesn't stay forever if something fails
             setTimeout(hideSplash, 15000);
         }
 
@@ -2056,7 +2081,7 @@
         });
 
         // ========================================
-        // GALLERY SWIPER - FIXED
+        // GALLERY SWIPER
         // ========================================
         document.addEventListener('DOMContentLoaded', function() {
             const swiperContainer = document.querySelector('.gallery-swiper');
@@ -2152,13 +2177,15 @@
         }
         document.addEventListener('DOMContentLoaded', loadCMS);
 
-        // ========================================
+        // ================================================================
         // LIVE EDIT MODE - FULL WORKING VERSION
-        // ========================================
-        
+        // ================================================================
+        // This enables editing when ?edit=true is in the URL
+        // To use: Go to CMS and click "Edit Live Website" which opens with ?edit=true
+
         let editModeActive = false;
         let editedElements = [];
-        let originalContent = {};
+        let editToast = null;
 
         // Check if edit mode is enabled from URL
         if (window.location.search.includes('edit=true')) {
@@ -2191,7 +2218,7 @@
             editBar.innerHTML = `
                 <div style="display:flex;align-items:center;gap:12px;">
                     <span style="font-weight:700;color:#D4A017;">✏️ EDIT MODE</span>
-                    <span style="font-size:12px;opacity:0.7;">Click any text to edit</span>
+                    <span style="font-size:12px;opacity:0.7;">Click any text or image to edit</span>
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                     <button onclick="saveEdits()" style="background:#28a745;color:white;border:none;padding:6px 18px;border-radius:6px;font-weight:600;cursor:pointer;">
@@ -2211,7 +2238,7 @@
             document.body.insertBefore(editBar, document.body.firstChild);
             
             // Make all text content editable
-            const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, .hero-description, .section-title, .subtitle, .welcome-text, .feature-item p, .news-item p, .editor-card .desc');
+            const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, .hero-description, .section-title, .subtitle, .welcome-text, .feature-item p, .news-item p');
             
             elements.forEach(el => {
                 // Skip navigation, footer, sidebar
@@ -2225,7 +2252,6 @@
                 // Store original content
                 const id = el.id || 'el-' + Math.random().toString(36).substr(2, 6);
                 if (!el.id) el.id = id;
-                originalContent[id] = el.innerHTML;
                 
                 // Make editable
                 el.style.cursor = 'pointer';
@@ -2266,7 +2292,7 @@
                             editedElements.push(id);
                         }
                         
-                        showToast('✅ Text updated! Click "Save All" to save changes.');
+                        showEditToast('✅ Text updated! Click "Save All" to save changes.', 'success');
                     }
                 });
             });
@@ -2300,24 +2326,31 @@
                     const action = confirm('What do you want to do?\n\nOK = Change Image URL\nCancel = Delete Image');
                     if (action) {
                         const newUrl = prompt('Enter new image URL:', this.src);
-                        if (newUrl) {
-                            this.src = newUrl;
+                        if (newUrl && newUrl.trim() !== '') {
+                            this.src = newUrl.trim();
                             this.style.borderColor = '#28a745';
-                            if (!editedElements.includes(img.id || 'img-' + Math.random())) {
-                                editedElements.push(img.id || 'img-' + Math.random());
+                            const imgId = img.id || 'img-' + Math.random().toString(36).substr(2, 6);
+                            if (!img.id) img.id = imgId;
+                            if (!editedElements.includes(imgId)) {
+                                editedElements.push(imgId);
                             }
-                            showToast('✅ Image updated! Click "Save All" to save.');
+                            showEditToast('✅ Image updated! Click "Save All" to save.', 'success');
                         }
                     } else {
                         if (confirm('Delete this image?')) {
                             this.style.display = 'none';
-                            showToast('✅ Image removed! Click "Save All" to save.');
+                            const imgId = img.id || 'img-' + Math.random().toString(36).substr(2, 6);
+                            if (!img.id) img.id = imgId;
+                            if (!editedElements.includes(imgId)) {
+                                editedElements.push(imgId);
+                            }
+                            showEditToast('✅ Image removed! Click "Save All" to save.', 'success');
                         }
                     }
                 });
             });
             
-            showToast('✏️ Edit mode enabled! Click any text or image to edit.');
+            showEditToast('✏️ Edit mode enabled! Click any text or image to edit.', 'info');
         }
 
         function exitEditMode() {
@@ -2335,7 +2368,6 @@
                 el.style.boxShadow = '';
             });
             
-            // Reset images
             document.querySelectorAll('img').forEach(img => {
                 img.style.cursor = '';
                 img.style.border = '';
@@ -2343,29 +2375,33 @@
                 img.style.boxShadow = '';
             });
             
-            showToast('📝 Edit mode disabled.');
+            // Remove toast
+            if (editToast) { editToast.remove(); editToast = null; }
+            
+            showEditToast('📝 Edit mode disabled.', 'info');
         }
 
         function editImage() {
             const url = prompt('Enter image URL:');
-            if (url) {
+            if (url && url.trim() !== '') {
+                const container = prompt('Where to insert? (selector like #content or .main-content)') || '#content';
+                const target = document.querySelector(container) || document.body;
+                
                 const img = document.createElement('img');
-                img.src = url;
+                img.src = url.trim();
                 img.style.maxWidth = '100%';
                 img.style.borderRadius = '8px';
                 img.style.margin = '10px 0';
-                
-                const container = prompt('Where to insert? (selector like #content or .main-content)') || '#content';
-                const target = document.querySelector(container) || document.body;
+                img.alt = 'Inserted image';
                 target.appendChild(img);
                 
-                showToast('✅ Image inserted!');
+                showEditToast('✅ Image inserted! Click "Save All" to save.', 'success');
             }
         }
 
         function editVideo() {
             const url = prompt('Enter video URL (MP4, YouTube, etc.):');
-            if (url) {
+            if (url && url.trim() !== '') {
                 let videoHtml = '';
                 if (url.includes('youtube.com') || url.includes('youtu.be')) {
                     const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
@@ -2378,115 +2414,155 @@
                         videoHtml = `<iframe width="100%" height="400" src="https://player.vimeo.com/video/${videoId[1]}" frameborder="0" allowfullscreen style="border-radius:12px;margin:10px 0;"></iframe>`;
                     }
                 } else {
-                    videoHtml = `<video src="${url}" controls style="width:100%;border-radius:12px;margin:10px 0;"></video>`;
+                    videoHtml = `<video src="${url.trim()}" controls style="width:100%;border-radius:12px;margin:10px 0;"></video>`;
                 }
                 
                 if (videoHtml) {
                     const container = prompt('Where to insert? (selector like #content or .main-content)') || '#content';
                     const target = document.querySelector(container) || document.body;
                     target.innerHTML += videoHtml;
-                    showToast('✅ Video inserted!');
+                    showEditToast('✅ Video inserted! Click "Save All" to save.', 'success');
                 }
             }
         }
 
         function saveEdits() {
             if (editedElements.length === 0) {
-                showToast('ℹ️ No changes to save.');
+                showEditToast('ℹ️ No changes to save.', 'info');
                 return;
             }
             
-            showToast('💾 Saving changes...');
+            showEditToast('💾 Saving changes to server...', 'info');
             
             // Collect all changes
             const changes = {};
+            let hasValidChanges = false;
+            
             editedElements.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
-                    changes[id] = el.innerHTML;
+                    // For images, save the src
+                    if (el.tagName === 'IMG') {
+                        if (el.style.display !== 'none') {
+                            changes[id] = el.src;
+                            hasValidChanges = true;
+                        } else {
+                            changes[id] = '__DELETED__';
+                            hasValidChanges = true;
+                        }
+                    } else {
+                        changes[id] = el.innerHTML;
+                        hasValidChanges = true;
+                    }
                 }
             });
             
-            // Send to server
-            fetch('/api/content/live-save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ changes: changes })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    editedElements = [];
-                    showToast('✅ All changes saved successfully!');
+            if (!hasValidChanges || Object.keys(changes).length === 0) {
+                showEditToast('ℹ️ No valid changes to save.', 'info');
+                return;
+            }
+            
+            // Send to server using the existing /api/content endpoint
+            // First, get current content, update it, then save
+            fetch('/api/content')
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) throw new Error('Failed to load current content');
                     
-                    // Reset styles
-                    document.querySelectorAll('[style*="border-color: #28a745"]').forEach(el => {
-                        el.style.borderColor = 'transparent';
-                        el.style.background = 'transparent';
+                    const content = data.content;
+                    
+                    // Map element IDs to content fields
+                    const fieldMap = {
+                        'heroTitle': 'heroTitle',
+                        'heroSubtitle': 'heroSubtitle',
+                        'aboutMission': 'aboutMission',
+                        'aboutVision': 'aboutVision',
+                        'aboutValues': 'aboutValues',
+                        'aboutHistory': 'aboutHistory',
+                        'aboutWhy': 'aboutWhy',
+                        'admissionsRequirements': 'admissionsRequirements',
+                        'admissionsAge': 'admissionsAge',
+                        'admissionsDocuments': 'admissionsDocuments',
+                        'admissionsProcess': 'admissionsProcess',
+                        'admissionsFees': 'admissionsFees',
+                        'performanceKcpe': 'performanceKcpe',
+                        'performanceInternal': 'performanceInternal',
+                        'parentsCalendar': 'parentsCalendar',
+                        'parentsHomework': 'parentsHomework',
+                        'parentsAttendance': 'parentsAttendance',
+                        'parentsRules': 'parentsRules',
+                        'parentsUniform': 'parentsUniform',
+                        'parentsFees': 'parentsFees',
+                        'feesContent': 'feesContent',
+                        'feesInstructions': 'feesInstructions'
+                    };
+                    
+                    let updatedCount = 0;
+                    for (const [id, newContent] of Object.entries(changes)) {
+                        const fieldName = fieldMap[id];
+                        if (fieldName && content[fieldName] !== undefined) {
+                            if (newContent === '__DELETED__') {
+                                content[fieldName] = '';
+                            } else {
+                                content[fieldName] = newContent;
+                            }
+                            updatedCount++;
+                        }
+                    }
+                    
+                    if (updatedCount === 0) {
+                        showEditToast('ℹ️ No matching content fields found to update.', 'info');
+                        return;
+                    }
+                    
+                    // Save the updated content
+                    return fetch('/api/content', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(content)
                     });
-                } else {
-                    showToast('❌ Error saving: ' + data.message);
-                }
-            })
-            .catch(err => {
-                console.error('Save error:', err);
-                showToast('❌ Error saving changes: ' + err.message);
-            });
+                })
+                .then(response => {
+                    if (!response) return;
+                    return response.json();
+                })
+                .then(result => {
+                    if (result && result.success) {
+                        editedElements = [];
+                        showEditToast('✅ All changes saved successfully!', 'success');
+                        
+                        // Reset styles
+                        document.querySelectorAll('[style*="border-color: #28a745"]').forEach(el => {
+                            el.style.borderColor = 'transparent';
+                            el.style.background = 'transparent';
+                        });
+                    } else if (result) {
+                        showEditToast('❌ Error saving: ' + (result.message || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Save error:', err);
+                    showEditToast('❌ Error saving changes: ' + err.message, 'error');
+                });
         }
 
-        function showToast(message) {
-            const colors = {
-                success: '#d4edda',
-                error: '#f8d7da',
-                info: '#d1ecf1'
-            };
-            const textColors = {
-                success: '#155724',
-                error: '#721c24',
-                info: '#0c5460'
-            };
-            
+        function showEditToast(message, type) {
             // Remove existing toast
-            const existing = document.querySelector('.edit-toast');
-            if (existing) existing.remove();
+            if (editToast) { editToast.remove(); editToast = null; }
             
             const toast = document.createElement('div');
-            toast.className = 'edit-toast';
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 30px;
-                right: 30px;
-                background: ${colors.info || '#fff'};
-                color: ${textColors.info || '#333'};
-                padding: 15px 25px;
-                border-radius: 10px;
-                font-weight: 500;
-                font-size: 14px;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-                z-index: 999999;
-                animation: slideInRight 0.4s ease;
-                max-width: 400px;
-                border-left: 4px solid #17a2b8;
-            `;
+            toast.className = 'edit-toast ' + (type || 'info');
             toast.textContent = message;
             document.body.appendChild(toast);
+            editToast = toast;
             
             setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transition = 'opacity 0.4s';
-                setTimeout(() => toast.remove(), 400);
+                if (toast) {
+                    toast.classList.add('fade-out');
+                    setTimeout(() => { if (toast.parentElement) toast.remove(); }, 400);
+                }
             }, 4000);
         }
-
-        // Add CSS for toast animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from { transform: translateX(100px); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
 
         console.log('✏️ Edit Mode Ready! Add ?edit=true to URL to enable.');
         console.log('🚀 Changara Star Academy loaded successfully!');
