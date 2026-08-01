@@ -55,7 +55,7 @@
         }
 
         /* ========================================
-           SPLASH SCREEN - STAYS FOR RENDER.COM SPIN-UP
+           SPLASH SCREEN
            ======================================== */
         #splash-screen {
             position: fixed;
@@ -68,14 +68,13 @@
             flex-direction: column;
             padding: 20px;
             transition: opacity 0.8s ease, visibility 0.8s ease;
-            opacity: 1;
-            visibility: visible;
         }
         #splash-screen.hide-splash {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
+        #splash-screen.splash-done { display: none !important; }
         .splash-card {
             max-width: 750px;
             width: 100%;
@@ -127,9 +126,7 @@
         .splash-loader .dot:nth-child(2) { animation-delay: 0.2s; }
         .splash-loader .dot:nth-child(3) { animation-delay: 0.4s; }
         .splash-loading-text { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 6px; letter-spacing: 2px; }
-
         @keyframes splashDot { 0%,80%,100% { transform: scale(0.4); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
-        @keyframes float { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(-6px); } }
 
         /* ========================================
            KENYA FLAG STRIP
@@ -142,186 +139,156 @@
         }
 
         /* ========================================
-           FIXED TOP HEADER - COMPLETELY STAYS WHEN SCROLLING
+           HEADER
            ======================================== */
-        .top-header {
+        .main-header {
+            background: rgba(10, 22, 40, 0.96);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 8px 0;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             z-index: 1000;
-            background: linear-gradient(135deg, #0A1628 0%, #1a2a4a 100%);
-            border-bottom: 3px solid var(--school-gold);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.4);
-            padding: 8px 0 6px;
+            border-bottom: 1px solid rgba(212,160,23,0.15);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
         }
-
-        /* Kenya Flag Strip inside fixed header */
-        .top-header .kenya-flag-strip {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1001;
-        }
-
-        .top-header .container {
+        .main-header .container {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            gap: 4px;
-            padding-top: 4px;
+            flex-wrap: wrap;
         }
-
-        /* Logo Row */
-        .top-header .logo-row {
+        .main-header .logo-section {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            width: 100%;
-            position: relative;
+            gap: 10px;
         }
-        .top-header .logo-row .school-logo {
-            width: 42px;
-            height: 42px;
+        .main-header .logo-section .school-logo {
+            width: 40px;
+            height: 40px;
             object-fit: contain;
+            display: block;
             border-radius: 8px;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.05);
             padding: 3px;
-            border: 1px solid rgba(212,160,23,0.15);
         }
-        .top-header .logo-row .logo-text {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.1;
-            text-align: center;
-        }
-        .top-header .logo-row .logo-text h1 {
+        .main-header .logo-section .school-icon { display: none; }
+        .main-header .logo-section h1 {
             font-family: var(--font-primary);
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: 0.5px;
         }
-        .top-header .logo-row .logo-text .subtitle {
-            font-size: 9px;
+        .main-header .logo-section .subtitle {
+            font-size: 8px;
             color: rgba(255,255,255,0.4);
-            letter-spacing: 4px;
+            display: block;
+            letter-spacing: 2px;
             text-transform: uppercase;
             -webkit-text-fill-color: rgba(255,255,255,0.4);
         }
-
-        /* Mobile Menu Button */
-        .top-header .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 22px;
-            cursor: pointer;
-            padding: 5px 10px;
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        /* Navigation Row */
-        .top-header .nav-row {
+        .main-header .nav-links {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-            flex-wrap: wrap;
-            width: 100%;
-        }
-        .top-header .nav-row a {
-            display: flex;
-            align-items: center;
             gap: 4px;
-            padding: 4px 12px;
-            border-radius: 50px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .main-header .nav-links a {
             color: rgba(255,255,255,0.7);
             text-decoration: none;
             font-weight: 500;
-            font-size: 11px;
+            padding: 5px 14px;
+            border-radius: 50px;
             transition: all 0.3s ease;
-            border: 1px solid transparent;
-            white-space: nowrap;
+            font-size: 12px;
+            position: relative;
         }
-        .top-header .nav-row a:hover {
+        .main-header .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--school-gold);
+            transition: width 0.3s ease;
+        }
+        .main-header .nav-links a:hover::after,
+        .main-header .nav-links a.active::after { width: 50%; }
+        .main-header .nav-links a:hover { color: white; }
+        .main-header .nav-links a.active {
             background: rgba(212,160,23,0.12);
             color: var(--school-gold);
-            border-color: rgba(212,160,23,0.15);
-            transform: translateY(-2px);
-        }
-        .top-header .nav-row a.active {
-            background: rgba(212,160,23,0.18);
-            color: var(--school-gold);
-            border-color: var(--school-gold);
-        }
-        .top-header .nav-row a i { font-size: 11px; }
-        .top-header .nav-row a .badge {
-            background: var(--kenya-red);
-            color: white;
-            font-size: 6px;
-            padding: 1px 6px;
-            border-radius: 50px;
-            font-weight: 700;
-            animation: pulseBadge 1.5s infinite;
         }
 
-        /* Admin Link */
-        .top-header .nav-row a.admin-link {
+        /* ========================================
+           HEADER BUTTONS
+           ======================================== */
+
+        /* ===== ADMIN BUTTON (Yellow/Gold) ===== */
+        .main-header .nav-links a.portal-link {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
             font-weight: 700;
-            padding: 4px 14px;
+            padding: 6px 18px;
             border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.1);
         }
-        .top-header .nav-row a.admin-link:hover {
+        .main-header .nav-links a.portal-link:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(212,160,23,0.3);
+            box-shadow: 0 8px 25px rgba(212,160,23,0.4);
         }
+        .main-header .nav-links a.portal-link::after { display: none; }
 
-        /* Enroll Now Link */
-        .top-header .nav-row a.enroll-link {
+        /* ===== ENROLL NOW BUTTON (Red) ===== */
+        .main-header .nav-links a.enroll-now-link {
             background: linear-gradient(135deg, #BB0000, #8B0000);
             color: white;
             font-weight: 700;
-            padding: 4px 16px;
+            padding: 6px 18px;
             border-radius: 50px;
+            font-size: 12px;
+            transition: all 0.3s ease;
             box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.1);
             animation: pulseBadgeRed 1.5s infinite;
         }
-        .top-header .nav-row a.enroll-link:hover {
+        .main-header .nav-links a.enroll-now-link i {
+            margin-right: 6px;
+            font-size: 13px;
+        }
+        .main-header .nav-links a.enroll-now-link:hover {
             transform: translateY(-3px) scale(1.03);
             box-shadow: 0 0 30px rgba(187, 0, 0, 0.5);
+            border-color: rgba(255,255,255,0.3);
         }
+        .main-header .nav-links a.enroll-now-link::after { display: none; }
 
-        /* Student Portal Link */
-        .top-header .nav-row a.student-portal-link {
+        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING) ===== */
+        .main-header .nav-links a.student-portal-link {
             background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
             background-size: 300% 300%;
             color: white;
             font-weight: 800;
-            padding: 4px 18px;
+            padding: 6px 22px;
             border-radius: 50px;
-            font-size: 11px;
+            font-size: 13px;
+            transition: all 0.4s ease;
             box-shadow: 0 0 15px rgba(255, 107, 107, 0.4), 0 0 40px rgba(255, 180, 70, 0.2);
             animation: rainbowPulse 3s ease infinite, floatButton 2.5s ease-in-out infinite;
-            border: 1px solid rgba(255,255,255,0.2);
+            letter-spacing: 0.5px;
+            border: 2px solid rgba(255,255,255,0.2);
             text-shadow: 0 2px 10px rgba(0,0,0,0.2);
             position: relative;
             overflow: hidden;
         }
-        .top-header .nav-row a.student-portal-link::before {
+        .main-header .nav-links a.student-portal-link::before {
             content: '';
             position: absolute;
             top: -50%;
@@ -331,94 +298,79 @@
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
             animation: shimmer 4s ease-in-out infinite;
         }
-        .top-header .nav-row a.student-portal-link i {
+        .main-header .nav-links a.student-portal-link i {
+            margin-right: 6px;
+            font-size: 14px;
             animation: bounceIcon 2s ease-in-out infinite;
         }
-        .top-header .nav-row a.student-portal-link:hover {
+        .main-header .nav-links a.student-portal-link:hover {
             transform: translateY(-3px) scale(1.05);
             box-shadow: 0 0 30px rgba(255, 107, 107, 0.6), 0 0 60px rgba(255, 180, 70, 0.3);
+            border-color: rgba(255,255,255,0.4);
+        }
+        .main-header .nav-links a.student-portal-link::after { display: none; }
+
+        .main-header .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
         }
 
-        /* Contact Row - Phone Numbers at Bottom Center */
-        .top-header .contact-row {
+        /* ========================================
+           NOTICE ALERT BAR
+           ======================================== */
+        .notice-alert-bar {
+            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
+            color: white;
+            padding: 6px 0;
+            position: relative;
+            z-index: 999;
+            border-bottom: 3px solid var(--school-gold);
+            display: none;
+            animation: slideDownNotice 0.6s ease forwards;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            margin-top: 62px;
+        }
+        .notice-alert-bar.show { display: block; }
+        .notice-alert-bar .container {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 14px;
+            justify-content: space-between;
             flex-wrap: wrap;
-            width: 100%;
-            padding-top: 2px;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            margin-top: 2px;
+            gap: 6px;
         }
-        .top-header .contact-row .contact-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            color: rgba(255,255,255,0.5);
-            font-size: 10px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            padding: 2px 10px;
+        .notice-alert-bar .notice-icon { font-size: 18px; animation: pulseBell 1.5s infinite; display: flex; align-items: center; gap: 6px; }
+        .notice-alert-bar .notice-content { flex:1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .notice-alert-bar .notice-content .badge {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            padding: 2px 12px;
             border-radius: 50px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.04);
+            font-weight: 700;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulseBadge 1.5s infinite;
         }
-        .top-header .contact-row .contact-link:hover {
+        .notice-alert-bar .notice-content .message { font-size: 13px; font-weight: 500; flex:1; }
+        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
+        .notice-alert-bar .notice-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
             color: white;
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(212,160,23,0.15);
-            transform: translateY(-2px);
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
         }
-        .top-header .contact-row .contact-link i {
-            font-size: 12px;
-        }
-        .top-header .contact-row .contact-link .phone-icon {
-            color: var(--school-gold);
-        }
-        .top-header .contact-row .contact-link .whatsapp-icon {
-            color: var(--whatsapp-green);
-        }
-        .top-header .contact-row .divider {
-            color: rgba(255,255,255,0.1);
-            font-size: 12px;
-        }
-
-        /* Mobile Menu Dropdown */
-        .top-header .nav-row.mobile-open {
-            display: flex !important;
-            flex-direction: column;
-            width: 100%;
-            padding: 8px 0;
-            gap: 4px;
-            background: rgba(10,22,40,0.98);
-            border-radius: 12px;
-            margin-top: 2px;
-        }
-        .top-header .nav-row.mobile-open a {
-            width: 100%;
-            justify-content: center;
-            padding: 6px 12px;
-        }
+        .notice-alert-bar .notice-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
 
         /* ========================================
-           ANIMATIONS
-           ======================================== */
-        @keyframes rainbowPulse { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        @keyframes floatButton { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
-        @keyframes bounceIcon { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-3px) scale(1.1); } }
-        @keyframes shimmer { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.2); } 100% { transform: rotate(360deg) scale(1); } }
-        @keyframes pulseBadge { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
-        @keyframes pulseBadgeRed { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(187,0,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(187,0,0,0.7); } }
-        @keyframes pulseBadgeGreen { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(0,102,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(0,102,0,0.7); } }
-        @keyframes tickerScroll { 0%,20% { transform:translateY(0); } 25%,45% { transform:translateY(-22px); } 50%,70% { transform:translateY(-44px); } 75%,95% { transform:translateY(-66px); } 100% { transform:translateY(0); } }
-        @keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes scrollDot { 0%,100% { transform:translateY(0); opacity:1; } 50% { transform:translateY(12px); opacity:0.3; } }
-        @keyframes bounceArrow { 0%,100% { transform:translateY(0); } 50% { transform:translateY(8px); } }
-        @keyframes arrowDown { 0%,100% { transform:translateY(0); } 50% { transform:translateY(5px); } }
-
-        /* ========================================
-           NEWS TICKER - PUSHED DOWN BY FIXED HEADER
+           NEWS TICKER
            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
@@ -428,7 +380,6 @@
             position: relative;
             z-index: 998;
             box-shadow: 0 2px 15px rgba(0,0,0,0.15);
-            margin-top: 135px; /* Push down below fixed header */
         }
         .news-ticker-section .container {
             display: flex;
@@ -478,6 +429,175 @@
             margin-right: 6px;
             color: var(--school-gold);
             font-weight: 600;
+        }
+
+        /* ========================================
+           TOP NAV BAR
+           ======================================== */
+        .top-nav-bar {
+            background: linear-gradient(135deg, #0A1628, #1a2a4a);
+            padding: 8px 0;
+            border-bottom: 2px solid var(--school-gold);
+            position: relative;
+            z-index: 100;
+        }
+        .top-nav-bar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .top-nav-bar .nav-left { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .top-nav-bar .nav-left .welcome-text {
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+            font-weight: 300;
+        }
+        .top-nav-bar .nav-left .welcome-text i { color: var(--school-gold); margin-right: 4px; }
+        .top-nav-bar .nav-links {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .top-nav-bar .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .top-nav-bar .nav-links a:hover {
+            background: rgba(212,160,23,0.12);
+            color: var(--school-gold);
+            border-color: rgba(212,160,23,0.15);
+            transform: translateY(-2px);
+        }
+        .top-nav-bar .nav-links a.active {
+            background: rgba(212,160,23,0.18);
+            color: var(--school-gold);
+            border-color: var(--school-gold);
+        }
+        .top-nav-bar .nav-links a i { font-size: 13px; }
+        .top-nav-bar .nav-links a .badge {
+            background: var(--kenya-red);
+            color: white;
+            font-size: 7px;
+            padding: 1px 7px;
+            border-radius: 50px;
+            font-weight: 700;
+            animation: pulseBadge 1.5s infinite;
+        }
+
+        /* ===== ENROLL NOW BUTTON (Red) - TOP NAV ===== */
+        .top-nav-bar .nav-links a.enroll-now-link {
+            background: linear-gradient(135deg, #BB0000, #8B0000);
+            color: white;
+            font-weight: 700;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+            animation: pulseBadgeRed 1.5s infinite;
+        }
+        .top-nav-bar .nav-links a.enroll-now-link i {
+            margin-right: 6px;
+            font-size: 13px;
+        }
+        .top-nav-bar .nav-links a.enroll-now-link:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 30px rgba(187, 0, 0, 0.5);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .top-nav-bar .nav-links a.enroll-now-link::after { display: none; }
+
+        /* ===== STUDENT PORTAL BUTTON (RAINBOW GLOWING) - TOP NAV ===== */
+        .top-nav-bar .nav-links a.student-portal-link-top {
+            background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
+            background-size: 300% 300%;
+            color: white;
+            font-weight: 800;
+            padding: 6px 22px;
+            border-radius: 50px;
+            font-size: 13px;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.4), 0 0 40px rgba(255, 180, 70, 0.2);
+            animation: rainbowPulse 3s ease infinite, floatButton 2.5s ease-in-out infinite;
+            letter-spacing: 0.5px;
+            border: 2px solid rgba(255,255,255,0.2);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .top-nav-bar .nav-links a.student-portal-link-top::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: shimmer 4s ease-in-out infinite;
+        }
+        .top-nav-bar .nav-links a.student-portal-link-top i {
+            margin-right: 6px;
+            font-size: 14px;
+            animation: bounceIcon 2s ease-in-out infinite;
+        }
+        .top-nav-bar .nav-links a.student-portal-link-top:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.6), 0 0 60px rgba(255, 180, 70, 0.3);
+            border-color: rgba(255,255,255,0.4);
+        }
+        .top-nav-bar .nav-links a.student-portal-link-top::after { display: none; }
+
+        .top-nav-bar .nav-right { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            flex-wrap: wrap;
+        }
+        .top-nav-bar .nav-right .contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.6);
+            font-size: 11px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 4px 12px;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
+            white-space: nowrap;
+        }
+        .top-nav-bar .nav-right .contact-link:hover {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(212,160,23,0.2);
+            transform: translateY(-2px);
+        }
+        .top-nav-bar .nav-right .contact-link i {
+            font-size: 14px;
+        }
+        .top-nav-bar .nav-right .contact-link .phone-icon {
+            color: var(--school-gold);
+        }
+        .top-nav-bar .nav-right .contact-link .whatsapp-icon {
+            color: var(--whatsapp-green);
+        }
+        .top-nav-bar .nav-right .divider {
+            color: rgba(255,255,255,0.15);
+            font-size: 14px;
         }
 
         /* ========================================
@@ -654,6 +774,7 @@
             animation:fadeInUp 1.4s ease forwards;
         }
 
+        /* ===== HERO BUTTONS ===== */
         .hero-section .btn-group {
             display:flex;
             gap:12px;
@@ -707,6 +828,7 @@
             transform:translateY(-3px);
         }
 
+        /* ===== HERO VIDEO PLAY BUTTON ===== */
         .hero-video-play {
             display:inline-flex;
             align-items:center;
@@ -832,7 +954,26 @@
         }
 
         /* ========================================
-           GALLERY SECTION
+           ANIMATIONS
+           ======================================== */
+        @keyframes rainbowPulse { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes floatButton { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
+        @keyframes bounceIcon { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-4px) scale(1.1); } }
+        @keyframes shimmer { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.2); } 100% { transform: rotate(360deg) scale(1); } }
+        @keyframes scrollDot { 0%,100% { transform:translateY(0); opacity:1; } 50% { transform:translateY(12px); opacity:0.3; } }
+        @keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes bounceArrow { 0%,100% { transform:translateY(0); } 50% { transform:translateY(8px); } }
+        @keyframes arrowDown { 0%,100% { transform:translateY(0); } 50% { transform:translateY(5px); } }
+        @keyframes float { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(-6px); } }
+        @keyframes slideDownNotice { from { transform:translateY(-100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
+        @keyframes pulseBell { 0%,100% { transform:scale(1); } 50% { transform:scale(1.15); } }
+        @keyframes pulseBadge { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+        @keyframes pulseBadgeRed { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(187,0,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(187,0,0,0.7); } }
+        @keyframes pulseBadgeGreen { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(0,102,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(0,102,0,0.7); } }
+        @keyframes tickerScroll { 0%,20% { transform:translateY(0); } 25%,45% { transform:translateY(-22px); } 50%,70% { transform:translateY(-44px); } 75%,95% { transform:translateY(-66px); } 100% { transform:translateY(0); } }
+
+        /* ========================================
+           GALLERY SECTION - FIXED
            ======================================== */
         .gallery-section {
             padding: 60px 0;
@@ -859,6 +1000,7 @@
             font-weight: 300;
         }
 
+        /* Swiper Container - Critical Fix */
         .gallery-swiper {
             width: 100%;
             padding: 15px 0 50px;
@@ -956,6 +1098,7 @@
             transform: translateX(4px);
         }
 
+        /* Swiper Navigation - Desktop */
         .gallery-swiper .swiper-button-next,
         .gallery-swiper .swiper-button-prev {
             color: var(--school-gold) !important;
@@ -986,6 +1129,7 @@
             left: 10px;
         }
 
+        /* Swiper Pagination */
         .gallery-swiper .swiper-pagination {
             position: absolute;
             bottom: 0;
@@ -1005,6 +1149,68 @@
             background: var(--school-gold) !important;
             opacity: 1;
         }
+
+        /* ========================================
+           RESPONSIVE - GALLERY FIX
+           ======================================== */
+        @media (max-width: 1024px) {
+            .gallery-card img {
+                height: 200px;
+            }
+            .gallery-swiper .swiper-button-next,
+            .gallery-swiper .swiper-button-prev {
+                width: 38px !important;
+                height: 38px !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .gallery-card img {
+                height: 180px;
+            }
+            .gallery-swiper .swiper-button-next,
+            .gallery-swiper .swiper-button-prev {
+                display: none !important;
+            }
+            .gallery-swiper .swiper-pagination {
+                display: block !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .gallery-card img {
+                height: 160px;
+            }
+            .gallery-section .section-title.light {
+                font-size: 24px;
+            }
+            .gallery-section .section-subtitle.light {
+                font-size: 14px;
+            }
+            .gallery-swiper {
+                padding: 10px 0 40px;
+            }
+        }
+
+        /* ========================================
+           SECTIONS
+           ======================================== */
+        .section-title {
+            font-family: var(--font-primary);
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+            color: var(--school-blue-dark);
+        }
+        .section-title .highlight { color: var(--school-gold); }
+        .section-title.light { color: white; }
+        .section-subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+        .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
         /* ========================================
            CONTENT CARDS
@@ -1210,7 +1416,7 @@
         .stat-item p { font-size: 13px; opacity: 0.6; color: white; font-weight: 300; letter-spacing: 1px; }
 
         /* ========================================
-           NEWS SECTION
+           NEWS SECTION - FULL WIDTH
            ======================================== */
         .news-section {
             padding: 60px 0 80px !important;
@@ -1358,22 +1564,19 @@
         /* ========================================
            RESPONSIVE
            ======================================== */
-        @media (max-width: 992px) {
-            .top-header .nav-row { display: none; }
-            .top-header .mobile-menu-btn { display: block; }
-            .top-header .nav-row.mobile-open { display: flex !important; }
-            .news-ticker-section { margin-top: 125px; }
-            .hero-section h1 { font-size: 40px; }
-        }
         @media (max-width: 768px) {
-            .top-header .logo-row .logo-text h1 { font-size: 16px; }
-            .top-header .logo-row .school-logo { width: 34px; height: 34px; }
-            .top-header .logo-row .logo-text .subtitle { font-size: 8px; letter-spacing: 2px; }
-            .top-header .contact-row .contact-link { font-size: 9px; padding: 2px 8px; }
-            .top-header .contact-row { gap: 8px; }
-            .top-header .nav-row a { font-size: 10px; padding: 3px 10px; }
-            .news-ticker-section { margin-top: 130px; }
-            .hero-section { padding: 60px 0 30px; }
+            .main-header .nav-links { display: none; flex-direction: column; width: 100%; padding: 15px 0; gap: 5px; }
+            .main-header .nav-links.show { display: flex; }
+            .main-header .mobile-menu-btn { display: block; }
+            .main-header .nav-links a.student-portal-link { font-size: 16px; padding: 12px 24px; width: 100%; justify-content: center; }
+            .main-header .nav-links a.enroll-now-link { width: 100%; justify-content: center; }
+            .main-header .nav-links a.portal-link { width: 100%; justify-content: center; }
+            .top-nav-bar .container { flex-direction: column; align-items: stretch; gap: 8px; }
+            .top-nav-bar .nav-left { justify-content: center; }
+            .top-nav-bar .nav-links { justify-content: center; }
+            .top-nav-bar .nav-right { justify-content: center; flex-wrap: wrap; }
+            .top-nav-bar .nav-links a { font-size: 11px; padding: 4px 12px; }
+            .hero-section { padding: 80px 0 40px; }
             .hero-section h1 { font-size: 32px; }
             .hero-section .hero-description { font-size: 16px; }
             .hero-section .btn-group { flex-direction: column; align-items: center; }
@@ -1389,6 +1592,9 @@
             .news-item h4 { font-size: 20px !important; }
             .news-item p { font-size: 15px !important; }
             .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
+            .notice-alert-bar .container { flex-direction: column; text-align: center; }
+            .main-header .logo-section h1 { font-size: 16px; }
+            .main-header .logo-section .school-logo { width: 32px; height: 32px; }
             .news-ticker-section .ticker-label { font-size: 8px; padding: 2px 10px; }
             .news-ticker-section .ticker-content .ticker-item { font-size: 11px; white-space: normal; }
             .video-modal { padding: 20px; }
@@ -1401,21 +1607,8 @@
             .splash-card h1 { font-size: 22px; }
             .splash-news .headline { font-size: 17px; }
             .splash-news { padding: 18px 16px; min-height: 140px; }
-            .gallery-card img { height: 180px; }
-            .gallery-swiper .swiper-button-next,
-            .gallery-swiper .swiper-button-prev { display: none !important; }
-            .gallery-swiper .swiper-pagination { display: block !important; }
         }
         @media (max-width: 480px) {
-            .top-header .logo-row .logo-text h1 { font-size: 13px; }
-            .top-header .logo-row .school-logo { width: 28px; height: 28px; }
-            .top-header .logo-row .logo-text .subtitle { font-size: 6px; letter-spacing: 1px; }
-            .top-header .contact-row .contact-link { font-size: 8px; padding: 1px 6px; }
-            .top-header .contact-row .divider { display: none; }
-            .top-header .nav-row a { font-size: 9px; padding: 2px 8px; }
-            .top-header .nav-row a.enroll-link { padding: 3px 12px; font-size: 9px; }
-            .top-header .nav-row a.student-portal-link { padding: 3px 12px; font-size: 9px; }
-            .news-ticker-section { margin-top: 140px; }
             .content-grid { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
@@ -1424,64 +1617,22 @@
             .section-title { font-size: 22px; }
             .section-tabs .tab-btn { font-size: 8px; padding: 3px 8px; }
             .section-tabs .tab-btn .tab-icon { font-size: 10px; }
+            .main-header .logo-section h1 { font-size: 14px; }
+            .main-header .logo-section .school-logo { width: 28px; height: 28px; }
             .hero-section { padding: 70px 0 30px; }
+            .top-nav-bar .nav-links a { font-size: 10px; padding: 3px 10px; }
+            .top-nav-bar .nav-links a i { font-size: 11px; }
             .news-item { padding: 22px 18px !important; min-height: 180px !important; }
             .news-item h4 { font-size: 18px !important; }
             .news-item p { font-size: 14px !important; }
             .news-section .container-news { padding: 0 10px !important; }
-            .gallery-card img { height: 160px; }
-            .gallery-section .section-title.light { font-size: 24px; }
-            .gallery-section .section-subtitle.light { font-size: 14px; }
-            .gallery-swiper { padding: 10px 0 40px; }
-        }
-
-        /* ========================================
-           EDIT MODE STYLES
-           ======================================== */
-        .edit-toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-weight: 500;
-            font-size: 14px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            z-index: 999999;
-            animation: slideInRight 0.4s ease;
-            max-width: 400px;
-            border-left: 4px solid #17a2b8;
-        }
-        .edit-toast.success {
-            background: #d4edda;
-            color: #155724;
-            border-left-color: #28a745;
-        }
-        .edit-toast.error {
-            background: #f8d7da;
-            color: #721c24;
-            border-left-color: #dc3545;
-        }
-        .edit-toast.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border-left-color: #17a2b8;
-        }
-        .edit-toast.fade-out {
-            opacity: 0;
-            transition: opacity 0.4s;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
         }
     </style>
 </head>
 <body>
 
     <!-- ======================================== -->
-    <!-- SPLASH SCREEN - REPLACES RENDER.COM SPIN-UP -->
+    <!-- SPLASH SCREEN - FIRST VISIT ONLY -->
     <!-- ======================================== -->
     <div id="splash-screen">
         <div class="splash-card">
@@ -1511,54 +1662,52 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- FIXED TOP HEADER - COMPLETELY STAYS WHEN SCROLLING -->
-    <!-- ALL NAVIGATION LINKS + PHONE NUMBERS STAY FIXED -->
+    <!-- HEADER -->
     <!-- ======================================== -->
-    <header class="top-header">
-        <!-- Kenya Flag Strip -->
+    <header class="main-header">
         <div class="kenya-flag-strip"></div>
-        
         <div class="container">
-            <!-- Logo Row -->
-            <div class="logo-row">
+            <div class="logo-section">
                 <img src="images/logo edited.ico" alt="Changara Star Academy Logo" class="school-logo" />
-                <div class="logo-text">
+                <span class="school-icon">🏫</span>
+                <div>
                     <h1>Changara Star Academy</h1>
                     <span class="subtitle">Assurance to Excellence</span>
                 </div>
-                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
-
-            <!-- Navigation Row - ALL LINKS STAY FIXED -->
-            <div class="nav-row" id="navCenter">
-                <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                <a href="fees.html"><i class="fas fa-coins"></i> Fees <span class="badge">VIEW</span></a>
-                <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
-                <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
-                <a href="portal.html" class="admin-link"><i class="fas fa-user-lock"></i> Admin</a>
-                <a href="admissions.html" class="enroll-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
-                <a href="student-portal.html" class="student-portal-link"><i class="fas fa-user-graduate"></i> Student Portal</a>
-            </div>
-
-            <!-- Contact Row - PHONE NUMBERS STAY FIXED AT BOTTOM CENTER -->
-            <div class="contact-row">
-                <a href="tel:+254721556252" class="contact-link">
-                    <i class="fas fa-phone phone-icon"></i>
-                    <span>+254 721 556 252</span>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html" class="active">Home</a>
+                <a href="fees.html">Fees <span class="badge">VIEW</span></a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="portal.html" class="portal-link">🔐 Admin</a>
+                <a href="admissions.html" class="enroll-now-link">
+                    <i class="fas fa-pen-fancy"></i> Enroll Now
                 </a>
-                <span class="divider">|</span>
-                <a href="https://wa.me/254740201441" target="_blank" class="contact-link">
-                    <i class="fab fa-whatsapp whatsapp-icon"></i>
-                    <span>+254 740 201 441</span>
+                <a href="student-portal.html" class="student-portal-link">
+                    <i class="fas fa-user-graduate"></i> Student Portal
                 </a>
-            </div>
+            </nav>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         </div>
     </header>
 
     <!-- ======================================== -->
-    <!-- NEWS TICKER - PUSHED DOWN BY FIXED HEADER -->
+    <!-- NOTICE ALERT BAR -->
+    <!-- ======================================== -->
+    <div class="notice-alert-bar" id="noticeAlertBar">
+        <div class="container">
+            <div class="notice-icon"><span class="bell">🔔</span><span style="font-weight:700;font-size:11px;">ALERT</span></div>
+            <div class="notice-content">
+                <span class="badge">⚠️ STAFF NOTICE</span>
+                <span class="message" id="noticeMessage"><strong>📢 Important:</strong> Staff meeting on Friday at 4:00 PM in the staff room.</span>
+            </div>
+            <button class="notice-close" onclick="closeNotice()">✕</button>
+        </div>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- NEWS TICKER -->
     <!-- ======================================== -->
     <div class="news-ticker-section" id="newsTicker">
         <div class="container">
@@ -1570,6 +1719,37 @@
                     <div class="ticker-item"><span class="tag">📚 MEETING</span> Parents' Meeting on 20th September 2026</div>
                     <div class="ticker-item"><span class="tag">📢 ANNOUNCEMENT</span> New computer lab now open!</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TOP NAV BAR -->
+    <!-- ======================================== -->
+    <div class="top-nav-bar">
+        <div class="container">
+            <div class="nav-left">
+                <span class="welcome-text"><i class="fas fa-graduation-cap"></i> Welcome to Changara Star Academy</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+                <a href="fees.html"><i class="fas fa-coins"></i> Fees <span class="badge">VIEW</span></a>
+                <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
+                <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
+                <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:6px 16px;border-radius:50px;font-weight:700;font-size:11px;"><i class="fas fa-user-lock"></i> Admin</a>
+                <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
+                <a href="student-portal.html" class="student-portal-link-top"><i class="fas fa-user-graduate"></i> Student Portal</a>
+            </div>
+            <div class="nav-right">
+                <a href="tel:+254721556252" class="contact-link">
+                    <i class="fas fa-phone phone-icon"></i>
+                    <span>+254 721 556 252</span>
+                </a>
+                <span class="divider">|</span>
+                <a href="https://wa.me/254740201441" target="_blank" class="contact-link">
+                    <i class="fab fa-whatsapp whatsapp-icon"></i>
+                    <span>+254 740 201 441</span>
+                </a>
             </div>
         </div>
     </div>
@@ -1590,7 +1770,7 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HERO SECTION - THIS MOVES WHEN SCROLLING -->
+    <!-- HERO SECTION -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-video-bg">
@@ -1629,7 +1809,7 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- GALLERY SECTION -->
+    <!-- GALLERY SECTION - FIXED -->
     <!-- ======================================== -->
     <section class="gallery-section" id="slide-gallery">
         <div class="container">
@@ -1788,7 +1968,7 @@
     </section>
 
     <!-- ======================================== -->
-    <!-- NEWS SECTION -->
+    <!-- NEWS SECTION - FULL WIDTH -->
     <!-- ======================================== -->
     <section class="news-section" id="slide-news">
         <div class="container-news">
@@ -1875,18 +2055,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    
-    <!-- ======================================== -->
-    <!-- MAIN APPLICATION SCRIPT -->
-    <!-- ======================================== -->
     <script>
-        // ========================================
-        // AOS INIT
-        // ========================================
         AOS.init({ duration: 800, once: true, offset: 60, easing: 'ease-in-out' });
 
         // ========================================
-        // SPLASH SCREEN - REPLACES RENDER.COM SPIN-UP
+        // SPLASH SCREEN - STAYS UNTIL PAGE FULLY LOADS
         // ========================================
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
@@ -1916,9 +2089,7 @@
             return temp.textContent || temp.innerText || '';
         }
 
-        // ========================================
-        // SPLASH NEWS - Update from CMS
-        // ========================================
+        // ===== SPLASH NEWS - Update from CMS =====
         async function updateSplashNews() {
             try {
                 const res = await fetch('/api/content');
@@ -1933,17 +2104,12 @@
         }
         updateSplashNews();
 
-        // ========================================
-        // MOBILE MENU
-        // ========================================
+        // ===== MOBILE MENU =====
         function toggleMobileMenu() {
-            const nav = document.getElementById('navCenter');
-            nav.classList.toggle('mobile-open');
+            document.getElementById('navLinks').classList.toggle('show');
         }
 
-        // ========================================
-        // SCROLL TO CONTENT
-        // ========================================
+        // ===== SCROLL TO CONTENT =====
         function scrollToContent() {
             const el = document.getElementById('slide-content');
             if (el) {
@@ -1952,9 +2118,7 @@
             }
         }
 
-        // ========================================
-        // SECTION TABS
-        // ========================================
+        // ===== SECTION TABS =====
         function scrollToSection(id) {
             const el = document.getElementById(id);
             if (el) {
@@ -1969,9 +2133,25 @@
             }
         }
 
-        // ========================================
-        // VIDEO MODAL
-        // ========================================
+        // ===== NOTICE =====
+        function closeNotice() {
+            const bar = document.getElementById('noticeAlertBar');
+            bar.classList.remove('show');
+            localStorage.setItem('noticeClosed', 'true');
+        }
+        function showNotice(msg) {
+            const bar = document.getElementById('noticeAlertBar');
+            if (msg) document.getElementById('noticeMessage').innerHTML = msg;
+            bar.classList.add('show');
+            localStorage.removeItem('noticeClosed');
+        }
+        (function checkNotice() {
+            if (!localStorage.getItem('noticeClosed')) {
+                document.getElementById('noticeAlertBar').classList.add('show');
+            }
+        })();
+
+        // ===== VIDEO MODAL =====
         function openVideoModal() {
             document.getElementById('videoModal').classList.add('show');
             document.getElementById('modalVideo').play();
@@ -1986,12 +2166,15 @@
         });
 
         // ========================================
-        // GALLERY SWIPER
+        // GALLERY SWIPER - FIXED FOR ALL SCREENS
         // ========================================
+        // Wait for DOM to be fully loaded before initializing Swiper
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if swiper container exists
             const swiperContainer = document.querySelector('.gallery-swiper');
             if (!swiperContainer) return;
 
+            // Initialize Swiper with proper configuration
             const gallerySwiper = new Swiper('.gallery-swiper', {
                 slidesPerView: 1,
                 spaceBetween: 20,
@@ -2011,38 +2194,59 @@
                     prevEl: '.swiper-button-prev'
                 },
                 breakpoints: {
-                    480: { slidesPerView: 1, spaceBetween: 15 },
-                    640: { slidesPerView: 1.5, spaceBetween: 16 },
-                    768: { slidesPerView: 2, spaceBetween: 20 },
-                    1024: { slidesPerView: 3, spaceBetween: 25 }
+                    480: {
+                        slidesPerView: 1,
+                        spaceBetween: 15,
+                    },
+                    640: {
+                        slidesPerView: 1.5,
+                        spaceBetween: 16,
+                    },
+                    768: {
+                        slidesPerView: 2,
+                        spaceBetween: 20,
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                        spaceBetween: 25,
+                    }
                 },
                 watchSlidesProgress: true,
                 watchSlidesVisibility: true,
+                // Ensure slides are properly rendered
                 on: {
-                    init: function() { this.update(); }
+                    init: function() {
+                        // Force a re-check of slide sizes
+                        this.update();
+                    }
                 }
             });
 
+            // Re-initialize swiper on window resize to ensure proper display
             let resizeTimer;
             window.addEventListener('resize', function() {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(function() {
-                    if (gallerySwiper) gallerySwiper.update();
+                    if (gallerySwiper) {
+                        gallerySwiper.update();
+                    }
                 }, 300);
             });
 
+            // Handle orientation change on mobile
             window.addEventListener('orientationchange', function() {
                 setTimeout(function() {
-                    if (gallerySwiper) gallerySwiper.update();
+                    if (gallerySwiper) {
+                        gallerySwiper.update();
+                    }
                 }, 500);
             });
 
+            // Expose swiper instance to window for debugging if needed
             window.gallerySwiper = gallerySwiper;
         });
 
-        // ========================================
-        // CMS LOAD
-        // ========================================
+        // ===== CMS LOAD =====
         function stripHtml(html) { 
             if (!html) return ''; 
             const d = document.createElement('DIV'); 
@@ -2065,6 +2269,7 @@
                     if (c.parentsCalendar) document.getElementById('displayParents').textContent = stripHtml(c.parentsCalendar);
                     if (c.downloads) document.getElementById('displayDownloads').textContent = stripHtml(c.downloads);
                     if (c.feesContent) document.getElementById('displayFees').textContent = stripHtml(c.feesContent);
+                    if (c.noticeAlert) showNotice(c.noticeAlert);
                     if (c.homeNews && c.homeNews.length) {
                         const grid = document.getElementById('newsGrid');
                         grid.innerHTML = '';
@@ -2081,405 +2286,6 @@
             } catch (e) { /* fallback */ }
         }
         document.addEventListener('DOMContentLoaded', loadCMS);
-
-        // ================================================================
-        // LIVE EDIT MODE
-        // ================================================================
-        let editModeActive = false;
-        let editedElements = [];
-        let editToast = null;
-
-        const FIELD_MAP = {
-            'heroTitle': 'heroTitle',
-            'heroSubtitle': 'heroSubtitle',
-            'heroButtonText': 'heroButtonText',
-            'heroButtonLink': 'heroButtonLink',
-            'aboutMission': 'aboutMission',
-            'aboutVision': 'aboutVision',
-            'aboutValues': 'aboutValues',
-            'aboutHistory': 'aboutHistory',
-            'aboutMotto': 'aboutMotto',
-            'aboutWhy': 'aboutWhy',
-            'admissionsRequirements': 'admissionsRequirements',
-            'admissionsAge': 'admissionsAge',
-            'admissionsDocuments': 'admissionsDocuments',
-            'admissionsProcess': 'admissionsProcess',
-            'admissionsFees': 'admissionsFees',
-            'performanceKcpe': 'performanceKcpe',
-            'performanceInternal': 'performanceInternal',
-            'parentsCalendar': 'parentsCalendar',
-            'parentsHomework': 'parentsHomework',
-            'parentsAttendance': 'parentsAttendance',
-            'parentsRules': 'parentsRules',
-            'parentsUniform': 'parentsUniform',
-            'parentsFees': 'parentsFees',
-            'feesContent': 'feesContent',
-            'feesPaybill': 'feesPaybill',
-            'feesInstructions': 'feesInstructions',
-            'contactAddress': 'contactAddress',
-            'contactPhone': 'contactPhone',
-            'contactEmail': 'contactEmail',
-            'contactHours': 'contactHours',
-            'contactMap': 'contactMap',
-            'seoTitle': 'seoTitle',
-            'seoDescription': 'seoDescription',
-            'seoKeywords': 'seoKeywords'
-        };
-
-        if (window.location.search.includes('edit=true')) {
-            setTimeout(enableEditMode, 800);
-        }
-
-        function enableEditMode() {
-            editModeActive = true;
-            
-            const editBar = document.createElement('div');
-            editBar.id = 'editToolbar';
-            editBar.style.cssText = `
-                position: fixed;
-                top: 60px;
-                left: 0;
-                right: 0;
-                background: #0A1628;
-                color: white;
-                padding: 10px 20px;
-                z-index: 999999;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 10px;
-                border-bottom: 3px solid #D4A017;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            `;
-            editBar.innerHTML = `
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <span style="font-weight:700;color:#D4A017;">✏️ EDIT MODE</span>
-                    <span style="font-size:12px;opacity:0.7;">Click any text or image to edit</span>
-                </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <button onclick="saveEdits()" style="background:#28a745;color:white;border:none;padding:6px 18px;border-radius:6px;font-weight:600;cursor:pointer;">
-                        <i class="fas fa-save"></i> Save All
-                    </button>
-                    <button onclick="exitEditMode()" style="background:#dc3545;color:white;border:none;padding:6px 18px;border-radius:6px;font-weight:600;cursor:pointer;">
-                        <i class="fas fa-times"></i> Exit
-                    </button>
-                    <button onclick="editImage()" style="background:#17a2b8;color:white;border:none;padding:6px 18px;border-radius:6px;font-weight:600;cursor:pointer;">
-                        <i class="fas fa-image"></i> Image
-                    </button>
-                    <button onclick="editVideo()" style="background:#6f42c1;color:white;border:none;padding:6px 18px;border-radius:6px;font-weight:600;cursor:pointer;">
-                        <i class="fas fa-video"></i> Video
-                    </button>
-                </div>
-            `;
-            document.body.insertBefore(editBar, document.body.firstChild);
-            
-            const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, .hero-description, .section-title, .subtitle, .welcome-text, .feature-item p, .news-item p');
-            
-            elements.forEach(el => {
-                if (el.closest('nav') || el.closest('footer') || el.closest('.sidebar') || el.closest('.navbar')) return;
-                if (!el.textContent.trim()) return;
-                
-                let id = el.id;
-                if (!id) {
-                    const text = el.textContent.trim().substring(0, 30);
-                    for (const [fieldId] of Object.entries(FIELD_MAP)) {
-                        const fieldEl = document.getElementById(fieldId);
-                        if (fieldEl && fieldEl === el) {
-                            id = fieldId;
-                            break;
-                        }
-                    }
-                    if (!id) {
-                        id = 'el-' + Math.random().toString(36).substr(2, 6);
-                        el.id = id;
-                    }
-                }
-                
-                if (!window._originalContent) window._originalContent = {};
-                window._originalContent[id] = el.innerHTML;
-                
-                el.style.cursor = 'pointer';
-                el.style.border = '2px dashed transparent';
-                el.style.padding = '4px 8px';
-                el.style.borderRadius = '4px';
-                el.style.transition = 'all 0.2s';
-                
-                el.addEventListener('mouseenter', function() {
-                    if (editModeActive) {
-                        this.style.borderColor = '#D4A017';
-                        this.style.background = 'rgba(212,160,23,0.05)';
-                    }
-                });
-                
-                el.addEventListener('mouseleave', function() {
-                    if (editModeActive) {
-                        this.style.borderColor = 'transparent';
-                        this.style.background = 'transparent';
-                    }
-                });
-                
-                el.addEventListener('click', function(e) {
-                    if (!editModeActive) return;
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const currentText = this.innerHTML;
-                    const newText = prompt('✏️ Edit this text:', currentText);
-                    
-                    if (newText !== null && newText !== currentText) {
-                        this.innerHTML = newText;
-                        this.style.borderColor = '#28a745';
-                        this.style.background = 'rgba(40,167,69,0.1)';
-                        
-                        if (!editedElements.includes(id)) {
-                            editedElements.push(id);
-                        }
-                        
-                        showEditToast('✅ Text updated! Click "Save All" to save changes.', 'success');
-                    }
-                });
-            });
-            
-            document.querySelectorAll('img:not(.logo):not(.school-logo):not(.footer-logo)').forEach(img => {
-                img.style.cursor = 'pointer';
-                img.style.border = '3px solid transparent';
-                img.style.borderRadius = '8px';
-                img.style.transition = 'all 0.2s';
-                
-                img.addEventListener('mouseenter', function() {
-                    if (editModeActive) {
-                        this.style.borderColor = '#D4A017';
-                        this.style.boxShadow = '0 0 20px rgba(212,160,23,0.3)';
-                    }
-                });
-                
-                img.addEventListener('mouseleave', function() {
-                    if (editModeActive) {
-                        this.style.borderColor = 'transparent';
-                        this.style.boxShadow = 'none';
-                    }
-                });
-                
-                img.addEventListener('click', function(e) {
-                    if (!editModeActive) return;
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const action = confirm('What do you want to do?\n\nOK = Change Image URL\nCancel = Delete Image');
-                    if (action) {
-                        const newUrl = prompt('Enter new image URL:', this.src);
-                        if (newUrl && newUrl.trim() !== '') {
-                            this.src = newUrl.trim();
-                            this.style.borderColor = '#28a745';
-                            const imgId = img.id || 'img-' + Math.random().toString(36).substr(2, 6);
-                            if (!img.id) img.id = imgId;
-                            if (!editedElements.includes(imgId)) {
-                                editedElements.push(imgId);
-                            }
-                            showEditToast('✅ Image updated! Click "Save All" to save.', 'success');
-                        }
-                    } else {
-                        if (confirm('Delete this image?')) {
-                            this.style.display = 'none';
-                            const imgId = img.id || 'img-' + Math.random().toString(36).substr(2, 6);
-                            if (!img.id) img.id = imgId;
-                            if (!editedElements.includes(imgId)) {
-                                editedElements.push(imgId);
-                            }
-                            showEditToast('✅ Image removed! Click "Save All" to save.', 'success');
-                        }
-                    }
-                });
-            });
-            
-            showEditToast('✏️ Edit mode enabled! Click any text or image to edit.', 'info');
-        }
-
-        function exitEditMode() {
-            editModeActive = false;
-            const toolbar = document.getElementById('editToolbar');
-            if (toolbar) toolbar.remove();
-            
-            document.querySelectorAll('[style*="cursor: pointer;"]').forEach(el => {
-                el.style.cursor = '';
-                el.style.border = '';
-                el.style.padding = '';
-                el.style.borderRadius = '';
-                el.style.background = '';
-                el.style.boxShadow = '';
-            });
-            
-            document.querySelectorAll('img').forEach(img => {
-                img.style.cursor = '';
-                img.style.border = '';
-                img.style.borderRadius = '';
-                img.style.boxShadow = '';
-            });
-            
-            if (editToast) { editToast.remove(); editToast = null; }
-            showEditToast('📝 Edit mode disabled.', 'info');
-        }
-
-        function editImage() {
-            const url = prompt('Enter image URL:');
-            if (url && url.trim() !== '') {
-                const container = prompt('Where to insert? (selector like #content or .main-content)') || '#content';
-                const target = document.querySelector(container) || document.body;
-                
-                const img = document.createElement('img');
-                img.src = url.trim();
-                img.style.maxWidth = '100%';
-                img.style.borderRadius = '8px';
-                img.style.margin = '10px 0';
-                img.alt = 'Inserted image';
-                target.appendChild(img);
-                showEditToast('✅ Image inserted! Click "Save All" to save.', 'success');
-            }
-        }
-
-        function editVideo() {
-            const url = prompt('Enter video URL (MP4, YouTube, etc.):');
-            if (url && url.trim() !== '') {
-                let videoHtml = '';
-                if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                    const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
-                    if (videoId) {
-                        videoHtml = `<iframe width="100%" height="400" src="https://www.youtube.com/embed/${videoId[1]}" frameborder="0" allowfullscreen style="border-radius:12px;margin:10px 0;"></iframe>`;
-                    }
-                } else if (url.includes('vimeo.com')) {
-                    const videoId = url.match(/vimeo\.com\/(\d+)/);
-                    if (videoId) {
-                        videoHtml = `<iframe width="100%" height="400" src="https://player.vimeo.com/video/${videoId[1]}" frameborder="0" allowfullscreen style="border-radius:12px;margin:10px 0;"></iframe>`;
-                    }
-                } else {
-                    videoHtml = `<video src="${url.trim()}" controls style="width:100%;border-radius:12px;margin:10px 0;"></video>`;
-                }
-                
-                if (videoHtml) {
-                    const container = prompt('Where to insert? (selector like #content or .main-content)') || '#content';
-                    const target = document.querySelector(container) || document.body;
-                    target.innerHTML += videoHtml;
-                    showEditToast('✅ Video inserted! Click "Save All" to save.', 'success');
-                }
-            }
-        }
-
-        function saveEdits() {
-            if (editedElements.length === 0) {
-                showEditToast('ℹ️ No changes to save.', 'info');
-                return;
-            }
-            
-            showEditToast('💾 Saving changes to server...', 'info');
-            
-            const changes = {};
-            let hasValidChanges = false;
-            
-            editedElements.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    if (el.tagName === 'IMG') {
-                        if (el.style.display !== 'none') {
-                            changes[id] = el.src;
-                            hasValidChanges = true;
-                        } else {
-                            changes[id] = '__DELETED__';
-                            hasValidChanges = true;
-                        }
-                    } else {
-                        changes[id] = el.innerHTML;
-                        hasValidChanges = true;
-                    }
-                }
-            });
-            
-            if (!hasValidChanges || Object.keys(changes).length === 0) {
-                showEditToast('ℹ️ No valid changes to save.', 'info');
-                return;
-            }
-            
-            fetch('/api/content')
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.success) throw new Error('Failed to load current content: ' + (data.message || 'Unknown error'));
-                    
-                    const content = data.content;
-                    let updatedCount = 0;
-                    const updatedFields = [];
-                    
-                    for (const [id, newContent] of Object.entries(changes)) {
-                        const fieldName = FIELD_MAP[id];
-                        if (fieldName && content[fieldName] !== undefined) {
-                            if (newContent === '__DELETED__') {
-                                content[fieldName] = '';
-                            } else {
-                                content[fieldName] = newContent;
-                            }
-                            updatedCount++;
-                            updatedFields.push(fieldName);
-                            console.log(`✅ Updated field "${fieldName}" from element "${id}"`);
-                        } else {
-                            console.log(`⚠️ No matching field for element "${id}"`);
-                        }
-                    }
-                    
-                    if (updatedCount === 0) {
-                        showEditToast('ℹ️ No matching content fields found to update. Make sure you\'re editing content with proper IDs.', 'info');
-                        return;
-                    }
-                    
-                    console.log(`📝 Updating ${updatedCount} fields:`, updatedFields);
-                    
-                    return fetch('/api/content', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(content)
-                    });
-                })
-                .then(response => {
-                    if (!response) return;
-                    return response.json();
-                })
-                .then(result => {
-                    if (result && result.success) {
-                        editedElements = [];
-                        showEditToast('✅ All changes saved successfully!', 'success');
-                        
-                        document.querySelectorAll('[style*="border-color: #28a745"]').forEach(el => {
-                            el.style.borderColor = 'transparent';
-                            el.style.background = 'transparent';
-                        });
-                    } else if (result) {
-                        showEditToast('❌ Error saving: ' + (result.message || 'Unknown error'), 'error');
-                    }
-                })
-                .catch(err => {
-                    console.error('Save error:', err);
-                    showEditToast('❌ Error saving changes: ' + err.message, 'error');
-                });
-        }
-
-        function showEditToast(message, type) {
-            if (editToast) { editToast.remove(); editToast = null; }
-            
-            const toast = document.createElement('div');
-            toast.className = 'edit-toast ' + (type || 'info');
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            editToast = toast;
-            
-            setTimeout(() => {
-                if (toast) {
-                    toast.classList.add('fade-out');
-                    setTimeout(() => { if (toast.parentElement) toast.remove(); }, 400);
-                }
-            }, 4000);
-        }
-
-        console.log('✏️ Edit Mode Ready! Add ?edit=true to URL to enable.');
-        console.log('📋 Field Map:', Object.keys(FIELD_MAP).length, 'fields mapped.');
-        console.log('🚀 Changara Star Academy loaded successfully!');
     </script>
 </body>
 </html>
