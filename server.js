@@ -47,6 +47,22 @@ const app = express();
 
 app.disable('x-powered-by');
 app.use(cors());
+
+// ============================================
+// RAW BODY PARSER FOR WEBHOOKS (Must come before express.json())
+// ============================================
+app.use('/api/webhooks/paystack', express.raw({ type: 'application/json' }));
+app.use('/api/webhooks/paystack', (req, res, next) => {
+    req.rawBody = req.body.toString();
+    try {
+        req.body = JSON.parse(req.rawBody);
+    } catch (e) {
+        // If parsing fails, keep body as is
+    }
+    next();
+});
+
+// Regular JSON parser for all other routes
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -1605,6 +1621,179 @@ const paymentSchema = new mongoose.Schema({
 });
 
 const Payment = mongoose.model('Payment', paymentSchema);
+
+// ============================================
+// PAYSTACK TRANSACTION SCHEMA
+// ============================================
+
+const paystackTransactionSchema = new mongoose.Schema({
+    reference: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    studentId: {
+        type: String,
+        required: true
+    },
+    studentName: {
+        type: String,
+        required: true
+    },
+    amount: {
+        type: Number,
+        required: true
+    },
+    amountPaid: {
+        type: Number,
+        default: 0
+    },
+    email: {
+        type: String,
+        default: ''
+    },
+    phone: {
+        type: String,
+        default: ''
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'success', 'failed', 'cancelled'],
+        default: 'pending'
+    },
+    paymentMethod: {
+        type: String,
+        enum: ['card', 'mpesa', 'bank_transfer', 'other'],
+        default: 'card'
+    },
+    channel: {
+        type: String,
+        default: ''
+    },
+    category: {
+        type: String,
+        default: 'School Fees'
+    },
+    notes: {
+        type: String,
+        default: ''
+    },
+    paystackData: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+const PaystackTransaction = mongoose.model('PaystackTransaction', paystackTransactionSchema);
+
+// ============================================
+// PAYSTACK HELPER FUNCTIONS
+// ============================================
+
+function isPaystackConfigured() {
+    return process.env.PAYSTACK_SECRET_KEY && 
+           process.env.PAYSTACK_SECRET_KEY.startsWith('sk_') &&
+           process.env.PAYSTACK_PUBLIC_KEY && 
+           process.env.PAYSTACK_PUBLIC_KEY.startsWith('pk_');
+}
+
+async function verifyPaystackWebhookSignature(req) {
+    try {
+        const signature = req.headers['x-paystack-signature'];
+        const secretKey = process.env.PAYSTACK_SECRET_KEY;
+        
+        if (!signature) return false;
+        
+        // Get raw body for verification
+        const rawBody = req.rawBody || JSON.stringify(req.body);
+        const hash = crypto.createHmac('sha512', secretKey).update(rawBody).digest('hex');
+        
+        return hash === signature;
+    } catch (error) {
+        console.error('Webhook verification error:', error);
+        return false;
+    }
+}
+
+async function processPaystackPayment(data) {
+    try {
+        const reference = data.reference;
+        const amount = data.amount / 100;
+        const metadata = data.metadata || {};
+        const studentId = metadata.studentId || 
+                         (metadata.custom_fields && 
+                          metadata.custom_fields.find(f => f.variable_name === 'student_id')?.value);
+        
+        console.log(`💰 Processing Paystack payment: ${reference} - ${studentId} - KES ${amount}`);
+        
+        if (!studentId) {
+            console.log('⚠️ No studentId found in metadata');
+            return { success: false, message: 'No studentId found' };
+        }
+        
+        // Find the student
+        const student = await Student.findOne({ studentId: studentId, isActive: true });
+        if (!student) {
+            console.log(`❌ Student not found: ${studentId}`);
+            return { success: false, message: 'Student not found' };
+        }
+        
+        // Update transaction status
+        await PaystackTransaction.findOneAndUpdate(
+            { reference: reference },
+            {
+                status: data.status === 'success' ? 'success' : 'failed',
+                amountPaid: amount,
+                channel: data.channel || '',
+                paymentMethod: data.channel === 'mpesa' ? 'mpesa' : data.channel === 'card' ? 'card' : 'other',
+                paystackData: data,
+                updatedAt: new Date()
+            },
+            { new: true, upsert: true }
+        );
+        
+        // Update student's paid amount
+        const oldPaid = student.paid || 0;
+        student.paid = oldPaid + amount;
+        student.updatedAt = new Date();
+        await student.save();
+        
+        // Record payment in the Payment collection
+        const payment = new Payment({
+            studentId: student.studentId,
+            studentName: student.name,
+            amount: amount,
+            category: 'School Fees (Online)',
+            method: `Paystack - ${data.channel || 'Online'}`,
+            reference: reference,
+            notes: `Paystack Transaction: ${reference}\nStatus: ${data.status}`,
+            date: new Date(),
+            categories: new Map([['School Fees', amount]])
+        });
+        await payment.save();
+        
+        console.log(`✅ Payment recorded: ${studentId} - KES ${amount}`);
+        
+        return {
+            success: true,
+            message: 'Payment processed successfully',
+            studentId: studentId,
+            amount: amount,
+            newBalance: (getFeeStructure(student.grade, student.type).total || 0) - student.paid
+        };
+    } catch (error) {
+        console.error('❌ Error processing payment:', error);
+        return { success: false, message: error.message };
+    }
+}
 
 // ============================================
 // HELPER FUNCTIONS
@@ -3988,6 +4177,259 @@ app.get('/api/clerk/reports/fee/:type', async (req, res) => {
 });
 
 // ============================================
+// PAYSTACK API ROUTES
+// ============================================
+
+// Initialize Paystack Payment
+app.post('/api/paystack/initialize', async (req, res) => {
+    try {
+        const { studentId, amount, email, name, phone } = req.body;
+        const secretKey = process.env.PAYSTACK_SECRET_KEY;
+        
+        console.log(`📡 Paystack initialize: ${studentId} - KES ${amount}`);
+        
+        if (!isPaystackConfigured()) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Paystack is not configured. Please check your API keys.' 
+            });
+        }
+        
+        // Validate student
+        const student = await Student.findOne({ studentId: studentId, isActive: true });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+        
+        // Validate amount
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid amount' });
+        }
+        
+        // Initialize transaction with Paystack
+        const response = await fetch('https://api.paystack.co/transaction/initialize', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${secretKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email || student.guardian || 'parent@example.com',
+                amount: Math.round(amount * 100),
+                currency: 'KES',
+                metadata: {
+                    studentId: studentId,
+                    studentName: student.name,
+                    custom_fields: [
+                        { display_name: "Student Name", variable_name: "student_name", value: student.name },
+                        { display_name: "Student ID", variable_name: "student_id", value: studentId },
+                        { display_name: "Grade", variable_name: "grade", value: student.grade }
+                    ]
+                },
+                callback_url: `${process.env.BASE_URL || 'http://localhost:5000'}/payment-success.html`,
+                channels: ['card', 'mpesa']
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status) {
+            // Save transaction to database
+            const transaction = new PaystackTransaction({
+                reference: data.data.reference,
+                studentId: studentId,
+                studentName: student.name,
+                amount: amount,
+                email: email || student.guardian || 'parent@example.com',
+                phone: phone || '',
+                status: 'pending',
+                category: 'School Fees',
+                notes: `Online payment for ${student.name} (${studentId})`
+            });
+            await transaction.save();
+            
+            console.log(`✅ Paystack initialized: ${data.data.reference}`);
+            
+            res.json({
+                success: true,
+                authorization_url: data.data.authorization_url,
+                reference: data.data.reference
+            });
+        } else {
+            console.log(`❌ Paystack init failed: ${data.message}`);
+            res.json({ success: false, message: data.message || 'Payment initialization failed' });
+        }
+    } catch (error) {
+        console.error('❌ Paystack init error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Verify Paystack Transaction
+app.get('/api/paystack/verify/:reference', async (req, res) => {
+    try {
+        const { reference } = req.params;
+        const secretKey = process.env.PAYSTACK_SECRET_KEY;
+        
+        console.log(`📡 Paystack verify: ${reference}`);
+        
+        if (!isPaystackConfigured()) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Paystack is not configured' 
+            });
+        }
+        
+        const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${secretKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.status) {
+            // Update transaction status
+            const transaction = await PaystackTransaction.findOneAndUpdate(
+                { reference: reference },
+                {
+                    status: data.data.status === 'success' ? 'success' : 'failed',
+                    amountPaid: data.data.amount / 100,
+                    channel: data.data.channel || '',
+                    paymentMethod: data.data.channel === 'mpesa' ? 'mpesa' : 
+                                   data.data.channel === 'card' ? 'card' : 'other',
+                    paystackData: data.data,
+                    updatedAt: new Date()
+                },
+                { new: true }
+            );
+            
+            // If payment was successful, update student balance
+            if (data.data.status === 'success' && transaction) {
+                const student = await Student.findOne({ studentId: transaction.studentId, isActive: true });
+                if (student) {
+                    student.paid = (student.paid || 0) + transaction.amount;
+                    await student.save();
+                    
+                    // Record payment
+                    const payment = new Payment({
+                        studentId: student.studentId,
+                        studentName: student.name,
+                        amount: transaction.amount,
+                        category: 'School Fees (Online)',
+                        method: `Paystack - ${data.data.channel || 'Online'}`,
+                        reference: reference,
+                        notes: `Paystack Transaction: ${reference}`,
+                        date: new Date()
+                    });
+                    await payment.save();
+                }
+            }
+        }
+        
+        res.json(data);
+    } catch (error) {
+        console.error('❌ Paystack verify error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get transaction by reference
+app.get('/api/paystack/transaction/:reference', async (req, res) => {
+    try {
+        const { reference } = req.params;
+        const transaction = await PaystackTransaction.findOne({ reference });
+        res.json({ success: true, transaction });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get transactions by student
+app.get('/api/paystack/student/:studentId', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const transactions = await PaystackTransaction.find({ studentId }).sort({ createdAt: -1 });
+        res.json({ success: true, transactions });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get all Paystack transactions (for admin)
+app.get('/api/paystack/transactions/all', async (req, res) => {
+    try {
+        const transactions = await PaystackTransaction.find().sort({ createdAt: -1 }).limit(100);
+        res.json({ success: true, transactions });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Paystack status check
+app.get('/api/paystack/status', (req, res) => {
+    const configured = isPaystackConfigured();
+    res.json({
+        success: true,
+        configured: configured,
+        message: configured ? 'Paystack is configured and ready' : 'Paystack is not configured',
+        publicKey: process.env.PAYSTACK_PUBLIC_KEY ? process.env.PAYSTACK_PUBLIC_KEY.substring(0, 10) + '...' : null
+    });
+});
+
+// ============================================
+// PAYSTACK WEBHOOK - CRITICAL FOR PAYMENT VERIFICATION
+// ============================================
+
+app.post('/api/webhooks/paystack', async (req, res) => {
+    console.log('📥 Paystack webhook received');
+    
+    try {
+        // Verify webhook signature
+        const signature = req.headers['x-paystack-signature'];
+        const secretKey = process.env.PAYSTACK_SECRET_KEY;
+        
+        if (!signature) {
+            console.log('⚠️ No signature provided');
+            return res.status(400).send('No signature provided');
+        }
+        
+        // Get raw body
+        const rawBody = req.rawBody || JSON.stringify(req.body);
+        const hash = crypto.createHmac('sha512', secretKey).update(rawBody).digest('hex');
+        
+        if (hash !== signature) {
+            console.log('❌ Invalid webhook signature');
+            return res.status(401).send('Invalid signature');
+        }
+        
+        const event = req.body;
+        console.log(`📥 Webhook event: ${event.event}`);
+        
+        if (event.event === 'charge.success') {
+            const data = event.data;
+            const result = await processPaystackPayment(data);
+            
+            if (result.success) {
+                console.log('✅ Webhook processed successfully');
+                res.sendStatus(200);
+            } else {
+                console.log(`❌ Webhook processing failed: ${result.message}`);
+                res.sendStatus(500);
+            }
+        } else {
+            console.log(`ℹ️ Unhandled webhook event: ${event.event}`);
+            res.sendStatus(200);
+        }
+    } catch (error) {
+        console.error('❌ Webhook error:', error);
+        res.sendStatus(500);
+    }
+});
+
+// ============================================
 // FIX PAST RECORDS - MANUAL API
 // ============================================
 
@@ -4459,6 +4901,15 @@ app.get('/student-report.html', (req, res) => {
 });
 
 // ============================================
+// PAYMENT SUCCESS PAGE
+// ============================================
+
+app.get('/payment-success.html', (req, res) => {
+    console.log('📄 Serving payment success page');
+    res.sendFile(path.join(__dirname, 'payment-success.html'));
+});
+
+// ============================================
 // DEBUG ROUTES
 // ============================================
 
@@ -4602,6 +5053,7 @@ app.get('/api/students/portal/assignments/filtered', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 // ============================================
 // LIVE SAVE - Save inline edits
 // ============================================
@@ -4716,6 +5168,7 @@ app.listen(PORT, () => {
     console.log(`Kenya Time: ${kenyaNow.toLocaleString()}`);
     console.log(`Test API: http://localhost:${PORT}/api/test`);
     console.log(`Cloudinary: ${isCloudinaryConfigured() ? '✅ Configured' : '❌ Not configured'}`);
+    console.log(`Paystack: ${isPaystackConfigured() ? '✅ Configured' : '❌ Not configured'}`);
     console.log('='.repeat(50));
     console.log('Server started successfully!');
 });
