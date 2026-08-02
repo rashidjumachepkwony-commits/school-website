@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fees Structure - Changara Star Academy</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
-    <meta name="description" content="Changara Star Academy Fees Structure - Affordable quality education from Playgroup to Grade 6. Day scholars and boarding options available.">
+    <meta name="description" content="Changara Star Academy Fees Structure - Affordable quality education from Playgroup to Grade 6.">
     
     <!-- ===== FONTS ===== -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,9 +37,6 @@
             --font-secondary: 'Poppins', sans-serif;
         }
 
-        /* ========================================
-           RESET & BASE
-           ======================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         
@@ -51,15 +48,9 @@
             line-height: 1.8;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-        /* ========================================
-           KENYAN FLAG STRIP
-           ======================================== */
+        /* ===== KENYA FLAG STRIP ===== */
         .kenya-flag-strip {
             height: 5px;
             background: linear-gradient(to right, 
@@ -73,9 +64,7 @@
             z-index: 1001;
         }
 
-        /* ========================================
-           NOTICE ALERT BAR
-           ======================================== */
+        /* ===== NOTICE ALERT BAR ===== */
         .notice-alert-bar {
             background: linear-gradient(135deg, var(--kenya-red), #8B0000);
             color: white;
@@ -142,9 +131,7 @@
             transform: rotate(90deg);
         }
 
-        /* ========================================
-           NEWS TICKER
-           ======================================== */
+        /* ===== NEWS TICKER ===== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
             color: white;
@@ -205,9 +192,7 @@
             font-weight: 600;
         }
 
-        /* ========================================
-           HEADER
-           ======================================== */
+        /* ===== HEADER ===== */
         .main-header {
             background: rgba(10, 22, 40, 0.92);
             backdrop-filter: blur(20px);
@@ -276,12 +261,8 @@
             transition: width 0.3s ease;
         }
         .main-header .nav-links a:hover::after,
-        .main-header .nav-links a.active::after {
-            width: 50%;
-        }
-        .main-header .nav-links a:hover {
-            color: white;
-        }
+        .main-header .nav-links a.active::after { width: 50%; }
+        .main-header .nav-links a:hover { color: white; }
         .main-header .nav-links a.active {
             background: rgba(212, 160, 23, 0.12);
             color: var(--school-gold);
@@ -309,9 +290,7 @@
             cursor: pointer;
         }
 
-        /* ========================================
-           PAGE HERO
-           ======================================== */
+        /* ===== PAGE HERO ===== */
         .page-hero {
             background: linear-gradient(135deg, #000000 0%, #1a0000 30%, #003300 70%, #0a1628 100%);
             color: white;
@@ -328,10 +307,7 @@
                 radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.05) 0%, transparent 50%),
                 radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.05) 0%, transparent 50%);
         }
-        .page-hero .hero-content {
-            position: relative;
-            z-index: 1;
-        }
+        .page-hero .hero-content { position: relative; z-index: 1; }
         .page-hero .hero-badge {
             display: inline-flex;
             align-items: center;
@@ -381,18 +357,10 @@
             margin: 0 auto;
         }
 
-        /* ========================================
-           SECTION STYLES
-           ======================================== */
-        .section {
-            padding: 40px 0;
-        }
-        .section-alt {
-            background: white;
-        }
-        .section-gray {
-            background: #f8f9fa;
-        }
+        /* ===== SECTION STYLES ===== */
+        .section { padding: 40px 0; }
+        .section-alt { background: white; }
+        .section-gray { background: #f8f9fa; }
         .section-dark {
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
             color: white;
@@ -419,9 +387,7 @@
         }
         .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
-        /* ========================================
-           MESSAGE BOX
-           ======================================== */
+        /* ===== MESSAGE BOX ===== */
         .message-box {
             padding: 15px 20px;
             border-radius: 12px;
@@ -456,13 +422,13 @@
         }
 
         /* ========================================
-           PAY ONLINE SECTION
+           SMART PAY ONLINE SECTION - ENHANCED
            ======================================== */
         .pay-online-section {
             background: white;
             border-radius: 16px;
             padding: 35px;
-            margin-bottom: 30px;
+            margin-top: 30px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             border: 2px solid var(--school-gold);
         }
@@ -506,6 +472,138 @@
             font-size: 14px;
         }
 
+        /* ---- SEARCH / AUTO-COMPLETE ---- */
+        .student-search-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .student-search-wrapper .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+        }
+        .student-search-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: var(--font-secondary);
+            background: #fafafa;
+        }
+        .student-search-wrapper input:focus {
+            border-color: var(--school-gold);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(212, 160, 23, 0.1);
+            background: white;
+        }
+        .student-search-wrapper .search-hint {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 11px;
+            background: #f0f0f0;
+            padding: 2px 12px;
+            border-radius: 20px;
+        }
+
+        /* ---- AUTO-COMPLETE DROPDOWN ---- */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--school-gold);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 260px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+        }
+        .autocomplete-dropdown.show { display: block; }
+        .autocomplete-dropdown .result-item {
+            padding: 12px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .autocomplete-dropdown .result-item:hover {
+            background: #f8f9fc;
+        }
+        .autocomplete-dropdown .result-item .name {
+            font-weight: 600;
+            color: var(--school-blue-dark);
+        }
+        .autocomplete-dropdown .result-item .details {
+            font-size: 12px;
+            color: #888;
+        }
+        .autocomplete-dropdown .result-item .details .grade-badge {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            padding: 1px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 10px;
+        }
+        .autocomplete-dropdown .result-item .details .type-badge {
+            background: #e8f5e9;
+            color: #0b8f34;
+            padding: 1px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .autocomplete-dropdown .no-results {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+        }
+
+        /* ---- STUDENT INFO CARD (after selection) ---- */
+        .student-info-card {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin: 15px 0 20px;
+            border: 2px solid var(--school-gold);
+            display: none;
+            animation: fadeSlideIn 0.4s ease;
+        }
+        .student-info-card.show { display: block; }
+        .student-info-card .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #e8ecf1;
+            font-size: 14px;
+        }
+        .student-info-card .info-row:last-child { border-bottom: none; }
+        .student-info-card .info-row .label { color: #888; font-weight: 500; }
+        .student-info-card .info-row .value { color: var(--school-blue-dark); font-weight: 600; }
+        .student-info-card .info-row .value .balance-amount {
+            color: var(--kenya-red);
+            font-weight: 700;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---- PAYMENT FORM ---- */
         .payment-form {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -542,8 +640,16 @@
             outline: none;
             box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.1);
         }
-        .payment-form .form-group input::placeholder {
-            color: #aaa;
+        .payment-form .form-group input:disabled {
+            background: #f5f5f5;
+            color: #666;
+            cursor: not-allowed;
+        }
+        .payment-form .form-group input::placeholder { color: #aaa; }
+        .payment-form .form-group input.readonly-field {
+            background: #f5f5f5;
+            color: #333;
+            cursor: default;
         }
 
         .btn-pay {
@@ -617,17 +723,13 @@
             border-bottom: 1px solid #f0f2f5;
             color: #333;
         }
-        .fee-table tr:hover td {
-            background: #f8f9fc;
-        }
+        .fee-table tr:hover td { background: #f8f9fc; }
         .fee-table .total-row {
             background: #f0f2f5;
             font-weight: 700;
             color: var(--school-blue-dark);
         }
-        .fee-table .total-row td {
-            border-bottom: 2px solid var(--school-gold);
-        }
+        .fee-table .total-row td { border-bottom: 2px solid var(--school-gold); }
         .fee-table .highlight-cell {
             color: var(--school-gold-dark);
             font-weight: 700;
@@ -654,22 +756,14 @@
             border-color: var(--school-gold);
             box-shadow: 0 10px 35px rgba(212, 160, 23, 0.12);
         }
-        .info-card .info-icon {
-            font-size: 32px;
-            display: block;
-            margin-bottom: 8px;
-        }
+        .info-card .info-icon { font-size: 32px; display: block; margin-bottom: 8px; }
         .info-card h4 {
             color: var(--school-blue-dark);
             font-size: 16px;
             margin-bottom: 4px;
             font-weight: 700;
         }
-        .info-card p {
-            color: #666;
-            font-size: 13px;
-            line-height: 1.6;
-        }
+        .info-card p { color: #666; font-size: 13px; line-height: 1.6; }
 
         /* ========================================
            M-PESA PAYMENT BOX
@@ -683,27 +777,15 @@
             max-width: 700px;
             margin: 0 auto;
         }
-        .mpesa-box .mpesa-icon {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 10px;
-        }
-        .mpesa-box h3 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
+        .mpesa-box .mpesa-icon { font-size: 48px; display: block; margin-bottom: 10px; }
+        .mpesa-box h3 { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
         .mpesa-box .paybill {
             font-size: 32px;
             font-weight: 900;
             color: var(--school-gold);
             letter-spacing: 2px;
         }
-        .mpesa-box p {
-            font-size: 15px;
-            opacity: 0.85;
-            line-height: 1.7;
-        }
+        .mpesa-box p { font-size: 15px; opacity: 0.85; line-height: 1.7; }
         .mpesa-box .account-label {
             display: inline-block;
             background: rgba(255,255,255,0.15);
@@ -767,11 +849,7 @@
             margin-bottom: 6px;
             color: var(--school-gold);
         }
-        .main-footer .footer-info p {
-            color: rgba(255,255,255,0.4);
-            line-height: 1.6;
-            font-size: 12px;
-        }
+        .main-footer .footer-info p { color: rgba(255,255,255,0.4); font-size: 12px; }
         .main-footer .footer-info .ministry-badge {
             display: inline-block;
             background: rgba(255,255,255,0.04);
@@ -792,11 +870,7 @@
             margin-bottom: 8px;
             font-weight: 600;
         }
-        .main-footer .footer-links {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+        .main-footer .footer-links { display: flex; flex-direction: column; gap: 4px; }
         .main-footer .footer-links a {
             color: rgba(255,255,255,0.3);
             text-decoration: none;
@@ -871,6 +945,8 @@
             .mpesa-box { padding: 20px; }
             .mpesa-box .paybill { font-size: 24px; }
             .mpesa-box h3 { font-size: 20px; }
+            
+            .student-info-card .info-row { flex-direction: column; gap: 2px; }
         }
 
         @media (max-width: 480px) {
@@ -882,6 +958,8 @@
             .mpesa-box .paybill { font-size: 20px; }
             .btn-pay { font-size: 15px; padding: 14px 20px; }
             .pay-online-section { padding: 15px; }
+            .student-search-wrapper input { font-size: 14px; padding: 12px 14px 12px 40px; }
+            .autocomplete-dropdown .result-item { padding: 10px 14px; flex-direction: column; align-items: flex-start; gap: 4px; }
         }
 
         /* ========================================
@@ -1021,108 +1099,22 @@
                 <div class="info-card" data-aos="fade-up" data-aos-delay="100">
                     <span class="info-icon">📖</span>
                     <h4>Transparent Fees</h4>
-                    <p>Our fee structure is reviewed periodically to ensure we continue to offer quality education while meeting the needs of our learners.</p>
+                    <p>Our fee structure is reviewed periodically to ensure we continue to offer quality education.</p>
                 </div>
                 <div class="info-card" data-aos="fade-up" data-aos-delay="150">
                     <span class="info-icon">📋</span>
                     <h4>Fee Schedule</h4>
-                    <p>Parents are encouraged to obtain the latest fee schedule from the school office or download it from this website where available.</p>
+                    <p>Parents are encouraged to obtain the latest fee schedule from the school office.</p>
                 </div>
                 <div class="info-card" data-aos="fade-up" data-aos-delay="200">
                     <span class="info-icon">📞</span>
                     <h4>Fee Enquiries</h4>
-                    <p>For enquiries regarding school fees, payment methods, or fee balances, please contact the school administration during office hours.</p>
+                    <p>For enquiries regarding school fees, payment methods, or fee balances, please contact the school.</p>
                 </div>
                 <div class="info-card" data-aos="fade-up" data-aos-delay="250">
                     <span class="info-icon">💪</span>
                     <h4>Partner with Us</h4>
-                    <p>We appreciate the support of our parents and guardians in ensuring that school fees are paid on time to promote uninterrupted learning.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ========================================
-    PAY ONLINE SECTION - NEW
-    ======================================== -->
-    <section class="section" data-aos="fade-up">
-        <div class="container">
-            <div class="pay-online-section" data-aos="fade-up">
-                <div class="pay-header">
-                    <h2><i class="fas fa-credit-card"></i> Pay Online</h2>
-                    <div>
-                        <span class="pay-badge"><i class="fas fa-bolt"></i> Instant</span>
-                        <span class="secure-badge"><i class="fas fa-lock"></i> Secured</span>
-                    </div>
-                </div>
-                <p class="pay-description">
-                    <i class="fas fa-info-circle" style="color:var(--school-gold);"></i> 
-                    Pay school fees securely using M-Pesa, Card, or Bank Transfer. 
-                    <strong>Payment updates automatically</strong> in the school system.
-                </p>
-
-                <!-- Message Box -->
-                <div id="paymentMessage" class="message-box"></div>
-
-                <form id="paymentForm" class="payment-form" onsubmit="event.preventDefault(); payWithPaystack();">
-                    <div class="form-group">
-                        <label for="studentId">👤 Student ID <span class="required">*</span></label>
-                        <input type="text" id="studentId" placeholder="e.g., ST001" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="studentName">📛 Student Name <span class="required">*</span></label>
-                        <input type="text" id="studentName" placeholder="Enter full name" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="grade">📚 Grade <span class="required">*</span></label>
-                        <select id="grade" required>
-                            <option value="">Select Grade</option>
-                            <option value="Playgroup">Playgroup</option>
-                            <option value="PP1">PP1</option>
-                            <option value="PP2">PP2</option>
-                            <option value="Grade 1">Grade 1</option>
-                            <option value="Grade 2">Grade 2</option>
-                            <option value="Grade 3">Grade 3</option>
-                            <option value="Grade 4">Grade 4</option>
-                            <option value="Grade 5">Grade 5</option>
-                            <option value="Grade 6">Grade 6</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="studentType">🏠 Student Type <span class="required">*</span></label>
-                        <select id="studentType" required>
-                            <option value="Day Scholar">Day Scholar</option>
-                            <option value="Boarder">Boarder</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">📧 Parent Email <span class="required">*</span></label>
-                        <input type="email" id="email" placeholder="parent@email.com" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">📱 Phone Number <span class="required">*</span></label>
-                        <input type="tel" id="phone" placeholder="e.g., 0712345678" required />
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="amount">💰 Amount (KES) <span class="required">*</span></label>
-                        <input type="number" id="amount" placeholder="Enter amount in KES" min="100" step="100" required />
-                        <span style="font-size:12px;color:#999;margin-top:4px;">Minimum: KES 100</span>
-                    </div>
-                    <div class="form-group full-width">
-                        <button type="submit" class="btn-pay" id="payButton">
-                            <i class="fas fa-credit-card"></i> Pay Now
-                        </button>
-                    </div>
-                </form>
-
-                <div style="margin-top:15px;padding:15px;background:#f8f9fa;border-radius:10px;border-left:4px solid var(--school-gold);">
-                    <p style="font-size:13px;color:#666;margin:0;">
-                        <i class="fas fa-check-circle" style="color:var(--kenya-green);"></i> 
-                        After payment, your child's fee record updates <strong>automatically</strong>.
-                        <br>
-                        <i class="fas fa-envelope" style="color:var(--school-gold);"></i> 
-                        You will receive a confirmation email.
-                    </p>
+                    <p>We appreciate the support of our parents in ensuring that school fees are paid on time.</p>
                 </div>
             </div>
         </div>
@@ -1149,34 +1141,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><strong>PLAYGROUP</strong></td>
-                            <td>6,000</td>
-                            <td>5,350</td>
-                            <td>4,100</td>
-                            <td class="highlight-cell">15,450</td>
-                        </tr>
-                        <tr>
-                            <td><strong>PP1 - PP2</strong></td>
-                            <td>7,000</td>
-                            <td>6,000</td>
-                            <td>5,000</td>
-                            <td class="highlight-cell">18,000</td>
-                        </tr>
-                        <tr>
-                            <td><strong>G1 - G3</strong></td>
-                            <td>7,500</td>
-                            <td>6,700</td>
-                            <td>5,500</td>
-                            <td class="highlight-cell">19,700</td>
-                        </tr>
-                        <tr>
-                            <td><strong>G4 - G6</strong></td>
-                            <td>8,300</td>
-                            <td>7,400</td>
-                            <td>6,000</td>
-                            <td class="highlight-cell">21,700</td>
-                        </tr>
+                        <tr><td><strong>PLAYGROUP</strong></td><td>6,000</td><td>5,350</td><td>4,100</td><td class="highlight-cell">15,450</td></tr>
+                        <tr><td><strong>PP1 - PP2</strong></td><td>7,000</td><td>6,000</td><td>5,000</td><td class="highlight-cell">18,000</td></tr>
+                        <tr><td><strong>G1 - G3</strong></td><td>7,500</td><td>6,700</td><td>5,500</td><td class="highlight-cell">19,700</td></tr>
+                        <tr><td><strong>G4 - G6</strong></td><td>8,300</td><td>7,400</td><td>6,000</td><td class="highlight-cell">21,700</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1204,55 +1172,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><strong>BOARDING</strong></td>
-                            <td>3,500</td>
-                            <td>2,500</td>
-                            <td>1,500</td>
-                            <td>7,500</td>
-                        </tr>
-                        <tr>
-                            <td><strong>TUITION</strong></td>
-                            <td>4,000</td>
-                            <td>3,000</td>
-                            <td>2,000</td>
-                            <td>9,000</td>
-                        </tr>
-                        <tr>
-                            <td><strong>MEALS</strong></td>
-                            <td>3,500</td>
-                            <td>3,000</td>
-                            <td>2,500</td>
-                            <td>9,000</td>
-                        </tr>
-                        <tr>
-                            <td><strong>REMEDIALS</strong></td>
-                            <td>700</td>
-                            <td>700</td>
-                            <td>600</td>
-                            <td>2,000</td>
-                        </tr>
-                        <tr>
-                            <td><strong>STATIONARIES</strong></td>
-                            <td>500</td>
-                            <td>500</td>
-                            <td>500</td>
-                            <td>1,500</td>
-                        </tr>
-                        <tr>
-                            <td><strong>ACTIVITY</strong></td>
-                            <td>400</td>
-                            <td>200</td>
-                            <td>100</td>
-                            <td>1,000</td>
-                        </tr>
-                        <tr>
-                            <td><strong>ASSESSMENT</strong></td>
-                            <td>500</td>
-                            <td>300</td>
-                            <td>300</td>
-                            <td>1,100</td>
-                        </tr>
+                        <tr><td><strong>BOARDING</strong></td><td>3,500</td><td>2,500</td><td>1,500</td><td>7,500</td></tr>
+                        <tr><td><strong>TUITION</strong></td><td>4,000</td><td>3,000</td><td>2,000</td><td>9,000</td></tr>
+                        <tr><td><strong>MEALS</strong></td><td>3,500</td><td>3,000</td><td>2,500</td><td>9,000</td></tr>
+                        <tr><td><strong>REMEDIALS</strong></td><td>700</td><td>700</td><td>600</td><td>2,000</td></tr>
+                        <tr><td><strong>STATIONARIES</strong></td><td>500</td><td>500</td><td>500</td><td>1,500</td></tr>
+                        <tr><td><strong>ACTIVITY</strong></td><td>400</td><td>200</td><td>100</td><td>1,000</td></tr>
+                        <tr><td><strong>ASSESSMENT</strong></td><td>500</td><td>300</td><td>300</td><td>1,100</td></tr>
                         <tr class="total-row">
                             <td><strong>TOTALS</strong></td>
                             <td>13,100</td>
@@ -1290,7 +1216,7 @@
                 <div class="info-card" data-aos="fade-up" data-aos-delay="250">
                     <span class="info-icon">⚠️</span>
                     <h4>Important Note</h4>
-                    <p><strong>No cash</strong> is allowed to be paid to any teacher. All payments must be made through the official channels.</p>
+                    <p><strong>No cash</strong> is allowed to be paid to any teacher. All payments must be made through official channels.</p>
                 </div>
             </div>
         </div>
@@ -1318,6 +1244,129 @@
                 <p style="margin-top:10px;font-size:12px;opacity:0.6;">
                     <i class="fas fa-exclamation-circle"></i> No cash is allowed to be paid to any teacher
                 </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+    SMART PAY ONLINE SECTION
+    ======================================== -->
+    <section class="section" data-aos="fade-up">
+        <div class="container">
+            <div class="pay-online-section" data-aos="fade-up">
+                <div class="pay-header">
+                    <h2><i class="fas fa-credit-card"></i> Pay Online</h2>
+                    <div>
+                        <span class="pay-badge"><i class="fas fa-bolt"></i> Instant</span>
+                        <span class="secure-badge"><i class="fas fa-lock"></i> Secured</span>
+                    </div>
+                </div>
+                <p class="pay-description">
+                    <i class="fas fa-info-circle" style="color:var(--school-gold);"></i> 
+                    <strong>Smart Search:</strong> Start typing your child's name or Student ID to auto-fill all details.
+                    <br>
+                    <i class="fas fa-magic" style="color:var(--school-gold);"></i>
+                    Grades and student type are selected automatically for you.
+                </p>
+
+                <!-- Message Box -->
+                <div id="paymentMessage" class="message-box"></div>
+
+                <!-- ===== SMART SEARCH ===== -->
+                <div class="student-search-wrapper">
+                    <span class="search-icon"><i class="fas fa-search"></i></span>
+                    <input 
+                        type="text" 
+                        id="studentSearch" 
+                        placeholder="🔍 Type Student Name or ID (e.g., ST001 or John)" 
+                        autocomplete="off"
+                        oninput="searchStudents(this.value)"
+                        onfocus="this.select()"
+                    />
+                    <span class="search-hint"><i class="fas fa-keyboard"></i> Keyboard friendly</span>
+                    <!-- Auto-complete Dropdown -->
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown">
+                        <div class="no-results" id="noResults">No students found</div>
+                    </div>
+                </div>
+
+                <!-- ===== STUDENT INFO CARD ===== -->
+                <div class="student-info-card" id="studentInfoCard">
+                    <div class="info-row">
+                        <span class="label"><i class="fas fa-user"></i> Student Name</span>
+                        <span class="value" id="displayName">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label"><i class="fas fa-id-card"></i> Student ID</span>
+                        <span class="value" id="displayId">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label"><i class="fas fa-graduation-cap"></i> Grade</span>
+                        <span class="value" id="displayGrade">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label"><i class="fas fa-home"></i> Student Type</span>
+                        <span class="value" id="displayType">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label"><i class="fas fa-coins"></i> Balance</span>
+                        <span class="value" id="displayBalance">—</span>
+                    </div>
+                </div>
+
+                <!-- ===== PAYMENT FORM ===== -->
+                <form id="paymentForm" class="payment-form" onsubmit="event.preventDefault(); payWithPaystack();">
+                    <div class="form-group">
+                        <label for="studentId">👤 Student ID <span class="required">*</span></label>
+                        <input type="text" id="studentId" placeholder="Auto-filled" readonly class="readonly-field" />
+                    </div>
+                    <div class="form-group">
+                        <label for="studentName">📛 Student Name <span class="required">*</span></label>
+                        <input type="text" id="studentName" placeholder="Auto-filled" readonly class="readonly-field" />
+                    </div>
+                    <div class="form-group">
+                        <label for="grade">📚 Grade <span class="required">*</span></label>
+                        <input type="text" id="grade" placeholder="Auto-filled" readonly class="readonly-field" />
+                    </div>
+                    <div class="form-group">
+                        <label for="studentType">🏠 Student Type <span class="required">*</span></label>
+                        <input type="text" id="studentType" placeholder="Auto-filled" readonly class="readonly-field" />
+                    </div>
+                    <div class="form-group">
+                        <label for="email">📧 Parent Email <span class="required">*</span></label>
+                        <input type="email" id="email" placeholder="Enter parent email" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">📱 Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="phone" placeholder="e.g., 0712345678" required />
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="amount">💰 Amount (KES) <span class="required">*</span></label>
+                        <input type="number" id="amount" placeholder="Enter amount to pay" min="100" step="100" required />
+                        <span style="font-size:12px;color:#999;margin-top:4px;">
+                            <i class="fas fa-info-circle"></i> Minimum: KES 100
+                            <span style="float:right;" id="balanceHint"></span>
+                        </span>
+                    </div>
+                    <div class="form-group full-width">
+                        <button type="submit" class="btn-pay" id="payButton">
+                            <i class="fas fa-credit-card"></i> Pay Now
+                        </button>
+                    </div>
+                </form>
+
+                <div style="margin-top:15px;padding:15px;background:#f8f9fa;border-radius:10px;border-left:4px solid var(--school-gold);">
+                    <p style="font-size:13px;color:#666;margin:0;">
+                        <i class="fas fa-check-circle" style="color:var(--kenya-green);"></i> 
+                        After payment, your child's fee record updates <strong>automatically</strong>.
+                        <br>
+                        <i class="fas fa-envelope" style="color:var(--school-gold);"></i> 
+                        You will receive a confirmation email.
+                        <br>
+                        <i class="fas fa-shield-alt" style="color:var(--school-gold);"></i>
+                        Payment is secured by <strong>Paystack</strong>.
+                    </p>
+                </div>
             </div>
         </div>
     </section>
@@ -1412,16 +1461,6 @@
             localStorage.setItem('noticeClosed', 'true');
         }
 
-        function showNotice(message) {
-            const bar = document.getElementById('noticeAlertBar');
-            const msgEl = document.getElementById('noticeMessage');
-            if (message) {
-                msgEl.innerHTML = message;
-            }
-            bar.classList.add('show');
-            localStorage.removeItem('noticeClosed');
-        }
-
         function checkNoticeStatus() {
             const closed = localStorage.getItem('noticeClosed');
             const bar = document.getElementById('noticeAlertBar');
@@ -1459,17 +1498,202 @@
                 console.log('News ticker not available');
             }
         }
-
         document.addEventListener('DOMContentLoaded', function() {
             loadNewsTicker();
         });
 
         // ============================================================
-        // PAYSTACK PAYMENT - PARENTS PAY FROM WEBSITE
+        // SMART STUDENT SEARCH & AUTO-COMPLETE
+        // ============================================================
+
+        let allStudents = [];
+        let selectedStudent = null;
+
+        // Load students from server
+        async function loadStudents() {
+            try {
+                const response = await fetch('/api/students');
+                const data = await response.json();
+                if (data.success) {
+                    allStudents = data.students;
+                    console.log(`✅ Loaded ${allStudents.length} students for search`);
+                }
+            } catch (error) {
+                console.error('Error loading students:', error);
+                // Fallback with sample data if API fails
+                allStudents = [];
+            }
+        }
+
+        // Search students by name or ID
+        function searchStudents(query) {
+            const dropdown = document.getElementById('autocompleteDropdown');
+            const noResults = document.getElementById('noResults');
+            
+            if (!query || query.length < 1) {
+                dropdown.classList.remove('show');
+                return;
+            }
+
+            const searchLower = query.toLowerCase().trim();
+            const results = allStudents.filter(s => 
+                (s.name && s.name.toLowerCase().includes(searchLower)) ||
+                (s.studentId && s.studentId.toLowerCase().includes(searchLower))
+            );
+
+            // Clear previous results (keep no-results)
+            const existingItems = dropdown.querySelectorAll('.result-item');
+            existingItems.forEach(el => el.remove());
+
+            if (results.length === 0) {
+                noResults.textContent = '😕 No students found. Try a different name or ID.';
+                noResults.style.display = 'block';
+                dropdown.classList.add('show');
+                return;
+            }
+
+            noResults.style.display = 'none';
+
+            results.slice(0, 10).forEach(student => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                const balance = getStudentBalance(student);
+                item.innerHTML = `
+                    <div>
+                        <div class="name">${student.name || 'Unknown'}</div>
+                        <div class="details">
+                            <span class="grade-badge">${student.grade || 'N/A'}</span>
+                            <span class="type-badge">${student.type || 'Day Scholar'}</span>
+                            <span style="margin-left:8px;color:#999;">ID: ${student.studentId || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-weight:700;color:var(--school-gold-dark);">KES ${balance}</div>
+                        <div style="font-size:10px;color:#999;">Balance</div>
+                    </div>
+                `;
+                item.addEventListener('click', function() {
+                    selectStudent(student);
+                });
+                dropdown.appendChild(item);
+            });
+
+            dropdown.classList.add('show');
+        }
+
+        // Get student balance
+        function getStudentBalance(student) {
+            // Calculate balance based on grade and type
+            const feeData = getFeeStructure(student.grade, student.type);
+            const paid = student.paid || 0;
+            const total = feeData.total || 0;
+            return total - paid;
+        }
+
+        // Get fee structure (matching the tables above)
+        function getFeeStructure(grade, type) {
+            const dayFees = {
+                'Playgroup': 15450,
+                'PP1': 18000,
+                'PP2': 18000,
+                'Grade 1': 19700,
+                'Grade 2': 19700,
+                'Grade 3': 19700,
+                'Grade 4': 21700,
+                'Grade 5': 21700,
+                'Grade 6': 21700
+            };
+            const boardingFees = {
+                'Grade 3': 31100,
+                'Grade 4': 31100,
+                'Grade 5': 31100,
+                'Grade 6': 31100
+            };
+            
+            if ((type === 'Boarder' || type === 'boarder') && boardingFees[grade]) {
+                return { total: boardingFees[grade] };
+            }
+            return { total: dayFees[grade] || 0 };
+        }
+
+        // Select student and auto-fill form
+        function selectStudent(student) {
+            selectedStudent = student;
+            const balance = getStudentBalance(student);
+            
+            // Hide dropdown
+            document.getElementById('autocompleteDropdown').classList.remove('show');
+            document.getElementById('studentSearch').value = `${student.name} (${student.studentId})`;
+
+            // Fill form fields
+            document.getElementById('studentId').value = student.studentId || '';
+            document.getElementById('studentName').value = student.name || '';
+            document.getElementById('grade').value = student.grade || '';
+            document.getElementById('studentType').value = student.type || 'Day Scholar';
+
+            // Show student info card
+            const card = document.getElementById('studentInfoCard');
+            document.getElementById('displayName').textContent = student.name || '—';
+            document.getElementById('displayId').textContent = student.studentId || '—';
+            document.getElementById('displayGrade').textContent = student.grade || '—';
+            document.getElementById('displayType').textContent = student.type || 'Day Scholar';
+            
+            const balanceDisplay = document.getElementById('displayBalance');
+            if (balance <= 0) {
+                balanceDisplay.innerHTML = '<span style="color:#0b8f34;font-weight:700;">✅ Fully Paid</span>';
+            } else {
+                balanceDisplay.innerHTML = `<span class="balance-amount">KES ${balance.toLocaleString()}</span>`;
+            }
+            card.classList.add('show');
+
+            // Update balance hint
+            const hint = document.getElementById('balanceHint');
+            if (balance <= 0) {
+                hint.innerHTML = '<span style="color:#0b8f34;">✅ No balance</span>';
+            } else {
+                hint.innerHTML = `<span style="color:#999;">Balance: <strong style="color:var(--kenya-red);">KES ${balance.toLocaleString()}</strong></span>`;
+            }
+
+            // Set max amount to balance
+            const amountInput = document.getElementById('amount');
+            if (balance > 0) {
+                amountInput.placeholder = `Enter amount (max KES ${balance.toLocaleString()})`;
+                amountInput.max = balance;
+            } else {
+                amountInput.placeholder = 'Enter amount to pay';
+                amountInput.max = '';
+            }
+
+            showPaymentMessage('✅ Student found! Fill in email, phone, and amount to pay.', 'success');
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', function(e) {
+            const wrapper = document.querySelector('.student-search-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('autocompleteDropdown').classList.remove('show');
+            }
+        });
+
+        // Keyboard shortcuts: Enter to select first result, Escape to close
+        document.getElementById('studentSearch').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const firstResult = document.querySelector('.autocomplete-dropdown .result-item');
+                if (firstResult) {
+                    firstResult.click();
+                }
+            }
+            if (e.key === 'Escape') {
+                document.getElementById('autocompleteDropdown').classList.remove('show');
+            }
+        });
+
+        // ============================================================
+        // PAYSTACK PAYMENT
         // ============================================================
 
         function showPaymentMessage(msg, type) {
-            var el = document.getElementById('paymentMessage');
+            const el = document.getElementById('paymentMessage');
             el.textContent = msg;
             el.className = 'message-box ' + type;
             el.style.display = 'block';
@@ -1479,19 +1703,36 @@
         }
 
         function validatePaymentForm() {
-            var studentId = document.getElementById('studentId').value.trim();
-            var studentName = document.getElementById('studentName').value.trim();
-            var grade = document.getElementById('grade').value;
-            var email = document.getElementById('email').value.trim();
-            var phone = document.getElementById('phone').value.trim();
-            var amount = document.getElementById('amount').value.trim();
+            const studentId = document.getElementById('studentId').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const amount = document.getElementById('amount').value.trim();
 
-            if (!studentId) { showPaymentMessage('❌ Please enter the Student ID', 'error'); return false; }
-            if (!studentName) { showPaymentMessage('❌ Please enter the Student Name', 'error'); return false; }
-            if (!grade) { showPaymentMessage('❌ Please select the Grade', 'error'); return false; }
-            if (!email || !email.includes('@')) { showPaymentMessage('❌ Please enter a valid Email address', 'error'); return false; }
-            if (!phone || phone.length < 10) { showPaymentMessage('❌ Please enter a valid Phone Number', 'error'); return false; }
-            if (!amount || parseFloat(amount) < 100) { showPaymentMessage('❌ Please enter a valid amount (minimum KES 100)', 'error'); return false; }
+            if (!studentId || !studentName) { 
+                showPaymentMessage('❌ Please search and select a student first', 'error'); 
+                return false; 
+            }
+            if (!email || !email.includes('@')) { 
+                showPaymentMessage('❌ Please enter a valid Email address', 'error'); 
+                return false; 
+            }
+            if (!phone || phone.length < 10) { 
+                showPaymentMessage('❌ Please enter a valid Phone Number', 'error'); 
+                return false; 
+            }
+            if (!amount || parseFloat(amount) < 100) { 
+                showPaymentMessage('❌ Please enter a valid amount (minimum KES 100)', 'error'); 
+                return false; 
+            }
+
+            // Check if amount exceeds balance
+            const balance = getStudentBalance(selectedStudent);
+            if (balance > 0 && parseFloat(amount) > balance) {
+                if (!confirm(`⚠️ Amount (KES ${parseFloat(amount).toLocaleString()}) exceeds balance (KES ${balance.toLocaleString()}). Continue?`)) {
+                    return false;
+                }
+            }
 
             return true;
         }
@@ -1499,21 +1740,20 @@
         function payWithPaystack() {
             if (!validatePaymentForm()) return;
 
-            var payButton = document.getElementById('payButton');
+            const payButton = document.getElementById('payButton');
             payButton.disabled = true;
             payButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
-            var studentId = document.getElementById('studentId').value.trim();
-            var studentName = document.getElementById('studentName').value.trim();
-            var grade = document.getElementById('grade').value;
-            var studentType = document.getElementById('studentType').value;
-            var email = document.getElementById('email').value.trim();
-            var phone = document.getElementById('phone').value.trim();
-            var amount = parseFloat(document.getElementById('amount').value.trim());
+            const studentId = document.getElementById('studentId').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+            const grade = document.getElementById('grade').value.trim();
+            const studentType = document.getElementById('studentType').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const amount = parseFloat(document.getElementById('amount').value.trim());
 
             showPaymentMessage('⏳ Initializing payment... Please wait.', 'info');
 
-            // Initialize payment with server
             fetch('/api/paystack/initialize', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1530,10 +1770,7 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    showPaymentMessage('✅ Payment initialized. Redirecting to Paystack...', 'success');
-                    
-                    // Use Paystack popup
-                    var handler = PaystackPop.setup({
+                    const handler = PaystackPop.setup({
                         key: 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', // REPLACE with your public key
                         email: email,
                         amount: Math.round(amount) * 100,
@@ -1579,13 +1816,17 @@
             fetch('/api/paystack/verify/' + reference)
                 .then(res => res.json())
                 .then(data => {
-                    var payButton = document.getElementById('payButton');
+                    const payButton = document.getElementById('payButton');
                     payButton.disabled = false;
                     payButton.innerHTML = '<i class="fas fa-credit-card"></i> Pay Now';
 
                     if (data.status && data.data.status === 'success') {
                         showPaymentMessage('✅ Payment confirmed! Your child\'s fee record has been updated automatically.', 'success');
                         document.getElementById('paymentForm').reset();
+                        document.getElementById('studentInfoCard').classList.remove('show');
+                        document.getElementById('studentSearch').value = '';
+                        // Reload students to update balance
+                        loadStudents();
                     } else if (data.status && data.data.status === 'pending') {
                         showPaymentMessage('⏳ Payment is pending verification. It will update shortly.', 'warning');
                     } else {
@@ -1593,12 +1834,19 @@
                     }
                 })
                 .catch(function(error) {
-                    var payButton = document.getElementById('payButton');
+                    const payButton = document.getElementById('payButton');
                     payButton.disabled = false;
                     payButton.innerHTML = '<i class="fas fa-credit-card"></i> Pay Now';
                     showPaymentMessage('⚠️ Verification pending. Check back later.', 'warning');
                 });
         }
+
+        // ============================================================
+        // LOAD STUDENTS ON PAGE LOAD
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudents();
+        });
     </script>
 
 </body>
