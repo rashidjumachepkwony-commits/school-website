@@ -1405,34 +1405,87 @@
         .main-footer .footer-social a:hover { color: var(--school-gold); border-color: var(--school-gold); transform: translateY(-2px); }
 
         /* ========================================
-           RESPONSIVE
+           RESPONSIVE - CLEAN MOBILE MENU
            ======================================== */
         @media (max-width: 992px) {
-            .main-header .nav-links:not(.mobile-visible) {
+            /* Hide desktop nav links on mobile */
+            .main-header .nav-links {
                 display: none;
                 flex-direction: column;
                 width: 100%;
-                padding: 10px 0;
-                gap: 6px;
+                padding: 12px 0;
+                gap: 8px;
+                background: rgba(10, 22, 40, 0.98);
+                border-top: 2px solid var(--school-gold);
+                margin-top: 10px;
+                border-radius: 12px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             }
             .main-header .nav-links.show {
                 display: flex;
+            }
+            .main-header .nav-links a {
+                width: 100%;
+                text-align: center;
+                padding: 10px 16px;
+                font-size: 14px;
+                border-radius: 8px;
+                border: 1px solid transparent;
+            }
+            .main-header .nav-links a::after {
+                display: none;
+            }
+            .main-header .nav-links a:hover {
+                background: rgba(212,160,23,0.12);
+                border-color: rgba(212,160,23,0.15);
+            }
+            .main-header .nav-links a.active {
+                background: rgba(212,160,23,0.18);
+            }
+            .main-header .nav-links a.portal-link,
+            .main-header .nav-links a.enroll-now-link,
+            .main-header .nav-links a.student-portal-link {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+                border-radius: 8px;
+                padding: 10px 16px;
             }
             .main-header .mobile-menu-btn {
                 display: block;
             }
             .main-header .container {
-                flex-wrap: nowrap;
-                gap: 4px;
+                flex-wrap: wrap;
+                gap: 0;
             }
             .mobile-header-buttons {
                 display: flex !important;
+                margin-left: auto;
+                margin-right: 6px;
             }
             .header-contacts {
                 display: none;
             }
             .main-content-wrapper {
-                padding-top: 145px;
+                padding-top: 150px;
+            }
+            /* Reorder: logo, buttons, hamburger */
+            .main-header .container {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+            .main-header .logo-section {
+                flex: 1;
+            }
+            .main-header .mobile-menu-btn {
+                order: 3;
+            }
+            .mobile-header-buttons {
+                order: 2;
+            }
+            .main-header .nav-links {
+                order: 4;
             }
         }
 
@@ -1456,7 +1509,7 @@
                 font-size: 10px;
             }
             .main-content-wrapper {
-                padding-top: 140px;
+                padding-top: 145px;
             }
             .hero-section h1 {
                 font-size: 32px;
@@ -1584,7 +1637,7 @@
                 font-size: 8px;
             }
             .main-content-wrapper {
-                padding-top: 130px;
+                padding-top: 135px;
             }
             .hero-section h1 {
                 font-size: 24px;
@@ -1723,6 +1776,18 @@
                     </div>
                 </div>
 
+                <!-- Mobile Header Buttons - ALWAYS VISIBLE on phone -->
+                <div class="mobile-header-buttons">
+                    <a href="portal.html" class="mobile-btn admin-btn"><i class="fas fa-user-lock"></i> Admin</a>
+                    <a href="student-portal.html" class="mobile-btn portal-btn"><i class="fas fa-user-graduate"></i> Student Portal</a>
+                    <a href="admissions.html" class="mobile-btn enroll-btn"><i class="fas fa-pen-fancy"></i> Enroll</a>
+                </div>
+
+                <!-- Hamburger Menu Button -->
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+
                 <!-- Desktop Navigation -->
                 <div class="nav-links" id="navLinks">
                     <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
@@ -1732,13 +1797,6 @@
                     <a href="portal.html" class="portal-link"><i class="fas fa-user-lock"></i> Admin</a>
                     <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
                     <a href="student-portal.html" class="student-portal-link"><i class="fas fa-user-graduate"></i> Student Portal</a>
-                </div>
-
-                <!-- Mobile Header Buttons - ALWAYS VISIBLE on phone -->
-                <div class="mobile-header-buttons">
-                    <a href="portal.html" class="mobile-btn admin-btn"><i class="fas fa-user-lock"></i> Admin</a>
-                    <a href="student-portal.html" class="mobile-btn portal-btn"><i class="fas fa-user-graduate"></i> Student Portal</a>
-                    <a href="admissions.html" class="mobile-btn enroll-btn"><i class="fas fa-pen-fancy"></i> Enroll</a>
                 </div>
 
                 <!-- Phone numbers (desktop) -->
@@ -1753,10 +1811,6 @@
                         <span>+254 740 201 441</span>
                     </a>
                 </div>
-
-                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
         </header>
 
@@ -2142,12 +2196,25 @@
         updateSplashNews();
 
         // ========================================
-        // MOBILE MENU
+        // MOBILE MENU TOGGLE - CLEAN
         // ========================================
         function toggleMobileMenu() {
             const nav = document.getElementById('navLinks');
             nav.classList.toggle('show');
         }
+
+        // Close mobile menu when clicking a link
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-links a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const nav = document.getElementById('navLinks');
+                    if (window.innerWidth <= 992) {
+                        nav.classList.remove('show');
+                    }
+                });
+            });
+        });
 
         // ========================================
         // SCROLL TO CONTENT
@@ -2285,7 +2352,6 @@
                             grid.appendChild(div);
                         });
                     }
-                    // Ticker Items
                     if (c.tickerItems && c.tickerItems.length) {
                         const tickerContent = document.getElementById('tickerContent');
                         if (tickerContent) {
