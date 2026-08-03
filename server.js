@@ -5116,7 +5116,7 @@ app.post('/api/content/live-save', async (req, res) => {
     }
 });
 // ============================================
-// ADMISSION SCHEMA - NEW
+// ADMISSION SCHEMA - UPDATED with unique IDs
 // ============================================
 const admissionSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
@@ -5135,6 +5135,7 @@ const admissionSchema = new mongoose.Schema({
     referral: { type: String, required: true },
     notes: { type: String, default: '' },
     documents: [{
+        id: { type: String, required: true, default: () => new mongoose.Types.ObjectId().toString() },
         name: { type: String, required: true },
         fileName: { type: String, required: true },
         fileSize: { type: Number, default: 0 },
@@ -5157,7 +5158,7 @@ const admissionSchema = new mongoose.Schema({
 const Admission = mongoose.model('Admission', admissionSchema);
 
 // ============================================
-// ADMISSION API ROUTES
+// ADMISSION API ROUTES - FIXED
 // ============================================
 
 // Submit new admission
@@ -5189,6 +5190,7 @@ app.post('/api/admissions', upload.array('documents', 10), async (req, res) => {
             for (const file of req.files) {
                 const fileBuffer = fs.readFileSync(file.path);
                 documents.push({
+                    id: new mongoose.Types.ObjectId().toString(),
                     name: file.fieldname || 'document',
                     fileName: file.originalname,
                     fileSize: file.size,
@@ -5371,8 +5373,57 @@ app.delete('/api/admissions/:id', async (req, res) => {
     }
 });
 
-// Download admission document
-app.get('/api/admissions/:id/document/:filename', async (req, res) => {
+// ============================================
+// FIXED: Download admission document by ID
+// ============================================
+app.get('/api/admissions/:id/document/:docId', async (req, res) => {
+    try {
+        const admission = await Admission.findById(req.params.id);
+        if (!admission) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admission not found'
+            });
+        }
+
+        const docId = req.params.docId;
+        const doc = admission.documents.find(d => d.id === docId);
+
+        if (!doc) {
+            return res.status(404).json({
+                success: false,
+                message: 'Document not found'
+            });
+        }
+
+        if (!doc.fileData || doc.fileData === '') {
+            return res.status(404).json({
+                success: false,
+                message: 'Document data is empty'
+            });
+        }
+
+        const fileBuffer = Buffer.from(doc.fileData, 'base64');
+        const mimeType = doc.mimeType || 'application/octet-stream';
+        
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Content-Disposition', `attachment; filename="${doc.fileName}"`);
+        res.setHeader('Content-Length', fileBuffer.length);
+        res.send(fileBuffer);
+
+    } catch (error) {
+        console.error('❌ Error downloading document:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// ============================================
+// ALTERNATIVE: Download by filename (backward compatible)
+// ============================================
+app.get('/api/admissions/:id/document/filename/:filename', async (req, res) => {
     try {
         const admission = await Admission.findById(req.params.id);
         if (!admission) {
@@ -5392,8 +5443,17 @@ app.get('/api/admissions/:id/document/:filename', async (req, res) => {
             });
         }
 
+        if (!doc.fileData || doc.fileData === '') {
+            return res.status(404).json({
+                success: false,
+                message: 'Document data is empty'
+            });
+        }
+
         const fileBuffer = Buffer.from(doc.fileData, 'base64');
-        res.setHeader('Content-Type', doc.mimeType || 'application/octet-stream');
+        const mimeType = doc.mimeType || 'application/octet-stream';
+        
+        res.setHeader('Content-Type', mimeType);
         res.setHeader('Content-Disposition', `attachment; filename="${doc.fileName}"`);
         res.setHeader('Content-Length', fileBuffer.length);
         res.send(fileBuffer);

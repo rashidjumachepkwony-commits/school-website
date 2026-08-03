@@ -1399,18 +1399,24 @@
                     };
                     document.getElementById('modalStatus').textContent = statusLabels[app.status] || app.status || 'Pending';
 
-                    // Documents
-                    const docsContainer = document.getElementById('modalDocuments');
-                    if (app.documents && app.documents.length > 0) {
-                        let docsHtml = '';
-                        app.documents.forEach(doc => {
-                            const fileName = doc.fileName || doc.name || 'Document';
-                            docsHtml += `<a href="#" class="file-link" onclick="downloadAdmissionDocument('${app._id}','${doc.name || doc.fileName}')"><i class="fas fa-file"></i> ${fileName}</a>`;
-                        });
-                        docsContainer.innerHTML = docsHtml || 'No documents uploaded';
-                    } else {
-                        docsContainer.textContent = 'No documents uploaded';
-                    }
+                    // Inside the viewAdmission function, update the documents section:
+// Documents
+const docsContainer = document.getElementById('modalDocuments');
+if (app.documents && app.documents.length > 0) {
+    let docsHtml = '';
+    app.documents.forEach(doc => {
+        const docId = doc.id || doc._id || doc.fileName;
+        const displayName = doc.fileName || doc.name || 'Document';
+        const icon = doc.mimeType && doc.mimeType.startsWith('image/') ? 'fa-file-image' : 
+                     doc.mimeType === 'application/pdf' ? 'fa-file-pdf' : 'fa-file';
+        docsHtml += `<a href="#" class="file-link" onclick="downloadAdmissionDocument('${app._id}','${docId}')">
+                        <i class="fas ${icon}"></i> ${displayName}
+                     </a>`;
+    });
+    docsContainer.innerHTML = docsHtml || 'No documents uploaded';
+} else {
+    docsContainer.textContent = 'No documents uploaded';
+}
 
                     document.getElementById('admissionModal').classList.add('active');
                 } else {
