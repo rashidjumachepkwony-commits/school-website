@@ -139,7 +139,7 @@
         }
 
         /* ========================================
-           FIXED HEADER WRAPPER - ALL STAYS WHEN SCROLLING
+           FIXED HEADER WRAPPER - TALLER, PREMIUM
            ======================================== */
         .fixed-header-wrapper {
             position: fixed;
@@ -163,11 +163,11 @@
         }
 
         /* ========================================
-           HEADER (merged with top nav)
+           HEADER - TALLER, MORE READABLE
            ======================================== */
         .main-header {
             color: white;
-            padding: 6px 0 4px;
+            padding: 12px 0 10px;
         }
         .main-header .container {
             display: flex;
@@ -178,20 +178,21 @@
         .main-header .logo-section {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 14px;
         }
         .main-header .logo-section .school-logo {
-            width: 40px;
-            height: 40px;
+            width: 52px;
+            height: 52px;
             object-fit: contain;
             display: block;
-            border-radius: 8px;
+            border-radius: 10px;
             background: rgba(255,255,255,0.05);
-            padding: 3px;
+            padding: 4px;
+            border: 1px solid rgba(212,160,23,0.15);
         }
         .main-header .logo-section h1 {
             font-family: var(--font-primary);
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 700;
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
             -webkit-background-clip: text;
@@ -199,18 +200,18 @@
             background-clip: text;
         }
         .main-header .logo-section .subtitle {
-            font-size: 8px;
+            font-size: 10px;
             color: rgba(255,255,255,0.4);
             display: block;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             text-transform: uppercase;
             -webkit-text-fill-color: rgba(255,255,255,0.4);
         }
 
-        /* Desktop Navigation */
+        /* ---- Desktop Navigation ---- */
         .main-header .nav-links {
             display: flex;
-            gap: 4px;
+            gap: 6px;
             align-items: center;
             flex-wrap: wrap;
         }
@@ -218,10 +219,10 @@
             color: rgba(255,255,255,0.7);
             text-decoration: none;
             font-weight: 500;
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 50px;
             transition: all 0.3s ease;
-            font-size: 11px;
+            font-size: 12px;
             position: relative;
             border: 1px solid transparent;
         }
@@ -248,9 +249,9 @@
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
             font-weight: 700;
-            padding: 4px 16px;
+            padding: 6px 20px;
             border-radius: 50px;
-            font-size: 11px;
+            font-size: 12px;
             transition: all 0.3s ease;
             border: 2px solid rgba(255,255,255,0.1);
         }
@@ -264,16 +265,16 @@
             background: linear-gradient(135deg, #BB0000, #8B0000);
             color: white;
             font-weight: 700;
-            padding: 4px 16px;
+            padding: 6px 20px;
             border-radius: 50px;
-            font-size: 11px;
+            font-size: 12px;
             transition: all 0.3s ease;
             box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
             border: 2px solid rgba(255,255,255,0.1);
             animation: pulseBadgeRed 1.5s infinite;
         }
         .main-header .nav-links a.enroll-now-link i {
-            margin-right: 4px;
+            margin-right: 6px;
             font-size: 12px;
         }
         .main-header .nav-links a.enroll-now-link:hover {
@@ -288,9 +289,9 @@
             background-size: 300% 300%;
             color: white;
             font-weight: 800;
-            padding: 4px 18px;
+            padding: 6px 22px;
             border-radius: 50px;
-            font-size: 11px;
+            font-size: 12px;
             transition: all 0.4s ease;
             box-shadow: 0 0 15px rgba(255, 107, 107, 0.4), 0 0 40px rgba(255, 180, 70, 0.2);
             animation: rainbowPulse 3s ease infinite, floatButton 2.5s ease-in-out infinite;
@@ -311,7 +312,7 @@
             animation: shimmer 4s ease-in-out infinite;
         }
         .main-header .nav-links a.student-portal-link i {
-            margin-right: 4px;
+            margin-right: 6px;
             font-size: 13px;
             animation: bounceIcon 2s ease-in-out infinite;
         }
@@ -327,28 +328,28 @@
             background: none;
             border: none;
             color: white;
-            font-size: 22px;
+            font-size: 26px;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 6px 10px;
         }
 
-        /* ---- phone numbers in header ---- */
+        /* ---- Phone numbers in header ---- */
         .header-contacts {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-left: 8px;
+            gap: 14px;
+            margin-left: 10px;
             flex-wrap: wrap;
         }
         .header-contacts .contact-link {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             color: rgba(255,255,255,0.6);
-            font-size: 10px;
+            font-size: 12px;
             text-decoration: none;
             transition: all 0.3s ease;
-            padding: 3px 10px;
+            padding: 4px 14px;
             border-radius: 50px;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.04);
@@ -361,7 +362,7 @@
             transform: translateY(-2px);
         }
         .header-contacts .contact-link i {
-            font-size: 12px;
+            font-size: 14px;
         }
         .header-contacts .contact-link .phone-icon {
             color: var(--school-gold);
@@ -371,7 +372,52 @@
         }
         .header-contacts .divider {
             color: rgba(255,255,255,0.1);
-            font-size: 12px;
+            font-size: 14px;
+        }
+
+        /* ---- Mobile Header Buttons (always visible) ---- */
+        .mobile-header-buttons {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .mobile-header-buttons .mobile-btn {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 2px solid rgba(255,255,255,0.15);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .mobile-header-buttons .mobile-btn i {
+            font-size: 11px;
+        }
+        .mobile-header-buttons .mobile-btn.admin-btn {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            border-color: var(--school-gold);
+        }
+        .mobile-header-buttons .mobile-btn.portal-btn {
+            background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
+            background-size: 300% 300%;
+            color: white;
+            animation: rainbowPulse 3s ease infinite;
+            border-color: rgba(255,255,255,0.2);
+        }
+        .mobile-header-buttons .mobile-btn.enroll-btn {
+            background: linear-gradient(135deg, #BB0000, #8B0000);
+            color: white;
+            animation: pulseBadgeRed 1.5s infinite;
+            border-color: rgba(255,255,255,0.1);
+        }
+        .mobile-header-buttons .mobile-btn:hover {
+            transform: translateY(-2px) scale(1.05);
         }
 
         /* ========================================
@@ -380,7 +426,7 @@
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), #001F5c);
             color: white;
-            padding: 3px 0;
+            padding: 4px 0;
             border-bottom: 2px solid var(--school-gold);
             position: relative;
             z-index: 998;
@@ -389,26 +435,26 @@
         .news-ticker-section .container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         .news-ticker-section .ticker-label {
             background: var(--kenya-red);
             color: white;
-            padding: 2px 12px;
+            padding: 3px 14px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 8px;
+            font-size: 9px;
             text-transform: uppercase;
             white-space: nowrap;
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
             letter-spacing: 1px;
         }
         .news-ticker-section .ticker-wrapper {
             flex: 1;
             overflow: hidden;
-            height: 20px;
+            height: 22px;
             position: relative;
         }
         .news-ticker-section .ticker-content {
@@ -417,31 +463,31 @@
             animation: tickerScroll 16s infinite;
         }
         .news-ticker-section .ticker-content .ticker-item {
-            height: 20px;
+            height: 22px;
             display: flex;
             align-items: center;
             padding: 0 6px;
-            font-size: 11px;
+            font-size: 12px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .news-ticker-section .ticker-content .ticker-item .tag {
             background: rgba(255,255,255,0.12);
-            padding: 1px 6px;
+            padding: 1px 8px;
             border-radius: 20px;
-            font-size: 7px;
-            margin-right: 4px;
+            font-size: 8px;
+            margin-right: 6px;
             color: var(--school-gold);
             font-weight: 600;
         }
 
         /* ========================================
-           SECTION TABS - FIXED (merged, no gap)
+           SECTION TABS - FIXED
            ======================================== */
         .section-tabs {
             background: white;
-            padding: 6px 0;
+            padding: 8px 0;
             position: relative;
             z-index: 997;
             box-shadow: 0 4px 20px rgba(0,0,0,0.06);
@@ -454,7 +500,7 @@
         .section-tabs::-webkit-scrollbar { display: none; }
         .section-tabs .container {
             display: flex;
-            gap: 3px;
+            gap: 4px;
             flex-wrap: nowrap;
             justify-content: center;
             align-items: center;
@@ -462,13 +508,13 @@
         .section-tabs .tab-btn {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 4px 12px;
+            gap: 5px;
+            padding: 6px 16px;
             border: 2px solid transparent;
             border-radius: 50px;
             background: transparent;
             color: #555;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -487,26 +533,26 @@
             border-color: var(--school-gold);
             box-shadow: 0 4px 15px rgba(212,160,23,0.3);
         }
-        .section-tabs .tab-btn .tab-icon { font-size: 11px; }
+        .section-tabs .tab-btn .tab-icon { font-size: 12px; }
         .section-tabs .tab-btn .tab-badge {
             background: var(--kenya-red);
             color: white;
-            font-size: 6px;
-            padding: 1px 5px;
+            font-size: 7px;
+            padding: 1px 6px;
             border-radius: 50px;
             font-weight: 700;
             animation: pulseBadgeRed 1.5s infinite;
         }
 
         /* ========================================
-           MAIN CONTENT WRAPPER - PUSHED DOWN (no extra spacing)
+           MAIN CONTENT WRAPPER - PUSHED DOWN
            ======================================== */
         .main-content-wrapper {
-            padding-top: 110px; /* header height */
+            padding-top: 135px;
         }
 
         /* ========================================
-           HERO SECTION (no top margin)
+           HERO SECTION
            ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
@@ -810,7 +856,7 @@
         @keyframes pulseBadge { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
         @keyframes pulseBadgeRed { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(187,0,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(187,0,0,0.7); } }
         @keyframes pulseBadgeGreen { 0%,100% { transform:scale(1); box-shadow:0 4px 20px rgba(0,102,0,0.4); } 50% { transform:scale(1.08); box-shadow:0 4px 30px rgba(0,102,0,0.7); } }
-        @keyframes tickerScroll { 0%,20% { transform:translateY(0); } 25%,45% { transform:translateY(-20px); } 50%,70% { transform:translateY(-40px); } 75%,95% { transform:translateY(-60px); } 100% { transform:translateY(0); } }
+        @keyframes tickerScroll { 0%,20% { transform:translateY(0); } 25%,45% { transform:translateY(-22px); } 50%,70% { transform:translateY(-44px); } 75%,95% { transform:translateY(-66px); } 100% { transform:translateY(0); } }
 
         /* ========================================
            GALLERY SECTION
@@ -1361,107 +1407,56 @@
         /* ========================================
            RESPONSIVE
            ======================================== */
-        @media (max-width: 768px) {
-            /* Hide desktop nav links on mobile - but keep Student Portal and Admin visible */
+        @media (max-width: 992px) {
             .main-header .nav-links:not(.mobile-visible) {
                 display: none;
                 flex-direction: column;
                 width: 100%;
                 padding: 10px 0;
-                gap: 4px;
+                gap: 6px;
             }
             .main-header .nav-links.show {
                 display: flex;
             }
-            
-            /* Always show Student Portal and Admin on mobile */
-            .main-header .nav-links .mobile-always-show {
-                display: inline-flex !important;
-            }
-            
             .main-header .mobile-menu-btn {
                 display: block;
             }
-            
-            /* Mobile header layout */
             .main-header .container {
                 flex-wrap: nowrap;
                 gap: 4px;
             }
-            
-            .main-header .logo-section h1 {
-                font-size: 13px;
-            }
-            .main-header .logo-section .school-logo {
-                width: 32px;
-                height: 32px;
-            }
-            .main-header .logo-section .subtitle {
-                font-size: 6px;
-            }
-            
-            /* Mobile visible buttons wrapper */
             .mobile-header-buttons {
                 display: flex !important;
-                align-items: center;
-                gap: 4px;
-                flex-shrink: 0;
             }
-            
-            .mobile-header-buttons .mobile-btn {
-                display: inline-flex !important;
-                align-items: center;
-                gap: 3px;
-                padding: 3px 8px;
-                border-radius: 50px;
-                font-size: 8px;
-                font-weight: 700;
-                text-decoration: none;
-                border: 2px solid rgba(255,255,255,0.15);
-                transition: all 0.3s ease;
-                white-space: nowrap;
-            }
-            
-            .mobile-header-buttons .mobile-btn i {
-                font-size: 10px;
-            }
-            
-            .mobile-header-buttons .mobile-btn.admin-btn {
-                background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
-                color: var(--kenya-black);
-                border-color: var(--school-gold);
-            }
-            
-            .mobile-header-buttons .mobile-btn.portal-btn {
-                background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
-                background-size: 300% 300%;
-                color: white;
-                animation: rainbowPulse 3s ease infinite;
-                border-color: rgba(255,255,255,0.2);
-            }
-            
-            .mobile-header-buttons .mobile-btn.enroll-btn {
-                background: linear-gradient(135deg, #BB0000, #8B0000);
-                color: white;
-                animation: pulseBadgeRed 1.5s infinite;
-                border-color: rgba(255,255,255,0.1);
-            }
-            
-            .mobile-header-buttons .mobile-btn:hover {
-                transform: translateY(-2px) scale(1.05);
-            }
-            
-            /* Hide phone numbers on very small screens */
             .header-contacts {
                 display: none;
             }
-            
             .main-content-wrapper {
-                padding-top: 130px;
+                padding-top: 145px;
             }
-            
-            .hero-section {
-                padding: 60px 0 40px;
+        }
+
+        @media (max-width: 768px) {
+            .main-header .logo-section h1 {
+                font-size: 16px;
+            }
+            .main-header .logo-section .school-logo {
+                width: 38px;
+                height: 38px;
+            }
+            .main-header .logo-section .subtitle {
+                font-size: 7px;
+                letter-spacing: 2px;
+            }
+            .mobile-header-buttons .mobile-btn {
+                font-size: 9px;
+                padding: 4px 10px;
+            }
+            .mobile-header-buttons .mobile-btn i {
+                font-size: 10px;
+            }
+            .main-content-wrapper {
+                padding-top: 140px;
             }
             .hero-section h1 {
                 font-size: 32px;
@@ -1571,26 +1566,25 @@
 
         @media (max-width: 480px) {
             .main-header .logo-section h1 {
-                font-size: 11px;
+                font-size: 13px;
             }
             .main-header .logo-section .school-logo {
-                width: 28px;
-                height: 28px;
+                width: 32px;
+                height: 32px;
             }
             .main-header .logo-section .subtitle {
-                font-size: 5px;
+                font-size: 6px;
+                letter-spacing: 1px;
             }
-            
             .mobile-header-buttons .mobile-btn {
                 font-size: 7px;
-                padding: 2px 6px;
+                padding: 3px 7px;
             }
             .mobile-header-buttons .mobile-btn i {
                 font-size: 8px;
             }
-            
             .main-content-wrapper {
-                padding-top: 120px;
+                padding-top: 130px;
             }
             .hero-section h1 {
                 font-size: 24px;
@@ -1626,10 +1620,12 @@
             }
         }
 
-        @media (min-width: 769px) {
-            /* Hide mobile buttons on desktop */
+        @media (min-width: 993px) {
             .mobile-header-buttons {
                 display: none !important;
+            }
+            .main-header .nav-links {
+                display: flex !important;
             }
         }
 
@@ -1716,7 +1712,7 @@
         <!-- Kenya Flag Strip -->
         <div class="kenya-flag-strip"></div>
 
-        <!-- ===== MAIN HEADER ===== -->
+        <!-- ===== MAIN HEADER - TALLER, PREMIUM ===== -->
         <header class="main-header">
             <div class="container">
                 <div class="logo-section">
@@ -1741,7 +1737,7 @@
                 <!-- Mobile Header Buttons - ALWAYS VISIBLE on phone -->
                 <div class="mobile-header-buttons">
                     <a href="portal.html" class="mobile-btn admin-btn"><i class="fas fa-user-lock"></i> Admin</a>
-                    <a href="student-portal.html" class="mobile-btn portal-btn"><i class="fas fa-user-graduate"></i> Portal</a>
+                    <a href="student-portal.html" class="mobile-btn portal-btn"><i class="fas fa-user-graduate"></i> Student Portal</a>
                     <a href="admissions.html" class="mobile-btn enroll-btn"><i class="fas fa-pen-fancy"></i> Enroll</a>
                 </div>
 
