@@ -379,7 +379,7 @@
         }
 
         /* ========================================
-           ENROLLMENT FORM - ADDED (APPEARS FIRST)
+           ENROLLMENT FORM - WITH FILE UPLOADS
            ======================================== */
         .enroll-form-section {
             padding: 40px 0 30px;
@@ -434,6 +434,12 @@
             color: var(--kenya-red);
             margin-left: 2px;
         }
+        .form-group label .optional {
+            color: #999;
+            font-weight: 400;
+            font-size: 11px;
+            margin-left: 4px;
+        }
         .form-group .field-note {
             font-size: 11px;
             color: #999;
@@ -485,6 +491,79 @@
             resize: vertical;
             min-height: 80px;
             font-family: var(--font-secondary);
+        }
+
+        /* ===== FILE UPLOAD STYLES ===== */
+        .file-upload-group {
+            margin-bottom: 12px;
+        }
+        .file-upload-group .file-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border: 2px dashed #d0d5dd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+        .file-upload-group .file-label:hover {
+            border-color: var(--school-gold);
+            background: #fdfaf0;
+        }
+        .file-upload-group .file-label .file-icon {
+            font-size: 22px;
+            color: var(--school-gold);
+        }
+        .file-upload-group .file-label .file-info {
+            flex: 1;
+        }
+        .file-upload-group .file-label .file-info .file-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+        .file-upload-group .file-label .file-info .file-hint {
+            font-size: 11px;
+            color: #999;
+        }
+        .file-upload-group .file-label .file-status {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 50px;
+            background: #e8ecf1;
+            color: #666;
+        }
+        .file-upload-group .file-label .file-status.uploaded {
+            background: #d4edda;
+            color: #155724;
+        }
+        .file-upload-group input[type="file"] {
+            display: none;
+        }
+        .file-upload-group .file-preview {
+            display: none;
+            margin-top: 6px;
+            padding: 6px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #666;
+            border: 1px solid #e8ecf1;
+        }
+        .file-upload-group .file-preview.show {
+            display: block;
+        }
+        .file-upload-group .file-preview .remove-file {
+            color: var(--kenya-red);
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .file-upload-group .file-preview .remove-file:hover {
+            text-decoration: underline;
         }
 
         .radio-group {
@@ -597,6 +676,21 @@
             color: var(--school-blue-dark);
             border: 2px solid var(--school-gold);
             margin-top: 10px;
+        }
+        .success-message .upload-summary {
+            margin-top: 12px;
+            padding: 12px 20px;
+            background: white;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 13px;
+            color: #444;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .success-message .upload-summary strong {
+            color: var(--school-blue-dark);
         }
 
         .spinner {
@@ -1197,7 +1291,7 @@
     </section>
 
     <!-- ========================================
-    ENROLLMENT FORM - ADDED (APPEARS FIRST)
+    ENROLLMENT FORM - WITH FILE UPLOADS
     ======================================== -->
     <section class="enroll-form-section" id="enrollForm">
         <div class="container">
@@ -1213,16 +1307,17 @@
                     <h3>Application Submitted!</h3>
                     <p>Thank you for choosing <strong>Changara Star Academy</strong>. We have received your application and will contact you within 48 hours.</p>
                     <div class="ref-number" id="refNumber">REF: CSA-2026-XXXX</div>
-                    <p style="margin-top:12px;font-size:13px;color:#666;">
-                        <i class="fas fa-print"></i> Please save your reference number for future correspondence.
-                    </p>
+                    <div class="upload-summary" id="uploadSummary">
+                        <strong>📎 Documents Uploaded:</strong>
+                        <ul id="uploadedFilesList" style="list-style:none;padding:0;margin-top:6px;"></ul>
+                    </div>
                     <button onclick="resetForm()" style="margin-top:16px;padding:10px 28px;background:var(--school-gold);color:var(--kenya-black);border:none;border-radius:50px;font-weight:700;cursor:pointer;font-size:14px;">
                         <i class="fas fa-plus"></i> Submit Another Application
                     </button>
                 </div>
 
                 <!-- FORM -->
-                <form id="admissionForm" onsubmit="submitForm(event)">
+                <form id="admissionForm" onsubmit="submitForm(event)" enctype="multipart/form-data">
                     <!-- Row 1: Full Name -->
                     <div class="form-group">
                         <label>Student's Full Name <span class="required">*</span></label>
@@ -1375,8 +1470,100 @@
                         </div>
                     </div>
 
+                    <!-- ===== DOCUMENT UPLOADS ===== -->
+                    <div style="margin-top:20px;margin-bottom:10px;padding:15px;background:#f8f9fa;border-radius:10px;border-left:4px solid var(--school-gold);">
+                        <h4 style="font-family:var(--font-primary);font-size:18px;color:var(--school-blue-dark);margin-bottom:4px;">
+                            📎 Required Documents
+                        </h4>
+                        <p style="font-size:12px;color:#666;">Please upload clear copies of the following documents. (PDF, JPG, PNG accepted)</p>
+                    </div>
+
+                    <!-- Document 1: Birth Certificate -->
+                    <div class="file-upload-group">
+                        <div class="file-label" onclick="document.getElementById('birthCert').click()">
+                            <span class="file-icon">📄</span>
+                            <div class="file-info">
+                                <div class="file-title">Birth Certificate <span class="required">*</span></div>
+                                <div class="file-hint">Copy of the learner's birth certificate</div>
+                            </div>
+                            <span class="file-status" id="birthCertStatus">Upload</span>
+                        </div>
+                        <input type="file" id="birthCert" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'birthCertStatus', 'birthCertPreview')" required />
+                        <div class="file-preview" id="birthCertPreview"></div>
+                    </div>
+
+                    <!-- Document 2: Passport Photos -->
+                    <div class="file-upload-group">
+                        <div class="file-label" onclick="document.getElementById('passportPhoto').click()">
+                            <span class="file-icon">📸</span>
+                            <div class="file-info">
+                                <div class="file-title">Passport Photos <span class="required">*</span></div>
+                                <div class="file-hint">Two recent passport-size photographs</div>
+                            </div>
+                            <span class="file-status" id="passportPhotoStatus">Upload</span>
+                        </div>
+                        <input type="file" id="passportPhoto" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'passportPhotoStatus', 'passportPhotoPreview')" required />
+                        <div class="file-preview" id="passportPhotoPreview"></div>
+                    </div>
+
+                    <!-- Document 3: Previous School Report -->
+                    <div class="file-upload-group">
+                        <div class="file-label" onclick="document.getElementById('prevReport').click()">
+                            <span class="file-icon">📊</span>
+                            <div class="file-info">
+                                <div class="file-title">Previous School Report <span class="optional">(if applicable)</span></div>
+                                <div class="file-hint">Previous school report (where applicable)</div>
+                            </div>
+                            <span class="file-status" id="prevReportStatus">Upload</span>
+                        </div>
+                        <input type="file" id="prevReport" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'prevReportStatus', 'prevReportPreview')" />
+                        <div class="file-preview" id="prevReportPreview"></div>
+                    </div>
+
+                    <!-- Document 4: Transfer Letter -->
+                    <div class="file-upload-group">
+                        <div class="file-label" onclick="document.getElementById('transferLetter').click()">
+                            <span class="file-icon">📩</span>
+                            <div class="file-info">
+                                <div class="file-title">Transfer Letter <span class="optional">(if applicable)</span></div>
+                                <div class="file-hint">Transfer letter from previous school (for transferring learners)</div>
+                            </div>
+                            <span class="file-status" id="transferLetterStatus">Upload</span>
+                        </div>
+                        <input type="file" id="transferLetter" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'transferLetterStatus', 'transferLetterPreview')" />
+                        <div class="file-preview" id="transferLetterPreview"></div>
+                    </div>
+
+                    <!-- Document 5: Parent/Guardian ID -->
+                    <div class="file-upload-group">
+                        <div class="file-label" onclick="document.getElementById('guardianId').click()">
+                            <span class="file-icon">🪪</span>
+                            <div class="file-info">
+                                <div class="file-title">Parent/Guardian ID <span class="required">*</span></div>
+                                <div class="file-hint">Parent or guardian identification details</div>
+                            </div>
+                            <span class="file-status" id="guardianIdStatus">Upload</span>
+                        </div>
+                        <input type="file" id="guardianId" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'guardianIdStatus', 'guardianIdPreview')" required />
+                        <div class="file-preview" id="guardianIdPreview"></div>
+                    </div>
+
+                    <!-- Document 6: Medical Information -->
+                    <div class="file-upload-group">
+                        <div class="file-label" onclick="document.getElementById('medicalDoc').click()">
+                            <span class="file-icon">🏥</span>
+                            <div class="file-info">
+                                <div class="file-title">Medical Information <span class="optional">(if applicable)</span></div>
+                                <div class="file-hint">Any relevant medical information about the learner</div>
+                            </div>
+                            <span class="file-status" id="medicalDocStatus">Upload</span>
+                        </div>
+                        <input type="file" id="medicalDoc" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'medicalDocStatus', 'medicalDocPreview')" />
+                        <div class="file-preview" id="medicalDocPreview"></div>
+                    </div>
+
                     <!-- Row 8: How did you hear about us? -->
-                    <div class="form-group">
+                    <div class="form-group" style="margin-top:12px;">
                         <label>How did you hear about us? <span class="required">*</span></label>
                         <select class="form-control" id="referral" required>
                             <option value="">— Select —</option>
@@ -1401,7 +1588,7 @@
                         <div class="checkbox-group">
                             <label>
                                 <input type="checkbox" id="agree" required />
-                                <span>I confirm that the information provided is accurate and complete. <span style="color:var(--kenya-red);">*</span></span>
+                                <span>I confirm that all information provided and documents uploaded are accurate and complete. <span style="color:var(--kenya-red);">*</span></span>
                             </label>
                         </div>
                     </div>
@@ -1911,7 +2098,76 @@
         });
 
         // ============================================
-        // ENROLLMENT FORM - ADDED
+        // FILE UPLOAD HANDLER
+        // ============================================
+        let uploadedFiles = {};
+
+        function handleFileUpload(input, statusId, previewId) {
+            const statusEl = document.getElementById(statusId);
+            const previewEl = document.getElementById(previewId);
+            const file = input.files[0];
+
+            if (file) {
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('File too large! Maximum size is 5MB.', 'error');
+                    input.value = '';
+                    statusEl.textContent = 'Upload';
+                    statusEl.className = 'file-status';
+                    previewEl.classList.remove('show');
+                    return;
+                }
+
+                // Check file type
+                const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+                if (!validTypes.includes(file.type)) {
+                    showToast('Please upload PDF, JPG, or PNG files only.', 'error');
+                    input.value = '';
+                    statusEl.textContent = 'Upload';
+                    statusEl.className = 'file-status';
+                    previewEl.classList.remove('show');
+                    return;
+                }
+
+                // Update status
+                statusEl.textContent = '✅ Uploaded';
+                statusEl.className = 'file-status uploaded';
+
+                // Show preview
+                const fileName = file.name;
+                const fileSize = (file.size / 1024).toFixed(1) + ' KB';
+                previewEl.innerHTML = `
+                    <i class="fas fa-file" style="color:var(--school-gold);"></i>
+                    <strong>${fileName}</strong> (${fileSize})
+                    <span class="remove-file" onclick="removeFile('${input.id}', '${statusId}', '${previewId}')">✕ Remove</span>
+                `;
+                previewEl.classList.add('show');
+
+                // Store file reference
+                uploadedFiles[input.id] = file;
+
+            } else {
+                statusEl.textContent = 'Upload';
+                statusEl.className = 'file-status';
+                previewEl.classList.remove('show');
+                delete uploadedFiles[input.id];
+            }
+        }
+
+        function removeFile(inputId, statusId, previewId) {
+            const input = document.getElementById(inputId);
+            input.value = '';
+            const statusEl = document.getElementById(statusId);
+            statusEl.textContent = 'Upload';
+            statusEl.className = 'file-status';
+            const previewEl = document.getElementById(previewId);
+            previewEl.classList.remove('show');
+            delete uploadedFiles[inputId];
+            showToast('File removed.', 'info');
+        }
+
+        // ============================================
+        // ENROLLMENT FORM SUBMISSION
         // ============================================
         function submitForm(e) {
             e.preventDefault();
@@ -1933,6 +2189,15 @@
             const referral = document.getElementById('referral').value;
             const agree = document.getElementById('agree').checked;
 
+            // Check required files
+            const requiredFiles = ['birthCert', 'passportPhoto', 'guardianId'];
+            let missingFiles = [];
+            requiredFiles.forEach(id => {
+                if (!uploadedFiles[id]) {
+                    missingFiles.push(id);
+                }
+            });
+
             if (!fullName) { showToast('Please enter the student\'s full name.', 'error'); return; }
             if (!dob) { showToast('Please select the date of birth.', 'error'); return; }
             if (!gender) { showToast('Please select the gender.', 'error'); return; }
@@ -1946,7 +2211,18 @@
             if (!referral) { showToast('Please tell us how you heard about us.', 'error'); return; }
             if (!agree) { showToast('Please confirm that the information is accurate.', 'error'); return; }
 
-            // Validate phone (basic Kenyan format)
+            if (missingFiles.length > 0) {
+                const fileNames = {
+                    'birthCert': 'Birth Certificate',
+                    'passportPhoto': 'Passport Photos',
+                    'guardianId': 'Parent/Guardian ID'
+                };
+                const missingNames = missingFiles.map(id => fileNames[id] || id).join(', ');
+                showToast(`Please upload the following required documents: ${missingNames}`, 'error');
+                return;
+            }
+
+            // Validate phone
             if (!/^[0-9]{7,12}$/.test(phone.replace(/[^0-9]/g, ''))) {
                 showToast('Please enter a valid phone number.', 'error');
                 return;
@@ -1973,17 +2249,41 @@
                 medicalInfo: document.getElementById('medicalInfo').value.trim(),
                 referral,
                 notes: document.getElementById('notes').value.trim(),
+                documents: Object.keys(uploadedFiles).map(key => ({
+                    name: key,
+                    fileName: uploadedFiles[key].name,
+                    fileSize: uploadedFiles[key].size
+                })),
                 submittedAt: new Date().toISOString()
             };
 
-            // Log form data (replace with actual API call)
             console.log('📝 Form Data:', formData);
+            console.log('📎 Uploaded Files:', Object.keys(uploadedFiles).length, 'files');
 
             // Simulate API delay
             setTimeout(() => {
                 // Generate reference number
                 const ref = 'CSA-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
                 document.getElementById('refNumber').textContent = 'REF: ' + ref;
+
+                // Show uploaded files in success message
+                const fileList = document.getElementById('uploadedFilesList');
+                fileList.innerHTML = '';
+                const fileNames = {
+                    'birthCert': '📄 Birth Certificate',
+                    'passportPhoto': '📸 Passport Photos',
+                    'prevReport': '📊 Previous School Report',
+                    'transferLetter': '📩 Transfer Letter',
+                    'guardianId': '🪪 Parent/Guardian ID',
+                    'medicalDoc': '🏥 Medical Information'
+                };
+                Object.keys(uploadedFiles).forEach(key => {
+                    const li = document.createElement('li');
+                    li.textContent = `${fileNames[key] || key}: ${uploadedFiles[key].name}`;
+                    li.style.padding = '2px 0';
+                    li.style.fontSize = '13px';
+                    fileList.appendChild(li);
+                });
 
                 // Hide form, show success
                 document.getElementById('admissionForm').style.display = 'none';
@@ -2008,6 +2308,19 @@
             document.getElementById('admissionForm').style.display = 'block';
             document.getElementById('successMessage').classList.remove('show');
 
+            // Reset file uploads
+            document.querySelectorAll('input[type="file"]').forEach(input => {
+                input.value = '';
+            });
+            document.querySelectorAll('.file-status').forEach(el => {
+                el.textContent = 'Upload';
+                el.className = 'file-status';
+            });
+            document.querySelectorAll('.file-preview').forEach(el => {
+                el.classList.remove('show');
+            });
+            uploadedFiles = {};
+
             // Reset validation states
             document.querySelectorAll('.form-control').forEach(el => {
                 el.classList.remove('success', 'error');
@@ -2021,7 +2334,6 @@
         // TOAST NOTIFICATION
         // ============================================
         function showToast(message, type = 'info') {
-            // Remove existing toast
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
 
@@ -2097,7 +2409,8 @@
             }
         });
 
-        console.log('🏫 Changara Star Academy – Admissions page loaded with online enrollment form!');
+        console.log('🏫 Changara Star Academy – Admissions page loaded with document uploads!');
+        console.log('📎 Required documents: Birth Certificate, Passport Photos, Parent/Guardian ID');
     </script>
 
 </body>
