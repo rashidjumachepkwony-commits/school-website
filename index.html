@@ -206,6 +206,8 @@
             text-transform: uppercase;
             -webkit-text-fill-color: rgba(255,255,255,0.4);
         }
+
+        /* Desktop Navigation */
         .main-header .nav-links {
             display: flex;
             gap: 4px;
@@ -1360,67 +1362,275 @@
            RESPONSIVE
            ======================================== */
         @media (max-width: 768px) {
-            .main-header .nav-links { display: none; flex-direction: column; width: 100%; padding: 10px 0; gap: 4px; }
-            .main-header .nav-links.show { display: flex; }
-            .main-header .mobile-menu-btn { display: block; }
-            .main-header .nav-links a.student-portal-link { font-size: 14px; padding: 10px 20px; width: 100%; justify-content: center; }
-            .main-header .nav-links a.enroll-now-link { width: 100%; justify-content: center; }
-            .main-header .nav-links a.portal-link { width: 100%; justify-content: center; }
-            .header-contacts { width: 100%; justify-content: center; margin: 4px 0 0; }
-            .main-content-wrapper { padding-top: 150px; }
-            .hero-section { padding: 60px 0 40px; }
-            .hero-section h1 { font-size: 32px; }
-            .hero-section .hero-description { font-size: 16px; }
-            .hero-section .btn-group { flex-direction: column; align-items: center; }
-            .btn-scroll-down, .btn-outline { width: 100%; justify-content: center; }
-            .section-tabs { padding: 4px 0; }
-            .section-title { font-size: 26px; }
-            .content-grid { grid-template-columns: 1fr 1fr; }
-            .features-grid { grid-template-columns: 1fr 1fr; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .news-grid { grid-template-columns: 1fr !important; }
-            .news-section .container-news { padding: 0 15px !important; }
-            .news-item { padding: 28px 22px !important; min-height: 200px !important; }
-            .news-item h4 { font-size: 20px !important; }
-            .news-item p { font-size: 15px !important; }
-            .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
-            .main-header .logo-section h1 { font-size: 16px; }
-            .main-header .logo-section .school-logo { width: 32px; height: 32px; }
-            .news-ticker-section .ticker-label { font-size: 7px; padding: 2px 8px; }
-            .news-ticker-section .ticker-content .ticker-item { font-size: 10px; white-space: normal; }
-            .video-modal { padding: 20px; }
-            .video-modal .close-modal { top: -40px; font-size: 20px; width: 36px; height: 36px; }
-            .hero-video-play { padding: 8px 16px 8px 8px; }
-            .hero-video-play .play-icon { width: 32px; height: 32px; font-size: 14px; }
-            .hero-video-play .play-text { font-size: 12px; }
-            .splash-card { padding: 30px 18px; }
-            .splash-card .splash-logo { width: 60px; height: 60px; }
-            .splash-card h1 { font-size: 22px; }
-            .splash-news .headline { font-size: 17px; }
-            .splash-news { padding: 18px 16px; min-height: 140px; }
-            .gallery-card img { height: 180px; }
+            /* Hide desktop nav links on mobile - but keep Student Portal and Admin visible */
+            .main-header .nav-links:not(.mobile-visible) {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                padding: 10px 0;
+                gap: 4px;
+            }
+            .main-header .nav-links.show {
+                display: flex;
+            }
+            
+            /* Always show Student Portal and Admin on mobile */
+            .main-header .nav-links .mobile-always-show {
+                display: inline-flex !important;
+            }
+            
+            .main-header .mobile-menu-btn {
+                display: block;
+            }
+            
+            /* Mobile header layout */
+            .main-header .container {
+                flex-wrap: nowrap;
+                gap: 4px;
+            }
+            
+            .main-header .logo-section h1 {
+                font-size: 13px;
+            }
+            .main-header .logo-section .school-logo {
+                width: 32px;
+                height: 32px;
+            }
+            .main-header .logo-section .subtitle {
+                font-size: 6px;
+            }
+            
+            /* Mobile visible buttons wrapper */
+            .mobile-header-buttons {
+                display: flex !important;
+                align-items: center;
+                gap: 4px;
+                flex-shrink: 0;
+            }
+            
+            .mobile-header-buttons .mobile-btn {
+                display: inline-flex !important;
+                align-items: center;
+                gap: 3px;
+                padding: 3px 8px;
+                border-radius: 50px;
+                font-size: 8px;
+                font-weight: 700;
+                text-decoration: none;
+                border: 2px solid rgba(255,255,255,0.15);
+                transition: all 0.3s ease;
+                white-space: nowrap;
+            }
+            
+            .mobile-header-buttons .mobile-btn i {
+                font-size: 10px;
+            }
+            
+            .mobile-header-buttons .mobile-btn.admin-btn {
+                background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+                color: var(--kenya-black);
+                border-color: var(--school-gold);
+            }
+            
+            .mobile-header-buttons .mobile-btn.portal-btn {
+                background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
+                background-size: 300% 300%;
+                color: white;
+                animation: rainbowPulse 3s ease infinite;
+                border-color: rgba(255,255,255,0.2);
+            }
+            
+            .mobile-header-buttons .mobile-btn.enroll-btn {
+                background: linear-gradient(135deg, #BB0000, #8B0000);
+                color: white;
+                animation: pulseBadgeRed 1.5s infinite;
+                border-color: rgba(255,255,255,0.1);
+            }
+            
+            .mobile-header-buttons .mobile-btn:hover {
+                transform: translateY(-2px) scale(1.05);
+            }
+            
+            /* Hide phone numbers on very small screens */
+            .header-contacts {
+                display: none;
+            }
+            
+            .main-content-wrapper {
+                padding-top: 130px;
+            }
+            
+            .hero-section {
+                padding: 60px 0 40px;
+            }
+            .hero-section h1 {
+                font-size: 32px;
+            }
+            .hero-section .hero-description {
+                font-size: 16px;
+            }
+            .hero-section .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn-scroll-down, .btn-outline {
+                width: 100%;
+                justify-content: center;
+            }
+            .section-tabs {
+                padding: 4px 0;
+            }
+            .section-title {
+                font-size: 26px;
+            }
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .features-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .news-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .news-section .container-news {
+                padding: 0 15px !important;
+            }
+            .news-item {
+                padding: 28px 22px !important;
+                min-height: 200px !important;
+            }
+            .news-item h4 {
+                font-size: 20px !important;
+            }
+            .news-item p {
+                font-size: 15px !important;
+            }
+            .main-footer .footer-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .news-ticker-section .ticker-label {
+                font-size: 7px;
+                padding: 2px 8px;
+            }
+            .news-ticker-section .ticker-content .ticker-item {
+                font-size: 10px;
+                white-space: normal;
+            }
+            .video-modal {
+                padding: 20px;
+            }
+            .video-modal .close-modal {
+                top: -40px;
+                font-size: 20px;
+                width: 36px;
+                height: 36px;
+            }
+            .hero-video-play {
+                padding: 8px 16px 8px 8px;
+            }
+            .hero-video-play .play-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+            .hero-video-play .play-text {
+                font-size: 12px;
+            }
+            .splash-card {
+                padding: 30px 18px;
+            }
+            .splash-card .splash-logo {
+                width: 60px;
+                height: 60px;
+            }
+            .splash-card h1 {
+                font-size: 22px;
+            }
+            .splash-news .headline {
+                font-size: 17px;
+            }
+            .splash-news {
+                padding: 18px 16px;
+                min-height: 140px;
+            }
+            .gallery-card img {
+                height: 180px;
+            }
             .gallery-swiper .swiper-button-next,
-            .gallery-swiper .swiper-button-prev { display: none !important; }
-            .gallery-swiper .swiper-pagination { display: block !important; }
+            .gallery-swiper .swiper-button-prev {
+                display: none !important;
+            }
+            .gallery-swiper .swiper-pagination {
+                display: block !important;
+            }
         }
 
         @media (max-width: 480px) {
-            .main-header .logo-section h1 { font-size: 13px; }
-            .main-header .logo-section .school-logo { width: 28px; height: 28px; }
-            .main-header .logo-section .subtitle { font-size: 6px; }
-            .main-content-wrapper { padding-top: 140px; }
-            .hero-section h1 { font-size: 24px; }
-            .hero-section .hero-description { font-size: 13px; }
-            .section-tabs .tab-btn { font-size: 8px; padding: 3px 6px; }
-            .section-tabs .tab-btn .tab-icon { font-size: 9px; }
-            .content-grid { grid-template-columns: 1fr; }
-            .features-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .news-item { padding: 20px 16px !important; min-height: 160px !important; }
-            .news-item h4 { font-size: 17px !important; }
-            .news-item p { font-size: 13px !important; }
-            .header-contacts .contact-link { font-size: 8px; padding: 2px 6px; }
-            .header-contacts .divider { display: none; }
+            .main-header .logo-section h1 {
+                font-size: 11px;
+            }
+            .main-header .logo-section .school-logo {
+                width: 28px;
+                height: 28px;
+            }
+            .main-header .logo-section .subtitle {
+                font-size: 5px;
+            }
+            
+            .mobile-header-buttons .mobile-btn {
+                font-size: 7px;
+                padding: 2px 6px;
+            }
+            .mobile-header-buttons .mobile-btn i {
+                font-size: 8px;
+            }
+            
+            .main-content-wrapper {
+                padding-top: 120px;
+            }
+            .hero-section h1 {
+                font-size: 24px;
+            }
+            .hero-section .hero-description {
+                font-size: 13px;
+            }
+            .section-tabs .tab-btn {
+                font-size: 8px;
+                padding: 3px 6px;
+            }
+            .section-tabs .tab-btn .tab-icon {
+                font-size: 9px;
+            }
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .news-item {
+                padding: 20px 16px !important;
+                min-height: 160px !important;
+            }
+            .news-item h4 {
+                font-size: 17px !important;
+            }
+            .news-item p {
+                font-size: 13px !important;
+            }
+        }
+
+        @media (min-width: 769px) {
+            /* Hide mobile buttons on desktop */
+            .mobile-header-buttons {
+                display: none !important;
+            }
         }
 
         /* ========================================
@@ -1499,14 +1709,14 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- FIXED HEADER WRAPPER - ALL STAYS WHEN SCROLLING -->
+    <!-- FIXED HEADER WRAPPER -->
     <!-- ======================================== -->
     <div class="fixed-header-wrapper">
 
         <!-- Kenya Flag Strip -->
         <div class="kenya-flag-strip"></div>
 
-        <!-- ===== MAIN HEADER (merged with top nav + phones) ===== -->
+        <!-- ===== MAIN HEADER ===== -->
         <header class="main-header">
             <div class="container">
                 <div class="logo-section">
@@ -1517,29 +1727,35 @@
                     </div>
                 </div>
 
-                <!-- Desktop Navigation + phone numbers -->
-                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                    <div class="nav-links" id="navLinks">
-                        <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                        <a href="fees.html"><i class="fas fa-coins"></i> Fees</a>
-                        <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
-                        <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
-                        <a href="portal.html" class="portal-link"><i class="fas fa-user-lock"></i> Admin</a>
-                        <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
-                        <a href="student-portal.html" class="student-portal-link"><i class="fas fa-user-graduate"></i> Student Portal</a>
-                    </div>
-                    <!-- phone numbers -->
-                    <div class="header-contacts">
-                        <a href="tel:+254721556252" class="contact-link">
-                            <i class="fas fa-phone phone-icon"></i>
-                            <span>+254 721 556 252</span>
-                        </a>
-                        <span class="divider">|</span>
-                        <a href="https://wa.me/254740201441" target="_blank" class="contact-link">
-                            <i class="fab fa-whatsapp whatsapp-icon"></i>
-                            <span>+254 740 201 441</span>
-                        </a>
-                    </div>
+                <!-- Desktop Navigation -->
+                <div class="nav-links" id="navLinks">
+                    <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+                    <a href="fees.html"><i class="fas fa-coins"></i> Fees</a>
+                    <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
+                    <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
+                    <a href="portal.html" class="portal-link"><i class="fas fa-user-lock"></i> Admin</a>
+                    <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
+                    <a href="student-portal.html" class="student-portal-link"><i class="fas fa-user-graduate"></i> Student Portal</a>
+                </div>
+
+                <!-- Mobile Header Buttons - ALWAYS VISIBLE on phone -->
+                <div class="mobile-header-buttons">
+                    <a href="portal.html" class="mobile-btn admin-btn"><i class="fas fa-user-lock"></i> Admin</a>
+                    <a href="student-portal.html" class="mobile-btn portal-btn"><i class="fas fa-user-graduate"></i> Portal</a>
+                    <a href="admissions.html" class="mobile-btn enroll-btn"><i class="fas fa-pen-fancy"></i> Enroll</a>
+                </div>
+
+                <!-- Phone numbers (desktop) -->
+                <div class="header-contacts">
+                    <a href="tel:+254721556252" class="contact-link">
+                        <i class="fas fa-phone phone-icon"></i>
+                        <span>+254 721 556 252</span>
+                    </a>
+                    <span class="divider">|</span>
+                    <a href="https://wa.me/254740201441" target="_blank" class="contact-link">
+                        <i class="fab fa-whatsapp whatsapp-icon"></i>
+                        <span>+254 740 201 441</span>
+                    </a>
                 </div>
 
                 <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
@@ -1579,7 +1795,7 @@
     </div><!-- end fixed-header-wrapper -->
 
     <!-- ======================================== -->
-    <!-- MAIN CONTENT WRAPPER - PUSHED DOWN -->
+    <!-- MAIN CONTENT WRAPPER -->
     <!-- ======================================== -->
     <div class="main-content-wrapper">
 
