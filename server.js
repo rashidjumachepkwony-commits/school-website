@@ -5115,7 +5115,476 @@ app.post('/api/content/live-save', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+// ============================================
+// ADMISSION SCHEMA - NEW
+// ============================================
+const admissionSchema = new mongoose.Schema({
+    fullName: { type: String, required: true },
+    dob: { type: Date, required: true },
+    gender: { type: String, enum: ['Male', 'Female'], required: true },
+    grade: { type: String, required: true },
+    studentType: { type: String, enum: ['Day Scholar', 'Boarder'], required: true },
+    guardianName: { type: String, required: true },
+    relationship: { type: String, required: true },
+    phone: { type: String, required: true },
+    email: { type: String, default: '' },
+    address: { type: String, required: true },
+    county: { type: String, required: true },
+    prevSchool: { type: String, default: '' },
+    medicalInfo: { type: String, default: '' },
+    referral: { type: String, required: true },
+    notes: { type: String, default: '' },
+    documents: [{
+        name: { type: String, required: true },
+        fileName: { type: String, required: true },
+        fileSize: { type: Number, default: 0 },
+        fileData: { type: String, default: '' },
+        mimeType: { type: String, default: '' },
+        uploadedAt: { type: Date, default: Date.now }
+    }],
+    status: {
+        type: String,
+        enum: ['pending', 'reviewed', 'contacted', 'enrolled', 'rejected'],
+        default: 'pending'
+    },
+    submittedAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+    reviewedBy: { type: String, default: '' },
+    reviewedAt: { type: Date },
+    notesInternal: { type: String, default: '' }
+});
 
+const Admission = mongoose.model('Admission', admissionSchema);
+
+// ============================================
+// ADMISSION API ROUTES
+// ============================================
+
+// Submit new admission
+app.post('/api/admissions', upload.array('documents', 10), async (req, res) => {
+    try {
+        console.log('📝 New admission application received');
+        console.log('📋 Form data:', req.body);
+        console.log('📎 Files:', req.files ? req.files.length : 0);
+
+        const {
+            fullName, dob, gender, grade, studentType, guardianName,
+            relationship, phone, email, address, county, prevSchool,
+            medicalInfo, referral, notes
+        } = req.body;
+
+        // Validate required fields
+        if (!fullName || !dob || !gender || !grade || !studentType || 
+            !guardianName || !relationship || !phone || !address || 
+            !county || !referral) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please fill in all required fields'
+            });
+        }
+
+        // Process uploaded documents
+        const documents = [];
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const fileBuffer = fs.readFileSync(file.path);
+                documents.push({
+                    name: file.fieldname || 'document',
+                    fileName: file.originalname,
+                    fileSize: file.size,
+                    fileData: fileBuffer.toString('base64'),
+                    mimeType: file.mimetype,
+                    uploadedAt: new Date()
+                });
+                // Clean up temp file
+                if (fs.existsSync(file.path)) {
+                    fs.unlinkSync(file.path);
+                }
+            }
+        }
+
+        // Create admission record
+        const admission = new Admission({
+            fullName,
+            dob: new Date(dob),
+            gender,
+            grade,
+            studentType,
+            guardianName,
+            relationship,
+            phone,
+            email: email || '',
+            address,
+            county,
+            prevSchool: prevSchool || '',
+            medicalInfo: medicalInfo || '',
+            referral,
+            notes: notes || '',
+            documents,
+            status: 'pending',
+            submittedAt: new Date(),
+            updatedAt: new Date()
+        });
+
+        await admission.save();
+
+        // Generate reference number
+        const ref = 'CSA-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+
+        res.status(201).json({
+            success: true,
+            message: '✅ Application submitted successfully!',
+            reference: ref,
+            admissionId: admission._id
+        });
+
+    } catch (error) {
+        console.error('❌ Error submitting admission:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Error submitting application'
+        });
+    }
+});
+
+// Get all admissions (with filters)
+app.get('/api/admissions', async (req, res) => {
+    try {
+        const { status, grade, dateFrom, dateTo } = req.query;
+        const filter = {};
+
+        if (status && status !== 'all') filter.status = status;
+        if (grade && grade !== 'all') filter.grade = grade;
+
+        if (dateFrom || dateTo) {
+            filter.submittedAt = {};
+            if (dateFrom) filter.submittedAt.$gte = new Date(dateFrom + 'T00:00:00');
+            if (dateTo) filter.submittedAt.$lte = new Date(dateTo + 'T23:59:59');
+        }
+
+        const admissions = await Admission.find(filter)
+            .sort({ submittedAt: -1 });
+
+        res.json({
+            success: true,
+            count: admissions.length,
+            admissions
+        });
+
+    } catch (error) {
+        console.error('❌ Error fetching admissions:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Get single admission by ID
+app.get('/api/admissions/:id', async (req, res) => {
+    try {
+        const admission = await Admission.findById(req.params.id);
+        if (!admission) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admission not found'
+            });
+        }
+        res.json({
+            success: true,
+            admission
+        });
+    } catch (error) {
+        console.error('❌ Error fetching admission:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Update admission status
+app.put('/api/admissions/:id/status', async (req, res) => {
+    try {
+        const { status } = req.body;
+        const validStatuses = ['pending', 'reviewed', 'contacted', 'enrolled', 'rejected'];
+
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid status value'
+            });
+        }
+
+        const admission = await Admission.findById(req.params.id);
+        if (!admission) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admission not found'
+            });
+        }
+
+        admission.status = status;
+        admission.updatedAt = new Date();
+        if (status === 'reviewed' || status === 'enrolled' || status === 'rejected') {
+            admission.reviewedAt = new Date();
+            admission.reviewedBy = req.body.reviewedBy || 'Admin';
+        }
+
+        await admission.save();
+
+        res.json({
+            success: true,
+            message: `Application status updated to "${status}"`,
+            admission
+        });
+
+    } catch (error) {
+        console.error('❌ Error updating admission status:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Delete admission
+app.delete('/api/admissions/:id', async (req, res) => {
+    try {
+        const admission = await Admission.findByIdAndDelete(req.params.id);
+        if (!admission) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admission not found'
+            });
+        }
+        res.json({
+            success: true,
+            message: 'Application deleted successfully'
+        });
+    } catch (error) {
+        console.error('❌ Error deleting admission:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Download admission document
+app.get('/api/admissions/:id/document/:filename', async (req, res) => {
+    try {
+        const admission = await Admission.findById(req.params.id);
+        if (!admission) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admission not found'
+            });
+        }
+
+        const filename = decodeURIComponent(req.params.filename);
+        const doc = admission.documents.find(d => d.fileName === filename);
+
+        if (!doc) {
+            return res.status(404).json({
+                success: false,
+                message: 'Document not found'
+            });
+        }
+
+        const fileBuffer = Buffer.from(doc.fileData, 'base64');
+        res.setHeader('Content-Type', doc.mimeType || 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename="${doc.fileName}"`);
+        res.setHeader('Content-Length', fileBuffer.length);
+        res.send(fileBuffer);
+
+    } catch (error) {
+        console.error('❌ Error downloading document:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Export admissions as PDF report
+app.get('/api/admissions/export-pdf', async (req, res) => {
+    try {
+        const admissions = await Admission.find().sort({ submittedAt: -1 });
+
+        const doc = new PDFDocument({ margin: 40, size: 'A4', landscape: true });
+        const chunks = [];
+
+        doc.on('data', (chunk) => chunks.push(chunk));
+        doc.on('end', () => {
+            const pdfBuffer = Buffer.concat(chunks);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="admissions_report_${new Date().toISOString().split('T')[0]}.pdf"`);
+            res.setHeader('Content-Length', pdfBuffer.length);
+            res.send(pdfBuffer);
+        });
+        doc.on('error', (err) => {
+            console.error('PDF error:', err);
+            res.status(500).json({ success: false, message: 'Error generating PDF' });
+        });
+
+        // Header
+        doc.fontSize(20).font('Helvetica-Bold').fillColor('#0A1628').text('CHANGARA STAR ACADEMY', { align: 'center' });
+        doc.fontSize(12).font('Helvetica-Oblique').fillColor('#D4A017').text('"Assurance to Excellence"', { align: 'center' }).moveDown(0.5);
+        doc.fontSize(14).font('Helvetica-Bold').fillColor('#0A1628').text('ADMISSION APPLICATIONS REPORT', { align: 'center' });
+        doc.fontSize(10).font('Helvetica').fillColor('#6c757d').text(`Generated: ${formatKenyaFullTime(new Date())}`, { align: 'center' }).moveDown(1);
+
+        // Stats
+        const total = admissions.length;
+        const pending = admissions.filter(a => a.status === 'pending').length;
+        const reviewed = admissions.filter(a => a.status === 'reviewed').length;
+        const enrolled = admissions.filter(a => a.status === 'enrolled').length;
+        const rejected = admissions.filter(a => a.status === 'rejected').length;
+
+        const statsData = [
+            { label: 'Total Applications', value: total, color: '#0A1628' },
+            { label: 'Pending', value: pending, color: '#d4a017' },
+            { label: 'Reviewed', value: reviewed, color: '#17a2b8' },
+            { label: 'Enrolled', value: enrolled, color: '#28a745' },
+            { label: 'Rejected', value: rejected, color: '#dc3545' }
+        ];
+
+        const statsY = doc.y;
+        const boxWidth = 120;
+        statsData.forEach((stat, i) => {
+            const x = 45 + (i * (boxWidth + 8));
+            doc.roundedRect(x, statsY, boxWidth, 35, 4)
+               .fillColor('#f8f9fa')
+               .fill()
+               .strokeColor('#dee2e6')
+               .lineWidth(0.5)
+               .roundedRect(x, statsY, boxWidth, 35, 4)
+               .stroke();
+
+            doc.fontSize(18)
+               .font('Helvetica-Bold')
+               .fillColor(stat.color)
+               .text(stat.value.toString(), x + 5, statsY + 4, { width: boxWidth - 10, align: 'center' });
+
+            doc.fontSize(7)
+               .font('Helvetica')
+               .fillColor('#6c757d')
+               .text(stat.label, x + 5, statsY + 22, { width: boxWidth - 10, align: 'center' });
+        });
+
+        doc.moveDown(2.5);
+
+        // Table
+        const tableTop = doc.y;
+        const colWidths = [25, 130, 60, 55, 70, 60, 70, 60];
+        const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+
+        doc.rect(40, tableTop, tableWidth, 18).fillColor('#0A1628').fill();
+
+        const headers = ['#', 'Student Name', 'Grade', 'Type', 'Guardian', 'Phone', 'Status', 'Date'];
+        let headerX = 45;
+        doc.fontSize(7).font('Helvetica-Bold').fillColor('white');
+        headers.forEach((h, i) => {
+            const align = i === 0 ? 'center' : 'left';
+            doc.text(h, headerX, tableTop + 4, { width: colWidths[i] - 4, align: align });
+            headerX += colWidths[i];
+        });
+
+        let rowY = tableTop + 18;
+        const maxRows = 25;
+        const displayAdmissions = admissions.slice(0, maxRows);
+
+        displayAdmissions.forEach((a, index) => {
+            if (rowY > 520) { doc.addPage(); rowY = 50; }
+            doc.rect(40, rowY, tableWidth, 16).fillColor(index % 2 === 0 ? '#f8f9fa' : 'white').fill();
+
+            let xPos = 45;
+            doc.fontSize(6).font('Helvetica').fillColor('#0A1628');
+            doc.text((index + 1).toString(), xPos, rowY + 3, { width: colWidths[0] - 4, align: 'center' });
+            xPos += colWidths[0];
+            doc.text(a.fullName || 'N/A', xPos, rowY + 3, { width: colWidths[1] - 4 });
+            xPos += colWidths[1];
+            doc.text(a.grade || 'N/A', xPos, rowY + 3, { width: colWidths[2] - 4 });
+            xPos += colWidths[2];
+            doc.text(a.studentType || 'Day', xPos, rowY + 3, { width: colWidths[3] - 4 });
+            xPos += colWidths[3];
+            doc.text(a.guardianName || 'N/A', xPos, rowY + 3, { width: colWidths[4] - 4 });
+            xPos += colWidths[4];
+            doc.text(a.phone || 'N/A', xPos, rowY + 3, { width: colWidths[5] - 4 });
+            xPos += colWidths[5];
+
+            const statusColors = {
+                'pending': '#d4a017',
+                'reviewed': '#17a2b8',
+                'contacted': '#6f42c1',
+                'enrolled': '#28a745',
+                'rejected': '#dc3545'
+            };
+            doc.fillColor(statusColors[a.status] || '#6c757d')
+               .font('Helvetica-Bold')
+               .text((a.status || 'pending').toUpperCase(), xPos, rowY + 3, { width: colWidths[6] - 4 });
+            xPos += colWidths[6];
+            doc.fillColor('#6c757d')
+               .font('Helvetica')
+               .text(a.submittedAt ? formatKenyaDate(a.submittedAt) : '-', xPos, rowY + 3, { width: colWidths[7] - 4 });
+
+            rowY += 16;
+        });
+
+        if (admissions.length > maxRows) {
+            doc.fontSize(6).font('Helvetica-Oblique').fillColor('#6c757d')
+               .text(`... and ${admissions.length - maxRows} more applications`, 45, rowY + 6);
+        }
+
+        doc.moveDown(2);
+        doc.fontSize(7).font('Helvetica').fillColor('#6c757d')
+           .text(`Total: ${admissions.length} applications`, 40, 570)
+           .text('CHANGARA STAR ACADEMY | P.O Box 7, Cheptais | 📞 +254 721 556 252', 40, 582, { align: 'center' });
+
+        doc.end();
+
+    } catch (error) {
+        console.error('❌ Error generating admissions PDF:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get admission statistics
+app.get('/api/admissions/stats', async (req, res) => {
+    try {
+        const total = await Admission.countDocuments();
+        const pending = await Admission.countDocuments({ status: 'pending' });
+        const reviewed = await Admission.countDocuments({ status: 'reviewed' });
+        const contacted = await Admission.countDocuments({ status: 'contacted' });
+        const enrolled = await Admission.countDocuments({ status: 'enrolled' });
+        const rejected = await Admission.countDocuments({ status: 'rejected' });
+
+        const byGrade = await Admission.aggregate([
+            { $group: { _id: '$grade', count: { $sum: 1 } } },
+            { $sort: { _id: 1 } }
+        ]);
+
+        res.json({
+            success: true,
+            stats: {
+                total,
+                pending,
+                reviewed,
+                contacted,
+                enrolled,
+                rejected,
+                byGrade
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Error fetching admission stats:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
 // ============================================
 // REGISTER STATIC FILES - MUST BE AFTER ALL API ROUTES
 // ============================================

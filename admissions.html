@@ -2167,138 +2167,158 @@
         }
 
         // ============================================
-        // ENROLLMENT FORM SUBMISSION
-        // ============================================
-        function submitForm(e) {
-            e.preventDefault();
+// ENROLLMENT FORM SUBMISSION - WITH API
+// ============================================
+async function submitForm(e) {
+    e.preventDefault();
 
-            const btn = document.getElementById('submitBtn');
-            const originalText = btn.innerHTML;
+    const btn = document.getElementById('submitBtn');
+    const originalText = btn.innerHTML;
 
-            // Basic validation
-            const fullName = document.getElementById('fullName').value.trim();
-            const dob = document.getElementById('dob').value;
-            const gender = document.querySelector('input[name="gender"]:checked');
-            const grade = document.getElementById('grade').value;
-            const studentType = document.querySelector('input[name="studentType"]:checked');
-            const guardianName = document.getElementById('guardianName').value.trim();
-            const relationship = document.getElementById('relationship').value;
-            const phone = document.getElementById('phone').value.trim();
-            const address = document.getElementById('address').value.trim();
-            const county = document.getElementById('county').value;
-            const referral = document.getElementById('referral').value;
-            const agree = document.getElementById('agree').checked;
+    // Basic validation
+    const fullName = document.getElementById('fullName').value.trim();
+    const dob = document.getElementById('dob').value;
+    const gender = document.querySelector('input[name="gender"]:checked');
+    const grade = document.getElementById('grade').value;
+    const studentType = document.querySelector('input[name="studentType"]:checked');
+    const guardianName = document.getElementById('guardianName').value.trim();
+    const relationship = document.getElementById('relationship').value;
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const county = document.getElementById('county').value;
+    const referral = document.getElementById('referral').value;
+    const agree = document.getElementById('agree').checked;
 
-            // Check required files
-            const requiredFiles = ['birthCert', 'passportPhoto', 'guardianId'];
-            let missingFiles = [];
-            requiredFiles.forEach(id => {
-                if (!uploadedFiles[id]) {
-                    missingFiles.push(id);
-                }
+    // Check required files
+    const requiredFiles = ['birthCert', 'passportPhoto', 'guardianId'];
+    let missingFiles = [];
+    requiredFiles.forEach(id => {
+        if (!uploadedFiles[id]) {
+            missingFiles.push(id);
+        }
+    });
+
+    if (!fullName) { showToast('Please enter the student\'s full name.', 'error'); return; }
+    if (!dob) { showToast('Please select the date of birth.', 'error'); return; }
+    if (!gender) { showToast('Please select the gender.', 'error'); return; }
+    if (!grade) { showToast('Please select the grade.', 'error'); return; }
+    if (!studentType) { showToast('Please select the student type.', 'error'); return; }
+    if (!guardianName) { showToast('Please enter the parent/guardian name.', 'error'); return; }
+    if (!relationship) { showToast('Please select the relationship to student.', 'error'); return; }
+    if (!phone) { showToast('Please enter a phone number.', 'error'); return; }
+    if (!address) { showToast('Please enter the residential address.', 'error'); return; }
+    if (!county) { showToast('Please select the county.', 'error'); return; }
+    if (!referral) { showToast('Please tell us how you heard about us.', 'error'); return; }
+    if (!agree) { showToast('Please confirm that the information is accurate.', 'error'); return; }
+
+    if (missingFiles.length > 0) {
+        const fileNames = {
+            'birthCert': 'Birth Certificate',
+            'passportPhoto': 'Passport Photos',
+            'guardianId': 'Parent/Guardian ID'
+        };
+        const missingNames = missingFiles.map(id => fileNames[id] || id).join(', ');
+        showToast(`Please upload the following required documents: ${missingNames}`, 'error');
+        return;
+    }
+
+    // Validate phone
+    if (!/^[0-9]{7,12}$/.test(phone.replace(/[^0-9]/g, ''))) {
+        showToast('Please enter a valid phone number.', 'error');
+        return;
+    }
+
+    // Show loading
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('fullName', fullName);
+    formData.append('dob', dob);
+    formData.append('gender', gender.value);
+    formData.append('grade', grade);
+    formData.append('studentType', studentType.value);
+    formData.append('guardianName', guardianName);
+    formData.append('relationship', relationship);
+    formData.append('phone', phone);
+    formData.append('email', document.getElementById('email').value.trim());
+    formData.append('address', address);
+    formData.append('county', county);
+    formData.append('prevSchool', document.getElementById('prevSchool').value.trim());
+    formData.append('medicalInfo', document.getElementById('medicalInfo').value.trim());
+    formData.append('referral', referral);
+    formData.append('notes', document.getElementById('notes').value.trim());
+
+    // Append files
+    const fileMappings = {
+        'birthCert': 'birthCertificate',
+        'passportPhoto': 'passportPhotos',
+        'prevReport': 'previousReport',
+        'transferLetter': 'transferLetter',
+        'guardianId': 'guardianId',
+        'medicalDoc': 'medicalInfoDoc'
+    };
+
+    Object.keys(uploadedFiles).forEach(key => {
+        const fieldName = fileMappings[key] || key;
+        formData.append('documents', uploadedFiles[key], uploadedFiles[key].name);
+    });
+
+    try {
+        const response = await fetch('/api/admissions', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Generate reference number
+            const ref = result.reference || 'CSA-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+            document.getElementById('refNumber').textContent = 'REF: ' + ref;
+
+            // Show uploaded files in success message
+            const fileList = document.getElementById('uploadedFilesList');
+            fileList.innerHTML = '';
+            const fileNames = {
+                'birthCert': '📄 Birth Certificate',
+                'passportPhoto': '📸 Passport Photos',
+                'prevReport': '📊 Previous School Report',
+                'transferLetter': '📩 Transfer Letter',
+                'guardianId': '🪪 Parent/Guardian ID',
+                'medicalDoc': '🏥 Medical Information'
+            };
+            Object.keys(uploadedFiles).forEach(key => {
+                const li = document.createElement('li');
+                li.textContent = `${fileNames[key] || key}: ${uploadedFiles[key].name}`;
+                li.style.padding = '2px 0';
+                li.style.fontSize = '13px';
+                fileList.appendChild(li);
             });
 
-            if (!fullName) { showToast('Please enter the student\'s full name.', 'error'); return; }
-            if (!dob) { showToast('Please select the date of birth.', 'error'); return; }
-            if (!gender) { showToast('Please select the gender.', 'error'); return; }
-            if (!grade) { showToast('Please select the grade.', 'error'); return; }
-            if (!studentType) { showToast('Please select the student type.', 'error'); return; }
-            if (!guardianName) { showToast('Please enter the parent/guardian name.', 'error'); return; }
-            if (!relationship) { showToast('Please select the relationship to student.', 'error'); return; }
-            if (!phone) { showToast('Please enter a phone number.', 'error'); return; }
-            if (!address) { showToast('Please enter the residential address.', 'error'); return; }
-            if (!county) { showToast('Please select the county.', 'error'); return; }
-            if (!referral) { showToast('Please tell us how you heard about us.', 'error'); return; }
-            if (!agree) { showToast('Please confirm that the information is accurate.', 'error'); return; }
+            // Hide form, show success
+            document.getElementById('admissionForm').style.display = 'none';
+            document.getElementById('successMessage').classList.add('show');
 
-            if (missingFiles.length > 0) {
-                const fileNames = {
-                    'birthCert': 'Birth Certificate',
-                    'passportPhoto': 'Passport Photos',
-                    'guardianId': 'Parent/Guardian ID'
-                };
-                const missingNames = missingFiles.map(id => fileNames[id] || id).join(', ');
-                showToast(`Please upload the following required documents: ${missingNames}`, 'error');
-                return;
-            }
+            showToast('✅ Application submitted successfully!', 'success');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
 
-            // Validate phone
-            if (!/^[0-9]{7,12}$/.test(phone.replace(/[^0-9]/g, ''))) {
-                showToast('Please enter a valid phone number.', 'error');
-                return;
-            }
-
-            // Show loading
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Submitting...';
-
-            // Build form data
-            const formData = {
-                fullName,
-                dob,
-                gender: gender.value,
-                grade,
-                studentType: studentType.value,
-                guardianName,
-                relationship,
-                phone,
-                email: document.getElementById('email').value.trim(),
-                address,
-                county,
-                prevSchool: document.getElementById('prevSchool').value.trim(),
-                medicalInfo: document.getElementById('medicalInfo').value.trim(),
-                referral,
-                notes: document.getElementById('notes').value.trim(),
-                documents: Object.keys(uploadedFiles).map(key => ({
-                    name: key,
-                    fileName: uploadedFiles[key].name,
-                    fileSize: uploadedFiles[key].size
-                })),
-                submittedAt: new Date().toISOString()
-            };
-
-            console.log('📝 Form Data:', formData);
-            console.log('📎 Uploaded Files:', Object.keys(uploadedFiles).length, 'files');
-
-            // Simulate API delay
-            setTimeout(() => {
-                // Generate reference number
-                const ref = 'CSA-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
-                document.getElementById('refNumber').textContent = 'REF: ' + ref;
-
-                // Show uploaded files in success message
-                const fileList = document.getElementById('uploadedFilesList');
-                fileList.innerHTML = '';
-                const fileNames = {
-                    'birthCert': '📄 Birth Certificate',
-                    'passportPhoto': '📸 Passport Photos',
-                    'prevReport': '📊 Previous School Report',
-                    'transferLetter': '📩 Transfer Letter',
-                    'guardianId': '🪪 Parent/Guardian ID',
-                    'medicalDoc': '🏥 Medical Information'
-                };
-                Object.keys(uploadedFiles).forEach(key => {
-                    const li = document.createElement('li');
-                    li.textContent = `${fileNames[key] || key}: ${uploadedFiles[key].name}`;
-                    li.style.padding = '2px 0';
-                    li.style.fontSize = '13px';
-                    fileList.appendChild(li);
-                });
-
-                // Hide form, show success
-                document.getElementById('admissionForm').style.display = 'none';
-                document.getElementById('successMessage').classList.add('show');
-
-                showToast('✅ Application submitted successfully!', 'success');
-
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-
-                // Scroll to success
-                document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            }, 1500);
+            // Scroll to success
+            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            showToast('❌ ' + (result.message || 'Error submitting application'), 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
+    } catch (error) {
+        console.error('❌ Submission error:', error);
+        showToast('❌ Error submitting application. Please try again.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
 
         // ============================================
         // RESET FORM

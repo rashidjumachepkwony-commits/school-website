@@ -78,6 +78,24 @@
             letter-spacing: 0.5px;
         }
 
+        /* Admission Badge */
+        .sidebar-menu a .admission-badge {
+            margin-left: auto;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 50px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            animation: pulseBadge 2s infinite;
+        }
+
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
         .main-content { 
             margin-left: 260px; 
             padding: 25px 30px; 
@@ -194,7 +212,7 @@
         .dashboard-card h3 { color: #1a2a4a; font-size: 16px; }
         .dashboard-card p { color: #666; font-size: 12px; }
 
-        .table-wrapper { overflow-x: auto; max-height: 500px; overflow-y: auto; }
+        .table-wrapper { overflow-x: auto; max-height: 600px; overflow-y: auto; }
         .table-wrapper table {
             width: 100%;
             border-collapse: collapse;
@@ -245,6 +263,7 @@
         .stat-card .number.red { color: #dc3545; }
         .stat-card .number.blue { color: #17a2b8; }
         .stat-card .number.orange { color: #d4a017; }
+        .stat-card .number.purple { color: #6f42c1; }
 
         .filter-bar {
             display: flex;
@@ -344,6 +363,20 @@
             margin: 15px 0;
         }
 
+        /* ===== ADMISSION STATUS BADGES ===== */
+        .admission-status {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .admission-status.pending { background: #fff3cd; color: #856404; }
+        .admission-status.reviewed { background: #cce5ff; color: #004085; }
+        .admission-status.enrolled { background: #d4edda; color: #155724; }
+        .admission-status.rejected { background: #f8d7da; color: #721c24; }
+        .admission-status.contacted { background: #d1ecf1; color: #0c5460; }
+
         /* ===== ASSESSMENT RESULTS STYLES ===== */
         .assessment-section {
             margin-top: 20px;
@@ -426,6 +459,66 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* View Details Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+        }
+        .modal-box .close-modal {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+        .modal-box .close-modal:hover { color: #dc3545; }
+        .modal-box h3 { color: #0A1628; margin-bottom: 15px; border-bottom: 2px solid #D4A017; padding-bottom: 10px; }
+        .modal-box .detail-row {
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .modal-box .detail-row .label {
+            font-weight: 600;
+            width: 160px;
+            color: #555;
+            flex-shrink: 0;
+        }
+        .modal-box .detail-row .value { color: #0A1628; }
+        .modal-box .file-link {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e8ecf1;
+            border-radius: 4px;
+            color: #0A1628;
+            text-decoration: none;
+            font-size: 12px;
+            margin: 2px 4px 2px 0;
+        }
+        .modal-box .file-link:hover { background: #D4A017; color: white; }
+
         @media (max-width: 768px) {
             .sidebar { width: 100%; position: relative; min-height: auto; padding: 10px 0; }
             .main-content { margin-left: 0; padding: 15px; }
@@ -433,6 +526,9 @@
             .chart-container { grid-template-columns: 1fr; }
             .dashboard-cards { grid-template-columns: 1fr 1fr; }
             .assessment-header { flex-direction: column; align-items: stretch; gap: 10px; }
+            .modal-box { padding: 20px; margin: 10px; }
+            .modal-box .detail-row { flex-direction: column; padding: 6px 0; }
+            .modal-box .detail-row .label { width: 100%; }
         }
         @media (max-width: 480px) {
             .dashboard-cards { grid-template-columns: 1fr; }
@@ -453,7 +549,14 @@
             <div class="menu-label">Dashboard</div>
             <a class="active" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Dashboard</a>
             
-            <!-- ===== CMS LINK - FIXED ===== -->
+            <!-- ===== ADMISSION MANAGEMENT - NEW ===== -->
+            <div class="menu-label" style="margin-top:10px;">Admissions</div>
+            <a onclick="showSection('admission-management')">
+                <i class="fas fa-clipboard-list"></i> Admissions
+                <span class="admission-badge" id="admissionCountBadge">0</span>
+            </a>
+            
+            <!-- ===== CMS LINK ===== -->
             <div class="menu-label" style="margin-top:10px;">Content Management</div>
             <a onclick="window.location.href='admin-cms.html'">
                 <i class="fas fa-rocket"></i> CMS
@@ -507,12 +610,19 @@
             </div>
         </div>
 
+        <!-- ============================================ -->
         <!-- ===== DASHBOARD SECTION ===== -->
+        <!-- ============================================ -->
         <div id="section-dashboard" class="editor-container active">
             <h2>📊 Dashboard Overview</h2>
             <p class="desc">Welcome to the Admin Dashboard. Manage staff, students, visitors, finance, assessments, and view reports.</p>
             <div class="dashboard-cards">
-                <!-- CMS Card - FIXED -->
+                <!-- Admission Card - NEW -->
+                <div class="dashboard-card" onclick="showSection('admission-management')" style="border-color:#28a745;background:linear-gradient(135deg,#f0fff4,#fff);">
+                    <span class="icon">📋</span>
+                    <h3 style="color:#28a745;">Admissions</h3>
+                    <p>View & manage applications</p>
+                </div>
                 <div class="dashboard-card" onclick="window.location.href='admin-cms.html'" style="border-color:#D4A017;background:linear-gradient(135deg,#fdf8ed,#fff);">
                     <span class="icon">🚀</span>
                     <h3 style="color:#D4A017;">CMS</h3>
@@ -665,7 +775,96 @@
             </div>
         </div>
 
+        <!-- ============================================ -->
+        <!-- ===== ADMISSION MANAGEMENT - NEW SECTION ===== -->
+        <!-- ============================================ -->
+        <div id="section-admission-management" class="editor-container">
+            <h2>📋 Admission Applications</h2>
+            <p class="desc">View and manage all online admission applications submitted through the enrollment form.</p>
+            
+            <div class="filter-bar">
+                <div class="form-group">
+                    <label>Status Filter</label>
+                    <select id="admissionStatusFilter" onchange="loadAdmissions()">
+                        <option value="all">All Statuses</option>
+                        <option value="pending">📌 Pending</option>
+                        <option value="reviewed">📖 Reviewed</option>
+                        <option value="contacted">📞 Contacted</option>
+                        <option value="enrolled">✅ Enrolled</option>
+                        <option value="rejected">❌ Rejected</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Grade Filter</label>
+                    <select id="admissionGradeFilter" onchange="loadAdmissions()">
+                        <option value="all">All Grades</option>
+                        <option value="Playgroup">🧸 Playgroup</option>
+                        <option value="PP1">🎨 PP1</option>
+                        <option value="PP2">📚 PP2</option>
+                        <option value="Grade 1">📖 Grade 1</option>
+                        <option value="Grade 2">✏️ Grade 2</option>
+                        <option value="Grade 3">📝 Grade 3</option>
+                        <option value="Grade 4">📐 Grade 4</option>
+                        <option value="Grade 5">🔬 Grade 5</option>
+                        <option value="Grade 6">💻 Grade 6</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date Range</label>
+                    <div style="display:flex;gap:8px;">
+                        <input type="date" id="admissionDateFrom" onchange="loadAdmissions()" style="flex:1;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;">
+                        <input type="date" id="admissionDateTo" onchange="loadAdmissions()" style="flex:1;padding:8px 12px;border:2px solid #e8ecf1;border-radius:6px;">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="loadAdmissions()"><i class="fas fa-sync"></i> Refresh</button>
+                <button class="btn btn-success" onclick="exportAdmissionsCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
+                <button class="btn btn-pdf" onclick="exportAdmissionsPDF()"><i class="fas fa-file-pdf"></i> Export PDF</button>
+            </div>
+
+            <div class="stats-grid" id="admissionStatsGrid">
+                <div class="stat-card">
+                    <div class="number gold" id="admissionTotal">0</div>
+                    <div class="label">Total Applications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number orange" id="admissionPending">0</div>
+                    <div class="label">📌 Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number blue" id="admissionReviewed">0</div>
+                    <div class="label">📖 Reviewed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number green" id="admissionEnrolled">0</div>
+                    <div class="label">✅ Enrolled</div>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="admissionTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student Name</th>
+                            <th>Grade</th>
+                            <th>Type</th>
+                            <th>Guardian</th>
+                            <th>Phone</th>
+                            <th>Submitted</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admissionBody">
+                        <tr><td colspan="9" style="text-align:center;color:#999;">Loading admission applications...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
         <!-- ===== STAFF MANAGEMENT ===== -->
+        <!-- ============================================ -->
         <div id="section-staff-management" class="editor-container">
             <h2>👨‍💼 Staff Management</h2>
             <p class="desc">Add, edit, and manage all staff members.</p>
@@ -686,7 +885,9 @@
             <div class="table-wrapper"><table><thead><tr><th>#</th><th>Name</th><th>Employee ID</th><th>Email</th><th>Department</th><th>Status</th><th>Actions</th></tr></thead><tbody id="staffTableBody"><tr><td colspan="7" style="text-align:center;color:#999;">Loading staff data...</td></tr></tbody></table></div>
         </div>
 
+        <!-- ============================================ -->
         <!-- ===== STAFF ATTENDANCE ===== -->
+        <!-- ============================================ -->
         <div id="section-staff-attendance" class="editor-container">
             <h2>👨‍🏫 Staff Attendance</h2>
             <p class="desc">View and manage staff attendance records for today.</p>
@@ -707,7 +908,9 @@
             <div class="table-wrapper"><table id="staffAttendanceTable"><thead><tr><th>#</th><th>Staff Name</th><th>Employee ID</th><th>Department</th><th>Status</th><th>Check In</th><th>Check Out</th><th>Hours Worked</th></tr></thead><tbody id="staffAttendanceBody"><tr><td colspan="8" style="text-align:center;color:#999;">Loading attendance data...</td></tr></tbody></table></div>
         </div>
 
+        <!-- ============================================ -->
         <!-- ===== VISITOR MANAGEMENT ===== -->
+        <!-- ============================================ -->
         <div id="section-visitor-management" class="editor-container">
             <h2>🚪 Visitor Management</h2>
             <p class="desc">View and manage visitor check-in/out records.</p>
@@ -727,7 +930,9 @@
             <div class="table-wrapper"><table id="visitorTable"><thead><tr><th>#</th><th>Visitor Name</th><th>Badge #</th><th>Purpose</th><th>Person to Visit</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Action</th></tr></thead><tbody id="visitorBody"><tr><td colspan="9" style="text-align:center;color:#999;">Loading visitor data...</td></tr></tbody></table></div>
         </div>
 
+        <!-- ============================================ -->
         <!-- ===== STAFF REPORTS ===== -->
+        <!-- ============================================ -->
         <div id="section-staff-reports" class="editor-container">
             <h2>📊 Staff Attendance Reports</h2>
             <p class="desc">Generate and view staff attendance reports with analysis.</p>
@@ -785,7 +990,9 @@
             </div>
         </div>
 
+        <!-- ============================================ -->
         <!-- ===== VISITOR REPORTS ===== -->
+        <!-- ============================================ -->
         <div id="section-visitor-reports" class="editor-container">
             <h2>📈 Visitor Reports</h2>
             <p class="desc">Generate and view visitor reports with analysis.</p>
@@ -839,6 +1046,43 @@
                     <thead><tr><th>#</th><th>Visitor Name</th><th>Badge #</th><th>Purpose</th><th>Person to Visit</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Duration</th></tr></thead>
                     <tbody id="visitorReportBody"><tr><td colspan="9" style="text-align:center;color:#999;">Select filters and click Generate</td></tr></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ===== VIEW ADMISSION MODAL ===== -->
+    <!-- ============================================ -->
+    <div class="modal-overlay" id="admissionModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeAdmissionModal()">&times;</button>
+            <h3>📋 Admission Application Details</h3>
+            <div id="admissionModalContent">
+                <div class="detail-row"><span class="label">Student Name:</span><span class="value" id="modalFullName">-</span></div>
+                <div class="detail-row"><span class="label">Date of Birth:</span><span class="value" id="modalDob">-</span></div>
+                <div class="detail-row"><span class="label">Gender:</span><span class="value" id="modalGender">-</span></div>
+                <div class="detail-row"><span class="label">Grade Applying For:</span><span class="value" id="modalGrade">-</span></div>
+                <div class="detail-row"><span class="label">Student Type:</span><span class="value" id="modalType">-</span></div>
+                <div class="detail-row"><span class="label">Guardian Name:</span><span class="value" id="modalGuardian">-</span></div>
+                <div class="detail-row"><span class="label">Relationship:</span><span class="value" id="modalRelationship">-</span></div>
+                <div class="detail-row"><span class="label">Phone:</span><span class="value" id="modalPhone">-</span></div>
+                <div class="detail-row"><span class="label">Email:</span><span class="value" id="modalEmail">-</span></div>
+                <div class="detail-row"><span class="label">Address:</span><span class="value" id="modalAddress">-</span></div>
+                <div class="detail-row"><span class="label">County:</span><span class="value" id="modalCounty">-</span></div>
+                <div class="detail-row"><span class="label">Previous School:</span><span class="value" id="modalPrevSchool">-</span></div>
+                <div class="detail-row"><span class="label">Medical Info:</span><span class="value" id="modalMedical">-</span></div>
+                <div class="detail-row"><span class="label">Referred By:</span><span class="value" id="modalReferral">-</span></div>
+                <div class="detail-row"><span class="label">Notes:</span><span class="value" id="modalNotes">-</span></div>
+                <div class="detail-row"><span class="label">Submitted:</span><span class="value" id="modalSubmitted">-</span></div>
+                <div class="detail-row"><span class="label">Status:</span><span class="value" id="modalStatus">-</span></div>
+                <div class="detail-row" id="modalDocumentsRow"><span class="label">Documents:</span><span class="value" id="modalDocuments">-</span></div>
+            </div>
+            <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="updateAdmissionStatus('reviewed')"><i class="fas fa-check"></i> Mark Reviewed</button>
+                <button class="btn btn-info" onclick="updateAdmissionStatus('contacted')"><i class="fas fa-phone"></i> Contacted</button>
+                <button class="btn btn-success" onclick="updateAdmissionStatus('enrolled')"><i class="fas fa-user-graduate"></i> Enrolled</button>
+                <button class="btn btn-danger" onclick="updateAdmissionStatus('rejected')"><i class="fas fa-times"></i> Reject</button>
+                <button class="btn btn-secondary" onclick="closeAdmissionModal()">Close</button>
             </div>
         </div>
     </div>
@@ -1006,6 +1250,7 @@
             const target = document.getElementById('section-' + section);
             if (target) target.classList.add('active');
 
+            if (section === 'admission-management') loadAdmissions();
             if (section === 'staff-management') loadStaffList();
             if (section === 'staff-attendance') loadStaffAttendance();
             if (section === 'visitor-management') loadVisitors();
@@ -1028,7 +1273,253 @@
         }
 
         // ============================================
-        // STAFF MANAGEMENT
+        // ADMISSION MANAGEMENT - COMPLETE
+        // ============================================
+        let currentAdmissionId = null;
+
+        async function loadAdmissions() {
+            showLoading('Loading admission applications...');
+            
+            const status = document.getElementById('admissionStatusFilter').value;
+            const grade = document.getElementById('admissionGradeFilter').value;
+            const dateFrom = document.getElementById('admissionDateFrom').value;
+            const dateTo = document.getElementById('admissionDateTo').value;
+
+            try {
+                let url = '/api/admissions';
+                const params = new URLSearchParams();
+                if (status !== 'all') params.append('status', status);
+                if (grade !== 'all') params.append('grade', grade);
+                if (dateFrom) params.append('dateFrom', dateFrom);
+                if (dateTo) params.append('dateTo', dateTo);
+                if (params.toString()) url += '?' + params.toString();
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                hideLoading();
+
+                if (data.success) {
+                    const admissions = data.admissions || [];
+                    const tbody = document.getElementById('admissionBody');
+
+                    // Update stats
+                    const total = admissions.length;
+                    const pending = admissions.filter(a => a.status === 'pending').length;
+                    const reviewed = admissions.filter(a => a.status === 'reviewed').length;
+                    const enrolled = admissions.filter(a => a.status === 'enrolled').length;
+
+                    document.getElementById('admissionTotal').textContent = total;
+                    document.getElementById('admissionPending').textContent = pending;
+                    document.getElementById('admissionReviewed').textContent = reviewed;
+                    document.getElementById('admissionEnrolled').textContent = enrolled;
+                    document.getElementById('admissionCountBadge').textContent = pending;
+
+                    if (admissions.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#999;">No admission applications found.</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = '';
+                    admissions.forEach((app, index) => {
+                        const tr = document.createElement('tr');
+                        const statusClass = app.status || 'pending';
+                        const statusLabels = {
+                            'pending': '📌 Pending',
+                            'reviewed': '📖 Reviewed',
+                            'contacted': '📞 Contacted',
+                            'enrolled': '✅ Enrolled',
+                            'rejected': '❌ Rejected'
+                        };
+
+                        tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td><strong>${app.fullName || 'N/A'}</strong></td>
+                            <td>${app.grade || 'N/A'}</td>
+                            <td>${app.studentType || 'Day Scholar'}</td>
+                            <td>${app.guardianName || 'N/A'}</td>
+                            <td>${app.phone || 'N/A'}</td>
+                            <td>${app.submittedAt ? new Date(app.submittedAt).toLocaleDateString('en-KE') : 'N/A'}</td>
+                            <td><span class="admission-status ${statusClass}">${statusLabels[statusClass] || statusClass}</span></td>
+                            <td>
+                                <button class="btn btn-info btn-sm" onclick="viewAdmission('${app._id}')" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-primary btn-sm" onclick="updateAdmissionStatus('${app._id}','reviewed')" title="Mark Reviewed"><i class="fas fa-check"></i></button>
+                                <button class="btn btn-success btn-sm" onclick="updateAdmissionStatus('${app._id}','enrolled')" title="Enroll"><i class="fas fa-user-graduate"></i></button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteAdmission('${app._id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    showAlert('❌ Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error loading admissions:', error);
+                showAlert('❌ Error loading admissions: ' + error.message, 'error');
+                document.getElementById('admissionBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc3545;">Error loading data</td></tr>`;
+            }
+        }
+
+        async function viewAdmission(id) {
+            showLoading('Loading application details...');
+            try {
+                const response = await fetch(`/api/admissions/${id}`);
+                const data = await response.json();
+
+                hideLoading();
+
+                if (data.success) {
+                    const app = data.admission;
+                    currentAdmissionId = id;
+
+                    document.getElementById('modalFullName').textContent = app.fullName || '-';
+                    document.getElementById('modalDob').textContent = app.dob ? new Date(app.dob).toLocaleDateString('en-KE') : '-';
+                    document.getElementById('modalGender').textContent = app.gender || '-';
+                    document.getElementById('modalGrade').textContent = app.grade || '-';
+                    document.getElementById('modalType').textContent = app.studentType || '-';
+                    document.getElementById('modalGuardian').textContent = app.guardianName || '-';
+                    document.getElementById('modalRelationship').textContent = app.relationship || '-';
+                    document.getElementById('modalPhone').textContent = app.phone || '-';
+                    document.getElementById('modalEmail').textContent = app.email || '-';
+                    document.getElementById('modalAddress').textContent = app.address || '-';
+                    document.getElementById('modalCounty').textContent = app.county || '-';
+                    document.getElementById('modalPrevSchool').textContent = app.prevSchool || 'None';
+                    document.getElementById('modalMedical').textContent = app.medicalInfo || 'None';
+                    document.getElementById('modalReferral').textContent = app.referral || '-';
+                    document.getElementById('modalNotes').textContent = app.notes || 'None';
+                    document.getElementById('modalSubmitted').textContent = app.submittedAt ? new Date(app.submittedAt).toLocaleString('en-KE') : '-';
+
+                    const statusLabels = {
+                        'pending': '📌 Pending',
+                        'reviewed': '📖 Reviewed',
+                        'contacted': '📞 Contacted',
+                        'enrolled': '✅ Enrolled',
+                        'rejected': '❌ Rejected'
+                    };
+                    document.getElementById('modalStatus').textContent = statusLabels[app.status] || app.status || 'Pending';
+
+                    // Documents
+                    const docsContainer = document.getElementById('modalDocuments');
+                    if (app.documents && app.documents.length > 0) {
+                        let docsHtml = '';
+                        app.documents.forEach(doc => {
+                            const fileName = doc.fileName || doc.name || 'Document';
+                            docsHtml += `<a href="#" class="file-link" onclick="downloadAdmissionDocument('${app._id}','${doc.name || doc.fileName}')"><i class="fas fa-file"></i> ${fileName}</a>`;
+                        });
+                        docsContainer.innerHTML = docsHtml || 'No documents uploaded';
+                    } else {
+                        docsContainer.textContent = 'No documents uploaded';
+                    }
+
+                    document.getElementById('admissionModal').classList.add('active');
+                } else {
+                    showAlert('❌ Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error viewing admission:', error);
+                showAlert('❌ Error loading application details', 'error');
+            }
+        }
+
+        function closeAdmissionModal() {
+            document.getElementById('admissionModal').classList.remove('active');
+            currentAdmissionId = null;
+        }
+
+        async function updateAdmissionStatus(id, status) {
+            const targetId = id || currentAdmissionId;
+            if (!targetId) {
+                showAlert('❌ No admission selected', 'error');
+                return;
+            }
+
+            const statusLabels = {
+                'pending': 'Pending',
+                'reviewed': 'Reviewed',
+                'contacted': 'Contacted',
+                'enrolled': 'Enrolled',
+                'rejected': 'Rejected'
+            };
+
+            if (!confirm(`Are you sure you want to mark this application as "${statusLabels[status] || status}"?`)) return;
+
+            showLoading('Updating status...');
+            try {
+                const response = await fetch(`/api/admissions/${targetId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                const data = await response.json();
+
+                hideLoading();
+
+                if (data.success) {
+                    showAlert(`✅ Application marked as "${statusLabels[status] || status}"`, 'success');
+                    closeAdmissionModal();
+                    loadAdmissions();
+                } else {
+                    showAlert('❌ Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error updating status:', error);
+                showAlert('❌ Error updating status', 'error');
+            }
+        }
+
+        async function deleteAdmission(id) {
+            if (!confirm('Are you sure you want to delete this admission application? This cannot be undone.')) return;
+
+            showLoading('Deleting application...');
+            try {
+                const response = await fetch(`/api/admissions/${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                hideLoading();
+
+                if (data.success) {
+                    showAlert('✅ Application deleted successfully', 'success');
+                    loadAdmissions();
+                } else {
+                    showAlert('❌ Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error deleting admission:', error);
+                showAlert('❌ Error deleting application', 'error');
+            }
+        }
+
+        function downloadAdmissionDocument(admissionId, fileName) {
+            window.open(`/api/admissions/${admissionId}/document/${encodeURIComponent(fileName)}`, '_blank');
+            showAlert('📄 Document downloading...', 'info');
+        }
+
+        function exportAdmissionsCSV() {
+            const table = document.getElementById('admissionTable');
+            let csv = '\uFEFF';
+            const rows = table.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('th, td');
+                const rowData = [];
+                cols.forEach(col => rowData.push('"' + col.textContent.trim() + '"'));
+                csv += rowData.join(',') + '\n';
+            });
+            downloadCSV(csv, 'admissions_' + new Date().toISOString().split('T')[0] + '.csv');
+        }
+
+        function exportAdmissionsPDF() {
+            window.open('/api/admissions/export-pdf', '_blank');
+            showAlert('📄 PDF is downloading...', 'info');
+        }
+
+        // ============================================
+        // STAFF MANAGEMENT - KEEPING EXISTING
         // ============================================
         async function loadStaffList() {
             try {
@@ -1150,7 +1641,7 @@
         }
 
         // ============================================
-        // STAFF ATTENDANCE
+        // STAFF ATTENDANCE - KEEPING EXISTING
         // ============================================
         let staffStatusChart = null;
         let staffTrendChart = null;
@@ -1230,7 +1721,7 @@
         }
 
         // ============================================
-        // VISITOR MANAGEMENT
+        // VISITOR MANAGEMENT - KEEPING EXISTING
         // ============================================
         async function loadVisitors() {
             try {
@@ -1310,7 +1801,7 @@
         }
 
         // ============================================
-        // STAFF REPORTS
+        // STAFF REPORTS - KEEPING EXISTING
         // ============================================
         async function generateStaffReport() {
             const period = document.getElementById('staffReportPeriod').value;
@@ -1443,7 +1934,7 @@
         }
 
         // ============================================
-        // VISITOR REPORTS
+        // VISITOR REPORTS - KEEPING EXISTING
         // ============================================
         let visitorPurposeChart = null;
         let visitorTrendChart = null;
@@ -1568,7 +2059,7 @@
         }
 
         // ============================================
-        // CLASS ASSESSMENT RESULTS
+        // CLASS ASSESSMENT RESULTS - KEEPING EXISTING
         // ============================================
         async function loadClassResults() {
             const grade = document.getElementById('classGradeFilter').value;
@@ -1898,5 +2389,6 @@
             setTimeout(generateVisitorReport, 500);
         });
     </script>
+
 </body>
 </html>
