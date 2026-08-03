@@ -8,8 +8,8 @@
     <link rel="shortcut icon" type="image/x-icon" href="images/logo edited.ico" />
     <meta name="description" content="Changara Star Academy – Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
@@ -163,7 +163,7 @@
         }
 
         /* ========================================
-           HEADER
+           HEADER (merged with top nav)
            ======================================== */
         .main-header {
             color: white;
@@ -330,9 +330,47 @@
             padding: 4px 8px;
         }
 
-        /* ========================================
-           NOTICE ALERT BAR - REMOVED
-           ======================================== */
+        /* ---- phone numbers in header ---- */
+        .header-contacts {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: 8px;
+            flex-wrap: wrap;
+        }
+        .header-contacts .contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: rgba(255,255,255,0.6);
+            font-size: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 3px 10px;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.04);
+            white-space: nowrap;
+        }
+        .header-contacts .contact-link:hover {
+            color: white;
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(212,160,23,0.15);
+            transform: translateY(-2px);
+        }
+        .header-contacts .contact-link i {
+            font-size: 12px;
+        }
+        .header-contacts .contact-link .phone-icon {
+            color: var(--school-gold);
+        }
+        .header-contacts .contact-link .whatsapp-icon {
+            color: var(--whatsapp-green);
+        }
+        .header-contacts .divider {
+            color: rgba(255,255,255,0.1);
+            font-size: 12px;
+        }
 
         /* ========================================
            NEWS TICKER - FIXED
@@ -397,174 +435,7 @@
         }
 
         /* ========================================
-           TOP NAV BAR - FIXED
-           ======================================== */
-        .top-nav-bar {
-            background: linear-gradient(135deg, #0A1628, #1a2a4a);
-            padding: 4px 0;
-            border-bottom: 2px solid var(--school-gold);
-            position: relative;
-            z-index: 100;
-        }
-        .top-nav-bar .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .top-nav-bar .nav-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .top-nav-bar .nav-left .welcome-text {
-            color: rgba(255,255,255,0.5);
-            font-size: 10px;
-            font-weight: 300;
-        }
-        .top-nav-bar .nav-left .welcome-text i { color: var(--school-gold); margin-right: 3px; }
-        .top-nav-bar .nav-links {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .top-nav-bar .nav-links a {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 12px;
-            border-radius: 50px;
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 10px;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-        .top-nav-bar .nav-links a:hover {
-            background: rgba(212,160,23,0.12);
-            color: var(--school-gold);
-            border-color: rgba(212,160,23,0.15);
-            transform: translateY(-2px);
-        }
-        .top-nav-bar .nav-links a.active {
-            background: rgba(212,160,23,0.18);
-            color: var(--school-gold);
-            border-color: var(--school-gold);
-        }
-        .top-nav-bar .nav-links a i { font-size: 11px; }
-        .top-nav-bar .nav-links a .badge {
-            background: var(--kenya-red);
-            color: white;
-            font-size: 6px;
-            padding: 1px 5px;
-            border-radius: 50px;
-            font-weight: 700;
-            animation: pulseBadge 1.5s infinite;
-        }
-
-        .top-nav-bar .nav-links a.enroll-now-link {
-            background: linear-gradient(135deg, #BB0000, #8B0000);
-            color: white;
-            font-weight: 700;
-            padding: 4px 14px;
-            border-radius: 50px;
-            font-size: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(187, 0, 0, 0.3);
-            border: 2px solid rgba(255,255,255,0.1);
-            animation: pulseBadgeRed 1.5s infinite;
-        }
-        .top-nav-bar .nav-links a.enroll-now-link i {
-            margin-right: 4px;
-            font-size: 11px;
-        }
-        .top-nav-bar .nav-links a.enroll-now-link:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 0 30px rgba(187, 0, 0, 0.5);
-            border-color: rgba(255,255,255,0.3);
-        }
-        .top-nav-bar .nav-links a.enroll-now-link::after { display: none; }
-
-        .top-nav-bar .nav-links a.student-portal-link-top {
-            background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD93D, #6BCB77, #4D96FF, #9B59B6);
-            background-size: 300% 300%;
-            color: white;
-            font-weight: 800;
-            padding: 4px 16px;
-            border-radius: 50px;
-            font-size: 10px;
-            transition: all 0.4s ease;
-            box-shadow: 0 0 15px rgba(255, 107, 107, 0.4), 0 0 40px rgba(255, 180, 70, 0.2);
-            animation: rainbowPulse 3s ease infinite, floatButton 2.5s ease-in-out infinite;
-            letter-spacing: 0.5px;
-            border: 2px solid rgba(255,255,255,0.2);
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        .top-nav-bar .nav-links a.student-portal-link-top::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-            animation: shimmer 4s ease-in-out infinite;
-        }
-        .top-nav-bar .nav-links a.student-portal-link-top i {
-            margin-right: 4px;
-            font-size: 12px;
-            animation: bounceIcon 2s ease-in-out infinite;
-        }
-        .top-nav-bar .nav-links a.student-portal-link-top:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 0 30px rgba(255, 107, 107, 0.6), 0 0 60px rgba(255, 180, 70, 0.3);
-            border-color: rgba(255,255,255,0.4);
-        }
-        .top-nav-bar .nav-links a.student-portal-link-top::after { display: none; }
-
-        .top-nav-bar .nav-right { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            flex-wrap: wrap;
-        }
-        .top-nav-bar .nav-right .contact-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            color: rgba(255,255,255,0.5);
-            font-size: 10px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            padding: 3px 10px;
-            border-radius: 50px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.04);
-            white-space: nowrap;
-        }
-        .top-nav-bar .nav-right .contact-link:hover {
-            color: white;
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(212,160,23,0.15);
-            transform: translateY(-2px);
-        }
-        .top-nav-bar .nav-right .contact-link i {
-            font-size: 12px;
-        }
-        .top-nav-bar .nav-right .contact-link .phone-icon {
-            color: var(--school-gold);
-        }
-        .top-nav-bar .nav-right .contact-link .whatsapp-icon {
-            color: var(--whatsapp-green);
-        }
-        .top-nav-bar .nav-right .divider {
-            color: rgba(255,255,255,0.1);
-            font-size: 12px;
-        }
-
-        /* ========================================
-           SECTION TABS - FIXED
+           SECTION TABS - FIXED (merged, no gap)
            ======================================== */
         .section-tabs {
             background: white;
@@ -576,6 +447,7 @@
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
+            margin: 0;
         }
         .section-tabs::-webkit-scrollbar { display: none; }
         .section-tabs .container {
@@ -625,14 +497,14 @@
         }
 
         /* ========================================
-           MAIN CONTENT WRAPPER - PUSHED DOWN
+           MAIN CONTENT WRAPPER - PUSHED DOWN (no extra spacing)
            ======================================== */
         .main-content-wrapper {
-            padding-top: 155px;
+            padding-top: 110px; /* header height */
         }
 
         /* ========================================
-           HERO SECTION
+           HERO SECTION (no top margin)
            ======================================== */
         .hero-section {
             min-height: calc(100vh - 62px);
@@ -1494,12 +1366,9 @@
             .main-header .nav-links a.student-portal-link { font-size: 14px; padding: 10px 20px; width: 100%; justify-content: center; }
             .main-header .nav-links a.enroll-now-link { width: 100%; justify-content: center; }
             .main-header .nav-links a.portal-link { width: 100%; justify-content: center; }
-            .top-nav-bar .container { flex-direction: column; align-items: stretch; gap: 6px; }
-            .top-nav-bar .nav-left { justify-content: center; }
-            .top-nav-bar .nav-links { justify-content: center; }
-            .top-nav-bar .nav-right { justify-content: center; flex-wrap: wrap; }
-            .top-nav-bar .nav-links a { font-size: 10px; padding: 3px 10px; }
-            .hero-section { padding: 80px 0 40px; }
+            .header-contacts { width: 100%; justify-content: center; margin: 4px 0 0; }
+            .main-content-wrapper { padding-top: 150px; }
+            .hero-section { padding: 60px 0 40px; }
             .hero-section h1 { font-size: 32px; }
             .hero-section .hero-description { font-size: 16px; }
             .hero-section .btn-group { flex-direction: column; align-items: center; }
@@ -1539,12 +1408,7 @@
             .main-header .logo-section h1 { font-size: 13px; }
             .main-header .logo-section .school-logo { width: 28px; height: 28px; }
             .main-header .logo-section .subtitle { font-size: 6px; }
-            .top-nav-bar .nav-links a { font-size: 8px; padding: 2px 6px; }
-            .top-nav-bar .nav-links a.enroll-now-link { font-size: 8px; padding: 2px 10px; }
-            .top-nav-bar .nav-links a.student-portal-link-top { font-size: 8px; padding: 2px 10px; }
-            .top-nav-bar .nav-right .contact-link { font-size: 8px; padding: 2px 6px; }
-            .top-nav-bar .nav-right .divider { display: none; }
-            .main-content-wrapper { padding-top: 145px; }
+            .main-content-wrapper { padding-top: 140px; }
             .hero-section h1 { font-size: 24px; }
             .hero-section .hero-description { font-size: 13px; }
             .section-tabs .tab-btn { font-size: 8px; padding: 3px 6px; }
@@ -1555,6 +1419,8 @@
             .news-item { padding: 20px 16px !important; min-height: 160px !important; }
             .news-item h4 { font-size: 17px !important; }
             .news-item p { font-size: 13px !important; }
+            .header-contacts .contact-link { font-size: 8px; padding: 2px 6px; }
+            .header-contacts .divider { display: none; }
         }
 
         /* ========================================
@@ -1640,7 +1506,7 @@
         <!-- Kenya Flag Strip -->
         <div class="kenya-flag-strip"></div>
 
-        <!-- ===== MAIN HEADER ===== -->
+        <!-- ===== MAIN HEADER (merged with top nav + phones) ===== -->
         <header class="main-header">
             <div class="container">
                 <div class="logo-section">
@@ -1651,15 +1517,29 @@
                     </div>
                 </div>
 
-                <!-- Desktop Navigation -->
-                <div class="nav-links" id="navLinks">
-                    <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                    <a href="fees.html"><i class="fas fa-coins"></i> Fees</a>
-                    <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
-                    <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
-                    <a href="portal.html" class="portal-link"><i class="fas fa-user-lock"></i> Admin</a>
-                    <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
-                    <a href="student-portal.html" class="student-portal-link"><i class="fas fa-user-graduate"></i> Student Portal</a>
+                <!-- Desktop Navigation + phone numbers -->
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <div class="nav-links" id="navLinks">
+                        <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+                        <a href="fees.html"><i class="fas fa-coins"></i> Fees</a>
+                        <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
+                        <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
+                        <a href="portal.html" class="portal-link"><i class="fas fa-user-lock"></i> Admin</a>
+                        <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
+                        <a href="student-portal.html" class="student-portal-link"><i class="fas fa-user-graduate"></i> Student Portal</a>
+                    </div>
+                    <!-- phone numbers -->
+                    <div class="header-contacts">
+                        <a href="tel:+254721556252" class="contact-link">
+                            <i class="fas fa-phone phone-icon"></i>
+                            <span>+254 721 556 252</span>
+                        </a>
+                        <span class="divider">|</span>
+                        <a href="https://wa.me/254740201441" target="_blank" class="contact-link">
+                            <i class="fab fa-whatsapp whatsapp-icon"></i>
+                            <span>+254 740 201 441</span>
+                        </a>
+                    </div>
                 </div>
 
                 <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
@@ -1668,9 +1548,7 @@
             </div>
         </header>
 
-        <!-- ===== NOTICE ALERT BAR - REMOVED ===== -->
-
-        <!-- ===== NEWS TICKER - FIXED ===== -->
+        <!-- ===== NEWS TICKER ===== -->
         <div class="news-ticker-section" id="newsTicker">
             <div class="container">
                 <div class="ticker-label"><span class="icon">📰</span> News</div>
@@ -1685,36 +1563,7 @@
             </div>
         </div>
 
-        <!-- ===== TOP NAV BAR - FIXED (Phone numbers included) ===== -->
-        <div class="top-nav-bar" id="topNavBar">
-            <div class="container">
-                <div class="nav-left">
-                    <span class="welcome-text"><i class="fas fa-graduation-cap"></i> Welcome to Changara Star Academy</span>
-                </div>
-                <div class="nav-links" id="topNavLinks">
-                    <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                    <a href="fees.html"><i class="fas fa-coins"></i> Fees <span class="badge">VIEW</span></a>
-                    <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
-                    <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
-                    <a href="portal.html" style="background:linear-gradient(135deg,#D4A017,#B8890A);color:#000;padding:4px 14px;border-radius:50px;font-weight:700;font-size:10px;border:1px solid rgba(255,255,255,0.1);"><i class="fas fa-user-lock"></i> Admin</a>
-                    <a href="admissions.html" class="enroll-now-link"><i class="fas fa-pen-fancy"></i> Enroll Now</a>
-                    <a href="student-portal.html" class="student-portal-link-top"><i class="fas fa-user-graduate"></i> Student Portal</a>
-                </div>
-                <div class="nav-right">
-                    <a href="tel:+254721556252" class="contact-link">
-                        <i class="fas fa-phone phone-icon"></i>
-                        <span>+254 721 556 252</span>
-                    </a>
-                    <span class="divider">|</span>
-                    <a href="https://wa.me/254740201441" target="_blank" class="contact-link">
-                        <i class="fab fa-whatsapp whatsapp-icon"></i>
-                        <span>+254 740 201 441</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== SECTION TABS - FIXED ===== -->
+        <!-- ===== SECTION TABS ===== -->
         <div class="section-tabs" id="sectionTabs">
             <div class="container">
                 <button class="tab-btn active" onclick="scrollToSection('slide-academics')"><span class="tab-icon">📚</span> Academics <span class="tab-badge">🔥</span></button>
