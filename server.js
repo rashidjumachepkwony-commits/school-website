@@ -2957,6 +2957,58 @@ app.post('/api/student/login', async (req, res) => {
   }
 });
 
+// ============================================
+// STUDENT CRUD API (for Express-served frontend)
+// ============================================
+
+// GET all students
+app.get('/api/students', async (req, res) => {
+  try {
+    const students = await Student.find({}, { attendance: 0 });
+    res.json({ success: true, students, totalMale: 0, totalFemale: 0 });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET single student
+app.get('/api/students/:studentId', async (req, res) => {
+  try {
+    const student = await Student.findOne({ studentId: req.params.studentId });
+    if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+    res.json({ success: true, student });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// PUT update student
+app.put('/api/students/:studentId', async (req, res) => {
+  try {
+    const { name, grade, pin } = req.body;
+    const student = await Student.findOne({ studentId: req.params.studentId });
+    if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+    if (name !== undefined) student.name = name;
+    if (grade !== undefined) student.grade = grade;
+    if (pin !== undefined) student.pin = pin;
+    await student.save();
+    res.json({ success: true, message: 'Student updated successfully!', student: { studentId: student.studentId, name: student.name, grade: student.grade } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// DELETE student
+app.delete('/api/students/:studentId', async (req, res) => {
+  try {
+    const student = await Student.findOneAndDelete({ studentId: req.params.studentId });
+    if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+    res.json({ success: true, message: 'Student deleted successfully!' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // GET today's student attendance (for admin/reports)
 app.get('/api/student/attendance/today', async (req, res) => {
   try {
