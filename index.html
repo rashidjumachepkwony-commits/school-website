@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🏫 Changara Star Academy - Excellence in Education</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>" />
+    <meta name="description" content="Changara Star Academy - Premier school in Changara Market, Teso North Sub-County, Busia County, Kenya." />
+    
+    <!-- ===== FONTS ===== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- ===== CSS ===== -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <style>
+        /* ========================================
+           ROOT VARIABLES
+           ======================================== */
+        :root {
+            --kenya-black: #000000;
+            --kenya-red: #BB0000;
+            --kenya-green: #006600;
+            --kenya-white: #FFFFFF;
+            --school-gold: #D4A017;
+            --school-gold-light: #F5C842;
+            --school-gold-dark: #B8890A;
+            --school-blue: #001F5C;
+            --school-blue-dark: #0A1628;
+            --font-primary: 'Playfair Display', serif;
+            --font-secondary: 'Poppins', sans-serif;
+        }
+
+        /* ========================================
+           RESET & BASE
+           ======================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: var(--font-secondary);
+            background: #f0f2f5;
+            color: #1a1a2e;
+            overflow-x: hidden;
+            line-height: 1.6;
+            padding-top: 100px; /* Increased to account for larger header */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ========================================
+           KENYAN FLAG STRIP - MADE THICKER
+           ======================================== */
+        .kenya-flag-strip {
+            height: 6px;
+            background: linear-gradient(to right, 
+                var(--kenya-black) 0%, var(--kenya-black) 20%,
+                var(--kenya-red) 20%, var(--kenya-red) 40%,
+                var(--kenya-green) 40%, var(--kenya-green) 60%,
+                var(--kenya-black) 60%, var(--kenya-black) 80%,
+                var(--kenya-red) 80%, var(--kenya-red) 100%
+            );
+            position: relative;
+            z-index: 1001;
+        }
+
+        /* ========================================
+           HEADER - LARGER, FIXED AT TOP
+           ======================================== */
+        .main-header {
+            background: rgba(10, 22, 40, 0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: white;
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 2px solid rgba(212, 160, 23, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        }
+        .main-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .main-header .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .main-header .school-icon {
+            font-size: 38px;
+            animation: float 3s ease-in-out infinite;
+        }
+        .main-header .logo-section .brand-text h1 {
+            font-family: var(--font-primary);
+            font-size: 26px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+        .main-header .logo-section .brand-text .subtitle {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            display: block;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            -webkit-text-fill-color: rgba(255,255,255,0.5);
+            font-weight: 300;
+        }
+        .main-header .nav-links {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .main-header .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            position: relative;
+        }
+        .main-header .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--school-gold);
+            transition: width 0.3s ease;
+        }
+        .main-header .nav-links a:hover::after,
+        .main-header .nav-links a.active::after {
+            width: 40%;
+        }
+        .main-header .nav-links a:hover {
+            color: white;
+        }
+        .main-header .nav-links a.active {
+            background: rgba(212, 160, 23, 0.12);
+            color: var(--school-gold);
+        }
+        .main-header .nav-links a.portal-link {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            font-weight: 700;
+            padding: 8px 22px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+        .main-header .nav-links a.portal-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.4);
+        }
+        .main-header .nav-links a.portal-link::after { display: none; }
+        .main-header .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        /* ========================================
+           NOTICE ALERT BAR
+           ======================================== */
+        .notice-alert-bar {
+            background: linear-gradient(135deg, var(--kenya-red), #8B0000);
+            color: white;
+            padding: 8px 0;
+            position: fixed;
+            top: 82px;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            border-bottom: 3px solid var(--school-gold);
+            display: none;
+            animation: slideDownNotice 0.6s ease forwards;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .notice-alert-bar.show { display: block; }
+        .notice-alert-bar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .notice-alert-bar .notice-icon {
+            font-size: 20px;
+            animation: pulseBell 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .notice-alert-bar .notice-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .notice-alert-bar .notice-content .badge {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            padding: 3px 14px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulseBadge 1.5s infinite;
+        }
+        .notice-alert-bar .notice-content .message {
+            font-size: 14px;
+            font-weight: 500;
+            flex: 1;
+        }
+        .notice-alert-bar .notice-content .message strong { color: var(--school-gold); }
+        .notice-alert-bar .notice-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .notice-alert-bar .notice-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        /* ========================================
+           NEWS TICKER - LARGER, COVERS WHITE SPACE
+           ======================================== */
+        .news-ticker-section {
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            color: white;
+            padding: 10px 0;
+            border-bottom: 3px solid var(--school-gold);
+            position: fixed;
+            top: 82px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+        }
+        .news-ticker-section.show-notice {
+            top: 118px;
+        }
+        .news-ticker-section .container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+        }
+        .news-ticker-section .ticker-label {
+            background: var(--kenya-red);
+            color: white;
+            padding: 4px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 1.5px;
+            flex-shrink: 0;
+            height: 36px;
+        }
+        .news-ticker-section .ticker-label .icon { font-size: 14px; }
+        .news-ticker-section .ticker-wrapper {
+            flex: 1;
+            overflow: hidden;
+            height: 36px;
+            position: relative;
+        }
+        .news-ticker-section .ticker-content {
+            position: absolute;
+            width: 100%;
+            animation: tickerScroll 16s infinite;
+        }
+        .news-ticker-section .ticker-content .ticker-item {
+            height: 36px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 15px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .news-ticker-section .ticker-content .ticker-item .tag {
+            background: rgba(255,255,255,0.15);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            margin-right: 10px;
+            color: var(--school-gold);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========================================
+           HERO SECTION - Adjusted for larger header
+           ======================================== */
+        .hero-section {
+            min-height: calc(100vh - 130px);
+            margin-top: 130px;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            padding: 60px 0;
+        }
+        
+        .hero-video-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .hero-video-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .hero-video-bg .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(10, 22, 40, 0.6) 50%, rgba(187, 0, 0, 0.3) 100%);
+            z-index: 1;
+        }
+        .hero-video-bg .video-overlay-kenya {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(187, 0, 0, 0.15) 50%, rgba(0, 102, 0, 0.15) 100%);
+            z-index: 2;
+        }
+        
+        .hero-section .hero-bg-pattern {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%);
+        }
+        .hero-section .hero-content {
+            position: relative;
+            z-index: 3;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .hero-flag-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 6px 20px 6px 6px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.15);
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease forwards;
+        }
+        .hero-flag-badge .flag-strip {
+            display: flex;
+            width: 36px;
+            height: 18px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .hero-flag-badge .flag-strip span { flex: 1; height: 100%; }
+        .hero-flag-badge .flag-strip .b { background: #000000; }
+        .hero-flag-badge .flag-strip .r { background: #BB0000; }
+        .hero-flag-badge .flag-strip .g { background: #006600; }
+        .hero-flag-badge .flag-strip .w { background: #FFFFFF; }
+        .hero-flag-badge .flag-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .hero-section h1 {
+            font-family: var(--font-primary);
+            font-size: 52px;
+            margin-bottom: 15px;
+            font-weight: 900;
+            line-height: 1.1;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1.2s ease forwards;
+        }
+        .hero-section h1 .highlight {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-section p {
+            font-size: 18px;
+            opacity: 0.9;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1.4s ease forwards;
+        }
+        .hero-section .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1.6s ease forwards;
+        }
+
+        .btn-scroll-down {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 35px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            animation: bounceArrow 2s infinite;
+        }
+        .btn-scroll-down:hover {
+            background: rgba(212, 160, 23, 0.25);
+            border-color: var(--school-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(212, 160, 23, 0.3);
+        }
+        .btn-scroll-down .arrow {
+            display: inline-block;
+            animation: arrowDown 1.5s infinite;
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: var(--school-gold);
+            transform: translateY(-3px);
+        }
+
+        .hero-video-play {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px 8px 8px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeInUp 2s ease forwards;
+        }
+        .hero-video-play:hover {
+            background: rgba(212, 160, 23, 0.2);
+            border-color: var(--school-gold);
+            transform: translateX(-50%) scale(1.05);
+        }
+        .hero-video-play .play-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--school-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--kenya-black);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .hero-video-play:hover .play-icon {
+            transform: scale(1.1);
+        }
+        .hero-video-play .play-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: rgba(255,255,255,0.3);
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .scroll-indicator .mouse {
+            width: 20px;
+            height: 30px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        .scroll-indicator .mouse .dot {
+            width: 3px;
+            height: 6px;
+            background: var(--school-gold);
+            border-radius: 2px;
+            margin-top: 4px;
+            animation: scrollDot 2s ease-in-out infinite;
+        }
+
+        /* ========================================
+           VIDEO MODAL
+           ======================================== */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .video-modal.show {
+            display: flex;
+        }
+        .video-modal .modal-content {
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+        }
+        .video-modal .modal-content video {
+            width: 100%;
+            display: block;
+            border-radius: 16px;
+        }
+        .video-modal .close-modal {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .video-modal .close-modal:hover {
+            background: var(--kenya-red);
+            transform: rotate(90deg);
+        }
+        .video-modal .modal-title {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 16px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ========================================
+           GALLERY SWIPER SECTION
+           ======================================== */
+        .gallery-section {
+            padding: 50px 0;
+            background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
+            scroll-margin-top: 50px;
+        }
+        .gallery-section .section-title {
+            font-family: var(--font-primary);
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+            color: white;
+        }
+        .gallery-section .section-title .highlight {
+            color: var(--school-gold);
+        }
+        .gallery-section .section-subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .gallery-swiper {
+            padding: 10px 0 30px;
+        }
+        .gallery-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .gallery-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .gallery-card .image-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 220px;
+        }
+        .gallery-card .image-wrapper img,
+        .gallery-card .image-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .gallery-card:hover .image-wrapper img,
+        .gallery-card:hover .image-wrapper video {
+            transform: scale(1.05);
+        }
+        .gallery-card .image-wrapper .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 30px 15px 15px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .gallery-card:hover .image-wrapper .overlay {
+            opacity: 1;
+        }
+        .gallery-card .image-wrapper .overlay .tag {
+            display: inline-block;
+            padding: 3px 14px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .gallery-card .gallery-content {
+            padding: 18px 20px;
+        }
+        .gallery-card .gallery-content h4 {
+            color: var(--school-blue-dark);
+            font-size: 16px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .gallery-card .gallery-content p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* ========================================
+           CONTENT CARDS SWIPER SECTION
+           ======================================== */
+        .content-cards-section {
+            padding: 60px 0;
+            background: #f0f2f5;
+            scroll-margin-top: 50px;
+        }
+        .content-cards-section .section-title {
+            font-family: var(--font-primary);
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+            color: var(--school-blue-dark);
+        }
+        .content-cards-section .section-title .highlight {
+            color: var(--school-gold);
+        }
+        .content-cards-section .section-subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .cards-swiper {
+            padding: 10px 0 30px;
+        }
+        .content-card {
+            background: white;
+            padding: 28px 20px;
+            border-radius: 18px;
+            text-align: center;
+            transition: all 0.4s ease;
+            border: 2px solid #e8ecf1;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+        .content-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--school-gold), var(--school-gold-light), var(--school-gold-dark));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .content-card:hover::before {
+            opacity: 1;
+        }
+        .content-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--school-gold);
+            box-shadow: 0 16px 50px rgba(212, 160, 23, 0.15);
+        }
+        .content-card .icon {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 10px;
+            background: rgba(212, 160, 23, 0.08);
+            width: 65px;
+            height: 65px;
+            line-height: 65px;
+            border-radius: 50%;
+            margin-left: auto;
+            margin-right: auto;
+            transition: all 0.4s ease;
+        }
+        .content-card:hover .icon {
+            background: var(--school-gold);
+            transform: scale(1.1) rotate(-5deg);
+        }
+        .content-card h3 {
+            color: var(--school-blue-dark);
+            font-size: 17px;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        .content-card p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .content-card .badge {
+            display: inline-block;
+            padding: 3px 14px;
+            border-radius: 50px;
+            font-size: 9px;
+            font-weight: 700;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .card-cta {
+            margin-top: 10px;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 11px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 160, 23, 0.25);
+        }
+        .content-card:hover .card-cta {
+            transform: scale(1.05);
+        }
+
+        /* Card variants */
+        .card-academics {
+            border-color: var(--school-gold) !important;
+            background: linear-gradient(135deg, #ffffff, #fff8e7) !important;
+        }
+        .card-academics .badge {
+            background: var(--kenya-red);
+            color: white;
+            animation: pulseBadgeRed 1.5s infinite;
+        }
+        .card-academics .card-cta {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+        }
+        .card-admissions {
+            border-color: var(--kenya-green) !important;
+            background: linear-gradient(135deg, #ffffff, #f0fff4) !important;
+        }
+        .card-admissions .badge {
+            background: var(--kenya-green);
+            color: white;
+            animation: pulseBadgeGreen 1.8s infinite;
+        }
+        .card-admissions .card-cta {
+            background: linear-gradient(135deg, var(--kenya-green), #004d00);
+            color: white;
+        }
+        .card-facilities {
+            border-color: #17a2b8 !important;
+            background: linear-gradient(135deg, #ffffff, #f0faff) !important;
+        }
+        .card-facilities .badge {
+            background: #17a2b8;
+            color: white;
+            animation: pulseBadgeBlue 2s infinite;
+        }
+        .card-facilities .card-cta {
+            background: linear-gradient(135deg, #17a2b8, #0d6e7a);
+            color: white;
+        }
+        .card-performance {
+            border-color: #6f42c1 !important;
+            background: linear-gradient(135deg, #ffffff, #f8f0ff) !important;
+        }
+        .card-performance .badge {
+            background: #6f42c1;
+            color: white;
+        }
+        .card-performance .card-cta {
+            background: linear-gradient(135deg, #6f42c1, #4a2a8a);
+            color: white;
+        }
+        .card-parents {
+            border-color: #fd7e14 !important;
+            background: linear-gradient(135deg, #ffffff, #fff5eb) !important;
+        }
+        .card-parents .badge {
+            background: #fd7e14;
+            color: white;
+        }
+        .card-parents .card-cta {
+            background: linear-gradient(135deg, #fd7e14, #c96a0a);
+            color: white;
+        }
+        .card-downloads {
+            border-color: #20c997 !important;
+            background: linear-gradient(135deg, #ffffff, #f0fff8) !important;
+        }
+        .card-downloads .badge {
+            background: #20c997;
+            color: white;
+        }
+        .card-downloads .card-cta {
+            background: linear-gradient(135deg, #20c997, #128f6e);
+            color: white;
+        }
+        .card-fees {
+            border-color: #dc3545 !important;
+            background: linear-gradient(135deg, #ffffff, #fff0f0) !important;
+        }
+        .card-fees .badge {
+            background: #dc3545;
+            color: white;
+            animation: pulseBadgeRed 2.2s infinite;
+        }
+        .card-fees .card-cta {
+            background: linear-gradient(135deg, #dc3545, #a71d2a);
+            color: white;
+        }
+
+        /* ========================================
+           SWIPER CUSTOM STYLES
+           ======================================== */
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: var(--school-gold) !important;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 50% !important;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .swiper-button-next:hover,
+        .swiper-button-prev:hover {
+            background: rgba(212, 160, 23, 0.2);
+            border-color: var(--school-gold);
+        }
+        .swiper-button-next::after,
+        .swiper-button-prev::after {
+            font-size: 14px !important;
+        }
+        .swiper-pagination-bullet {
+            background: rgba(255,255,255,0.2) !important;
+            width: 10px !important;
+            height: 10px !important;
+        }
+        .swiper-pagination-bullet-active {
+            background: var(--school-gold) !important;
+        }
+
+        .cards-swiper .swiper-pagination-bullet {
+            background: rgba(0,0,0,0.2) !important;
+        }
+        .cards-swiper .swiper-pagination-bullet-active {
+            background: var(--school-gold) !important;
+        }
+        .cards-swiper .swiper-button-next,
+        .cards-swiper .swiper-button-prev {
+            color: var(--school-gold) !important;
+            background: rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .cards-swiper .swiper-button-next:hover,
+        .cards-swiper .swiper-button-prev:hover {
+            background: rgba(212, 160, 23, 0.15);
+            border-color: var(--school-gold);
+        }
+
+        /* ========================================
+           BADGE ANIMATIONS
+           ======================================== */
+        @keyframes pulseBadgeRed {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(187, 0, 0, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(187, 0, 0, 0.7); }
+        }
+        @keyframes pulseBadgeGreen {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(0, 102, 0, 0.7); }
+        }
+        @keyframes pulseBadgeBlue {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 4px 30px rgba(23, 162, 184, 0.7); }
+        }
+
+        /* ========================================
+           FEATURES
+           ======================================== */
+        .features-section {
+            padding: 60px 0;
+            background: linear-gradient(135deg, #000000, #1a0000, #0a1628);
+            position: relative;
+            overflow: hidden;
+            scroll-margin-top: 50px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .feature-item {
+            text-align: center;
+            padding: 25px 15px;
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s ease;
+        }
+        .feature-item:hover {
+            transform: translateY(-4px);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(212, 160, 23, 0.15);
+        }
+        .feature-item .icon { font-size: 36px; display: block; margin-bottom: 10px; }
+        .feature-item h4 {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .feature-item p {
+            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .read-more-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 4px 16px;
+            background: transparent;
+            color: var(--school-gold);
+            border: 2px solid var(--school-gold);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 11px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .read-more-btn:hover {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            transform: translateX(4px);
+        }
+        .read-more-btn i {
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+        .read-more-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* ========================================
+           STATS
+           ======================================== */
+        .stats-section {
+            padding: 60px 0;
+            background: linear-gradient(135deg, var(--kenya-black), var(--school-blue-dark));
+            position: relative;
+            overflow: hidden;
+            scroll-margin-top: 50px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .stat-item {
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+        }
+        .stat-item:hover {
+            background: rgba(255,255,255,0.06);
+            transform: scale(1.02);
+        }
+        .stat-item h3 {
+            font-family: var(--font-primary);
+            font-size: 34px;
+            color: var(--school-gold);
+            margin-bottom: 3px;
+            font-weight: 700;
+        }
+        .stat-item p {
+            font-size: 13px;
+            opacity: 0.6;
+            color: white;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* ========================================
+           NEWS
+           ======================================== */
+        .news-section {
+            padding: 60px 0;
+            background: #f0f2f5;
+            scroll-margin-top: 50px;
+        }
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .news-item {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border-left: 4px solid var(--school-gold);
+            transition: all 0.3s ease;
+        }
+        .news-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+        }
+        .news-item h4 {
+            color: var(--school-blue-dark);
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .news-item p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .news-item .date {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            display: block;
+        }
+
+        /* ========================================
+           FOOTER
+           ======================================== */
+        .main-footer {
+            background: var(--kenya-black);
+            color: white;
+            padding: 25px 0 12px;
+            position: relative;
+        }
+        .main-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--kenya-black), var(--kenya-red), var(--kenya-green), var(--kenya-black));
+        }
+        .main-footer .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .main-footer .footer-info h3 {
+            font-family: var(--font-primary);
+            font-size: 18px;
+            margin-bottom: 6px;
+            color: var(--school-gold);
+        }
+        .main-footer .footer-info p {
+            color: rgba(255,255,255,0.4);
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .main-footer .footer-info .ministry-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.04);
+            padding: 4px 14px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.35);
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .main-footer .footer-info .ministry-badge i {
+            color: var(--school-gold);
+            margin-right: 6px;
+        }
+        .main-footer .footer-links h4 {
+            color: white;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .main-footer .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .main-footer .footer-links a {
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        .main-footer .footer-links a:hover {
+            color: var(--school-gold);
+            padding-left: 4px;
+        }
+        .main-footer .footer-bottom {
+            text-align: center;
+            padding-top: 12px;
+            color: rgba(255,255,255,0.2);
+            font-size: 11px;
+        }
+        .main-footer .footer-social {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .main-footer .footer-social a {
+            color: rgba(255,255,255,0.25);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        .main-footer .footer-social a:hover {
+            color: var(--school-gold);
+            border-color: var(--school-gold);
+            transform: translateY(-2px);
+        }
+
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
+        @keyframes scrollDot {
+            0%, 100% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(12px); opacity: 0.3; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounceArrow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+        @keyframes arrowDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(5px); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes slideDownNotice {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulseBell {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes tickerScroll {
+            0%, 20% { transform: translateY(0); }
+            25%, 45% { transform: translateY(-36px); }
+            50%, 70% { transform: translateY(-72px); }
+            75%, 95% { transform: translateY(-108px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 768px) {
+            .main-header .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                padding: 15px 0;
+                gap: 5px;
+            }
+            .main-header .nav-links.show { display: flex; }
+            .main-header .mobile-menu-btn { display: block; }
+            
+            .main-header .logo-section .brand-text h1 {
+                font-size: 20px;
+            }
+            .main-header .school-icon {
+                font-size: 30px;
+            }
+            
+            body { padding-top: 120px; }
+            .notice-alert-bar { top: 100px; }
+            .news-ticker-section { top: 100px; }
+            .hero-section { margin-top: 150px; }
+
+            .hero-section h1 { font-size: 32px; }
+            .hero-section p { font-size: 16px; }
+            .hero-section .btn-group { flex-direction: column; align-items: center; }
+            .btn-scroll-down, .btn-outline { width: 100%; justify-content: center; }
+
+            .gallery-section .section-title { font-size: 26px; }
+            .content-cards-section .section-title { font-size: 26px; }
+            
+            .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
+            .notice-alert-bar .container { flex-direction: column; text-align: center; }
+            .gallery-card .image-wrapper { height: 180px; }
+            
+            .news-ticker-section .ticker-label { font-size: 10px; padding: 4px 14px; height: 32px; }
+            .news-ticker-section .ticker-wrapper { height: 32px; }
+            .news-ticker-section .ticker-content .ticker-item { height: 32px; font-size: 13px; }
+            
+            .video-modal { padding: 20px; }
+            .video-modal .close-modal { top: -40px; font-size: 20px; width: 36px; height: 36px; }
+            
+            .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
+            .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
+            .hero-video-play .play-text { font-size: 10px; }
+
+            .swiper-button-next,
+            .swiper-button-prev {
+                display: none !important;
+            }
+            
+            .features-grid { grid-template-columns: 1fr 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .news-grid { grid-template-columns: 1fr; }
+            
+            .main-header .nav-links a { font-size: 13px; padding: 6px 14px; }
+            .main-header .nav-links a.portal-link { font-size: 12px; padding: 6px 18px; }
+        }
+
+        @media (max-width: 480px) {
+            .features-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .hero-section h1 { font-size: 26px; }
+            .gallery-section .section-title { font-size: 22px; }
+            .content-cards-section .section-title { font-size: 22px; }
+            
+            .main-header .logo-section .brand-text h1 { font-size: 17px; }
+            .main-header .school-icon { font-size: 24px; }
+            .main-header .logo-section .brand-text .subtitle { font-size: 9px; }
+            
+            body { padding-top: 105px; }
+            .notice-alert-bar { top: 90px; }
+            .news-ticker-section { top: 90px; }
+            .hero-section { margin-top: 130px; }
+            
+            .hero-video-play { bottom: 60px; }
+            .gallery-card .image-wrapper { height: 200px; }
+            
+            .news-ticker-section .ticker-label { font-size: 8px; padding: 3px 10px; height: 28px; }
+            .news-ticker-section .ticker-wrapper { height: 28px; }
+            .news-ticker-section .ticker-content .ticker-item { height: 28px; font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NOTICE ALERT BAR ===== -->
+    <div class="notice-alert-bar" id="noticeAlertBar">
+        <div class="container">
+            <div class="notice-icon">
+                <span class="bell">🔔</span>
+                <span style="font-weight:700;font-size:11px;">ALERT</span>
+            </div>
+            <div class="notice-content">
+                <span class="badge">⚠️ STAFF NOTICE</span>
+                <span class="message" id="noticeMessage">
+                    <strong>📢 Important:</strong> Staff meeting on Friday at 4:00 PM in the staff room.
+                </span>
+            </div>
+            <button class="notice-close" onclick="closeNotice()">✕</button>
+        </div>
+    </div>
+
+    <!-- ===== NEWS TICKER - LARGER ===== -->
+    <div class="news-ticker-section" id="newsTicker">
+        <div class="container">
+            <div class="ticker-label">
+                <span class="icon">📰</span> NEWS
+            </div>
+            <div class="ticker-wrapper">
+                <div class="ticker-content" id="tickerContent">
+                    <div class="ticker-item">
+                        <span class="tag">🎉 NEW</span>
+                        School opens Term 3 on 1st September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">🏆 EVENT</span>
+                        Sports Day on 15th September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">📚 MEETING</span>
+                        Parents' Meeting on 20th September 2026
+                    </div>
+                    <div class="ticker-item">
+                        <span class="tag">📢 ANNOUNCEMENT</span>
+                        New computer lab now open!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- HEADER - LARGER -->
+    <!-- ======================================== -->
+    <header class="main-header">
+        <div class="kenya-flag-strip"></div>
+        <div class="container">
+            <div class="logo-section">
+                <span class="school-icon">🏫</span>
+                <div class="brand-text">
+                    <h1>Changara Star Academy</h1>
+                    <span class="subtitle">Assurance to Excellence</span>
+                </div>
+            </div>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html" class="active">Home</a>
+                <a href="about.html">About</a>
+                <a href="portal.html" class="portal-link">🔐 Portal</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </header>
+
+    <!-- ======================================== -->
+    <!-- HERO SECTION -->
+    <!-- ======================================== -->
+    <section class="hero-section" id="slide-hero">
+        <div class="hero-video-bg">
+            <video id="heroVideo" autoplay muted loop playsinline poster="/images/school-compound.jpg">
+                <source src="/videos/school-hero.mp4" type="video/mp4">
+            </video>
+            <div class="video-overlay"></div>
+            <div class="video-overlay-kenya"></div>
+        </div>
+
+        <div class="hero-bg-pattern"></div>
+
+        <div class="hero-video-play" onclick="openVideoModal()">
+            <div class="play-icon"><i class="fas fa-play"></i></div>
+            <span class="play-text">▶ Watch Our Story</span>
+        </div>
+
+        <div class="hero-content">
+            <div class="hero-flag-badge">
+                <div class="flag-strip">
+                    <span class="b"></span><span class="r"></span>
+                    <span class="g"></span><span class="w"></span>
+                </div>
+                <span class="flag-text">🇰🇪 Proudly Kenyan</span>
+            </div>
+            <h1 id="heroTitle">
+                Welcome to <br><span class="highlight">Changara Star Academy</span>
+            </h1>
+            <p id="heroSubtitle">
+                Nurturing young minds through quality education, discipline, innovation, and strong moral values.
+                We provide a safe and supportive learning environment where every child is encouraged to discover
+                their potential and achieve academic excellence.
+            </p>
+            <div class="btn-group">
+                <button class="btn-scroll-down" onclick="scrollToContent()">
+                    <span>Scroll Down</span>
+                    <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+                </button>
+                <a href="admissions.html" class="btn-outline">
+                    <i class="fas fa-pen-fancy"></i> Apply Now
+                </a>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <div class="mouse"><div class="dot"></div></div>
+            <span>Scroll</span>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
+    <!-- VIDEO MODAL -->
+    <!-- ======================================== -->
+    <div class="video-modal" id="videoModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeVideoModal()">✕</button>
+            <video id="modalVideo" controls autoplay>
+                <source src="/videos/school-hero.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="modal-title">🏫 Changara Star Academy - Our Story</div>
+        </div>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- GALLERY SWIPER SECTION -->
+    <!-- ======================================== -->
+    <section class="gallery-section" id="slide-gallery">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">🖼️ Our <span class="highlight">Gallery</span></h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Explore our school facilities, activities, and events</p>
+
+            <div class="swiper gallery-swiper" data-aos="fade-up" data-aos-delay="200">
+                <div class="swiper-wrapper" id="gallerySwiperWrapper">
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/school-compound.jpg" alt="School Compound">
+                                <div class="overlay">
+                                    <span class="tag">🏫 Facilities</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>School Compound</h4>
+                                <p>The beautiful Changara Star Academy compound showcasing our modern facilities.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/ecde-section.jpg" alt="ECDE Section">
+                                <div class="overlay">
+                                    <span class="tag">🧸 ECDE</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>E.C.D.E Section</h4>
+                                <p>Our Early Childhood Development Education section where young learners begin their journey.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/classroom-learning.jpg" alt="Classroom Learning">
+                                <div class="overlay">
+                                    <span class="tag">📚 Academics</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>Classroom Learning</h4>
+                                <p>Pupils engaged in active learning in our well-equipped classrooms.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/computer-lab.jpg" alt="Computer Lab">
+                                <div class="overlay">
+                                    <span class="tag">💻 Technology</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>Computer Lab</h4>
+                                <p>Students learning essential computer skills in our modern computer laboratory.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/sports-day.jpg" alt="Sports Day">
+                                <div class="overlay">
+                                    <span class="tag">🏆 Sports</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>Sports Day</h4>
+                                <p>Students participating in various sports activities during our annual sports day.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="gallery-card">
+                            <div class="image-wrapper">
+                                <img src="/images/graduation.jpg" alt="Graduation Ceremony">
+                                <div class="overlay">
+                                    <span class="tag">🎓 Events</span>
+                                </div>
+                            </div>
+                            <div class="gallery-content">
+                                <h4>Graduation Ceremony</h4>
+                                <p>Celebrating the achievements of our graduating students in a colorful ceremony.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-pagination"></div>
+            </div>
+
+            <div style="text-align:center;margin-top:10px;" data-aos="fade-up">
+                <a href="gallery.html" class="btn" style="padding:12px 35px;border-radius:50px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--school-gold),var(--school-gold-dark));color:var(--kenya-black);transition:all 0.3s ease;box-shadow:0 4px 20px rgba(212,160,23,0.3);">
+                    <i class="fas fa-images"></i> View Full Gallery
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
+    <!-- CONTENT CARDS SWIPER SECTION -->
+    <!-- ======================================== -->
+    <section class="content-cards-section" id="slide-content">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">📚 Explore <span class="highlight">Our School</span></h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Discover everything about Changara Star Academy</p>
+
+            <div class="swiper cards-swiper" data-aos="fade-up" data-aos-delay="200">
+                <div class="swiper-wrapper" id="cardsSwiperWrapper">
+                    <div class="swiper-slide">
+                        <div class="content-card card-academics" onclick="window.location.href='academics.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-red); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 1.5s infinite; box-shadow: 0 4px 20px rgba(187, 0, 0, 0.5);">
+                                🔥 NEW
+                            </div>
+                            <span class="icon">📚</span>
+                            <h3>Academics</h3>
+                            <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📖 Playgroup to Grade 6 • CBC Curriculum</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Qualified Teachers</span> • <span>✅ Modern Facilities</span> • <span>✅ CBC</span>
+                            </div>
+                            <span class="badge">📢 Explore</span>
+                            <div class="card-cta">👆 Click to Explore</div>
+                        </div>
+                    </div>
+
+                    <div class="swiper-slide">
+                        <div class="content-card card-admissions" onclick="window.location.href='admissions.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: var(--kenya-green); color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeGreen 1.8s infinite; box-shadow: 0 4px 20px rgba(0, 102, 0, 0.4);">
+                                📢 ENROLLING
+                            </div>
+                            <span class="icon">📝</span>
+                            <h3>Admissions</h3>
+                            <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">📋 Open • Playgroup to Grade 6</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Simple Process</span> • <span>✅ Affordable Fees</span> • <span>✅ Quality</span>
+                            </div>
+                            <span class="badge">📢 Apply Now</span>
+                            <div class="card-cta">👆 Apply Now</div>
+                        </div>
+                    </div>
+
+                    <div class="swiper-slide">
+                        <div class="content-card card-facilities" onclick="window.location.href='facilities.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: #17a2b8; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeBlue 2s infinite; box-shadow: 0 4px 20px rgba(23, 162, 184, 0.4);">
+                                🏫 MODERN
+                            </div>
+                            <span class="icon">🏫</span>
+                            <h3>School Facilities</h3>
+                            <p style="font-weight: 600; color: #1a1a2e; font-size: 13px;">🏗️ Modern Classrooms • Computer Lab • Library</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Safe Environment</span> • <span>✅ Sports Facilities</span> • <span>✅ Meals</span>
+                            </div>
+                            <span class="badge">🏗️ Explore</span>
+                            <div class="card-cta">👆 View Facilities</div>
+                        </div>
+                    </div>
+
+                    <div class="swiper-slide">
+                        <div class="content-card card-performance" onclick="window.location.href='performance.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: #6f42c1; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(111, 66, 193, 0.4);">
+                                🏆 EXCELLENCE
+                            </div>
+                            <span class="icon">🏆</span>
+                            <h3>Performance</h3>
+                            <p id="displayPerformance" style="font-weight: 500;">Excellent academic performance in national examinations with top-performing students.</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Top Grades</span> • <span>✅ National Exams</span> • <span>✅ Track Record</span>
+                            </div>
+                            <span class="badge">🏆 Results</span>
+                            <div class="card-cta">👆 See Results</div>
+                        </div>
+                    </div>
+
+                    <div class="swiper-slide">
+                        <div class="content-card card-parents" onclick="window.location.href='parents-corner.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: #fd7e14; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(253, 126, 20, 0.4);">
+                                👨‍👩‍👧‍👦 FAMILY
+                            </div>
+                            <span class="icon">👨‍👩‍👧‍👦</span>
+                            <h3>Parents Corner</h3>
+                            <p id="displayParents" style="font-weight: 500;">Important information for parents including school calendar, policies, homework guidelines, and communication.</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Calendar</span> • <span>✅ Policies</span> • <span>✅ Communication</span>
+                            </div>
+                            <span class="badge">📋 Info</span>
+                            <div class="card-cta">👆 View Info</div>
+                        </div>
+                    </div>
+
+                    <div class="swiper-slide">
+                        <div class="content-card card-downloads" onclick="window.location.href='downloads.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: #20c997; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; box-shadow: 0 4px 20px rgba(32, 201, 151, 0.4);">
+                                📥 DOWNLOAD
+                            </div>
+                            <span class="icon">📄</span>
+                            <h3>Downloads</h3>
+                            <p id="displayDownloads" style="font-weight: 500;">Download admission forms, school calendar, fee structure, newsletters, and other important documents.</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Forms</span> • <span>✅ Calendar</span> • <span>✅ Documents</span>
+                            </div>
+                            <span class="badge">📥 Get</span>
+                            <div class="card-cta">👆 Download</div>
+                        </div>
+                    </div>
+
+                    <div class="swiper-slide">
+                        <div class="content-card card-fees" onclick="window.location.href='fees.html'">
+                            <div style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 50px; animation: pulseBadgeRed 2.2s infinite; box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);">
+                                💰 AFFORDABLE
+                            </div>
+                            <span class="icon">💰</span>
+                            <h3>Fees Structure</h3>
+                            <p id="displayFees" style="font-weight: 500;">View our competitive school fees structure for all grades including day scholars and boarding options.</p>
+                            <div style="margin: 8px 0; font-size: 11px; color: #555; line-height: 1.6;">
+                                <span>✅ Affordable</span> • <span>✅ Day Scholars</span> • <span>✅ Boarding</span>
+                            </div>
+                            <span class="badge">💰 View</span>
+                            <div class="card-cta">👆 View Fees</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
+    <!-- FEATURES SECTION -->
+    <!-- ======================================== -->
+    <section class="features-section" id="slide-features">
+        <div class="container">
+            <h2 class="section-title light" data-aos="fade-up">🌟 Why <span style="color:var(--school-gold);">Choose Us</span></h2>
+            <p class="section-subtitle light" data-aos="fade-up" data-aos-delay="100">
+                We provide holistic education that nurtures talent and builds character for a successful future.
+            </p>
+            <div class="features-grid" id="featuresGrid">
+                <div class="feature-item" data-aos="zoom-in" data-aos-delay="100">
+                    <span class="icon">👨‍🏫</span>
+                    <h4>Qualified Teachers</h4>
+                    <p>Our dedicated and experienced teachers are committed to excellence in teaching and learning.</p>
+                    <a href="about.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="feature-item" data-aos="zoom-in" data-aos-delay="200">
+                    <span class="icon">🏆</span>
+                    <h4>Excellence in Performance</h4>
+                    <p>We consistently produce top-performing students in national examinations and co-curricular activities.</p>
+                    <a href="performance.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="feature-item" data-aos="zoom-in" data-aos-delay="300">
+                    <span class="icon">🏫</span>
+                    <h4>Modern Facilities</h4>
+                    <p>Our school is equipped with modern classrooms, laboratories, library, and sports facilities.</p>
+                    <a href="facilities.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="feature-item" data-aos="zoom-in" data-aos-delay="400">
+                    <span class="icon">💡</span>
+                    <h4>Innovative Learning</h4>
+                    <p>We use modern teaching methods including technology integration and hands-on learning experiences.</p>
+                    <a href="academics.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
+    <!-- STATS SECTION -->
+    <!-- ======================================== -->
+    <section class="stats-section" id="slide-stats">
+        <div class="container">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-item" data-aos="flip-up" data-aos-delay="100">
+                    <h3 id="stat1Number">500+</h3>
+                    <p>Students</p>
+                </div>
+                <div class="stat-item" data-aos="flip-up" data-aos-delay="200">
+                    <h3 id="stat2Number">50+</h3>
+                    <p>Staff Members</p>
+                </div>
+                <div class="stat-item" data-aos="flip-up" data-aos-delay="300">
+                    <h3 id="stat3Number">98%</h3>
+                    <p>Attendance Rate</p>
+                </div>
+                <div class="stat-item" data-aos="flip-up" data-aos-delay="400">
+                    <h3 id="stat4Number">15+</h3>
+                    <p>Years of Excellence</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
+    <!-- NEWS SECTION -->
+    <!-- ======================================== -->
+    <section class="news-section" id="slide-news">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">📰 Latest <span class="highlight">News</span></h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Stay updated with our latest news and events</p>
+            <div class="news-grid" id="newsGrid">
+                <div class="news-item" data-aos="fade-up" data-aos-delay="100">
+                    <h4>📅 Term 3 Opening</h4>
+                    <p>School will open for Term 3 on 1st September 2026. All students are expected to report by 7:30 AM.</p>
+                    <span class="date">Posted: Recently</span>
+                    <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="news-item" data-aos="fade-up" data-aos-delay="200">
+                    <h4>🏆 Sports Day</h4>
+                    <p>The annual Sports Day will be held on 15th September 2026. Parents are invited to attend.</p>
+                    <span class="date">Posted: Recently</span>
+                    <a href="events.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="news-item" data-aos="fade-up" data-aos-delay="300">
+                    <h4>📚 Parents' Meeting</h4>
+                    <p>There will be a parents' meeting on 20th September 2026 at 9:00 AM in the school hall.</p>
+                    <span class="date">Posted: Recently</span>
+                    <a href="parents-corner.html" class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
+    <!-- FOOTER -->
+    <!-- ======================================== -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>🏫 Changara Star Academy</h3>
+                    <p>Changara Market, Teso North Sub-County, Busia County, Kenya</p>
+                    <p>📞 +254 721 556 252 | 📧 starchangara@gmail.com</p>
+                    <div class="footer-social">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="ministry-badge">
+                        <i class="fas fa-certificate"></i> Registered under Ministry of Education, Kenya
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">🏠 Home</a>
+                    <a href="about.html">📖 About Us</a>
+                    <a href="portal.html">🔐 Portal</a>
+                    <a href="admissions.html">📝 Admissions</a>
+                    <a href="contact.html">📞 Contact</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <a href="gallery.html">🖼️ Gallery</a>
+                    <a href="events.html">📰 Events</a>
+                    <a href="downloads.html">📄 Downloads</a>
+                    <a href="fees.html">💰 Fees</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Changara Star Academy. All rights reserved. | <span style="color:var(--school-gold);">🇰🇪 Proudly Kenyan</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ======================================== -->
+    <!-- SCRIPTS -->
+    <!-- ======================================== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <script>
+        // ============================================
+        // INITIALIZE AOS
+        // ============================================
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 60,
+            easing: 'ease-in-out'
+        });
+
+        // ============================================
+        // MOBILE MENU
+        // ============================================
+        function toggleMobileMenu() {
+            const nav = document.getElementById('navLinks');
+            if (nav) nav.classList.toggle('show');
+        }
+
+        // ============================================
+        // SCROLL TO CONTENT
+        // ============================================
+        function scrollToContent() {
+            const contentSection = document.getElementById('slide-content');
+            if (contentSection) {
+                const offset = 150;
+                const top = contentSection.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({ top: top, behavior: 'smooth' });
+            }
+        }
+
+        // ============================================
+        // NOTICE ALERT
+        // ============================================
+        function closeNotice() {
+            const bar = document.getElementById('noticeAlertBar');
+            bar.classList.remove('show');
+            localStorage.setItem('noticeClosed', 'true');
+            const ticker = document.getElementById('newsTicker');
+            if (ticker) {
+                ticker.style.top = '82px';
+            }
+        }
+
+        function showNotice(message) {
+            const bar = document.getElementById('noticeAlertBar');
+            const msgEl = document.getElementById('noticeMessage');
+            if (message) {
+                msgEl.innerHTML = message;
+            }
+            bar.classList.add('show');
+            localStorage.removeItem('noticeClosed');
+            const ticker = document.getElementById('newsTicker');
+            if (ticker) {
+                ticker.style.top = '118px';
+            }
+        }
+
+        function checkNoticeStatus() {
+            const closed = localStorage.getItem('noticeClosed');
+            const bar = document.getElementById('noticeAlertBar');
+            const ticker = document.getElementById('newsTicker');
+            if (!closed) {
+                bar.classList.add('show');
+                if (ticker) {
+                    ticker.style.top = '118px';
+                }
+            }
+        }
+        checkNoticeStatus();
+
+        // ============================================
+        // VIDEO MODAL
+        // ============================================
+        function openVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('modalVideo');
+            modal.classList.add('show');
+            video.play();
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('modalVideo');
+            modal.classList.remove('show');
+            video.pause();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeVideoModal();
+            }
+        });
+
+        document.getElementById('videoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVideoModal();
+            }
+        });
+
+        // ============================================
+        // SWIPER INITIALIZATION
+        // ============================================
+        let gallerySwiper, cardsSwiper;
+
+        function initSwipers() {
+            gallerySwiper = new Swiper('.gallery-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 4000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: '.gallery-swiper .swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.gallery-swiper .swiper-button-next',
+                    prevEl: '.gallery-swiper .swiper-button-prev',
+                },
+                breakpoints: {
+                    640: { slidesPerView: 1 },
+                    768: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 },
+                },
+            });
+
+            cardsSwiper = new Swiper('.cards-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: '.cards-swiper .swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.cards-swiper .swiper-button-next',
+                    prevEl: '.cards-swiper .swiper-button-prev',
+                },
+                breakpoints: {
+                    640: { slidesPerView: 1 },
+                    768: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 },
+                },
+            });
+        }
+
+        // ============================================
+        // LOAD CMS CONTENT
+        // ============================================
+        function stripHtml(html) {
+            if (!html) return '';
+            const tmp = document.createElement('DIV');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        async function loadWebsiteContent() {
+            try {
+                const response = await fetch('/api/content');
+                const data = await response.json();
+                if (data.success) {
+                    const c = data.content;
+
+                    if (c.heroTitle) {
+                        document.getElementById('heroTitle').innerHTML = c.heroTitle;
+                    }
+                    if (c.heroSubtitle) {
+                        document.getElementById('heroSubtitle').textContent = c.heroSubtitle;
+                    }
+
+                    const cardIds = [
+                        'displayPerformance', 'displayParents', 'displayDownloads', 'displayFees'
+                    ];
+
+                    const cmsData = [
+                        c.performanceKcpe, c.parentsCalendar, c.downloads, c.feesContent
+                    ];
+
+                    cardIds.forEach((id, index) => {
+                        const el = document.getElementById(id);
+                        if (el && cmsData[index]) {
+                            el.textContent = stripHtml(cmsData[index]);
+                        }
+                    });
+
+                    if (c.gallery && c.gallery.length > 0) {
+                        const wrapper = document.getElementById('gallerySwiperWrapper');
+                        wrapper.innerHTML = '';
+                        c.gallery.forEach((item) => {
+                            const slide = document.createElement('div');
+                            slide.className = 'swiper-slide';
+                            
+                            let mediaHtml = '';
+                            if (item.type === 'video') {
+                                mediaHtml = `<video src="${item.file}" muted loop playsinline></video>`;
+                            } else {
+                                mediaHtml = `<img src="${item.file}" alt="${item.title || 'Gallery Image'}">`;
+                            }
+                            
+                            slide.innerHTML = `
+                                <div class="gallery-card">
+                                    <div class="image-wrapper">
+                                        ${mediaHtml}
+                                        <div class="overlay">
+                                            <span class="tag">${item.category || 'Gallery'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="gallery-content">
+                                        <h4>${item.title || 'Gallery Item'}</h4>
+                                        <p>${item.description || ''}</p>
+                                    </div>
+                                </div>
+                            `;
+                            wrapper.appendChild(slide);
+                        });
+                        if (gallerySwiper) {
+                            gallerySwiper.destroy();
+                            gallerySwiper = null;
+                        }
+                    }
+
+                    if (c.noticeAlert) {
+                        showNotice(c.noticeAlert);
+                    }
+                }
+            } catch (error) {
+                console.log('CMS not available - using default content');
+            }
+            
+            setTimeout(initSwipers, 300);
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadWebsiteContent();
+        });
+    </script>
+</body>
+</html>

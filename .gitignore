@@ -1,0 +1,7 @@
+node_modules/
+uploads/
+.env
+.kilo/
+.DS_Store
+*.log
+npm-debug.log*

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏫 Changara Star Academy - School Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+    <meta name="description" content="Changara Star Academy School Portal - School management, staff, visitors, and content.">
+    <style>
+        .portal-container {
+            flex: 1;
+            width: 100%;
+            background: #f5f7fa;
+            min-height: calc(100vh - 150px);
+            padding: 40px 0;
+        }
+        .portal-section-title {
+            text-align: center;
+            color: #001f5c;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .portal-section-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .portal-badge {
+            display: inline-block;
+            background: #d4a017;
+            color: #001f5c;
+            padding: 4px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .btn-primary {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #d4a017;
+            color: #001f5c;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.4);
+        }
+        .btn-secondary {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #0b5394;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: #001f5c;
+            transform: scale(1.05);
+        }
+
+        .management-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #e8ecf1;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .management-section h3 {
+            color: #001f5c;
+            font-size: 24px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .management-section .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .management-link {
+            background: #f8f9fc;
+            padding: 25px 15px;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: #001f5c;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .management-link:hover {
+            border-color: #d4a017;
+            background: white;
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .management-link .icon {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .management-link span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .management-link .link-badge {
+            display: block;
+            font-size: 10px;
+            color: #999;
+            margin-top: 3px;
+        }
+        .management-link .btn-yellow {
+            background: #d4a017;
+            color: #001f5c;
+            font-weight: bold;
+        }
+        .management-link .btn-yellow:hover {
+            background: #f5c842;
+        }
+
+        .main-footer {
+            display: none !important;
+        }
+
+        .portal-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .portal-section-title {
+                font-size: 24px;
+            }
+            .btn-secondary {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+            .management-section {
+                padding: 20px;
+                margin: 10px;
+            }
+            .management-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 480px) {
+            .management-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="logo-section">
+                <span class="school-icon">🏫</span>
+                <div>
+                    <h1>Changara Star Academy</h1>
+                    <span class="subtitle">School Portal <span class="portal-badge">🔐 SECURE</span></span>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="portal.html" class="active portal-link">🔐 Portal</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </header>
+
+    <main class="portal-container">
+        <div class="container">
+            <h1 class="portal-section-title">🔐 School Management Portal</h1>
+            <p class="portal-section-subtitle">Manage school operations, staff, and visitors</p>
+
+            <!-- ===== MANAGEMENT SECTION ===== -->
+            <div class="management-section">
+                <div class="management-grid">
+                    <!-- ADMIN LOGIN -->
+                    <a href="admin-login.html" class="management-link" style="background:#d4a017;color:#001f5c;font-weight:bold;border-color:#d4a017;">
+                        <span class="icon">⚙️</span>
+                        <span>Admin Login</span>
+                        <span class="link-badge">🔐 Secure Access</span>
+                    </a>
+                    <a href="teacher-checkin.html" class="management-link" style="border-color:#28a745;">
+                        <span class="icon">👨‍🏫</span>
+                        <span>Staff Check In/Out</span>
+                        <span class="link-badge">Daily Attendance</span>
+                    </a>
+                    <a href="visitor-checkin.html" class="management-link" style="border-color:#17a2b8;">
+                        <span class="icon">🚪</span>
+                        <span>Visitor Check In/Out</span>
+                        <span class="link-badge">Visitor Management</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="portal-actions">
+                <a href="index.html" class="btn-secondary">🏠 Return to Homepage</a>
+                <a href="contact.html" class="btn-secondary" style="margin-left:10px;">📞 Contact Us</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleMobileMenu() {
+            const nav = document.querySelector('.nav-links');
+            if (nav) nav.classList.toggle('show');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Visitor Management - Changara Star Academy</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 270px;
+            background: linear-gradient(180deg, #0a1628, #1a2a4a);
+            color: white;
+            padding: 25px 0;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .sidebar-brand { padding: 0 25px 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .sidebar-brand .logo-icon { font-size: 40px; display: block; margin-bottom: 8px; }
+        .sidebar-brand h2 { color: #ffeb99; font-size: 22px; font-weight: 700; }
+        .sidebar-brand p { color: #d4a017; font-size: 13px; }
+        .sidebar-menu { padding: 20px 15px; }
+        .sidebar-menu .menu-label { font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 0 10px 10px; }
+        .sidebar-menu a {
+            display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.7);
+            text-decoration: none; padding: 12px 16px; border-radius: 10px; margin-bottom: 4px;
+            transition: all 0.3s ease; font-size: 14px; font-weight: 500;
+        }
+        .sidebar-menu a i { width: 20px; font-size: 16px; text-align: center; }
+        .sidebar-menu a:hover { background: rgba(212, 160, 23, 0.15); color: #d4a017; }
+        .sidebar-menu a.active { background: rgba(212, 160, 23, 0.2); color: #d4a017; }
+        .sidebar-menu .logout { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; }
+        .sidebar-menu .logout a { color: rgba(255, 107, 107, 0.7); }
+        .sidebar-menu .logout a:hover { color: #ff6b6b; background: rgba(255, 107, 107, 0.1); }
+
+        .main-content { margin-left: 270px; padding: 30px 35px; width: 100%; }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e8ecf1;
+        }
+        .header-left h1 { color: #1a2a4a; font-size: 28px; font-weight: 700; }
+        .header-left h1 i { color: #d4a017; margin-right: 10px; }
+        .header-left .subtitle { color: #888; font-size: 14px; margin-top: 4px; }
+        .header-right .admin-info { display: flex; align-items: center; gap: 12px; background: white; padding: 6px 16px 6px 6px; border-radius: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .header-right .admin-info .avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #d4a017, #f5c842); display: flex; align-items: center; justify-content: center; color: #1a2a4a; font-weight: 700; font-size: 16px; }
+
+        .stats-row {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px; margin-bottom: 25px;
+        }
+        .stat-card {
+            background: white; padding: 15px 20px; border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 14px;
+        }
+        .stat-card .icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .stat-card .icon-box.blue { background: #e8f0fe; color: #0b5394; }
+        .stat-card .icon-box.green { background: #e6f7e6; color: #28a745; }
+        .stat-card .icon-box.orange { background: #fff3e6; color: #e67e22; }
+        .stat-card .icon-box.purple { background: #f0e6ff; color: #6f42c1; }
+        .stat-card .info .number { font-size: 22px; font-weight: 700; color: #1a2a4a; display: block; }
+        .stat-card .info .label { font-size: 12px; color: #888; }
+
+        .tabs {
+            display: flex; gap: 5px; margin-bottom: 15px; background: white; padding: 5px;
+            border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); flex-wrap: wrap;
+        }
+        .tabs button {
+            flex: 1; padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer;
+            font-weight: bold; font-size: 14px; transition: all 0.3s ease;
+            background: transparent; color: #666; min-width: 80px;
+        }
+        .tabs button:hover { background: #f0f2f5; }
+        .tabs button.active { background: #0b5394; color: white; }
+
+        .filter-section {
+            background: white; padding: 15px; border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 15px;
+            display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+        }
+        .filter-section input, .filter-section select {
+            padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 14px; flex: 1; min-width: 120px;
+        }
+        .filter-section input[type="date"] { min-width: 160px; cursor: pointer; }
+        .filter-section button {
+            padding: 8px 18px; background: #0b5394; color: white; border: none;
+            border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+        .filter-section button:hover { background: #001f5c; }
+        .filter-section .export-btn { background: #28a745; }
+        .filter-section .export-btn:hover { background: #1e7e34; }
+        .filter-section .pdf-btn { background: #dc3545; }
+        .filter-section .pdf-btn:hover { background: #c82333; }
+
+        .summary-box {
+            background: #f8f9fa; padding: 15px 20px; border-radius: 8px;
+            margin-bottom: 15px; border-left: 4px solid #0b5394;
+        }
+        .summary-box .title { font-weight: bold; color: #001f5c; font-size: 16px; }
+        .summary-box .stats { display: flex; gap: 25px; flex-wrap: wrap; margin-top: 5px; }
+        .summary-box .stats span { font-size: 13px; }
+        .summary-box .stats .count { font-weight: bold; font-size: 16px; }
+
+        .table-container {
+            background: white; padding: 15px; border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow-x: auto;
+        }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .table-header h3 { color: #1a2a4a; font-size: 18px; }
+        .table-header .count { color: #888; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            background: #f8f9fc; color: #1a2a4a; padding: 10px 12px;
+            text-align: left; font-size: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e8ecf1;
+        }
+        tbody td { padding: 10px 12px; border-bottom: 1px solid #f0f2f5; font-size: 13px; color: #333; vertical-align: middle; }
+        tbody tr:hover td { background: #fafbfc; }
+        .badge { padding: 3px 12px; border-radius: 50px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+
+        .loading { text-align: center; padding: 30px; color: #888; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #999; }
+        .empty-state i { font-size: 48px; color: #ddd; margin-bottom: 15px; display: block; }
+        .empty-state h4 { color: #666; font-size: 18px; margin-bottom: 6px; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; position: relative; min-height: auto; padding: 15px 0; }
+            .main-content { margin-left: 0; padding: 15px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .filter-section { flex-direction: column; }
+            .filter-section input, .filter-section select { width: 100%; }
+        }
+
+        /* PDF STYLES */
+        .pdf-content { font-family: Arial, sans-serif; padding: 20px; background: white; }
+        .pdf-content h1 { color: #001f5c; text-align: center; font-size: 24px; }
+        .pdf-content h2 { text-align: center; color: #0b5394; font-size: 18px; margin: 10px 0; }
+        .pdf-content .pdf-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
+        .pdf-content .pdf-stat { background: #f8f9fa; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #ddd; }
+        .pdf-content .pdf-stat .num { font-size: 20px; font-weight: bold; display: block; }
+        .pdf-content .pdf-stat .lbl { font-size: 11px; color: #666; }
+        .pdf-content table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        .pdf-content th { background: #001f5c; color: white; padding: 6px 8px; text-align: left; }
+        .pdf-content td { padding: 5px 8px; border-bottom: 1px solid #eee; }
+        .pdf-content .pdf-footer { text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 11px; color: #999; }
+        .pdf-content .badge-success { background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 10px; font-weight: bold; }
+        .pdf-content .badge-danger { background: #f8d7da; color: #721c24; padding: 2px 8px; border-radius: 12px; display: inline-block; font-size: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <span class="logo-icon">🏫</span>
+            <h2>Admin</h2>
+            <p>Changara Star Academy</p>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-label">Navigation</div>
+            <a href="admin-dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="admin-attendance.html"><i class="fas fa-clipboard-list"></i> Attendance</a>
+            <a href="admin-teachers.html"><i class="fas fa-users"></i> Teachers</a>
+            <a href="admin-visitors.html" class="active"><i class="fas fa-door-open"></i> Visitors</a>
+            <div class="logout">
+                <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <h1><i class="fas fa-door-open"></i> Visitor Management</h1>
+                <div class="subtitle">Track all visitors entering and leaving the school</div>
+            </div>
+            <div class="header-right">
+                <div class="admin-info">
+                    <div class="avatar" id="adminAvatar">A</div>
+                    <span class="name" id="adminName">Admin</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card"><div class="icon-box blue"><i class="fas fa-users"></i></div><div class="info"><span class="number" id="totalVisitors">0</span><span class="label">Total Visitors</span></div></div>
+            <div class="stat-card"><div class="icon-box green"><i class="fas fa-user-check"></i></div><div class="info"><span class="number" id="activeVisitors">0</span><span class="label">Currently In</span></div></div>
+            <div class="stat-card"><div class="icon-box orange"><i class="fas fa-user-clock"></i></div><div class="info"><span class="number" id="completedVisitors">0</span><span class="label">Checked Out</span></div></div>
+            <div class="stat-card"><div class="icon-box purple"><i class="fas fa-chart-bar"></i></div><div class="info"><span class="number" id="purposeCount">0</span><span class="label">Visit Purposes</span></div></div>
+        </div>
+
+        <div class="tabs" id="reportTabs">
+            <button class="active" onclick="switchReport('daily')">📅 Daily</button>
+            <button onclick="switchReport('weekly')">📆 Weekly</button>
+            <button onclick="switchReport('monthly')">📊 Monthly</button>
+            <button onclick="switchReport('custom')">📅 Custom Date</button>
+        </div>
+
+        <div class="filter-section">
+            <input type="text" id="searchInput" placeholder="Search by name, badge, or phone..." onkeyup="filterTable()">
+            <select id="statusFilter" onchange="filterTable()">
+                <option value="">All Status</option>
+                <option value="Checked In">Checked In</option>
+                <option value="Checked Out">Checked Out</option>
+            </select>
+            <input type="date" id="datePicker" style="display:none;" onchange="loadCustomReport()">
+            <button onclick="loadVisitors()"><i class="fas fa-sync-alt"></i> Refresh</button>
+            <button class="export-btn" onclick="exportCSV()"><i class="fas fa-file-export"></i> CSV</button>
+            <button class="pdf-btn" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button onclick="window.location.href='visitor-checkin.html'" style="background:#d4a017;color:#001f5c;"><i class="fas fa-plus-circle"></i> New Visitor</button>
+        </div>
+
+        <div id="summaryBox" class="summary-box">
+            <div class="title" id="reportTitle">📅 Daily Visitor Report</div>
+            <div class="stats" id="reportStats">
+                <span>Total: <span class="count" id="reportTotal">0</span></span>
+                <span>Checked In: <span class="count" id="reportActive">0</span></span>
+                <span>Checked Out: <span class="count" id="reportCompleted">0</span></span>
+                <span>Rate: <span class="count" id="reportRate">0%</span></span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-list"></i> Visitor Log</h3>
+                <span class="count" id="recordCount">0 records</span>
+            </div>
+            <div id="loading" style="text-align:center;padding:30px;color:#888;">
+                <i class="fas fa-spinner fa-spin fa-2x"></i><br>Loading visitors...
+            </div>
+            <div id="tableWrapper" style="display:none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Badge #</th>
+                            <th>Phone</th>
+                            <th>ID</th>
+                            <th>Purpose</th>
+                            <th>Visiting</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Status</th>
+                            <th style="text-align:center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitorsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let visitorsData = [];
+        let currentReport = 'daily';
+        let filteredData = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) { window.location.href = 'admin-login.html'; return; }
+            const admin = JSON.parse(localStorage.getItem('admin') || '{}');
+            document.getElementById('adminName').textContent = admin.fullName || 'Admin';
+            document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('datePicker').value = today;
+            
+            loadVisitors();
+        });
+
+        function switchReport(type) {
+            currentReport = type;
+            document.querySelectorAll('#reportTabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#reportTabs button').forEach(b => {
+                if (b.textContent.toLowerCase().includes(type)) b.classList.add('active');
+            });
+            
+            const datePicker = document.getElementById('datePicker');
+            if (type === 'custom') {
+                datePicker.style.display = 'inline-block';
+            } else {
+                datePicker.style.display = 'none';
+            }
+            loadVisitors();
+        }
+
+        function loadCustomReport() {
+            if (currentReport === 'custom') {
+                loadVisitors();
+            }
+        }
+
+        async function loadVisitors() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('tableWrapper').style.display = 'none';
+
+            let endpoint = '/api/visitors';
+            let title = '📅 Daily Visitor Report';
+            let dateLabel = 'Today';
+
+            const today = new Date();
+            
+            if (currentReport === 'daily') {
+                endpoint = '/api/visitors';
+                title = '📅 Daily Visitor Report - ' + today.toLocaleDateString();
+                dateLabel = 'Today';
+            } else if (currentReport === 'weekly') {
+                endpoint = '/api/visitors/weekly';
+                const weekStart = getWeekStart(today);
+                title = '📆 Weekly Visitor Report - Week of ' + weekStart.toLocaleDateString();
+                dateLabel = 'This Week';
+            } else if (currentReport === 'monthly') {
+                endpoint = '/api/visitors/monthly';
+                title = '📊 Monthly Visitor Report - ' + today.toLocaleString('default', { month: 'long', year: 'numeric' });
+                dateLabel = 'This Month';
+            } else if (currentReport === 'custom') {
+                const datePicker = document.getElementById('datePicker');
+                if (datePicker.value) {
+                    const selectedDate = new Date(datePicker.value + 'T00:00:00');
+                    endpoint = '/api/visitors';
+                    title = '📅 Visitor Report - ' + selectedDate.toLocaleDateString();
+                    dateLabel = selectedDate.toLocaleDateString();
+                } else {
+                    endpoint = '/api/visitors';
+                    title = '📅 Daily Visitor Report - ' + today.toLocaleDateString();
+                }
+            }
+
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                
+                if (data.success) {
+                    visitorsData = data.visitors || [];
+                    
+                    // If custom date, filter by that date
+                    if (currentReport === 'custom') {
+                        const datePicker = document.getElementById('datePicker');
+                        if (datePicker.value) {
+                            const selectedDate = new Date(datePicker.value + 'T00:00:00');
+                            const dateStr = selectedDate.toDateString();
+                            visitorsData = visitorsData.filter(v => {
+                                const vDate = new Date(v.checkIn);
+                                return vDate.toDateString() === dateStr;
+                            });
+                        }
+                    }
+                    
+                    document.getElementById('reportTitle').textContent = title;
+                    
+                    // Update stats
+                    const total = visitorsData.length;
+                    const active = visitorsData.filter(v => v.status === 'Checked In').length;
+                    const completed = visitorsData.filter(v => v.status === 'Checked Out').length;
+                    
+                    document.getElementById('totalVisitors').textContent = total;
+                    document.getElementById('activeVisitors').textContent = active;
+                    document.getElementById('completedVisitors').textContent = completed;
+                    
+                    const purposes = new Set(visitorsData.map(v => v.purpose).filter(p => p));
+                    document.getElementById('purposeCount').textContent = purposes.size;
+                    
+                    document.getElementById('reportTotal').textContent = total;
+                    document.getElementById('reportActive').textContent = active;
+                    document.getElementById('reportCompleted').textContent = completed;
+                    document.getElementById('reportRate').textContent = total > 0 ? ((active / total) * 100).toFixed(1) + '%' : '0%';
+                    document.getElementById('recordCount').textContent = total + ' records';
+                    
+                    filteredData = visitorsData;
+                    renderTable(visitorsData);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('tableWrapper').style.display = 'block';
+                } else {
+                    showError('Failed to load visitors');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error loading visitors: ' + error.message);
+            }
+        }
+
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            d.setDate(diff);
+            d.setHours(0, 0, 0, 0);
+            return d;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('visitorsBody');
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><i class="fas fa-user-slash"></i><h4>No Visitors Found</h4><p style="color:#999;font-size:14px;">No visitors recorded for this period.</p></div></td></tr>`;
+                return;
+            }
+
+            data.forEach((visitor, index) => {
+                const row = document.createElement('tr');
+                const statusClass = visitor.status === 'Checked In' ? 'badge-success' : 'badge-danger';
+                const checkIn = new Date(visitor.checkIn).toLocaleTimeString();
+                const checkOut = visitor.checkOut ? new Date(visitor.checkOut).toLocaleTimeString() : '-';
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${visitor.firstName || ''} ${visitor.lastName || ''}</strong></td>
+                    <td><span style="font-weight:bold;color:#0b5394;">${visitor.badgeNumber || 'N/A'}</span></td>
+                    <td>${visitor.phoneNumber || 'N/A'}</td>
+                    <td>${visitor.idNumber || 'N/A'}</td>
+                    <td>${visitor.purpose || 'N/A'}</td>
+                    <td>${visitor.personToVisit || 'N/A'}</td>
+                    <td style="font-size:12px;">${checkIn}</td>
+                    <td style="font-size:12px;">${checkOut}</td>
+                    <td><span class="badge ${statusClass}">${visitor.status}</span></td>
+                    <td style="text-align:center;">
+                        <button style="background:#dc3545;color:white;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;" onclick="deleteVisitor('${visitor._id}')" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function filterTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+
+            const filtered = visitorsData.filter(visitor => {
+                const nameMatch = `${visitor.firstName || ''} ${visitor.lastName || ''}`.toLowerCase().includes(search);
+                const badgeMatch = (visitor.badgeNumber || '').toLowerCase().includes(search);
+                const phoneMatch = (visitor.phoneNumber || '').toLowerCase().includes(search);
+                const statusMatch = status === '' || visitor.status === status;
+                return (nameMatch || badgeMatch || phoneMatch) && statusMatch;
+            });
+
+            filteredData = filtered;
+            renderTable(filtered);
+            document.getElementById('recordCount').textContent = filtered.length + ' records';
+        }
+
+        async function deleteVisitor(id) {
+            if (!confirm('Are you sure you want to delete this visitor record?')) return;
+            try {
+                const res = await fetch(`/api/visitors/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Visitor record deleted successfully!', 'success');
+                    loadVisitors();
+                } else {
+                    showAlert('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error deleting visitor', 'error');
+            }
+        }
+
+        function exportCSV() {
+            const data = filteredData.length > 0 ? filteredData : visitorsData;
+            if (!data || data.length === 0) { alert('No data to export'); return; }
+            
+            let csv = 'Name,Badge,Phone,ID,Purpose,Visiting,Department,Check In,Check Out,Status\n';
+            data.forEach(v => {
+                csv += `${v.firstName || ''} ${v.lastName || ''},${v.badgeNumber || ''},${v.phoneNumber || ''},${v.idNumber || ''},${v.purpose || ''},${v.personToVisit || ''},${v.department || ''},${new Date(v.checkIn).toLocaleString()},${v.checkOut ? new Date(v.checkOut).toLocaleString() : 'Still In'},${v.status}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `visitors_${currentReport}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        function exportPDF() {
+            const data = filteredData.length > 0 ? filteredData : visitorsData;
+            if (!data || data.length === 0) { alert('No data to export'); return; }
+
+            const total = data.length;
+            const active = data.filter(v => v.status === 'Checked In').length;
+            const completed = data.filter(v => v.status === 'Checked Out').length;
+            const rate = total > 0 ? ((active / total) * 100).toFixed(1) : 0;
+
+            let tableRows = '';
+            data.forEach((v, i) => {
+                const statusBadge = v.status === 'Checked In' ? 'badge-success' : 'badge-danger';
+                tableRows += `
+                    <tr>
+                        <td>${i+1}</td>
+                        <td>${v.firstName || ''} ${v.lastName || ''}</td>
+                        <td>${v.badgeNumber || ''}</td>
+                        <td>${v.phoneNumber || ''}</td>
+                        <td>${v.idNumber || ''}</td>
+                        <td>${v.purpose || ''}</td>
+                        <td>${v.personToVisit || ''}</td>
+                        <td>${new Date(v.checkIn).toLocaleTimeString()}</td>
+                        <td>${v.checkOut ? new Date(v.checkOut).toLocaleTimeString() : 'Still In'}</td>
+                        <td><span class="${statusBadge}">${v.status}</span></td>
+                    </tr>
+                `;
+            });
+
+            const pdfHTML = `
+                <div class="pdf-content">
+                    <h1>🏫 CHANGARA STAR ACADEMY</h1>
+                    <h2>Visitor Report (${currentReport.toUpperCase()})</h2>
+                    <p style="text-align:center;color:#666;font-size:12px;">Generated: ${new Date().toLocaleString()}</p>
+                    <div class="pdf-stats">
+                        <div class="pdf-stat"><span class="num" style="color:#0b5394;">${total}</span><span class="lbl">Total Visitors</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#28a745;">${active}</span><span class="lbl">Checked In</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#dc3545;">${completed}</span><span class="lbl">Checked Out</span></div>
+                        <div class="pdf-stat"><span class="num" style="color:#6f42c1;">${rate}%</span><span class="lbl">Rate</span></div>
+                    </div>
+                    <table>
+                        <thead><tr>
+                            <th>#</th><th>Name</th><th>Badge</th><th>Phone</th><th>ID</th>
+                            <th>Purpose</th><th>Visiting</th><th>In</th><th>Out</th><th>Status</th>
+                        </tr></thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+                    <div class="pdf-footer">
+                        <p>© ${new Date().getFullYear()} Changara Star Academy. All rights reserved.</p>
+                        <p>Report Type: ${currentReport.toUpperCase()}</p>
+                    </div>
+                </div>
+            `;
+
+            const container = document.createElement('div');
+            container.innerHTML = pdfHTML;
+            container.style.position = 'absolute';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            document.body.appendChild(container);
+
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: `visitors_${currentReport}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, width: 1100 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(container).save().then(() => document.body.removeChild(container));
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.style.cssText = `position:fixed;top:20px;right:20px;padding:16px 24px;border-radius:12px;font-weight:600;z-index:9999;background:${type === 'success' ? '#d4edda' : '#f8d7da'};color:${type === 'success' ? '#155724' : '#721c24'};border:1px solid ${type === 'success' ? '#c3e6cb' : '#f5c6cb'};box-shadow:0 10px 40px rgba(0,0,0,0.1);font-size:14px;`;
+            alertDiv.textContent = message;
+            document.body.appendChild(alertDiv);
+            setTimeout(() => { alertDiv.style.opacity = '0'; setTimeout(() => alertDiv.remove(), 300); }, 4000);
+        }
+
+        function showError(msg) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('tableWrapper').style.display = 'block';
+            document.getElementById('visitorsBody').innerHTML = `<tr><td colspan="11"><div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i><h4 style="color:#dc3545;">${msg}</h4></div></td></tr>`;
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('admin');
+            window.location.href = 'admin-login.html';
+        }
+    </script>
+</body>
+</html>
