@@ -393,6 +393,13 @@
         }
         @media print {
             .no-print { display: none !important; }
+            .header, .assessment-info-card, .grade-tabs, #periodBar, .action-bar, #historyCard, .card:last-child { break-after: avoid; page-break-after: avoid; }
+            table { font-size: 10pt; }
+            table th, table td { padding: 6px 8px; border: 1px solid #999; }
+            table th { background: #0A1628 !important; color: white; -webkit-print-color-adjust: exact; }
+            table tr { break-inside: avoid; page-break-inside: avoid; }
+            thead { display: table-header-group; }
+            .btn, .action-bar, .grade-tabs, #periodBar { break-inside: avoid; }
         }
 
         .spinner {
@@ -1132,25 +1139,27 @@
     // ============================================
     // CONFIRM DELETE GRADE
     // ============================================
-    function confirmDeleteGrade() {
-        if (!confirm(`⚠️ Are you sure you want to delete ALL students in ${currentGrade}? This cannot be undone!`)) return;
-        if (!confirm(`⚠️ REALLY? All ${studentsData.length} students in ${currentGrade} will be permanently deleted!`)) return;
+    async function confirmDeleteGrade() {
+        if (!confirm(`⚠️ Delete ALL assessment records for ${currentGrade} — ${currentType} — ${currentPeriod}? This cannot be undone!`)) return;
+        if (!confirm(`⚠️ REALLY? All students in ${currentGrade} for ${currentPeriod} will be permanently deleted!`)) return;
         
-        studentsData.forEach(async (student) => {
-            if (student._id && !student._id.startsWith('new_')) {
-                try {
-                    await fetch(`/api/assessments/${student._id}`, { method: 'DELETE' });
-                } catch (error) {
-                    console.error('Error deleting student:', error);
-                }
+        try {
+            const response = await fetch(`/api/assessments/by-period/${encodeURIComponent(currentGrade)}?period=${encodeURIComponent(currentPeriod)}&type=${encodeURIComponent(currentType)}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                studentsData = [];
+                renderMarksTable();
+                loadGradeData();
+                loadHistory();
+                showSaveStatus(`Cleared ${result.deleted} record(s)`, 'saved');
+                setTimeout(() => hideSaveStatus(), 2000);
+            } else {
+                showAlert('Error deleting records', 'error');
             }
-        });
-        
-        studentsData = [];
-        renderMarksTable();
-        loadGradeData();
-        showSaveStatus(`Cleared ${currentGrade}`, 'saved');
-        setTimeout(() => hideSaveStatus(), 2000);
+        } catch (error) {
+            console.error('Error deleting records:', error);
+            showAlert('Error deleting records', 'error');
+        }
     }
 
     // ============================================
@@ -1262,6 +1271,11 @@
             const data = await response.json();
             if (data.success) {
                 const student = data.student;
+                // Load the correct period/type for this student's assessment record
+                if (student.assessmentPeriod) document.getElementById('assessmentPeriod').value = student.assessmentPeriod;
+                if (student.assessmentType) document.getElementById('assessmentType').value = student.assessmentType;
+                currentPeriod = document.getElementById('assessmentPeriod').value;
+                currentType = document.getElementById('assessmentType').value;
                 selectGrade(student.grade);
                 document.getElementById('marksTableContainer').scrollIntoView({ behavior: 'smooth' });
                 setTimeout(() => {
@@ -1321,8 +1335,10 @@
 
             container.innerHTML = data.periods.map(p => {
                 const isCurrent = p.assessmentPeriod === currentPeriod && p.assessmentType === currentType;
+                const bgColor = isCurrent ? '#fff3cd' : '#f8f9fc';
+                const borderColor = isCurrent ? '#ffc107' : '#e8ecf1';
                 return `
-                    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 15px;margin-bottom:8px;border-radius:8px;background:${isCurrent ? '#fff3cd;' : '#f8f9fc'};border:1px solid ${isCurrent ? '#ffc107;' : '#e8ecf1'};">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 15px;margin-bottom:8px;border-radius:8px;background:${bgColor};border:1px solid ${borderColor};">
                         <div>
                             <strong>${p.assessmentPeriod} — ${p.assessmentType}</strong>
                             <span style="font-size:12px;color:#666;margin-left:8px;">${p.studentCount} student(s)</span>

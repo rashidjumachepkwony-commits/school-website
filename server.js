@@ -1750,7 +1750,7 @@ app.get('/api/assessments/stats', async (req, res) => {
 // previous month's because each period is identified by a separate document.
 app.post('/api/assessments', async (req, res) => {
   try {
-    const { studentName, grade, assessments, assessmentPeriod, assessmentType, assessmentDate, maxScore: bodyMax } = req.body;
+    const { studentName, grade, assessments, assessmentPeriod, assessmentType, assessmentDate } = req.body;
     
     if (!studentName || !String(studentName).trim()) {
       return res.status(400).json({ success: false, message: 'studentName is required' });
@@ -2073,7 +2073,7 @@ app.get('/api/assessments/class-report/:grade', async (req, res) => {
     overflow-wrap: anywhere;
     padding: 5px 4px;
   }
-  table.class-results thead th.firstrow,
+  table.class-results thead th:first-child,
   table.class-results thead th:nth-child(2) { text-align: left; }
   .subj-header {
     min-width: 70px;
@@ -2099,12 +2099,12 @@ app.get('/api/assessments/class-report/:grade', async (req, res) => {
     padding: 3px 10px;
     border-radius: 50px;
     color: #fff !important;
-    font-weight: 700;
-    font-size: 8pt;
-    white-space: nowrap;
-    word-break: normal;
-    overflow-wrap: anywhere;
-  }
+   font-weight: 700;
+     font-size: 8pt;
+     white-space: normal;
+     word-break: normal;
+     overflow-wrap: anywhere;
+   }
   thead { display: table-header-group; }
   tbody tr { break-inside: avoid; page-break-inside: avoid; }
   .report-footer {
@@ -2146,8 +2146,8 @@ app.get('/api/assessments/class-report/:grade', async (req, res) => {
     <table class="class-results">
       <thead>
         <tr>
-          <th class="_firstrow">No.</th>
-          <th class="_firstrow">Student Name</th>
+          <th>No.</th>
+          <th>Student Name</th>
           ${subjectHeaders}
           <th class="num-cell">Total</th>
           <th class="num-cell">Average</th>
