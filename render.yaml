@@ -8,4 +8,4 @@ services:
       - key: PORT
         value: 5000
       - key: MONGODB_URI
-        value: mongodb+srv://rashidjumachepkwony_db_user:78VGp5cxssNEgNDb@school-cluster.rwq5xx8.mongodb.net/schoolDB
+        value: mongodb://localhost:27017/schoolDB
