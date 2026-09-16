@@ -1981,8 +1981,12 @@ app.get('/api/assessments/class-report/:grade', async (req, res) => {
     }).join('');
 
     const subjectCount = subjectOrder.length;
-    // Landscape is required when there are several subject columns (always for our grades)
-    const useLandscape = subjectCount >= 3;
+    // Landscape is always used since our grades have 6-10 subjects
+    // Adaptive sizing based on column count for optimal space usage
+    const headerFontSize = subjectCount > 8 ? '7pt' : subjectCount > 6 ? '7.5pt' : '8pt';
+    const tableFontSize = subjectCount > 8 ? '7.5pt' : subjectCount > 6 ? '8pt' : '8.5pt';
+    const cellPadding = subjectCount > 8 ? '2px 3px' : '4px 5px';
+    const thPadding = subjectCount > 8 ? '3px 2px' : '5px 4px';
 
     const html = `
 <!DOCTYPE html>
@@ -1993,7 +1997,7 @@ app.get('/api/assessments/class-report/:grade', async (req, res) => {
 <title>Class Assessment Report - ${escapeHtml(grade)}</title>
 <style>
   @page {
-    size: A4 ${useLandscape ? 'landscape' : 'portrait'};
+    size: A4 landscape;
     margin: 10mm;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -2054,12 +2058,12 @@ app.get('/api/assessments/class-report/:grade', async (req, res) => {
   table.class-results {
     width: 100%;
     border-collapse: collapse;
-    font-size: 8.5pt;
+    font-size: ${tableFontSize};
     table-layout: auto;
   }
   table.class-results th, table.class-results td {
     border: 1px solid #777;
-    padding: 4px 5px;
+    padding: ${cellPadding};
     text-align: center;
     vertical-align: middle;
   }
@@ -2067,44 +2071,44 @@ app.get('/api/assessments/class-report/:grade', async (req, res) => {
     background: #0A1628;
     color: #fff;
     font-weight: 600;
-    font-size: 8pt;
+    font-size: ${headerFontSize};
     white-space: normal;
     word-break: normal;
     overflow-wrap: anywhere;
-    padding: 5px 4px;
+    padding: ${thPadding};
   }
   table.class-results thead th:first-child,
   table.class-results thead th:nth-child(2) { text-align: left; }
   .subj-header {
-    min-width: 70px;
-    max-width: 140px;
+    min-width: 55px;
+    max-width: 110px;
     word-break: normal;
     overflow-wrap: anywhere;
     white-space: normal;
     line-height: 1.2;
   }
   .name-cell {
-    min-width: 140px;
+    min-width: 110px;
     text-align: left;
     word-break: normal;
     overflow-wrap: anywhere;
     white-space: normal;
   }
-  .no-cell { min-width: 36px; }
-  .num-cell { min-width: 50px; word-break: normal; overflow-wrap: anywhere; }
-  .score-cell { min-width: 48px; word-break: normal; overflow-wrap: anywhere; }
-  .perf-cell { min-width: 150px; }
+  .no-cell { min-width: 28px; }
+  .num-cell { min-width: 42px; word-break: normal; overflow-wrap: anywhere; }
+  .score-cell { min-width: 38px; word-break: normal; overflow-wrap: anywhere; }
+  .perf-cell { min-width: 120px; }
   .perf-badge {
     display: inline-block;
-    padding: 3px 10px;
+    padding: 2px 7px;
     border-radius: 50px;
     color: #fff !important;
-   font-weight: 700;
-     font-size: 8pt;
-     white-space: normal;
-     word-break: normal;
-     overflow-wrap: anywhere;
-   }
+    font-weight: 700;
+    font-size: ${headerFontSize};
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
   thead { display: table-header-group; }
   tbody tr { break-inside: avoid; page-break-inside: avoid; }
   .report-footer {
@@ -2117,6 +2121,7 @@ app.get('/api/assessments/class-report/:grade', async (req, res) => {
   }
   @media print {
     .no-print { display: none !important; }
+    @page { size: A4 landscape; margin: 7mm; }
     body { -webkit-print-color-adjust: exact; color-adjust: exact; }
     table.class-results th { -webkit-print-color-adjust: exact; }
   }
@@ -2137,6 +2142,7 @@ app.get('/api/assessments/class-report/:grade', async (req, res) => {
       <span><strong>Period:</strong> ${escapeHtml(periodLabel)}</span>
       <span><strong>Term:</strong> ${escapeHtml(getTermForPeriod(periodLabel))}</span>
       <span><strong>Date Generated:</strong> ${genDate}</span>
+      <span><strong>Layout:</strong> A4 Landscape</span>
     </div>
 
     <div class="print-controls no-print">
