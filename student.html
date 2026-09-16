@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #001f5c 0%, #0b5394 35%, #d4a017 70%, #ffeb99 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  padding: 30px;
+  border-radius: 40px;
+  background: linear-gradient(135deg, #ffffff, #f5f9ff, #fff8dc);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  text-align: center;
+}
+
+.home-btn {
+  display: inline-block;
+  padding: 12px 25px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  background: #0b5394;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  transition: all 0.3s;
+}
+.home-btn:hover {
+  background: #1a6fb5;
+  transform: scale(1.02);
+}
+
+.header {
+  background: linear-gradient(135deg, #001f5c, #0b5394);
+  padding: 20px;
+  border-radius: 30px;
+  margin-bottom: 25px;
+  color: white;
+}
+.header h1 { font-size: 42px; margin: 5px 0; color: #ffeb99; }
+.header p { font-size: 28px; margin: 5px 0; color: #d4a017; font-weight: bold; }
+
+.box-section {
+  background: white;
+  border-radius: 25px;
+  padding: 25px;
+  margin: 20px 0;
+  border: 4px solid #0b8f34;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: all 0.5s ease;
+}
+
+.box-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #001f5c;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #0b8f34;
+}
+
+.checkout-section {
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+.checkout-section .box-title {
+  color: #dc3545;
+  border-bottom-color: #dc3545;
+}
+
+.hidden-section {
+  display: none !important;
+}
+
+label {
+  display: block;
+  text-align: left;
+  font-size: 22px;
+  font-weight: bold;
+  color: #001f5c;
+  margin: 12px 0 5px 5px;
+}
+
+input {
+  width: 100%;
+  padding: 18px;
+  margin: 5px 0 15px 0;
+  font-size: 26px;
+  border: 3px solid #ccc;
+  border-radius: 15px;
+  background: #f9f9f9;
+}
+input:focus {
+  border-color: #0b8f34;
+  outline: none;
+  box-shadow: 0 0 15px rgba(11, 143, 52, 0.3);
+}
+
+.btn {
+  padding: 25px;
+  font-size: 36px;
+  font-weight: bold;
+  border: none;
+  border-radius: 20px;
+  width: 100%;
+  cursor: pointer;
+  margin: 10px 0;
+  transition: transform 0.2s;
+}
+.btn:hover { transform: scale(1.02); }
+
+.btn-checkin {
+  background: linear-gradient(135deg, #0b8f34, #0cac47);
+  color: white;
+  box-shadow: 0 8px 25px rgba(11, 143, 52, 0.4);
+}
+
+.btn-checkout {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+  box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+}
+
+.btn-home {
+  background: #0b5394;
+  color: white;
+  padding: 18px;
+  font-size: 24px;
+  border: none;
+  border-radius: 15px;
+  width: 100%;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+.btn-reset {
+  background: #0b5394;
+  color: white;
+  padding: 15px 30px;
+  font-size: 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+.btn-reset:hover { transform: scale(1.05); }
+
+#msg {
+  font-size: 28px;
+  font-weight: bold;
+  padding: 20px;
+  border-radius: 15px;
+  margin: 15px 0;
+  min-height: 60px;
+}
+.success { background: #d4edda; color: #155724; border: 3px solid #0b8f34; }
+.error { background: #f8d7da; color: #721c24; border: 3px solid #dc3545; }
+.warning { background: #fff3cd; color: #856404; border: 3px solid #ffc107; }
+.info { background: #d1ecf1; color: #0c5460; border: 3px solid #0b5394; }
+
+.hidden { display: none; }
+
+@media (max-width: 600px) {
+  .container { padding: 15px; }
+  .header h1 { font-size: 28px; }
+  input { font-size: 20px; padding: 14px; }
+  .btn { font-size: 28px; padding: 20px; }
+  .home-btn { width: 100%; text-align: center; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Home Button -->
+  <button class="home-btn" onclick="goHome()">🏠 Back to Home</button>
+
+  <div class="header">
+    <h1>🏫 Changara Star Academy</h1>
+    <p>🎓 Student Dashboard</p>
+    <div id="datetime" style="font-size:22px;color:white;margin-top:8px;"></div>
+  </div>
+
+  <div id="msg" class="hidden"></div>
+
+  <!-- CHECK IN SECTION -->
+  <div class="box-section" id="checkinSection">
+    <div class="box-title">📋 Check In</div>
+    <p style="font-size:22px;color:#666;margin-bottom:15px;">Enter your Student ID and PIN to check in</p>
+
+    <label>👤 Student ID:</label>
+    <input id="studentId" placeholder="e.g., ST001">
+
+    <label>🔐 PIN:</label>
+    <input id="studentPin" type="password" placeholder="Enter your PIN">
+
+    <button class="btn btn-checkin" onclick="checkInStudent()">✅ CHECK IN</button>
+  </div>
+
+  <!-- CHECK OUT SECTION -->
+  <div class="box-section checkout-section" id="checkoutSection">
+    <div class="box-title">🚪 Check Out</div>
+    <p style="font-size:22px;color:#856404;margin-bottom:15px;">Enter your Student ID and PIN to check out</p>
+
+    <label>👤 Student ID:</label>
+    <input id="checkoutId" placeholder="Enter your Student ID">
+
+    <label>🔐 PIN:</label>
+    <input id="checkoutPin" type="password" placeholder="Enter your PIN">
+
+    <button class="btn btn-checkout" onclick="checkOutStudent()">❌ CHECK OUT</button>
+  </div>
+
+  <button class="btn-home" onclick="goHome()">🏠 Back to Home</button>
+</div>
+<script>
+function updateDateTime() {
+  const now = new Date();
+  document.getElementById("datetime").innerHTML = now.toLocaleDateString('en-GB') + " | " + now.toLocaleTimeString('en-GB');
+}
+setInterval(updateDateTime, 1000); updateDateTime();
+
+const SCHOOL_LAT = 0.7409274977411274;
+const SCHOOL_LNG = 34.418766365824496;
+const ALLOWED_DISTANCE = 1000000;
+
+function getDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function goHome() {
+  window.location.href = 'index.html';
+}
+
+function clearCheckInFields() {
+  document.getElementById("studentId").value = "";
+  document.getElementById("studentPin").value = "";
+}
+
+function clearCheckOutFields() {
+  document.getElementById("checkoutId").value = "";
+  document.getElementById("checkoutPin").value = "";
+}
+
+function showMessage(msg, type = "info") {
+  const el = document.getElementById("msg");
+  el.textContent = msg;
+  el.className = type;
+  el.classList.remove("hidden");
+}
+
+function resetStudentSections() {
+  document.getElementById("checkinSection").classList.remove("hidden-section");
+  document.getElementById("checkoutSection").classList.remove("hidden-section");
+  document.getElementById("msg").classList.add("hidden");
+  clearCheckInFields();
+  clearCheckOutFields();
+}
+
+// Sends the check-in/out request to the Express backend.
+// Replaces the Google Apps Script `loginStudent` call.
+function loginStudent(id, pin, action, onSuccess, onFailure) {
+  fetch('/api/student/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ studentId: id, pin: pin, action: action })
+  })
+    .then(async function(response) {
+      let result = {};
+      try { result = await response.json(); } catch (e) { result = {}; }
+      if (response.ok && result.message) {
+        onSuccess(result.message);
+      } else {
+        onFailure(new Error(result.message || 'Request failed (' + response.status + ')'));
+      }
+    })
+    .catch(function(error) {
+      onFailure(error);
+    });
+}
+
+function handleSuccess(resultMessage) {
+  document.getElementById("checkinSection").classList.add("hidden-section");
+  document.getElementById("checkoutSection").classList.add("hidden-section");
+  document.getElementById("msg").className = "success";
+  document.getElementById("msg").innerHTML = resultMessage + '<br><br><button class="btn-reset" onclick="resetStudentSections()">🔄 Check Another Student</button>';
+  document.getElementById("msg").classList.remove("hidden");
+}
+
+function checkInStudent() {
+  const id = document.getElementById("studentId").value.trim();
+  const pin = document.getElementById("studentPin").value.trim();
+
+  if (!id || !pin) {
+    showMessage("❌ Please enter Student ID and PIN", "error");
+    return;
+  }
+
+  showMessage("⏳ Checking in...", "info");
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      if (getDistance(pos.coords.latitude, pos.coords.longitude, SCHOOL_LAT, SCHOOL_LNG) > ALLOWED_DISTANCE) {
+        showMessage("❌ You are outside the school area", "error");
+        return;
+      }
+
+      loginStudent(id, pin, "IN", handleSuccess, function(error) {
+        showMessage("❌ Error: " + error.message, "error");
+      });
+    },
+    function() {
+      showMessage("❌ Please allow GPS access", "error");
+    }
+  );
+}
+
+function checkOutStudent() {
+  const id = document.getElementById("checkoutId").value.trim();
+  const pin = document.getElementById("checkoutPin").value.trim();
+
+  if (!id || !pin) {
+    showMessage("❌ Please enter Student ID and PIN", "error");
+    return;
+  }
+
+  showMessage("⏳ Checking out...", "info");
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      if (getDistance(pos.coords.latitude, pos.coords.longitude, SCHOOL_LAT, SCHOOL_LNG) > ALLOWED_DISTANCE) {
+        showMessage("❌ You are outside the school area", "error");
+        return;
+      }
+
+      loginStudent(id, pin, "OUT", handleSuccess, function(error) {
+        showMessage("❌ Error: " + error.message, "error");
+      });
+    },
+    function() {
+      showMessage("❌ Please allow GPS access", "error");
+    }
+  );
+}
+</script>
+</body>
+</html>

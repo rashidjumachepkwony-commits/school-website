@@ -2457,6 +2457,537 @@ app.post('/api/fix-attendance-times', async (req, res) => {
 });
 
 // ============================================
+// CLERK DASHBOARD - FEE SCHEMAS & HELPERS
+// ============================================
+
+// Student record used by the Clerk Dashboard (fees system).
+// Kept separate from StudentAssessment so the assessment system
+// is completely untouched.
+const feeStudentSchema = new mongoose.Schema({
+  studentId: { type: String, required: true, unique: true },
+  name: { type: String, required: true, trim: true },
+  grade: { type: String, required: true, trim: true },
+  gender: { type: String, required: true, enum: ['Male', 'Female'] },
+  studentType: { type: String, required: true, enum: ['Day Scholar', 'Boarder'] },
+  createdAt: { type: Date, default: Date.now }
+});
+const FeeStudent = mongoose.model('FeeStudent', feeStudentSchema);
+
+// Payment record. `row` mimics the spreadsheet row used by the clerk
+// dashboard receipt/edit flows.
+const feePaymentSchema = new mongoose.Schema({
+  row: { type: Number },
+  studentId: { type: String, required: true, index: true },
+  studentName: { type: String, required: true },
+  grade: { type: String, default: '' },
+  category: { type: String, required: true },
+  amount: { type: Number, required: true, min: 0 },
+  method: { type: String, default: 'MPESA' },
+  reference: { type: String, default: '' },
+  notes: { type: String, default: '' },
+  date: { type: Date, default: Date.now }
+});
+feePaymentSchema.pre('save', async function () {
+  if (this.row == null) {
+    const last = await FeePayment.findOne({}, { row: 1 }).sort({ row: -1 });
+    this.row = (last && last.row ? last.row : 0) + 1;
+  }
+});
+const FeePayment = mongoose.model('FeePayment', feePaymentSchema);
+
+// Fees structure stored as a single config document (day + boarding).
+const feeStructureSchema = new mongoose.Schema({
+  key: { type: String, default: 'main', unique: true },
+  dayFees: { type: Map, of: new mongoose.Schema({ term1: Number, term2: Number, term3: Number, total: Number }, { _id: false }), default: {} },
+  boardingFees: { type: Map, of: new mongoose.Schema({ term1: Number, term2: Number, term3: Number, total: Number }, { _id: false }), default: {} }
+});
+const FeeStructure = mongoose.model('FeeStructure', feeStructureSchema);
+
+const CLERK_GRADES = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+const DEFAULT_DAY_FEES = {
+  'Playgroup': { term1: 8000, term2: 8000, term3: 8000 },
+  'PP1': { term1: 8500, term2: 8500, term3: 8500 },
+  'PP2': { term1: 8500, term2: 8500, term3: 8500 },
+  'Grade 1': { term1: 9000, term2: 9000, term3: 9000 },
+  'Grade 2': { term1: 9000, term2: 9000, term3: 9000 },
+  'Grade 3': { term1: 9500, term2: 9500, term3: 9500 },
+  'Grade 4': { term1: 9500, term2: 9500, term3: 9500 },
+  'Grade 5': { term1: 10000, term2: 10000, term3: 10000 },
+  'Grade 6': { term1: 10000, term2: 10000, term3: 10000 }
+};
+const DEFAULT_BOARDING_FEES = {
+  'Full Boarding': { term1: 12000, term2: 12000, term3: 12000 }
+};
+
+// Get (or lazily create) the fees structure document.
+async function getClerkFeesStructure() {
+  let cfg = await FeeStructure.findOne({ key: 'main' });
+  if (!cfg) {
+    const dayFees = {};
+    CLERK_GRADES.forEach(g => {
+      const d = DEFAULT_DAY_FEES[g];
+      dayFees[g] = { term1: d.term1, term2: d.term2, term3: d.term3, total: d.term1 + d.term2 + d.term3 };
+    });
+    const boardingFees = {};
+    Object.keys(DEFAULT_BOARDING_FEES).forEach(k => {
+      const d = DEFAULT_BOARDING_FEES[k];
+      boardingFees[k] = { term1: d.term1, term2: d.term2, term3: d.term3, total: d.term1 + d.term2 + d.term3 };
+    });
+    cfg = await FeeStructure.create({ key: 'main', dayFees, boardingFees });
+  }
+  return cfg;
+}
+
+// Convert a Map/plain object into a plain object.
+function feesToPlain(map) {
+  const out = {};
+  if (!map) return out;
+  // Native Map or Mongoose Map: iterate keys directly.
+  if (typeof map.get === 'function' && typeof map.keys === 'function') {
+    for (const k of map.keys()) out[k] = map.get(k);
+    return out;
+  }
+  if (typeof map.toObject === 'function') {
+    const obj = map.toObject();
+    Object.keys(obj).forEach(k => { out[k] = obj[k]; });
+  } else {
+    Object.keys(map).forEach(k => { out[k] = map[k]; });
+  }
+  return out;
+}
+
+// Compute a student's fee totals (fees owed vs payments made).
+async function computeClerkStudentFee(student) {
+  const cfg = await getClerkFeesStructure();
+  const day = feesToPlain(cfg.dayFees);
+  const boarding = feesToPlain(cfg.boardingFees);
+  let totalFees = 0;
+  const gradeFee = day[student.grade];
+  if (gradeFee) {
+    totalFees += (gradeFee.total != null ? gradeFee.total : (gradeFee.term1 + gradeFee.term2 + gradeFee.term3));
+  }
+  if (student.studentType === 'Boarder') {
+    Object.keys(boarding).forEach(k => {
+      const b = boarding[k];
+      totalFees += (b.total != null ? b.total : (b.term1 + b.term2 + b.term3));
+    });
+  }
+  const paidAgg = await FeePayment.aggregate([
+    { $match: { studentId: student.studentId } },
+    { $group: { _id: null, paid: { $sum: '$amount' } } }
+  ]);
+  const paid = paidAgg.length ? paidAgg[0].paid : 0;
+  return {
+    id: student.studentId,
+    name: student.name,
+    grade: student.grade,
+    gender: student.gender,
+    studentType: student.studentType,
+    isBoarding: student.studentType === 'Boarder',
+    totalFees,
+    paid,
+    balance: Math.max(totalFees - paid, 0)
+  };
+}
+
+// ============================================
+// CLERK DASHBOARD - STUDENT & FEES ROUTES
+// ============================================
+
+// GET summary of all student fees (clerk dashboard "Students" tab)
+app.get('/api/clerk/fees-summary', async (req, res) => {
+  try {
+    const students = await FeeStudent.find().sort({ grade: 1, name: 1 });
+    const rows = [];
+    for (const s of students) rows.push(await computeClerkStudentFee(s));
+    const totalDayScholars = rows.filter(r => !r.isBoarding).length;
+    const totalBoarders = rows.filter(r => r.isBoarding).length;
+    const totalPaid = rows.reduce((sum, r) => sum + r.paid, 0);
+    const totalBalance = rows.reduce((sum, r) => sum + r.balance, 0);
+    res.json({
+      success: true,
+      students: rows,
+      totalDayScholars,
+      totalBoarders,
+      totalPaid,
+      totalBalance
+    });
+  } catch (error) {
+    console.error('Clerk fees summary error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET day scholar fees structure
+app.get('/api/clerk/fees-structure', async (req, res) => {
+  try {
+    const cfg = await getClerkFeesStructure();
+    res.json({ success: true, fees: feesToPlain(cfg.dayFees) });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET boarding fees structure
+app.get('/api/clerk/boarding-fees', async (req, res) => {
+  try {
+    const cfg = await getClerkFeesStructure();
+    res.json({ success: true, fees: feesToPlain(cfg.boardingFees) });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// PUT fees structure (type = 'day' | 'boarding')
+app.put('/api/clerk/fees-structure/:type', async (req, res) => {
+  try {
+    const type = req.params.type;
+    const feesData = req.body;
+    if (!feesData || typeof feesData !== 'object') {
+      return res.status(400).json({ success: false, message: 'Invalid fees data' });
+    }
+    const normalised = {};
+    Object.keys(feesData).forEach(k => {
+      const f = feesData[k] || {};
+      const term1 = Number(f.term1) || 0;
+      const term2 = Number(f.term2) || 0;
+      const term3 = Number(f.term3) || 0;
+      if (term1 < 0 || term2 < 0 || term3 < 0) {
+        throw new Error('Fees cannot be negative');
+      }
+      normalised[k] = { term1, term2, term3, total: term1 + term2 + term3 };
+    });
+    const cfg = await getClerkFeesStructure();
+    if (type === 'boarding') cfg.boardingFees = normalised;
+    else cfg.dayFees = normalised;
+    await cfg.save();
+    res.json({ success: true, message: (type === 'boarding' ? 'Boarding' : 'Day scholar') + ' fees updated successfully!' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// POST add a new fee student
+app.post('/api/clerk/students', async (req, res) => {
+  try {
+    const { name, grade, gender, studentType } = req.body;
+    if (!name || !grade || !gender || !studentType) {
+      return res.status(400).json({ success: false, message: 'Name, grade, gender and type are required' });
+    }
+    if (!CLERK_GRADES.includes(grade)) {
+      return res.status(400).json({ success: false, message: 'Invalid grade' });
+    }
+    if (!['Male', 'Female'].includes(gender)) {
+      return res.status(400).json({ success: false, message: 'Invalid gender' });
+    }
+    if (!['Day Scholar', 'Boarder'].includes(studentType)) {
+      return res.status(400).json({ success: false, message: 'Invalid student type' });
+    }
+    const count = await FeeStudent.countDocuments();
+    const studentId = 'CSA' + String(count + 1).padStart(3, '0');
+    const clash = await FeeStudent.findOne({ studentId });
+    const student = new FeeStudent({
+      studentId: clash ? studentId + '-' + Date.now().toString().slice(-4) : studentId,
+      name: String(name).trim(),
+      grade,
+      gender,
+      studentType
+    });
+    await student.save();
+    res.json({ success: true, message: 'Student registered successfully!', student });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// DELETE a fee student (and their payment records)
+app.delete('/api/clerk/students/:studentId', async (req, res) => {
+  try {
+    const student = await FeeStudent.findOneAndDelete({ studentId: req.params.studentId });
+    if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+    await FeePayment.deleteMany({ studentId: req.params.studentId });
+    res.json({ success: true, message: 'Student and their payment records deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET single student fee details + payment history
+app.get('/api/clerk/students/:studentId/fees', async (req, res) => {
+  try {
+    const student = await FeeStudent.findOne({ studentId: req.params.studentId });
+    if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+    const fee = await computeClerkStudentFee(student);
+    const payments = await FeePayment.find({ studentId: student.studentId }).sort({ date: 1 });
+    res.json({
+      success: true,
+      student: { id: student.studentId, name: student.name, grade: student.grade, studentType: student.studentType },
+      studentType: student.studentType,
+      totalFees: fee.totalFees,
+      paid: fee.paid,
+      balance: fee.balance,
+      payments
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// CLERK DASHBOARD - PAYMENT ROUTES (MongoDB)
+// ============================================
+
+// GET all payments
+app.get('/api/clerk/payments', async (req, res) => {
+  try {
+    const payments = await FeePayment.find().sort({ date: -1 });
+    res.json(payments);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// POST record a multi-category payment
+app.post('/api/clerk/payments', async (req, res) => {
+  try {
+    const { studentId, payments, method, reference, notes } = req.body;
+    const student = await FeeStudent.findOne({ studentId });
+    if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+    if (!payments || typeof payments !== 'object') {
+      return res.status(400).json({ success: false, message: 'No payment amounts provided' });
+    }
+    const categories = [];
+    let totalAmount = 0;
+    for (const cat of Object.keys(payments)) {
+      const amount = Number(payments[cat]);
+      if (!isNaN(amount) && amount > 0) {
+        categories.push({ category: cat, amount });
+        totalAmount += amount;
+      }
+    }
+    if (categories.length === 0) {
+      return res.status(400).json({ success: false, message: 'Please enter at least one payment amount' });
+    }
+    for (const c of categories) {
+      await FeePayment.create({
+        studentId: student.studentId,
+        studentName: student.name,
+        grade: student.grade,
+        category: c.category,
+        amount: c.amount,
+        method: method || 'MPESA',
+        reference: reference || '',
+        notes: notes || '',
+        date: getKenyaTime()
+      });
+    }
+    res.json({
+      success: true,
+      message: 'Payment recorded successfully!',
+      totalAmount,
+      categories,
+      date: getKenyaTime().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// PUT edit a payment record
+app.put('/api/clerk/payments/:row', async (req, res) => {
+  try {
+    const { amount, category, method, reference, notes } = req.body;
+    const amt = Number(amount);
+    if (isNaN(amt) || amt <= 0) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid amount' });
+    }
+    const payment = await FeePayment.findOne({ row: Number(req.params.row) });
+    if (!payment) return res.status(404).json({ success: false, message: 'Payment record not found' });
+    payment.amount = amt;
+    payment.category = category || payment.category;
+    payment.method = method || payment.method;
+    payment.reference = reference != null ? reference : payment.reference;
+    payment.notes = notes != null ? notes : payment.notes;
+    await payment.save();
+    res.json({ success: true, message: 'Payment updated successfully!' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// DELETE a payment record
+app.delete('/api/clerk/payments/:row', async (req, res) => {
+  try {
+    const payment = await FeePayment.findOneAndDelete({ row: Number(req.params.row) });
+    if (!payment) return res.status(404).json({ success: false, message: 'Payment record not found' });
+    res.json({ success: true, message: 'Payment record deleted successfully!' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// STUDENT CHECK-IN/OUT (MongoDB)
+// ============================================
+// Student record for the student check-in dashboard.
+const studentSchema = new mongoose.Schema({
+  studentId: { type: String, required: true, unique: true },
+  name: { type: String, required: true, trim: true },
+  pin: { type: String, required: true },
+  grade: { type: String, default: '' },
+  isActive: { type: Boolean, default: true },
+  attendance: [{
+    date: Date,
+    checkIn: Date,
+    checkOut: Date,
+    status: { type: String, enum: ['Present', 'Absent', 'Late', 'Excused'], default: 'Present' },
+    notes: String,
+    isLate: { type: Boolean, default: false }
+  }],
+  createdAt: { type: Date, default: Date.now }
+});
+const Student = mongoose.model('Student', studentSchema);
+
+// Register a student (used to create check-in accounts)
+app.post('/api/student/register', async (req, res) => {
+  try {
+    const { studentId, name, pin, grade } = req.body;
+    if (!studentId || !name || !pin) {
+      return res.status(400).json({ success: false, message: 'Please provide studentId, name, and pin' });
+    }
+    if (pin.length < 4 || pin.length > 6) {
+      return res.status(400).json({ success: false, message: 'PIN must be 4-6 digits' });
+    }
+    const existing = await Student.findOne({ studentId });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'Student ID already exists' });
+    }
+    const student = new Student({ studentId, name, pin, grade: grade || '' });
+    await student.save();
+    res.json({ success: true, message: 'Student registered successfully!', student: { studentId: student.studentId, name: student.name, grade: student.grade } });
+  } catch (error) {
+    console.error('Student registration error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Student login + check-in / check-out (action = 'IN' | 'OUT')
+app.post('/api/student/login', async (req, res) => {
+  try {
+    const { studentId, pin, action } = req.body;
+    if (!studentId || !pin || !action) {
+      return res.status(400).json({ success: false, message: 'Please provide studentId, pin, and action' });
+    }
+    const student = await Student.findOne({ studentId });
+    if (!student) {
+      return res.status(404).json({ success: false, message: '❌ Student not found. Please contact admin.' });
+    }
+    if (!student.isActive) {
+      return res.status(403).json({ success: false, message: '❌ This student account is inactive. Please contact admin.' });
+    }
+    if (student.pin !== pin) {
+      return res.status(401).json({ success: false, message: '❌ Invalid PIN. Please try again.' });
+    }
+
+    const kenyaNow = getKenyaTime();
+    const kenyaToday = getKenyaDate();
+    const kenyaHour = getKenyaHour();
+    const dayOfWeek = kenyaNow.getDay();
+
+    if (action === 'IN') {
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        return res.status(400).json({ success: false, message: '📅 Weekend! Check-in is only available on weekdays (Monday-Friday).' });
+      }
+      const existingAttendance = student.attendance.find(a => {
+        const aDate = new Date(a.date);
+        aDate.setHours(0, 0, 0, 0);
+        return aDate.getTime() === kenyaToday.getTime();
+      });
+      if (existingAttendance) {
+        return res.status(400).json({ success: false, message: '⚠️ You already checked in today at ' + formatKenyaTime(existingAttendance.checkIn) });
+      }
+      if (kenyaHour >= 17) {
+        return res.status(400).json({ success: false, message: '⏰ Check-in is not allowed after 5:00 PM. Please try again tomorrow.' });
+      }
+      const isLate = kenyaHour > 7 || (kenyaHour === 7 && kenyaNow.getMinutes() > 0);
+      student.attendance.push({
+        date: kenyaToday,
+        checkIn: kenyaNow,
+        status: isLate ? 'Late' : 'Present',
+        isLate: isLate,
+        notes: isLate ? 'Late check-in at ' + formatKenyaFullTime(kenyaNow) : 'On-time check-in at ' + formatKenyaFullTime(kenyaNow)
+      });
+      await student.save();
+      const message = isLate
+        ? '⚠️ Check-in successful! (You are LATE - after 7:00 AM)'
+        : '✅ Check-in successful! (On time)';
+      res.json({
+        success: true,
+        message: message,
+        timeFormatted: formatKenyaTime(kenyaNow),
+        student: { studentId: student.studentId, name: student.name, grade: student.grade }
+      });
+    } else if (action === 'OUT') {
+      const todayRecord = student.attendance.find(a => {
+        const aDate = new Date(a.date);
+        aDate.setHours(0, 0, 0, 0);
+        return aDate.getTime() === kenyaToday.getTime();
+      });
+      if (!todayRecord) {
+        return res.status(400).json({ success: false, message: '⚠️ You have not checked in today. Please check in first.' });
+      }
+      if (todayRecord.checkOut) {
+        return res.status(400).json({ success: false, message: '⚠️ You already checked out today at ' + formatKenyaTime(todayRecord.checkOut) });
+      }
+      todayRecord.checkOut = kenyaNow;
+      todayRecord.notes = (todayRecord.notes || '') + ' | Checked out at ' + formatKenyaFullTime(kenyaNow);
+      await student.save();
+      res.json({
+        success: true,
+        message: '✅ Check-out successful! See you tomorrow!',
+        timeFormatted: formatKenyaTime(kenyaNow),
+        student: { studentId: student.studentId, name: student.name, grade: student.grade }
+      });
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid action. Use "IN" or "OUT".' });
+    }
+  } catch (error) {
+    console.error('Student login error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET today's student attendance (for admin/reports)
+app.get('/api/student/attendance/today', async (req, res) => {
+  try {
+    const kenyaToday = getKenyaDate();
+    const students = await Student.find({});
+    const records = [];
+    students.forEach(s => {
+      const rec = s.attendance.find(a => {
+        const aDate = new Date(a.date);
+        aDate.setHours(0, 0, 0, 0);
+        return aDate.getTime() === kenyaToday.getTime();
+      });
+      if (rec) {
+        records.push({
+          studentId: s.studentId,
+          name: s.name,
+          grade: s.grade,
+          checkIn: rec.checkIn,
+          checkOut: rec.checkOut,
+          status: rec.status,
+          isLate: rec.isLate
+        });
+      }
+    });
+    res.json({ success: true, date: kenyaToday, count: records.length, records });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
 // SERVE STATIC FILES
 // ============================================
 app.use(express.static(__dirname));
