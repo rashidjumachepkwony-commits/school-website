@@ -95,6 +95,27 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/schoolDB'
   .catch(err => console.error('❌ MongoDB Error:', err.message));
 
 // ============================================
+// NEW CBE MODEL FILES
+// ============================================
+const PerformanceLevel = require('./models/PerformanceLevel');
+const AssessmentMethod = require('./models/AssessmentMethod');
+const EducationLevel = require('./models/EducationLevel');
+const AcademicYear = require('./models/AcademicYear');
+const Term = require('./models/Term');
+const CurriculumConfig = require('./models/CurriculumConfig');
+const LearningArea = require('./models/LearningArea');
+const Strand = require('./models/Strand');
+const SubStrand = require('./models/SubStrand');
+const LearningOutcome = require('./models/LearningOutcome');
+const Competency = require('./models/Competency');
+const Rubric = require('./models/Rubric');
+const AssessmentRecord = require('./models/AssessmentRecord');
+const Evidence = require('./models/Evidence');
+const LearnerProfile = require('./models/LearnerProfile');
+const AssessmentWeight = require('./models/AssessmentWeight');
+const AuditLog = require('./models/AuditLog');
+
+// ============================================
 // FILE UPLOAD SETUP
 // ============================================
 const uploadDirs = ['./uploads', './uploads/images', './uploads/videos', './uploads/audio'];
@@ -1562,37 +1583,7 @@ app.get('/api/visitors/today', async (req, res) => {
 // support history-aware (per-period) assessments. Old records that predate this
 // change are treated as "Legacy Assessment" / "Legacy" so existing data keeps
 // displaying correctly without any destructive migration.
-const studentAssessmentSchema = new mongoose.Schema({
-  studentName: { type: String, required: true, trim: true },
-  grade: { type: String, required: true, trim: true },
-  assessments: [{
-    subject: { type: String, required: true },
-    maxScore: { type: Number, required: true },
-    score: { type: Number, required: true }
-  }],
-  totalScore: { type: Number, default: 0 },
-  averageScore: { type: Number, default: 0 },
-  performanceLevel: {
-    type: String,
-    enum: ['Below Expectation', 'Approaching Expectation', 'Meeting Expectation', 'Exceeding Expectation'],
-    default: 'Approaching Expectation'
-  },
-  assessmentPeriod: {
-    type: String,
-    default: 'Legacy Assessment',
-    index: true
-  },
-  assessmentType: {
-    type: String,
-    default: 'Legacy',
-    index: true
-  },
-  assessmentDate: { type: Date, default: Date.now },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
-
-const StudentAssessment = mongoose.model('StudentAssessment', studentAssessmentSchema);
+const StudentAssessment = require('./models/StudentAssessment');
 
 // Default assessment period/type helpers (used for legacy fallback)
 const DEFAULT_PERIOD = 'Legacy Assessment';
@@ -2463,45 +2454,14 @@ app.post('/api/fix-attendance-times', async (req, res) => {
 // Student record used by the Clerk Dashboard (fees system).
 // Kept separate from StudentAssessment so the assessment system
 // is completely untouched.
-const feeStudentSchema = new mongoose.Schema({
-  studentId: { type: String, required: true, unique: true },
-  name: { type: String, required: true, trim: true },
-  grade: { type: String, required: true, trim: true },
-  gender: { type: String, required: true, enum: ['Male', 'Female'] },
-  studentType: { type: String, required: true, enum: ['Day Scholar', 'Boarder'] },
-  createdAt: { type: Date, default: Date.now }
-});
-const FeeStudent = mongoose.model('FeeStudent', feeStudentSchema);
+const FeeStudent = require('./models/FeeStudent');
 
 // Payment record. `row` mimics the spreadsheet row used by the clerk
 // dashboard receipt/edit flows.
-const feePaymentSchema = new mongoose.Schema({
-  row: { type: Number },
-  studentId: { type: String, required: true, index: true },
-  studentName: { type: String, required: true },
-  grade: { type: String, default: '' },
-  category: { type: String, required: true },
-  amount: { type: Number, required: true, min: 0 },
-  method: { type: String, default: 'MPESA' },
-  reference: { type: String, default: '' },
-  notes: { type: String, default: '' },
-  date: { type: Date, default: Date.now }
-});
-feePaymentSchema.pre('save', async function () {
-  if (this.row == null) {
-    const last = await FeePayment.findOne({}, { row: 1 }).sort({ row: -1 });
-    this.row = (last && last.row ? last.row : 0) + 1;
-  }
-});
-const FeePayment = mongoose.model('FeePayment', feePaymentSchema);
+const FeePayment = require('./models/FeePayment');
 
 // Fees structure stored as a single config document (day + boarding).
-const feeStructureSchema = new mongoose.Schema({
-  key: { type: String, default: 'main', unique: true },
-  dayFees: { type: Map, of: new mongoose.Schema({ term1: Number, term2: Number, term3: Number, total: Number }, { _id: false }), default: {} },
-  boardingFees: { type: Map, of: new mongoose.Schema({ term1: Number, term2: Number, term3: Number, total: Number }, { _id: false }), default: {} }
-});
-const FeeStructure = mongoose.model('FeeStructure', feeStructureSchema);
+const FeeStructure = require('./models/FeeStructure');
 
 const CLERK_GRADES = ['Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
 const DEFAULT_DAY_FEES = {
@@ -2830,23 +2790,7 @@ app.delete('/api/clerk/payments/:row', async (req, res) => {
 // STUDENT CHECK-IN/OUT (MongoDB)
 // ============================================
 // Student record for the student check-in dashboard.
-const studentSchema = new mongoose.Schema({
-  studentId: { type: String, required: true, unique: true },
-  name: { type: String, required: true, trim: true },
-  pin: { type: String, required: true },
-  grade: { type: String, default: '' },
-  isActive: { type: Boolean, default: true },
-  attendance: [{
-    date: Date,
-    checkIn: Date,
-    checkOut: Date,
-    status: { type: String, enum: ['Present', 'Absent', 'Late', 'Excused'], default: 'Present' },
-    notes: String,
-    isLate: { type: Boolean, default: false }
-  }],
-  createdAt: { type: Date, default: Date.now }
-});
-const Student = mongoose.model('Student', studentSchema);
+const Student = require('./models/Student');
 
 // Register a student (used to create check-in accounts)
 app.post('/api/student/register', async (req, res) => {
