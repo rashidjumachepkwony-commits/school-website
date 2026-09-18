@@ -1,120 +1,265 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<base target="_top">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(135deg, #001f5c 0%, #0b5394 35%, #d4a017 70%, #ffeb99 100%);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 15px;
-}
-.container {
-  width: 100%;
-  max-width: 800px;
-  padding: 30px;
-  border-radius: 40px;
-  background: linear-gradient(135deg, #ffffff, #f5f9ff, #fff8dc);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  text-align: center;
-}
-.home-btn {
-  display: inline-block; padding: 12px 25px; font-size: 18px; font-weight: bold;
-  color: white; background: #0b5394; border: none; border-radius: 10px;
-  cursor: pointer; margin-bottom: 15px; transition: all 0.3s;
-}
-.home-btn:hover { background: #1a6fb5; transform: scale(1.02); }
-.header {
-  background: linear-gradient(135deg, #001f5c, #0b5394);
-  padding: 20px; border-radius: 30px; margin-bottom: 25px; color: white;
-}
-.header h1 { font-size: 42px; margin: 5px 0; color: #ffeb99; }
-.header p { font-size: 28px; margin: 5px 0; color: #d4a017; font-weight: bold; }
-.box-section {
-  background: white; border-radius: 25px; padding: 25px;
-  margin: 20px 0; border: 4px solid #0b8f34;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-.box-title {
-  font-size: 32px; font-weight: bold; color: #001f5c;
-  margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #0b8f34;
-}
-.checkout-section { border-color: #dc3545; background: #fff5f5; }
-.checkout-section .box-title { color: #dc3545; border-bottom-color: #dc3545; }
-.hidden-section { display: none !important; }
-label { display: block; text-align: left; font-size: 22px; font-weight: bold; color: #001f5c; margin: 12px 0 5px 5px; }
-input {
-  width: 100%; padding: 18px; margin: 5px 0 15px 0; font-size: 26px;
-  border: 3px solid #ccc; border-radius: 15px; background: #f9f9f9;
-}
-input:focus { border-color: #0b8f34; outline: none; box-shadow: 0 0 15px rgba(11, 143, 52, 0.3); }
-.btn {
-  padding: 25px; font-size: 36px; font-weight: bold; border: none;
-  border-radius: 20px; width: 100%; cursor: pointer; margin: 10px 0; transition: transform 0.2s;
-}
-.btn:hover { transform: scale(1.02); }
-.btn-checkin { background: linear-gradient(135deg, #0b8f34, #0cac47); color: white; box-shadow: 0 8px 25px rgba(11, 143, 52, 0.4); }
-.btn-checkout { background: linear-gradient(135deg, #dc3545, #c82333); color: white; box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4); }
-.btn-home { background: #0b5394; color: white; padding: 18px; font-size: 24px; border: none; border-radius: 15px; width: 100%; cursor: pointer; margin: 10px 0; }
-.btn-reset { background: #0b5394; color: white; padding: 15px 30px; font-size: 20px; border: none; border-radius: 10px; cursor: pointer; margin-top: 15px; }
-.btn-reset:hover { transform: scale(1.05); }
-#msg { font-size: 28px; font-weight: bold; padding: 20px; border-radius: 15px; margin: 15px 0; min-height: 60px; }
-.success { background: #d4edda; color: #155724; border: 3px solid #0b8f34; }
-.error { background: #f8d7da; color: #721c24; border: 3px solid #dc3545; }
-.warning { background: #fff3cd; color: #856404; border: 3px solid #ffc107; }
-.info { background: #d1ecf1; color: #0c5460; border: 3px solid #0b5394; }
-.hidden { display: none; }
-@media (max-width: 600px) {
-  .container { padding: 15px; }
-  .header h1 { font-size: 28px; }
-  input { font-size: 20px; padding: 14px; }
-  .btn { font-size: 28px; padding: 20px; }
-  .home-btn { width: 100%; text-align: center; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Check In/Out - Changara Star Academy</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f0fe 0%, #f5f5f5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 480px;
+        }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header .icon { font-size: 64px; display: block; }
+        .header h1 { color: #001f5c; font-size: 28px; margin-top: 10px; }
+        .header p { color: #666; margin-top: 5px; }
+        .time-display { text-align: center; color: #0b5394; font-size: 16px; font-weight: bold; margin-bottom: 15px; }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-buttons button {
+            flex: 1; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px;
+            background: white; cursor: pointer; font-weight: bold; font-size: 16px;
+            transition: all 0.3s ease; color: #666;
+        }
+        .tab-buttons button.active { background: #0b5394; color: white; border-color: #0b5394; }
+        .tab-buttons button:hover:not(.active) { border-color: #0b5394; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 600; color: #333; margin-bottom: 5px; font-size: 14px; }
+        .form-group label .required { color: #dc3545; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px 14px; border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 15px; transition: border-color 0.3s ease; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #0b5394; outline: none;
+        }
+        .btn-checkin {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        .btn-checkin:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4); }
+        .btn-checkin:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        .btn-checkout {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s ease; margin-top: 10px;
+        }
+        .btn-checkout:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4); }
+        .btn-checkout:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        .alert {
+            padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; display: none; font-size: 14px;
+        }
+        .alert.success { display: block; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert.error { display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert.info { display: block; background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .student-info {
+            background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;
+            display: none; border-left: 4px solid #0b5394;
+        }
+        .student-info p { margin: 5px 0; font-size: 14px; color: #555; }
+        .student-info .label { font-weight: 600; color: #333; }
+        .student-info .status { font-weight: bold; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: inline-block; }
+        .student-info .status.present { background: #d4edda; color: #155724; }
+        .student-info .status.late { background: #fff3cd; color: #856404; }
+        .student-info .status.checked-out { background: #d1ecf1; color: #0c5460; }
+        .buttons-row { display: flex; gap: 10px; margin-top: 15px; }
+        .buttons-row button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; }
+        .btn-home { background: #6c757d; color: white; }
+        .btn-home:hover { background: #5a6268; }
+        .btn-portal { background: #0b5394; color: white; }
+        .btn-portal:hover { background: #001f5c; }
+        #checkinForm, #checkoutForm { display: none; }
+        #checkinForm.active, #checkoutForm.active { display: block; }
+        .loading {
+            display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3;
+            border-top: 3px solid #28a745; border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 480px) { .container { padding: 20px; } .tab-buttons button { font-size: 14px; padding: 10px; } }
+    </style>
 </head>
 <body>
-<div class="container">
-  <button class="home-btn" onclick="goHome()">&#127968; Back to Home</button>
-  <div class="header">
-    <h1>&#127881; Changara Star Academy</h1>
-    <p>&#127895; Student Dashboard</p>
-    <div id="datetime" style="font-size:22px;color:white;margin-top:8px;"></div>
-  </div>
-  <div id="msg" class="hidden"></div>
-  <div class="box-section" id="checkinSection">
-    <div class="box-title">&#128203; Check In</div>
-    <p style="font-size:22px;color:#666;margin-bottom:15px;">Enter your Student ID and PIN to check in</p>
-    <label>&#128100; Student ID:</label><input id="studentId" placeholder="e.g., ST001">
-    <label>&#128274; PIN:</label><input id="studentPin" type="password" placeholder="Enter your PIN">
-    <button class="btn btn-checkin" onclick="checkInStudent()">&#10003; CHECK IN</button>
-  </div>
-  <div class="box-section checkout-section" id="checkoutSection">
-    <div class="box-title">&#128682; Check Out</div>
-    <p style="font-size:22px;color:#856404;margin-bottom:15px;">Enter your Student ID and PIN to check out</p>
-    <label>&#128100; Student ID:</label><input id="checkoutId" placeholder="Enter your Student ID">
-    <label>&#128274; PIN:</label><input id="checkoutPin" type="password" placeholder="Enter your PIN">
-    <button class="btn btn-checkout" onclick="checkOutStudent()">&#10005; CHECK OUT</button>
-  </div>
-  <button class="btn-home" onclick="goHome()">&#127968; Back to Home</button>
-</div>
-<script>
-function updateDateTime(){var n=new Date();document.getElementById("datetime").innerHTML=n.toLocaleDateString('en-GB')+" | "+n.toLocaleTimeString('en-GB');}setInterval(updateDateTime,1000);updateDateTime();
-const SCHOOL_LAT=0.7409274977411274;const SCHOOL_LNG=34.418766365824496;const ALLOWED_DISTANCE=1000000;
-function getDistance(lat1,lng1,lat2,lng2){var R=6371000;var dLat=(lat2-lat1)*Math.PI/180;var dLng=(lng2-lng1)*Math.PI/180;var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);var c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));return R*c;}
-function goHome(){google.script.run.withSuccessHandler(function(u){window.top.location.href=u;}).getWebAppUrl();}
-function clearCheckInFields(){document.getElementById("studentId").value="";document.getElementById("studentPin").value="";}
-function clearCheckOutFields(){document.getElementById("checkoutId").value="";document.getElementById("checkoutPin").value="";}
-function showMessage(msg,type){var el=document.getElementById("msg");el.textContent=msg;el.className=type;el.classList.remove("hidden");}
-function resetStudentSections(){document.getElementById("checkinSection").classList.remove("hidden-section");document.getElementById("checkoutSection").classList.remove("hidden-section");document.getElementById("msg").classList.add("hidden");clearCheckInFields();clearCheckOutFields();}
-function checkInStudent(){var id=document.getElementById("studentId").value.trim();var pin=document.getElementById("studentPin").value.trim();if(!id||!pin){showMessage("Please enter Student ID and PIN","error");return;}navigator.geolocation.getCurrentPosition(function(pos){if(getDistance(pos.coords.latitude,pos.coords.longitude,SCHOOL_LAT,SCHOOL_LNG)>ALLOWED_DISTANCE){showMessage("You are outside the school area","error");return;}google.script.run.withSuccessHandler(function(r){if(r.includes("Successfully")||r.includes("checked in")){document.getElementById("checkinSection").classList.add("hidden-section");document.getElementById("checkoutSection").classList.add("hidden-section");document.getElementById("msg").className="success";document.getElementById("msg").innerHTML=r+'<br><br><button class="btn-reset" onclick="resetStudentSections()">&#128260; Check Another Student</button>';document.getElementById("msg").classList.remove("hidden");}else{showMessage(r,"warning");}}).withFailureHandler(function(e){showMessage("Error: "+e.message,"error");}).loginStudent(id,pin,"IN");},function(){showMessage("Please allow GPS access","error");});}
-function checkOutStudent(){var id=document.getElementById("checkoutId").value.trim();var pin=document.getElementById("checkoutPin").value.trim();if(!id||!pin){showMessage("Please enter Student ID and PIN","error");return;}navigator.geolocation.getCurrentPosition(function(pos){if(getDistance(pos.coords.latitude,pos.coords.longitude,SCHOOL_LAT,SCHOOL_LNG)>ALLOWED_DISTANCE){showMessage("You are outside the school area","error");return;}google.script.run.withSuccessHandler(function(r){if(r.includes("Successfully")||r.includes("checked out")){document.getElementById("checkinSection").classList.add("hidden-section");document.getElementById("checkoutSection").classList.add("hidden-section");document.getElementById("msg").className="success";document.getElementById("msg").innerHTML=r+'<br><br><button class="btn-reset" onclick="resetStudentSections()">&#128260; Check Another Student</button>';document.getElementById("msg").classList.remove("hidden");}else{showMessage(r,"warning");}}).withFailureHandler(function(e){showMessage("Error: "+e.message,"error");}).loginStudent(id,pin,"OUT");},function(){showMessage("Please allow GPS access","error");});}
-</script>
+    <div class="container">
+        <div class="header">
+            <span class="icon">🎓</span>
+            <h1>Student Check In/Out</h1>
+            <p>Changara Star Academy</p>
+        </div>
+
+        <div id="timeDisplay" class="time-display">🕐 Loading time...</div>
+
+        <div id="alert" class="alert"></div>
+
+        <div id="studentInfo" class="student-info">
+            <p><span class="label">👤 Name:</span> <span id="studentName"></span></p>
+            <p><span class="label">🆔 Student ID:</span> <span id="studentId"></span></p>
+            <p><span class="label">📚 Grade:</span> <span id="studentGrade"></span></p>
+            <p><span class="label">📊 Status:</span> <span id="studentStatus" class="status"></span></p>
+            <p><span class="label">⏰ Check In:</span> <span id="studentCheckIn"></span></p>
+            <p><span class="label">🚪 Check Out:</span> <span id="studentCheckOut"></span></p>
+        </div>
+
+        <div class="tab-buttons">
+            <button class="active" onclick="switchTab('checkin')">✅ Check In</button>
+            <button onclick="switchTab('checkout')">🚪 Check Out</button>
+        </div>
+
+        <form id="checkinForm" class="active">
+            <div class="form-group">
+                <label>Student ID <span class="required">*</span></label>
+                <input type="text" id="checkinStudentId" placeholder="Enter your Student ID" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>PIN <span class="required">*</span></label>
+                <input type="password" id="checkinPin" placeholder="Enter your 4-digit PIN" required maxlength="6" autocomplete="off">
+            </div>
+            <button type="submit" id="checkinBtn" class="btn-checkin">✅ Check In</button>
+        </form>
+
+        <form id="checkoutForm">
+            <div class="form-group">
+                <label>Student ID <span class="required">*</span></label>
+                <input type="text" id="checkoutStudentId" placeholder="Enter your Student ID" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>PIN <span class="required">*</span></label>
+                <input type="password" id="checkoutPin" placeholder="Enter your 4-digit PIN" required maxlength="6" autocomplete="off">
+            </div>
+            <button type="submit" id="checkoutBtn" class="btn-checkout">🚪 Check Out</button>
+        </form>
+
+        <div class="buttons-row">
+            <button onclick="window.location.href='portal.html'" class="btn-home">🏠 Back to Portal</button>
+            <button onclick="window.location.href='index.html'" class="btn-portal">🏫 Homepage</button>
+        </div>
+    </div>
+
+    <script>
+        const checkinForm = document.getElementById('checkinForm');
+        const checkoutForm = document.getElementById('checkoutForm');
+        const checkinBtn = document.getElementById('checkinBtn');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const alertDiv = document.getElementById('alert');
+        const studentInfo = document.getElementById('studentInfo');
+        const timeDisplay = document.getElementById('timeDisplay');
+
+        function updateTime() {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Africa/Nairobi' };
+            timeDisplay.textContent = '🕐 Kenya Time: ' + now.toLocaleTimeString('en-KE', options);
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-buttons button').forEach(b => b.classList.remove('active'));
+            if (tab === 'checkin') {
+                document.querySelector('.tab-buttons button:first-child').classList.add('active');
+                checkinForm.classList.add('active');
+                checkoutForm.classList.remove('active');
+                hideAlert();
+                hideStudentInfo();
+            } else {
+                document.querySelector('.tab-buttons button:last-child').classList.add('active');
+                checkoutForm.classList.add('active');
+                checkinForm.classList.remove('active');
+                hideAlert();
+                hideStudentInfo();
+            }
+        }
+
+        function showAlert(message, type) {
+            alertDiv.className = 'alert ' + type;
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+        }
+
+        function hideAlert() { alertDiv.style.display = 'none'; }
+
+        function showStudentInfo(data) {
+            studentInfo.style.display = 'block';
+            document.getElementById('studentName').textContent = data.name;
+            document.getElementById('studentId').textContent = data.studentId;
+            document.getElementById('studentGrade').textContent = data.grade || 'N/A';
+            const statusEl = document.getElementById('studentStatus');
+            statusEl.textContent = data.status;
+            statusEl.className = 'status ' + data.statusClass;
+            document.getElementById('studentCheckIn').textContent = data.checkIn || 'Not checked in';
+            document.getElementById('studentCheckOut').textContent = data.checkOut || 'Not checked out';
+        }
+
+        function hideStudentInfo() { studentInfo.style.display = 'none'; }
+
+        function refreshPage() { setTimeout(() => { window.location.reload(); }, 3000); }
+
+        async function handleCheckInOut(studentId, pin, action) {
+            try {
+                const btn = action === 'IN' ? checkinBtn : checkoutBtn;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading"></span> Processing...';
+
+                const response = await fetch('/api/student/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ studentId, pin, action })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    showStudentInfo({
+                        name: result.student.name,
+                        studentId: result.student.studentId,
+                        grade: result.student.grade,
+                        status: result.message.includes('LATE') ? 'LATE' : (action === 'IN' ? 'PRESENT' : 'CHECKED OUT'),
+                        statusClass: result.message.includes('LATE') ? 'late' : (action === 'IN' ? 'present' : 'checked-out'),
+                        checkIn: result.timeFormatted,
+                        checkOut: action === 'OUT' ? result.timeFormatted : null
+                    });
+                    refreshPage();
+                } else {
+                    showAlert(result.message || 'Operation failed', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = action === 'IN' ? '✅ Check In' : '🚪 Check Out';
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+                const btn = action === 'IN' ? checkinBtn : checkoutBtn;
+                btn.disabled = false;
+                btn.innerHTML = action === 'IN' ? '✅ Check In' : '🚪 Check Out';
+            }
+        }
+
+        checkinForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('checkinStudentId').value.trim();
+            const pin = document.getElementById('checkinPin').value.trim();
+            if (!studentId || !pin) { showAlert('Please enter Student ID and PIN', 'error'); return; }
+            await handleCheckInOut(studentId, pin, 'IN');
+        });
+
+        checkoutForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('checkoutStudentId').value.trim();
+            const pin = document.getElementById('checkoutPin').value.trim();
+            if (!studentId || !pin) { showAlert('Please enter Student ID and PIN', 'error'); return; }
+            await handleCheckInOut(studentId, pin, 'OUT');
+        });
+    </script>
 </body>
 </html>
