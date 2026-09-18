@@ -2341,6 +2341,276 @@ app.get('/api/assessments/generate-report/:id', async (req, res) => {
 });
 
 // ============================================
+// CBE/CBA ASSESSMENT API (Phase 2)
+// ============================================
+
+// --- Curriculum Config ---
+app.get('/api/curriculum/configs', async (req, res) => {
+  try {
+    const configs = await CurriculumConfig.find().sort({ year: -1 });
+    res.json({ success: true, configs });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.post('/api/curriculum/configs', async (req, res) => {
+  try {
+    const config = new CurriculumConfig(req.body);
+    await config.save();
+    res.status(201).json({ success: true, config });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.put('/api/curriculum/configs/:id', async (req, res) => {
+  try {
+    const config = await CurriculumConfig.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!config) return res.status(404).json({ success: false, message: 'Config not found' });
+    res.json({ success: true, config });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.delete('/api/curriculum/configs/:id', async (req, res) => {
+  try { await CurriculumConfig.findByIdAndDelete(req.params.id); res.json({ success: true, message: 'Deleted' }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Education Levels ---
+app.get('/api/education-levels', async (req, res) => {
+  try { const levels = await EducationLevel.find().sort({ sortOrder: 1 }); res.json({ success: true, levels }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.post('/api/education-levels', async (req, res) => {
+  try { const level = new EducationLevel(req.body); await level.save(); res.status(201).json({ success: true, level }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.put('/api/education-levels/:id', async (req, res) => {
+  try { const level = await EducationLevel.findByIdAndUpdate(req.params.id, req.body, { new: true }); if (!level) return res.status(404).json({ success: false, message: 'Not found' }); res.json({ success: true, level }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Learning Areas ---
+app.get('/api/learning-areas', async (req, res) => {
+  try { const areas = await LearningArea.find().populate('strands').populate('competencies').sort({ sortOrder: 1 }); res.json({ success: true, areas }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.post('/api/learning-areas', async (req, res) => {
+  try { const area = new LearningArea(req.body); await area.save(); res.status(201).json({ success: true, area }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.put('/api/learning-areas/:id', async (req, res) => {
+  try { const area = await LearningArea.findByIdAndUpdate(req.params.id, req.body, { new: true }); if (!area) return res.status(404).json({ success: false, message: 'Not found' }); res.json({ success: true, area }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Assessment Records (main CBE data) ---
+app.get('/api/assessment-records', async (req, res) => {
+  try {
+    const { learnerId, grade, learningAreaId, period, type, academicYearId } = req.query;
+    const query = {};
+    if (learnerId) query.learnerId = learnerId;
+    if (grade) query.grade = grade;
+    if (learningAreaId) query.learningAreaId = learningAreaId;
+    if (period) query.assessmentPeriod = period;
+    if (type) query.assessmentType = type;
+    if (academicYearId) query.academicYearId = academicYearId;
+    const records = await AssessmentRecord.find(query).sort({ createdAt: -1 }).populate('learnerId').populate('learningAreaId').populate('academicYearId').populate('termId');
+    res.json({ success: true, records });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.post('/api/assessment-records', async (req, res) => {
+  try {
+    const record = new AssessmentRecord(req.body);
+    await record.save();
+    await AuditLog.create({ action: 'CREATE', entityType: 'AssessmentRecord', entityId: record._id, learnerId: record.learnerId, performedBy: req.body.createdById, performedByName: req.body.createdByName, grade: record.grade });
+    res.status(201).json({ success: true, message: 'Assessment record saved', record });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.put('/api/assessment-records/:id', async (req, res) => {
+  try {
+    const record = await AssessmentRecord.findByIdAndUpdate(req.params.id, { ...req.body, updatedAt: new Date() }, { new: true });
+    if (!record) return res.status(404).json({ success: false, message: 'Not found' });
+    await AuditLog.create({ action: 'UPDATE', entityType: 'AssessmentRecord', entityId: record._id, learnerId: record.learnerId, performedBy: req.body.updatedById, performedByName: req.body.updatedByName, grade: record.grade, fieldChanged: 'assessment', oldValue: { period: record.assessmentPeriod, type: record.assessmentType }, newValue: { period: req.body.assessmentPeriod, type: req.body.assessmentType } });
+    res.json({ success: true, message: 'Updated', record });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.delete('/api/assessment-records/:id', async (req, res) => {
+  try {
+    const record = await AssessmentRecord.findById(req.params.id);
+    if (!record) return res.status(404).json({ success: false, message: 'Not found' });
+    await AuditLog.create({ action: 'DELETE', entityType: 'AssessmentRecord', entityId: record._id, learnerId: record.learnerId, performedBy: req.body.performedById, performedByName: req.body.performedByName, grade: record.grade });
+    await AssessmentRecord.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Deleted' });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Evidence ---
+app.get('/api/evidence', async (req, res) => {
+  try {
+    const { learnerId, assessmentRecordId } = req.query;
+    const query = {};
+    if (learnerId) query.learnerId = learnerId;
+    if (assessmentRecordId) query.assessmentRecordId = assessmentRecordId;
+    const evidence = await Evidence.find(query).sort({ date: -1 });
+    res.json({ success: true, evidence });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.post('/api/evidence', async (req, res) => {
+  try { const evidence = new Evidence(req.body); await evidence.save(); res.status(201).json({ success: true, evidence }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.put('/api/evidence/:id', async (req, res) => {
+  try { const evidence = await Evidence.findByIdAndUpdate(req.params.id, req.body, { new: true }); if (!evidence) return res.status(404).json({ success: false, message: 'Not found' }); res.json({ success: true, evidence }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.delete('/api/evidence/:id', async (req, res) => {
+  try { await Evidence.findByIdAndDelete(req.params.id); res.json({ success: true, message: 'Deleted' }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Learner Profiles ---
+app.get('/api/learners', async (req, res) => {
+  try {
+    const { grade, className, educationLevelId, status } = req.query;
+    const query = {};
+    if (grade) query.grade = grade;
+    if (className) query.className = className;
+    if (educationLevelId) query.educationLevelId = educationLevelId;
+    if (status) query.status = status;
+    const learners = await LearnerProfile.find(query).sort({ fullName: 1 });
+    res.json({ success: true, learners });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.post('/api/learners', async (req, res) => {
+  try {
+    const learner = new LearnerProfile(req.body);
+    await learner.save();
+    res.status(201).json({ success: true, learner });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+app.put('/api/learners/:id', async (req, res) => {
+  try { const learner = await LearnerProfile.findByIdAndUpdate(req.params.id, req.body, { new: true }); if (!learner) return res.status(404).json({ success: false, message: 'Not found' }); res.json({ success: true, learner }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Learner Progress ---
+app.get('/api/learners/:id/progress', async (req, res) => {
+  try {
+    const records = await AssessmentRecord.find({ learnerId: req.params.id }).sort({ assessmentDate: 1 }).populate('academicYearId').populate('termId');
+    const progress = records.map(r => ({
+      date: r.assessmentDate,
+      period: r.assessmentPeriod,
+      type: r.assessmentType,
+      grade: r.grade,
+      performanceLevel: r.performanceLevel,
+      performanceLevelCode: r.performanceLevelCode,
+      totalScore: r.totalScore,
+      change: null
+    }));
+    for (let i = 1; i < progress.length; i++) {
+      const prev = progress[i - 1];
+      const curr = progress[i];
+      const prevCode = ['PL1', 'PL2', 'PL3', 'PL4'].indexOf(prev.performanceLevelCode);
+      const currCode = ['PL1', 'PL2', 'PL3', 'PL4'].indexOf(curr.performanceLevelCode);
+      if (prevCode >= 0 && currCode >= 0) {
+        const diff = currCode - prevCode;
+        curr.change = diff > 0 ? 'IMPROVING' : diff < 0 ? 'DECLINING' : 'STABLE';
+      }
+    }
+    res.json({ success: true, progress });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Class Analysis ---
+app.get('/api/analysis/class/:grade', async (req, res) => {
+  try {
+    const grade = decodeURIComponent(req.params.grade);
+    const { period, type, learningAreaId } = req.query;
+    const query = { grade };
+    if (period) query.assessmentPeriod = period;
+    if (type) query.assessmentType = type;
+    if (learningAreaId) query.learningAreaId = learningAreaId;
+    const records = await AssessmentRecord.find(query);
+    const distribution = { PL4: 0, PL3: 0, PL2: 0, PL1: 0 };
+    records.forEach(r => {
+      if (distribution[r.performanceLevelCode] !== undefined) distribution[r.performanceLevelCode]++;
+      else if (r.performanceLevel === 'Exceeding Expectation') distribution.PL4++;
+      else if (r.performanceLevel === 'Meeting Expectation') distribution.PL3++;
+      else if (r.performanceLevel === 'Approaching Expectation') distribution.PL2++;
+      else if (r.performanceLevel === 'Below Expectation') distribution.PL1++;
+    });
+    const total = records.length;
+    res.json({
+      success: true,
+      grade, period, type,
+      total,
+      distribution,
+      percentages: {
+        PL4: total > 0 ? ((distribution.PL4 / total) * 100).toFixed(1) : '0.0',
+        PL3: total > 0 ? ((distribution.PL3 / total) * 100).toFixed(1) : '0.0',
+        PL2: total > 0 ? ((distribution.PL2 / total) * 100).toFixed(1) : '0.0',
+        PL1: total > 0 ? ((distribution.PL1 / total) * 100).toFixed(1) : '0.0'
+      },
+      learners: records.map(r => ({ learnerId: r.learnerId, learnerName: r.learnerName, performanceLevel: r.performanceLevel, performanceLevelCode: r.performanceLevelCode, totalScore: r.totalScore }))
+    });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Calculation Engine ---
+app.post('/api/calculation/calculate', async (req, res) => {
+  try {
+    const { records, method, weighting } = req.body;
+    if (!records || !Array.isArray(records)) return res.status(400).json({ success: false, message: 'records array required' });
+    const results = records.map(r => {
+      let score = 0; let count = 0;
+      if (r.contents && Array.isArray(r.contents)) {
+        r.contents.forEach(c => {
+          if (c.score != null && !isNaN(Number(c.score))) { score += Number(c.score); count++; }
+          else if (c.performanceLevelCode) {
+            const code = ['PL1', 'PL2', 'PL3', 'PL4'].indexOf(c.performanceLevelCode);
+            if (code >= 0) { score += (code + 1) * 25; count++; }
+          }
+        });
+      }
+      return {
+        learnerId: r.learnerId, learnerName: r.learnerName,
+        rawScore: score, itemCount: count,
+        average: count > 0 ? score / count : 0,
+        calculationMethod: method || 'AVERAGE',
+        weighting: weighting || null
+      };
+    });
+    res.json({ success: true, results, trace: { method, weighting, calculatedAt: new Date() } });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Assessment Methods ---
+app.get('/api/assessment-methods', async (req, res) => {
+  try { const methods = await AssessmentMethod.find({ isActive: true }); res.json({ success: true, methods }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Performance Levels ---
+app.get('/api/performance-levels', async (req, res) => {
+  try { const levels = await PerformanceLevel.find({ isActive: true }); res.json({ success: true, levels }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Rubrics ---
+app.get('/api/rubrics', async (req, res) => {
+  try { const rubrics = await Rubric.find({ isActive: true }).populate('learningAreaId').populate('strandId').populate('subStrandId').populate('learningOutcomeId').populate('competencyId'); res.json({ success: true, rubrics }); }
+  catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// --- Audit Log ---
+app.get('/api/audit', async (req, res) => {
+  try {
+    const { learnerId, entityId, performedBy } = req.query;
+    const query = {};
+    if (learnerId) query.learnerId = learnerId;
+    if (entityId) query.entityId = entityId;
+    if (performedBy) query.performedBy = performedBy;
+    const logs = await AuditLog.find(query).sort({ createdAt: -1 }).limit(500);
+    res.json({ success: true, logs });
+  } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// ============================================
 // TEST ROUTE
 // ============================================
 app.get('/api/test', (req, res) => {
