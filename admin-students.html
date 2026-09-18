@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Admin - Changara Star Academy</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #001f5c, #0b5394);
+            color: white;
+            padding: 20px 0;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+        }
+        .sidebar-brand { padding: 0 20px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-brand h2 { color: #ffeb99; font-size: 22px; }
+        .sidebar-brand p { color: #d4a017; font-size: 13px; }
+        .sidebar-menu { padding: 20px; }
+        .sidebar-menu a {
+            display: block;
+            color: #ccc;
+            text-decoration: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(212, 160, 23, 0.2);
+            color: #d4a017;
+        }
+        .sidebar-menu .logout { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+        .sidebar-menu .logout a { color: #ff6b6b; cursor: pointer; }
+        .main-content { margin-left: 250px; padding: 30px; width: 100%; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .header h1 { color: #001f5c; }
+        .header .admin-info { display: flex; align-items: center; gap: 15px; }
+        .header .admin-info .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #d4a017;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #001f5c;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .stat-card .number { font-size: 24px; font-weight: bold; display: block; }
+        .stat-card .label { color: #666; font-size: 12px; }
+        .stat-card .number.green { color: #28a745; }
+        .stat-card .number.orange { color: #ffc107; }
+        .stat-card .number.blue { color: #0b5394; }
+        .stat-card .number.red { color: #dc3545; }
+
+        .filter-section {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-section input, .filter-section select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 120px;
+        }
+        .filter-section input[type="date"] {
+            min-width: 160px;
+            cursor: pointer;
+        }
+        .filter-section .date-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .filter-section button {
+            padding: 8px 18px;
+            background: #0b5394;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .filter-section button:hover { background: #001f5c; }
+        .filter-section .export-btn { background: #28a745; }
+        .filter-section .export-btn:hover { background: #1e7e34; }
+        .filter-section .pdf-btn { background: #dc3545; }
+        .filter-section .pdf-btn:hover { background: #c82333; }
+
+        .summary-box {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #0b5394;
+        }
+        .summary-box .title { font-weight: bold; color: #001f5c; font-size: 16px; }
+        .summary-box .stats { display: flex; gap: 25px; flex-wrap: wrap; margin-top: 5px; }
+        .summary-box .stats span { font-size: 13px; }
+        .summary-box .stats .count { font-weight: bold; font-size: 16px; }
+
+        .table-container {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: #001f5c;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 12px;
+        }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+        tr:hover td { background: #f8f9fa; }
+
+        .badge {
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge.green { background: #d4edda; color: #155724; }
+        .badge.orange { background: #fff3cd; color: #856404; }
+        .badge.blue { background: #d1ecf1; color: #0c5460; }
+        .badge.gray { background: #e9ecef; color: #6c757d; }
+
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .loading { text-align: center; padding: 20px; color: #0b5394; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; min-height: auto; }
+            .main-content { margin-left: 0; padding: 15px; }
+            .filter-section { flex-direction: column; align-items: stretch; }
+            .filter-section input, .filter-section select { min-width: 100%; }
+            .header { flex-direction: column; gap: 15px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h2>🏫 Changara Star Academy</h2>
+            <p>Student Attendance Admin</p>
+        </div>
+        <div class="sidebar-menu">
+            <a href="admin-dashboard.html" onclick="return checkAuth(event)">🏠 Dashboard</a>
+            <a href="admin-academics.html" onclick="return checkAuth(event)">📚 Academics</a>
+            <a href="admin-teachers.html" onclick="return checkAuth(event)">👨‍🏫 Teachers</a>
+            <a href="admin-students.html" onclick="return checkAuth(event)" class="active">🎓 Students</a>
+            <a href="admin-attendance.html" onclick="return checkAuth(event)">📋 Teacher Attendance</a>
+            <a href="admin-visitors.html" onclick="return checkAuth(event)">🚪 Visitors</a>
+            <a href="admin-cms.html" onclick="return checkAuth(event)">📝 CMS</a>
+            <a href="admin-fees.html" onclick="return checkAuth(event)">💰 Fees</a>
+            <div class="logout">
+                <a href="#" onclick="logout()">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>🎓 Student Attendance Records</h1>
+            <div class="admin-info">
+                <div class="avatar">SA</div>
+                <span id="adminName">Student Admin</span>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="number blue" id="totalStudents">0</span>
+                <span class="label">Total Students</span>
+            </div>
+            <div class="stat-card">
+                <span class="number green" id="presentCount">0</span>
+                <span class="label">Present Today</span>
+            </div>
+            <div class="stat-card">
+                <span class="number orange" id="lateCount">0</span>
+                <span class="label">Late Today</span>
+            </div>
+            <div class="stat-card">
+                <span class="number red" id="absentCount">0</span>
+                <span class="label">Absent Today</span>
+            </div>
+            <div class="stat-card">
+                <span class="number blue" id="checkedOutCount">0</span>
+                <span class="label">Checked Out</span>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <input type="text" id="searchInput" placeholder="🔍 Search by name, ID, or grade..." onkeyup="filterTable()">
+            <select id="gradeFilter" onchange="filterTable()">
+                <option value="">All Grades</option>
+                <option value="Playgroup">Playgroup</option>
+                <option value="PP1">PP1</option>
+                <option value="PP2">PP2</option>
+                <option value="Grade 1">Grade 1</option>
+                <option value="Grade 2">Grade 2</option>
+                <option value="Grade 3">Grade 3</option>
+                <option value="Grade 4">Grade 4</option>
+                <option value="Grade 5">Grade 5</option>
+                <option value="Grade 6">Grade 6</option>
+            </select>
+            <select id="statusFilter" onchange="filterTable()">
+                <option value="">All Status</option>
+                <option value="Present">✅ Present</option>
+                <option value="Late">⚠️ Late</option>
+                <option value="Checked Out">🚪 Checked Out</option>
+                <option value="Absent">❌ Absent</option>
+            </select>
+            <input type="date" id="dateFilter" onchange="loadAttendance()" value="">
+            <button onclick="loadAttendance()">🔄 Load</button>
+            <button class="export-btn" onclick="exportCSV()">📊 Export CSV</button>
+            <button class="pdf-btn" onclick="generatePDF()">📄 PDF Report</button>
+        </div>
+
+        <div class="summary-box" id="summaryBox" style="display:none;">
+            <div class="title">📊 Attendance Summary for <span id="summaryDate"></span></div>
+            <div class="stats">
+                <span>Total: <span class="count" id="sumTotal">0</span></span>
+                <span>✅ Present: <span class="count green" id="sumPresent">0</span></span>
+                <span>⚠️ Late: <span class="count orange" id="sumLate">0</span></span>
+                <span>🚪 Checked Out: <span class="count blue" id="sumCheckedOut">0</span></span>
+                <span>❌ Absent: <span class="count red" id="sumAbsent">0</span></span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceBody">
+                    <tr><td colspan="8" class="loading">Loading attendance...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PIN = '1010';
+
+        function checkAuth(event) {
+            const isAuthed = sessionStorage.getItem('adminAuthed') === 'true';
+            if (!isAuthed) {
+                event.preventDefault();
+                const target = event.currentTarget.href;
+                const pin = prompt('Enter admin PIN to access:');
+                if (pin === ADMIN_PIN) {
+                    sessionStorage.setItem('adminAuthed', 'true');
+                    window.location.href = target;
+                } else if (pin !== null) {
+                    alert('Invalid PIN');
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function logout() {
+            sessionStorage.removeItem('adminAuthed');
+            window.location.href = 'admin-login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!sessionStorage.getItem('adminAuthed')) {
+                const pin = prompt('Enter admin PIN to access Student Attendance Admin:');
+                if (pin === ADMIN_PIN) {
+                    sessionStorage.setItem('adminAuthed', 'true');
+                    initPage();
+                } else {
+                    window.location.href = 'portal.html';
+                }
+            } else {
+                initPage();
+            }
+        });
+
+        function initPage() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateFilter').value = today;
+            loadAttendance();
+        }
+
+        async function loadAttendance() {
+            const date = document.getElementById('dateFilter').value;
+            const tbody = document.getElementById('attendanceBody');
+            tbody.innerHTML = '<tr><td colspan="8" class="loading">Loading attendance...</td></tr>';
+
+            try {
+                const url = date ? `/api/student/attendance/date/${date}` : '/api/student/attendance/today';
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.success) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="color:red;text-align:center;">Error: ' + (data.message || 'Unknown error') + '</td></tr>';
+                    return;
+                }
+
+                const records = data.records || [];
+                renderTable(records);
+                updateSummary(records, date);
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="8" style="color:red;text-align:center;">Error: ' + error.message + '</td></tr>';
+            }
+        }
+
+        function renderTable(records) {
+            const tbody = document.getElementById('attendanceBody');
+            const gradeFilter = document.getElementById('gradeFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = records;
+
+            if (gradeFilter) filtered = filtered.filter(r => r.grade === gradeFilter);
+            if (statusFilter) filtered = filtered.filter(r => getStatusLabel(r) === statusFilter);
+            if (searchInput) filtered = filtered.filter(r => 
+                r.name.toLowerCase().includes(searchInput) ||
+                r.studentId.toLowerCase().includes(searchInput) ||
+                (r.grade || '').toLowerCase().includes(searchInput)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No attendance records found</td></tr>';
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((r, i) => {
+                const statusLabel = getStatusLabel(r);
+                const statusClass = getStatusClass(r);
+                html += `<tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${r.studentId}</strong></td>
+                    <td>${r.name}</td>
+                    <td>${r.grade || 'N/A'}</td>
+                    <td><span class="badge ${statusClass}">${statusLabel}</span></td>
+                    <td>${r.checkIn ? formatTime(r.checkIn) : '-'}</td>
+                    <td>${r.checkOut ? formatTime(r.checkOut) : '-'}</td>
+                    <td>${r.notes || ''}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function filterTable() {
+            loadAttendance();
+        }
+
+        function getStatusLabel(r) {
+            if (r.checkOut) return 'Checked Out';
+            if (r.status === 'Late') return 'Late';
+            if (r.checkIn) return 'Present';
+            return 'Absent';
+        }
+
+        function getStatusClass(r) {
+            if (r.checkOut) return 'blue';
+            if (r.status === 'Late') return 'orange';
+            if (r.checkIn) return 'green';
+            return 'gray';
+        }
+
+        function formatTime(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', hour12: true });
+        }
+
+        function updateSummary(records, date) {
+            const summaryBox = document.getElementById('summaryBox');
+            summaryBox.style.display = 'block';
+            document.getElementById('summaryDate').textContent = date ? new Date(date).toLocaleDateString('en-GB') : 'Today';
+
+            let present = 0, late = 0, checkedOut = 0, absent = 0;
+            const allStudents = records.length;
+
+            records.forEach(r => {
+                if (r.checkOut) checkedOut++;
+                else if (r.status === 'Late') late++;
+                else if (r.checkIn) present++;
+                else absent++;
+            });
+
+            document.getElementById('sumTotal').textContent = allStudents;
+            document.getElementById('sumPresent').textContent = present;
+            document.getElementById('sumLate').textContent = late;
+            document.getElementById('sumCheckedOut').textContent = checkedOut;
+            document.getElementById('sumAbsent').textContent = absent;
+
+            document.getElementById('totalStudents').textContent = allStudents;
+            document.getElementById('presentCount').textContent = present;
+            document.getElementById('lateCount').textContent = late;
+            document.getElementById('checkedOutCount').textContent = checkedOut;
+            document.getElementById('absentCount').textContent = absent;
+        }
+
+        function exportCSV() {
+            const date = document.getElementById('dateFilter').value;
+            const rows = [['#', 'Student ID', 'Name', 'Grade', 'Status', 'Check In', 'Check Out', 'Notes']];
+            const tbody = document.getElementById('attendanceBody');
+            const trs = tbody.querySelectorAll('tr');
+            trs.forEach((tr, i) => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length === 8) {
+                    rows.push([i + 1, tds[1].textContent, tds[2].textContent, tds[3].textContent, tds[4].textContent, tds[5].textContent, tds[6].textContent, tds[7].textContent]);
+                }
+            });
+
+            const csv = rows.map(r => r.map(c => '"' + c + '"').join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `student-attendance-${date || 'today'}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+            
+            doc.setFontSize(18);
+            doc.setTextColor(0, 31, 92);
+            doc.text('Changara Star Academy - Student Attendance Report', 14, 20);
+            
+            doc.setFontSize(12);
+            const date = document.getElementById('dateFilter').value || 'Today';
+            doc.text(`Date: ${new Date(date).toLocaleDateString('en-GB')}`, 14, 28);
+            doc.text(`Generated: ${new Date().toLocaleString('en-GB')}`, 14, 34);
+
+            const headers = [['#', 'Student ID', 'Name', 'Grade', 'Status', 'Check In', 'Check Out', 'Notes']];
+            const data = [];
+            const tbody = document.getElementById('attendanceBody');
+            const trs = tbody.querySelectorAll('tr');
+            trs.forEach((tr, i) => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length === 8) {
+                    data.push([i + 1, tds[1].textContent, tds[2].textContent, tds[3].textContent, tds[4].textContent, tds[5].textContent, tds[6].textContent, tds[7].textContent]);
+                }
+            });
+
+            doc.autoTable({
+                head: headers,
+                body: data,
+                startY: 40,
+                styles: { fontSize: 8, cellPadding: 2 },
+                headStyles: { fillColor: [0, 31, 92], textColor: 255 },
+                alternateRowStyles: { fillColor: [245, 247, 250] },
+                margin: { left: 10, right: 10 }
+            });
+
+            doc.save(`student-attendance-${date || 'today'}.pdf`);
+        }
+    </script>
+</body>
+</html>

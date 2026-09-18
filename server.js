@@ -3253,6 +3253,38 @@ app.get('/api/student/attendance/today', async (req, res) => {
   }
 });
 
+// GET student attendance for a specific date
+app.get('/api/student/attendance/date/:date', async (req, res) => {
+  try {
+    const dateStr = req.params.date;
+    const targetDate = new Date(dateStr);
+    targetDate.setHours(0, 0, 0, 0);
+    const students = await Student.find({});
+    const records = [];
+    students.forEach(s => {
+      const rec = s.attendance.find(a => {
+        const aDate = new Date(a.date);
+        aDate.setHours(0, 0, 0, 0);
+        return aDate.getTime() === targetDate.getTime();
+      });
+      if (rec) {
+        records.push({
+          studentId: s.studentId,
+          name: s.name,
+          grade: s.grade,
+          checkIn: rec.checkIn,
+          checkOut: rec.checkOut,
+          status: rec.status,
+          isLate: rec.isLate
+        });
+      }
+    });
+    res.json({ success: true, date: targetDate, count: records.length, records });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // ============================================
 // SERVE STATIC FILES
 // ============================================
