@@ -476,6 +476,29 @@
             .cbc-summary-item { border: 1px solid #ddd; }
             .cbc-distribution, .cbc-summary, .cbc-grid { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
         }
+
+        /* ===== SUBJECT CONFIGURATION EDITOR ===== */
+        .config-subject-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .config-subject-row input[type="text"] {
+            min-width: 200px;
+        }
+        .config-subject-row input[type="number"] {
+            padding: 8px 10px;
+            border: 2px solid #e8ecf1;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .config-subject-row input:focus {
+            border-color: #D4A017;
+            outline: none;
+        }
     </style>
 </head>
 <body>
@@ -553,6 +576,11 @@
                     <option value="Continuous Assessment">Continuous Assessment</option>
                 </select>
             </div>
+            <div class="form-group" style="flex:1;min-width:200px;">
+                <label><i class="fas fa-tag"></i> Assessment Name <span style="font-weight:400;color:#999;">(unique per assessment)</span></label>
+                <input type="text" id="assessmentNameInput" list="assessmentNameList" placeholder="Auto (uses type name)" onchange="onAssessmentNameChange()">
+                <datalist id="assessmentNameList"></datalist>
+            </div>
             <div class="form-group" style="flex:1;min-width:150px;">
                 <label><i class="fas fa-calendar-day"></i> Assessment Date</label>
                 <input type="date" id="assessmentDate" style="width:100%;">
@@ -569,6 +597,9 @@
             <button class="btn btn-info" onclick="loadGradeData()">
                 <i class="fas fa-sync"></i> Refresh
             </button>
+            <button class="btn btn-warning" onclick="toggleSubjectConfig()">
+                <i class="fas fa-cog"></i> Edit Subjects
+            </button>
             <span class="save-status" id="saveStatus"></span>
         </div>
 
@@ -584,6 +615,18 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- ===== SUBJECT CONFIGURATION ===== -->
+    <div class="card" id="subjectConfigCard" style="display:none;">
+        <h2><i class="fas fa-cog" style="color:#D4A017;"></i> Subject Configuration</h2>
+        <p class="desc">Edit subject names and maximum scores for <strong id="configGradeLabel">-</strong> — <strong id="configTypeLabel">-</strong>. Saved subjects are used when entering marks for this grade and assessment type.</p>
+        <div id="subjectConfigRows"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;">
+            <button class="btn btn-success" onclick="addSubjectConfigRow()"><i class="fas fa-plus"></i> Add Subject</button>
+            <button class="btn btn-primary" onclick="saveSubjectConfig()"><i class="fas fa-save"></i> Save Subjects</button>
+            <button class="btn btn-secondary" onclick="toggleSubjectConfig()"><i class="fas fa-times"></i> Close</button>
         </div>
     </div>
 
@@ -723,6 +766,22 @@
     let currentType = 'Monthly Assessment';
     let studentsData = [];
     let isPeriodDirty = false;
+    // Server-saved subject configuration (overrides the built-in GRADE_CONFIGS
+    // defaults once the admin has saved subjects for this grade/type).
+    let activeSubjectConfig = null;
+
+    // Returns the assessment name entered by the admin (empty = automatic,
+    // in which case the backend uses the assessment type as the name).
+    function getCurrentAssessmentName() {
+        const el = document.getElementById('assessmentNameInput');
+        return (el && el.value.trim()) ? el.value.trim() : '';
+    }
+
+    function onAssessmentNameChange() {
+        updateAssessmentInfo();
+        loadGradeData();
+        loadHistory();
+    }
 
     // ============================================
     // GRADE SUBJECT CONFIGURATIONS
@@ -867,14 +926,18 @@
                 el.classList.add('active');
             }
         });
+        loadSubjectConfig();
         loadGradeData();
+        loadHistory();
     }
 
     function onPeriodChange() {
         currentPeriod = document.getElementById('assessmentPeriod').value;
         currentType = document.getElementById('assessmentType').value;
         updateAssessmentInfo();
+        loadSubjectConfig();
         loadGradeData();
+        loadHistory();
     }
 
     function updateAssessmentInfo() {
@@ -882,7 +945,8 @@
         const title = document.getElementById('assessmentInfoTitle');
         if (currentGrade && currentPeriod && currentType) {
             info.style.display = 'block';
-            title.textContent = `${currentGrade} — ${currentType} — ${currentPeriod}`;
+            const name = getCurrentAssessmentName();
+            title.textContent = `${currentGrade} — ${name || currentType} — ${currentPeriod}`;
         } else {
             info.style.display = 'none';
         }
@@ -895,7 +959,10 @@
         showSaveStatus('Loading...', 'saving');
         
         try {
-            const response = await fetch(`/api/assessments/grade/${encodeURIComponent(currentGrade)}?period=${encodeURIComponent(currentPeriod)}&type=${encodeURIComponent(currentType)}`);
+            let url = `/api/assessments/grade/${encodeURIComponent(currentGrade)}?period=${encodeURIComponent(currentPeriod)}&type=${encodeURIComponent(currentType)}`;
+            const assessmentName = getCurrentAssessmentName();
+            if (assessmentName) url += `&name=${encodeURIComponent(assessmentName)}`;
+            const response = await fetch(url);
             const data = await response.json();
             
             if (data.success) {
@@ -926,7 +993,10 @@
 
     async function loadStats() {
         try {
-            const response = await fetch(`/api/assessments/stats?grade=${encodeURIComponent(currentGrade)}&period=${encodeURIComponent(currentPeriod)}&type=${encodeURIComponent(currentType)}`);
+            let url = `/api/assessments/stats?grade=${encodeURIComponent(currentGrade)}&period=${encodeURIComponent(currentPeriod)}&type=${encodeURIComponent(currentType)}`;
+            const assessmentName = getCurrentAssessmentName();
+            if (assessmentName) url += `&name=${encodeURIComponent(assessmentName)}`;
+            const response = await fetch(url);
             const data = await response.json();
             if (data.success && data.stats) {
                 document.getElementById('totalStudents').textContent = data.stats.total || 0;
@@ -941,11 +1011,115 @@
     }
 
     // ============================================
+    // SUBJECT CONFIGURATION (editable)
+    // ============================================
+    function getConfigSubjects() {
+        if (activeSubjectConfig && activeSubjectConfig.length > 0) return activeSubjectConfig;
+        const def = GRADE_CONFIGS[currentGrade];
+        return def ? def.subjects : [];
+    }
+
+    async function loadSubjectConfig() {
+        try {
+            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(currentGrade)}?type=${encodeURIComponent(currentType)}`);
+            const data = await response.json();
+            if (data.success && data.config && Array.isArray(data.config.subjects) && data.config.subjects.length > 0) {
+                activeSubjectConfig = data.config.subjects;
+            } else {
+                activeSubjectConfig = null;
+            }
+        } catch (error) {
+            console.error('Error loading subject config:', error);
+            activeSubjectConfig = null;
+        }
+        renderMarksTable();
+    }
+
+    function toggleSubjectConfig() {
+        const card = document.getElementById('subjectConfigCard');
+        if (card.style.display === 'none' || !card.style.display) {
+            document.getElementById('configGradeLabel').textContent = currentGrade;
+            document.getElementById('configTypeLabel').textContent = currentType;
+            renderSubjectConfigEditor();
+            card.style.display = 'block';
+            card.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            card.style.display = 'none';
+        }
+    }
+
+    function renderSubjectConfigEditor() {
+        const container = document.getElementById('subjectConfigRows');
+        const subjects = getConfigSubjects();
+        if (!subjects || subjects.length === 0) {
+            container.innerHTML = '<p style="color:#999;">No subjects configured. Add subjects below.</p>';
+            return;
+        }
+        container.innerHTML = subjects.map((s, i) => `
+            <div class="config-subject-row">
+                <input type="text" class="cfg-subject-name" value="${(s.name || '').replace(/"/g, '&quot;')}" placeholder="Subject name" style="flex:1;">
+                <input type="number" class="cfg-subject-max" value="${s.max}" min="1" step="1" style="width:100px;">
+                <span style="font-size:12px;color:#999;">max score</span>
+                <button class="btn btn-danger btn-sm" onclick="removeSubjectConfigRow(this)" title="Remove subject"><i class="fas fa-times"></i></button>
+            </div>
+        `).join('');
+    }
+
+    function addSubjectConfigRow() {
+        const container = document.getElementById('subjectConfigRows');
+        const div = document.createElement('div');
+        div.className = 'config-subject-row';
+        div.innerHTML = `
+            <input type="text" class="cfg-subject-name" value="" placeholder="Subject name" style="flex:1;">
+            <input type="number" class="cfg-subject-max" value="20" min="1" step="1" style="width:100px;">
+            <span style="font-size:12px;color:#999;">max score</span>
+            <button class="btn btn-danger btn-sm" onclick="removeSubjectConfigRow(this)" title="Remove subject"><i class="fas fa-times"></i></button>
+        `;
+        container.appendChild(div);
+    }
+
+    function removeSubjectConfigRow(btn) {
+        btn.closest('.config-subject-row').remove();
+    }
+
+    async function saveSubjectConfig() {
+        const rows = document.querySelectorAll('#subjectConfigRows .config-subject-row');
+        const subjects = [];
+        rows.forEach(row => {
+            const name = row.querySelector('.cfg-subject-name').value.trim();
+            const max = parseFloat(row.querySelector('.cfg-subject-max').value);
+            if (name && max > 0) subjects.push({ name, max });
+        });
+        if (subjects.length === 0) {
+            showAlert('Please add at least one subject with a valid max score', 'error');
+            return;
+        }
+        try {
+            const response = await fetch(`/api/assessments/subjects/${encodeURIComponent(currentGrade)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: currentType, subjects })
+            });
+            const data = await response.json();
+            if (data.success) {
+                activeSubjectConfig = subjects;
+                showAlert(`✅ Subjects saved for ${currentGrade} (${currentType})!`, 'success');
+                renderSubjectConfigEditor();
+                renderMarksTable();
+            } else {
+                showAlert('❌ Error: ' + data.message, 'error');
+            }
+        } catch (error) {
+            showAlert('❌ Error saving subjects: ' + error.message, 'error');
+        }
+    }
+
+    // ============================================
     // RENDER MARKS TABLE
     // ============================================
     function renderMarksTable() {
-        const config = GRADE_CONFIGS[currentGrade];
-        if (!config) return;
+        const config = { subjects: getConfigSubjects() };
+        if (!config.subjects || config.subjects.length === 0) return;
 
         const thead = document.getElementById('marksTableHead');
         const tbody = document.getElementById('marksTableBody');
@@ -1045,7 +1219,7 @@
         }
         if (perfCell) {
             const avg = count > 0 ? total / count : 0;
-            const config = GRADE_CONFIGS[currentGrade];
+            const config = { subjects: getConfigSubjects() };
             const maxTotal = config.subjects.reduce((sum, s) => sum + s.max, 0);
             const percentage = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
             
@@ -1081,7 +1255,7 @@
             _id: 'new_' + Date.now(),
             studentName: '',
             grade: currentGrade,
-            assessments: GRADE_CONFIGS[currentGrade].subjects.map(s => ({
+            assessments: getConfigSubjects().map(s => ({
                 subject: s.name,
                 maxScore: s.max,
                 score: 0
@@ -1140,7 +1314,7 @@
     async function saveAllMarks() {
         showSaveStatus('Saving...', 'saving');
         
-        const config = GRADE_CONFIGS[currentGrade];
+        const config = { subjects: getConfigSubjects() };
         const rows = document.querySelectorAll('#marksTableBody tr');
         const studentsToSave = [];
 
@@ -1189,6 +1363,7 @@
                 grade: currentGrade,
                 assessmentPeriod: currentPeriod,
                 assessmentType: currentType,
+                assessmentName: getCurrentAssessmentName(),
                 assessmentDate: document.getElementById('assessmentDate').value || new Date().toISOString(),
                 assessments,
                 totalScore,
@@ -1442,37 +1617,52 @@
             }
 
             container.innerHTML = data.periods.map(p => {
-                const isCurrent = p.assessmentPeriod === currentPeriod && p.assessmentType === currentType;
+                const nameKey = getCurrentAssessmentName() || currentType;
+                const isCurrent = p.assessmentPeriod === currentPeriod && p.assessmentType === currentType && (p.assessmentName || p.assessmentType) === nameKey;
                 const bgColor = isCurrent ? '#fff3cd' : '#f8f9fc';
                 const borderColor = isCurrent ? '#ffc107' : '#e8ecf1';
+                const escapedName = (p.assessmentName || '').replace(/'/g, "\\'");
                 return `
                     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 15px;margin-bottom:8px;border-radius:8px;background:${bgColor};border:1px solid ${borderColor};">
                         <div>
-                            <strong>${p.assessmentPeriod} — ${p.assessmentType}</strong>
+                            <strong><i class="fas fa-file-signature" style="color:#D4A017;margin-right:6px;"></i>${p.assessmentName || p.assessmentType}</strong>
+                            <span style="font-size:12px;color:#666;margin-left:8px;">${p.assessmentPeriod} — ${p.assessmentType}</span>
                             <span style="font-size:12px;color:#666;margin-left:8px;">${p.studentCount} student(s)</span>
                             ${p.latestDate ? `<span style="font-size:11px;color:#999;margin-left:8px;">(${new Date(p.latestDate).toLocaleDateString('en-KE')})</span>` : ''}
                             ${isCurrent ? '<span style="font-size:11px;color:#D4A017;font-weight:600;margin-left:8px;">◀ CURRENT</span>' : ''}
                         </div>
                         <div>
-                            <button class="btn btn-info btn-sm" onclick="loadPeriod('${p.assessmentPeriod.replace(/'/g, "\\'")}', '${p.assessmentType.replace(/'/g, "\\'")}')">
+                            <button class="btn btn-info btn-sm" onclick="loadPeriod('${p.assessmentPeriod.replace(/'/g, "\\'")}', '${p.assessmentType.replace(/'/g, "\\'")}', '${escapedName}')">
                                 <i class="fas fa-eye"></i> View
                             </button>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            // Populate the Assessment Name datalist with existing names so the
+            // admin can quickly pick a previously stored assessment.
+            const datalist = document.getElementById('assessmentNameList');
+            if (datalist) {
+                const names = [...new Set(data.periods.map(p => p.assessmentName).filter(Boolean))];
+                datalist.innerHTML = names.map(n => `<option value="${n}"></option>`).join('');
+            }
         } catch (error) {
             console.error('Error loading history:', error);
             document.getElementById('historyContent').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading history</p></div>';
         }
     }
 
-    function loadPeriod(period, type) {
+    function loadPeriod(period, type, name) {
         document.getElementById('assessmentPeriod').value = period;
         document.getElementById('assessmentType').value = type;
+        // Only set the name input for custom-named assessments; the automatic
+        // (type-based) name stays empty so legacy records keep matching.
+        document.getElementById('assessmentNameInput').value = (name && name !== type) ? name : '';
         currentPeriod = period;
         currentType = type;
         updateAssessmentInfo();
+        loadSubjectConfig();
         loadGradeData();
     }
 
@@ -1480,7 +1670,10 @@
     // DOWNLOAD CLASS REPORT
     // ============================================
     function downloadClassReport() {
-        const win = window.open(`/api/assessments/class-report/${encodeURIComponent(currentGrade)}?period=${encodeURIComponent(currentPeriod)}&type=${encodeURIComponent(currentType)}`, '_blank');
+        let url = `/api/assessments/class-report/${encodeURIComponent(currentGrade)}?period=${encodeURIComponent(currentPeriod)}&type=${encodeURIComponent(currentType)}`;
+        const assessmentName = getCurrentAssessmentName();
+        if (assessmentName) url += `&name=${encodeURIComponent(assessmentName)}`;
+        const win = window.open(url, '_blank');
         if (!win) {
             showAlert('Please allow popups for this site to download reports', 'error');
         }
@@ -1723,6 +1916,7 @@
         document.getElementById('assessmentDate').value = today;
         
         updateAssessmentInfo();
+        loadSubjectConfig();
         loadGradeData();
         loadHistory();
         loadStudentList();

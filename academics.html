@@ -1492,8 +1492,10 @@
                     <h4>Resources</h4>
                     <a href="gallery.html">🖼️ Gallery</a>
                     <a href="events.html">📰 Events</a>
+                    <a href="holiday-assignments.html">✏️ Holiday Assignments</a>
                     <a href="downloads.html">📄 Downloads</a>
                     <a href="fees.html">💰 Fees</a>
+                </div>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -1505,6 +1507,7 @@
     <!-- ========================================
     SCRIPTS
     ======================================== -->
+    <script src="js/config.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
     <script>
@@ -1559,7 +1562,7 @@
         // ============================================
         async function loadNewsTicker() {
             try {
-                const response = await fetch('/api/content');
+                 const response = await fetch(apiUrl('/api/content'));
                 const data = await response.json();
                 if (data.success && data.content.homeNews) {
                     const tickerContent = document.getElementById('tickerContent');
@@ -1608,7 +1611,7 @@
             }
 
             try {
-                let url = '/api/assessments/search?';
+                 let url = apiUrl('/api/assessments/search?');
                 if (studentName) url += `name=${encodeURIComponent(studentName)}`;
                 if (grade) url += `${studentName ? '&' : ''}grade=${encodeURIComponent(grade)}`;
 
@@ -1706,38 +1709,45 @@
             `;
         }
 
-        async function downloadAssessmentPDF(studentId) {
-            try {
-                const response = await fetch(`/api/assessments/generate-report/${studentId}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    const win = window.open('', '_blank');
-                    win.document.write(data.html);
-                    win.document.close();
-                    setTimeout(() => {
-                        win.print();
-                    }, 500);
-                } else {
-                    showAlert('Error generating report', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('Error downloading report', 'error');
-            }
-        }
+         async function downloadAssessmentPDF(studentId) {
+             try {
+                 const response = await fetch(apiUrl('/api/assessments/generate-report/' + studentId));
+                 const data = await response.json();
+                 
+                 if (data.success && data.html) {
+                     const blob = new Blob([data.html], { type: 'text/html' });
+                     const url = URL.createObjectURL(blob);
+                     const a = document.createElement('a');
+                     const fileName = (data.student && data.student.studentName ? data.student.studentName : 'assessment')
+                         .replace(/[^a-zA-Z0-9]/g, '_') + '_assessment_report.html';
+                     a.href = url;
+                     a.download = fileName;
+                     document.body.appendChild(a);
+                     a.click();
+                     document.body.removeChild(a);
+                     URL.revokeObjectURL(url);
+                 } else {
+                     showAlert(data.message || 'Error generating report', 'error');
+                 }
+             } catch (error) {
+                 console.error('Error:', error);
+                 showAlert('Error downloading report', 'error');
+             }
+         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadNewsTicker();
-            
-            // Check if grade parameter is in URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const grade = urlParams.get('grade');
-            if (grade) {
-                document.getElementById('gradeFilter').value = grade;
-                searchStudentAssessment();
-            }
-        });
+         document.addEventListener('DOMContentLoaded', function() {
+             loadNewsTicker();
+             
+             _autoDetectApiBase().then(function() {
+                 // Check if grade parameter is in URL
+                 const urlParams = new URLSearchParams(window.location.search);
+                 const grade = urlParams.get('grade');
+                 if (grade) {
+                     document.getElementById('gradeFilter').value = grade;
+                     searchStudentAssessment();
+                 }
+             });
+         });
     </script>
 </body>
 </html>

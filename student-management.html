@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Management - Changara Star Academy</title>
+<style>
+* { box-sizing: border-box; }
+body { margin:0; font-family:'Arial',sans-serif; background:linear-gradient(135deg,#001f5c 0%,#0b5394 35%,#d4a017 70%,#ffeb99 100%); min-height:100vh; display:flex; justify-content:center; align-items:center; padding:15px; }
+.container { width:100%; max-width:1200px; padding:30px; border-radius:40px; background:linear-gradient(135deg,#fff,#f5f9ff,#fff8dc); box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center; }
+.header { background:linear-gradient(135deg,#001f5c,#0b5394); padding:20px; border-radius:30px; margin-bottom:25px; color:white; }
+.header h1 { font-size:42px; margin:5px 0; color:#ffeb99; }
+.header p { font-size:24px; margin:5px 0; color:#d4a017; font-weight:bold; }
+.pin-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center; z-index:9999; backdrop-filter:blur(5px); }
+.pin-box { background:white; padding:40px; border-radius:30px; max-width:450px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center; }
+.pin-box h2 { color:#001f5c; font-size:32px; margin-bottom:10px; }
+.pin-box p { color:#666; font-size:18px; margin-bottom:20px; }
+.pin-box input { width:100%; padding:18px; font-size:28px; border:3px solid #ccc; border-radius:15px; text-align:center; letter-spacing:10px; margin-bottom:15px; }
+.pin-box input:focus { border-color:#0b5394; outline:none; }
+.pin-box .btn-unlock { background:linear-gradient(135deg,#0b5394,#1a6fb5); color:white; padding:18px; font-size:24px; font-weight:bold; border:none; border-radius:15px; width:100%; cursor:pointer; transition:transform 0.2s; }
+.pin-box .btn-unlock:hover { transform:scale(1.02); }
+.pin-box .home-btn { display:inline-block; padding:12px 25px; font-size:18px; font-weight:bold; color:white; background:#6c757d; border:none; border-radius:10px; cursor:pointer; margin-top:10px; transition:all 0.3s; width:100%; }
+.pin-box .home-btn:hover { background:#5a6268; transform:scale(1.02); }
+.pin-box .pin-error { color:#dc3545; font-size:18px; margin-top:10px; display:none; }
+.pin-box .pin-error.show { display:block; }
+.hidden-content { display:none; }
+.home-btn-main { display:inline-block; padding:12px 25px; font-size:18px; font-weight:bold; color:white; background:#0b5394; border:none; border-radius:10px; cursor:pointer; margin-bottom:15px; transition:all 0.3s; }
+.home-btn-main:hover { background:#1a6fb5; transform:scale(1.02); }
+#msg { font-size:24px; font-weight:bold; padding:15px; border-radius:15px; margin:15px 0; min-height:50px; }
+.success { background:#d4edda; color:#155724; border:3px solid #0b8f34; }
+.error { background:#f8d7da; color:#721c24; border:3px solid #dc3545; }
+.hidden { display:none; }
+.table-container { overflow-x:auto; margin-top:15px; border-radius:15px; border:2px solid #e0e0e0; }
+table { width:100%; border-collapse:collapse; font-size:14px; }
+th { background:#001f5c; color:white; padding:12px 15px; text-align:center; white-space:nowrap; }
+td { padding:10px 15px; text-align:center; border-bottom:1px solid #eee; }
+tr:hover { background:#f5f5f5; }
+.no-records { text-align:center; padding:30px; color:#999; font-size:18px; }
+.loading { text-align:center; padding:30px; color:#0b5394; font-size:18px; }
+.btn { padding:12px 20px; font-size:16px; font-weight:bold; border:none; border-radius:10px; cursor:pointer; margin:5px; transition:transform 0.2s; }
+.btn:hover { transform:scale(1.02); }
+.btn-danger { background:#dc3545; color:white; }
+.btn-danger:hover { background:#c82333; }
+.btn-primary { background:#0b5394; color:white; }
+.btn-primary:hover { background:#1a6fb5; }
+.btn-success { background:#0b8f34; color:white; }
+.btn-success:hover { background:#0cac47; }
+.btn-info { background:#0b5394; color:white; }
+@media print { .no-print { display:none!important; } }
+@media (max-width:600px) { .container { padding:15px; } .header h1 { font-size:28px; } th,td { padding:8px 10px; font-size:12px; } }
+</style>
+</head>
+<body>
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <h2>&#128274; Student Management</h2>
+    <p>Enter PIN to access student records</p>
+    <input type="password" id="managementPin" placeholder="&#8226;&#8226;&#8226;&#8226;" maxlength="4" onkeypress="if(event.keyCode==13)unlockManagement()">
+    <button class="btn-unlock" onclick="unlockManagement()">&#128273; UNLOCK</button>
+    <button class="home-btn" onclick="goHome()">&#127968; Back to Home</button>
+    <div class="pin-error" id="pinError">&#10060; Invalid PIN. Please try again.</div>
+  </div>
+</div>
+<div class="container hidden-content" id="mainContent" style="display:none;">
+  <div class="header">
+    <h1>&#127881; Changara Star Academy</h1>
+    <p>&#127895; Student Management Portal</p>
+    <div id="datetime" style="font-size:18px;color:white;margin-top:8px;"></div>
+  </div>
+  <button class="home-btn-main no-print" onclick="goHome()">&#127968; Back to Home</button>
+  <div id="msg" class="hidden"></div>
+  <div class="no-print" style="margin:15px 0;">
+    <button class="btn btn-info" onclick="loadStudents()">&#128260; Refresh</button>
+    <button class="btn btn-primary" onclick="showAddForm()">&#10010; Add Student</button>
+  </div>
+  <div id="addForm" class="hidden" style="background:white;border-radius:25px;padding:25px;margin:20px 0;border:4px solid #0b8f34;text-align:left;">
+    <h3 style="color:#001f5c;margin-top:0;">Add New Student</h3>
+    <label>Student ID:</label><input id="newStudentId" placeholder="e.g., ST001" style="width:100%;padding:12px;margin:5px 0 15px;font-size:18px;border:3px solid #ccc;border-radius:10px;">
+    <label>Name:</label><input id="newName" placeholder="Full name" style="width:100%;padding:12px;margin:5px 0 15px;font-size:18px;border:3px solid #ccc;border-radius:10px;">
+    <label>Grade:</label>
+    <select id="newGrade" style="width:100%;padding:12px;margin:5px 0 15px;font-size:18px;border:3px solid #ccc;border-radius:10px;">
+      <option value="">Select Grade</option><option>Playgroup</option><option>PP1</option><option>PP2</option>
+      <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option>
+      <option>Grade 5</option><option>Grade 6</option>
+    </select>
+    <label>PIN:</label><input id="newPin" type="password" value="1010" placeholder="4 digit PIN" maxlength="6" style="width:100%;padding:12px;margin:5px 0 15px;font-size:18px;border:3px solid #ccc;border-radius:10px;">
+    <button class="btn btn-success" onclick="addStudent()">&#10003; SAVE</button>
+    <button class="btn btn-danger" onclick="hideAddForm()" style="margin-left:10px;">CANCEL</button>
+  </div>
+  <div class="table-container">
+    <table><thead><tr><th>#</th><th>ID</th><th>Name</th><th>Grade</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody id="studentTable"><tr><td colspan=6 class="loading">Loading students...</td></tr></tbody></table>
+  </div>
+  <button class="home-btn-main no-print" onclick="goHome()" style="margin-top:20px;">&#127968; Back to Home</button>
+</div>
+<script>
+var MANAGEMENT_PIN="1010";
+var allStudents=[];
+function goHome(){window.top.location.href='admin-dashboard.html';}
+function updateDateTime(){var n=new Date();document.getElementById("datetime").innerHTML=n.toLocaleDateString('en-GB')+" | "+n.toLocaleTimeString('en-GB');}setInterval(updateDateTime,1000);updateDateTime();
+function unlockManagement(){var pin=document.getElementById("managementPin").value.trim();var err=document.getElementById("pinError");if(pin===MANAGEMENT_PIN){document.getElementById("pinOverlay").style.display="none";document.getElementById("mainContent").style.display="block";document.getElementById("mainContent").classList.remove("hidden-content");loadStudents();}else{err.classList.add("show");document.getElementById("managementPin").value="";document.getElementById("managementPin").focus();setTimeout(function(){err.classList.remove("show");},3000);}}
+function showMessage(m,t){var el=document.getElementById("msg");el.textContent=m;el.className=t;el.classList.remove("hidden");setTimeout(function(){el.classList.add("hidden");},8000);}
+function hideAddForm(){document.getElementById("addForm").classList.add("hidden");}
+function showAddForm(){document.getElementById("addForm").classList.remove("hidden");}
+function loadStudents(){fetch('/api/learners').then(function(r){return r.json();}).then(function(data){if(!data.success){showMessage(data.message,"error");return;}allStudents=data.learners||[];renderStudentsTable(allStudents);}).catch(function(e){showMessage("Error: "+e.message,"error");});}
+function renderStudentsTable(students){var h="";if(!students||students.length===0){h='<tr><td colspan=6 class="no-records">No students found</td></tr>';}else{for(var i=0;i<students.length;i++){var s=students[i];var st=s.status==='INACTIVE'?'<span style="background:#f8d7da;color:#721c24;padding:2px 10px;border-radius:8px;font-size:11px;font-weight:bold;">Inactive</span>':'<span style="background:#d4edda;color:#155724;padding:2px 10px;border-radius:8px;font-size:11px;font-weight:bold;">Active</span>';h+="<tr><td>"+(i+1)+"</td><td><strong>"+(s.learnerCode||s.learnerId||"-")+"</strong></td><td>"+s.fullName+"</td><td>"+(s.grade||"-")+"</td><td>"+st+"</td><td><button class=\"btn btn-primary\" onclick=\"viewStudent('"+s._id+"')\">View</button> <button class=\"btn btn-danger\" onclick=\"deleteStudent('"+s._id+"')\">Delete</button></td></tr>";}}document.getElementById("studentTable").innerHTML=h;}
+function addStudent(){var sid=document.getElementById("newStudentId").value.trim();var name=document.getElementById("newName").value.trim();var grade=document.getElementById("newGrade").value;var pin=document.getElementById("newPin").value.trim();if(!sid||!name||!grade){showMessage("Fill all fields","error");return;}fetch('/api/learners',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({learnerCode:sid,fullName:name,grade:grade,pin:pin,status:'ACTIVE'}})).then(function(r){return r.json();}).then(function(data){if(data.success){showMessage("Student added successfully","success");loadStudents();hideAddForm();document.getElementById("newStudentId").value="";document.getElementById("newName").value="";document.getElementById("newGrade").value="";document.getElementById("newPin").value="1010";}else{showMessage(data.message||"Error","error");}}).catch(function(e){showMessage("Error: "+e.message,"error");});}
+function deleteStudent(id){if(!confirm("Delete this student? This cannot be undone!"))return;fetch('/api/learners/'+id,{method:'DELETE'}).then(function(r){return r.json();}).then(function(data){if(data.success){showMessage("Student deleted","success");loadStudents();}else{showMessage(data.message||"Error","error");}}).catch(function(e){showMessage("Error: "+e.message,"error");});}
+function viewStudent(id){var s=allStudents.find(function(x){return x._id===id;});if(!s)return;var html="<h3>"+s.fullName+"</h3><p>ID: "+(s.learnerCode||s._id)+"</p><p>Grade: "+(s.grade||"-")+"</p><p>Class: "+(s.className||"-")+"</p><p>Status: "+(s.status||"-")+"</p><p>Guardian: "+(s.guardianName||"-")+"</p><p>Phone: "+(s.guardianPhone||"-")+"</p>";showMessage(html,"info");}
+window.onload=function(){document.getElementById("managementPin").focus();};
+</script>
+</body>
+</html>

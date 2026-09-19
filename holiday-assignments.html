@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Downloads - Changara Star Academy</title>
+    <title>Holiday Assignments - Changara Star Academy</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
-    <meta name="description" content="Changara Star Academy Downloads Centre - Download admission forms, fee structure, school calendar, timetables, learning resources, and more.">
+    <meta name="description" content="Changara Star Academy Holiday Assignments - Browse and download holiday assignments by grade level.">
     
     <!-- ===== FONTS ===== -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -384,12 +384,8 @@
         .section {
             padding: 40px 0;
         }
-        .section-alt {
-            background: white;
-        }
-        .section-gray {
-            background: #f8f9fa;
-        }
+        .section-alt { background: white; }
+        .section-gray { background: #f8f9fa; }
         .section-dark {
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
             color: white;
@@ -417,112 +413,206 @@
         .section-subtitle.light { color: rgba(255,255,255,0.6); }
 
         /* ========================================
-           DOWNLOAD CARDS
+           GRADE FILTER
            ======================================== */
-        .download-grid {
+        .filter-bar {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            text-align: center;
+        }
+        .filter-bar .grade-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .filter-bar select {
+            padding: 10px 20px;
+            border: 2px solid #e8ecf1;
+            border-radius: 50px;
+            font-size: 14px;
+            background: white;
+            min-width: 180px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .filter-bar select:focus {
+            border-color: var(--school-gold);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.2);
+        }
+        .filter-bar .btn {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+        }
+        .filter-bar .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 160, 23, 0.35);
+        }
+
+        /* ========================================
+           ASSIGNMENT CARDS
+           ======================================== */
+        .assignment-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
-        .download-card {
+        .assignment-card {
             background: white;
-            padding: 25px 20px;
             border-radius: 14px;
-            text-align: center;
+            padding: 25px;
             transition: all 0.4s ease;
             border: 1px solid #e8ecf1;
             box-shadow: 0 2px 15px rgba(0,0,0,0.04);
-            position: relative;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
-        .download-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--school-gold), var(--school-gold-light), var(--school-gold-dark));
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-        .download-card:hover::before {
-            opacity: 1;
-        }
-        .download-card:hover {
+        .assignment-card:hover {
             transform: translateY(-6px);
             border-color: var(--school-gold);
             box-shadow: 0 12px 40px rgba(212, 160, 23, 0.12);
         }
-        .download-card .download-icon {
-            font-size: 36px;
-            display: block;
-            margin-bottom: 10px;
+        .assignment-card .assignment-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .assignment-card .file-type-icon {
+            font-size: 32px;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
             background: rgba(212, 160, 23, 0.08);
-            width: 60px;
-            height: 60px;
-            line-height: 60px;
-            border-radius: 50%;
-            margin-left: auto;
-            margin-right: auto;
-            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
-        .download-card:hover .download-icon {
-            background: var(--school-gold);
-            transform: scale(1.1) rotate(-5deg);
-        }
-        .download-card h4 {
+        .assignment-card .assignment-title {
+            font-size: 16px;
+            font-weight: 700;
             color: var(--school-blue-dark);
-            font-size: 15px;
-            margin-bottom: 4px;
+            flex: 1;
+        }
+        .assignment-card .subject-badge {
+            background: rgba(11, 100, 163, 0.1);
+            color: var(--school-blue);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .assignment-card .grade-badge {
+            background: var(--school-gold);
+            color: var(--kenya-black);
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 11px;
             font-weight: 700;
         }
-        .download-card p {
-            color: #888;
-            font-size: 12px;
-            line-height: 1.5;
+        .assignment-card .assignment-desc {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            flex: 1;
         }
-        .download-btn {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 8px 24px;
+        .assignment-card .assignment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #888;
+        }
+        .assignment-card .file-size {
+            font-weight: 500;
+        }
+        .assignment-card .upload-date {
+            font-style: italic;
+        }
+        .assignment-card .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 24px;
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
             border-radius: 50px;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 13px;
             text-decoration: none;
             transition: all 0.3s ease;
             border: none;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(212, 160, 23, 0.25);
         }
-        .download-btn:hover {
+        .assignment-card .download-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(212, 160, 23, 0.4);
         }
-        .download-btn i {
-            margin-right: 6px;
-        }
 
         /* ========================================
-           CATEGORY BADGES
+           ALERT & NO RESULTS
            ======================================== */
-        .category-badge {
-            display: inline-block;
-            padding: 2px 12px;
-            border-radius: 50px;
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 14px;
         }
-        .category-badge.forms { background: #d4edda; color: #155724; }
-        .category-badge.academic { background: #cce5ff; color: #004085; }
-        .category-badge.events { background: #fff3cd; color: #856404; }
-        .category-badge.general { background: #f8d7da; color: #721c24; }
-        .category-badge.media { background: #d6d8db; color: #1b1e21; }
+        .alert.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 16px;
+            grid-column: 1 / -1;
+        }
+        .no-results i {
+            font-size: 48px;
+            color: #ddd;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .no-results h3 {
+            color: #666;
+            font-size: 18px;
+        }
+        .no-results p {
+            color: #999;
+            font-size: 14px;
+        }
 
         /* ========================================
            INFO BOX
@@ -690,22 +780,18 @@
             .page-hero p { font-size: 15px; }
             .section-title { font-size: 24px; }
             
-            .download-grid { grid-template-columns: 1fr 1fr; }
+            .assignment-grid { grid-template-columns: 1fr; }
             
             .main-footer .footer-content { grid-template-columns: 1fr; gap: 15px; }
             
             .notice-alert-bar .container { flex-direction: column; text-align: center; }
             .news-ticker-section .container { flex-direction: column; gap: 4px; }
-            
-            .info-box { padding: 20px; }
-            .info-box h3 { font-size: 18px; }
         }
 
         @media (max-width: 480px) {
-            .download-grid { grid-template-columns: 1fr; }
             .page-hero h1 { font-size: 24px; }
             .section-title { font-size: 20px; }
-            .info-box h3 { font-size: 16px; }
+            .info-box h3 { font-size: 18px; }
             .info-box p { font-size: 13px; }
         }
 
@@ -805,9 +891,10 @@
                 <a href="admissions.html">Admissions</a>
                 <a href="facilities.html">Facilities</a>
                 <a href="performance.html">Performance</a>
-                <a href="parents-corner.html">Parents</a>
+                <a href="parents_corner.html">Parents</a>
                 <a href="fees.html">Fees</a>
-                <a href="downloads.html" class="active">Downloads</a>
+                <a href="downloads.html">Downloads</a>
+                <a href="holiday-assignments.html" class="active">Assignments</a>
                 <a href="portal.html">🔐 Portal</a>
                 <a href="contact.html">Contact</a>
             </nav>
@@ -816,8 +903,8 @@
     </header>
 
     <!-- ========================================
-    PAGE HERO
-    ======================================== -->
+         PAGE HERO
+         ======================================== -->
     <section class="page-hero">
         <div class="container">
             <div class="hero-content">
@@ -828,88 +915,77 @@
                     </div>
                     <span class="flag-text">🇰🇪 Proudly Kenyan</span>
                 </div>
-                <h1>📥 <span class="highlight">Downloads</span> Centre</h1>
+                <h1>✏️ <span class="highlight">Holiday Assignments</span></h1>
                 <p>
-                    The Downloads Centre provides parents, learners, teachers, and visitors with easy access to important 
-                    school resources. Here you can download official documents, learning materials, forms, newsletters, 
-                    and other files published by Changara Star Academy.
+                    Browse and download holiday assignments and learning resources for all grade levels at Changara Star Academy.
+                    Select your grade below to see available assignments.
                 </p>
             </div>
         </div>
     </section>
 
     <!-- ========================================
-    OVERVIEW CARDS
-    ======================================== -->
+         GRADE FILTER
+         ======================================== -->
     <section class="section section-alt" data-aos="fade-up">
         <div class="container">
-            <div class="info-box" data-aos="zoom-in">
-                <h3>📂 All Files Are Regularly Updated</h3>
-                <p>
-                    All files are regularly updated to ensure you have access to the latest information. 
-                    Please ensure that you download the latest version of any document before using it.
-                </p>
+            <div class="filter-bar">
+                <div class="grade-selector">
+                    <select id="gradeFilter" onchange="loadAssignments()">
+                        <option value="">All Grades</option>
+                        <option value="Play Group">Play Group</option>
+                        <option value="PP1">PP1</option>
+                        <option value="PP2">PP2</option>
+                        <option value="Grade 1">Grade 1</option>
+                        <option value="Grade 2">Grade 2</option>
+                        <option value="Grade 3">Grade 3</option>
+                        <option value="Grade 4">Grade 4</option>
+                        <option value="Grade 5">Grade 5</option>
+                        <option value="Grade 6">Grade 6</option>
+                    </select>
+                </div>
+                <div id="alert" class="alert"></div>
             </div>
         </div>
     </section>
 
     <!-- ========================================
-    DOWNLOAD CARDS - ACTIVE BUTTONS
-    ======================================== -->
+         ASSIGNMENT LIST
+         ======================================== -->
     <section class="section" data-aos="fade-up">
         <div class="container">
-            <h2 class="section-title">📋 Available <span class="highlight">Downloads</span></h2>
-            <p class="section-subtitle">
-                Click the download button to access any file. New files will be added regularly.
-            </p>
+            <h2 class="section-title">📚 Available <span class="highlight">Assignments</span></h2>
+            <p class="section-subtitle">Select a grade above to browse holiday assignments for that level.</p>
 
-            <div class="download-grid" id="downloadsContainer">
-                <!-- Dynamic download cards are rendered here from the CMS -->
-            </div>
-
-            <!-- Holiday Assignments Card - static, always visible -->
-            <div class="download-grid" style="margin-top:20px;">
-                <div class="download-card" data-aos="fade-up" data-aos-delay="100">
-                    <span class="download-icon">✏️</span>
-                    <span class="category-badge academic">Academic</span>
-                    <h4>View Holiday Assignments</h4>
-                    <p>Browse and download holiday assignments by grade level</p>
-                    <a href="holiday-assignments.html" class="download-btn">
-                        <i class="fas fa-folder-open"></i> Browse
-                    </a>
+            <div id="assignmentsGrid" class="assignment-grid">
+                <div class="no-results">
+                    <i class="fas fa-book-open"></i>
+                    <h3>Select a Grade</h3>
+                    <p>Choose a grade from the dropdown above to see available holiday assignments.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ========================================
-    IMPORTANT INFORMATION
-    ======================================== -->
+         INFO BOX
+         ======================================== -->
     <section class="section section-gray" data-aos="fade-up">
         <div class="container">
             <div class="info-box" data-aos="zoom-in">
-                <h3>ℹ️ Important Information</h3>
+                <h3>ℹ️ About Holiday Assignments</h3>
                 <p>
-                    Please ensure that you download the <strong>latest version</strong> of any document before using it. 
-                    New files will be added regularly, so we encourage you to visit this page frequently for updates.
-                </p>
-                <p style="margin-top:10px;">
-                    If you experience any difficulty downloading a file or cannot find the document you need, 
-                    please contact the <strong>school office</strong> for assistance.
-                </p>
-                <p style="margin-top:15px;font-size:14px;">
-                    <i class="fas fa-phone" style="color:var(--kenya-black);"></i> 
-                    📞 +254 721 556 252 &nbsp;|&nbsp; 
-                    <i class="fas fa-envelope" style="color:var(--kenya-black);"></i> 
-                    📧 starchangara@gmail.com
+                    Holiday assignments are designed to reinforce learning during school breaks. 
+                    Students should download the assignment for their grade, complete it in their 
+                    exercise books, and submit on the first day of the new term.
                 </p>
             </div>
         </div>
     </section>
 
     <!-- ========================================
-    BACK TO HOME
-    ======================================== -->
+         BACK TO HOME
+         ======================================== -->
     <section class="section" style="text-align:center;padding:30px 0;">
         <div class="container">
             <a href="index.html" class="back-home">
@@ -919,8 +995,8 @@
     </section>
 
     <!-- ========================================
-    FOOTER
-    ======================================== -->
+         FOOTER
+         ======================================== -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
@@ -946,7 +1022,6 @@
                     <a href="admissions.html">📝 Admissions</a>
                     <a href="facilities.html">🏫 Facilities</a>
                     <a href="performance.html">🏆 Performance</a>
-                    <a href="parents-corner.html">👨‍👩‍👧‍👦 Parents</a>
                     <a href="fees.html">💰 Fees</a>
                     <a href="downloads.html">📥 Downloads</a>
                     <a href="portal.html">🔐 Portal</a>
@@ -954,11 +1029,10 @@
                 </div>
                 <div class="footer-links">
                     <h4>Resources</h4>
-                    <a href="gallery.html">🖼️ Gallery</a>
-                    <a href="events.html">📰 Events</a>
                     <a href="holiday-assignments.html">✏️ Holiday Assignments</a>
                     <a href="downloads.html">📄 Downloads</a>
-                    <a href="fees.html">💰 Fees</a>
+                    <a href="gallery.html">🖼️ Gallery</a>
+                    <a href="events.html">📰 Events</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -968,8 +1042,8 @@
     </footer>
 
     <!-- ========================================
-    SCRIPTS
-    ======================================== -->
+         SCRIPTS
+         ======================================== -->
     <script src="js/config.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
@@ -1021,11 +1095,141 @@
         checkNoticeStatus();
 
         // ============================================
+        // ALERT
+        // ============================================
+        function showAlert(message, type) {
+            const alertEl = document.getElementById('alert');
+            if (!alertEl) return;
+            alertEl.className = 'alert ' + type;
+            alertEl.textContent = message;
+            alertEl.style.display = 'block';
+            setTimeout(() => {
+                alertEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // ============================================
+        // FILE TYPE ICON
+        // ============================================
+        function getFileTypeIcon(fileType) {
+            const ext = String(fileType || '').toLowerCase();
+            if (['pdf'].includes(ext)) return '📄';
+            if (['doc', 'docx'].includes(ext)) return '📝';
+            if (['xls', 'xlsx'].includes(ext)) return '📊';
+            if (['ppt', 'pptx'].includes(ext)) return '📽';
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return '🖼️';
+            return '📄';
+        }
+
+        // ============================================
+        // FORMAT FILE SIZE
+        // ============================================
+        function formatFileSize(bytes) {
+            if (!bytes || bytes === 0) return 'Unknown size';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];
+        }
+
+        // ============================================
+        // FORMAT DATE
+        // ============================================
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                return new Date(dateStr).toLocaleDateString('en-KE', {
+                    year: 'numeric', month: 'short', day: 'numeric',
+                    timeZone: 'Africa/Nairobi'
+                });
+            } catch (e) {
+                return '-';
+            }
+        }
+
+        // ============================================
+        // LOAD ASSIGNMENTS
+        // ============================================
+        async function loadAssignments() {
+            const grade = document.getElementById('gradeFilter').value;
+            const grid = document.getElementById('assignmentsGrid');
+
+            if (!grade) {
+                grid.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-book-open"></i>
+                        <h3>Select a Grade</h3>
+                        <p>Choose a grade from the dropdown above to see available holiday assignments.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h3>Loading...</h3>
+                    <p>Loading assignments for ${grade}...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(apiUrl('/api/holiday-assignments/' + encodeURIComponent(grade)));
+                const data = await response.json();
+
+                if (data.success && data.assignments && data.assignments.length > 0) {
+                    let html = '';
+                    data.assignments.forEach((assignment, index) => {
+                        const icon = getFileTypeIcon(assignment.fileType);
+                        const downloadUrl = apiUrl('/api/holiday-assignments/download/' + assignment._id);
+                        const subject = assignment.subject ? `<span class="subject-badge">${assignment.subject}</span>` : '';
+                        html += `
+                            <div class="assignment-card" data-aos="fade-up" data-aos-delay="${100 + index * 30}">
+                                <div class="assignment-header">
+                                    <span class="file-type-icon">${icon}</span>
+                                    <div class="assignment-title">${assignment.title || 'Untitled'}</div>
+                                    <span class="grade-badge">${assignment.grade || 'All'}</span>
+                                </div>
+                                ${subject ? `<div style="margin-bottom:8px;">${subject}</div>` : ''}
+                                <p class="assignment-desc">${assignment.description || 'No description available.'}</p>
+                                <div class="assignment-meta">
+                                    <span class="file-size"><i class="fas fa-file"></i> ${formatFileSize(assignment.fileSize)} · ${String(assignment.fileType || 'file').toUpperCase()}</span>
+                                    <span class="upload-date"><i class="far fa-calendar"></i> ${formatDate(assignment.createdAt)}</span>
+                                </div>
+                                <a href="${downloadUrl}" class="download-btn">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        `;
+                    });
+                    grid.innerHTML = html;
+                    AOS.refresh();
+                } else {
+                    grid.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-book-open"></i>
+                            <h3>No Assignments Found</h3>
+                            <p>No holiday assignments have been uploaded for ${grade} yet. Please check back later.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading assignments:', error);
+                grid.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i>
+                        <h3>Error Loading Assignments</h3>
+                        <p>There was an error loading the assignments. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================
         // LOAD NEWS TICKER
         // ============================================
         async function loadNewsTicker() {
             try {
-                 const response = await fetch(apiUrl('/api/content'));
+                const response = await fetch(apiUrl('/api/content'));
                 const data = await response.json();
                 if (data.success && data.content.homeNews) {
                     const tickerContent = document.getElementById('tickerContent');
@@ -1049,62 +1253,29 @@
             }
         }
 
+        // ============================================
+        // DOM READY
+        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadNewsTicker();
-            loadDownloads();
-            _autoDetectApiBase();
-        });
-
-        // ============================================
-        // DOWNLOAD CARDS - DYNAMIC FROM CMS
-        // ============================================
-        async function loadDownloads() {
-            try {
-                const response = await fetch(apiUrl('/api/content'));
-                const data = await response.json();
-
-                if (data.success && data.content && Array.isArray(data.content.downloads) && data.content.downloads.length > 0) {
-                    const container = document.getElementById('downloadsContainer');
-                    if (!container) return;
-
-                    const categoryIcons = {
-                        forms: '📝', academic: '📚', general: '📄',
-                        events: '🎉', media: '🖼️'
-                    };
-
-                    const categoryLabels = {
-                        forms: 'Forms', academic: 'Academic', general: 'General',
-                        events: 'Events', media: 'Media'
-                    };
-
-                    let html = '';
-                    data.content.downloads.forEach((dl, index) => {
-                        const icon = dl.icon || categoryIcons[dl.category] || '📄';
-                        const category = dl.category || 'general';
-                        const categoryClass = category;
-                        const categoryLabel = categoryLabels[category] || 'General';
-                        const fileUrl = assetUrl(dl.file);
-                        html += `
-                            <div class="download-card" data-aos="fade-up" data-aos-delay="${100 + index * 30}">
-                                <span class="download-icon">${icon}</span>
-                                <span class="category-badge ${categoryClass}">${categoryLabel}</span>
-                                <h4>${dl.name || 'Download'}</h4>
-                                <p>${dl.description || 'Click to download'}</p>
-                                <a href="${fileUrl}" class="download-btn" download>
-                                    <i class="fas fa-download"></i> Download
-                                </a>
-                            </div>
-                        `;
-                    });
-                    container.innerHTML = html;
-                } else {
-                    // CMS has no downloads yet — Holiday Assignments card stays as fallback
-                    console.log('No CMS downloads configured');
-                }
-            } catch (error) {
-                console.log('Downloads not available from CMS');
+            
+            // Check if grade parameter is in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const grade = urlParams.get('grade');
+            if (grade) {
+                document.getElementById('gradeFilter').value = grade;
             }
-        }
+            
+            _autoDetectApiBase().then(function() {
+                // If grade was set from URL, load assignments now that API URL is resolved
+                const urlParams = new URLSearchParams(window.location.search);
+                const grade = urlParams.get('grade');
+                if (grade) {
+                    document.getElementById('gradeFilter').value = grade;
+                    loadAssignments();
+                }
+            });
+        });
     </script>
 </body>
 </html>

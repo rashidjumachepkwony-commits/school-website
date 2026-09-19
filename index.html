@@ -1191,6 +1191,151 @@
         }
 
         /* ========================================
+           STUDENT CORNER (Results & Holiday Assignments)
+           ======================================== */
+        .student-corner-section {
+            padding: 60px 0;
+            background: linear-gradient(135deg, var(--kenya-black), var(--school-blue-dark));
+            scroll-margin-top: 50px;
+        }
+        .student-corner-section .section-title,
+        .student-corner-section .section-subtitle { color: white; }
+        .sc-grade-picker {
+            max-width: 420px;
+            margin: 0 auto 25px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .sc-grade-picker label {
+            display: block;
+            color: var(--school-gold);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        .sc-grade-picker select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 2px solid rgba(212,160,23,0.4);
+            background: rgba(255,255,255,0.95);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--school-blue-dark);
+            cursor: pointer;
+        }
+        .sc-grade-picker select:focus { outline: none; border-color: var(--school-gold); }
+        .sc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .sc-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            border-top: 4px solid var(--school-gold);
+        }
+        .sc-card h3 {
+            color: var(--school-blue-dark);
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .sc-list { max-height: 320px; overflow-y: auto; }
+        .sc-assignment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        .sc-assignment-item:hover { border-color: var(--school-gold); background: #fffdf5; }
+        .sc-assignment-item .sc-file-info { flex: 1; min-width: 0; }
+        .sc-assignment-item .sc-file-info strong {
+            display: block;
+            color: var(--school-blue-dark);
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .sc-assignment-item .sc-file-info small { color: #999; font-size: 11px; }
+        .sc-btn {
+            padding: 8px 18px;
+            background: linear-gradient(135deg, var(--school-gold), #f5c842);
+            color: var(--school-blue-dark);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .sc-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(212,160,23,0.35); }
+        .sc-btn.sc-btn-green { background: linear-gradient(135deg, #28a745, #34c759); color: white; }
+        .sc-empty {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            padding: 25px 10px;
+        }
+        .sc-result-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .sc-result-form input, .sc-result-form select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid #e8ecf1;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fafbfc;
+        }
+        .sc-result-form input:focus, .sc-result-form select:focus {
+            border-color: var(--school-gold);
+            outline: none;
+            background: white;
+        }
+        .sc-result-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        .sc-result-table th { background: var(--school-blue-dark); color: white; padding: 8px 10px; text-align: left; }
+        .sc-result-table td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+        .sc-result-table tr:nth-child(even) { background: #fafbfc; }
+        .sc-student-heading {
+            background: #fff8e7;
+            border-left: 4px solid var(--school-gold);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 12px;
+            color: var(--school-blue-dark);
+            font-size: 14px;
+        }
+        .sc-perf-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+        }
+        @media (max-width: 900px) {
+            .sc-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ========================================
            FOOTER
            ======================================== */
         .main-footer {
@@ -1891,6 +2036,56 @@
     </section>
 
     <!-- ======================================== -->
+    <!-- STUDENT CORNER: RESULTS & HOLIDAY ASSIGNMENTS -->
+    <!-- ======================================== -->
+    <section class="student-corner-section" id="student-corner">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">🎒 Student <span class="highlight">Corner</span></h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Select your class to download holiday assignments and check your assessment results</p>
+
+            <div class="sc-grade-picker" data-aos="fade-up" data-aos-delay="150">
+                <label for="scGrade"><i class="fas fa-graduation-cap"></i> Select Your Class</label>
+                <select id="scGrade" onchange="loadStudentCorner()">
+                    <option value="Play Group">Play Group</option>
+                    <option value="PP1">PP1</option>
+                    <option value="PP2">PP2</option>
+                    <option value="Grade 1" selected>Grade 1</option>
+                    <option value="Grade 2">Grade 2</option>
+                    <option value="Grade 3">Grade 3</option>
+                    <option value="Grade 4">Grade 4</option>
+                    <option value="Grade 5">Grade 5</option>
+                    <option value="Grade 6">Grade 6</option>
+                </select>
+            </div>
+
+            <div class="sc-grid">
+                <!-- Holiday Assignments -->
+                <div class="sc-card" data-aos="fade-up" data-aos-delay="200">
+                    <h3>📋 Holiday Assignments</h3>
+                    <div id="scAssignments" class="sc-list">
+                        <p class="sc-empty"><i class="fas fa-spinner fa-spin"></i> Loading assignments...</p>
+                    </div>
+                </div>
+
+                <!-- Assessment Results Lookup -->
+                <div class="sc-card" data-aos="fade-up" data-aos-delay="300">
+                    <h3>📊 My Assessment Results</h3>
+                    <div class="sc-result-form">
+                        <input type="text" id="scStudentName" placeholder="Enter your full name (as registered in class)">
+                        <select id="scAssessment">
+                            <option value="">Loading assessments...</option>
+                        </select>
+                        <button class="sc-btn sc-btn-green" onclick="checkMyResults()"><i class="fas fa-search"></i> View My Results</button>
+                    </div>
+                    <div id="scResults">
+                        <p class="sc-empty">Enter your name and choose an assessment to see your results.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
     <!-- FOOTER -->
     <!-- ======================================== -->
     <footer class="main-footer">
@@ -2183,6 +2378,160 @@
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             loadWebsiteContent();
+        });
+    </script>
+
+    <!-- ============================================ -->
+    <!-- STUDENT CORNER: RESULTS & HOLIDAY ASSIGNMENTS -->
+    <!-- ============================================ -->
+    <script>
+        let scAssessmentOptions = [];
+
+        function scEscapeHtml(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        function scPerfBadge(level) {
+            const map = {
+                'Exceeding Expectation': ['#28a745', 'Exceeding'],
+                'Meeting Expectation': ['#17a2b8', 'Meeting'],
+                'Approaching Expectation': ['#d4a017', 'Approaching'],
+                'Below Expectation': ['#dc3545', 'Below']
+            };
+            const m = map[level] || ['#6c757d', level || 'N/A'];
+            return `<span class="sc-perf-badge" style="background:${m[0]};">${m[1]} Expectation</span>`;
+        }
+
+        // Load holiday assignments + available assessments for the selected grade
+        async function loadStudentCorner() {
+            const grade = document.getElementById('scGrade').value;
+            const listEl = document.getElementById('scAssignments');
+            const assessEl = document.getElementById('scAssessment');
+            document.getElementById('scResults').innerHTML = '<p class="sc-empty">Enter your name and choose an assessment to see your results.</p>';
+
+            // Holiday assignments (active only)
+            listEl.innerHTML = '<p class="sc-empty"><i class="fas fa-spinner fa-spin"></i> Loading assignments...</p>';
+            try {
+                const res = await fetch(`/api/holiday-assignments/${encodeURIComponent(grade)}`);
+                const data = await res.json();
+                if (data.success && data.assignments && data.assignments.length > 0) {
+                    listEl.innerHTML = data.assignments.map(a => {
+                        const date = a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-KE') : '';
+                        return `
+                            <div class="sc-assignment-item">
+                                <div class="sc-file-info">
+                                    <strong>📄 ${scEscapeHtml(a.title)}</strong>
+                                    <small>${a.subject ? scEscapeHtml(a.subject) + ' • ' : ''}${date}</small>
+                                </div>
+                                <a class="sc-btn" href="/api/holiday-assignments/download/${a._id}" target="_blank">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    listEl.innerHTML = '<p class="sc-empty">📭 No holiday assignments for your class yet. Check back later!</p>';
+                }
+            } catch (error) {
+                listEl.innerHTML = '<p class="sc-empty">⚠️ Could not load assignments right now.</p>';
+            }
+
+            // Available assessments for the results lookup
+            assessEl.innerHTML = '<option value="">Loading assessments...</option>';
+            scAssessmentOptions = [];
+            try {
+                const res = await fetch(`/api/assessments/history/${encodeURIComponent(grade)}`);
+                const data = await res.json();
+                if (data.success && data.periods && data.periods.length > 0) {
+                    scAssessmentOptions = data.periods;
+                    assessEl.innerHTML = '<option value="">-- Choose Assessment --</option>' +
+                        data.periods.map((p, i) =>
+                            `<option value="${i}">${scEscapeHtml(p.assessmentName || p.assessmentType)} — ${scEscapeHtml(p.assessmentPeriod)}</option>`
+                        ).join('');
+                } else {
+                    assessEl.innerHTML = '<option value="">No assessments published yet</option>';
+                }
+            } catch (error) {
+                assessEl.innerHTML = '<option value="">Could not load assessments</option>';
+            }
+        }
+
+        // Look up a single student's results for the chosen assessment
+        async function checkMyResults() {
+            const grade = document.getElementById('scGrade').value;
+            const studentName = document.getElementById('scStudentName').value.trim();
+            const assessEl = document.getElementById('scAssessment');
+            const resultsEl = document.getElementById('scResults');
+
+            if (!studentName) {
+                resultsEl.innerHTML = '<p class="sc-empty">✋ Please enter your full name first.</p>';
+                return;
+            }
+            if (assessEl.value === '') {
+                resultsEl.innerHTML = '<p class="sc-empty">✋ Please choose an assessment.</p>';
+                return;
+            }
+
+            const opt = scAssessmentOptions[parseInt(assessEl.value, 10)];
+            if (!opt) {
+                resultsEl.innerHTML = '<p class="sc-empty">⚠️ Please choose a valid assessment.</p>';
+                return;
+            }
+
+            resultsEl.innerHTML = '<p class="sc-empty"><i class="fas fa-spinner fa-spin"></i> Searching for your results...</p>';
+
+            try {
+                let url = `/api/assessments/search?grade=${encodeURIComponent(grade)}` +
+                    `&period=${encodeURIComponent(opt.assessmentPeriod)}` +
+                    `&type=${encodeURIComponent(opt.assessmentType)}` +
+                    `&name=${encodeURIComponent(studentName)}`;
+                if (opt.assessmentName && opt.assessmentName !== opt.assessmentType) {
+                    url += `&assessmentName=${encodeURIComponent(opt.assessmentName)}`;
+                }
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.success || !data.students || data.students.length === 0) {
+                    resultsEl.innerHTML = '<p class="sc-empty">❌ No results found for that name. Make sure you spell your name exactly as registered in class.</p>';
+                    return;
+                }
+
+                resultsEl.innerHTML = data.students.map(s => {
+                    const rows = (s.assessments || []).map(a => {
+                        const pct = a.maxScore > 0 ? ((a.score / a.maxScore) * 100).toFixed(1) : 0;
+                        const color = pct >= 80 ? '#28a745' : pct >= 60 ? '#17a2b8' : pct >= 40 ? '#d4a017' : '#dc3545';
+                        return `
+                            <tr>
+                                <td>${scEscapeHtml(a.subject)}</td>
+                                <td style="text-align:center;">${a.score} / ${a.maxScore}</td>
+                                <td style="text-align:center;font-weight:700;color:${color};">${pct}%</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    return `
+                        <div class="sc-student-heading">
+                            <strong>🎓 ${scEscapeHtml(s.studentName)}</strong> — ${scEscapeHtml(s.grade)}<br>
+                            <small>${scEscapeHtml(s.assessmentName || s.assessmentType || '')} • ${scEscapeHtml(s.assessmentPeriod || '')} • ${scEscapeHtml(s.assessmentType || '')}</small><br>
+                            <small>Total: <strong>${s.totalScore || 0}</strong> • Average: <strong>${(s.averageScore || 0).toFixed(1)}</strong> • ${scPerfBadge(s.performanceLevel)}</small>
+                        </div>
+                        <table class="sc-result-table">
+                            <thead><tr><th>Subject</th><th style="text-align:center;">Score</th><th style="text-align:center;">Percentage</th></tr></thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                        <div style="text-align:right;margin-top:8px;">
+                            <button class="sc-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Results</button>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                resultsEl.innerHTML = '<p class="sc-empty">⚠️ Error loading results. Please try again.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudentCorner();
         });
     </script>
 </body>

@@ -13,7 +13,19 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:5000',
+  'http://localhost:3000',
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (process.env.CORS_ORIGIN === '*') return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(null, true);
+  },
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -306,7 +318,8 @@ const contentSchema = new mongoose.Schema({
     name: { type: String, default: 'Admission Form' },
     file: { type: String, default: '/downloads/admission-form.pdf' },
     description: { type: String, default: 'Download the admission form.' },
-    icon: { type: String, default: '📄' }
+    icon: { type: String, default: '📄' },
+    category: { type: String, default: 'general' }
   }],
 
   feesIntro: { type: String, default: '' },
@@ -1584,6 +1597,7 @@ app.get('/api/visitors/today', async (req, res) => {
 // change are treated as "Legacy Assessment" / "Legacy" so existing data keeps
 // displaying correctly without any destructive migration.
 const StudentAssessment = require('./models/StudentAssessment');
+const SubjectConfig = require('./models/SubjectConfig');
 
 // Default assessment period/type helpers (used for legacy fallback)
 const DEFAULT_PERIOD = 'Legacy Assessment';
@@ -1666,6 +1680,20 @@ function buildPeriodFilter(period, type) {
   return filter;
 }
 
+// Build a filter for the per-assessment name. Each assessment instance is
+// stored under its own name (e.g. "CAT 1", "Opener Exam") so results for one
+// assessment are never overwritten by another. When the requested name equals
+// the assessment type (the automatic/default name), legacy records that
+// predate the assessmentName field (missing/null/'') are matched too.
+function buildNameFilter(name, type) {
+  if (!name || !String(name).trim()) return null;
+  const n = String(name).trim();
+  if (n === (type && String(type).trim())) {
+    return { $in: [n, null, ''] };
+  }
+  return n;
+}
+
 // GET all assessments (optionally filtered by assessment period/type)
 app.get('/api/assessments/all', async (req, res) => {
   try {
@@ -1677,11 +1705,13 @@ app.get('/api/assessments/all', async (req, res) => {
   }
 });
 
-// GET assessments by grade (optionally filtered by assessment period/type)
+// GET assessments by grade (optionally filtered by assessment period/type/name)
 app.get('/api/assessments/grade/:grade', async (req, res) => {
   try {
     const grade = decodeURIComponent(req.params.grade);
     const query = buildPeriodFilter(req.query.period, req.query.type);
+    const nameFilter = buildNameFilter(req.query.name, req.query.type);
+    if (nameFilter) query.assessmentName = nameFilter;
     query.grade = grade;
     const students = await StudentAssessment.find(query).sort({ studentName: 1 });
     res.json({ success: true, students });
@@ -1693,8 +1723,10 @@ app.get('/api/assessments/grade/:grade', async (req, res) => {
 // GET search assessments
 app.get('/api/assessments/search', async (req, res) => {
   try {
-    const { name, grade, period, type } = req.query;
+    const { name, grade, period, type, assessmentName } = req.query;
     let query = buildPeriodFilter(period, type);
+    const assessmentNameFilter = buildNameFilter(assessmentName, type);
+    if (assessmentNameFilter) query.assessmentName = assessmentNameFilter;
     if (name) query.studentName = { $regex: name, $options: 'i' };
     if (grade) query.grade = grade;
     
@@ -1718,10 +1750,12 @@ app.get('/api/assessments/student/:id', async (req, res) => {
   }
 });
 
-// GET stats (optionally filtered by assessment period/type)
+// GET stats (optionally filtered by assessment period/type/name)
 app.get('/api/assessments/stats', async (req, res) => {
   try {
     const query = buildPeriodFilter(req.query.period, req.query.type);
+    const nameFilter = buildNameFilter(req.query.name, req.query.type);
+    if (nameFilter) query.assessmentName = nameFilter;
     const students = await StudentAssessment.find(query);
     const stats = {
       total: students.length,
@@ -1741,7 +1775,7 @@ app.get('/api/assessments/stats', async (req, res) => {
 // previous month's because each period is identified by a separate document.
 app.post('/api/assessments', async (req, res) => {
   try {
-    const { studentName, grade, assessments, assessmentPeriod, assessmentType, assessmentDate } = req.body;
+    const { studentName, grade, assessments, assessmentPeriod, assessmentType, assessmentDate, assessmentName: assessmentNameRaw } = req.body;
     
     if (!studentName || !String(studentName).trim()) {
       return res.status(400).json({ success: false, message: 'studentName is required' });
@@ -1752,6 +1786,10 @@ app.post('/api/assessments', async (req, res) => {
     validateAssessments(assessments);
     
     const { period, type } = normalisePeriodType(assessmentPeriod, assessmentType);
+    // Each assessment instance gets its own name. When the admin leaves the
+    // name empty the assessment type is used, which keeps legacy period+type
+    // records compatible instead of creating duplicates.
+    const assessmentName = (assessmentNameRaw && String(assessmentNameRaw).trim()) || type;
     
     const totalScore = computeTotal(assessments);
     const averageScore = assessments.length > 0 ? totalScore / assessments.length : 0;
@@ -1766,18 +1804,22 @@ app.post('/api/assessments', async (req, res) => {
       performanceLevel,
       assessmentPeriod: period,
       assessmentType: type,
+      assessmentName,
       assessmentDate: assessmentDate ? new Date(assessmentDate) : new Date(),
       updatedAt: new Date()
     };
     
-    // Upsert on the composite key so the same student+period+type is updated
-    // in place while a different period remains untouched.
+    // Upsert on the composite key (student + grade + period + type + name) so
+    // re-saving the SAME assessment updates it in place, while any OTHER
+    // assessment (different name/period/type) is stored as a separate record
+    // and can never be overwritten.
     const student = await StudentAssessment.findOneAndUpdate(
       {
         studentName: update.studentName,
         grade: update.grade,
         assessmentPeriod: period,
-        assessmentType: type
+        assessmentType: type,
+        assessmentName: buildNameFilter(assessmentName, type)
       },
       update,
       { new: true, upsert: true, setDefaultsOnInsert: true }
@@ -1793,7 +1835,7 @@ app.post('/api/assessments', async (req, res) => {
 // the assessment period/type so edits stay in their correct period.
 app.put('/api/assessments/:id', async (req, res) => {
   try {
-    const { studentName, grade, assessments, assessmentPeriod, assessmentType, assessmentDate } = req.body;
+    const { studentName, grade, assessments, assessmentPeriod, assessmentType, assessmentDate, assessmentName: assessmentNameRaw } = req.body;
     const student = await StudentAssessment.findById(req.params.id);
     
     if (!student) {
@@ -1804,6 +1846,7 @@ app.put('/api/assessments/:id', async (req, res) => {
     
     const period = (assessmentPeriod && String(assessmentPeriod).trim()) || student.assessmentPeriod || DEFAULT_PERIOD;
     const type = (assessmentType && String(assessmentType).trim()) || student.assessmentType || DEFAULT_TYPE;
+    const assessmentName = (assessmentNameRaw && String(assessmentNameRaw).trim()) || student.assessmentName || type;
     
     student.studentName = studentName || student.studentName;
     student.grade = grade || student.grade;
@@ -1813,6 +1856,7 @@ app.put('/api/assessments/:id', async (req, res) => {
     student.performanceLevel = calculatePerformanceLevel(assessments);
     student.assessmentPeriod = period;
     student.assessmentType = type;
+    student.assessmentName = assessmentName;
     if (assessmentDate) student.assessmentDate = new Date(assessmentDate);
     student.updatedAt = new Date();
     
@@ -1840,6 +1884,60 @@ app.delete('/api/assessments/all', async (req, res) => {
     res.json({ success: true, message: 'All assessments deleted!' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// SUBJECT CONFIGURATION (editable per grade + assessment type)
+// ============================================
+
+// GET saved subject configuration for a grade. Falls back to the grade-level
+// "All" configuration when no type-specific config exists. Returns
+// config: null when nothing has been saved (the client then uses its
+// built-in defaults).
+app.get('/api/assessments/subjects/:grade', async (req, res) => {
+  try {
+    const grade = decodeURIComponent(req.params.grade);
+    const type = (req.query.type && String(req.query.type).trim()) || 'All';
+    let config = await SubjectConfig.findOne({ grade, assessmentType: type });
+    if (!config && type !== 'All') {
+      config = await SubjectConfig.findOne({ grade, assessmentType: 'All' });
+    }
+    res.json({ success: true, config });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// PUT save subject configuration for a grade (+ optional assessment type).
+app.put('/api/assessments/subjects/:grade', async (req, res) => {
+  try {
+    const grade = decodeURIComponent(req.params.grade);
+    const { type, subjects } = req.body;
+    if (!Array.isArray(subjects) || subjects.length === 0) {
+      return res.status(400).json({ success: false, message: 'At least one subject is required' });
+    }
+    const cleaned = [];
+    subjects.forEach((s, i) => {
+      const name = s && s.name ? String(s.name).trim() : '';
+      const max = Number(s.max);
+      if (!name) {
+        throw new Error(`Subject name at position ${i + 1} is required`);
+      }
+      if (isNaN(max) || max <= 0) {
+        throw new Error(`Max score for "${name}" must be a positive number`);
+      }
+      cleaned.push({ name, max });
+    });
+    const assessmentType = (type && String(type).trim()) || 'All';
+    const config = await SubjectConfig.findOneAndUpdate(
+      { grade, assessmentType },
+      { grade, assessmentType, subjects: cleaned, updatedAt: new Date() },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+    res.json({ success: true, message: 'Subject configuration saved!', config });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
@@ -2033,7 +2131,10 @@ app.delete('/api/holiday-assignments/:id', async (req, res) => {
 
 
 
-// GET assessment history (distinct periods/types) for a grade
+// GET assessment history (distinct assessment instances) for a grade.
+// Each instance is identified by its name + period + type so that multiple
+// assessments (e.g. "CAT 1" and "CAT 2" in the same month) are listed
+// separately and can be loaded individually.
 app.get('/api/assessments/history/:grade', async (req, res) => {
   try {
     const grade = decodeURIComponent(req.params.grade);
@@ -2042,6 +2143,7 @@ app.get('/api/assessments/history/:grade', async (req, res) => {
       {
         $group: {
           _id: {
+            name: { $ifNull: ['$assessmentName', '$assessmentType'] },
             period: { $ifNull: ['$assessmentPeriod', DEFAULT_PERIOD] },
             type: { $ifNull: ['$assessmentType', DEFAULT_TYPE] }
           },
@@ -2052,6 +2154,7 @@ app.get('/api/assessments/history/:grade', async (req, res) => {
       { $sort: { latestDate: -1 } }
     ]);
     const periods = history.map(h => ({
+      assessmentName: h._id.name,
       assessmentPeriod: h._id.period,
       assessmentType: h._id.type,
       studentCount: h.studentCount,
@@ -2068,11 +2171,13 @@ app.get('/api/assessments/history/:grade', async (req, res) => {
 app.delete('/api/assessments/by-period/:grade', async (req, res) => {
   try {
     const grade = decodeURIComponent(req.params.grade);
-    const { period, type } = req.query;
+    const { period, type, name } = req.query;
     if (!period) {
       return res.status(400).json({ success: false, message: 'period query parameter is required' });
     }
     const filter = buildPeriodFilter(period, type);
+    const nameFilter = buildNameFilter(name, type);
+    if (nameFilter) filter.assessmentName = nameFilter;
     filter.grade = grade;
     const toDelete = await StudentAssessment.find(filter);
     let deleted = 0;
@@ -2094,6 +2199,8 @@ app.get('/api/assessments/class-report/:grade', async (req, res) => {
     const { period, type } = req.query;
 
     const query = buildPeriodFilter(period, type);
+    const nameFilter = buildNameFilter(req.query.name, type);
+    if (nameFilter) query.assessmentName = nameFilter;
     query.grade = grade;
 
     const students = await StudentAssessment.find(query).sort({ studentName: 1 });
@@ -2798,6 +2905,17 @@ app.get('/api/audit', async (req, res) => {
     const logs = await AuditLog.find(query).sort({ createdAt: -1 }).limit(500);
     res.json({ success: true, logs });
   } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+});
+
+// ============================================
+// API CONFIG - exposes backend URL for cross-origin frontends
+// ============================================
+app.get('/api/config', (req, res) => {
+  res.json({
+    success: true,
+    apiBaseUrl: process.env.API_BASE_URL || '',
+    frontendUrl: process.env.FRONTEND_URL || ''
+  });
 });
 
 // ============================================

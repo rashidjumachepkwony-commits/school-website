@@ -25,6 +25,15 @@ const studentAssessmentSchema = new mongoose.Schema({
     default: 'Legacy',
     index: true
   },
+  // Unique name for each assessment instance (e.g. "CAT 1", "Opener Exam",
+  // "End-Term Exam"). Every assessment is stored under its own name so adding
+  // a new assessment NEVER overwrites previous results. When empty, the
+  // assessment type is used as the name (legacy-compatible behaviour).
+  assessmentName: {
+    type: String,
+    default: '',
+    index: true
+  },
   assessmentDate: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
