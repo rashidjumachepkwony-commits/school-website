@@ -3591,6 +3591,32 @@ app.get('/api/student/attendance/date/:date', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
+  });
+  
+// GET all student attendance records (for period-based reports)
+app.get('/api/student/attendance/all', async (req, res) => {
+  try {
+    const students = await Student.find({});
+    const records = [];
+    students.forEach(s => {
+      s.attendance.forEach(rec => {
+        records.push({
+          studentId: s.studentId,
+          name: s.name,
+          grade: s.grade,
+          class: s.class,
+          date: rec.date,
+          checkIn: rec.checkIn,
+          checkOut: rec.checkOut,
+          status: rec.status,
+          isLate: rec.isLate
+        });
+      });
+    });
+    res.json({ success: true, count: records.length, records });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // ============================================

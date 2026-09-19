@@ -133,6 +133,28 @@
         .filter-section .pdf-btn { background: #dc3545; }
         .filter-section .pdf-btn:hover { background: #c82333; }
 
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .tabs button {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            color: #555;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .tabs button:hover { background: #e9ecef; }
+        .tabs button.active { background: #0b5394; color: white; border-color: #0b5394; }
+        .date-label { display: none; font-weight: 600; color: #333; font-size: 13px; }
+
         .summary-box {
             background: #f8f9fa;
             padding: 15px 20px;
@@ -239,6 +261,13 @@
             </div>
         </div>
 
+        <div class="tabs no-print">
+            <button class="active" onclick="switchTab('daily')">📅 Daily</button>
+            <button onclick="switchTab('weekly')">📆 Weekly</button>
+            <button onclick="switchTab('monthly')">📊 Monthly</button>
+            <button onclick="switchTab('datepicker')">📅 Select Date</button>
+        </div>
+
         <div class="filter-section">
             <input type="text" id="searchInput" placeholder="🔍 Search by name, ID, or grade..." onkeyup="filterTable()">
             <select id="gradeFilter" onchange="filterTable()">
@@ -260,7 +289,8 @@
                 <option value="Checked Out">🚪 Checked Out</option>
                 <option value="Absent">❌ Absent</option>
             </select>
-            <input type="date" id="dateFilter" onchange="loadAttendance()" value="">
+            <span class="date-label" id="dateLabel">📅 Date:</span>
+            <input type="date" id="dateFilter" onchange="loadAttendance()" style="display:none;" hidden>
             <button onclick="loadAttendance()">🔄 Load</button>
             <button class="export-btn" onclick="exportCSV()">📊 Export CSV</button>
             <button class="pdf-btn" onclick="generatePDF()">📄 PDF Report</button>
@@ -300,6 +330,8 @@
 
     <script>
         const ADMIN_PIN = '1010';
+        let allRecords = [];
+        let currentTab = 'daily';
 
         function checkAuth(event) {
             const isAuthed = sessionStorage.getItem('adminAuthed') === 'true';
@@ -343,27 +375,85 @@
             loadAttendance();
         }
 
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tabs button').forEach(b => {
+                if (b.textContent.toLowerCase().includes(tab.replace('datepicker','select'))) b.classList.add('active');
+            });
+
+            const dateLabel = document.querySelector('.date-label');
+            const dateInput = document.getElementById('dateFilter');
+            if (tab === 'datepicker') {
+                document.getElementById('dateFilter').style.display = 'inline-block';
+            } else {
+                document.getElementById('dateFilter').style.display = 'none';
+            }
+            loadAttendance();
+        }
+
         async function loadAttendance() {
-            const date = document.getElementById('dateFilter').value;
             const tbody = document.getElementById('attendanceBody');
             tbody.innerHTML = '<tr><td colspan="8" class="loading">Loading attendance...</td></tr>';
 
             try {
-                const url = date ? `/api/student/attendance/date/${date}` : '/api/student/attendance/today';
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (!data.success) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="color:red;text-align:center;">Error: ' + (data.message || 'Unknown error') + '</td></tr>';
-                    return;
+                if (currentTab === 'daily' || currentTab === 'datepicker') {
+                    const date = currentTab === 'datepicker' ? document.getElementById('dateFilter').value : '';
+                    const url = date ? `/api/student/attendance/date/${date}` : '/api/student/attendance/today';
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    if (!data.success) {
+                        tbody.innerHTML = '<tr><td colspan="8" style="color:red;text-align:center;">Error: ' + (data.message || 'Unknown error') + '</td></tr>';
+                        return;
+                    }
+                    const records = data.records || [];
+                    renderTable(records);
+                    updateSummary(records, date);
+                } else {
+                    const response = await fetch('/api/student/attendance/all');
+                    const data = await response.json();
+                    if (!data.success) {
+                        tbody.innerHTML = '<tr><td colspan="8" style="color:red;text-align:center;">Error: ' + (data.message || 'Unknown error') + '</td></tr>';
+                        return;
+                    }
+                    allRecords = data.records || [];
+                    const records = filterByTab();
+                    renderTable(records);
+                    updateSummary(records, currentTab);
                 }
-
-                const records = data.records || [];
-                renderTable(records);
-                updateSummary(records, date);
             } catch (error) {
                 tbody.innerHTML = '<tr><td colspan="8" style="color:red;text-align:center;">Error: ' + error.message + '</td></tr>';
             }
+        }
+
+        function filterByTab() {
+            const today = new Date();
+            if (currentTab === 'weekly') {
+                const weekStart = getWeekStart(today);
+                const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+                return allRecords.filter(r => {
+                    const recDate = new Date(r.date);
+                    recDate.setHours(0,0,0,0);
+                    return recDate >= weekStart && recDate <= weekEnd;
+                });
+            } else if (currentTab === 'monthly') {
+                const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                return allRecords.filter(r => {
+                    const recDate = new Date(r.date);
+                    recDate.setHours(0,0,0,0);
+                    return recDate >= monthStart && recDate <= monthEnd;
+                });
+            }
+            return allRecords;
+        }
+
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            d.setDate(diff); d.setHours(0,0,0,0);
+            return d;
         }
 
         function renderTable(records) {
@@ -431,7 +521,20 @@
         function updateSummary(records, date) {
             const summaryBox = document.getElementById('summaryBox');
             summaryBox.style.display = 'block';
-            document.getElementById('summaryDate').textContent = date ? new Date(date).toLocaleDateString('en-GB') : 'Today';
+            const summaryDate = document.getElementById('summaryDate');
+
+            let dateLabel = '';
+            if (currentTab === 'weekly') {
+                const weekStart = getWeekStart(new Date());
+                const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+                dateLabel = `${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
+            } else if (currentTab === 'monthly') {
+                const today = new Date();
+                dateLabel = today.toLocaleString('default', { month: 'long', year: 'numeric' });
+            } else {
+                dateLabel = date ? new Date(date).toLocaleDateString('en-GB') : 'Today';
+            }
+            summaryDate.textContent = dateLabel;
 
             let present = 0, late = 0, checkedOut = 0, absent = 0;
             const allStudents = records.length;
@@ -457,7 +560,17 @@
         }
 
         function exportCSV() {
-            const date = document.getElementById('dateFilter').value;
+            let dateLabel;
+            if (currentTab === 'weekly') {
+                const weekStart = getWeekStart(new Date());
+                const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+                dateLabel = `weekly-${weekStart.toISOString().split('T')[0]}`;
+            } else if (currentTab === 'monthly') {
+                dateLabel = `monthly-${new Date().toISOString().slice(0,7)}`;
+            } else {
+                const date = document.getElementById('dateFilter').value;
+                dateLabel = date || 'today';
+            }
             const rows = [['#', 'Student ID', 'Name', 'Grade', 'Status', 'Check In', 'Check Out', 'Notes']];
             const tbody = document.getElementById('attendanceBody');
             const trs = tbody.querySelectorAll('tr');
@@ -473,7 +586,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `student-attendance-${date || 'today'}.csv`;
+            a.download = `student-attendance-${dateLabel}.csv`;
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -487,8 +600,19 @@
             doc.text('Changara Star Academy - Student Attendance Report', 14, 20);
             
             doc.setFontSize(12);
-            const date = document.getElementById('dateFilter').value || 'Today';
-            doc.text(`Date: ${new Date(date).toLocaleDateString('en-GB')}`, 14, 28);
+            let dateLabel;
+            if (currentTab === 'weekly') {
+                const weekStart = getWeekStart(new Date());
+                const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+                dateLabel = `Weekly: ${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
+            } else if (currentTab === 'monthly') {
+                const today = new Date();
+                dateLabel = `Monthly: ${today.toLocaleString('default', { month: 'long', year: 'numeric' })}`;
+            } else {
+                const date = document.getElementById('dateFilter').value;
+                dateLabel = date ? new Date(date).toLocaleDateString('en-GB') : 'Today';
+            }
+            doc.text(`Period: ${dateLabel}`, 14, 28);
             doc.text(`Generated: ${new Date().toLocaleString('en-GB')}`, 14, 34);
 
             const headers = [['#', 'Student ID', 'Name', 'Grade', 'Status', 'Check In', 'Check Out', 'Notes']];
@@ -512,7 +636,11 @@
                 margin: { left: 10, right: 10 }
             });
 
-            doc.save(`student-attendance-${date || 'today'}.pdf`);
+            let filename = currentTab;
+            if (currentTab === 'weekly') filename = 'weekly';
+            else if (currentTab === 'monthly') filename = 'monthly';
+            else filename = 'daily';
+            doc.save(`student-attendance-${filename}.pdf`);
         }
     </script>
 </body>
