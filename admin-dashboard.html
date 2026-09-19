@@ -413,6 +413,11 @@
         <a onclick="showSection('seo')"><i class="fas fa-search"></i> SEO</a>
         <a onclick="showSection('notice')"><i class="fas fa-bell"></i> Notice Alert</a>
 
+        <!-- ===== REPORTS ===== -->
+        <div class="menu-label" style="margin-top:10px;">Reports & Analytics</div>
+        <a onclick="showSection('reports')"><i class="fas fa-chart-line"></i> Reports</a>
+        <!-- ===== END REPORTS ===== -->
+
         <div class="menu-label" style="margin-top:10px;">Staff Management</div>
         <a onclick="showSection('staff')"><i class="fas fa-users-cog"></i> Manage Staff</a>
         <a onclick="showSection('attendance')"><i class="fas fa-user-check"></i> Attendance</a>
@@ -423,6 +428,8 @@
         <!-- ===== ACADEMIC MANAGEMENT ===== -->
         <div class="menu-label" style="margin-top:10px;">Academic Management</div>
         <a onclick="window.location.href='admin-academics.html'"><i class="fas fa-chart-bar"></i> Assessments</a>
+        <a onclick="window.location.href='admin-holiday-assignments.html'"><i class="fas fa-file-alt"></i> Holiday Assignments</a>
+        <a onclick="window.location.href='admin-holiday-assignments-manage.html'"><i class="fas fa-tasks"></i> Manage Assignments</a>
         <!-- ===== END ACADEMIC MANAGEMENT ===== -->
 
         <!-- ===== STUDENT MANAGEMENT ===== -->
@@ -495,10 +502,20 @@
                 <h3>Assessments</h3>
                 <p>Marks entry & reports</p>
             </div>
+            <div class="dashboard-card" onclick="window.location.href='admin-holiday-assignments.html'" style="border-color:#d4a017; background: #fffbeb;">
+                <span class="icon">📋</span>
+                <h3>Holiday Assignments</h3>
+                <p>Upload & manage assignments</p>
+            </div>
             <div class="dashboard-card" onclick="window.location.href='admin-students.html'" style="border-color:#0b8f34; background: #f0fdf4;">
                 <span class="icon">🎓</span>
                 <h3>Student Attendance</h3>
                 <p>Daily check-in/out records</p>
+            </div>
+            <div class="dashboard-card" onclick="showSection('reports')" style="border-color:#6f42c1; background: #f5f0ff;">
+                <span class="icon">📈</span>
+                <h3>Reports & Analytics</h3>
+                <p>Daily, Weekly, Monthly reports</p>
             </div>
         </div>
 
@@ -511,6 +528,9 @@
                 <button class="btn btn-warning" onclick="showSection('notice')"><i class="fas fa-bell"></i> Post Notice</button>
                 <button class="btn btn-assessments" onclick="window.location.href='admin-academics.html'">
                     <i class="fas fa-chart-bar"></i> Assessments
+                </button>
+                <button class="btn btn-success" onclick="window.location.href='admin-holiday-assignments.html'">
+                    <i class="fas fa-file-alt"></i> Assignments
                 </button>
                 <button class="btn btn-danger" onclick="clearAllCache()"><i class="fas fa-trash"></i> Clear Cache</button>
             </div>

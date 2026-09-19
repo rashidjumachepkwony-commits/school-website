@@ -415,6 +415,67 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* ===== CBC COMPETENCY-BASED ANALYSIS (integrated) ===== */
+        .cbc-distribution { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 18px; }
+        .cbc-distribution .dist-item {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; color: #333;
+        }
+        .cbc-distribution .dist-item .dot {
+            width: 12px; height: 12px; border-radius: 50%; display: inline-block;
+        }
+        .cbc-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .cbc-summary-item {
+            background: #fafbfc;
+            border: 1px solid #e8ecf1;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+        .cbc-summary-item .num { font-size: 24px; font-weight: 700; color: #0A1628; }
+        .cbc-summary-item .num.green { color: #28a745; }
+        .cbc-summary-item .num.blue { color: #17a2b8; }
+        .cbc-summary-item .num.orange { color: #d4a017; }
+        .cbc-summary-item .num.red { color: #dc3545; }
+        .cbc-summary-item .label {
+            font-size: 10px; color: #888; margin-top: 4px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .cbc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 12px;
+        }
+        .cbc-item {
+            background: white;
+            border: 1px solid #e8ecf1;
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .cbc-item .competency { font-weight: 700; font-size: 14px; color: #0A1628; margin-bottom: 8px; }
+        .cbc-item .cbc-bar {
+            height: 8px; background: #e8ecf1; border-radius: 4px; overflow: hidden; margin: 8px 0;
+        }
+        .cbc-item .cbc-bar .cbc-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .cbc-item .cbc-stats {
+            display: flex; justify-content: space-between; flex-wrap: wrap;
+            gap: 4px; font-size: 12px; color: #6c757d;
+        }
+        .cbc-item .cbc-stats .value { font-weight: 700; color: #0A1628; }
+        .cbc-item .cbc-levels {
+            margin-top: 8px; font-size: 11px; color: #6c757d;
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
+        @media print {
+            .cbc-summary-item { border: 1px solid #ddd; }
+            .cbc-distribution, .cbc-summary, .cbc-grid { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+        }
     </style>
 </head>
 <body>
@@ -547,6 +608,50 @@
         <div class="stat-card">
             <div class="number red" id="belowCount">0</div>
             <div class="label">Below Expectation</div>
+        </div>
+    </div>
+
+    <!-- ===== CBC COMPETENCY-BASED ANALYSIS ===== -->
+    <div class="card" id="cbcAnalysisCard">
+        <h2><i class="fas fa-bullseye" style="color:#D4A017;"></i> CBC Competency-Based Analysis <span style="background:#D4A017;color:white;font-size:10px;padding:2px 10px;border-radius:12px;vertical-align:middle;">Competency Assessment</span></h2>
+        <p class="desc">Subject-by-subject competency breakdown for <strong id="cbcGradeLabel">-</strong> — <strong id="cbcPeriodLabel">-</strong></p>
+
+        <div class="cbc-distribution" id="cbcDistribution"></div>
+
+        <div class="cbc-summary">
+            <div class="cbc-summary-item">
+                <div class="num" id="cbcTotal">0</div>
+                <div class="label">Total Students</div>
+            </div>
+            <div class="cbc-summary-item">
+                <div class="num green" id="cbcExceeding">0</div>
+                <div class="label">Exceeding (EE)</div>
+            </div>
+            <div class="cbc-summary-item">
+                <div class="num blue" id="cbcMeeting">0</div>
+                <div class="label">Meeting (ME)</div>
+            </div>
+            <div class="cbc-summary-item">
+                <div class="num orange" id="cbcApproaching">0</div>
+                <div class="label">Approaching (AE)</div>
+            </div>
+            <div class="cbc-summary-item">
+                <div class="num red" id="cbcBelow">0</div>
+                <div class="label">Below (BE)</div>
+            </div>
+            <div class="cbc-summary-item">
+                <div class="num" id="cbcClassAvg" style="color:#6f42c1;">0%</div>
+                <div class="label">Class Average</div>
+            </div>
+        </div>
+
+        <div class="cbc-grid" id="cbcGrid">
+            <div class="cbc-item" style="grid-column:1/-1;text-align:center;color:#999;">Loading CBC analysis...</div>
+        </div>
+
+        <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-success" onclick="exportCBCResults()"><i class="fas fa-file-csv"></i> Export CBC Results (CSV)</button>
+            <button class="btn btn-info" onclick="window.print()"><i class="fas fa-print"></i> Print Analysis</button>
         </div>
     </div>
 
@@ -797,12 +902,14 @@
                 studentsData = data.students || [];
                 renderMarksTable();
                 loadStats();
+                renderCBCAnalysis();
                 showSaveStatus('Loaded', 'saved');
                 setTimeout(() => hideSaveStatus(), 1500);
             } else {
                 studentsData = [];
                 renderMarksTable();
                 loadStats();
+                renderCBCAnalysis();
                 showSaveStatus('No data', 'saved');
                 setTimeout(() => hideSaveStatus(), 1500);
             }
@@ -811,6 +918,7 @@
             studentsData = [];
             renderMarksTable();
             loadStats();
+            renderCBCAnalysis();
             showSaveStatus('Error loading', 'error');
             setTimeout(() => hideSaveStatus(), 2000);
         }
@@ -1376,6 +1484,234 @@
         if (!win) {
             showAlert('Please allow popups for this site to download reports', 'error');
         }
+    }
+
+    // ============================================
+    // CBC COMPETENCY-BASED ANALYSIS HELPERS
+    // (Adapted from "Class Assessment Results with CBC Analysis" page.
+    //  Renders from the already-loaded studentsData — no extra API calls.
+    //  Uses the same 80/60/40 performance thresholds as the rest of the app.)
+    // ============================================
+    let cbcExportData = null;
+
+    function cbcPerformanceLevel(percentage) {
+        if (percentage >= 80) return 'Exceeding Expectation';
+        if (percentage >= 60) return 'Meeting Expectation';
+        if (percentage >= 40) return 'Approaching Expectation';
+        return 'Below Expectation';
+    }
+
+    function cbcLevelColor(level) {
+        const colors = {
+            'Exceeding Expectation': '#28a745',
+            'Meeting Expectation': '#17a2b8',
+            'Approaching Expectation': '#d4a017',
+            'Below Expectation': '#dc3545'
+        };
+        return colors[level] || '#6c757d';
+    }
+
+    function cbcLevelShort(level) {
+        const shorts = {
+            'Exceeding Expectation': 'EE',
+            'Meeting Expectation': 'ME',
+            'Approaching Expectation': 'AE',
+            'Below Expectation': 'BE'
+        };
+        return shorts[level] || 'AE';
+    }
+
+    function cbcLevelRating(level) {
+        const ratings = {
+            'Exceeding Expectation': 4,
+            'Meeting Expectation': 3,
+            'Approaching Expectation': 2,
+            'Below Expectation': 1
+        };
+        return ratings[level] || 2;
+    }
+
+    function renderCBCAnalysis() {
+        const students = studentsData || [];
+        document.getElementById('cbcGradeLabel').textContent = currentGrade;
+        document.getElementById('cbcPeriodLabel').textContent = currentPeriod + ' — ' + currentType;
+
+        // Overall class stats
+        let exceeding = 0, meeting = 0, approaching = 0, below = 0, totalAvg = 0;
+        students.forEach(s => {
+            const level = s.performanceLevel || cbcPerformanceLevel(s.averageScore || 0);
+            if (level === 'Exceeding Expectation') exceeding++;
+            else if (level === 'Meeting Expectation') meeting++;
+            else if (level === 'Approaching Expectation') approaching++;
+            else below++;
+            totalAvg += (s.averageScore || 0);
+        });
+        const total = students.length;
+        const classAvg = total > 0 ? (totalAvg / total) : 0;
+
+        document.getElementById('cbcTotal').textContent = total;
+        document.getElementById('cbcExceeding').textContent = exceeding;
+        document.getElementById('cbcMeeting').textContent = meeting;
+        document.getElementById('cbcApproaching').textContent = approaching;
+        document.getElementById('cbcBelow').textContent = below;
+        document.getElementById('cbcClassAvg').textContent = classAvg.toFixed(1) + '%';
+
+        // Distribution legend
+        const levels = [
+            { label: 'Exceeding (80-100%)', color: '#28a745', count: exceeding },
+            { label: 'Meeting (60-79%)', color: '#17a2b8', count: meeting },
+            { label: 'Approaching (40-59%)', color: '#d4a017', count: approaching },
+            { label: 'Below (0-39%)', color: '#dc3545', count: below }
+        ];
+        document.getElementById('cbcDistribution').innerHTML = levels.map(l =>
+            `<span class="dist-item">
+                <span class="dot" style="background:${l.color};"></span>
+                ${l.label}: <strong>${l.count}</strong> (${total > 0 ? ((l.count / total) * 100).toFixed(1) : 0}%)
+            </span>`
+        ).join('');
+
+        // Per-subject (learning area) competency analysis
+        const subjectMap = {};
+        students.forEach(s => {
+            if (s.assessments) {
+                s.assessments.forEach(a => {
+                    if (!a || !a.subject) return;
+                    if (!subjectMap[a.subject]) subjectMap[a.subject] = { scores: [], maxes: [] };
+                    subjectMap[a.subject].scores.push(Number(a.score) || 0);
+                    subjectMap[a.subject].maxes.push(Number(a.maxScore) || 0);
+                });
+            }
+        });
+
+        const grid = document.getElementById('cbcGrid');
+        if (total === 0 || Object.keys(subjectMap).length === 0) {
+            grid.innerHTML = `<div class="cbc-item" style="grid-column:1/-1;text-align:center;color:#999;">
+                <i class="fas fa-chart-pie" style="font-size:32px;display:block;margin-bottom:8px;color:#ddd;"></i>
+                No assessment data for ${currentGrade} in this period yet. Add students and marks above to see the CBC analysis.
+            </div>`;
+            cbcExportData = null;
+            return;
+        }
+
+        const competencies = Object.keys(subjectMap).map(subject => {
+            const d = subjectMap[subject];
+            const avgScore = d.scores.reduce((sum, v) => sum + v, 0) / d.scores.length;
+            const avgMax = d.maxes.reduce((sum, v) => sum + v, 0) / d.maxes.length;
+            const pct = avgMax > 0 ? (avgScore / avgMax) * 100 : 0;
+            const level = cbcPerformanceLevel(pct);
+
+            // Count students at each level for this subject
+            let ee = 0, me = 0, ae = 0, be = 0;
+            students.forEach(s => {
+                const a = s.assessments ? s.assessments.find(x => x.subject === subject) : null;
+                if (a && Number(a.maxScore) > 0) {
+                    const l = cbcPerformanceLevel((Number(a.score) / Number(a.maxScore)) * 100);
+                    if (l === 'Exceeding Expectation') ee++;
+                    else if (l === 'Meeting Expectation') me++;
+                    else if (l === 'Approaching Expectation') ae++;
+                    else be++;
+                }
+            });
+
+            return { subject, avgScore, avgMax, pct, level, ee, me, ae, be, count: d.scores.length };
+        }).sort((a, b) => b.pct - a.pct);
+
+        grid.innerHTML = competencies.map(c => {
+            const levelColor = cbcLevelColor(c.level);
+            const barColor = c.pct >= 80 ? '#28a745' : c.pct >= 60 ? '#17a2b8' : c.pct >= 40 ? '#d4a017' : '#dc3545';
+            return `
+                <div class="cbc-item">
+                    <div class="competency">${c.subject}</div>
+                    <div class="cbc-bar">
+                        <div class="cbc-fill" style="width:${Math.min(c.pct, 100)}%; background:${barColor};"></div>
+                    </div>
+                    <div class="cbc-stats">
+                        <span>Avg: <span class="value">${c.pct.toFixed(1)}%</span></span>
+                        <span>Score: <span class="value">${c.avgScore.toFixed(1)}/${c.avgMax.toFixed(1)}</span></span>
+                        <span style="color:${levelColor};font-weight:700;">${c.level.replace(' Expectation', '')}</span>
+                    </div>
+                    <div class="cbc-levels">
+                        <span>⬤ EE: ${c.ee}</span>
+                        <span>⬤ ME: ${c.me}</span>
+                        <span>⬤ AE: ${c.ae}</span>
+                        <span>⬤ BE: ${c.be}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Cache for CSV export
+        cbcExportData = { students, total, exceeding, meeting, approaching, below, classAvg, competencies };
+    }
+
+    function exportCBCResults() {
+        if (!cbcExportData || !cbcExportData.students || cbcExportData.students.length === 0) {
+            showAlert('No CBC data to export. Load a grade with marks first.', 'error');
+            return;
+        }
+
+        const { students, total, exceeding, meeting, approaching, below, classAvg, competencies } = cbcExportData;
+
+        // Collect all subjects across students
+        const allSubjects = new Set();
+        students.forEach(s => {
+            if (s.assessments) {
+                s.assessments.forEach(a => { if (a.subject) allSubjects.add(a.subject); });
+            }
+        });
+        const subjects = Array.from(allSubjects).sort();
+
+        let csv = 'Rank,Student Name,Grade,Period,Assessment Type,Total Score,Average %,Performance Level,Rating';
+        subjects.forEach(sub => {
+            csv += `,${sub} Score,${sub} Max,${sub} %`;
+        });
+        csv += '\n';
+
+        const sorted = [...students].sort((a, b) => (b.averageScore || 0) - (a.averageScore || 0));
+        sorted.forEach((s, index) => {
+            const rank = index + 1;
+            const level = s.performanceLevel || cbcPerformanceLevel(s.averageScore || 0);
+            const avg = s.averageScore ? s.averageScore.toFixed(1) : '0';
+            csv += `${rank},"${(s.studentName || 'N/A').replace(/"/g, '""')}",${s.grade || currentGrade},"${s.assessmentPeriod || currentPeriod}","${s.assessmentType || currentType}",${s.totalScore || 0},${avg},"${level}",${cbcLevelRating(level)}`;
+            subjects.forEach(sub => {
+                const a = s.assessments ? s.assessments.find(x => x.subject === sub) : null;
+                if (a) {
+                    const pct = Number(a.maxScore) > 0 ? ((Number(a.score) / Number(a.maxScore)) * 100).toFixed(1) : 0;
+                    csv += `,${Number(a.score) || 0},${Number(a.maxScore) || 0},${pct}`;
+                } else {
+                    csv += ',,,';
+                }
+            });
+            csv += '\n';
+        });
+
+        // CBC summary block
+        csv += '\n\nCBC Analysis Summary\n';
+        csv += `Grade,${currentGrade}\n`;
+        csv += `Period,${currentPeriod}\n`;
+        csv += `Assessment Type,${currentType}\n`;
+        csv += `Total Students,${total}\n`;
+        csv += `Exceeding (EE),${exceeding}\n`;
+        csv += `Meeting (ME),${meeting}\n`;
+        csv += `Approaching (AE),${approaching}\n`;
+        csv += `Below (BE),${below}\n`;
+        csv += `Class Average,${classAvg.toFixed(1)}%\n`;
+        csv += '\nSubject Competency Breakdown\n';
+        csv += 'Subject,Avg Score,Avg Max,Average %,Level,EE,ME,AE,BE\n';
+        competencies.forEach(c => {
+            csv += `${c.subject},${c.avgScore.toFixed(1)},${c.avgMax.toFixed(1)},${c.pct.toFixed(1)},"${c.level}",${c.ee},${c.me},${c.ae},${c.be}\n`;
+        });
+
+        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `CBC_Assessment_${currentGrade.replace(/\s+/g, '_')}_${currentPeriod.replace(/\s+/g, '_')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        showAlert('✅ CBC results exported as CSV!', 'success');
     }
 
     // ============================================
