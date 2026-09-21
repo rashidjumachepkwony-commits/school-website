@@ -1,25 +1,20 @@
 {
-  "name": "school-website",
-  "version": "1.0.0",
-  "description": "Changara Star Academy - Complete School Management System",
-  "main": "server.js",
+  "name": "changara-star-academy",
+  "version": "2.0.0",
+  "description": "Changara Star Academy Management System - Cloudflare Pages + D1",
+  "main": "functions/api/[[path]].js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "start": "wrangler dev",
+    "dev": "wrangler dev",
+    "build:static": "node scripts/build-static.js",
+    "deploy": "wrangler deploy",
+    "d1:create": "wrangler d1 create csa-school-db",
+    "d1:migrate": "wrangler d1 execute DB --file=schema.sql",
+    "d1:reset": "wrangler d1 execute DB --command='DROP TABLE IF EXISTS audit_logs; DROP TABLE IF EXISTS staff_attendance; DROP TABLE IF EXISTS student_attendance; DROP TABLE IF EXISTS visitors; DROP TABLE IF EXISTS content; DROP TABLE IF EXISTS students; DROP TABLE IF EXISTS staff; DROP TABLE' && wrangler d1 execute DB --file=schema.sql",
+    "d1:seed": "node scripts/seed-admin.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "import:students": "node scripts/import-students.js",
     "import:students:dry": "node scripts/import-students.js --dry-run"
-  },
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.7.4",
-    "multer": "^1.4.5-lts.1",
-    "nodemon": "^3.1.14",
-    "xlsx": "^0.18.5"
   },
   "keywords": [
     "school",
@@ -28,8 +23,12 @@
     "attendance",
     "student",
     "teacher",
-    "cms"
+    "cms",
+    "cloudflare"
   ],
   "author": "Changara Star Academy",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "wrangler": "^3.100.0"
+  }
 }
