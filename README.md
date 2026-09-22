@@ -158,5 +158,5 @@ Add the `DB` binding in your `wrangler.jsonc` under the `d1` section.
 ## Warnings and Limitations
 
 - The legacy Express server (`server.js`) and Mongoose models are kept for reference but are **not used** in the Cloudflare deployment.
-- File uploads are not supported in the current Cloudflare Worker setup. For upload functionality, use Cloudflare R2.
+- File uploads use Cloudinary (signed, server-side) — no local disk or R2 required.
 - The `scripts/import-students.js` script works with MongoDB and will be migrated to D1 in a future update.

@@ -1,0 +1,6 @@
+# Cloudflare Pages redirects
+# /api/* requests are proxied to the Cloudflare Worker
+/api/* https://csa-api.rashidjumachepkwony.workers.dev/api/:splat 200
+
+# SPA fallback - serve index.html for all non-API routes
+/* /index.html 200

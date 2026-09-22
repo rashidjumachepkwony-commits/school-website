@@ -2,18 +2,8 @@
   "$schema": "https://developer.cloudflare.com/api/branding/config.json",
   "name": "changara-star-academy",
   "compatibility_date": "2025-01-01",
-  "pages_builds": {
-    "output_dir": "/",
-    "git_branch": "main"
-  },
   "vars": {
-    "JWT_SECRET": "CHANGE-ME-IN-CLOUDFLARE-SECRET"
+    "FRONTEND_URL": "https://changarastaracademy.co.ke"
   },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "csa-school-db",
-      "database_id": ""
-    }
-  ]
+  "d1_databases": []
 }

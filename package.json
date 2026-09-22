@@ -1,20 +1,19 @@
 {
   "name": "changara-star-academy",
-  "version": "2.0.0",
-  "description": "Changara Star Academy Management System - Cloudflare Pages + D1",
-  "main": "functions/api/[[path]].js",
+  "version": "3.0.0",
+  "description": "Changara Star Academy Management System - Static site for Cloudflare Pages & Netlify, API on Cloudflare Workers",
+  "main": "server.js",
   "scripts": {
-    "start": "wrangler dev",
-    "dev": "wrangler dev",
+    "dev": "node server.js",
+    "dev:worker": "cd worker && node node_modules/wrangler/bin/wrangler.js dev",
+    "start": "node server.js",
     "build:static": "node scripts/build-static.js",
-    "deploy": "wrangler deploy",
-    "d1:create": "wrangler d1 create csa-school-db",
-    "d1:migrate": "wrangler d1 execute DB --file=schema.sql",
-    "d1:reset": "wrangler d1 execute DB --command='DROP TABLE IF EXISTS audit_logs; DROP TABLE IF EXISTS staff_attendance; DROP TABLE IF EXISTS student_attendance; DROP TABLE IF EXISTS visitors; DROP TABLE IF EXISTS content; DROP TABLE IF EXISTS students; DROP TABLE IF EXISTS staff; DROP TABLE' && wrangler d1 execute DB --file=schema.sql",
-    "d1:seed": "node scripts/seed-admin.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "import:students": "node scripts/import-students.js",
-    "import:students:dry": "node scripts/import-students.js --dry-run"
+    "deploy:worker": "cd worker && node node_modules/wrangler/bin/wrangler.js deploy",
+    "deploy:pages": "echo 'Deploy via Cloudflare Pages UI (publish directory = .)'",
+    "deploy:netlify": "npx netlify deploy --dir=. --prod",
+    "lint": "echo 'No lint step configured'",
+    "typecheck": "echo 'No typecheck step configured'",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "school",
@@ -24,11 +23,14 @@
     "student",
     "teacher",
     "cms",
-    "cloudflare"
+    "cloudflare",
+    "netlify",
+    "cloudinary"
   ],
   "author": "Changara Star Academy",
   "license": "ISC",
   "devDependencies": {
     "wrangler": "^3.100.0"
-  }
+  },
+  "dependencies": {}
 }
