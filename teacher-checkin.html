@@ -422,20 +422,23 @@
         // ============================================
         async function getTeacherStatus(employeeId) {
             try {
-                const response = await fetch(`/api/teacher/attendance/today`);
+                const response = await fetch(apiUrl('/api/teacher/attendance/today'));
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 const data = await response.json();
                 if (data.success) {
                     const teacher = data.attendance.find(t => t.employeeId === employeeId);
                     if (teacher) {
                         return {
-                            checkedIn: teacher.status === 'Checked In',
+                            checkedIn: teacher.status === 'Checked In' || teacher.status === 'Late' || teacher.status === 'Present',
                             checkedOut: teacher.status === 'Checked Out',
                             isLate: teacher.isLate || false,
-                            checkInTime: teacher.checkIn,
-                            checkOutTime: teacher.checkOut,
+                            checkInTime: teacher.checkInTime || null,
+                            checkOutTime: teacher.checkOutTime || null,
                             hoursWorked: teacher.hoursWorked || 0,
-                            checkInTimeFormatted: teacher.checkInTime,
-                            checkOutTimeFormatted: teacher.checkOutTime
+                            checkInTimeFormatted: teacher.checkInTime || null,
+                            checkOutTimeFormatted: teacher.checkOutTime || null
                         };
                     }
                 }
@@ -498,14 +501,14 @@
                 }
             }
             
-            const endpoint = action === 'checkin' ? '/api/teacher/checkin' : '/api/teacher/checkout';
+            const endpoint = action === 'checkin' ? apiUrl('/api/teacher/checkin') : apiUrl('/api/teacher/checkout');
             
             try {
                 // Disable both buttons while processing
                 checkinBtn.disabled = true;
                 checkoutBtn.disabled = true;
-                checkinBtn.textContent = '⏳ ...';
-                checkoutBtn.textContent = '⏳ ...';
+                checkinBtn.textContent = '⏳ Processing...';
+                checkoutBtn.textContent = '⏳ Processing...';
                 
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -516,6 +519,10 @@
                         pin: pin 
                     })
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
                 
                 const result = await response.json();
                 
@@ -547,7 +554,11 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showAlert('Error: ' + error.message, 'error');
+                if (error.message.includes('HTTP 4') || error.message.includes('HTTP 5')) {
+                    showAlert('Network error: Please check your connection and try again.', 'error');
+                } else {
+                    showAlert('Error: ' + (error.message || 'Unable to connect to the server.'), 'error');
+                }
             } finally {
                 // Re-enable buttons
                 checkinBtn.disabled = false;
@@ -570,12 +581,50 @@
         // ============================================
         // INIT
         // ============================================
+        async function loadTodayStatus() {
+            const employeeId = employeeIdInput.value.trim();
+            if (!employeeId) return;
+
+            const status = await getTeacherStatus(employeeId);
+            if (status) {
+                if (status.checkedIn && !status.checkedOut) {
+                    checkinBtn.disabled = true;
+                    checkoutBtn.disabled = false;
+                    statusCard.style.display = 'block';
+                    statusText.textContent = status.isLate ? '⚠️ Checked In (LATE)' : '✅ Checked In';
+                    statusText.className = status.isLate ? 'status-text late' : 'status-text checked-in';
+                    statusTime.textContent = `Time: ${status.checkInTimeFormatted || '--:--'}`;
+                    statusHours.textContent = '';
+                } else if (status.checkedOut) {
+                    checkinBtn.disabled = true;
+                    checkoutBtn.disabled = true;
+                    statusCard.style.display = 'block';
+                    statusText.textContent = '🚪 Checked Out';
+                    statusText.className = 'status-text checked-out';
+                    statusTime.textContent = `Time: ${status.checkOutTimeFormatted || '--:--'}`;
+                    statusHours.textContent = `Hours Worked: ${status.hoursWorked || 0}`;
+                }
+            }
+        }
+
+        // Load today's status on page load if employeeId is in the input
         document.addEventListener('DOMContentLoaded', function() {
             updateDayUI();
             updateKenyanTime();
-            
-            // Update time every second
             setInterval(updateKenyanTime, 1000);
+            
+            // Check if employeeId was pre-filled (e.g., from session)
+            if (employeeIdInput.value.trim()) {
+                loadTodayStatus();
+            }
+        });
+
+        // Check status when user enters employeeId and blurs the field
+        employeeIdInput.addEventListener('blur', function() {
+            const empId = this.value.trim();
+            if (empId) {
+                loadTodayStatus();
+            }
         });
     </script>
 </body>
