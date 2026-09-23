@@ -1,7 +1,7 @@
 /**
  * Student management route handlers.
  */
-import { ObjectId as ObjId } from 'mongodb';
+import { ObjectId as ObjId } from '../utils/objectid.js';
 import { success, error } from '../utils/helpers.js';
 import { hashPassword, verifyPassword } from '../services/password.service.js';
 import { getKenyaTime, getKenyaDate } from '../services/time.service.js';
@@ -12,7 +12,7 @@ export async function handleStudents(db, env, route, method, body, p) {
 
   // GET /api/students
   if (route === '/students' && method === 'GET') {
-    const { results } = await db.collection('students').find({}).sort({ createdAt: -1 }).toArray();
+    const results = await db.collection('students').find({}).sort({ createdAt: -1 }).toArray();
     const students = results.map(s => ({
       _id: s._id?.toString(),
       admissionNumber: s.admissionNumber, studentId: s.admissionNumber,
@@ -125,7 +125,7 @@ export async function handleStudents(db, env, route, method, body, p) {
   // GET /api/students/class/:className
   if (p[0] === 'students' && p[1] === 'class' && p[2] && method === 'GET') {
     const className = decodeURIComponent(p[2]);
-    const { results } = await db.collection('students').find({ class: className }).toArray();
+    const results = await db.collection('students').find({ class: className }).toArray();
     return success({ students: results, count: results.length });
   }
 

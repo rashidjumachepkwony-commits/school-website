@@ -3,7 +3,13 @@ main = "src/index.js"
 compatibility_date = "2026-08-04"
 compatibility_flags = ["nodejs_compat_v2"]
 
-vars = { FRONTEND_URL = "https://changarastaracademy.co.ke" }
+vars = { FRONTEND_URL = "https://changarastaracademy.co.ke", SUPABASE_URL = "https://gspikjhqvklixzdnlwhn.supabase.co" }
+
+# Secrets (set with `wrangler secret put <NAME>`):
+#   SUPABASE_SERVICE_ROLE_KEY  — Supabase service-role key (backend only!)
+#   JWT_SECRET                 — admin JWT signing key
+#   CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET
 
 # No R2 bucket - using Cloudinary for file storage
-# No KV namespace needed - using MongoDB for all data
+# Database: Supabase PostgreSQL (was MongoDB - migrated; see supabase/schema.sql
+# and scripts/migrate-mongodb-to-supabase.js)

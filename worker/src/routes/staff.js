@@ -1,7 +1,7 @@
 /**
  * Staff (Teacher) management route handlers.
  */
-import { ObjectId } from 'mongodb';
+import { ObjectId } from '../utils/objectid.js';
 import { success, error } from '../utils/helpers.js';
 import { hashPassword, verifyPassword } from '../services/password.service.js';
 

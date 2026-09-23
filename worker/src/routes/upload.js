@@ -7,7 +7,7 @@
 import { uploadToCloudinary, deleteFromCloudinary, getResourceTypeForExtension } from '../services/cloudinary.js';
 import { success, error } from '../utils/helpers.js';
 import { verifyToken } from '../utils/auth.js';
-import { ObjectId as ObjId } from 'mongodb';
+import { ObjectId as ObjId } from '../utils/objectid.js';
 
 const ALLOWED_IMAGE = new Set([
   'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'

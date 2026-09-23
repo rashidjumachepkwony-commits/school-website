@@ -1,7 +1,7 @@
 /**
  * Attendance route handlers.
  */
-import { ObjectId as ObjId } from 'mongodb';
+import { ObjectId as ObjId } from '../utils/objectid.js';
 import { success, error, extractIntId } from '../utils/helpers.js';
 import { getKenyaTime, getKenyaDate, getKenyaHour, formatKenyaTime } from '../services/time.service.js';
 import { verifyPassword } from '../services/password.service.js';

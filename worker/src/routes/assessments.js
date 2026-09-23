@@ -1,7 +1,7 @@
 /**
  * Assessment management route handlers.
  */
-import { ObjectId as ObjId } from 'mongodb';
+import { ObjectId as ObjId } from '../utils/objectid.js';
 import { success, error, extractIntId } from '../utils/helpers.js';
 
 export async function handleAssessments(db, env, route, method, body, p, url) {
@@ -49,7 +49,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     const assessment = await db.collection('assessments').findOne({ _id: new ObjId(p[1]) });
     if (!assessment) return error('Assessment not found', 404);
 
-    const { results: students } = await db.collection('students').find({ class: assessment.class }).toArray();
+    const students = await db.collection('students').find({ class: assessment.class }).toArray();
     const studentList = students.map(s => ({
       studentId: s._id.toString(),
       studentName: `${s.firstName} ${s.lastName}`,
@@ -96,7 +96,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
 
   // GET /api/assessments/:id/results
   if (p[0] === 'assessments' && p[2] === 'results' && method === 'GET') {
-    const { results } = await db.collection('assessmentResults').find({ assessmentId: p[1] })
+    const results = await db.collection('assessmentResults').find({ assessmentId: p[1] })
       .sort({ createdAt: -1 }).toArray();
     return success({ results, total: results.length });
   }

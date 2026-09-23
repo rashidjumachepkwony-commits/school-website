@@ -1,7 +1,7 @@
 /**
  * Visitor management route handlers.
  */
-import { ObjectId as ObjId } from 'mongodb';
+import { ObjectId as ObjId } from '../utils/objectid.js';
 import { success, error } from '../utils/helpers.js';
 import { getKenyaTime, getKenyaDate } from '../services/time.service.js';
 
@@ -13,7 +13,7 @@ export async function handleVisitors(db, env, route, method, body, p) {
 
   // GET /api/visitors
   if (route === '/visitors' && method === 'GET') {
-    const { results } = await db.collection('visitors').find({}).sort({ createdAt: -1 }).limit(200).toArray();
+    const results = await db.collection('visitors').find({}).sort({ createdAt: -1 }).limit(200).toArray();
     return success({ visitors: results });
   }
 
