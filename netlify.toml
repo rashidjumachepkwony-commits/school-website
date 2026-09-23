@@ -23,16 +23,55 @@
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Proxy /api/* requests to the Cloudflare Worker
+# Proxy /api/* requests to the Cloudflare Worker.
+# NOTE: CORS is handled by the Worker itself. Do NOT add an
+# Access-Control-Allow-Origin header here — a duplicate CORS header on the
+# proxied response would cause browsers to reject the request.
 [[redirects]]
   from = "/api/*"
   to = "https://csa-api.rashidjumachepkwony.workers.dev/api/:splat"
   status = 200
   force = true
-  headers = {Access-Control-Allow-Origin = "*"}
 
-# SPA fallback
+# ── Source/config files are NOT part of the public website. ──
+# Block them so backend source code cannot be downloaded from the site.
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+  from = "/server.js"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/worker/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/models/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/scripts/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+# No SPA fallback: this is a multi-page static site and every internal link
+# uses explicit .html paths. A `/* /index.html 200` catch-all would mask 404
+# errors and shadow the pretty-URLs post-processing. Unmatched paths are now
+# served 404.html automatically by Netlify.
