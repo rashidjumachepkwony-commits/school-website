@@ -1,7 +1,7 @@
 /**
  * Assessment management route handlers.
  */
-import { DbId as ObjId } from '../db.js';
+import { ObjectId as ObjId } from 'mongodb';
 import { success, error, extractIntId } from '../utils/helpers.js';
 
 export async function handleAssessments(db, env, route, method, body, p, url) {

@@ -1,81 +1,87 @@
 # Changara Star Academy Management System
 
-A complete school management system: static frontend on **Netlify/Cloudflare
-Pages**, API on a **Cloudflare Worker**, database on **Supabase PostgreSQL**
-(previously MongoDB Atlas — see `supabase/schema.sql` and
-`scripts/migrate-mongodb-to-supabase.js`).
+A complete school management system built on **Cloudflare Pages + D1**, deployed via **GitHub**.
 
 ## Technology Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Static hosting | Netlify (+ optional Cloudflare Pages) |
-| API backend | Cloudflare Worker (`worker/`) |
-| Database | Supabase PostgreSQL via `@supabase/supabase-js` (Mongo-compatible adapter in `worker/src/db.js`) |
-| Media storage | Cloudinary (signed, server-side uploads) |
-| Deployment | GitHub → Netlify (frontend) / `wrangler deploy` (Worker) |
-| Authentication | HMAC-SHA256 password hashes + JWT (Web Crypto / node:crypto) |
+| Static hosting | Cloudflare Pages |
+| API backend | Cloudflare Pages Functions (Worker) |
+| Database | Cloudflare D1 (SQLite) |
+| Deployment | GitHub → Cloudflare Pages (automatic) |
+| Authentication | Password hashing via Web Crypto API (PBKDF2) |
 
 ## Quick Start (Local Development)
 
 ### Prerequisites
 - Node.js 20+
-- A Supabase project (schema: `supabase/schema.sql`)
-- Worker secrets configured with `wrangler secret put` (see `DEPLOY.md`)
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/): `npm install -g wrangler`
+- Cloudflare account with D1 enabled
 
 ### Steps
 
-1. **Create the Supabase schema**
-   Open the [Supabase SQL Editor](https://supabase.com/dashboard/project/gspikjhqvklixzdnlwhn/sql/new),
-   paste `supabase/schema.sql`, and run it.
-
-2. **Configure Worker secrets**
+1. **Login to Cloudflare**
    ```bash
-   cd worker
-   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
-   npx wrangler secret put JWT_SECRET
+   wrangler login
    ```
 
-3. **Run the Worker locally**
+2. **Create the D1 database**
    ```bash
-   npm run dev:worker
+   wrangler d1 create csa-school-db
+   ```
+   Note the `database_id` from the output.
+
+3. **Link the database in `wrangler.jsonc`**
+   Update the `"database_name"` field to match your created database.
+
+4. **Run migrations**
+   ```bash
+   wrangler d1 execute DB --file=schema.sql
    ```
 
-4. **Serve the frontend locally**
+5. **Set environment variables**
+   ```bash
+   wrangler secret put JWT_SECRET
+   # Enter a random 32+ character string when prompted
+   ```
+
+6. **Start local development**
    ```bash
    npm run dev
    ```
-   (legacy Express server on `http://localhost:5000`)
+   This starts Wrangler in preview mode with a local D1 database.
 
-5. **Seed the initial admin**
-   With the Worker running, call `POST /api/setup-admin` (see `DEPLOY.md`),
-   or insert a row into the Supabase `admins` table with a password hash
-   produced by the same HMAC-SHA256 scheme used by `worker/src/utils/auth.js`.
+7. **Seed the initial admin**
+   After the first migration, create the initial admin account:
+   ```bash
+   wrangler d1 execute DB --command="INSERT OR IGNORE INTO admins (username, email, password_hash, full_name, role, is_active) VALUES ('admin', 'admin@changarastaracademy.co.ke', 'pbkdf2_sha256$100000$00000000000000000000000000000000$0000000000000000000000000000000000000000000000000000000000000000', 'Super Admin', 'Super Admin', 1)"
+   ```
+   Default password: `admin123` (change immediately after first login)
 
 ## Deployment
 
 1. Push to GitHub (`main` branch)
-2. Netlify deploys the static frontend (publish directory `.`)
-3. Deploy the Worker: `cd worker && npx wrangler deploy`
+2. Connect your repo to [Cloudflare Pages](https://dash.cloudflare.com)
+3. In Pages settings:
+   - Build command: `npm install && npm run build:static`
+   - Output directory: `dist`
+   - OR use the Worker directly: Build command: `npm run dev`, Output: `public/`
+4. Set `JWT_SECRET` in Pages environment variables
+5. Add `DB` binding in Pages settings pointing to your D1 database
 
 ## File Structure
 
 ```
-├── worker/src/                  # Cloudflare Worker (all API routes)
-│   ├── db.js                    # Supabase-backed Mongo-compatible data layer
-│   ├── routes/                  # auth, content, staff, attendance, visitors,
-│   │                            # students, assessments, curriculum, upload,
-│   │                            # holidayAssignments
-│   └── services/                # cloudinary, time (Africa/Nairobi), password
-├── supabase/schema.sql          # Supabase tables, RLS, indexes
+├── functions/api/[[path]].js  # Cloudflare Pages Function (all API routes)
+├── schema.sql                  # D1 database migrations
+├── wrangler.jsonc              # Cloudflare configuration
+├── js/config.js                # Frontend API URL configuration
 ├── scripts/
-│   ├── migrate-mongodb-to-supabase.js  # one-time data migration
-│   └── test-supabase-adapter.mjs       # data-layer unit tests
-├── js/config.js                 # Frontend API URL configuration
-├── server.js                    # Legacy local Express server (reference)
-├── *.html                       # Static pages (admin, staff, student, visitor)
-├── css/                         # Stylesheets
-└── images/                      # Static images
+│   └── seed-admin.js          # Admin seed script
+├── *.html                     # Static pages (admin, staff, student, visitor)
+├── css/                        # Stylesheets
+└── images/                     # Static images
 ```
 
 ## Creating the First Admin
@@ -138,20 +144,19 @@ Pages**, API on a **Cloudflare Worker**, database on **Supabase PostgreSQL**
 
 ## Troubleshooting
 
-### `Database not configured` / `db-health` fails
-- Check `SUPABASE_URL` is set in `worker/wrangler.toml` vars
-- Check the secret: `cd worker && npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY`
-- Confirm `supabase/schema.sql` has been run (the health check reads the
-  `contents` table)
+### D1 migration fails
+Ensure you're logged in: `wrangler login`
+Ensure the database exists: `wrangler d1 create csa-school-db`
+Check migration: `wrangler d1 execute DB --command="SELECT name FROM sqlite_master WHERE type='table'"`
 
 ### Login fails
-Verify the admin row exists in the Supabase `admins` table
-(`POST /api/setup-admin` creates it once), and that `JWT_SECRET` is set.
+Verify the admin was seeded correctly. Re-run the seed command if needed.
+
+### Database not found
+Add the `DB` binding in your `wrangler.jsonc` under the `d1` section.
 
 ## Warnings and Limitations
 
-- The legacy Express server (`server.js`) and Mongoose models are kept for
-  reference/local development but are **not used** in production.
+- The legacy Express server (`server.js`) and Mongoose models are kept for reference but are **not used** in the Cloudflare deployment.
 - File uploads use Cloudinary (signed, server-side) — no local disk or R2 required.
-- `scripts/import-students.js` targets MongoDB (legacy). New imports should go
-  through the Supabase adapter or the Worker API.
+- The `scripts/import-students.js` script works with MongoDB and will be migrated to D1 in a future update.

@@ -1,7 +1,7 @@
 /**
  * Student management route handlers.
  */
-import { DbId as ObjId } from '../db.js';
+import { ObjectId as ObjId } from 'mongodb';
 import { success, error } from '../utils/helpers.js';
 import { hashPassword, verifyPassword } from '../services/password.service.js';
 import { getKenyaTime, getKenyaDate } from '../services/time.service.js';

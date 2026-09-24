@@ -2,7 +2,5 @@
 # /api/* requests are proxied to the Cloudflare Worker
 /api/* https://csa-api.rashidjumachepkwony.workers.dev/api/:splat 200
 
-# NOTE: no SPA fallback — this is a multi-page static site and every internal
-# link uses explicit .html paths. A `/* /index.html 200` catch-all masked 404
-# errors, so it was removed. Unmatched paths are served by 404.html
-# (Netlify serves it automatically; Cloudflare Pages uses it as the not-found page).
+# SPA fallback - serve index.html for all non-API routes
+/* /index.html 200

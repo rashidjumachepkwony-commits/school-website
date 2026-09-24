@@ -33,3 +33,5 @@ uploads/
 # Misc
 query
 *.tmp
+.dev.vars
+.wrangler
