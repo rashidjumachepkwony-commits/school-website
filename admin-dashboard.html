@@ -1913,7 +1913,7 @@
     // ============================================
     async function loadAttendance() {
         try {
-            const response = await fetch(apiUrl('/api/teacher/attendance/today'));
+            const response = await fetch('/api/teacher/attendance/today');
             const data = await response.json();
             if (data.success) {
                 const tbody = document.getElementById('attendanceTableBody');

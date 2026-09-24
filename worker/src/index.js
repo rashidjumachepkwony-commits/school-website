@@ -2,7 +2,7 @@
  * Changara Star Academy Management System - Cloudflare Worker
  *
  * Production API backend handling all /api/* routes.
- * Uses Supabase PostgreSQL for storage and Cloudinary for file uploads.
+ * Uses MongoDB Atlas for storage and Cloudinary for file uploads.
  */
 
 import { connectToDatabase, checkDbHealth } from './db.js';
@@ -46,12 +46,7 @@ export default {
         if (health.ok) {
           return applyCors(success({ status: 'ok', latencyMs: health.latencyMs, dbName: health.dbName, collectionAccessible: health.collectionAccessible }));
         }
-        return applyCors(
-          error(
-            `Database connection failed: ${health.error || 'Unknown error'} (${health.code || 'UNKNOWN'})`,
-            503
-          )
-        );
+        return applyCors(error('Database connection failed', 503));
       }
 
       if (!url.pathname.startsWith('/api/')) {

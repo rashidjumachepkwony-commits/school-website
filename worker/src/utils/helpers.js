@@ -6,8 +6,7 @@ export function success(data, status = 200) {
 }
 
 export function error(message, status = 400) {
-  // Frontends read `result.message` on failure — keep both keys populated.
-  return new Response(JSON.stringify({ success: false, error: message, message }), {
+  return new Response(JSON.stringify({ success: false, error: message }), {
     status,
     headers: { 'Content-Type': 'application/json' }
   });

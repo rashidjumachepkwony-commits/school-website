@@ -1,284 +1,122 @@
 /**
- * Supabase database adapter for Cloudflare Workers.
+ * MongoDB connection manager for Cloudflare Workers.
  *
- * The application routes were originally written against MongoDB. This adapter
- * exposes a small Mongo-like API (collection/find/insertOne/etc.) on top of
- * Supabase (Postgres) so the existing HTTP contract keeps working.
- *
- * Live schema (matches supabase/schema.sql): every collection is a table with
- *   _id  text PRIMARY KEY   (24-hex id, same format as old ObjectIds)
- *   data jsonb              (the full document — nothing is lost)
- *
- * IMPORTANT: physical table names in the live Supabase project follow the
- * legacy_* naming produced by the migration (legacy_students, legacy_teachers,
- * legacy_visitors, ...). The mapping below must match those names — verify with
- * `node scripts/probe-supabase.mjs` before changing them.
+ * Key Workers-specific considerations:
+ * 1. maxPoolSize=1 — Workers processes a single request at a time per instance.
+ * 2. The MongoClient is cached at module scope (persist across requests in the
+ *    same Worker instance) but validated with a cheap ping() before reuse.
+ * 3. If the cached connection is stale (TCP idle timeout, etc.) we reconnect
+ *    transparently so the caller never sees a broken connection.
+ * 4. Connection details are only logged from the host portion — never the URI.
  */
+import { MongoClient } from 'mongodb';
 
-const DEFAULT_LIMIT = 5000;
+let cachedClient = null;
+let cachedDb = null;
 
-// Logical collection name (used by route handlers) -> physical table name.
-const TABLES = {
-  admins: 'legacy_admins',
-  teachers: 'legacy_teachers',
-  students: 'legacy_students',
-  classes: 'legacy_classes',
-  subjects: 'legacy_subjects',
-  syllabus: 'legacy_syllabus',
-  assessments: 'legacy_assessments',
-  assessmentResults: 'assessmentResults',
-  attendances: 'attendances',
-  visitors: 'legacy_visitors',
-  holidayassignments: 'holidayassignments',
-  contents: 'legacy_contents',
-  content: 'content',
-  grades: 'grades'
-};
+const CONNECT_TIMEOUT_MS = 10000;
+const SERVER_SELECTION_TIMEOUT_MS = 5000;
+const SOCKET_TIMEOUT_MS = 30000;
+const PING_TIMEOUT_MS = 5000;
 
-function unwrapId(value) {
-  if (value == null) return value;
-  if (typeof value === 'object' && typeof value.toString === 'function') return value.toString();
-  return String(value);
-}
-
-/** Generate a 24-hex id (same shape as legacy Mongo ObjectIds). */
-function generateId() {
-  const bytes = new Uint8Array(12);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
-}
-
-function getPath(obj, path) {
-  return String(path).split('.').reduce((acc, key) => acc == null ? undefined : acc[key], obj);
-}
-
-function equals(a, b) {
-  if (a == null && b == null) return true;
-  if (typeof a === 'boolean' || typeof b === 'boolean') return Boolean(a) === Boolean(b);
-  return String(a) === String(b);
-}
-
-function matchesField(actual, expected) {
-  if (expected && typeof expected === 'object' && !Array.isArray(expected)) {
-    if ('$ne' in expected) return !equals(actual, expected.$ne);
-    if ('$in' in expected) return expected.$in.some(v => equals(actual, v));
-    if ('$exists' in expected) return expected.$exists ? actual !== undefined : actual === undefined;
-  }
-  return equals(actual, expected);
-}
-
-function matches(doc, query) {
-  if (!query || !Object.keys(query).length) return true;
-  if (Array.isArray(query.$or)) {
-    return query.$or.some(q => matches(doc, q)) &&
-      Object.entries(query).filter(([k]) => k !== '$or').every(([k, v]) => matchesField(getPath(doc, k), v));
-  }
-  return Object.entries(query).every(([key, expected]) => {
-    if (key === '$or') return expected.some(q => matches(doc, q));
-    return matchesField(getPath(doc, key), expected);
-  });
-}
-
-class Cursor {
-  constructor(rows) { this.rows = rows; }
-  sort(spec) {
-    const entries = Object.entries(spec || {});
-    this.rows.sort((a, b) => {
-      for (const [field, direction] of entries) {
-        const av = getPath(a, field), bv = getPath(b, field);
-        if (av === bv) continue;
-        if (av == null) return -1 * direction;
-        if (bv == null) return 1 * direction;
-        return (av > bv ? 1 : -1) * direction;
-      }
-      return 0;
-    });
-    return this;
-  }
-  limit(n) { this.rows = this.rows.slice(0, Number(n)); return this; }
-  async toArray() { return this.rows; }
-}
-
-/** Async cursor chain helper (sort/limit continue from the same promise). */
-function asyncChain(promise) {
-  const state = { promise };
-  return {
-    sort(spec) { state.promise = state.promise.then(rows => new Cursor(rows).sort(spec).rows); return this; },
-    limit(n) { state.promise = state.promise.then(rows => rows.slice(0, Number(n))); return this; },
-    toArray() { return state.promise; }
-  };
-}
-
-
-class SupabaseClient {
-  constructor(env) {
-    this.url = String(env.SUPABASE_URL || '').replace(/\/$/, '');
-    this.key = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_KEY;
-    if (!this.url || !this.key) throw new Error('Supabase not configured: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required');
-  }
-
-  headers(extra = {}) {
-    return {
-      apikey: this.key,
-      Authorization: `Bearer ${this.key}`,
-      'Content-Type': 'application/json',
-      ...extra
-    };
-  }
-
-  async request(path, options = {}) {
-    const response = await fetch(`${this.url}/rest/v1/${path}`, {
-      ...options,
-      headers: this.headers(options.headers || {})
-    });
-    const text = await response.text();
-    let data = null;
-    try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-    if (!response.ok) {
-      const message = data?.message || data?.error_description || data?.hint || text || `Supabase HTTP ${response.status}`;
-      const err = new Error(message);
-      err.status = response.status;
-      err.details = data;
-      throw err;
+export async function connectToDatabase(env) {
+  // --- Reuse cached connection if healthy ---
+  if (cachedClient && cachedDb) {
+    try {
+      await cachedDb.admin().command({ ping: 1, $comment: 'healthcheck' }, { timeoutMS: PING_TIMEOUT_MS });
+      return cachedDb;
+    } catch (pingErr) {
+      console.warn('MongoDB cached connection stale, reconnecting:', pingErr.message);
+      try { await cachedClient.close(); } catch { /* ignore */ }
+      cachedClient = null;
+      cachedDb = null;
     }
-    return data;
   }
 
-  async select(table) {
-    return await this.request(`${table}?select=*`, {
-      method: 'GET',
-      headers: { Range: `0-${DEFAULT_LIMIT - 1}` }
-    });
+  // --- Create new connection ---
+  const connectionString = env.MONGODB_URI || process.env.MONGODB_URI;
+  if (!connectionString) {
+    console.error('MONGODB_URI not configured in env');
+    throw new Error('Database not configured');
   }
 
-  async insert(table, row) {
-    return (await this.request(table, {
-      method: 'POST',
-      headers: { Prefer: 'return=representation' },
-      body: JSON.stringify(row)
-    }))[0];
+  // Extract host for logging (never log the full URI with credentials)
+  let hostLog = 'unknown';
+  try {
+    const u = new URL(connectionString);
+    hostLog = u.hostname || u.host || 'unknown';
+  } catch { /* ignore */ }
+
+  console.log(`Connecting to MongoDB at host: ${hostLog}`);
+
+  const client = new MongoClient(connectionString, {
+    maxPoolSize: 1,
+    minPoolSize: 0,
+    serverSelectionTimeoutMS: SERVER_SELECTION_TIMEOUT_MS,
+    connectTimeoutMS: CONNECT_TIMEOUT_MS,
+    socketTimeoutMS: SOCKET_TIMEOUT_MS,
+    retryWrites: true,
+    retryReads: true,
+    tls: connectionString.includes('mongodb+srv') || connectionString.includes('ssl=true') || connectionString.includes('tls=true'),
+    directConnection: false,
+    family: 4, // force IPv4 to avoid DNS resolution issues
+  });
+
+  await client.connect();
+
+  // Extract database name from connection string
+  let dbName = 'school';
+  try {
+    const u = new URL(connectionString);
+    dbName = u.pathname.replace(/^\//, '').replace(/\/$/, '') || 'school';
+    if (dbName.includes('?')) dbName = dbName.split('?')[0];
+  } catch { /* use default */ }
+
+  const db = client.db(dbName);
+
+  // Verify connection with a ping
+  try {
+    await db.admin().command({ ping: 1, $comment: 'initial-connect' }, { timeoutMS: PING_TIMEOUT_MS });
+    console.log('MongoDB connection verified ✓');
+  } catch (pingErr) {
+    console.error('MongoDB initial ping failed:', pingErr.message);
+    try { await client.close(); } catch { /* ignore */ }
+    throw new Error('Failed to verify MongoDB connection');
   }
 
-  async updateById(table, id, row) {
-    const data = await this.request(`${table}?_id=eq.${encodeURIComponent(id)}`, {
-      method: 'PATCH',
-      headers: { Prefer: 'return=representation' },
-      body: JSON.stringify(row)
-    });
-    return data[0] ?? null;
-  }
+  cachedClient = client;
+  cachedDb = db;
 
-  async deleteById(table, id) {
-    return this.request(`${table}?_id=eq.${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-      headers: { Prefer: 'return=minimal' }
-    });
-  }
+  return db;
 }
 
-export function connectToDatabase(env) {
-  return Promise.resolve(new SupabaseDatabase(env));
-}
-
+/**
+ * Diagnostic helper — ping the database and return status.
+ * Never exposes credentials or connection strings.
+ */
 export async function checkDbHealth(env) {
   try {
-    const client = new SupabaseClient(env);
-    const started = Date.now();
-    await client.request('content?select=_id&limit=1', { method: 'GET' });
+    const db = await connectToDatabase(env);
+    const start = Date.now();
+    await db.admin().command({ ping: 1 }, { timeoutMS: PING_TIMEOUT_MS });
+    const latency = Date.now() - start;
+
+    // Try a simple collection read to confirm end-to-end connectivity
+    const collInfo = await db.collection('contents').findOne(
+      { section_key: 'main' }
+    ).catch(() => null);
+
     return {
       ok: true,
-      latencyMs: Date.now() - started,
-      dbName: 'supabase-postgresql',
-      collectionAccessible: true
+      latencyMs: latency,
+      dbName: db.databaseName,
+      collectionAccessible: collInfo !== undefined
     };
   } catch (err) {
-    return { ok: false, error: err.message, code: err.status || 'SUPABASE_ERROR' };
+    return {
+      ok: false,
+      error: err.message,
+      code: err.code || err.cause?.code || 'UNKNOWN',
+    };
   }
-}
-
-class SupabaseDatabase {
-  constructor(env) { this.client = new SupabaseClient(env); }
-  collection(name) { return new SupabaseCollection(this.client, name); }
-}
-
-class SupabaseCollection {
-  constructor(client, name) {
-    this.client = client;
-    this.name = name;
-    this.table = TABLES[name] || name;
-  }
-
-  /** Every row becomes a plain document: { ...data, _id }. */
-  async findRows() {
-    const rows = await this.client.select(this.table);
-    return (rows || []).map(r => ({ ...(r.data || {}), _id: r._id }));
-  }
-
-  find(query = {}) {
-    const promise = this.findRows().then(rows => rows.filter(r => matches(r, query)));
-    return asyncChain(promise);
-  }
-
-  async findOne(query = {}) {
-    const rows = await this.findRows();
-    return rows.find(r => matches(r, query)) ?? null;
-  }
-
-  async insertOne(doc) {
-    const data = { ...doc };
-    const id = data._id != null ? unwrapId(data._id) : generateId();
-    delete data._id;
-    await this.client.insert(this.table, { _id: id, data });
-    return { insertedId: id, acknowledged: true };
-  }
-
-  async updateOne(filter, update, options = {}) {
-    const existing = await this.findOne(filter);
-    const patch = update?.$set ? { ...update.$set } : { ...(update || {}) };
-    delete patch._id;
-
-    if (!existing) {
-      if (!options.upsert) return { matchedCount: 0, modifiedCount: 0, upsertedId: null };
-      const doc = { ...filter, ...patch };
-      for (const key of Object.keys(doc)) {
-        if (key.startsWith('$')) delete doc[key];
-      }
-      delete doc._id;
-      const inserted = await this.insertOne(doc);
-      return { matchedCount: 0, modifiedCount: 0, upsertedId: inserted.insertedId };
-    }
-
-    const id = unwrapId(existing._id);
-    const newData = { ...existing };
-    delete newData._id;
-    Object.assign(newData, patch);
-    delete newData._id;
-    await this.client.updateById(this.table, id, { data: newData });
-    return { matchedCount: 1, modifiedCount: 1, upsertedId: null };
-  }
-
-  async deleteOne(filter) {
-    const existing = await this.findOne(filter);
-    if (!existing) return { deletedCount: 0 };
-    await this.client.deleteById(this.table, unwrapId(existing._id));
-    return { deletedCount: 1 };
-  }
-
-  aggregate(pipeline = []) {
-    let cursorPromise = this.findRows();
-    for (const stage of pipeline) {
-      if (stage.$match) cursorPromise = cursorPromise.then(rows => rows.filter(r => matches(r, stage.$match)));
-      if (stage.$sort) cursorPromise = cursorPromise.then(rows => new Cursor(rows).sort(stage.$sort).rows);
-      if (stage.$limit) cursorPromise = cursorPromise.then(rows => rows.slice(0, Number(stage.$limit)));
-    }
-    return { toArray: () => cursorPromise };
-  }
-}
-
-export class DbId {
-  constructor(value) {
-    this.value = unwrapId(value);
-  }
-  toString() { return this.value; }
-  valueOf() { return this.value; }
 }

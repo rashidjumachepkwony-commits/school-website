@@ -12,5 +12,7 @@
   "devDependencies": {
     "wrangler": "^4.136.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "mongodb": "^6.3.0"
+  }
 }

@@ -1,7 +1,7 @@
 /**
  * Curriculum route handlers.
  */
-import { DbId as ObjId } from '../db.js';
+import { ObjectId as ObjId } from 'mongodb';
 import { success, error } from '../utils/helpers.js';
 import { getKenyaTime, getKenyaDate } from '../services/time.service.js';
 
@@ -103,7 +103,7 @@ export async function handleCurriculum(db, env, route, method, body, p, url) {
 
   // GET /api/syllabus
   if (route === '/syllabus' && method === 'GET') {
-    const results = await db.collection('syllabus').find({}).sort({ createdAt: -1 }).toArray();
+    const { results } = await db.collection('syllabus').find({}).sort({ createdAt: -1 }).toArray();
     return success({ syllabus: results });
   }
 

@@ -13,7 +13,8 @@
     "deploy:netlify": "npx netlify deploy --dir=. --prod",
     "lint": "echo 'No lint step configured'",
     "typecheck": "echo 'No typecheck step configured'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:e2e:staff": "node tests/e2e-staff-attendance.mjs"
   },
   "keywords": [
     "school",

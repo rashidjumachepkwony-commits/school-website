@@ -1,7 +1,7 @@
 /**
  * Assessment management route handlers.
  */
-import { DbId as ObjId } from '../db.js';
+import { ObjectId as ObjId } from 'mongodb';
 import { success, error, extractIntId } from '../utils/helpers.js';
 
 export async function handleAssessments(db, env, route, method, body, p, url) {
@@ -96,7 +96,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
 
   // GET /api/assessments/:id/results
   if (p[0] === 'assessments' && p[2] === 'results' && method === 'GET') {
-    const results = await db.collection('assessmentResults').find({ assessmentId: p[1] })
+    const { results } = await db.collection('assessmentResults').find({ assessmentId: p[1] })
       .sort({ createdAt: -1 }).toArray();
     return success({ results, total: results.length });
   }

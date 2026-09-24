@@ -2,6 +2,7 @@
 .env
 .env.local
 .env.*.local
+*.dev.vars
 
 # Dependencies
 node_modules/
@@ -33,5 +34,3 @@ uploads/
 # Misc
 query
 *.tmp
-.dev.vars
-.wrangler

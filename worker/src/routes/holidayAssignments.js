@@ -3,7 +3,7 @@
  * Uploads files to Cloudinary; metadata stored in MongoDB.
  * File paths stored as Cloudinary URLs (no local disk).
  */
-import { DbId as ObjId } from '../db.js';
+import { ObjectId as ObjId } from 'mongodb';
 import { success, error } from '../utils/helpers.js';
 import { verifyToken } from '../utils/auth.js';
 import { uploadToCloudinary, deleteFromCloudinary, getResourceTypeForExtension, MAX_ASSIGNMENT_SIZE } from '../services/cloudinary.js';

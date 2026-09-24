@@ -1,7 +1,9 @@
 name = "csa-api"
 main = "src/index.js"
-compatibility_date = "2026-09-24"
-compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2026-08-04"
+compatibility_flags = ["nodejs_compat_v2"]
 
-[vars]
-FRONTEND_URL = "https://changarastaracademy.co.ke"
+vars = { FRONTEND_URL = "https://changarastaracademy.co.ke" }
+
+# No R2 bucket - using Cloudinary for file storage
+# No KV namespace needed - using MongoDB for all data

@@ -5,6 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // Load environment variables
 dotenv.config();
@@ -68,6 +69,23 @@ function formatKenyaFullTime(date) {
         minute: '2-digit',
         second: '2-digit'
     });
+}
+
+function verifyTeacherPin(pin, stored) {
+    if (typeof stored !== 'string') return false;
+    if (stored.includes(':')) {
+        const [salt, expected] = stored.split(':');
+        if (!salt || !expected) return false;
+        const actual = crypto.createHmac('sha256', salt + pin).digest('hex');
+        return actual === expected;
+    }
+    return stored === pin;
+}
+
+function hashTeacherPin(pin) {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.createHmac('sha256', salt + pin).digest('hex');
+    return `${salt}:${hash}`;
 }
 
 function formatKenyaDate(date) {
@@ -666,7 +684,7 @@ app.post('/api/teacher/checkin', async (req, res) => {
       });
     }
     
-    if (teacher.password !== pin) {
+    if (!verifyTeacherPin(pin, teacher.password)) {
       return res.status(401).json({
         success: false,
         message: '❌ Invalid PIN. Please try again.'
@@ -763,7 +781,7 @@ app.post('/api/teacher/checkout', async (req, res) => {
       });
     }
     
-    if (teacher.password !== pin) {
+    if (!verifyTeacherPin(pin, teacher.password)) {
       return res.status(401).json({
         success: false,
         message: '❌ Invalid PIN. Please try again.'
