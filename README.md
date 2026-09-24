@@ -159,7 +159,7 @@ Add the `DB` binding in your `wrangler.jsonc` under the `d1` section.
 
 - The legacy Express server (`server.js`) and Mongoose models are kept for reference but are **not used** in the Cloudflare deployment.
 - File uploads use Cloudinary (signed, server-side) — no local disk or R2 required.
-- The `scripts/import-students.js` script works with MongoDB and will be migrated to D1 in a future update.
+- The `scripts/import-students.js` script works with Supabase and will be migrated to D1 in a future update.
 
 
 ## Staff Attendance E2E Tests

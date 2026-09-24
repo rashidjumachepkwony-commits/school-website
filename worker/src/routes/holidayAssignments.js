@@ -1,9 +1,8 @@
 /**
  * Holiday Assignment management route handlers.
- * Uploads files to Cloudinary; metadata stored in MongoDB.
+ * Uploads files to Cloudinary; metadata stored in Supabase.
  * File paths stored as Cloudinary URLs (no local disk).
  */
-import { ObjectId as ObjId } from 'mongodb';
 import { success, error } from '../utils/helpers.js';
 import { verifyToken } from '../utils/auth.js';
 import { uploadToCloudinary, deleteFromCloudinary, getResourceTypeForExtension, MAX_ASSIGNMENT_SIZE } from '../services/cloudinary.js';
@@ -114,14 +113,14 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
 
   // GET /api/holiday-assignments/id/:id
   if (p[0] === 'holiday-assignments' && p[1] === 'id' && p[2] && method === 'GET') {
-    const assignment = await db.collection('holidayassignments').findOne({ _id: new ObjId(p[2]) });
+    const assignment = await db.collection('holidayassignments').findOne({ _id: p[2] });
     if (!assignment) return error('Assignment not found', 404);
     return success({ assignment: serializeOne(assignment) });
   }
 
   // GET /api/holiday-assignments/download/:id — redirect to Cloudinary URL
   if (p[0] === 'holiday-assignments' && p[1] === 'download' && p[2] && method === 'GET') {
-    const assignment = await db.collection('holidayassignments').findOne({ _id: new ObjId(p[2]) });
+    const assignment = await db.collection('holidayassignments').findOne({ _id: p[2] });
     if (!assignment || !assignment.filePath) return error('Assignment file not found', 404);
 
     const headers = new Headers();
@@ -143,7 +142,7 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
     const formData = await request.formData().catch(() => null);
     if (!formData) return error('No form data provided');
 
-    const assignment = await db.collection('holidayassignments').findOne({ _id: new ObjId(p[1]) });
+    const assignment = await db.collection('holidayassignments').findOne({ _id: p[1] });
     if (!assignment) return error('Assignment not found', 404);
 
     const updates = {};
@@ -209,7 +208,7 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
     }
 
     await db.collection('holidayassignments').updateOne(
-      { _id: new ObjId(p[1]) },
+      { _id: p[1] },
       { $set: updates }
     );
 
@@ -227,7 +226,7 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
       return error('Confirmation required. Add ?confirm=yes');
     }
 
-    const assignment = await db.collection('holidayassignments').findOne({ _id: new ObjId(p[1]) });
+    const assignment = await db.collection('holidayassignments').findOne({ _id: p[1] });
     if (!assignment) return error('Assignment not found', 404);
 
     // Delete file from Cloudinary (best-effort)
@@ -243,7 +242,7 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
       }
     }
 
-    await db.collection('holidayassignments').deleteOne({ _id: new ObjId(p[1]) });
+    await db.collection('holidayassignments').deleteOne({ _id: p[1] });
     return success({ message: 'Assignment deleted successfully!' });
   }
 

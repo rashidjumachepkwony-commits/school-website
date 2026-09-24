@@ -5,5 +5,10 @@ compatibility_flags = ["nodejs_compat_v2"]
 
 vars = { FRONTEND_URL = "https://changarastaracademy.co.ke" }
 
+# Required secrets (set with wrangler secret put):
+# SUPABASE_URL
+# SUPABASE_SERVICE_ROLE_KEY
+# JWT_SECRET
+
 # No R2 bucket - using Cloudinary for file storage
-# No KV namespace needed - using MongoDB for all data
+# Database: Supabase via the REST API adapter in src/db.js.

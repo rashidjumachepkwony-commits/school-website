@@ -1,37 +1,20 @@
 {
   "name": "changara-star-academy",
-  "version": "3.0.0",
-  "description": "Changara Star Academy Management System - Static site for Cloudflare Pages & Netlify, API on Cloudflare Workers",
+  "version": "3.1.0",
+  "description": "Changara Star Academy Management System - Supabase + Cloudflare Worker architecture",
   "main": "server.js",
   "scripts": {
     "dev": "node server.js",
-    "dev:worker": "cd worker && node node_modules/wrangler/bin/wrangler.js dev",
     "start": "node server.js",
-    "build:static": "node scripts/build-static.js",
-    "deploy:worker": "cd worker && node node_modules/wrangler/bin/wrangler.js deploy",
-    "deploy:pages": "echo 'Deploy via Cloudflare Pages UI (publish directory = .)'",
+    "dev:worker": "cd worker && npx wrangler dev",
+    "deploy:worker": "cd worker && npx wrangler deploy",
+    "deploy:pages": "echo \"Deploy the static project through Cloudflare Pages (publish directory = .)\"",
     "deploy:netlify": "npx netlify deploy --dir=. --prod",
-    "lint": "echo 'No lint step configured'",
-    "typecheck": "echo 'No typecheck step configured'",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "validate": "node scripts/validate-project.mjs",
     "test:e2e:staff": "node tests/e2e-staff-attendance.mjs"
   },
-  "keywords": [
-    "school",
-    "management",
-    "education",
-    "attendance",
-    "student",
-    "teacher",
-    "cms",
-    "cloudflare",
-    "netlify",
-    "cloudinary"
-  ],
+  "keywords": ["school", "management", "education", "attendance", "student", "teacher", "supabase", "cloudflare"],
   "author": "Changara Star Academy",
   "license": "ISC",
-  "devDependencies": {
-    "wrangler": "^3.100.0"
-  },
   "dependencies": {}
 }

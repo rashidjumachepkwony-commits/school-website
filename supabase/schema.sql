@@ -1,6 +1,6 @@
 -- ============================================================
 -- Changara Star Academy — Supabase schema
--- Mirrors the MongoDB collections used by the Cloudflare Worker.
+-- Compatibility tables used by the Supabase-backed Worker route layer.
 --
 -- Storage model: each collection is a table with
 --   _id  text PRIMARY KEY   (24-hex id, same format as old ObjectIds)
@@ -158,3 +158,31 @@ create index if not exists idx_holiday_createdat      on holidayassignments ((da
 -- Generic JSONB index (speeds up ad-hoc jsonb filters).
 create index if not exists idx_attendances_data_gin   on attendances   using gin (data);
 create index if not exists idx_students_data_gin      on students      using gin (data);
+-- ============================================================
+-- Additive application configuration + clerk/fees support
+-- These tables are independent of the legacy document tables and
+-- therefore do not alter existing records.
+-- ============================================================
+create table if not exists system_settings (
+  _id text primary key,
+  data jsonb not null default '{}'::jsonb
+);
+
+create table if not exists fee_structures (
+  _id text primary key,
+  data jsonb not null default '{}'::jsonb
+);
+
+create table if not exists fee_payments (
+  _id text primary key,
+  data jsonb not null default '{}'::jsonb
+);
+
+alter table system_settings enable row level security;
+alter table fee_structures enable row level security;
+alter table fee_payments enable row level security;
+
+create index if not exists idx_settings_key on system_settings ((data->>'key'));
+create index if not exists idx_fee_structures_type on fee_structures ((data->>'type'));
+create index if not exists idx_fee_payments_student on fee_payments ((data->>'studentId'));
+create index if not exists idx_fee_payments_date on fee_payments ((data->>'paymentDate'));

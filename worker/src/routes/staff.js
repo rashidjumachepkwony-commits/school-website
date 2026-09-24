@@ -1,7 +1,6 @@
 /**
  * Staff (Teacher) management route handlers.
  */
-import { ObjectId } from 'mongodb';
 import { success, error } from '../utils/helpers.js';
 import { hashPassword, verifyPassword } from '../services/password.service.js';
 
@@ -45,7 +44,7 @@ export async function handleStaff(db, env, route, method, body, p) {
 
   // GET /api/teachers/:id
   if (p[0] === 'teachers' && p[1] && !p[2] && method === 'GET') {
-    const teacher = await db.collection('teachers').findOne({ _id: new ObjectId(p[1]) });
+    const teacher = await db.collection('teachers').findOne({ _id: p[1] });
     if (!teacher) return error('Staff not found', 404);
     return success({ staff: {
       _id: teacher._id.toString(), firstName: teacher.firstName, lastName: teacher.lastName,
@@ -69,7 +68,7 @@ export async function handleStaff(db, env, route, method, body, p) {
     updates.updatedAt = now;
 
     await db.collection('teachers').updateOne(
-      { _id: new ObjectId(p[1]) },
+      { _id: p[1] },
       { $set: updates }
     );
     return success({ message: 'Staff updated successfully!' });
@@ -77,7 +76,7 @@ export async function handleStaff(db, env, route, method, body, p) {
 
   // DELETE /api/teachers/:id
   if (p[0] === 'teachers' && p[1] && !p[2] && method === 'DELETE') {
-    await db.collection('teachers').deleteOne({ _id: new ObjectId(p[1]) });
+    await db.collection('teachers').deleteOne({ _id: p[1] });
     return success({ message: 'Staff deleted successfully!' });
   }
 
@@ -86,7 +85,7 @@ export async function handleStaff(db, env, route, method, body, p) {
     const newPin = body.pin || '1234';
     const hash = await hashPassword(newPin);
     await db.collection('teachers').updateOne(
-      { _id: new ObjectId(p[1]) },
+      { _id: p[1] },
       { $set: { password: hash, updatedAt: now } }
     );
     return success({ message: 'PIN reset successfully!', newPin });

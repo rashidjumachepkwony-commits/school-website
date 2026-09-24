@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root = process.cwd();
+const required = ['server.js','supabase/schema.sql','worker/src/db.js','worker/src/index.js','worker/src/routes/clerk.js','scripts/seed-supabase-data.mjs','clerk-dashboard.html','admin-academics.html','teacher-checkin.html','admin-students.html','admin-teachers.html'];
+const missing = required.filter(f => !fs.existsSync(path.join(root,f)));
+if (missing.length) throw new Error('Missing required project files: '+missing.join(', '));
+const schema=fs.readFileSync(path.join(root,'supabase/schema.sql'),'utf8');
+for (const table of ['teachers','students','assessments','assessmentResults','holidayassignments','system_settings','fee_structures','fee_payments']) if(!schema.includes(`create table if not exists ${table}`) && !schema.includes(`create table if not exists "${table}"`)) throw new Error('Schema missing '+table);
+const server = fs.readFileSync(path.join(root,'server.js'),'utf8');
+if (/require\(['\"]mongoose['\"]\)|mongoose\.connect|MONGODB_URI|mongodb:\/\//i.test(server)) throw new Error('Active server.js still contains MongoDB/Mongoose references.');
+console.log('Project validation passed: local server, worker modules, seed script and Supabase tables are present; active server is MongoDB-free.');

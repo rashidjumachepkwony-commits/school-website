@@ -1,31 +1,45 @@
-# Changara Star Academy Worker — Supabase Migration
+# Changara Star Academy — Supabase + Cloudflare Worker
 
-## 1. Database
-Run `../supabase_worker_compat_migration.sql` in Supabase SQL Editor after the main schema migration.
+The application uses Supabase for persistent data. The Cloudflare Worker is the production API and the root `server.js` is a local development bridge to the same Worker route layer.
 
-## 2. Cloudflare Production secrets/variables
-Required:
-- `FRONTEND_URL`
-- `JWT_SECRET` (secret)
+## Supabase
+Run `supabase/schema.sql` in the Supabase SQL Editor. The seed script is `scripts/seed-supabase-data.mjs`.
+
+## Production secrets
+Set these in the `worker` directory with Wrangler:
+
 - `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY` (secret)
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `JWT_SECRET`
 
-Keep the service-role key server-side only.
+Keep the Supabase service-role key server-side only.
 
-## 3. Install and deploy
-From this `worker` directory:
+## Local development
+Copy `.env.example` to `.env` and set the same server-side values, then from the project root run:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:5000`. API requests under `/api/*` are handled by the same Supabase-backed Worker code used in production.
+
+## Worker deployment
+From `worker`:
 
 ```bash
 npm install
+npx wrangler secret put SUPABASE_URL
+npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+npx wrangler secret put JWT_SECRET
 npx wrangler deploy
 ```
 
-## 4. Test
-After deployment:
+## Basic API checks
+After local start or deployment, test:
 
 - `GET /api/test`
 - `GET /api/db-health`
 - `POST /api/setup-admin`
 - `POST /api/admin/login`
 
-Do not remove the old MongoDB database until the Supabase API has passed functional testing.
+No MongoDB/Mongoose runtime is required by the active application.

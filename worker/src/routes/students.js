@@ -1,7 +1,6 @@
 /**
  * Student management route handlers.
  */
-import { ObjectId as ObjId } from 'mongodb';
 import { success, error } from '../utils/helpers.js';
 import { hashPassword, verifyPassword } from '../services/password.service.js';
 import { getKenyaTime, getKenyaDate } from '../services/time.service.js';
@@ -53,7 +52,7 @@ export async function handleStudents(db, env, route, method, body, p) {
 
   // GET /api/students/:id
   if (p[0] === 'students' && p[1] && !p[2] && method === 'GET') {
-    const student = await db.collection('students').findOne({ _id: new ObjId(p[1]) });
+    const student = await db.collection('students').findOne({ _id: p[1] });
     if (!student) return error('Student not found', 404);
     return success({ student: serializeStudent(student) });
   }
@@ -76,13 +75,13 @@ export async function handleStudents(db, env, route, method, body, p) {
     fields.forEach(f => { if (body[f] !== undefined) updates[f] = body[f]; });
     updates.updatedAt = now;
 
-    await db.collection('students').updateOne({ _id: new ObjId(p[1]) }, { $set: updates });
+    await db.collection('students').updateOne({ _id: p[1] }, { $set: updates });
     return success({ message: 'Student updated successfully!' });
   }
 
   // DELETE /api/students/:id
   if (p[0] === 'students' && p[1] && !p[2] && method === 'DELETE') {
-    await db.collection('students').deleteOne({ _id: new ObjId(p[1]) });
+    await db.collection('students').deleteOne({ _id: p[1] });
     return success({ message: 'Student deleted successfully!' });
   }
 

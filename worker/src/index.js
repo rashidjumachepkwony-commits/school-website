@@ -2,7 +2,7 @@
  * Changara Star Academy Management System - Cloudflare Worker
  *
  * Production API backend handling all /api/* routes.
- * Uses MongoDB Atlas for storage and Cloudinary for file uploads.
+ * Uses Supabase for storage and Cloudinary for file uploads. Existing route contracts are preserved.
  */
 
 import { connectToDatabase, checkDbHealth } from './db.js';
@@ -18,6 +18,7 @@ import { handleAssessments } from './routes/assessments.js';
 import { handleCurriculum } from './routes/curriculum.js';
 import { handleUpload } from './routes/upload.js';
 import { handleHolidayAssignments } from './routes/holidayAssignments.js';
+import { handleClerk } from './routes/clerk.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -78,6 +79,7 @@ export default {
         () => handleCurriculum(db, env, route, method, body, pathParts, url),
         () => handleUpload(db, env, route, method, body, pathParts, request),
         () => handleHolidayAssignments(db, env, route, method, body, pathParts, request),
+        () => handleClerk(db, env, route, method, body, pathParts),
       ];
 
       for (const handler of handlers) {

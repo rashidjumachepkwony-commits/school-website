@@ -1,11 +1,107 @@
 /**
  * Assessment management route handlers.
  */
-import { ObjectId as ObjId } from 'mongodb';
 import { success, error, extractIntId } from '../utils/helpers.js';
 
 export async function handleAssessments(db, env, route, method, body, p, url) {
   const now = new Date().toISOString();
+
+  // Legacy/advanced assessment UI endpoints used by admin-academics.html.
+  if (route === '/assessments' && method === 'POST' && body.studentName) {
+    const now = new Date().toISOString();
+    const student = body._id ? await db.collection('students').findOne({ _id: body._id }) : null;
+    const record = {
+      ...body,
+      studentId: student?._id?.toString() || body._id || null,
+      studentName: body.studentName,
+      grade: body.grade || student?.grade || student?.class || '',
+      class: body.grade || student?.class || student?.grade || '',
+      assessmentPeriod: body.assessmentPeriod || '',
+      assessmentType: body.assessmentType || '',
+      assessmentName: body.assessmentName || body.assessmentType || '',
+      assessmentDate: body.assessmentDate || now,
+      createdAt: body.createdAt || now,
+      updatedAt: now
+    };
+    const existing = record.studentId ? await db.collection('assessments').findOne({
+      studentId: record.studentId, assessmentPeriod: record.assessmentPeriod, assessmentType: record.assessmentType
+    }) : await db.collection('assessments').findOne({
+      studentName: record.studentName, grade: record.grade, assessmentPeriod: record.assessmentPeriod, assessmentType: record.assessmentType
+    });
+    if (existing) {
+      await db.collection('assessments').updateOne({ _id: existing._id }, { $set: record });
+      return success({ message: 'Assessment saved successfully!', assessment: { ...existing, ...record, _id: existing._id.toString() } });
+    }
+    const result = await db.collection('assessments').insertOne(record);
+    return success({ message: 'Assessment saved successfully!', assessment: { ...record, _id: result.insertedId.toString() } });
+  }
+
+  if (p[0] === 'assessments' && p[1] === 'subjects' && p[2] && method === 'GET') {
+    const grade = decodeURIComponent(p[2]);
+    const type = url.searchParams.get('type') || 'CAT1';
+    const key = `assessment_subjects:${grade}:${type}`;
+    const setting = await db.collection('system_settings').findOne({ key });
+    return success({ config: setting?.value || null });
+  }
+
+  if (p[0] === 'assessments' && p[1] === 'subjects' && p[2] && method === 'PUT') {
+    const grade = decodeURIComponent(p[2]);
+    const type = body.type || 'CAT1';
+    const subjects = Array.isArray(body.subjects) ? body.subjects.filter(s => s?.name && Number(s.max) > 0).map(s => ({ name: String(s.name).trim(), max: Number(s.max) })) : [];
+    if (!subjects.length) return error('At least one subject is required');
+    const key = `assessment_subjects:${grade}:${type}`;
+    const existing = await db.collection('system_settings').findOne({ key });
+    const value = { subjects, grade, type, updatedAt: new Date().toISOString() };
+    if (existing) await db.collection('system_settings').updateOne({ _id: existing._id }, { $set: { value, updatedAt: new Date().toISOString() } });
+    else await db.collection('system_settings').insertOne({ key, value, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+    return success({ message: 'Assessment subject configuration saved', config: value });
+  }
+
+  if (route === '/assessments/all' && method === 'GET') {
+    const period = url.searchParams.get('period');
+    const type = url.searchParams.get('type');
+    const query = { ...(period ? { assessmentPeriod: period } : {}), ...(type ? { assessmentType: type } : {}) };
+    const rows = await db.collection('assessments').find(query).sort({ updatedAt: -1 }).toArray();
+    const students = await db.collection('students').find({}).toArray();
+    const byId = new Map(students.map(s => [s._id.toString(), s]));
+    const data = rows.map(r => {
+      const st = byId.get(String(r.studentId));
+      return { ...r, _id: r._id.toString(), studentName: r.studentName || (st ? `${st.firstName || ''} ${st.lastName || ''}`.trim() : ''), grade: r.grade || st?.grade || st?.class || '' };
+    });
+    return success({ students: data, assessments: data, total: data.length });
+  }
+
+  if (p[0] === 'assessments' && p[1] === 'student' && p[2] && method === 'GET') {
+    const id = p[2];
+    const student = await db.collection('students').findOne({ _id: id });
+    const rows = await db.collection('assessments').find({ studentId: id }).sort({ updatedAt: -1 }).toArray();
+    const latest = rows[0] || {};
+    return success({ student: { ...(student || {}), ...latest, _id: id, studentName: latest.studentName || (student ? `${student.firstName || ''} ${student.lastName || ''}`.trim() : '') }, assessments: rows });
+  }
+
+  if (p[0] === 'assessments' && p[1] === 'generate-report' && p[2] && method === 'GET') {
+    const student = await db.collection('students').findOne({ _id: p[2] });
+    const rows = await db.collection('assessments').find({ studentId: p[2] }).sort({ updatedAt: -1 }).toArray();
+    const name = rows[0]?.studentName || (student ? `${student.firstName || ''} ${student.lastName || ''}`.trim() : 'Student');
+    const grade = rows[0]?.grade || student?.grade || student?.class || '';
+    const html = `<!doctype html><html><head><title>Assessment Report</title><style>body{font-family:Arial;padding:30px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:8px}</style></head><body><h1>Changara Star Academy</h1><h2>Assessment Report</h2><p><strong>Student:</strong> ${name}</p><p><strong>Grade:</strong> ${grade}</p><table><tr><th>Assessment</th><th>Period</th><th>Type</th><th>Total</th><th>Average</th><th>Performance</th></tr>${rows.map(r=>`<tr><td>${r.assessmentName || ''}</td><td>${r.assessmentPeriod || ''}</td><td>${r.assessmentType || ''}</td><td>${r.totalScore ?? ''}</td><td>${r.averageScore ?? ''}</td><td>${r.performanceLevel || ''}</td></tr>`).join('')}</table></body></html>`;
+    return success({ html });
+  }
+
+  if (p[0] === 'assessments' && p[1] === 'history' && p[2] && method === 'GET') {
+    const grade = decodeURIComponent(p[2]);
+    const rows = await db.collection('assessments').find({ grade }).sort({ updatedAt: -1 }).toArray();
+    const seen = new Set(); const periods = [];
+    for (const r of rows) { const key = `${r.assessmentPeriod}|${r.assessmentType}|${r.assessmentName || ''}`; if (!seen.has(key)) { seen.add(key); periods.push(r); } }
+    return success({ periods });
+  }
+
+  if (p[0] === 'assessments' && p[1] === 'by-period' && p[2] && method === 'DELETE') {
+    const grade = decodeURIComponent(p[2]); const period = url.searchParams.get('period') || ''; const type = url.searchParams.get('type') || '';
+    const rows = await db.collection('assessments').find({ grade, assessmentPeriod: period, assessmentType: type }).toArray();
+    for (const r of rows) await db.collection('assessments').deleteOne({ _id: r._id });
+    return success({ message: 'Assessment records deleted', deleted: rows.length });
+  }
 
   // GET /api/assessments
   if (route === '/assessments' && method === 'GET') {
@@ -46,7 +142,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
 
   // GET /api/assessments/:id
   if (p[0] === 'assessments' && p[1] && !p[2] && method === 'GET') {
-    const assessment = await db.collection('assessments').findOne({ _id: new ObjId(p[1]) });
+    const assessment = await db.collection('assessments').findOne({ _id: p[1] });
     if (!assessment) return error('Assessment not found', 404);
 
     const { results: students } = await db.collection('students').find({ class: assessment.class }).toArray();
@@ -68,13 +164,13 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     fields.forEach(f => { if (body[f] !== undefined) updates[f] = body[f]; });
     updates.updatedAt = now;
 
-    await db.collection('assessments').updateOne({ _id: new ObjId(p[1]) }, { $set: updates });
+    await db.collection('assessments').updateOne({ _id: p[1] }, { $set: updates });
     return success({ message: 'Assessment updated successfully!' });
   }
 
   // DELETE /api/assessments/:id
   if (p[0] === 'assessments' && p[1] && !p[2] && method === 'DELETE') {
-    await db.collection('assessments').deleteOne({ _id: new ObjId(p[1]) });
+    await db.collection('assessments').deleteOne({ _id: p[1] });
     return success({ message: 'Assessment deleted successfully!' });
   }
 
@@ -150,7 +246,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     const updates = { ...body };
     updates.updatedAt = now;
     await db.collection('assessmentResults').updateOne(
-      { _id: new ObjId(p[1]) },
+      { _id: p[1] },
       { $set: updates }
     );
     return success({ message: 'Result updated successfully!' });
@@ -158,7 +254,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
 
   // DELETE /api/results/:id
   if (p[0] === 'results' && p[1] && method === 'DELETE') {
-    await db.collection('assessmentResults').deleteOne({ _id: new ObjId(p[1]) });
+    await db.collection('assessmentResults').deleteOne({ _id: p[1] });
     return success({ message: 'Result deleted successfully!' });
   }
 
