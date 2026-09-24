@@ -1,7 +1,6 @@
 /**
  * Curriculum route handlers.
  */
-import { ObjectId as ObjId } from 'mongodb';
 import { success, error } from '../utils/helpers.js';
 import { getKenyaTime, getKenyaDate } from '../services/time.service.js';
 
@@ -47,13 +46,13 @@ export async function handleCurriculum(db, env, route, method, body, p, url) {
     if (capacity !== undefined) updates.capacity = capacity;
     if (form !== undefined) updates.form = form;
 
-    await db.collection('classes').updateOne({ _id: new ObjId(p[1]) }, { $set: updates });
+    await db.collection('classes').updateOne({ _id: p[1] }, { $set: updates });
     return success({ message: 'Class updated' });
   }
 
   // DELETE /api/classes/:id
   if (p[0] === 'classes' && p[1] && method === 'DELETE') {
-    await db.collection('classes').deleteOne({ _id: new ObjId(p[1]) });
+    await db.collection('classes').deleteOne({ _id: p[1] });
     return success({ message: 'Class deleted' });
   }
 
@@ -91,13 +90,13 @@ export async function handleCurriculum(db, env, route, method, body, p, url) {
     if (code !== undefined) updates.code = code;
     if (hasInternal !== undefined) updates.hasInternal = hasInternal;
 
-    await db.collection('subjects').updateOne({ _id: new ObjId(p[1]) }, { $set: updates });
+    await db.collection('subjects').updateOne({ _id: p[1] }, { $set: updates });
     return success({ message: 'Subject updated' });
   }
 
   // DELETE /api/subjects/:id
   if (p[0] === 'subjects' && p[1] && method === 'DELETE') {
-    await db.collection('subjects').deleteOne({ _id: new ObjId(p[1]) });
+    await db.collection('subjects').deleteOne({ _id: p[1] });
     return success({ message: 'Subject deleted' });
   }
 

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-1. **MongoDB Atlas cluster** - Ensure your database is accessible and you have the connection string
+1. **Supabase project** - Ensure the project is accessible and you have the project URL and service-role key
 2. **Cloudflare account** - For Worker API + Pages hosting
 3. **Netlify account** - For Netlify deployment
 4. **Git** - Repository pushed to GitHub/GitLab
@@ -15,13 +15,15 @@
 # 1. Navigate to worker directory
 cd worker
 
-# 2. Install dependencies (includes mongodb driver)
+# 2. Install dependencies
 npm install
 
-# 3. Set MongoDB URI secret
-node node_modules/wrangler/bin/wrangler.js secret put MONGODB_URI
-# Paste your MongoDB Atlas connection string:
-# mongodb+srv://user:pass@cluster0.mongodb.net/csa-school?retryWrites=true&w=majority
+# 3. Set Supabase secrets
+node node_modules/wrangler/bin/wrangler.js secret put SUPABASE_URL
+# Example: https://YOUR_PROJECT.supabase.co
+
+node node_modules/wrangler/bin/wrangler.js secret put SUPABASE_SERVICE_ROLE_KEY
+# Paste the Supabase service-role key (server-side only; never put it in frontend code)
 
 # 4. Set JWT secret (for admin auth)
 node node_modules/wrangler/bin/wrangler.js secret put JWT_SECRET
@@ -96,49 +98,6 @@ Or deploy via Git:
 
 ---
 
-## Important: MongoDB Atlas Network Access
+## Important: Supabase
 
-Ensure your MongoDB Atlas cluster allows connections from anywhere:
-1. Atlas → **Network Access** → **Security**
-2. Add IP address: `0.0.0.0/0` (Allow access from anywhere)
-
----
-
-## Post-Deployment
-
-1. Register your first admin:
-   ```bash
-   curl -X POST https://your-worker-url/api/setup-admin \
-     -H "Content-Type: application/json" \
-     -d '{"username":"admin","email":"admin@school.com","password":"admin123","fullName":"Admin"}'
-   ```
-
-2. Test the API:
-   ```bash
-   curl https://your-worker-url/api/test
-   ```
-
-3. Upload a logo/image via the admin CMS to test Cloudinary storage.
-
----
-
-## Environment Variables Summary
-
-| Variable | Where | Value |
-|----------|-------|-------|
-| `MONGODB_URI` | Worker secrets | `mongodb+srv://...` |
-| `JWT_SECRET` | Worker secrets | Your secret key |
-| `CLOUDINARY_CLOUD_NAME` | Worker secrets | Your Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` | Worker secrets | Your Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | Worker secrets | Your Cloudinary API secret |
-| `FRONTEND_URL` | wrangler.toml | `https://changarastaracademy.co.ke` |
-
----
-
-## Rollback
-
-To redeploy an older Worker version:
-```bash
-cd worker && npx wrangler versions -> list
-npx wrangler versions -> rollback <version-id>
-```
+The active application uses Supabase for persistent data. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `JWT_SECRET` as Cloudflare Worker secrets. Never expose the service-role key in browser JavaScript or commit it to Git.

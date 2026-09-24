@@ -1,7 +1,6 @@
 /**
  * Visitor management route handlers.
  */
-import { ObjectId as ObjId } from 'mongodb';
 import { success, error } from '../utils/helpers.js';
 import { getKenyaTime, getKenyaDate } from '../services/time.service.js';
 
@@ -42,7 +41,7 @@ export async function handleVisitors(db, env, route, method, body, p) {
     updates.updatedAt = now.toISOString();
 
     await db.collection('visitors').updateOne(
-      { _id: new ObjectId(id) },
+      { _id: id },
       { $set: updates }
     );
 
@@ -51,13 +50,13 @@ export async function handleVisitors(db, env, route, method, body, p) {
 
   // DELETE /api/visitor/:id
   if (p[0] === 'visitor' && p[1] && method === 'DELETE') {
-    await db.collection('visitors').deleteOne({ _id: new ObjId(p[1]) });
+    await db.collection('visitors').deleteOne({ _id: p[1] });
     return success({ message: 'Visitor deleted successfully!' });
   }
 
   // POST /api/visitor/:id/signout
   if (p[0] === 'visitor' && p[2] === 'signout' && method === 'POST') {
-    const visitor = await db.collection('visitors').findOne({ _id: new ObjId(p[1]) });
+    const visitor = await db.collection('visitors').findOne({ _id: p[1] });
     if (!visitor) return error('Visitor not found', 404);
 
     const checkoutTime = now.toTimeString().split(' ')[0];
