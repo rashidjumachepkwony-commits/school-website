@@ -26,13 +26,16 @@ The schema has already been designed in `supabase/schema.sql`.
 
 If the schema has already been successfully run in your Supabase SQL Editor, **do not run it again unnecessarily**.
 
-The supplied seed script is:
+The supplied register import script is:
 
 ```powershell
-node scripts/seed-supabase-data.mjs
+node scripts/import-registers.mjs --dry-run
+node scripts/import-registers.mjs
 ```
 
-In your current setup it has already processed **17 staff records and 130 student records**, so there is no need to rerun it unless you intentionally want to synchronize those seed records again.
+This imports the staff and student registers from `CHANGARA STAR ACADEMY SCHOOL SYSTEM.xlsx` into the Supabase `teachers` and `students` tables. It is idempotent: re-running it updates matching records instead of creating duplicates. It requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (see `.env.example`). Pin numbers are salted-hashed on import and are never stored or logged in plaintext.
+
+In your current setup it has already processed **18 staff records and 130 student records**, so there is no need to rerun it unless you intentionally want to resynchronize those records again.
 
 ## 4. Start the complete local application
 

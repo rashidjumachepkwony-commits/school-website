@@ -36,21 +36,21 @@ npm install
 npx wrangler deploy
 ```
 
-5. Seed the supplied records from the project root:
+ 5. Import the supplied records from the project root:
 
-```bash
-SUPABASE_URL="https://YOUR_PROJECT.supabase.co" SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY" node scripts/seed-supabase-data.mjs
-```
+ ```bash
+ SUPABASE_URL="https://YOUR_PROJECT.supabase.co" SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY" node scripts/import-registers.mjs
+ ```
 
-On Windows PowerShell:
+ On Windows PowerShell:
 
-```powershell
-$env:SUPABASE_URL="https://YOUR_PROJECT.supabase.co"
-$env:SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY"
-node scripts/seed-supabase-data.mjs
-```
+ ```powershell
+ $env:SUPABASE_URL="https://YOUR_PROJECT.supabase.co"
+ $env:SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY"
+ node scripts/import-registers.mjs
+ ```
 
-The seed is idempotent. It updates matching staff/student records instead of creating duplicates.
+ The import is idempotent. It updates matching staff/student records instead of creating duplicates. Use `--dry-run` first to preview without writing.
 
 ## Important source-data note
 

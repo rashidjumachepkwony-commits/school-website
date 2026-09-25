@@ -3,7 +3,7 @@
 The application uses Supabase for persistent data. The Cloudflare Worker is the production API and the root `server.js` is a local development bridge to the same Worker route layer.
 
 ## Supabase
-Run `supabase/schema.sql` in the Supabase SQL Editor. The seed script is `scripts/seed-supabase-data.mjs`.
+Run `supabase/schema.sql` in the Supabase SQL Editor. Import the school registers with `scripts/import-registers.mjs`.
 
 ## Production secrets
 Set these in the `worker` directory with Wrangler:
