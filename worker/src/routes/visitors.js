@@ -34,8 +34,30 @@ export async function handleVisitors(db, env, route, method, body, p) {
     return success({ message: 'Visitor signed in successfully!', visitor: { _id: result.insertedId, ...body } });
   }
 
+   // PUT /api/visitor/checkout/:badgeNumber
+  if (p[0] === 'visitor' && p[1] === 'checkout' && p[2] && method === 'PUT') {
+    const badgeNumber = p[2];
+    const visitor = await db.collection('visitors').findOne({ badgeNumber });
+    if (!visitor) return error('Visitor not found', 404);
+    if (visitor.status !== 'Checked In') return error('Visitor is not checked in', 400);
+
+    const checkoutTime = now.toISOString();
+    const checkIn = new Date(visitor.createdAt || visitor.checkIn || checkoutTime);
+    const minutes = Math.max(0, Math.round((new Date(checkoutTime).getTime() - checkIn.getTime()) / 60000));
+
+    await db.collection('visitors').updateOne(
+      { _id: visitor._id },
+      { $set: { status: 'Checked Out', checkoutTime, timeSpent: `${minutes} minutes`, updatedAt: checkoutTime } }
+    );
+
+    return success({
+      message: 'Visitor checked out successfully!',
+      visitor: { badgeNumber: visitor.badgeNumber, fullName: visitor.fullName, duration: `${minutes} minutes` }
+    });
+  }
+
   // PUT /api/visitor/:id
-  if (p[0] === 'visitor' && p[1] && method === 'PUT') {
+  if (p[0] === 'visitor' && p[1] && p[1] !== 'checkout' && method === 'PUT') {
     const id = p[1];
     const updates = body;
     updates.updatedAt = now.toISOString();
@@ -76,6 +98,35 @@ export async function handleVisitors(db, env, route, method, body, p) {
 
     return success({ message: 'Visitor signed out successfully!', timeSpent: `${timeSpentMin} minutes` });
   }
+
+  // POST /api/visitor/checkin
+  if (route === '/visitor/checkin' && method === 'POST') {
+    const {
+      firstName = '', lastName = '', phoneNumber = '', idNumber = '',
+      purpose = '', purposeDetails = '', personToVisit = '',
+      department = '', hostName = '', branch = 'main'
+    } = body;
+
+    if (!firstName || !lastName || !phoneNumber || !idNumber || !purpose || !personToVisit) {
+      return error('Please fill in all required fields');
+    }
+
+    const badgeNumber = 'V' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const result = await db.collection('visitors').insertOne({
+      badgeNumber, fullName: `${firstName} ${lastName}`, firstName, lastName,
+      phoneNumber, idNumber, purpose, purposeDetails, personToVisit,
+      department, hostName, branch, date: today, time: timeStr,
+      status: 'Checked In', createdAt, updatedAt: createdAt
+    });
+
+    return success({
+      message: 'Visitor checked in successfully!',
+      visitor: { _id: result.insertedId, badgeNumber, fullName: `${firstName} ${lastName}`, checkIn: createdAt, purpose, personToVisit }
+    });
+  }
+
+  // POST /api/visitor/checkout/:badgeNumber
+  // (handled above as PUT /api/visitor/checkout/:badgeNumber)
 
   return null;
 }

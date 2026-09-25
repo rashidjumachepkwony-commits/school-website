@@ -2,7 +2,7 @@
  * Attendance route handlers.
  */
 import { success, error, extractIntId } from '../utils/helpers.js';
-import { getKenyaTime, getKenyaHour, formatKenyaTime } from '../services/time.service.js';
+import { getKenyaTime, getKenyaHour, getKenyaDate, formatKenyaTime } from '../services/time.service.js';
 import { verifyPassword, hashPassword } from '../services/password.service.js';
 
 export async function handleAttendance(db, env, route, method, body, p, url) {
@@ -294,10 +294,76 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
     return success({ date: kenyaDate, total: attendance.length, attendance });
   }
 
+   // GET /api/admin/attendance/all - staff attendance records for admin reports.
+  if (route === '/admin/attendance/all' && method === 'GET') {
+    const teachers = await db.collection('teachers').find({ isActive: { $ne: false } }).sort({ createdAt: -1 }).toArray();
+    return success({ success: true, teachers, total: teachers.length });
+  }
+
+  // GET /api/admin/attendance/summary - today's staff attendance summary.
+  if (route === '/admin/attendance/summary' && method === 'GET') {
+    const today = getKenyaDate();
+    const teachers = await db.collection('teachers').find({}).toArray();
+    let present = 0; let late = 0; let absent = 0;
+    for (const t of teachers) {
+      const records = Array.isArray(t.attendance) ? t.attendance : [];
+      const rec = records.find(a => {
+        if (!a || !a.date) return false;
+        if (typeof a.date === 'string') return a.date.slice(0, 10) === today;
+        const d = new Date(a.date);
+        return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === today;
+      });
+      if (!rec) { absent++; continue; }
+      if (rec.checkOut) { rec.isLate ? late++ : present++; }
+      else if (rec.isLate) { late++; }
+      else { present++; }
+    }
+    const total = teachers.length;
+    const attendanceRate = total ? Math.round(((present + late) / total) * 100) : 0;
+    return success({ success: true, today: { total, present, late, absent, attendanceRate } });
+  }
+
+  // GET /api/student/attendance/today
+  if (route === '/student/attendance/today' && method === 'GET') {
+    const today = getKenyaDate();
+    const records = await db.collection('attendances')
+      .find({ type: 'student', date: today }).sort({ createdAt: 1 }).toArray();
+    return success({ success: true, records: records.map(mapStudentRecord), count: records.length });
+  }
+
+  // GET /api/student/attendance/all
+  if (route === '/student/attendance/all' && method === 'GET') {
+    const records = await db.collection('attendances')
+      .find({ type: 'student' }).sort({ createdAt: -1 }).limit(500).toArray();
+    return success({ success: true, records: records.map(mapStudentRecord), count: records.length });
+  }
+
+  // GET /api/student/attendance/date/:date
+  if (p[0] === 'student' && p[1] === 'attendance' && p[2] === 'date' && p[3] && method === 'GET') {
+    const date = decodeURIComponent(p[3]);
+    const records = await db.collection('attendances')
+      .find({ type: 'student', date }).sort({ createdAt: 1 }).toArray();
+    return success({ success: true, records: records.map(mapStudentRecord), count: records.length });
+  }
+
   return null;
 }
 
-async function getStudents(db) {
-  const results = await db.collection('students').find({}).sort({ createdAt: -1 }).toArray();
-  return { results, total: results.length };
+function mapStudentRecord(r) {
+  let status = 'Absent';
+  if (r.checkOut) status = 'Checked Out';
+  else if (r.isLate) status = 'Late';
+  else if (r.checkIn) status = 'Present';
+  return {
+    _id: r._id?.toString(),
+    studentId: r.studentId,
+    name: r.studentName || r.name,
+    grade: r.grade || r.class,
+    class: r.class || r.grade,
+    status,
+    checkIn: r.checkIn || null,
+    checkOut: r.checkOut || null,
+    date: r.date,
+    notes: r.notes || ''
+  };
 }

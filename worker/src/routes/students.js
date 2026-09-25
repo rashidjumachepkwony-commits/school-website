@@ -3,7 +3,7 @@
  */
 import { success, error } from '../utils/helpers.js';
 import { hashPassword, verifyPassword } from '../services/password.service.js';
-import { getKenyaTime, getKenyaDate } from '../services/time.service.js';
+import { getKenyaTime, getKenyaDate, formatKenyaTime } from '../services/time.service.js';
 import { createToken } from '../utils/auth.js';
 
 export async function handleStudents(db, env, route, method, body, p) {
@@ -85,27 +85,92 @@ export async function handleStudents(db, env, route, method, body, p) {
     return success({ message: 'Student deleted successfully!' });
   }
 
-  // POST /api/student/login
+  // POST /api/student/login  (also handles student check-in/out via action: 'IN' | 'OUT')
   if (route === '/student/login' && method === 'POST') {
-    const { admissionNumber, password } = body;
-    if (!admissionNumber || !password) return error('Please provide admission number and password', 400);
+    const sid = body.studentId || body.admissionNumber;
+    const pin = body.pin || body.password;
+    const action = String(body.action || 'LOGIN').toUpperCase();
+    if (!sid || !pin) return error('Please provide student ID and PIN', 400);
 
-    const student = await db.collection('students').findOne({ admissionNumber });
+    const student = await db.collection('students').findOne({
+      $or: [{ admissionNumber: sid }, { studentId: sid }]
+    });
     if (!student) return error('Invalid credentials', 401);
 
-    if (student.password && await verifyPassword(password, student.password)) {
+    const passwordValid = student.password
+      ? await verifyPassword(pin, student.password)
+      : false;
+    if (!passwordValid) return error('Invalid credentials', 401);
+
+    const name = `${student.firstName || ''} ${student.lastName || ''}`.trim() || student.name || '';
+    const studentId = student.admissionNumber || student.studentId || sid;
+    const grade = student.grade || student.class || '';
+
+    if (action === 'LOGIN') {
       const token = await createToken(
-        { id: student._id.toString(), admissionNumber, role: 'student' },
+        { id: student._id.toString(), admissionNumber: studentId, role: 'student' },
         env.JWT_SECRET || env.jwt_secret
       );
       return success({
         message: 'Login successful!',
-        student: { _id: student._id.toString(), firstName: student.firstName, lastName: student.lastName, admissionNumber },
+        student: { _id: student._id.toString(), firstName: student.firstName, lastName: student.lastName, admissionNumber: studentId, name, grade },
         token
       });
     }
 
-    return error('Invalid credentials', 401);
+    const kenyaNow = getKenyaTime();
+    const kenyaDate = kenyaNow.toISOString().slice(0, 10);
+
+    if (action === 'IN') {
+      const existing = await db.collection('attendances').findOne({
+        studentId, date: kenyaDate, type: 'student'
+      });
+      if (existing) return error('You already checked in today', 400);
+
+      const hour = kenyaNow.getHours();
+      const minute = kenyaNow.getMinutes();
+      const isLate = hour > 7 || (hour === 7 && minute > 0);
+      const record = {
+        studentId, studentName: name, name, class: grade, grade,
+        date: kenyaDate, time: formatKenyaTime(kenyaNow),
+        checkIn: kenyaNow.toISOString(), checkInTime: formatKenyaTime(kenyaNow),
+        checkOut: null, status: 'Present', isLate, hoursWorked: 0,
+        branch: 'main', type: 'student', isActive: true
+      };
+      await db.collection('attendances').insertOne(record);
+
+      return success({
+        message: isLate ? 'Check-in successful! (You are LATE - after 7:00 AM)' : 'Check-in successful! (On time)',
+        student: { name, studentId, grade },
+        timeFormatted: formatKenyaTime(kenyaNow),
+        isLate
+      });
+    }
+
+    if (action === 'OUT') {
+      const rec = await db.collection('attendances').findOne({
+        studentId, date: kenyaDate, type: 'student'
+      });
+      if (!rec || !rec.checkIn) return error('No check-in found for today. Please check in first.', 400);
+      if (rec.checkOut) return error('You already checked out today.', 400);
+
+      const checkIn = new Date(rec.checkIn);
+      const hoursWorked = Number(((kenyaNow.getTime() - checkIn.getTime()) / 3600000).toFixed(2));
+      await db.collection('attendances').updateOne(
+        { _id: rec._id },
+        { $set: { checkOut: kenyaNow.toISOString(), checkoutTime: formatKenyaTime(kenyaNow), hoursWorked, updatedAt: new Date().toISOString() } }
+      );
+
+      return success({
+        message: 'Check-out successful!',
+        student: { name, studentId, grade },
+        timeFormatted: formatKenyaTime(kenyaNow),
+        checkOutTime: formatKenyaTime(kenyaNow),
+        hoursWorked
+      });
+    }
+
+    return error('Invalid action', 400);
   }
 
   // GET /api/classes
