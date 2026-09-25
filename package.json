@@ -16,5 +16,8 @@
   "keywords": ["school", "management", "education", "attendance", "student", "teacher", "supabase", "cloudflare"],
   "author": "Changara Star Academy",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "xlsx": "^0.18.5"
+  }
 }

@@ -157,9 +157,9 @@ Add the `DB` binding in your `wrangler.jsonc` under the `d1` section.
 
 ## Warnings and Limitations
 
-- The legacy Express server (`server.js`) and Mongoose models are kept for reference but are **not used** in the Cloudflare deployment.
+- The application has been fully migrated from MongoDB/Mongoose to **Supabase PostgreSQL**. No active code, models, or dependencies reference MongoDB.
 - File uploads use Cloudinary (signed, server-side) — no local disk or R2 required.
-- The `scripts/import-students.js` script works with Supabase and will be migrated to D1 in a future update.
+- The `scripts/import-registers.mjs` script imports the student and staff registers from `CHANGARA STAR ACADEMY SCHOOL SYSTEM.xlsx` into Supabase. Pin numbers are salted-hashed on import and are never stored or logged in plaintext.
 
 
 ## Staff Attendance E2E Tests
