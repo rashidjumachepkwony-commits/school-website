@@ -16,6 +16,18 @@ export async function handleVisitors(db, env, route, method, body, p) {
     return success({ visitors: results });
   }
 
+  // GET /api/visitors/today
+  if (route === '/visitors/today' && method === 'GET') {
+    const { results } = await db.collection('visitors').find({ date: today }).sort({ createdAt: -1 }).toArray();
+    return success({ visitors: results, total: results.length });
+  }
+
+  // GET /api/visitors/active
+  if (route === '/visitors/active' && method === 'GET') {
+    const { results } = await db.collection('visitors').find({ status: { $in: ['Checked In', 'in', 'checked-in'] } }).sort({ createdAt: -1 }).toArray();
+    return success({ visitors: results, total: results.length });
+  }
+
   // POST /api/visitor
   if (route === '/visitor' && method === 'POST') {
     const {
@@ -121,7 +133,7 @@ export async function handleVisitors(db, env, route, method, body, p) {
 
     return success({
       message: 'Visitor checked in successfully!',
-      visitor: { _id: result.insertedId, badgeNumber, fullName: `${firstName} ${lastName}`, checkIn: createdAt, purpose, personToVisit }
+      visitor: { _id: result.insertedId, badgeNumber, fullName: `${firstName} ${lastName}`, checkInTime: createdAt, checkIn: createdAt, purpose, personToVisit }
     });
   }
 

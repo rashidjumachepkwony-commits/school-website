@@ -6,21 +6,29 @@
  *
  * Usage: node scripts/test-checkin-flows.mjs
  */
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { createHmac, randomBytes } from 'crypto';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const vars = {};
-for (const line of readFileSync(join(__dirname, '..', 'worker', '.dev.vars'), 'utf8').split(/\r?\n/)) {
-  const m = line.match(/^([A-Z_0-9]+)=(.*)$/);
-  if (m) vars[m[1]] = m[2].trim();
+const devVarsPath = join(__dirname, '..', 'worker', '.dev.vars');
+const envPath = join(__dirname, '..', '.env');
+function loadVars(file) {
+  const out = {};
+  if (!existsSync(file)) return out;
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const m = line.match(/^([A-Z_0-9]+)=(.*)$/);
+    if (m) out[m[1]] = m[2].trim().replace(/^['\"]|['\"]$/g, '');
+  }
+  return out;
 }
+const vars = loadVars(devVarsPath);
+for (const [k, v] of Object.entries(loadVars(envPath))) if (!(k in vars)) vars[k] = v;
 const SB = vars.SUPABASE_URL.replace(/\/$/, '');
 const KEY = vars.SUPABASE_SERVICE_ROLE_KEY;
 const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' };
-const API = process.env.TEST_API || 'http://127.0.0.1:8787';
+const API = process.env.TEST_API || (vars.SUPABASE_URL ? 'http://localhost:5000' : 'http://127.0.0.1:8787');
 
 /** Same scheme as worker/src/utils/auth.js hashPassword. */
 function hashPin(pin) {
@@ -144,13 +152,13 @@ async function studentFlow() {
   }
 
   const dup = await api('/api/student/login', { method: 'POST', body: JSON.stringify({ studentId: 'S001', pin: '1234', action: 'IN' }) });
-  check('student duplicate check-in blocked (400)', dup.status === 400, JSON.stringify(dup.body));
+  check('student duplicate check-in blocked (409)', dup.status === 409, JSON.stringify(dup.body));
 
   const outRes = await api('/api/student/login', { method: 'POST', body: JSON.stringify({ studentId: 'S001', pin: '1234', action: 'OUT' }) });
   check('student check-out succeeds', outRes.body.success === true, JSON.stringify(outRes.body));
 
   const dupOut = await api('/api/student/login', { method: 'POST', body: JSON.stringify({ studentId: 'S001', pin: '1234', action: 'OUT' }) });
-  check('student duplicate check-out blocked (400)', dupOut.status === 400, JSON.stringify(dupOut.body));
+  check('student duplicate check-out blocked (409)', dupOut.status === 409, JSON.stringify(dupOut.body));
 
   const today = await api('/api/student/attendance/today');
   check('student attendance/today includes record', (today.body.records || []).some(r => r.studentId === 'S001'), JSON.stringify(today.body).slice(0, 160));
@@ -196,7 +204,7 @@ async function main() {
   console.log('- Cleaning previous test data...');
   await cleanup();
   console.log('- Seeding test data...');
-  await seed('legacy_teachers', [{
+  await seed('teachers', [{
     _id: T_ID,
     data: {
       employeeId: 'T001', firstName: 'Test', lastName: 'Teacher',
@@ -205,11 +213,12 @@ async function main() {
       createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
     }
   }]);
-  await seed('legacy_students', [{
+  await seed('students', [{
     _id: S_ID,
     data: {
       studentId: 'S001', admissionNumber: 'S001', name: 'Test Student',
-      pin: '1234', grade: 'Grade 4', class: 'Grade 4', isActive: true,
+      firstName: 'Test', lastName: 'Student', password: hashPin('1234'),
+      grade: 'Grade 4', class: 'Grade 4', isActive: true,
       createdAt: new Date().toISOString()
     }
   }]);
@@ -230,13 +239,13 @@ main().catch(e => { console.error('TEST RUNNER ERROR:', e); process.exit(1); });
 
 async function cleanup() {
   const dels = [
-    `${SB}/rest/v1/legacy_teachers?_id=eq.${T_ID}`,
-    `${SB}/rest/v1/legacy_students?_id=eq.${S_ID}`,
+    `${SB}/rest/v1/teachers?_id=eq.${T_ID}`,
+    `${SB}/rest/v1/students?_id=eq.${S_ID}`,
     `${SB}/rest/v1/attendances?_id=eq.seed-att-t001`,
     `${SB}/rest/v1/attendances?_id=eq.seed-att-s001`,
     `${SB}/rest/v1/attendances?data->>employeeId=eq.T001`,
     `${SB}/rest/v1/attendances?data->>studentId=eq.S001`,
-    `${SB}/rest/v1/legacy_visitors?data->>phoneNumber=eq.${VISITOR_PHONE}`
+    `${SB}/rest/v1/visitors?data->>phoneNumber=eq.${VISITOR_PHONE}`
   ];
   for (const url of dels) await fetch(url, { method: 'DELETE', headers: H });
 }

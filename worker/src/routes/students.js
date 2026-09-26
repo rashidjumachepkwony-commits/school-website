@@ -125,7 +125,7 @@ export async function handleStudents(db, env, route, method, body, p) {
       const existing = await db.collection('attendances').findOne({
         studentId, date: kenyaDate, type: 'student'
       });
-      if (existing) return error('You already checked in today', 400);
+      if (existing) return error('You already checked in today', 409);
 
       const hour = kenyaNow.getHours();
       const minute = kenyaNow.getMinutes();
@@ -152,7 +152,7 @@ export async function handleStudents(db, env, route, method, body, p) {
         studentId, date: kenyaDate, type: 'student'
       });
       if (!rec || !rec.checkIn) return error('No check-in found for today. Please check in first.', 400);
-      if (rec.checkOut) return error('You already checked out today.', 400);
+      if (rec.checkOut) return error('You already checked out today.', 409);
 
       const checkIn = new Date(rec.checkIn);
       const hoursWorked = Number(((kenyaNow.getTime() - checkIn.getTime()) / 3600000).toFixed(2));

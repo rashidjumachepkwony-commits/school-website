@@ -140,7 +140,7 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
       return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === kenyaDate;
     });
     if (existing) {
-      return error(`You already checked in today at ${existing.checkIn ? formatKenyaTime(new Date(existing.checkIn)) : 'earlier'}`, 400);
+      return error(`You already checked in today at ${existing.checkIn ? formatKenyaTime(new Date(existing.checkIn)) : 'earlier'}`, 409);
     }
 
     const hour = kenyaNow.getHours();
@@ -223,7 +223,7 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
       return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === kenyaDate;
     });
     if (index < 0) return error('No check-in found for today. Please check in first.', 400);
-    if (attendance[index].checkOut) return error('You already checked out today.', 400);
+    if (attendance[index].checkOut) return error('You already checked out today.', 409);
     if (kenyaNow.getHours() < 15) return error('Check-out is only allowed after 3:00 PM. Please continue working.', 400);
 
     const checkIn = new Date(attendance[index].checkIn);

@@ -3,7 +3,7 @@
  */
 import { success, error, extractIntId } from '../utils/helpers.js';
 import { getKenyaTime, getKenyaDate, formatKenyaTime } from '../services/time.service.js';
-import { loadPolicy, classStats, gradePercentage, computePercentage, rankStudents } from '../services/assessment.service.js';
+import { loadPolicy, classStats, gradePercentage, computePercentage, rankStudents, DEFAULT_POLICY } from '../services/assessment.service.js';
 
 export async function handleAssessments(db, env, route, method, body, p, url) {
   const now = new Date().toISOString();
@@ -277,15 +277,33 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     const { results } = body;
     if (!Array.isArray(results)) return error('Results must be an array');
 
+    const policySetting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
+    const policy = loadPolicy(policySetting && policySetting.value ? JSON.stringify(policySetting.value) : null);
+
     for (const r of results) {
+      let performanceLevel = r.performanceLevel || null;
+      let performanceCode = r.performanceCode || null;
+      let percentageScore = r.percentageScore != null ? r.percentageScore : null;
+      if (percentageScore === null && r.score != null && r.maxMarks && Number(r.maxMarks) > 0) {
+        percentageScore = Number(((Number(r.score) / Number(r.maxMarks)) * 100).toFixed(2));
+      }
+      if (percentageScore !== null) {
+        const g = gradePercentage(percentageScore, policy);
+        if (!performanceLevel) performanceLevel = g.level;
+        if (!performanceCode) performanceCode = g.code;
+      }
+
       await db.collection('assessmentResults').updateOne(
         { assessmentId: p[1], studentId: r.studentId },
-        { $set: { ...r, assessmentId: p[1], updatedAt: now }, $setOnInsert: { createdAt: now } },
+        {
+          $set: { ...r, assessmentId: p[1], percentageScore, performanceLevel, performanceCode, updatedAt: now },
+          $setOnInsert: { createdAt: now }
+        },
         { upsert: true }
       );
     }
 
-    return success({ message: `Saved ${results.length} results` });
+    return success({ message: `Saved ${results.length} results`, gradingPolicy: policy === DEFAULT_POLICY ? 'default' : 'configured' });
   }
 
   // GET /api/assessments/:id/results
@@ -401,6 +419,23 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     const results = await db.collection('assessmentResults').find(query)
       .sort({ createdAt: -1 }).toArray();
     return success({ results });
+  }
+
+  // GET /api/admin/settings/grading-policy
+  if (route === '/admin/settings/grading-policy' && method === 'GET') {
+    const setting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
+    return success({ policy: setting ? setting.value : DEFAULT_POLICY });
+  }
+
+  // PUT /api/admin/settings/grading-policy
+  if (route === '/admin/settings/grading-policy' && method === 'PUT') {
+    const policy = body && body.policy ? body.policy : body;
+    if (!Array.isArray(policy.levels)) return error('policy.levels array is required');
+    const setting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
+    const value = { levels: policy.levels, updatedAt: now };
+    if (setting) await db.collection('system_settings').updateOne({ _id: setting._id }, { $set: value });
+    else await db.collection('system_settings').insertOne({ key: 'grading_policy', value, createdAt: now, updatedAt: now });
+    return success({ message: 'Grading policy saved', policy: value });
   }
 
   return null;
