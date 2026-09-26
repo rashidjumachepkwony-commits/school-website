@@ -34,3 +34,9 @@ uploads/
 # Misc
 query
 *.tmp
+
+# Real student data and live-database snapshots.
+# These contain children's names and parent phone numbers, so they must never be
+# committed to this (public) repository. The register is kept locally only and is
+# read by scripts/sync-student-register.mjs.
+data/
