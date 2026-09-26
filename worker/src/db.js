@@ -124,9 +124,18 @@ class SupabaseCollection {
   find(query = {}) { return new SupabaseCursor(this, query); }
 
   async _all() {
-    const url = `${this.client.restUrl}/${encodeURIComponent(tableName(this.name))}?select=_id,data`;
-    const response = await this.client.fetch(url, { method: 'GET' });
-    const rows = await this.client.json(response);
+    const tableNameEnc = encodeURIComponent(tableName(this.name));
+    let rows = [];
+    let offset = 0;
+    while (true) {
+      const url = `${this.client.restUrl}/${tableNameEnc}?select=_id,data&offset=${offset}&limit=100`;
+      const response = await this.client.fetch(url, { method: 'GET' });
+      const chunk = await this.client.json(response);
+      if (!Array.isArray(chunk) || chunk.length === 0) break;
+      rows = rows.concat(chunk);
+      offset += chunk.length;
+      if (chunk.length < 100) break;
+    }
     return rows.map(row => ({ _id: row._id, ...(row.data || {}) }));
   }
 
