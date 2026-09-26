@@ -2,9 +2,107 @@
  * Assessment management route handlers.
  */
 import { success, error, extractIntId } from '../utils/helpers.js';
+import { getKenyaTime, getKenyaDate, formatKenyaTime } from '../services/time.service.js';
+import { loadPolicy, classStats, gradePercentage, computePercentage, rankStudents } from '../services/assessment.service.js';
 
 export async function handleAssessments(db, env, route, method, body, p, url) {
   const now = new Date().toISOString();
+
+  // GET /api/assessments/grade/:grade  (and optional ?period&type&name filtering)
+  if (p[0] === 'assessments' && p[1] === 'grade' && p[2] && method === 'GET') {
+    const grade = decodeURIComponent(p[2]);
+    const period = url.searchParams.get('period') || '';
+    const type = url.searchParams.get('type') || '';
+    const name = url.searchParams.get('name') || '';
+
+    const students = await db.collection('students').find({ class: grade }).sort({ firstName: 1, lastName: 1 }).toArray();
+    const recQuery = { grade, ...(period ? { assessmentPeriod: period } : {}), ...(type ? { assessmentType: type } : {}), ...(name ? { assessmentName: name } : {}) };
+    const records = await db.collection('assessments').find(recQuery).toArray();
+    const byStudent = new Map(records.map(r => [String(r.studentId), r]));
+
+    const policySetting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
+    const policy = loadPolicy(policySetting && policySetting.value ? JSON.stringify(policySetting.value) : null);
+
+    const out = students.map(s => {
+      const r = byStudent.get(s._id.toString());
+      const pct = r ? computePercentage(r) : null;
+      const graded = pct !== null ? gradePercentage(pct, policy) : null;
+      return {
+        _id: s._id.toString(),
+        studentName: `${s.firstName || ''} ${s.lastName || ''}`.trim(),
+        firstName: s.firstName, lastName: s.lastName,
+        admissionNumber: s.admissionNumber,
+        grade: s.grade, class: s.class,
+        assessments: r ? (r.assessments || []) : [],
+        totalScore: r ? (r.totalScore ?? null) : null,
+        averageScore: r ? (r.averageScore ?? null) : null,
+        percentageScore: pct,
+        performanceLevel: r ? (r.performanceLevel || (graded ? graded.level : null)) : null,
+        performanceCode: graded ? graded.code : null,
+        assessmentDate: r ? (r.assessmentDate || null) : null,
+        updatedAt: r ? (r.updatedAt || null) : null
+      };
+    });
+    return success({ success: true, students: out, total: out.length, stats: classStats(out, policy) });
+  }
+
+  // GET /api/assessments/stats?grade&period&type&name
+  if (route === '/assessments/stats' && method === 'GET') {
+    const grade = url.searchParams.get('grade') || '';
+    const period = url.searchParams.get('period') || '';
+    const type = url.searchParams.get('type') || '';
+    const name = url.searchParams.get('name') || '';
+    const recQuery = { ...(grade ? { grade } : {}), ...(period ? { assessmentPeriod: period } : {}), ...(type ? { assessmentType: type } : {}), ...(name ? { assessmentName: name } : {}) };
+    const records = await db.collection('assessments').find(recQuery).toArray();
+    const policySetting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
+    const policy = loadPolicy(policySetting && policySetting.value ? JSON.stringify(policySetting.value) : null);
+    return success({ success: true, stats: classStats(records, policy), total: records.length });
+  }
+
+  // GET /api/assessments/class-report/:grade?period&type&name  (returns printable HTML)
+  if (p[0] === 'assessments' && p[1] === 'class-report' && p[2] && method === 'GET') {
+    const grade = decodeURIComponent(p[2]);
+    const period = url.searchParams.get('period') || '';
+    const type = url.searchParams.get('type') || '';
+    const name = url.searchParams.get('name') || '';
+    const recQuery = { grade, ...(period ? { assessmentPeriod: period } : {}), ...(type ? { assessmentType: type } : {}), ...(name ? { assessmentName: name } : {}) };
+    const records = await db.collection('assessments').find(recQuery).toArray();
+    const policySetting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
+    const policy = loadPolicy(policySetting && policySetting.value ? JSON.stringify(policySetting.value) : null);
+    const students = await db.collection('students').find({ class: grade }).sort({ firstName: 1, lastName: 1 }).toArray();
+    const byStudent = new Map(records.map(r => [String(r.studentId), r]));
+
+    const rows = students.map((s, i) => {
+      const r = byStudent.get(s._id.toString());
+      const pct = r ? computePercentage(r) : null;
+      const g = pct !== null ? gradePercentage(pct, policy) : { level: 'Not Assessed', code: 'NA' };
+      return {
+        name: `${s.firstName || ''} ${s.lastName || ''}`.trim(),
+        admissionNumber: s.admissionNumber,
+        percentage: pct === null ? '-' : pct.toFixed(2) + '%',
+        level: g.level, code: g.code, position: 0
+      };
+    });
+    const ranked = rankStudents(students.map((s, i) => {
+      const r = byStudent.get(s._id.toString());
+      const pct = r ? computePercentage(r) : null;
+      return { ...s, studentName: `${s.firstName || ''} ${s.lastName || ''}`.trim(), percentageScore: pct };
+    }), policy);
+    const posByAdmission = new Map(ranked.map(x => [x.admissionNumber, x.position]));
+    const bodyRows = rows.map(row => {
+      const pos = posByAdmission.get(row.admissionNumber) || '-';
+      return `<tr><td>${pos}</td><td>${row.admissionNumber}</td><td>${row.name}</td><td>${row.percentage}</td><td>${row.level}</td></tr>`;
+    }).join('');
+
+    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Class Report - ${grade}</title>
+    <style>body{font-family:Arial;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:8px;text-align:left}th{background:#f4f4f4}</style></head>
+    <body><h1>Changara Star Academy</h1><h2>Class Report</h2>
+    <p><strong>Grade/Class:</strong> ${grade}</p><p><strong>Period:</strong> ${period || '-'} | <strong>Type:</strong> ${type || '-'} | <strong>Name:</strong> ${name || '-'}</p>
+    <table><thead><tr><th>#</th><th>Admission No.</th><th>Name</th><th>Average %</th><th>Performance Level</th></tr></thead>
+    <tbody>${bodyRows}</tbody></table>
+    <p style="margin-top:20px">Generated: ${new Date().toISOString()}</p></body></html>`;
+    return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html' } });
+  }
 
   // Legacy/advanced assessment UI endpoints used by admin-academics.html.
   if (route === '/assessments' && method === 'POST' && body.studentName) {
