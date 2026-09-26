@@ -14,7 +14,7 @@
  *       { "code": "EE", "name": "Exceeding Expectation", "min": 80, "max": 100 }
  *     ]
  *   }
- * If absent, the default Kenya CBC-style 80/60/40 boundaries are used.
+ * If absent, the default Kenya CBE-style 80/60/40 boundaries are used.
  */
 export const DEFAULT_POLICY = {
   levels: [

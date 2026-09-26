@@ -417,65 +417,65 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* ===== CBC COMPETENCY-BASED ANALYSIS (integrated) ===== */
-        .cbc-distribution { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 18px; }
-        .cbc-distribution .dist-item {
+        /* ===== CBE COMPETENCY-BASED ANALYSIS (integrated) ===== */
+        .cbe-distribution { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 18px; }
+        .cbe-distribution .dist-item {
             display: inline-flex; align-items: center; gap: 6px;
             font-size: 13px; color: #333;
         }
-        .cbc-distribution .dist-item .dot {
+        .cbe-distribution .dist-item .dot {
             width: 12px; height: 12px; border-radius: 50%; display: inline-block;
         }
-        .cbc-summary {
+        .cbe-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
             margin-bottom: 20px;
         }
-        .cbc-summary-item {
+        .cbe-summary-item {
             background: #fafbfc;
             border: 1px solid #e8ecf1;
             border-radius: 10px;
             padding: 14px;
             text-align: center;
         }
-        .cbc-summary-item .num { font-size: 24px; font-weight: 700; color: #0A1628; }
-        .cbc-summary-item .num.green { color: #28a745; }
-        .cbc-summary-item .num.blue { color: #17a2b8; }
-        .cbc-summary-item .num.orange { color: #d4a017; }
-        .cbc-summary-item .num.red { color: #dc3545; }
-        .cbc-summary-item .label {
+        .cbe-summary-item .num { font-size: 24px; font-weight: 700; color: #0A1628; }
+        .cbe-summary-item .num.green { color: #28a745; }
+        .cbe-summary-item .num.blue { color: #17a2b8; }
+        .cbe-summary-item .num.orange { color: #d4a017; }
+        .cbe-summary-item .num.red { color: #dc3545; }
+        .cbe-summary-item .label {
             font-size: 10px; color: #888; margin-top: 4px;
             text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .cbc-grid {
+        .cbe-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
             gap: 12px;
         }
-        .cbc-item {
+        .cbe-item {
             background: white;
             border: 1px solid #e8ecf1;
             border-radius: 10px;
             padding: 14px;
         }
-        .cbc-item .competency { font-weight: 700; font-size: 14px; color: #0A1628; margin-bottom: 8px; }
-        .cbc-item .cbc-bar {
+        .cbe-item .competency { font-weight: 700; font-size: 14px; color: #0A1628; margin-bottom: 8px; }
+        .cbe-item .cbe-bar {
             height: 8px; background: #e8ecf1; border-radius: 4px; overflow: hidden; margin: 8px 0;
         }
-        .cbc-item .cbc-bar .cbc-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
-        .cbc-item .cbc-stats {
+        .cbe-item .cbe-bar .cbe-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .cbe-item .cbe-stats {
             display: flex; justify-content: space-between; flex-wrap: wrap;
             gap: 4px; font-size: 12px; color: #6c757d;
         }
-        .cbc-item .cbc-stats .value { font-weight: 700; color: #0A1628; }
-        .cbc-item .cbc-levels {
+        .cbe-item .cbe-stats .value { font-weight: 700; color: #0A1628; }
+        .cbe-item .cbe-levels {
             margin-top: 8px; font-size: 11px; color: #6c757d;
             display: flex; gap: 10px; flex-wrap: wrap;
         }
         @media print {
-            .cbc-summary-item { border: 1px solid #ddd; }
-            .cbc-distribution, .cbc-summary, .cbc-grid { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            .cbe-summary-item { border: 1px solid #ddd; }
+            .cbe-distribution, .cbe-summary, .cbe-grid { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
         }
 
         /* ===== SUBJECT CONFIGURATION EDITOR ===== */
@@ -655,46 +655,46 @@
         </div>
     </div>
 
-    <!-- ===== CBC COMPETENCY-BASED ANALYSIS ===== -->
-    <div class="card" id="cbcAnalysisCard">
-        <h2><i class="fas fa-bullseye" style="color:#D4A017;"></i> CBC Competency-Based Analysis <span style="background:#D4A017;color:white;font-size:10px;padding:2px 10px;border-radius:12px;vertical-align:middle;">Competency Assessment</span></h2>
-        <p class="desc">Subject-by-subject competency breakdown for <strong id="cbcGradeLabel">-</strong> — <strong id="cbcPeriodLabel">-</strong></p>
+    <!-- ===== CBE COMPETENCY-BASED ANALYSIS ===== -->
+    <div class="card" id="cbeAnalysisCard">
+        <h2><i class="fas fa-bullseye" style="color:#D4A017;"></i> CBE Competency-Based Analysis <span style="background:#D4A017;color:white;font-size:10px;padding:2px 10px;border-radius:12px;vertical-align:middle;">Competency Assessment</span></h2>
+        <p class="desc">Subject-by-subject competency breakdown for <strong id="cbeGradeLabel">-</strong> — <strong id="cbePeriodLabel">-</strong></p>
 
-        <div class="cbc-distribution" id="cbcDistribution"></div>
+        <div class="cbe-distribution" id="cbeDistribution"></div>
 
-        <div class="cbc-summary">
-            <div class="cbc-summary-item">
-                <div class="num" id="cbcTotal">0</div>
+        <div class="cbe-summary">
+            <div class="cbe-summary-item">
+                <div class="num" id="cbeTotal">0</div>
                 <div class="label">Total Students</div>
             </div>
-            <div class="cbc-summary-item">
-                <div class="num green" id="cbcExceeding">0</div>
+            <div class="cbe-summary-item">
+                <div class="num green" id="cbeExceeding">0</div>
                 <div class="label">Exceeding (EE)</div>
             </div>
-            <div class="cbc-summary-item">
-                <div class="num blue" id="cbcMeeting">0</div>
+            <div class="cbe-summary-item">
+                <div class="num blue" id="cbeMeeting">0</div>
                 <div class="label">Meeting (ME)</div>
             </div>
-            <div class="cbc-summary-item">
-                <div class="num orange" id="cbcApproaching">0</div>
+            <div class="cbe-summary-item">
+                <div class="num orange" id="cbeApproaching">0</div>
                 <div class="label">Approaching (AE)</div>
             </div>
-            <div class="cbc-summary-item">
-                <div class="num red" id="cbcBelow">0</div>
+            <div class="cbe-summary-item">
+                <div class="num red" id="cbeBelow">0</div>
                 <div class="label">Below (BE)</div>
             </div>
-            <div class="cbc-summary-item">
-                <div class="num" id="cbcClassAvg" style="color:#6f42c1;">0%</div>
+            <div class="cbe-summary-item">
+                <div class="num" id="cbeClassAvg" style="color:#6f42c1;">0%</div>
                 <div class="label">Class Average</div>
             </div>
         </div>
 
-        <div class="cbc-grid" id="cbcGrid">
-            <div class="cbc-item" style="grid-column:1/-1;text-align:center;color:#999;">Loading CBC analysis...</div>
+        <div class="cbe-grid" id="cbeGrid">
+            <div class="cbe-item" style="grid-column:1/-1;text-align:center;color:#999;">Loading CBE analysis...</div>
         </div>
 
         <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-success" onclick="exportCBCResults()"><i class="fas fa-file-csv"></i> Export CBC Results (CSV)</button>
+            <button class="btn btn-success" onclick="exportCBEResults()"><i class="fas fa-file-csv"></i> Export CBE Results (CSV)</button>
             <button class="btn btn-info" onclick="window.print()"><i class="fas fa-print"></i> Print Analysis</button>
         </div>
     </div>
@@ -970,14 +970,14 @@
                 studentsData = data.students || [];
                 renderMarksTable();
                 loadStats();
-                renderCBCAnalysis();
+                renderCBEAnalysis();
                 showSaveStatus('Loaded', 'saved');
                 setTimeout(() => hideSaveStatus(), 1500);
             } else {
                 studentsData = [];
                 renderMarksTable();
                 loadStats();
-                renderCBCAnalysis();
+                renderCBEAnalysis();
                 showSaveStatus('No data', 'saved');
                 setTimeout(() => hideSaveStatus(), 1500);
             }
@@ -986,7 +986,7 @@
             studentsData = [];
             renderMarksTable();
             loadStats();
-            renderCBCAnalysis();
+            renderCBEAnalysis();
             showSaveStatus('Error loading', 'error');
             setTimeout(() => hideSaveStatus(), 2000);
         }
@@ -1681,21 +1681,21 @@
     }
 
     // ============================================
-    // CBC COMPETENCY-BASED ANALYSIS HELPERS
-    // (Adapted from "Class Assessment Results with CBC Analysis" page.
+    // CBE COMPETENCY-BASED ANALYSIS HELPERS
+    // (Adapted from "Class Assessment Results with CBE Analysis" page.
     //  Renders from the already-loaded studentsData — no extra API calls.
     //  Uses the same 80/60/40 performance thresholds as the rest of the app.)
     // ============================================
-    let cbcExportData = null;
+    let cbeExportData = null;
 
-    function cbcPerformanceLevel(percentage) {
+    function cbePerformanceLevel(percentage) {
         if (percentage >= 80) return 'Exceeding Expectation';
         if (percentage >= 60) return 'Meeting Expectation';
         if (percentage >= 40) return 'Approaching Expectation';
         return 'Below Expectation';
     }
 
-    function cbcLevelColor(level) {
+    function cbeLevelColor(level) {
         const colors = {
             'Exceeding Expectation': '#28a745',
             'Meeting Expectation': '#17a2b8',
@@ -1705,7 +1705,7 @@
         return colors[level] || '#6c757d';
     }
 
-    function cbcLevelShort(level) {
+    function cbeLevelShort(level) {
         const shorts = {
             'Exceeding Expectation': 'EE',
             'Meeting Expectation': 'ME',
@@ -1715,7 +1715,7 @@
         return shorts[level] || 'AE';
     }
 
-    function cbcLevelRating(level) {
+    function cbeLevelRating(level) {
         const ratings = {
             'Exceeding Expectation': 4,
             'Meeting Expectation': 3,
@@ -1725,15 +1725,15 @@
         return ratings[level] || 2;
     }
 
-    function renderCBCAnalysis() {
+    function renderCBEAnalysis() {
         const students = studentsData || [];
-        document.getElementById('cbcGradeLabel').textContent = currentGrade;
-        document.getElementById('cbcPeriodLabel').textContent = currentPeriod + ' — ' + currentType;
+        document.getElementById('cbeGradeLabel').textContent = currentGrade;
+        document.getElementById('cbePeriodLabel').textContent = currentPeriod + ' — ' + currentType;
 
         // Overall class stats
         let exceeding = 0, meeting = 0, approaching = 0, below = 0, totalAvg = 0;
         students.forEach(s => {
-            const level = s.performanceLevel || cbcPerformanceLevel(s.averageScore || 0);
+            const level = s.performanceLevel || cbePerformanceLevel(s.averageScore || 0);
             if (level === 'Exceeding Expectation') exceeding++;
             else if (level === 'Meeting Expectation') meeting++;
             else if (level === 'Approaching Expectation') approaching++;
@@ -1743,12 +1743,12 @@
         const total = students.length;
         const classAvg = total > 0 ? (totalAvg / total) : 0;
 
-        document.getElementById('cbcTotal').textContent = total;
-        document.getElementById('cbcExceeding').textContent = exceeding;
-        document.getElementById('cbcMeeting').textContent = meeting;
-        document.getElementById('cbcApproaching').textContent = approaching;
-        document.getElementById('cbcBelow').textContent = below;
-        document.getElementById('cbcClassAvg').textContent = classAvg.toFixed(1) + '%';
+        document.getElementById('cbeTotal').textContent = total;
+        document.getElementById('cbeExceeding').textContent = exceeding;
+        document.getElementById('cbeMeeting').textContent = meeting;
+        document.getElementById('cbeApproaching').textContent = approaching;
+        document.getElementById('cbeBelow').textContent = below;
+        document.getElementById('cbeClassAvg').textContent = classAvg.toFixed(1) + '%';
 
         // Distribution legend
         const levels = [
@@ -1757,7 +1757,7 @@
             { label: 'Approaching (40-59%)', color: '#d4a017', count: approaching },
             { label: 'Below (0-39%)', color: '#dc3545', count: below }
         ];
-        document.getElementById('cbcDistribution').innerHTML = levels.map(l =>
+        document.getElementById('cbeDistribution').innerHTML = levels.map(l =>
             `<span class="dist-item">
                 <span class="dot" style="background:${l.color};"></span>
                 ${l.label}: <strong>${l.count}</strong> (${total > 0 ? ((l.count / total) * 100).toFixed(1) : 0}%)
@@ -1777,13 +1777,13 @@
             }
         });
 
-        const grid = document.getElementById('cbcGrid');
+        const grid = document.getElementById('cbeGrid');
         if (total === 0 || Object.keys(subjectMap).length === 0) {
-            grid.innerHTML = `<div class="cbc-item" style="grid-column:1/-1;text-align:center;color:#999;">
+            grid.innerHTML = `<div class="cbe-item" style="grid-column:1/-1;text-align:center;color:#999;">
                 <i class="fas fa-chart-pie" style="font-size:32px;display:block;margin-bottom:8px;color:#ddd;"></i>
-                No assessment data for ${currentGrade} in this period yet. Add students and marks above to see the CBC analysis.
+                No assessment data for ${currentGrade} in this period yet. Add students and marks above to see the CBE analysis.
             </div>`;
-            cbcExportData = null;
+            cbeExportData = null;
             return;
         }
 
@@ -1792,14 +1792,14 @@
             const avgScore = d.scores.reduce((sum, v) => sum + v, 0) / d.scores.length;
             const avgMax = d.maxes.reduce((sum, v) => sum + v, 0) / d.maxes.length;
             const pct = avgMax > 0 ? (avgScore / avgMax) * 100 : 0;
-            const level = cbcPerformanceLevel(pct);
+            const level = cbePerformanceLevel(pct);
 
             // Count students at each level for this subject
             let ee = 0, me = 0, ae = 0, be = 0;
             students.forEach(s => {
                 const a = s.assessments ? s.assessments.find(x => x.subject === subject) : null;
                 if (a && Number(a.maxScore) > 0) {
-                    const l = cbcPerformanceLevel((Number(a.score) / Number(a.maxScore)) * 100);
+                    const l = cbePerformanceLevel((Number(a.score) / Number(a.maxScore)) * 100);
                     if (l === 'Exceeding Expectation') ee++;
                     else if (l === 'Meeting Expectation') me++;
                     else if (l === 'Approaching Expectation') ae++;
@@ -1811,20 +1811,20 @@
         }).sort((a, b) => b.pct - a.pct);
 
         grid.innerHTML = competencies.map(c => {
-            const levelColor = cbcLevelColor(c.level);
+            const levelColor = cbeLevelColor(c.level);
             const barColor = c.pct >= 80 ? '#28a745' : c.pct >= 60 ? '#17a2b8' : c.pct >= 40 ? '#d4a017' : '#dc3545';
             return `
-                <div class="cbc-item">
+                <div class="cbe-item">
                     <div class="competency">${c.subject}</div>
-                    <div class="cbc-bar">
-                        <div class="cbc-fill" style="width:${Math.min(c.pct, 100)}%; background:${barColor};"></div>
+                    <div class="cbe-bar">
+                        <div class="cbe-fill" style="width:${Math.min(c.pct, 100)}%; background:${barColor};"></div>
                     </div>
-                    <div class="cbc-stats">
+                    <div class="cbe-stats">
                         <span>Avg: <span class="value">${c.pct.toFixed(1)}%</span></span>
                         <span>Score: <span class="value">${c.avgScore.toFixed(1)}/${c.avgMax.toFixed(1)}</span></span>
                         <span style="color:${levelColor};font-weight:700;">${c.level.replace(' Expectation', '')}</span>
                     </div>
-                    <div class="cbc-levels">
+                    <div class="cbe-levels">
                         <span>⬤ EE: ${c.ee}</span>
                         <span>⬤ ME: ${c.me}</span>
                         <span>⬤ AE: ${c.ae}</span>
@@ -1835,16 +1835,16 @@
         }).join('');
 
         // Cache for CSV export
-        cbcExportData = { students, total, exceeding, meeting, approaching, below, classAvg, competencies };
+        cbeExportData = { students, total, exceeding, meeting, approaching, below, classAvg, competencies };
     }
 
-    function exportCBCResults() {
-        if (!cbcExportData || !cbcExportData.students || cbcExportData.students.length === 0) {
-            showAlert('No CBC data to export. Load a grade with marks first.', 'error');
+    function exportCBEResults() {
+        if (!cbeExportData || !cbeExportData.students || cbeExportData.students.length === 0) {
+            showAlert('No CBE data to export. Load a grade with marks first.', 'error');
             return;
         }
 
-        const { students, total, exceeding, meeting, approaching, below, classAvg, competencies } = cbcExportData;
+        const { students, total, exceeding, meeting, approaching, below, classAvg, competencies } = cbeExportData;
 
         // Collect all subjects across students
         const allSubjects = new Set();
@@ -1864,9 +1864,9 @@
         const sorted = [...students].sort((a, b) => (b.averageScore || 0) - (a.averageScore || 0));
         sorted.forEach((s, index) => {
             const rank = index + 1;
-            const level = s.performanceLevel || cbcPerformanceLevel(s.averageScore || 0);
+            const level = s.performanceLevel || cbePerformanceLevel(s.averageScore || 0);
             const avg = s.averageScore ? s.averageScore.toFixed(1) : '0';
-            csv += `${rank},"${(s.studentName || 'N/A').replace(/"/g, '""')}",${s.grade || currentGrade},"${s.assessmentPeriod || currentPeriod}","${s.assessmentType || currentType}",${s.totalScore || 0},${avg},"${level}",${cbcLevelRating(level)}`;
+            csv += `${rank},"${(s.studentName || 'N/A').replace(/"/g, '""')}",${s.grade || currentGrade},"${s.assessmentPeriod || currentPeriod}","${s.assessmentType || currentType}",${s.totalScore || 0},${avg},"${level}",${cbeLevelRating(level)}`;
             subjects.forEach(sub => {
                 const a = s.assessments ? s.assessments.find(x => x.subject === sub) : null;
                 if (a) {
@@ -1879,8 +1879,8 @@
             csv += '\n';
         });
 
-        // CBC summary block
-        csv += '\n\nCBC Analysis Summary\n';
+        // CBE summary block
+        csv += '\n\nCBE Analysis Summary\n';
         csv += `Grade,${currentGrade}\n`;
         csv += `Period,${currentPeriod}\n`;
         csv += `Assessment Type,${currentType}\n`;
@@ -1900,12 +1900,12 @@
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `CBC_Assessment_${currentGrade.replace(/\s+/g, '_')}_${currentPeriod.replace(/\s+/g, '_')}.csv`);
+        link.setAttribute('download', `CBE_Assessment_${currentGrade.replace(/\s+/g, '_')}_${currentPeriod.replace(/\s+/g, '_')}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        showAlert('✅ CBC results exported as CSV!', 'success');
+        showAlert('✅ CBE results exported as CSV!', 'success');
     }
 
     // ============================================
