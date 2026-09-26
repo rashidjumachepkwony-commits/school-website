@@ -11,6 +11,9 @@
     "deploy:pages": "echo \"Deploy the static project through Cloudflare Pages (publish directory = .)\"",
     "deploy:netlify": "npx netlify deploy --dir=. --prod",
     "validate": "node scripts/validate-project.mjs",
+    "test:checkin": "node scripts/test-checkin-flows.mjs",
+    "test:assessments": "node tests/assessment-calc.test.mjs",
+    "test:adapter": "node scripts/test-supabase-adapter.mjs",
     "test:e2e:staff": "node tests/e2e-staff-attendance.mjs"
   },
   "keywords": ["school", "management", "education", "attendance", "student", "teacher", "supabase", "cloudflare"],

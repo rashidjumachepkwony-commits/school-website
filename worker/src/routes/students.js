@@ -18,6 +18,7 @@ export async function handleStudents(db, env, route, method, body, p) {
       firstName: s.firstName, lastName: s.lastName,
       email: s.email, phone: s.phone, class: s.class,
       grade: s.grade, age: s.age, gender: s.gender,
+      boarding: s.boarding === true || s.boarding === 'true',
       dateOfBirth: s.dateOfBirth, parentId: s.parentId,
       isActive: s.isActive !== false
     }));
@@ -29,7 +30,7 @@ export async function handleStudents(db, env, route, method, body, p) {
     const {
       firstName, lastName, admissionNumber, class: studentClass,
       age, gender, dateOfBirth, email, phone, parentId, grade,
-      stream, branch = 'main'
+      boarding, stream, branch = 'main'
     } = body;
 
     if (!firstName || !lastName || !admissionNumber) return error('Required fields missing');
@@ -40,7 +41,9 @@ export async function handleStudents(db, env, route, method, body, p) {
     const result = await db.collection('students').insertOne({
       firstName, lastName, admissionNumber, class: studentClass, age, gender,
       dateOfBirth, email: email || '', phone: phone || '', parentId: parentId || '',
-      grade: grade || '', stream: stream || '', branch,
+      grade: grade || '', stream: stream || '',
+      boarding: boarding === true || boarding === 'true',
+      branch,
       isActive: true, createdAt: now, updatedAt: now
     });
 
@@ -62,7 +65,9 @@ export async function handleStudents(db, env, route, method, body, p) {
       _id: s._id?.toString(),
       admissionNumber: s.admissionNumber, firstName: s.firstName, lastName: s.lastName,
       email: s.email, phone: s.phone, class: s.class, grade: s.grade,
-      age: s.age, gender: s.gender, dateOfBirth: s.dateOfBirth, parentId: s.parentId,
+      age: s.age, gender: s.gender,
+      boarding: s.boarding === true || s.boarding === 'true',
+      dateOfBirth: s.dateOfBirth, parentId: s.parentId,
       isActive: s.isActive !== false, createdAt: s.createdAt
     };
   }
@@ -71,7 +76,7 @@ export async function handleStudents(db, env, route, method, body, p) {
   if (p[0] === 'students' && p[1] && !p[2] && method === 'PUT') {
     const updates = {};
     const fields = ['firstName', 'lastName', 'admissionNumber', 'class', 'age', 'gender',
-      'dateOfBirth', 'email', 'phone', 'parentId', 'grade', 'stream', 'isActive'];
+      'dateOfBirth', 'email', 'phone', 'parentId', 'grade', 'stream', 'boarding', 'isActive'];
     fields.forEach(f => { if (body[f] !== undefined) updates[f] = body[f]; });
     updates.updatedAt = now;
 

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/config.js"></script>
+    <title>Student Management - Changara Star Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 15px; }
+        .header h1 { color: #0A1628; font-size: 26px; }
+        .header h1 i { color: #D4A017; margin-right: 10px; }
+        .header .admin-info { display: flex; align-items: center; gap: 12px; background: white; padding: 5px 16px; border-radius: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .header .admin-info .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #D4A017, #F5C842); display: flex; align-items: center; justify-content: center; color: #0A1628; font-weight: 700; font-size: 15px; }
+
+        .quick-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 22px; }
+        .quick-link-card { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border-top: 4px solid #D4A017; transition: transform .2s; display: block; text-decoration: none; color: inherit; }
+        .quick-link-card:hover { transform: translateY(-3px); }
+        .quick-link-card i { font-size: 24px; color: #0A1628; }
+        .quick-link-card h3 { font-size: 13px; font-weight: 700; color: #1a2a4a; }
+        .quick-link-card p { font-size: 11px; color: #777; }
+
+        .toolbar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+        .toolbar input, .toolbar select { padding: 9px 12px; border: 2px solid #e8ecf1; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fafbfc; }
+        .toolbar input:focus, .toolbar select:focus { border-color: #D4A017; outline: none; background: white; }
+        .btn { padding: 9px 16px; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; }
+
+        .card { background: white; border-radius: 16px; padding: 22px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .card h2 { color: #0A1628; font-size: 18px; margin-bottom: 4px; }
+        .card .desc { color: #888; font-size: 13px; margin-bottom: 16px; }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { border: 1px solid #e8ecf1; padding: 8px 10px; text-align: left; }
+        th { background: #0A1628; color: white; font-weight: 600; white-space: nowrap; }
+        tr:nth-child(even) { background: #fafbfc; }
+        tr:hover { background: #f0f4ff; }
+        .badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+        .badge.boarder { background: #e3f2fd; color: #0b5394; }
+        .badge.day { background: #f1f8e9; color: #33691e; }
+        .badge.gender-m { color: #1565c0; }
+        .badge.gender-f { color: #c2185b; }
+        .row-link { display: inline-block; padding: 4px 8px; color: #0b5394; text-decoration: none; font-size: 12px; }
+        .row-link:hover { text-decoration: underline; }
+        .save-status { padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 12px; display: none; }
+        .save-status.show { display: inline-block; }
+        .save-status.saving { background: #cce5ff; color: #004085; }
+        .save-status.saved { background: #d4edda; color: #155724; }
+        .save-status.error { background: #f8d7da; color: #721c24; }
+        @media (max-width: 768px) { .toolbar { flex-direction: column; align-items: stretch; } table { font-size: 11px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-id-badge"></i> Student Management</h1>
+        <div class="admin-info">
+            <div class="avatar" id="adminAvatar">A</div>
+            <span id="adminName">Admin</span>
+        </div>
+    </div>
+
+    <div class="quick-links">
+        <a href="admin-academics.html" class="quick-link-card"><i class="fas fa-chart-bar"></i>
+            <h3>Assessments</h3><p>Marks entry &amp; reports</p></a>
+        <a href="clerk-dashboard.html" class="quick-link-card"><i class="fas fa-coins"></i>
+            <h3>Clerk Dashboard</h3><p>Fees &amp; payments</p></a>
+        <a href="admin-holiday-assignments.html" class="quick-link-card"><i class="fas fa-file-alt"></i>
+            <h3>Holiday Assignments</h3><p>Upload &amp; manage</p></a>
+        <a href="admin-students.html" class="quick-link-card"><i class="fas fa-clipboard-check"></i>
+            <h3>Student Attendance</h3><p>Check-in/out records</p></a>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-users"></i> All Students</h2>
+        <p class="desc">Student name, grade, gender, boarder/day-scholar status and parent contact. Use the links above to open each module.</p>
+        <div class="toolbar">
+            <input type="text" id="searchStudent" placeholder="Search name, admission number, grade..." onkeyup="renderStudents()">
+            <select id="gradeFilter" onchange="renderStudents()"><option value="">All Grades</option></select>
+            <select id="statusFilter" onchange="renderStudents()">
+                <option value="">All Statuses</option>
+                <option value="boarder">Boarders</option>
+                <option value="day">Day Scholars</option>
+            </select>
+            <button class="btn btn-success" onclick="loadStudents()"><i class="fas fa-sync"></i> Refresh</button>
+            <span class="save-status" id="saveStatus"></span>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th><th>Admission No.</th><th>Student Name</th><th>Grade</th>
+                        <th>Gender</th><th>Status</th><th>Parent Contact</th><th>Modules</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsBody">
+                    <tr><td colspan="8" style="text-align:center;padding:40px;color:#999;">
+                        <i class="fas fa-spinner fa-pulse"></i> Loading students...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let studentsData = [];
+
+    (function () {
+        const token = localStorage.getItem('adminToken');
+        if (!token) { window.location.href = 'admin-login.html'; return; }
+        const admin = JSON.parse(localStorage.getItem('admin') || '{}');
+        document.getElementById('adminName').textContent = admin.fullName || 'Admin';
+        document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
+        loadStudents();
+    })();
+
+    async function loadStudents() {
+        showStatus('Loading...', 'saving');
+        try {
+            const response = await fetch('/api/students');
+            const data = await response.json();
+            studentsData = (data && data.success) ? (data.students || []) : [];
+            buildGradeFilter();
+            renderStudents();
+            showStatus('Loaded ' + studentsData.length, 'saved');
+        } catch (err) {
+            studentsData = [];
+            renderStudents();
+            showStatus('Error loading students', 'error');
+        }
+    }
+
+    function buildGradeFilter() {
+        const grades = [...new Set(studentsData.map(s => s.grade).filter(Boolean))].sort();
+        const sel = document.getElementById('gradeFilter');
+        const current = sel.value;
+        sel.innerHTML = '<option value="">All Grades</option>' +
+            grades.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('');
+        if (grades.includes(current)) sel.value = current;
+    }
+
+    function renderStudents() {
+        const search = (document.getElementById('searchStudent').value || '').toLowerCase();
+        const grade = document.getElementById('gradeFilter').value;
+        const status = document.getElementById('statusFilter').value;
+
+        const rows = studentsData.filter(s => {
+            const name = `${s.firstName || ''} ${s.lastName || ''}`.toLowerCase();
+            const matchesSearch = !search ||
+                name.includes(search) ||
+                (s.admissionNumber || '').toLowerCase().includes(search) ||
+                (s.grade || '').toLowerCase().includes(search);
+            const isBoarder = s.boarding === true;
+            const matchesStatus = !status || (status === 'boarder' ? isBoarder : !isBoarder);
+            return matchesSearch && (!grade || s.grade === grade) && matchesStatus;
+        });
+
+        const tbody = document.getElementById('studentsBody');
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#999;">' +
+                '<i class="fas fa-user-slash"></i> No students match your filters.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = rows.map((s, i) => {
+            const name = `${s.firstName || ''} ${s.lastName || ''}`.trim() || '—';
+            const isBoarder = s.boarding === true;
+            const g = (s.gender || '').toLowerCase();
+            let genderBadge = '<span class="badge">N/A</span>';
+            if (g === 'male' || g === 'm' || g === 'boy') genderBadge = '<span class="badge gender-m">M</span>';
+            else if (g === 'female' || g === 'f' || g === 'girl') genderBadge = '<span class="badge gender-f">F</span>';
+
+            return '<tr>' +
+                '<td>' + (i + 1) + '</td>' +
+                '<td>' + escapeHtml(s.admissionNumber || '—') + '</td>' +
+                '<td><strong>' + escapeHtml(name) + '</strong></td>' +
+                '<td>' + escapeHtml(s.grade || s.class || '—') + '</td>' +
+                '<td>' + genderBadge + '</td>' +
+                '<td><span class="badge ' + (isBoarder ? 'boarder' : 'day') + '">' +
+                    (isBoarder ? 'Boarder' : 'Day Scholar') + '</span></td>' +
+                '<td>' + escapeHtml(s.phone || '—') + '</td>' +
+                '<td style="white-space:nowrap;">' +
+                    '<a class="row-link" href="admin-academics.html" title="Assessments"><i class="fas fa-chart-bar"></i> Assess</a>' +
+                    '<a class="row-link" href="clerk-dashboard.html" title="Clerk Dashboard"><i class="fas fa-coins"></i> Fees</a>' +
+                '</td></tr>';
+        }).join('');
+    }
+
+    function escapeHtml(v) {
+        return String(v).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    function showStatus(msg, cls) {
+        const el = document.getElementById('saveStatus');
+        el.textContent = msg;
+        el.className = 'save-status show ' + cls;
+        clearTimeout(window.statusTimer);
+        window.statusTimer = setTimeout(() => { el.className = 'save-status'; }, 2000);
+    }
+</script>
+</body>
+</html>
