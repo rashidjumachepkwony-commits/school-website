@@ -436,10 +436,11 @@
         <!-- ===== STUDENT MANAGEMENT ===== -->
         <div class="menu-label" style="margin-top:10px;">Student Management</div>
         <a onclick="window.location.href='student.html'"><i class="fas fa-users"></i> Students</a>
-        <a onclick="window.location.href='student-management.html'"><i class="fas fa-id-badge"></i> Student Management</a>
-        <a onclick="window.location.href='student-login-out.html'"><i class="fas fa-sign-in-alt"></i> Student Login/Out</a>
+        <a onclick="window.location.href='admin-student-management.html'"><i class="fas fa-id-badge"></i> Student Management</a>
+        <a onclick="window.location.href='student-checkin.html'"><i class="fas fa-sign-in-alt"></i> Student Login/Out</a>
         <a onclick="window.location.href='admin-students.html'"><i class="fas fa-clipboard-check"></i> Student Attendance</a>
-        <a onclick="window.location.href='cbe-dashboard.html'"><i class="fas fa-chart-line"></i> CBE Dashboard</a>
+        <a onclick="window.location.href='performance.html'"><i class="fas fa-chart-line"></i> CBE Dashboard</a>
+        <a onclick="window.location.href='clerk-dashboard.html'"><i class="fas fa-coins"></i> Clerk Dashboard</a>
         <!-- ===== END STUDENT MANAGEMENT ===== -->
 
         <div class="logout">
@@ -512,6 +513,11 @@
                 <span class="icon">🎓</span>
                 <h3>Student Attendance</h3>
                 <p>Daily check-in/out records</p>
+            </div>
+            <div class="dashboard-card" onclick="window.location.href='admin-student-management.html'" style="border-color:#0b5394; background: #eef6ff;">
+                <span class="icon">🆔</span>
+                <h3>Student Management</h3>
+                <p>Names, grade, gender, boarder/day, parent contact</p>
             </div>
             <div class="dashboard-card" onclick="showSection('reports')" style="border-color:#6f42c1; background: #f5f0ff;">
                 <span class="icon">📈</span>

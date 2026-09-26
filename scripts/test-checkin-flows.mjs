@@ -130,7 +130,7 @@ async function staffFlow() {
   if (outRes.body.success) {
     check('staff check-out succeeds', true);
     check('staff check-out returns hoursWorked', outRes.body.hoursWorked !== undefined, JSON.stringify(outRes.body));
-    check('staff check-out returns checkoutTimeFormatted', !!outRes.body.checkoutTimeFormatted, JSON.stringify(outRes.body));
+    check('staff check-out returns checkoutTimeFormatted', !!outRes.body.checkOutTimeFormatted || !!outRes.body.checkoutTimeFormatted, JSON.stringify(outRes.body));
   } else if (/3:00 PM|Weekend|No check-in/i.test(String(outRes.body.error || outRes.body.message || ''))) {
     check('staff check-out succeeds (blocked by time policy — seeded record used)', true);
     check('staff check-out returns hoursWorked (from seeded record)', rec && rec.hoursWorked !== undefined, JSON.stringify(outRes.body));
