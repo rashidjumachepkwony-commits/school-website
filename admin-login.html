@@ -160,21 +160,19 @@
             
             try {
                 console.log('📤 Sending login request...');
-                const response = await fetch('/api/admin/login', {
+                const result = await window.apiJson('/api/admin/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
-                
-                const result = await response.json();
                 console.log('📥 Login response:', result);
                 
                 if (result.success) {
-                    // Save to localStorage
-                    localStorage.setItem('adminToken', 'demo-token');
+                    // Save the real signed token, not a placeholder
+                    localStorage.setItem('adminToken', result.token);
                     localStorage.setItem('admin', JSON.stringify(result.admin));
                     
-                    console.log('✅ Token saved:', localStorage.getItem('adminToken'));
+                    console.log('✅ Token saved');
                     
                     alertEl.className = 'alert success';
                     alertEl.style.display = 'block';
@@ -186,13 +184,13 @@
                 } else {
                     alertEl.className = 'alert error';
                     alertEl.style.display = 'block';
-                    alertEl.textContent = '❌ ' + (result.message || 'Login failed');
+                    alertEl.textContent = '❌ ' + (result.error || result.message || 'Login failed');
                 }
             } catch (error) {
                 console.error('❌ Login error:', error);
                 alertEl.className = 'alert error';
                 alertEl.style.display = 'block';
-                alertEl.textContent = '❌ Error: ' + error.message;
+                alertEl.textContent = '❌ ' + error.message;
             }
         });
     </script>
