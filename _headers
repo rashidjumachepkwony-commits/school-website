@@ -1,0 +1,23 @@
+# Cloudflare Pages response headers
+# Translated from the old netlify.toml [[headers]] block, plus caching rules
+# for the static assets this site actually serves.
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-XSS-Protection: 0
+
+# Long-lived caching for versioned static assets
+/css/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/js/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/images/*
+  Cache-Control: public, max-age=86400, must-revalidate
+
+# HTML must always be revalidated so page changes appear immediately
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate

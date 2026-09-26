@@ -1,6 +1,22 @@
 # Cloudflare Pages redirects
-# /api/* requests are proxied to the Cloudflare Worker
-/api/* https://csa-api.rashidjumachepkwony.workers.dev/api/:splat 200
-
-# SPA fallback - serve index.html for all non-API routes
-/* /index.html 200
+#
+# This is a multi-page static website, not a single-page app, so there is
+# deliberately NO catch-all rewrite to /index.html. Cloudflare Pages serves the
+# real file when it exists and serves 404.html for anything else, which keeps
+# deep links such as /admin-login.html working and stops broken URLs from
+# silently returning the homepage with HTTP 200.
+#
+# There is also no /api/* proxy to the Cloudflare Worker. Pages accepts the
+# rule in this file but does not honour a proxy to an external origin - it
+# returns 404. That is fine, because API traffic never goes through Pages:
+#
+#   js/config.js points every /api/ request straight at
+#   https://csa-api.rashidjumachepkwony.workers.dev
+#
+# so the browser talks to the Worker cross-origin, and the Worker allows this
+# site's origin via its CORS policy. The pages that do not load js/config.js
+# (about, contact, parents-corner, portal, 404 and the Google verification
+# file) make no API calls.
+#
+# If you ever need a same-origin /api path, add a route to the Worker itself
+# rather than proxying from Pages.
