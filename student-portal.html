@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="js/config.js"></script>
+<title>Student Portal - Changara Star Academy</title>
+<meta name="description" content="Parent and student portal. Check assessment results, holiday assignments and fees balance at Changara Star Academy.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  /* Large, high-contrast styling: this page is used by parents, many of whom
+     are older and may be using a small phone screen. */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --ink:#0a1628; --ink-soft:#3c4d68; --gold:#d4a017; --line:#d7dfeb;
+    --bg:#f2f5f9; --ok:#0b7a3b; --warn:#9a6400; --bad:#a4161a;
+  }
+  html { font-size: 19px; }
+  body { font-family:"Segoe UI",Tahoma,Verdana,sans-serif; background:var(--bg); color:var(--ink); line-height:1.6; }
+  .wrap { max-width:900px; margin:0 auto; padding:16px; }
+
+  header { background:linear-gradient(135deg,var(--ink),#1d3a6b); color:#fff; padding:22px 18px; text-align:center; border-bottom:5px solid var(--gold); }
+  header h1 { font-size:1.55rem; line-height:1.25; }
+  header p { font-size:1rem; color:#d8e2f2; margin-top:6px; }
+  header .home { display:inline-block; margin-top:12px; background:#fff; color:var(--ink); padding:10px 20px; border-radius:10px; text-decoration:none; font-weight:700; font-size:1rem; }
+
+  .card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px 20px; margin:18px 0; box-shadow:0 2px 10px rgba(10,22,40,.05); }
+  .card h2 { font-size:1.3rem; margin-bottom:6px; }
+  .card .hint { color:var(--ink-soft); font-size:1rem; margin-bottom:16px; }
+
+  label { display:block; font-weight:700; font-size:1.05rem; margin:0 0 8px; }
+  input, select { width:100%; padding:15px 14px; font-size:1.1rem; font-family:inherit; border:2px solid var(--line); border-radius:10px; background:#fff; color:var(--ink); }
+  input:focus, select:focus { outline:none; border-color:var(--gold); }
+  .btn { display:block; width:100%; margin-top:16px; padding:17px; font-size:1.15rem; font-weight:800; font-family:inherit; border:0; border-radius:12px; background:var(--gold); color:var(--ink); cursor:pointer; }
+  .btn:hover { background:#c1900f; }
+  .btn.sec { background:var(--ink); color:#fff; margin-top:10px; }
+  .btn.sec:hover { background:#1d3a6b; }
+
+  .match { margin-top:14px; padding:16px; border:2px dashed var(--gold); border-radius:12px; background:#fffaf0; }
+  .match p { font-weight:700; margin-bottom:12px; }
+
+  .tabs { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:6px 0 4px; }
+  .tab { padding:15px 8px; text-align:center; border:2px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; font-weight:700; font-size:1rem; }
+  .tab .ico { display:block; font-size:1.5rem; margin-bottom:4px; }
+  .tab.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  .pupil { background:#f7f9fc; border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:14px; }
+  .pupil .nm { font-size:1.2rem; font-weight:800; }
+  .pupil .mt { color:var(--ink-soft); font-size:.98rem; }
+
+  table { width:100%; border-collapse:collapse; margin:10px 0 4px; }
+  th, td { border:1px solid var(--line); padding:12px 10px; text-align:left; font-size:1rem; }
+  th { background:var(--ink); color:#fff; }
+  .num { text-align:right; }
+  .lvl { padding:3px 10px; border-radius:8px; font-weight:800; font-size:.92rem; white-space:nowrap; }
+  .ee{background:#dff3e4;color:#136b2c} .me{background:#dbeafe;color:#12459b}
+  .ae{background:#fff3cd;color:#856404} .be{background:#fbdcdc;color:#8c1c24}
+
+  .big { font-size:1.5rem; font-weight:800; }
+  .good { color:var(--ok); } .due { color:var(--bad); }
+  .bar { height:18px; background:#e8edf5; border-radius:10px; overflow:hidden; margin-top:10px; }
+  .bar i { display:block; height:100%; background:var(--gold); }
+  .dl { display:inline-block; margin-top:8px; padding:12px 18px; background:#fff; border:2px solid var(--ink); border-radius:10px; color:var(--ink); text-decoration:none; font-weight:700; }
+
+  .note { background:#fff8e6; border-left:5px solid var(--gold); padding:14px 16px; border-radius:8px; margin:12px 0; }
+  .msg { padding:15px; border-radius:10px; font-weight:700; margin:14px 0; display:none; }
+  .msg.show { display:block; }
+  .msg.err { background:#fbdcdc; color:#8c1c24; }
+  .msg.ok { background:#dff3e4; color:#136b2c; }
+  .foot { text-align:center; color:var(--ink-soft); font-size:.95rem; padding:18px; }
+  .back { background:none; border:0; color:var(--ink); font-size:1.05rem; font-weight:700; text-decoration:underline; margin-bottom:14px; cursor:pointer; font-family:inherit; }
+  @media (max-width:600px){ html{font-size:18px} .tabs{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Student &amp; Parent Portal</h1>
+  <p>Changara Star Academy</p>
+  <a class="home" href="index.html"><i class="fas fa-arrow-left"></i> Back to Home</a>
+</header>
+
+<div class="wrap">
+  <div class="msg" id="msg"></div>
+
+  <!-- STEP 1 : find the child -->
+  <div class="card" id="step1">
+    <h2><i class="fas fa-search"></i> Step 1: Find Your Child</h2>
+    <p class="hint">Type part of your child's name (or the admission number) in the box below, then choose their name from the list.</p>
+
+    <label for="search">Child's name or admission number</label>
+    <input type="text" id="search" placeholder="e.g. Amara" autocomplete="off">
+
+    <div id="results"></div>
+
+    <div class="match" id="match" style="display:none">
+      <p id="matchText"></p>
+      <label for="studentSelect">Tap your child's name here</label>
+      <select id="studentSelect" size="6"></select>
+      <button class="btn" onclick="openStudent()"><i class="fas fa-arrow-right"></i> Continue</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 : choose what to see -->
+  <div class="card" id="step2" style="display:none">
+    <button class="back" onclick="backToSearch()">&larr; Not this child? Search again</button>
+    <h2><i class="fas fa-user-circle"></i> Step 2: Choose Your Child</h2>
+    <div class="pupil" id="pupil"></div>
+    <p class="hint">Now tap what you would like to see:</p>
+    <div class="tabs">
+      <div class="tab on" data-view="results" onclick="showView('results')">
+        <span class="ico">&#128202;</span>Assessment Results
+      </div>
+      <div class="tab" data-view="assignments" onclick="showView('assignments')">
+        <span class="ico">&#128196;</span>Holiday Assignments
+      </div>
+      <div class="tab" data-view="fees" onclick="showView('fees')">
+        <span class="ico">&#128176;</span>Fees Balance
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 : the chosen information -->
+  <div class="card" id="step3" style="display:none">
+    <button class="back" onclick="backToChild()">&larr; Back to the three choices</button>
+    <h2 id="viewTitle"></h2>
+    <div id="viewBody"></div>
+  </div>
+</div>
+
+<div class="foot">Changara Star Academy &middot; For help, please contact the school office.</div>
+
+<script>
+let allStudents = [];
+let current = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadStudents();
+  const box = document.getElementById('search');
+  box.addEventListener('input', filterStudents);
+});
+
+async function loadStudents() {
+  try {
+    const res = await window.apiJson('/api/portal/students');
+    allStudents = res.students || [];
+    if (!allStudents.length) {
+      showMsg('The list of students is empty. Please contact the school office.', 'err');
+    }
+  } catch (e) {
+    showMsg('Could not load the student list. Please check your connection and try again.', 'err');
+  }
+}
+
+function filterStudents() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const box = document.getElementById('results');
+  if (q.length < 1) { box.innerHTML = ''; document.getElementById('match').style.display = 'none'; return; }
+
+  const hits = allStudents.filter(s =>
+    s.name.toLowerCase().includes(q) || (s.admissionNumber || '').toLowerCase().includes(q)
+  );
+
+  if (!hits.length) {
+    box.innerHTML = '<div class="msg err show">No student found with that name. Please check the spelling, or search using the admission number.</div>';
+    document.getElementById('match').style.display = 'none';
+    return;
+  }
+
+  if (hits.length === 1) {
+    document.getElementById('matchText').textContent = 'Found 1 student. Please confirm:';
+  } else {
+    document.getElementById('matchText').textContent =
+      'Found ' + hits.length + ' students. Please choose your child:';
+  }
+
+  const sel = document.getElementById('studentSelect');
+  sel.innerHTML = hits.map(s =>
+    '<option value="' + s.id + '">' + s.name + '  (' + (s.admissionNumber || 'no adm. no.') + ', ' + s.grade + ')</option>'
+  ).join('');
+  box.innerHTML = '';
+  document.getElementById('match').style.display = 'block';
+}
+
+async function openStudent() {
+  const id = document.getElementById('studentSelect').value;
+  if (!id) { showMsg('Please choose your child\'s name from the list.', 'err'); return; }
+  showMsg('', '');
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+  document.getElementById('step3').style.display = 'none';
+  window.scrollTo(0, 0);
+
+  try {
+    const data = await window.apiJson('/api/portal/student/' + encodeURIComponent(id));
+    current = data;
+    const s = data.student;
+    document.getElementById('pupil').innerHTML =
+      '<div class="nm">' + esc(s.name) + '</div>' +
+      '<div class="mt">Admission No: ' + esc(s.admissionNumber || '-') + ' &middot; ' + esc(s.grade) +
+      ' &middot; ' + esc(s.studentType) + '</div>' +
+      (s.guardianPhone ? '<div class="mt">Parent contact: ' + esc(s.guardianPhone) + '</div>' : '');
+    showView('results');
+  } catch (e) {
+    document.getElementById('step1').style.display = 'block';
+    showMsg('Could not open this student. Please try again.', 'err');
+  }
+}
+
+function backToSearch() {
+  document.getElementById('step1').style.display = 'block';
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = 'none';
+}
+
+function backToChild() {
+  document.getElementById('step3').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+}
+
+function showView(view) {
+  if (!current) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.view === view));
+  document.getElementById('step3').style.display = 'block';
+
+  const body = document.getElementById('viewBody');
+  if (view === 'results') { document.getElementById('viewTitle').textContent = 'Assessment Results'; body.innerHTML = renderResults(current); }
+  if (view === 'assignments') { document.getElementById('viewTitle').textContent = 'Holiday Assignments'; body.innerHTML = renderAssignments(current); }
+  if (view === 'fees') { document.getElementById('viewTitle').textContent = 'Fees Balance'; body.innerHTML = renderFees(current); }
+  window.scrollTo(0, 0);
+}
+
+function renderResults(d) {
+  if (!d.assessments.length) {
+    return empty('There are no assessment results for this child yet. Results appear here as soon as the teacher enters them.');
+  }
+  let html = '';
+  for (const a of d.assessments) {
+    const rows = a.subjects.map(s =>
+      '<tr><td>' + esc(s.subject) + '</td><td class="num">' + (s.score === null ? '-' : s.score) + '</td><td class="num">' + (s.max || '-') + '</td></tr>'
+    ).join('');
+    html += '<div class="pupil">' +
+      '<div class="nm">' + esc(a.period || 'Assessment') + '</div>' +
+      '<div class="mt">' + esc(a.type || '') + (a.name && a.name !== a.type ? ' &middot; ' + esc(a.name) : '') + '</div>' +
+      '<table><thead><tr><th>Subject</th><th class="num">Score</th><th class="num">Out of</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<div class="mt" style="margin-top:10px">' +
+        'Total: <strong>' + a.total + '</strong> / ' + a.maxTotal + ' &nbsp;|&nbsp; ' +
+        'Average: <strong>' + (a.percentage === null ? '-' : a.percentage + '%') + '</strong> &nbsp;|&nbsp; ' +
+        'Level: ' + levelBadge(a.performanceLevel, a.performanceCode) +
+      '</div>' +
+      '<button class="btn sec" style="margin-top:14px" onclick="printResult()"><i class="fas fa-download"></i> Download / Print this result</button>' +
+      '</div>';
+  }
+  return html + gradingKeyHtml(d.gradingKey);
+}
+
+function printResult() {
+  const w = window.open('', '_blank', 'width=850,height=900');
+  if (!w) { showMsg('Please allow popups to download the result.', 'err'); return; }
+  const s = current.student;
+  let rows = '';
+  current.assessments.forEach(a => {
+    rows += '<h3>' + esc(a.period || '') + ' &mdash; ' + esc(a.type || '') + '</h3><table><tr><th>Subject</th><th>Score</th><th>Out of</th></tr>';
+    a.subjects.forEach(x => { rows += '<tr><td>' + esc(x.subject) + '</td><td>' + (x.score === null ? '-' : x.score) + '</td><td>' + x.max + '</td></tr>'; });
+    rows += '<tr><th>Total</th><th>' + a.total + '</th><th>' + a.maxTotal + '</th></tr></table>' +
+      '<p>Average: <b>' + (a.percentage === null ? '-' : a.percentage + '%') + '</b> &nbsp; Performance: <b>' + esc(a.performanceLevel) + '</b> (' + esc(a.performanceCode) + ')</p>';
+  });
+  w.document.write(
+    '<!doctype html><html><head><title>Assessment Results - ' + esc(s.name) + '</title><style>' +
+    'body{font-family:Arial;padding:24px;color:#12233f}h1{font-size:20px;margin:0 0 4px}' +
+    '.tag{font-size:11px;letter-spacing:2px;color:#6a7a90;text-transform:uppercase}' +
+    'table{border-collapse:collapse;width:100%;margin:8px 0 18px}th,td{border:1px solid #ccd;padding:8px;text-align:left}' +
+    'th{background:#0a1628;color:#fff}h3{margin:16px 0 4px;font-size:15px;color:#0a1628}' +
+    '.print{padding:11px 20px;background:#d4a017;border:0;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}' +
+    '@media print{.print{display:none}}</style></head><body>' +
+    '<button class="print" onclick="window.print()">Print / Save as PDF</button>' +
+    '<h1>CHANGARA STAR ACADEMY</h1><div class="tag">Competency Based Education (CBE) &middot; Assessment Results</div>' +
+    '<p><b>Student:</b> ' + esc(s.name) + ' &nbsp; <b>Admission No:</b> ' + esc(s.admissionNumber) +
+    ' &nbsp; <b>Class:</b> ' + esc(s.grade) + '</p><hr>' + rows +
+    '<p style="margin-top:24px;font-size:11px;color:#888">Generated ' + new Date().toLocaleString() + '</p>' +
+    '<script>window.onload=function(){setTimeout(function(){window.print()},400)}<\/script></body></html>'
+  );
+  w.document.close();
+}
+
+function renderAssignments(d) {
+  if (!d.assignments.length) {
+    return empty('There are no holiday assignments uploaded for this class yet. Please check again later.');
+  }
+  return d.assignments.map(a =>
+    '<div class="pupil">' +
+      '<div class="nm">' + esc(a.title) + '</div>' +
+      '<div class="mt">' + esc(a.subject || '') + (a.term ? ' &middot; ' + esc(a.term) : '') + '</div>' +
+      (a.description ? '<div class="mt" style="margin-top:6px">' + esc(a.description) + '</div>' : '') +
+      (a.fileUrl ? '<a class="dl" href="' + esc(a.fileUrl) + '" target="_blank" rel="noopener"><i class="fas fa-download"></i> Download ' + esc(a.fileName || 'the file') + '</a>' : '<div class="mt">No file attached.</div>') +
+    '</div>'
+  ).join('');
+}
+
+function renderFees(d) {
+  const f = d.fees;
+  const paidPct = f.total > 0 ? Math.min(100, Math.round((f.paid / f.total) * 100)) : 0;
+  return '<div class="pupil">' +
+    '<div class="mt">Total fees for the year</div><div class="big">' + f.currency + ' ' + f.total.toLocaleString() + '</div>' +
+    '<div class="bar"><i style="width:' + paidPct + '%"></i></div>' +
+    '<table style="margin-top:14px">' +
+      '<tr><td>Amount paid</td><td class="num good">' + f.currency + ' ' + f.paid.toLocaleString() + '</td></tr>' +
+      '<tr><td>Balance remaining</td><td class="num ' + (f.balance > 0 ? 'due' : 'good') + '">' + f.currency + ' ' + f.balance.toLocaleString() + '</td></tr>' +
+    '</table>' +
+    (f.balance > 0
+      ? '<div class="note">There is a balance still to be paid. Please speak to the clerk about payment plans if this is difficult.</div>'
+      : '<div class="msg ok show">All fees are fully paid. Thank you.</div>') +
+    (f.structure && f.structure.length
+      ? '<h3 style="margin:18px 0 6px;font-size:1.1rem">Fee breakdown</h3><table><tr><th>Type</th><th>Term</th><th class="num">Amount</th></tr>' +
+        f.structure.map(s => '<tr><td>' + esc(s.type || '-') + '</td><td>' + esc(s.term || '-') + '</td><td class="num">' + f.currency + ' ' + s.amount.toLocaleString() + '</td></tr>').join('') +
+        '</table>'
+      : '') +
+    '</div>';
+}
+
+function gradingKeyHtml(key) {
+  if (!key || !key.length) return '';
+  return '<div class="note"><b>What the levels mean</b><br>' +
+    key.map(k => '<b>' + esc(k.code) + '</b> ' + esc(k.name) + ' (' + k.min + '&ndash;' + k.max + '%)').join('<br>') +
+    '</div>';
+}
+
+function levelBadge(level, code) {
+  const cls = { 'Exceeding Expectation': 'ee', 'Meeting Expectation': 'me', 'Approaching Expectation': 'ae', 'Below Expectation': 'be' }[level] || '';
+  return '<span class="lvl ' + cls + '">' + esc(level) + (code && code !== 'NA' ? ' (' + esc(code) + ')' : '') + '</span>';
+}
+
+function empty(msg) { return '<div class="note">' + esc(msg) + '</div>'; }
+
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = 'msg' + (text ? ' show ' + type : '');
+}
+
+function esc(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+</script>
+</body>
+</html>

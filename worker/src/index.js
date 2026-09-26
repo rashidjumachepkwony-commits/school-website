@@ -19,6 +19,7 @@ import { handleCurriculum } from './routes/curriculum.js';
 import { handleUpload } from './routes/upload.js';
 import { handleHolidayAssignments } from './routes/holidayAssignments.js';
 import { handleClerk } from './routes/clerk.js';
+import { handlePortal } from './routes/portal.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -80,6 +81,7 @@ export default {
         () => handleUpload(db, env, route, method, body, pathParts, request),
         () => handleHolidayAssignments(db, env, route, method, body, pathParts, request),
         () => handleClerk(db, env, route, method, body, pathParts),
+        () => handlePortal(db, env, route, method, body, pathParts, url),
       ];
 
       for (const handler of handlers) {

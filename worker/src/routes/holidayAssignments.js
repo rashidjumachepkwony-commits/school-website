@@ -51,7 +51,28 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
     if (!grade) return error('Grade is required');
 
     const file = formData.get('file');
-    if (!file) return error('Please select a file to upload');
+
+    if (!file) {
+      // A written-only assignment (no attachment). This keeps holiday work
+      // usable even when file storage is not configured, instead of forcing
+      // the teacher to attach a file they do not have.
+      const result = await db.collection('holidayassignments').insertOne({
+        title, grade, subject, description, uploadedBy,
+        fileName: '', fileType: '', fileSize: 0,
+        filePath: '', filePublicId: '', fileResourceType: '',
+        isActive: true,
+        createdAt: now,
+        updatedAt: now
+      });
+      return success({
+        message: 'Assignment saved successfully!',
+        assignment: {
+          _id: result.insertedId.toString(),
+          title, grade, subject, description, uploadedBy,
+          fileName: '', isActive: true, createdAt: now
+        }
+      });
+    }
 
     const filename = file.name || 'assignment';
     const ext = getExtension(filename);
