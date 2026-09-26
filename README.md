@@ -1,96 +1,114 @@
 # Changara Star Academy Management System
 
-A complete school management system built on **Cloudflare Pages + D1**, deployed via **GitHub**.
+A complete school management system: a static multi-page website on **Cloudflare Pages**, an API on a **Cloudflare Worker**, and **Supabase PostgreSQL** for all persistent data. Deployed from GitHub.
 
 ## Technology Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Static hosting | Cloudflare Pages |
-| API backend | Cloudflare Pages Functions (Worker) |
-| Database | Cloudflare D1 (SQLite) |
-| Deployment | GitHub → Cloudflare Pages (automatic) |
-| Authentication | Password hashing via Web Crypto API (PBKDF2) |
+| Static hosting | Cloudflare Pages (project `csa-frontend`, output `dist/`) |
+| API backend | Cloudflare Worker `csa-api` (`https://csa-api.rashidjumachepkwony.workers.dev`) |
+| Database | Supabase (PostgreSQL) via a REST adapter in `worker/src/db.js` |
+| File storage | Cloudinary (optional, uploads only) |
+| Deployment | GitHub → Cloudflare Pages (automatic), Worker deployed via Wrangler |
+| Authentication | Admin JWTs + HMAC-SHA256 salted password hashes (Web Crypto) |
+
+The frontend is plain HTML/CSS/JavaScript - no framework, no bundler. There is no
+D1 database and there are no Pages Functions; the API is a standalone Worker.
 
 ## Quick Start (Local Development)
 
 ### Prerequisites
 - Node.js 20+
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/): `npm install -g wrangler`
-- Cloudflare account with D1 enabled
+- A Supabase project (already provisioned in production - you do not need to
+  create one)
 
 ### Steps
 
-1. **Login to Cloudflare**
+1. **Create a local environment file**
    ```bash
-   wrangler login
+   cp .env.example .env
    ```
+   Fill in `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` from the Supabase
+   project settings. `.env` is git-ignored and must never be committed or
+   published.
 
-2. **Create the D1 database**
-   ```bash
-   wrangler d1 create csa-school-db
-   ```
-   Note the `database_id` from the output.
-
-3. **Link the database in `wrangler.jsonc`**
-   Update the `"database_name"` field to match your created database.
-
-4. **Run migrations**
-   ```bash
-   wrangler d1 execute DB --file=schema.sql
-   ```
-
-5. **Set environment variables**
-   ```bash
-   wrangler secret put JWT_SECRET
-   # Enter a random 32+ character string when prompted
-   ```
-
-6. **Start local development**
+2. **Start the local server**
    ```bash
    npm run dev
    ```
-   This starts Wrangler in preview mode with a local D1 database.
+   Serves the site on http://localhost:5000 and proxies `/api/*` to the Worker
+   code running in-process.
 
-7. **Seed the initial admin**
-   After the first migration, create the initial admin account:
+3. **Build the Cloudflare Pages output** (optional, for testing the deployable
+   artefact locally)
    ```bash
-   wrangler d1 execute DB --command="INSERT OR IGNORE INTO admins (username, email, password_hash, full_name, role, is_active) VALUES ('admin', 'admin@changarastaracademy.co.ke', 'pbkdf2_sha256$100000$00000000000000000000000000000000$0000000000000000000000000000000000000000000000000000000000000000', 'Super Admin', 'Super Admin', 1)"
+   npm run build:pages:check
+   node scripts/verify-pages-build.mjs
    ```
-   Default password: `admin123` (change immediately after first login)
+
+### Do NOT run D1 commands
+Earlier versions of this project used Cloudflare D1 (SQLite). That has been
+fully replaced by Supabase. `wrangler d1 create`, `wrangler d1 execute` and the
+`DB` binding are all obsolete and will operate on the wrong database.
 
 ## Deployment
 
+See **[DEPLOY.md](DEPLOY.md)** for the full guide. In summary:
+
 1. Push to GitHub (`main` branch)
-2. Connect your repo to [Cloudflare Pages](https://dash.cloudflare.com)
-3. In Pages settings:
-   - Build command: `npm install && npm run build:static`
-   - Output directory: `dist`
-   - OR use the Worker directly: Build command: `npm run dev`, Output: `public/`
-4. Set `JWT_SECRET` in Pages environment variables
-5. Add `DB` binding in Pages settings pointing to your D1 database
+2. Connect the repo to Cloudflare Pages and set:
+   - Framework preset: **None**
+   - Build command: `npm run build:pages`
+   - Build output directory: `dist`
+3. Add **no** environment variables on Pages. The Worker URL is a constant in
+   `js/config.js`, and `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` and the
+   Cloudinary secrets are **Worker secrets only** - anything set as a Pages
+   build variable is not secret from the browser.
+
+Deploy the Worker separately with `npm run deploy:worker` (or
+`npm run deploy:live`).
 
 ## File Structure
 
 ```
-├── functions/api/[[path]].js  # Cloudflare Pages Function (all API routes)
-├── schema.sql                  # D1 database migrations
-├── wrangler.jsonc              # Cloudflare configuration
-├── js/config.js                # Frontend API URL configuration
+├── *.html                     # All site pages (public, admin, teacher, student, visitor)
+├── css/                       # Stylesheets
+├── js/config.js               # Frontend API URL configuration (Worker URL)
+├── images/                    # Static images
+├── _headers                   # Cloudflare Pages response headers
+├── _redirects                 # Cloudflare Pages redirects (intentionally minimal)
+├── dist/                      # Build output for Pages (git-ignored, generated)
+├── worker/
+│   ├── wrangler.toml          # Worker config (name: csa-api)
+│   └── src/
+│       ├── index.js           # Worker entry point and router
+│       ├── db.js              # Supabase REST adapter
+│       ├── middleware/cors.js # CORS policy
+│       └── routes/            # API route modules
+├── supabase/schema.sql        # Supabase table definitions (documentation only)
 ├── scripts/
-│   └── seed-admin.js          # Admin seed script
-├── *.html                     # Static pages (admin, staff, student, visitor)
-├── css/                        # Stylesheets
-└── images/                     # Static images
+│   ├── build-pages.mjs        # Builds dist/ from an allow-list
+│   ├── verify-pages-build.mjs # Verifies dist/ is safe and resolves
+│   └── test-pages-preview.ps1 # End-to-end test of a deployed preview
+└── data/                      # Private student register (git-ignored, never published)
 ```
 
 ## Creating the First Admin
 
-1. After running migrations, visit: https://your-domain.pages.dev/admin-login.html
-2. Login with:
-   - Username: `admin`
-   - Password: `admin123`
-3. Immediately change the password via Admin Settings.
+The `admins` table starts empty, so nobody can sign in until one is created:
+
+```bash
+curl -X POST https://csa-api.rashidjumachepkwony.workers.dev/api/setup-admin \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","email":"admin@changarastaracademy.co.ke","password":"<strong-password>","fullName":"Administrator"}'
+```
+
+`scripts/seed-admin.js` does the same thing. There is **no default password** -
+choose a strong one and store it in a password manager. The first admin created
+for this deployment uses a password set during setup, not a value in this
+repository.
 
 ## API Endpoints
 
@@ -144,22 +162,37 @@ A complete school management system built on **Cloudflare Pages + D1**, deployed
 
 ## Troubleshooting
 
-### D1 migration fails
-Ensure you're logged in: `wrangler login`
-Ensure the database exists: `wrangler d1 create csa-school-db`
-Check migration: `wrangler d1 execute DB --command="SELECT name FROM sqlite_master WHERE type='table'"`
+### "Invalid URL" or every database call fails on the Worker
+A UTF-8 BOM has been prepended to the `SUPABASE_URL` secret. Never pipe values
+from PowerShell into `wrangler secret put`; use `npm run deploy:live`, which
+writes BOM-free temp files and redirects through `cmd`.
+
+### "Unexpected token '<'" when calling the API
+The request reached the static site instead of the Worker. Confirm
+`window.__API_BASE_URL__` in `js/config.js` and hard-reload the page so the
+cached config is not used.
+
+### CORS failure in the browser console
+The Worker's allowed origins come from `FRONTEND_URL` (production) plus any
+`https://*.pages.dev` preview. Add anything else via the `ALLOWED_ORIGINS`
+Worker variable, comma separated.
 
 ### Login fails
-Verify the admin was seeded correctly. Re-run the seed command if needed.
+Check that an admin row exists (`GET /api/setup-admin` is a one-time
+bootstrap). Passwords are stored as `salt:hash`, not plaintext.
 
 ### Database not found
-Add the `DB` binding in your `wrangler.jsonc` under the `d1` section.
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` must be set as **Worker
+secrets**. The application talks to Supabase over its REST API; there is no D1
+binding.
 
 ## Warnings and Limitations
 
-- The application has been fully migrated from MongoDB/Mongoose to **Supabase PostgreSQL**. No active code, models, or dependencies reference MongoDB.
-- File uploads use Cloudinary (signed, server-side) — no local disk or R2 required.
+- The application has been fully migrated from MongoDB/Mongoose to **Supabase PostgreSQL**. No active code, models, or dependencies reference MongoDB. The old D1/SQLite configuration is gone.
+- File uploads use Cloudinary (signed, server-side) — no local disk or R2 required. The `CLOUDINARY_*` values are currently empty, so file uploads are unavailable until real Cloudinary credentials are added as Worker secrets. Written-only holiday assignments work without them.
 - The `scripts/import-registers.mjs` script imports the student and staff registers from `CHANGARA STAR ACADEMY SCHOOL SYSTEM.xlsx` into Supabase. Pin numbers are salted-hashed on import and are never stored or logged in plaintext.
+- `data/student-register.csv` contains children's names and parent phone numbers. It is git-ignored and excluded from the Pages build. Do not commit it or paste it into logs or issues.
+- The frontend is deployed from an allow-list (`scripts/build-pages.mjs`) into `dist/`, never by publishing the repository root.
 
 
 ## Staff Attendance E2E Tests

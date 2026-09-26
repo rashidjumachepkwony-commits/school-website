@@ -69,7 +69,21 @@
   .msg.ok { background:#dff3e4; color:#136b2c; }
   .foot { text-align:center; color:var(--ink-soft); font-size:.95rem; padding:18px; }
   .back { background:none; border:0; color:var(--ink); font-size:1.05rem; font-weight:700; text-decoration:underline; margin-bottom:14px; cursor:pointer; font-family:inherit; }
-  @media (max-width:600px){ html{font-size:18px} .tabs{grid-template-columns:1fr} }
+
+  /* Sticky lookup bar: stays reachable at the top of a phone screen, so a
+     parent never has to scroll to search for another child. */
+  .topbar {
+    position: sticky; top: 0; z-index: 30; background: var(--ink); color: #fff;
+    padding: 10px 14px; box-shadow: 0 2px 8px rgba(10,22,40,.25);
+  }
+  .topbar .inner { max-width: 900px; margin: 0 auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .topbar .title { font-weight: 800; font-size: 1rem; white-space: nowrap; }
+  .topbar input { flex: 1 1 180px; padding: 12px; font-size: 1.05rem; border-radius: 10px; border: 2px solid #c9d3e2; }
+  .topbar input:focus { outline: none; border-color: var(--gold); }
+  .topbar .btn { width: auto; margin: 0; padding: 12px 20px; white-space: nowrap; }
+  .topbar .home { display:none; }
+
+  @media (max-width:600px){ html{font-size:18px} .tabs{grid-template-columns:1fr} .topbar .title{display:none} }
 </style>
 </head>
 <body>
@@ -79,13 +93,22 @@
   <a class="home" href="index.html"><i class="fas fa-arrow-left"></i> Back to Home</a>
 </header>
 
+<div class="topbar">
+  <div class="inner">
+    <span class="title">Find a Child</span>
+    <input type="text" id="topSearch" placeholder="Type a name or admission number" autocomplete="off">
+    <button class="btn" onclick="searchFromTop()"><i class="fas fa-search"></i> Search</button>
+    <a class="btn" href="index.html" style="background:#fff;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;"><i class="fas fa-home"></i> Home</a>
+  </div>
+</div>
+
 <div class="wrap">
   <div class="msg" id="msg"></div>
 
   <!-- STEP 1 : find the child -->
   <div class="card" id="step1">
     <h2><i class="fas fa-search"></i> Step 1: Find Your Child</h2>
-    <p class="hint">Type part of your child's name (or the admission number) in the box below, then choose their name from the list.</p>
+    <p class="hint">Type part of your child's name (or the admission number) above, then choose their name from the list.</p>
 
     <label for="search">Child's name or admission number</label>
     <input type="text" id="search" placeholder="e.g. Amara" autocomplete="off">
@@ -135,9 +158,28 @@ let current = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   loadStudents();
-  const box = document.getElementById('search');
-  box.addEventListener('input', filterStudents);
+  document.getElementById('search').addEventListener('input', filterStudents);
+  const top = document.getElementById('topSearch');
+  top.addEventListener('input', () => {
+    // Keep the in-page box in step with the sticky bar, and filter live.
+    document.getElementById('search').value = top.value;
+    filterStudents();
+  });
+  top.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchFromTop(); } });
 });
+
+/** Called by the sticky Search button: reveal the match list near the top. */
+function searchFromTop() {
+  const q = document.getElementById('topSearch').value;
+  document.getElementById('search').value = q;
+  document.getElementById('step1').style.display = 'block';
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = 'none';
+  filterStudents();
+  const m = document.getElementById('match');
+  if (m && m.style.display === 'block') m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 async function loadStudents() {
   try {
@@ -247,39 +289,25 @@ function renderResults(d) {
         'Average: <strong>' + (a.percentage === null ? '-' : a.percentage + '%') + '</strong> &nbsp;|&nbsp; ' +
         'Level: ' + levelBadge(a.performanceLevel, a.performanceCode) +
       '</div>' +
-      '<button class="btn sec" style="margin-top:14px" onclick="printResult()"><i class="fas fa-download"></i> Download / Print this result</button>' +
+      '<button class="btn sec" style="margin-top:14px" onclick="printResult()"><i class="fas fa-download"></i> Download / Print result slip</button>' +
       '</div>';
   }
   return html + gradingKeyHtml(d.gradingKey);
 }
 
 function printResult() {
-  const w = window.open('', '_blank', 'width=850,height=900');
+  if (!current || !current.student) return;
+  // Use the same professional result slip the teachers print, so what the
+  // parent downloads is the official document, not a plain web page.
+  const a = (current.assessments || [])[0];
+  let url = '/api/assessments/student-report/' + encodeURIComponent(current.student.id);
+  if (a) {
+    if (a.period) url += '?period=' + encodeURIComponent(a.period);
+    if (a.type) url += (url.indexOf('?') === -1 ? '?' : '&') + 'type=' + encodeURIComponent(a.type);
+    if (a.name) url += (url.indexOf('?') === -1 ? '?' : '&') + 'name=' + encodeURIComponent(a.name);
+  }
+  const w = window.open(url, '_blank');
   if (!w) { showMsg('Please allow popups to download the result.', 'err'); return; }
-  const s = current.student;
-  let rows = '';
-  current.assessments.forEach(a => {
-    rows += '<h3>' + esc(a.period || '') + ' &mdash; ' + esc(a.type || '') + '</h3><table><tr><th>Subject</th><th>Score</th><th>Out of</th></tr>';
-    a.subjects.forEach(x => { rows += '<tr><td>' + esc(x.subject) + '</td><td>' + (x.score === null ? '-' : x.score) + '</td><td>' + x.max + '</td></tr>'; });
-    rows += '<tr><th>Total</th><th>' + a.total + '</th><th>' + a.maxTotal + '</th></tr></table>' +
-      '<p>Average: <b>' + (a.percentage === null ? '-' : a.percentage + '%') + '</b> &nbsp; Performance: <b>' + esc(a.performanceLevel) + '</b> (' + esc(a.performanceCode) + ')</p>';
-  });
-  w.document.write(
-    '<!doctype html><html><head><title>Assessment Results - ' + esc(s.name) + '</title><style>' +
-    'body{font-family:Arial;padding:24px;color:#12233f}h1{font-size:20px;margin:0 0 4px}' +
-    '.tag{font-size:11px;letter-spacing:2px;color:#6a7a90;text-transform:uppercase}' +
-    'table{border-collapse:collapse;width:100%;margin:8px 0 18px}th,td{border:1px solid #ccd;padding:8px;text-align:left}' +
-    'th{background:#0a1628;color:#fff}h3{margin:16px 0 4px;font-size:15px;color:#0a1628}' +
-    '.print{padding:11px 20px;background:#d4a017;border:0;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}' +
-    '@media print{.print{display:none}}</style></head><body>' +
-    '<button class="print" onclick="window.print()">Print / Save as PDF</button>' +
-    '<h1>CHANGARA STAR ACADEMY</h1><div class="tag">Competency Based Education (CBE) &middot; Assessment Results</div>' +
-    '<p><b>Student:</b> ' + esc(s.name) + ' &nbsp; <b>Admission No:</b> ' + esc(s.admissionNumber) +
-    ' &nbsp; <b>Class:</b> ' + esc(s.grade) + '</p><hr>' + rows +
-    '<p style="margin-top:24px;font-size:11px;color:#888">Generated ' + new Date().toLocaleString() + '</p>' +
-    '<script>window.onload=function(){setTimeout(function(){window.print()},400)}<\/script></body></html>'
-  );
-  w.document.close();
 }
 
 function renderAssignments(d) {

@@ -208,6 +208,45 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
       `<tr><td>${escapeHtml(l.code)}</td><td>${escapeHtml(l.name)}</td><td class="ctr">${l.min}% &ndash; ${l.max}%</td></tr>`
     ).join('');
 
+    // Subject-level analysis: how the class is performing in each subject.
+    const subjStats = [];
+    for (const subj of subjectOrder) {
+      let sum = 0, n = 0, best = null, worst = null, pass = 0;
+      for (const row of assessed) {
+        const cell = row.scores.find(x => x.subject === subj);
+        if (!cell || cell.score === null) continue;
+        const p = cell.max > 0 ? (cell.score / cell.max) * 100 : 0;
+        sum += p; n++;
+        if (cell.score >= cell.max * 0.6) pass++;
+        if (!best || p > best.p) best = { name: row.name, p };
+        if (!worst || p < worst.p) worst = { name: row.name, p };
+      }
+      if (n === 0) continue;
+      const mean = sum / n;
+      const level = gradePercentage(mean, policy);
+      subjStats.push({
+        subject: subj, mean, n,
+        passRate: (pass / n) * 100,
+        best, worst,
+        code: level.code,
+        cls: levelClass[level.level] || ''
+      });
+    }
+    const subjRows = subjStats.map(s =>
+      `<tr>
+        <td>${escapeHtml(s.subject)}</td>
+        <td class="ctr">${s.mean.toFixed(1)}%</td>
+        <td class="ctr">${s.passRate.toFixed(0)}%</td>
+        <td class="barcell"><div class="bar"><i style="width:${Math.max(0, Math.min(100, s.mean))}%"></i></div></td>
+        <td>${s.best ? escapeHtml(s.best.name) : '-'}</td>
+        <td>${s.worst ? escapeHtml(s.worst.name) : '-'}</td>
+        <td class="ctr ${s.cls}">${escapeHtml(s.code)}</td>
+      </tr>`
+    ).join('');
+
+    const weakest = [...subjStats].sort((a, b) => a.mean - b.mean)[0];
+    const strongest = [...subjStats].sort((a, b) => b.mean - a.mean)[0];
+
     const academicYear = new Date().getFullYear();
     const generated = new Date().toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' });
 
@@ -245,6 +284,8 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
   .box h3{margin:0;padding:8px 12px;background:#0a1628;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.6px}
   .box table{margin:0}
   .box table th{background:#f2f5fa;color:#0a1628}
+  .barcell{width:80px}.bar{height:9px;background:#e8edf5;border-radius:6px;overflow:hidden}
+  .bar i{display:block;height:100%;background:#d4a017}
   .stat-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
   .stat{flex:1;min-width:130px;border:1px solid #e3e9f2;border-radius:8px;padding:9px 12px;background:#fbfcfe}
   .stat .k{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:#6b7a92}
@@ -320,6 +361,19 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         <tbody>${legendRows}</tbody>
       </table>
     </div>
+  </div>
+
+  <div class="box" style="margin-top:16px">
+    <h3>Subject Analysis</h3>
+    <table>
+      <thead><tr><th>Subject</th><th class="ctr">Class Mean</th><th class="ctr">At 60%+</th><th>Progress</th><th>Highest</th><th>Lowest</th><th class="ctr">Band</th></tr></thead>
+      <tbody>${subjRows || '<tr><td colspan="7" class="ctr" style="padding:18px;color:#8a97ab">No subject data for this period.</td></tr>'}</tbody>
+    </table>
+    ${weakest && strongest ? `<div style="padding:10px 13px;border-top:1px solid #e3e9f2;font-size:11px;color:#3c4d68">
+      <b>Strongest subject:</b> ${escapeHtml(strongest.subject)} at ${strongest.mean.toFixed(1)}% &nbsp;&middot;&nbsp;
+      <b>Needs attention:</b> ${escapeHtml(weakest.subject)} at ${weakest.mean.toFixed(1)}%
+      ${weakest.passRate < 50 ? ` (only ${weakest.passRate.toFixed(0)}% of the class reached 60%)` : ''}
+    </div>` : ''}
   </div>
 
   <div class="sign">
@@ -524,6 +578,229 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
   }
 
   // GET /api/assessments
+  // GET /api/assessments/student-report/:id?period&type&name
+  // A single learner's professional CBE result slip, with subject analysis,
+  // class comparison and a teacher remark. Print / Save as PDF ready.
+  if (p[0] === 'assessments' && p[1] === 'student-report' && p[2] && method === 'GET') {
+    const studentId = decodeURIComponent(p[2]);
+    const period = url.searchParams.get('period') || '';
+    const type = url.searchParams.get('type') || '';
+    const name = url.searchParams.get('name') || '';
+
+    const student = await db.collection('students').findOne({ _id: studentId })
+      || await db.collection('students').findOne({ admissionNumber: studentId });
+    if (!student) return error('Student not found', 404);
+
+    const policySetting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
+    const policy = loadPolicy(policySetting && policySetting.value ? JSON.stringify(policySetting.value) : null);
+
+    const fullName = `${student.firstName || ''} ${student.lastName || ''}`.trim();
+    const grade = student.grade || student.class || '';
+
+    const query = {
+      grade,
+      ...(period ? { assessmentPeriod: period } : {}),
+      ...(type ? { assessmentType: type } : {})
+    };
+    const records = await db.collection('assessments').find(query).toArray();
+    const mine = records.find(r => String(r.studentId) === String(student._id.toString()))
+      || records.find(r => String(r.studentId) === String(student.admissionNumber || ''))
+      || records.find(r => String(r.studentName || '').trim().toLowerCase() === fullName.toLowerCase());
+
+    if (!mine) {
+      const none = `<!doctype html><html><head><meta charset="utf-8"><title>No result</title>
+        <style>body{font-family:Segoe UI,Arial;padding:40px;color:#12233f}.b{background:#f5f7fa;padding:24px;border-radius:10px;border-left:5px solid #d4a017}</style></head>
+        <body><h1>Changara Star Academy</h1><p class="b"><b>No marks recorded</b><br>
+        There is no result for ${escapeHtml(fullName)} (${escapeHtml(grade)}) for the selected period.</p></body></html>`;
+      return new Response(none, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    }
+
+    // Subject columns and totals across the class, for comparison
+    const subjectOrder = [];
+    const maxBySubject = {};
+    for (const r of records) {
+      for (const a of (r.assessments || [])) {
+        if (a && a.subject && !subjectOrder.includes(a.subject)) subjectOrder.push(a.subject);
+        if (a && a.subject) maxBySubject[a.subject] = Math.max(maxBySubject[a.subject] || 0, Number(a.maxScore) || 0);
+      }
+    }
+    const maxTotal = subjectOrder.reduce((s, x) => s + (maxBySubject[x] || 0), 0);
+
+    const pct = score => (maxTotal > 0 ? Number(((score / maxTotal) * 100).toFixed(2)) : 0);
+    const myTotal = (mine.assessments || []).reduce((s, a) => s + (Number(a.score) || 0), 0);
+    const myPct = pct(myTotal);
+    const graded = gradePercentage(myPct, policy);
+
+    // Subject-by-subject: my mark against the class average for that subject
+    const classSubj = {};
+    for (const r of records) {
+      for (const a of (r.assessments || [])) {
+        if (!a || !a.subject || a.score === null || a.score === undefined || a.score === '') continue;
+        const s = classSubj[a.subject] || (classSubj[a.subject] = { sum: 0, n: 0, max: Number(a.maxScore) || 0 });
+        s.sum += Number(a.score) || 0; s.n++;
+        s.max = Math.max(s.max, Number(a.maxScore) || 0);
+      }
+    }
+    const subjectRows = subjectOrder.map(subj => {
+      const a = (mine.assessments || []).find(x => x.subject === subj);
+      const score = a && a.score !== null && a.score !== undefined && a.score !== '' ? Number(a.score) : null;
+      const max = maxBySubject[subj] || 0;
+      const cs = classSubj[subj];
+      const classAvg = cs && cs.n ? Number((cs.sum / cs.n).toFixed(1)) : null;
+      const mySubjPct = score !== null && max > 0 ? Number(((score / max) * 100).toFixed(2)) : null;
+      const classSubjPct = classAvg !== null && cs.max > 0 ? Number(((classAvg / cs.max) * 100).toFixed(2)) : null;
+      const level = mySubjPct === null ? null : gradePercentage(mySubjPct, policy);
+      return { subject: subj, score, max, classAvg, mySubjPct, classSubjPct, level, delta: (mySubjPct !== null && classSubjPct !== null) ? Number((mySubjPct - classSubjPct).toFixed(1)) : null };
+    });
+
+    // Position in class
+    const classTotals = records.map(r => ({
+      name: r.studentName || '',
+      p: pct((r.assessments || []).reduce((s, a) => s + (Number(a.score) || 0), 0))
+    })).sort((x, y) => y.p - x.p);
+    let position = classTotals.findIndex(x => x.name === (mine.studentName || '')) + 1;
+    if (position === 0) position = classTotals.filter(x => x.p > myPct).length + 1;
+    const outOf = classTotals.length || 1;
+    const classMean = Number((classTotals.reduce((s, x) => s + x.p, 0) / outOf).toFixed(2));
+
+    const assessedSubjects = subjectRows.filter(s => s.mySubjPct !== null);
+    const strengths = [...assessedSubjects].sort((a, b) => (b.delta ?? 0) - (a.delta ?? 0)).slice(0, 3);
+    const focus = [...assessedSubjects].sort((a, b) => (a.mySubjPct ?? 0) - (b.mySubjPct ?? 0)).slice(0, 3);
+
+    const levelClass = { 'Exceeding Expectation': 'lv-exceed', 'Meeting Expectation': 'lv-meet', 'Approaching Expectation': 'lv-approach', 'Below Expectation': 'lv-below' };
+    const subjCells = subjectRows.map(s => {
+      const bar = s.mySubjPct === null ? 0 : Math.max(0, Math.min(100, s.mySubjPct));
+      const cls = s.level ? (levelClass[s.level] || '') : '';
+      return `<tr>
+        <td>${escapeHtml(s.subject)}</td>
+        <td class="ctr"><strong>${s.score === null ? '-' : s.score}</strong><span class="mx">/${s.max}</span></td>
+        <td class="ctr">${s.mySubjPct === null ? '-' : s.mySubjPct + '%'}</td>
+        <td class="ctr">${s.classAvg === null ? '-' : s.classAvg}</td>
+        <td class="ctr ${s.delta === null ? '' : s.delta >= 0 ? 'up' : 'down'}">${s.delta === null ? '-' : (s.delta >= 0 ? '+' : '') + s.delta}</td>
+        <td class="barcell"><div class="bar"><i style="width:${bar}%"></i></div></td>
+        <td class="ctr ${cls}">${s.level ? escapeHtml(s.level) : '-'}</td>
+      </tr>`;
+    }).join('');
+
+    const strengthList = strengths.filter(s => s.delta !== null)
+      .map(s => `<li><b>${escapeHtml(s.subject)}</b> - ${s.delta > 0 ? 'above' : 'in line with'} the class average by ${Math.abs(s.delta)}%.</li>`).join('');
+    const focusList = focus.map(s => `<li><b>${escapeHtml(s.subject)}</b> - ${s.mySubjPct}% scored. More practice needed here.</li>`).join('');
+
+    const html = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CBE Result Slip - ${escapeHtml(fullName)}</title>
+<style>
+  *{box-sizing:border-box}
+  @page{size:A4 portrait;margin:14mm 12mm}
+  body{font-family:"Segoe UI",Arial;margin:0;padding:20px;background:#eef1f5;color:#12233f;font-size:12px}
+  .sheet{max-width:820px;margin:0 auto;background:#fff;padding:28px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
+  .hd{display:flex;align-items:center;gap:15px;border-bottom:3px solid #d4a017;padding-bottom:12px}
+  .crest{width:58px;height:58px;flex:0 0 58px;border-radius:50%;background:linear-gradient(135deg,#0a1628,#1c3a6e);color:#d4a017;display:flex;align-items:center;justify-content:center;font-size:25px}
+  .hd h1{margin:0;font-size:20px;color:#0a1628;letter-spacing:.4px}
+  .hd .tag{font-size:10.5px;color:#5a6b85;text-transform:uppercase;letter-spacing:2px}
+  .hd .motto{font-size:11px;color:#8a6d1f;font-style:italic}
+  .who{display:flex;flex-wrap:wrap;gap:6px 22px;margin:14px 0;padding:11px 14px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px}
+  .who b{color:#0a1628;margin-right:5px}
+  .score{display:flex;align-items:center;gap:18px;margin:12px 0;padding:14px 16px;border:1px solid #e3e9f2;border-radius:10px;background:#fbfcfe}
+  .score .ring{width:86px;height:86px;flex:0 0 86px;border-radius:50%;background:conic-gradient(#d4a017 var(--p), #e8edf5 0);display:flex;align-items:center;justify-content:center}
+  .score .ring i{width:66px;height:66px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:20px;color:#0a1628}
+  .score .meta b{font-size:12.5px}
+  .pill{display:inline-block;padding:4px 12px;border-radius:12px;font-weight:800;font-size:12px}
+  .lv-exceed{background:#dff3e4;color:#136b2c}.lv-meet{background:#dbeafe;color:#12459b}
+  .lv-approach{background:#fff3cd;color:#856404}.lv-below{background:#fbdcdc;color:#8c1c24}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border:1px solid #cfd8e6;padding:6px 8px;text-align:left}
+  thead th{background:#0a1628;color:#fff;font-size:10.5px;text-transform:uppercase}
+  .ctr{text-align:center}.mx{color:#8a97ab;font-size:9px;margin-left:1px}
+  .up{color:#136b2c;font-weight:700}.down{color:#8c1c24;font-weight:700}
+  .barcell{width:90px}.bar{height:9px;background:#e8edf5;border-radius:6px;overflow:hidden}
+  .bar i{display:block;height:100%;background:#d4a017}
+  .cols{display:flex;gap:14px;margin-top:14px}
+  .box{flex:1;border:1px solid #cfd8e6;border-radius:8px;padding:11px 13px;background:#fbfcfe}
+  .box h3{margin:0 0 7px;font-size:12.5px;text-transform:uppercase;letter-spacing:.5px;color:#0a1628}
+  .box ul{margin:0;padding-left:18px}.box li{margin-bottom:4px}
+  .key{margin-top:12px;font-size:10.5px;color:#5a6b85}
+  .sign{display:flex;gap:26px;margin-top:26px}
+  .sign div{flex:1;border-top:1px solid #8a97ab;padding-top:5px;font-size:10.5px;color:#5a6b85;text-align:center}
+  .foot{margin-top:12px;padding-top:8px;border-top:1px solid #e3e9f2;font-size:9.5px;color:#8a97ab;display:flex;justify-content:space-between}
+  .btn{display:inline-block;background:#d4a017;color:#12233f;border:0;border-radius:7px;padding:9px 16px;font-weight:800;font-size:12.5px;cursor:pointer;font-family:inherit;margin-right:8px}
+  .btn.sec{background:#0a1628;color:#fff}
+  .toolbar{text-align:right;margin:0 auto 12px;max-width:820px}
+  @media print{body{background:#fff;padding:0}.sheet{box-shadow:none;padding:0}.toolbar{display:none}tr{page-break-inside:avoid}}
+</style></head><body>
+<div class="toolbar"><button class="btn" onclick="window.print()">&#128424; Save as PDF / Print</button><button class="btn sec" onclick="window.close()">Close</button></div>
+<div class="sheet">
+  <div class="hd"><div class="crest">&#9734;</div><div>
+    <h1>CHANGARA STAR ACADEMY</h1><div class="tag">Competency Based Education (CBE)</div>
+    <div class="motto">&ldquo;Assurance for Excellence&rdquo;</div></div></div>
+
+  <div class="who">
+    <div><b>Student:</b> ${escapeHtml(fullName)}</div>
+    <div><b>Admission No:</b> ${escapeHtml(student.admissionNumber || '-')}</div>
+    <div><b>Class:</b> ${escapeHtml(grade)}</div>
+    <div><b>Period:</b> ${escapeHtml(period || '-')}</div>
+    <div><b>Assessment:</b> ${escapeHtml(name || mine.assessmentName || type || '-')}</div>
+    <div><b>Type:</b> ${escapeHtml(type || mine.assessmentType || '-')}</div>
+  </div>
+
+  <div class="score">
+    <div class="ring" style="--p:${Math.max(0, Math.min(100, myPct))}%"><i>${myPct}%</i></div>
+    <div class="meta">
+      <div><b>Total Score:</b> ${myTotal} / ${maxTotal}</div>
+      <div style="margin-top:4px"><b>Position in class:</b> ${position} of ${outOf}</div>
+      <div style="margin-top:4px"><b>Class mean:</b> ${classMean}%</div>
+      <div style="margin-top:7px"><span class="pill ${levelClass[graded.level] || ''}">${escapeHtml(graded.level)} (${escapeHtml(graded.code)})</span></div>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Subject</th><th class="ctr">Score</th><th class="ctr">%</th><th class="ctr">Class Avg</th><th class="ctr">Diff</th><th>Progress</th><th class="ctr">Level</th></tr></thead>
+    <tbody>${subjCells}</tbody>
+  </table>
+
+  <div class="cols">
+    <div class="box"><h3>&#128161; Strengths</h3>${strengthList ? '<ul>' + strengthList + '</ul>' : '<p>Keep working consistently.</p>'}</div>
+    <div class="box"><h3>&#127919; Focus On</h3>${focusList ? '<ul>' + focusList + '</ul>' : '<p>No areas flagged.</p>'}</div>
+  </div>
+
+  <div class="key"><b>Grading key:</b> ${(policy.levels || DEFAULT_POLICY.levels).map(l => `${escapeHtml(l.code)} ${escapeHtml(l.name)} (${l.min}&ndash;${l.max}%)`).join(' &nbsp;|&nbsp; ')}</div>
+
+  <div class="sign"><div>Class Teacher</div><div>Head Teacher</div><div>Parent / Guardian</div></div>
+
+  <div class="foot"><span>Changara Star Academy &middot; CBE Result Slip &middot; ${escapeHtml(grade)}</span><span>Generated: ${escapeHtml(new Date().toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' }))}</span></div>
+</div></body></html>`;
+    return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  }
+
+  // DELETE /api/assessments/record/:studentId?period&type&name
+  // Removes one child's marks for one assessment sitting. Takes the student id
+  // rather than the record id, because that is what the marks grid has to
+  // hand; the record is found by student + grade + period + type.
+  if (p[0] === 'assessments' && p[1] === 'record' && p[2] && method === 'DELETE') {
+    const studentId = decodeURIComponent(p[2]);
+    const period = url.searchParams.get('period') || '';
+    const type = url.searchParams.get('type') || '';
+    const grade = url.searchParams.get('grade') || '';
+
+    const student = await db.collection('students').findOne({ _id: studentId })
+      || await db.collection('students').findOne({ admissionNumber: studentId });
+    const studentName = student ? `${student.firstName || ''} ${student.lastName || ''}`.trim() : '';
+    const rowGrade = grade || (student ? (student.grade || student.class || '') : '');
+
+    const candidates = await db.collection('assessments').find({
+      ...(rowGrade ? { grade: rowGrade } : {}),
+      ...(period ? { assessmentPeriod: period } : {}),
+      ...(type ? { assessmentType: type } : {})
+    }).toArray();
+
+    const row = candidates.find(r => String(r.studentId) === String(studentId))
+      || candidates.find(r => studentName && String(r.studentName || '').trim().toLowerCase() === studentName.toLowerCase());
+
+    if (!row) return error('No saved result found for that student in this assessment', 404);
+    await db.collection('assessments').deleteOne({ _id: row._id });
+    return success({ message: `Result for ${row.studentName || 'student'} deleted`, deleted: 1, studentName: row.studentName || '' });
+  }
+
   if (route === '/assessments' && method === 'GET') {
     const { searchParams } = url;
     const classFilter = searchParams.get('class');
