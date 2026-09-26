@@ -109,7 +109,7 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
     if (!employeeId || !pin) return error('Staff ID and PIN are required', 400);
 
     const teacher = await db.collection('teachers').findOne({ employeeId, isActive: { $ne: false } });
-    if (!teacher) return error('Staff not found. Please contact admin.', 404);
+    if (!teacher) return error('Invalid Staff ID or PIN. Please try again.', 401);
 
     let validPin = false;
     if (typeof teacher.password === 'string' && teacher.password.includes(':')) {
@@ -197,7 +197,7 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
     if (!employeeId || !pin) return error('Staff ID and PIN are required', 400);
 
     const teacher = await db.collection('teachers').findOne({ employeeId, isActive: { $ne: false } });
-    if (!teacher) return error('Staff not found. Please contact admin.', 404);
+    if (!teacher) return error('Invalid Staff ID or PIN. Please try again.', 401);
 
     let validPin = false;
     if (typeof teacher.password === 'string' && teacher.password.includes(':')) {
