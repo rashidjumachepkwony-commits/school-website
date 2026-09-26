@@ -850,7 +850,31 @@
     // ============================================
     // INIT
     // ============================================
+    // Supports deep links from Student Management, e.g.
+    // admin-holiday-assignments.html?grade=Grade%204
+    function applyDeepLink() {
+        const params = new URLSearchParams(window.location.search);
+        const grade = params.get('grade');
+        if (!grade) return false;
+        const filter = document.getElementById('filterGrade');
+        const form = document.getElementById('assignmentGrade');
+        if (filter) {
+            // Tolerate register spellings such as "Playgroup" vs "Play Group".
+            const wanted = grade.trim().toLowerCase();
+            const match = Array.from(filter.options).find(o => o.value.trim().toLowerCase() === wanted);
+            filter.value = match ? match.value : grade;
+        }
+        if (form) {
+            const wanted = grade.trim().toLowerCase();
+            const match = Array.from(form.options).find(o => o.value.trim().toLowerCase() === wanted);
+            form.value = match ? match.value : grade;
+        }
+        showAlert('Showing assignments for <strong>' + grade + '</strong>', 'info');
+        return true;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        applyDeepLink();
         loadAssignments();
     });
 

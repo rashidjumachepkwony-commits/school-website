@@ -638,6 +638,37 @@ function loadAllData() {
   loadFeesStructure();
   loadPayments();
   populateHistoryStudentSelect();
+  applyDeepLink();
+}
+
+// Deep link support from Student Management, e.g.
+// clerk-dashboard.html?student=ST003  -> filters to that admission number
+// clerk-dashboard.html?grade=Grade%204
+function applyDeepLink() {
+  var params = new URLSearchParams(window.location.search);
+  var student = params.get('student');
+  var grade = params.get('grade');
+
+  if (grade) {
+    var gf = document.getElementById('gradeFilter');
+    if (gf) {
+      var wanted = grade.trim().toLowerCase();
+      var match = Array.from(gf.options).find(function(o) {
+        return o.value.trim().toLowerCase() === wanted;
+      });
+      gf.value = match ? match.value : grade;
+    }
+  }
+  if (student) {
+    var box = document.getElementById('searchInput');
+    if (box) box.value = student;
+  }
+  if (student || grade) {
+    // Re-filter once the fee list has rendered.
+    setTimeout(function() {
+      try { searchStudents(); } catch (e) { /* list not ready yet */ }
+    }, 600);
+  }
 }
 // ========================
 // STUDENT FUNCTIONS

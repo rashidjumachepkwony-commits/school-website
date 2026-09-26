@@ -1915,13 +1915,57 @@
         // Set default date
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('assessmentDate').value = today;
-        
+
+        // Deep link support, e.g. admin-academics.html?grade=Grade%204&period=September%202026
+        applyDeepLink();
+
         updateAssessmentInfo();
         loadSubjectConfig();
         loadGradeData();
         loadHistory();
         loadStudentList();
     });
+
+    // Opens straight onto the requested grade/period when arriving from
+    // Student Management. Tolerates register spellings like "Playgroup".
+    function applyDeepLink() {
+        const params = new URLSearchParams(window.location.search);
+        const grade = params.get('grade');
+        const period = params.get('period');
+        const type = params.get('type');
+
+        if (period) {
+            const sel = document.getElementById('assessmentPeriod');
+            if (sel && Array.from(sel.options).some(o => o.value === period)) {
+                sel.value = period;
+                currentPeriod = period;
+            }
+        }
+        if (type) {
+            const sel = document.getElementById('assessmentType');
+            if (sel && Array.from(sel.options).some(o => o.value === type)) {
+                sel.value = type;
+                currentType = type;
+            }
+        }
+        if (!grade) return;
+
+        const wanted = grade.trim().toLowerCase();
+        const tab = Array.from(document.querySelectorAll('#gradeTabs .tab'))
+            .find(t => t.textContent.trim().toLowerCase().endsWith(wanted));
+        if (tab) {
+            tab.click();
+        } else {
+            // No matching tab (e.g. "Playgroup" vs "Play Group"): fall back to the
+            // closest known grade so the page still loads something sensible.
+            const alias = { 'playgroup': 'Play Group', 'play group': 'Play Group' }[wanted];
+            const fallback = alias
+                ? Array.from(document.querySelectorAll('#gradeTabs .tab'))
+                    .find(t => t.textContent.trim().toLowerCase().endsWith(alias.toLowerCase()))
+                : null;
+            if (fallback) fallback.click();
+        }
+    }
 </script>
 </body>
 </html>

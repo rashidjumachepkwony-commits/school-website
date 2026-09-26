@@ -9,44 +9,52 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 20px; }
-        .container { max-width: 1300px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 15px; }
+        .container { max-width: 1500px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 15px; }
         .header h1 { color: #0A1628; font-size: 26px; }
         .header h1 i { color: #D4A017; margin-right: 10px; }
         .header .admin-info { display: flex; align-items: center; gap: 12px; background: white; padding: 5px 16px; border-radius: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .header .admin-info .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #D4A017, #F5C842); display: flex; align-items: center; justify-content: center; color: #0A1628; font-weight: 700; font-size: 15px; }
 
-        .quick-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 22px; }
-        .quick-link-card { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border-top: 4px solid #D4A017; transition: transform .2s; display: block; text-decoration: none; color: inherit; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .summary-item { background: white; border: 1px solid #e8ecf1; border-radius: 12px; padding: 14px; text-align: center; }
+        .summary-item .num { font-size: 24px; font-weight: 700; color: #0A1628; }
+        .summary-item .label { font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: .4px; margin-top: 3px; }
+        .num.gold { color: #D4A017; } .num.blue { color: #0b5394; }
+        .num.green { color: #28a745; } .num.red { color: #dc3545; } .num.orange { color: #fd7e14; }
+
+        .quick-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .quick-link-card { background: white; border-radius: 12px; padding: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border-top: 4px solid #D4A017; transition: transform .2s; display: block; text-decoration: none; color: inherit; }
         .quick-link-card:hover { transform: translateY(-3px); }
-        .quick-link-card i { font-size: 24px; color: #0A1628; }
-        .quick-link-card h3 { font-size: 13px; font-weight: 700; color: #1a2a4a; }
+        .quick-link-card i { font-size: 22px; color: #0A1628; }
+        .quick-link-card h3 { font-size: 12px; font-weight: 700; color: #1a2a4a; }
         .quick-link-card p { font-size: 11px; color: #777; }
 
-        .toolbar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+        .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
         .toolbar input, .toolbar select { padding: 9px 12px; border: 2px solid #e8ecf1; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fafbfc; }
         .toolbar input:focus, .toolbar select:focus { border-color: #D4A017; outline: none; background: white; }
         .btn { padding: 9px 16px; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-success:hover { background: #1e7e34; }
+        .btn-success { background: #28a745; color: white; } .btn-success:hover { background: #1e7e34; }
 
-        .card { background: white; border-radius: 16px; padding: 22px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
         .card h2 { color: #0A1628; font-size: 18px; margin-bottom: 4px; }
-        .card .desc { color: #888; font-size: 13px; margin-bottom: 16px; }
+        .card .desc { color: #888; font-size: 13px; margin-bottom: 14px; }
 
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { border: 1px solid #e8ecf1; padding: 8px 10px; text-align: left; }
-        th { background: #0A1628; color: white; font-weight: 600; white-space: nowrap; }
+        .table-wrapper { overflow-x: auto; max-height: 70vh; }
+        table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        th, td { border: 1px solid #e8ecf1; padding: 7px 9px; text-align: left; white-space: nowrap; }
+        th { background: #0A1628; color: white; font-weight: 600; position: sticky; top: 0; z-index: 2; }
         tr:nth-child(even) { background: #fafbfc; }
         tr:hover { background: #f0f4ff; }
-        .badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+        .badge { padding: 2px 9px; border-radius: 11px; font-size: 10.5px; font-weight: 700; }
         .badge.boarder { background: #e3f2fd; color: #0b5394; }
         .badge.day { background: #f1f8e9; color: #33691e; }
-        .badge.gender-m { color: #1565c0; }
-        .badge.gender-f { color: #c2185b; }
-        .row-link { display: inline-block; padding: 4px 8px; color: #0b5394; text-decoration: none; font-size: 12px; }
+        .badge.male { color: #1565c0; } .badge.female { color: #c2185b; }
+        .badge.warn { background: #fff3cd; color: #856404; }
+        .row-link { display: inline-block; padding: 3px 6px; color: #0b5394; text-decoration: none; font-size: 11px; }
         .row-link:hover { text-decoration: underline; }
+        .fee-ok { color: #28a745; font-weight: 700; }
+        .fee-due { color: #dc3545; font-weight: 700; }
         .save-status { padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 12px; display: none; }
         .save-status.show { display: inline-block; }
         .save-status.saving { background: #cce5ff; color: #004085; }
@@ -65,41 +73,60 @@
         </div>
     </div>
 
+    <div class="summary-grid" id="summaryGrid">
+        <div class="summary-item"><div class="num" id="sumTotal">0</div><div class="label">Total</div></div>
+        <div class="summary-item"><div class="num gold" id="sumBoarders">0</div><div class="label">Boarders</div></div>
+        <div class="summary-item"><div class="num blue" id="sumDay">0</div><div class="label">Day Scholars</div></div>
+        <div class="summary-item"><div class="num green" id="sumMale">0</div><div class="label">Male</div></div>
+        <div class="summary-item"><div class="num orange" id="sumFemale">0</div><div class="label">Female</div></div>
+        <div class="summary-item"><div class="num red" id="sumNoPhone">0</div><div class="label">No Contact</div></div>
+    </div>
+
     <div class="quick-links">
         <a href="admin-academics.html" class="quick-link-card"><i class="fas fa-chart-bar"></i>
-            <h3>Assessments</h3><p>Marks entry &amp; reports</p></a>
+            <h3>Assessments</h3><p>Marks entry &amp; CBC reports</p></a>
         <a href="clerk-dashboard.html" class="quick-link-card"><i class="fas fa-coins"></i>
             <h3>Clerk Dashboard</h3><p>Fees &amp; payments</p></a>
         <a href="admin-holiday-assignments.html" class="quick-link-card"><i class="fas fa-file-alt"></i>
             <h3>Holiday Assignments</h3><p>Upload &amp; manage</p></a>
         <a href="admin-students.html" class="quick-link-card"><i class="fas fa-clipboard-check"></i>
             <h3>Student Attendance</h3><p>Check-in/out records</p></a>
+        <a href="admin-holiday-assignments-manage.html" class="quick-link-card"><i class="fas fa-tasks"></i>
+            <h3>Manage Assignments</h3><p>Edit &amp; remove</p></a>
+        <a href="admin-teachers.html" class="quick-link-card"><i class="fas fa-user-tie"></i>
+            <h3>Staff</h3><p>Teacher records</p></a>
     </div>
 
     <div class="card">
         <h2><i class="fas fa-users"></i> All Students</h2>
-        <p class="desc">Student name, grade, gender, boarder/day-scholar status and parent contact. Use the links above to open each module.</p>
+        <p class="desc">Name, grade, gender, boarder/day-scholar, parent contact and fee status. Every row links straight into assessments, the clerk ledger and that grade's holiday assignments.</p>
         <div class="toolbar">
-            <input type="text" id="searchStudent" placeholder="Search name, admission number, grade..." onkeyup="renderStudents()">
+            <input type="text" id="searchStudent" placeholder="Search name, admission no, grade..." onkeyup="renderStudents()" style="flex:1;min-width:220px;">
             <select id="gradeFilter" onchange="renderStudents()"><option value="">All Grades</option></select>
             <select id="statusFilter" onchange="renderStudents()">
-                <option value="">All Statuses</option>
-                <option value="boarder">Boarders</option>
-                <option value="day">Day Scholars</option>
+                <option value="">Boarder &amp; Day Scholar</option>
+                <option value="boarder">Boarders only</option>
+                <option value="day">Day Scholars only</option>
+            </select>
+            <select id="feeFilter" onchange="renderStudents()">
+                <option value="">All fee statuses</option>
+                <option value="due">Has balance</option>
+                <option value="clear">Fully paid</option>
             </select>
             <button class="btn btn-success" onclick="loadStudents()"><i class="fas fa-sync"></i> Refresh</button>
+            <button class="btn btn-success" onclick="exportCsv()" style="background:#0b5394;"><i class="fas fa-file-csv"></i> Export CSV</button>
             <span class="save-status" id="saveStatus"></span>
         </div>
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th>#</th><th>Admission No.</th><th>Student Name</th><th>Grade</th>
-                        <th>Gender</th><th>Status</th><th>Parent Contact</th><th>Modules</th>
+                        <th>#</th><th>Adm. No.</th><th>Student Name</th><th>Grade</th><th>Gender</th>
+                        <th>Type</th><th>Parent Contact</th><th>Fees (Paid/Bal)</th><th>Link To</th>
                     </tr>
                 </thead>
                 <tbody id="studentsBody">
-                    <tr><td colspan="8" style="text-align:center;padding:40px;color:#999;">
+                    <tr><td colspan="9" style="text-align:center;padding:40px;color:#999;">
                         <i class="fas fa-spinner fa-pulse"></i> Loading students...</td></tr>
                 </tbody>
             </table>
@@ -109,10 +136,11 @@
 
 <script>
     let studentsData = [];
+    let summary = {};
+    let gradeList = [];
 
     (function () {
-        const token = localStorage.getItem('adminToken');
-        if (!token) { window.location.href = 'admin-login.html'; return; }
+        if (!localStorage.getItem('adminToken')) { window.location.href = 'admin-login.html'; return; }
         const admin = JSON.parse(localStorage.getItem('admin') || '{}');
         document.getElementById('adminName').textContent = admin.fullName || 'Admin';
         document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
@@ -122,77 +150,126 @@
     async function loadStudents() {
         showStatus('Loading...', 'saving');
         try {
-            const response = await fetch('/api/students');
-            const data = await response.json();
-            studentsData = (data && data.success) ? (data.students || []) : [];
-            buildGradeFilter();
-            renderStudents();
-            showStatus('Loaded ' + studentsData.length, 'saved');
-        } catch (err) {
-            studentsData = [];
-            renderStudents();
-            showStatus('Error loading students', 'error');
+            const res = await fetch('/api/students/management');
+            const data = await res.json();
+            if (data && data.success) {
+                studentsData = data.students || [];
+                summary = data.summary || {};
+                gradeList = (data.byGrade || []).map(g => g.grade);
+                renderSummary();
+                buildGradeFilter();
+                renderStudents();
+                showStatus('Loaded ' + studentsData.length, 'saved');
+            } else {
+                studentsData = []; renderSummary(); renderStudents();
+                showStatus((data && (data.error || data.message)) || 'Failed to load', 'error');
+            }
+        } catch (e) {
+            studentsData = []; renderSummary(); renderStudents();
+            showStatus('Error: ' + e.message, 'error');
         }
+    }
+
+    function renderSummary() {
+        const s = summary || {};
+        document.getElementById('sumTotal').textContent = s.total || 0;
+        document.getElementById('sumBoarders').textContent = s.boarders || 0;
+        document.getElementById('sumDay').textContent = s.dayScholars || 0;
+        document.getElementById('sumMale').textContent = s.male || 0;
+        document.getElementById('sumFemale').textContent = s.female || 0;
+        document.getElementById('sumNoPhone').textContent = s.missingPhone || 0;
     }
 
     function buildGradeFilter() {
-        const grades = [...new Set(studentsData.map(s => s.grade).filter(Boolean))].sort();
         const sel = document.getElementById('gradeFilter');
         const current = sel.value;
         sel.innerHTML = '<option value="">All Grades</option>' +
-            grades.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('');
-        if (grades.includes(current)) sel.value = current;
+            gradeList.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)} (${(studentsData.filter(s => s.grade === g)).length})</option>`).join('');
+        if (gradeList.includes(current)) sel.value = current;
+    }
+
+    function visibleStudents() {
+        const q = (document.getElementById('searchStudent').value || '').toLowerCase();
+        const grade = document.getElementById('gradeFilter').value;
+        const type = document.getElementById('statusFilter').value;
+        const fee = document.getElementById('feeFilter').value;
+        return studentsData.filter(s => {
+            const name = (s.fullName || `${s.firstName || ''} ${s.lastName || ''}`).toLowerCase();
+            if (q && !(name.includes(q) || (s.admissionNumber || '').toLowerCase().includes(q) || (s.grade || '').toLowerCase().includes(q))) return false;
+            if (grade && s.grade !== grade) return false;
+            if (type === 'boarder' && !s.boarding) return false;
+            if (type === 'day' && s.boarding) return false;
+            const bal = (s.fees && s.fees.balance) || 0;
+            if (fee === 'due' && bal <= 0) return false;
+            if (fee === 'clear' && bal > 0) return false;
+            return true;
+        });
     }
 
     function renderStudents() {
-        const search = (document.getElementById('searchStudent').value || '').toLowerCase();
-        const grade = document.getElementById('gradeFilter').value;
-        const status = document.getElementById('statusFilter').value;
-
-        const rows = studentsData.filter(s => {
-            const name = `${s.firstName || ''} ${s.lastName || ''}`.toLowerCase();
-            const matchesSearch = !search ||
-                name.includes(search) ||
-                (s.admissionNumber || '').toLowerCase().includes(search) ||
-                (s.grade || '').toLowerCase().includes(search);
-            const isBoarder = s.boarding === true;
-            const matchesStatus = !status || (status === 'boarder' ? isBoarder : !isBoarder);
-            return matchesSearch && (!grade || s.grade === grade) && matchesStatus;
-        });
-
+        const rows = visibleStudents();
         const tbody = document.getElementById('studentsBody');
         if (!rows.length) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#999;">' +
-                '<i class="fas fa-user-slash"></i> No students match your filters.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:#999;"><i class="fas fa-user-slash"></i> No students match your filters.</td></tr>';
             return;
         }
-
         tbody.innerHTML = rows.map((s, i) => {
-            const name = `${s.firstName || ''} ${s.lastName || ''}`.trim() || '—';
-            const isBoarder = s.boarding === true;
+            const name = s.fullName || `${s.firstName || ''} ${s.lastName || ''}`.trim() || '—';
             const g = (s.gender || '').toLowerCase();
-            let genderBadge = '<span class="badge">N/A</span>';
-            if (g === 'male' || g === 'm' || g === 'boy') genderBadge = '<span class="badge gender-m">M</span>';
-            else if (g === 'female' || g === 'f' || g === 'girl') genderBadge = '<span class="badge gender-f">F</span>';
+            const genderBadge = g.startsWith('m') ? '<span class="badge male">M</span>'
+                : g.startsWith('f') ? '<span class="badge female">F</span>' : '<span class="badge">N/A</span>';
+            const fees = s.fees || { total: 0, paid: 0, balance: 0 };
+            const adm = encodeURIComponent(s.admissionNumber || '');
+            const gr = encodeURIComponent(s.grade || '');
 
             return '<tr>' +
                 '<td>' + (i + 1) + '</td>' +
-                '<td>' + escapeHtml(s.admissionNumber || '—') + '</td>' +
+                '<td><strong>' + escapeHtml(s.admissionNumber || '—') + '</strong></td>' +
                 '<td><strong>' + escapeHtml(name) + '</strong></td>' +
                 '<td>' + escapeHtml(s.grade || s.class || '—') + '</td>' +
                 '<td>' + genderBadge + '</td>' +
-                '<td><span class="badge ' + (isBoarder ? 'boarder' : 'day') + '">' +
-                    (isBoarder ? 'Boarder' : 'Day Scholar') + '</span></td>' +
-                '<td>' + escapeHtml(s.phone || '—') + '</td>' +
+                '<td><span class="badge ' + (s.boarding ? 'boarder' : 'day') + '">' +
+                    (s.boarding ? 'Boarder' : 'Day Scholar') + '</span></td>' +
+                '<td>' + (s.guardianPhone ? escapeHtml(s.guardianPhone) : '<span class="badge warn">none</span>') + '</td>' +
+                '<td><span class="' + (fees.balance > 0 ? 'fee-due' : 'fee-ok') + '">' +
+                    fees.paid + ' / ' + fees.total + '</span>' +
+                    (fees.balance > 0 ? ' <span class="badge warn">due ' + fees.balance + '</span>' : '') + '</td>' +
                 '<td style="white-space:nowrap;">' +
-                    '<a class="row-link" href="admin-academics.html" title="Assessments"><i class="fas fa-chart-bar"></i> Assess</a>' +
-                    '<a class="row-link" href="clerk-dashboard.html" title="Clerk Dashboard"><i class="fas fa-coins"></i> Fees</a>' +
+                    '<a class="row-link" href="admin-academics.html?grade=' + gr + '" title="Assessments for ' + escapeHtml(s.grade || '') + '"><i class="fas fa-chart-bar"></i> Assess</a>' +
+                    '<a class="row-link" href="clerk-dashboard.html?student=' + adm + '" title="Clerk ledger"><i class="fas fa-coins"></i> Fees</a>' +
+                    '<a class="row-link" href="admin-holiday-assignments.html?grade=' + gr + '" title="Holiday assignments"><i class="fas fa-file-alt"></i> Work</a>' +
+                    '<a class="row-link" href="admin-students.html" title="Attendance"><i class="fas fa-clipboard-check"></i> Att.</a>' +
                 '</td></tr>';
         }).join('');
     }
 
+    function exportCsv() {
+        const rows = visibleStudents();
+        if (!rows.length) { showStatus('Nothing to export', 'error'); return; }
+        const head = ['AdmissionNo', 'Name', 'Grade', 'Gender', 'Type', 'ParentContact', 'TotalFees', 'Paid', 'Balance'];
+        const lines = [head.join(',')];
+        for (const s of rows) {
+            const f = s.fees || {};
+            lines.push([
+                s.admissionNumber || '',
+                `"${(s.fullName || '').replace(/"/g, '""')}"`,
+                s.grade || '', s.gender || '',
+                s.boarding ? 'Boarder' : 'Day Scholar',
+                s.guardianPhone || '',
+                f.total || 0, f.paid || 0, f.balance || 0
+            ].join(','));
+        }
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'student-management.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showStatus('Exported ' + rows.length, 'saved');
+    }
+
     function escapeHtml(v) {
-        return String(v).replace(/[&<>"']/g, c => ({
+        return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[c]));
     }
@@ -202,7 +279,7 @@
         el.textContent = msg;
         el.className = 'save-status show ' + cls;
         clearTimeout(window.statusTimer);
-        window.statusTimer = setTimeout(() => { el.className = 'save-status'; }, 2000);
+        window.statusTimer = setTimeout(() => { el.className = 'save-status'; }, 2500);
     }
 </script>
 </body>
