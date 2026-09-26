@@ -1,5 +1,13 @@
 import { success, error } from '../utils/helpers.js';
 
+// Boarding status is written by several screens (student management, clerk,
+// register import) under different keys. Normalise so the clerk ledger and the
+// Student Management card always agree.
+const isBoardingStudent = s =>
+  s.boarding === true || s.boarding === 'true' ||
+  s.isBoarding === true || s.isBoarding === 'true' ||
+  s.studentType === 'Boarder' || s.studentType === 'boarder';
+
 export async function handleClerk(db, env, route, method, body, p) {
   const now = new Date().toISOString();
 
@@ -18,7 +26,8 @@ export async function handleClerk(db, env, route, method, body, p) {
       const paid = byStudent.get(id) || byStudent.get(s._id.toString()) || 0;
       const totalFees = Number(s.totalFees ?? totalDefault ?? 0);
       const name = `${s.firstName || ''} ${s.lastName || ''}`.trim();
-      return { id, studentId: id, name, grade: s.grade || s.class || '', gender: s.gender || '', studentType: s.studentType || 'Day Scholar', isBoarding: s.isBoarding === true || s.studentType === 'Boarder', totalFees, paid, balance: Math.max(0, totalFees - paid) };
+      const boarding = isBoardingStudent(s);
+      return { id, studentId: id, name, grade: s.grade || s.class || '', gender: s.gender || '', studentType: boarding ? 'Boarder' : 'Day Scholar', isBoarding: boarding, guardianPhone: s.phone || '', totalFees, paid, balance: Math.max(0, totalFees - paid) };
     });
     return success({ students: mapped, totalStudents: mapped.length, totalDayScholars: mapped.filter(s => !s.isBoarding).length, totalBoarders: mapped.filter(s => s.isBoarding).length, totalPaid: mapped.reduce((n,s)=>n+s.paid,0), totalBalance: mapped.reduce((n,s)=>n+s.balance,0) });
   }
@@ -29,7 +38,7 @@ export async function handleClerk(db, env, route, method, body, p) {
     const parts = String(name).trim().split(/\s+/); const firstName = parts.shift() || ''; const lastName = parts.join(' ') || '';
     const count = (await db.collection('students').find({}).toArray()).length;
     const admissionNumber = `ST${String(count + 1).padStart(3, '0')}`;
-    const result = await db.collection('students').insertOne({ firstName, lastName, admissionNumber, class: grade, grade, gender, studentType, isBoarding: studentType === 'Boarder', isActive: true, createdAt: now, updatedAt: now });
+    const result = await db.collection('students').insertOne({ firstName, lastName, admissionNumber, class: grade, grade, gender, studentType, boarding: studentType === 'Boarder', isBoarding: studentType === 'Boarder', guardianPhone: '', status: 'ACTIVE', isActive: true, createdAt: now, updatedAt: now });
     return success({ message: 'Student added', student: { studentId: admissionNumber, id: admissionNumber, name, grade, gender, studentType, _id: result.insertedId } });
   }
 
