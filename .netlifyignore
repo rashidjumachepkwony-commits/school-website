@@ -1,0 +1,13 @@
+# Never publish these to the live website.
+.git
+.gitignore
+node_modules
+.wrangler
+.kilo
+worker_backup
+data
+.env
+.env.*
+*.dev.vars
+*.log
+tests

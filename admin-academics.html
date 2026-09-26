@@ -1195,12 +1195,49 @@
     // ============================================
     // ON SCORE CHANGE
     // ============================================
+    // Performance bands come from the school's own policy, loaded once from
+    // /api/admin/settings/grading-policy, so the screen and the saved report
+    // can never disagree.
+    let gradingPolicy = null;
+
+    async function loadGradingPolicy() {
+        try {
+            const res = await fetch('/api/admin/settings/grading-policy');
+            const data = await res.json();
+            if (data && data.success) gradingPolicy = data.policy || data.gradingPolicy || null;
+        } catch (e) {
+            gradingPolicy = null;
+        }
+    }
+
+    function gradeFor(percentage) {
+        const levels = (gradingPolicy && gradingPolicy.levels) || [
+            { code: 'BE', name: 'Below Expectation', min: 0, max: 39 },
+            { code: 'AE', name: 'Approaching Expectation', min: 40, max: 59 },
+            { code: 'ME', name: 'Meeting Expectation', min: 60, max: 79 },
+            { code: 'EE', name: 'Exceeding Expectation', min: 80, max: 100 }
+        ];
+        for (const l of levels) {
+            if (percentage >= l.min && percentage <= l.max) return l;
+        }
+        return percentage < levels[0].min ? levels[0] : levels[levels.length - 1];
+    }
+
+    function statusClassFor(level) {
+        return {
+            'Exceeding Expectation': 'status-exceeding',
+            'Meeting Expectation': 'status-meeting',
+            'Approaching Expectation': 'status-approaching',
+            'Below Expectation': 'status-below'
+        }[level] || '';
+    }
+
     function onScoreChange(input) {
         const row = input.closest('tr');
         const inputs = row.querySelectorAll('.score-input');
         let total = 0;
         let count = 0;
-        
+
         inputs.forEach(inp => {
             const val = parseFloat(inp.value);
             if (!isNaN(val)) {
@@ -1219,34 +1256,70 @@
             avgCell.textContent = avg.toFixed(1);
         }
         if (perfCell) {
-            const avg = count > 0 ? total / count : 0;
             const config = { subjects: getConfigSubjects() };
             const maxTotal = config.subjects.reduce((sum, s) => sum + s.max, 0);
             const percentage = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
-            
-            let level = 'Approaching Expectation';
-            let className = 'status-approaching';
-            if (percentage >= 80) {
-                level = 'Exceeding Expectation';
-                className = 'status-exceeding';
-            } else if (percentage >= 60) {
-                level = 'Meeting Expectation';
-                className = 'status-meeting';
-            } else if (percentage >= 40) {
-                level = 'Approaching Expectation';
-                className = 'status-approaching';
-            } else {
-                level = 'Below Expectation';
-                className = 'status-below';
-            }
-            perfCell.innerHTML = `<span class="${className}">${level}</span>`;
+            const level = gradeFor(percentage);
+            perfCell.innerHTML = `<span class="${statusClassFor(level.name)}" title="${level.code}">${level.name}</span>`;
         }
 
         clearTimeout(window.saveTimeout);
         window.saveTimeout = setTimeout(() => {
             saveAllMarks();
-        }, 1000);
+        }, 1200);
     }
+
+    // ============================================
+    // KEYBOARD NAVIGATION FOR FAST CAPTURE
+    // ============================================
+    // Enter / Down arrow  -> next student, same subject
+    // Up arrow            -> previous student, same subject
+    // Left / Right        -> previous / next subject in the same row
+    // Tab                 -> browser default (next subject, same student)
+    // Ctrl+Enter          -> save immediately
+    function navigateMarks(event) {
+        const input = event.target;
+        if (!input.classList || !input.classList.contains('score-input')) return;
+
+        const table = input.closest('table');
+        if (!table) return;
+        const all = Array.from(table.querySelectorAll('.score-input'));
+        const index = all.indexOf(input);
+        if (index === -1) return;
+
+        let target = null;
+
+        if (event.key === 'Enter' || event.key === 'ArrowDown') {
+            event.preventDefault();
+            if (event.ctrlKey) { saveAllMarks(); return; }
+            target = all[index + 1];
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            target = all[index - 1];
+        } else if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+            // Move within the same student's row only.
+            const row = input.closest('tr');
+            const rowInputs = Array.from(row.querySelectorAll('.score-input'));
+            const i = rowInputs.indexOf(input);
+            target = event.key === 'ArrowRight' ? rowInputs[i + 1] : rowInputs[i - 1];
+        } else {
+            return;
+        }
+
+        if (target) {
+            target.focus();
+            target.select();
+        }
+    }
+
+    function selectAllOnFocus(event) {
+        if (event.target.classList && event.target.classList.contains('score-input')) {
+            event.target.select();
+        }
+    }
+
+    document.addEventListener('keydown', navigateMarks);
+    document.addEventListener('focusin', selectAllOnFocus);
 
     // ============================================
     // ADD STUDENT ROW
@@ -1347,76 +1420,49 @@
 
             if (!hasValidScore) return;
 
-            const avgScore = assessments.length > 0 ? totalScore / assessments.length : 0;
-            const maxTotal = config.subjects.reduce((sum, s) => sum + s.max, 0);
-            const percentage = maxTotal > 0 ? (totalScore / maxTotal) * 100 : 0;
-            
-            let performanceLevel = 'Approaching Expectation';
-            if (percentage >= 80) performanceLevel = 'Exceeding Expectation';
-            else if (percentage >= 60) performanceLevel = 'Meeting Expectation';
-            else if (percentage >= 40) performanceLevel = 'Approaching Expectation';
-            else performanceLevel = 'Below Expectation';
-
             const studentId = nameInput.dataset.id;
             studentsToSave.push({
                 _id: studentId && !studentId.startsWith('new_') ? studentId : null,
                 studentName,
                 grade: currentGrade,
-                assessmentPeriod: currentPeriod,
-                assessmentType: currentType,
-                assessmentName: getCurrentAssessmentName(),
-                assessmentDate: document.getElementById('assessmentDate').value || new Date().toISOString(),
-                assessments,
-                totalScore,
-                averageScore: avgScore,
-                performanceLevel
+                assessments
             });
         });
 
         if (studentsToSave.length === 0) {
-            showSaveStatus('No data to save', 'error');
+            showSaveStatus('No scores to save', 'error');
             setTimeout(() => hideSaveStatus(), 2000);
             return;
         }
 
-        let savedCount = 0;
-        let errorCount = 0;
+        // One request for the whole class instead of one per student.
+        try {
+            const response = await fetch('/api/assessments/bulk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    rows: studentsToSave,
+                    grade: currentGrade,
+                    assessmentPeriod: currentPeriod,
+                    assessmentType: currentType,
+                    assessmentName: getCurrentAssessmentName(),
+                    assessmentDate: document.getElementById('assessmentDate').value || new Date().toISOString()
+                })
+            });
+            const result = await response.json();
 
-        for (const student of studentsToSave) {
-            try {
-                // Use upsert by student+grade+period+type (history-safe)
-                const url = '/api/assessments';
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(student)
-                });
-                const result = await response.json();
-                if (result.success) {
-                    savedCount++;
-                    if (!student._id && result.student) {
-                        const nameInput = document.querySelector(`.student-name-input[data-id="${student._id || 'new'}"]`);
-                        if (nameInput) {
-                            nameInput.dataset.id = result.student._id;
-                        }
-                    }
-                } else {
-                    errorCount++;
-                }
-            } catch (error) {
-                errorCount++;
-                console.error('Error saving student:', error);
+            if (!result.success) {
+                showSaveStatus('❌ ' + (result.error || 'Save failed'), 'error');
+                setTimeout(() => hideSaveStatus(), 4000);
+                return;
             }
-        }
 
-        await loadGradeData();
-        
-        if (errorCount > 0) {
-            showSaveStatus(`Saved ${savedCount}/${savedCount + errorCount} students`, 'error');
-            setTimeout(() => hideSaveStatus(), 3000);
-        } else {
-            showSaveStatus(`✅ ${savedCount} students saved!`, 'saved');
-            setTimeout(() => hideSaveStatus(), 2000);
+            await loadGradeData();
+            showSaveStatus(`✅ ${result.saved} student${result.saved === 1 ? '' : 's'} saved`, 'saved');
+            setTimeout(() => hideSaveStatus(), 2500);
+        } catch (error) {
+            showSaveStatus('❌ Error: ' + error.message, 'error');
+            setTimeout(() => hideSaveStatus(), 4000);
         }
     }
 
@@ -1920,6 +1966,7 @@
         applyDeepLink();
 
         updateAssessmentInfo();
+        loadGradingPolicy();
         loadSubjectConfig();
         loadGradeData();
         loadHistory();

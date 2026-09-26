@@ -40,3 +40,6 @@ query
 # committed to this (public) repository. The register is kept locally only and is
 # read by scripts/sync-student-register.mjs.
 data/
+
+# Local Netlify folder
+.netlify
