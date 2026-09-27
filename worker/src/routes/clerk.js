@@ -57,9 +57,49 @@ export async function handleClerk(db, env, route, method, body, p, url) {
 
   if (route === '/clerk/payments' && method === 'POST') {
     if (!body.studentId) return error('studentId is required');
-    const amount = Number(body.totalAmount || body.amount || 0); if (amount <= 0) return error('Payment amount must be greater than zero');
-    const result = await db.collection('fee_payments').insertOne({ ...body, amount, totalAmount: amount, paymentDate: body.paymentDate || now, createdAt: now, updatedAt: now });
-    return success({ message: 'Payment saved', payment: { ...body, _id: result.insertedId, amount, totalAmount: amount } });
+
+    // The clerk screen records a payment as separate category amounts
+    // (School Fees, Boarding, Remedials, ...), so accept that shape as well as
+    // a single amount. Either way one total is stored.
+    let categories = {};
+    let total = Number(body.totalAmount ?? body.amount ?? 0);
+
+    if (body.payments && typeof body.payments === 'object' && !Array.isArray(body.payments)) {
+      for (const [k, v] of Object.entries(body.payments)) {
+        const n = Number(v);
+        if (!Number.isNaN(n) && n > 0) categories[k] = n;
+      }
+      total = Object.values(categories).reduce((a, b) => a + b, 0);
+    }
+
+    if (!Number.isFinite(total) || total <= 0) {
+      return error('Enter a payment amount greater than zero in at least one category', 400);
+    }
+
+    const paymentDate = body.paymentDate || now;
+    const record = {
+      ...body,
+      categories,
+      amount: total,
+      totalAmount: total,
+      method: body.method || 'Cash',
+      paymentDate,
+      createdAt: now,
+      updatedAt: now
+    };
+    const result = await db.collection('fee_payments').insertOne(record);
+
+    // Return a flat shape as well, because the receipt on the clerk screen
+    // reads totalAmount, categories and date straight off the response.
+    return success({
+      message: 'Payment recorded',
+      totalAmount: total,
+      amount: total,
+      categories,
+      date: paymentDate,
+      paymentId: result.insertedId.toString(),
+      payment: { _id: result.insertedId, ...record }
+    });
   }
 
   if (p[0] === 'clerk' && p[1] === 'payments' && p[2] && method === 'PUT') {
@@ -67,14 +107,20 @@ export async function handleClerk(db, env, route, method, body, p, url) {
     if (!existing) return error('Payment record not found', 404);
     // Keep amount and totalAmount in step, otherwise an edit appears to do nothing.
     const updates = { ...body, updatedAt: now };
-    if (body.amount !== undefined || body.totalAmount !== undefined) {
-      const amount = Number(body.totalAmount ?? body.amount ?? existing.totalAmount ?? existing.amount ?? 0);
-      if (amount < 0) return error('Payment amount cannot be negative');
-      updates.amount = amount;
-      updates.totalAmount = amount;
+    let total = Number(body.totalAmount ?? body.amount ?? 0);
+    if (body.payments && typeof body.payments === 'object' && !Array.isArray(body.payments)) {
+      const categories = {};
+      for (const [k, v] of Object.entries(body.payments)) {
+        const n = Number(v);
+        if (!Number.isNaN(n) && n > 0) categories[k] = n;
+      }
+      total = Object.values(categories).reduce((a, b) => a + b, 0);
+      updates.categories = categories;
     }
+    if (total < 0) return error('Payment amount cannot be negative');
+    if (total > 0) { updates.amount = total; updates.totalAmount = total; }
     await db.collection('fee_payments').updateOne({ _id: p[2] }, { $set: updates });
-    return success({ message: 'Payment updated' });
+    return success({ message: 'Payment updated', totalAmount: updates.totalAmount ?? existing.totalAmount });
   }
 
   if (p[0] === 'clerk' && p[1] === 'payments' && p[2] && method === 'DELETE') {

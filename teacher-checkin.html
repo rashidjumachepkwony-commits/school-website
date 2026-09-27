@@ -488,15 +488,12 @@
         // ============================================
         // GET TODAY'S ATTENDANCE STATUS FOR TEACHER
         // ============================================
-        async         // ============================================
-        // MY OWN ATTENDANCE (day / week / month)
-        // ============================================
+        async         // ============ MY OWN ATTENDANCE (day / week / month) ============
         let myAttPeriod = 'day';
-        let myAttVerified = false;
 
         /**
-         * Verifies the Staff ID and PIN, then reveals the attendance panel.
-         * This never checks the member in or out - it is view only.
+         * Verifies Staff ID and PIN, then reveals the attendance panel.
+         * View only - it never checks the member in or out.
          */
         async function handleViewAttendance() {
             const id = (employeeIdInput.value || '').trim();
@@ -510,25 +507,22 @@
             btn.textContent = 'Checking...';
 
             try {
-                // Verify the credentials only - this never checks the member in.
-                const res = await fetch('/api/teacher/verify', {
+                const data = await window.apiJson('/api/teacher/verify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ employeeId: id, pin: pin })
                 });
-                const data = await res.json();
                 if (!data.success) {
                     showAlert(data.error || 'Could not verify your details.', 'error');
                     return;
                 }
-
                 myAttVerified = true;
                 document.getElementById('myAtt').style.display = 'block';
                 showAlert('Welcome ' + (data.teacher.name || id) + '. Choose a period below.', 'success');
                 await loadMyAttendance(myAttPeriod);
                 document.getElementById('myAtt').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } catch (err) {
-                showAlert('Network problem. Please try again.', 'error');
+                showAlert(err.message, 'error');
             } finally {
                 btn.disabled = false;
                 btn.textContent = '📊 View My Attendance';
@@ -562,8 +556,7 @@
             body.innerHTML = '<p class="myatt-empty"><i class="fas fa-spinner fa-spin"></i> Loading your record...</p>';
 
             try {
-                const res = await fetch('/api/teacher/attendance/history?employeeId=' + encodeURIComponent(id) + '&period=' + period);
-                const data = await res.json();
+                const data = await window.apiJson('/api/teacher/attendance/history?employeeId=' + encodeURIComponent(id) + '&period=' + period);
                 if (!data.success) {
                     body.innerHTML = '<p class="myatt-empty"><i class="fas fa-exclamation-circle"></i> ' +
                         escapeHtml(data.error || 'Could not load your record') + '</p>';
@@ -572,7 +565,8 @@
                 myAttVerified = true;
                 body.innerHTML = renderMyAttendance(data);
             } catch (err) {
-                body.innerHTML = '<p class="myatt-empty"><i class="fas fa-wifi"></i> Network problem. Please try again.</p>';
+                body.innerHTML = '<p class="myatt-empty"><i class="fas fa-exclamation-triangle"></i> ' +
+                    escapeHtml(err.message) + '</p>';
             }
         }
 
@@ -632,13 +626,8 @@
 
         // Refresh the panel automatically once a staff member types their ID.
         let myAttTimer = null;
-        employeeIdInput.addEventListener('input', function () {
-            clearTimeout(myAttTimer);
-            myAttTimer = setTimeout(() => {
-                if ((employeeIdInput.value || '').trim().length >= 3) loadMyAttendance(myAttPeriod);
-            }, 500);
-        });
-
+        // No automatic loading while the ID is being typed: the panel only
+        // appears after "View My Attendance" has verified the ID and PIN.
         async function getTeacherStatus(employeeId) {
             try {
                 const response = await fetch(`/api/teacher/attendance/today`);

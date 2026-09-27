@@ -37,6 +37,37 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
   const now = new Date().toISOString();
 
   // POST /api/holiday-assignments — upload new assignment
+  // GET /api/holiday-assignments - list every active assignment.
+  // (Without this the bare path fell through to the worker's
+  // "Endpoint under construction" reply and the admin screens showed nothing.)
+  if (route === '/holiday-assignments' && method === 'GET') {
+    const params = new URL(request.url).searchParams;
+    const grade = params.get('grade') || '';
+    const term = params.get('term') || '';
+    const query = { isActive: { $ne: false } };
+    if (grade) query.grade = grade;
+    if (term) query.term = term;
+    const rows = await db.collection('holidayassignments')
+      .find(query)
+      .sort({ uploadedAt: -1, createdAt: -1 }).toArray();
+    return success({
+      assignments: rows.map(a => ({
+        _id: a._id.toString(),
+        title: a.title || '',
+        subject: a.subject || '',
+        description: a.description || '',
+        grade: a.grade || '',
+        term: a.term || '',
+        hasFile: !!a.filePath,
+        fileUrl: a.filePath || '',
+        fileName: a.fileName || '',
+        uploadedAt: a.uploadedAt || a.createdAt || null
+      })),
+      total: rows.length
+    });
+  }
+
+  // GET /api/holiday-assignments - POST
   if (route === '/holiday-assignments' && method === 'POST') {
     const formData = await request.formData().catch(() => null);
     if (!formData) return error('No form data provided');
@@ -142,12 +173,64 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
   // GET /api/holiday-assignments/download/:id — redirect to Cloudinary URL
   if (p[0] === 'holiday-assignments' && p[1] === 'download' && p[2] && method === 'GET') {
     const assignment = await db.collection('holidayassignments').findOne({ _id: p[2] });
-    if (!assignment || !assignment.filePath) return error('Assignment file not found', 404);
+    if (!assignment) return error('Assignment not found', 404);
 
-    const headers = new Headers();
-    headers.set('Location', assignment.filePath);
-    headers.set('Content-Disposition', `attachment; filename="${assignment.fileName || 'assignment'}"`);
-    return new Response(null, { status: 302, headers });
+    // With an uploaded file, hand back the stored location.
+    if (assignment.filePath) {
+      const headers = new Headers();
+      headers.set('Location', assignment.filePath);
+      headers.set('Content-Disposition', `attachment; filename="${assignment.fileName || 'assignment'}"`);
+      return new Response(null, { status: 302, headers });
+    }
+
+    // No file was attached, so build a printable sheet from the assignment
+    // text instead of failing. This keeps "download" useful even when file
+    // storage is not configured.
+    const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+    const title = assignment.title || 'Holiday Assignment';
+    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title><style>
+@page{size:A4 portrait;margin:18mm}
+body{font-family:"Segoe UI",Arial;margin:0;padding:26px;color:#12233f;line-height:1.6}
+.sheet{max-width:760px;margin:0 auto;border:1px solid #cfd8e6;padding:28px 32px}
+.hd{text-align:center;border-bottom:3px solid #d4a017;padding-bottom:14px;margin-bottom:18px}
+.hd h1{margin:0;font-size:20px;color:#0a1628}
+.hd .sub{font-size:11px;letter-spacing:2px;color:#5a6b85;text-transform:uppercase;margin-top:4px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 22px;padding:11px 14px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px;font-size:12px;margin-bottom:16px}
+.meta b{margin-right:5px}
+h2{font-size:14px;text-transform:uppercase;letter-spacing:.5px;color:#0b5394;margin:18px 0 6px}
+.desc{font-size:13.5px;white-space:pre-wrap}
+.rule{margin-top:26px;padding-top:10px;border-top:1px solid #e3e9f2;font-size:11px;color:#8a97ab}
+.line{margin-top:34px}
+.line div{border-bottom:1px solid #b9c4d4;height:30px}
+.btn{display:inline-block;background:#d4a017;color:#12233f;border:0;border-radius:7px;padding:9px 18px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:16px}
+@media print{.btn{display:none}}
+</style></head><body>
+<button class="btn" onclick="window.print()">Print / Save as PDF</button>
+<div class="sheet">
+  <div class="hd"><h1>${esc(title)}</h1>
+  <div class="sub">Changara Star Academy &middot; Holiday Assignment</div></div>
+  <div class="meta">
+    <div><b>Class:</b> ${esc(assignment.grade || '-')}</div>
+    <div><b>Subject:</b> ${esc(assignment.subject || '-')}</div>
+    <div><b>Term:</b> ${esc(assignment.term || '-')}</div>
+    <div><b>Set by:</b> ${esc(assignment.uploadedBy || 'Class Teacher')}</div>
+  </div>
+  <h2>What to do</h2>
+  <div class="desc">${esc(assignment.description || 'Please ask your class teacher for the details of this assignment.')}</div>
+  <div class="line"><div></div><div></div><div></div><div></div><div></div></div>
+  <div class="rule">Generated ${esc(new Date().toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' }))}</div>
+</div></body></html>`;
+    return new Response(html, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `inline; filename="${(assignment.title || 'assignment').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.html"`
+      }
+    });
   }
 
   // GET /api/holiday-assignments/:grade
