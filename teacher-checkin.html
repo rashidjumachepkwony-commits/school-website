@@ -243,50 +243,111 @@
                 flex-direction: column;
             }
         .myatt {
-            margin-top:22px; padding:16px; background:#f7f9fc;
-            border:1px solid #e3e9f2; border-radius:14px; text-align:left;
+            margin-top:22px; padding:18px; background:linear-gradient(160deg,#f8fafc,#eef2f8);
+            border:1px solid #dde5f0; border-radius:18px; text-align:left;
+            box-shadow:0 6px 20px rgba(10,22,40,.07);
         }
-        .myatt h3 { font-size:16px; color:#0A1628; margin-bottom:4px; }
-        .myatt-hint { font-size:12px; color:#6c757d; margin-bottom:12px; }
-        .myatt-tabs { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+        .myatt h3 {
+            font-size:19px; color:#0A1628; margin-bottom:5px;
+            display:flex; align-items:center; gap:9px;
+        }
+        .myatt h3::before {
+            content:""; width:5px; height:22px; border-radius:3px;
+            background:linear-gradient(180deg,#D4A017,#0A1628);
+        }
+        .myatt-hint { font-size:12.5px; color:#5f6f88; margin-bottom:16px; line-height:1.55; }
+
+        /* Period selector: large touch targets, obvious selected state. */
+        .myatt-tabs { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
         .myatt-tab {
-            flex:1 1 90px; padding:11px 8px; font-size:13px; font-weight:700; font-family:inherit;
-            border:2px solid #d5dce6; background:#fff; color:#0A1628; border-radius:10px; cursor:pointer;
+            position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+            gap:2px; padding:14px 8px; min-height:88px; cursor:pointer; font-family:inherit;
+            background:#fff; border:2px solid #dbe3ef; border-radius:14px;
+            box-shadow:0 2px 6px rgba(10,22,40,.05);
+            transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
         }
-        .myatt-tab.on { background:#0A1628; color:#fff; border-color:#0A1628; }
-        .myatt-tab.myatt-pdf { background:#d4a017; border-color:#d4a017; color:#0A1628; font-weight:800; }
-        .myatt-tab.myatt-pdf:hover { background:#c1900f; }
+        .myatt-tab:hover { transform:translateY(-2px); box-shadow:0 8px 18px rgba(10,22,40,.12); border-color:#b9c7db; }
+        .myatt-tab:focus-visible { outline:3px solid #D4A017; outline-offset:2px; }
+        .myatt-ico { font-size:23px; line-height:1.1; font-style:normal; }
+        .myatt-txt { font-size:14px; font-weight:800; color:#0A1628; letter-spacing:.1px; }
+        .myatt-sub { font-size:10.5px; font-weight:600; color:#7d8ba3; text-transform:uppercase; letter-spacing:.4px; }
+
+        .myatt-tab.on {
+            background:linear-gradient(160deg,#0A1628,#1d3a6b);
+            border-color:#0A1628; color:#fff;
+            box-shadow:0 8px 22px rgba(10,22,40,.32);
+        }
+        .myatt-tab.on .myatt-txt { color:#fff; }
+        .myatt-tab.on .myatt-sub { color:#D4A017; }
+        .myatt-tab.on::after {
+            content:""; position:absolute; inset:auto 0 0 0; height:5px;
+            background:linear-gradient(90deg,#D4A017,#F5C842); border-radius:0 0 12px 12px;
+        }
+
+        .myatt-tab.myatt-pdf { background:#fff; border-color:#0b7a3b; }
+        .myatt-tab.myatt-pdf .myatt-ico { color:#0b7a3b; }
+        .myatt-tab.myatt-pdf:hover { background:#f2fbf5; }
+        .myatt-pdf-note { font-size:11px; color:#7d8ba3; text-align:center; margin-top:-8px; margin-bottom:14px; }
+
+        @media (max-width:640px){
+            .myatt-tabs { grid-template-columns:repeat(2,1fr); }
+            .myatt-tab { min-height:78px; }
+        }
+        @media (max-width:340px){
+            .myatt-tabs { grid-template-columns:1fr; }
+        }
         .btn-view {
             width:100%; padding:15px; font-size:15px; font-weight:800; font-family:inherit; cursor:pointer;
             border:2px solid #0b5394; background:#0b5394; color:#fff; border-radius:12px;
         }
         .btn-view:hover { background:#093f6e; }
         .btn-view:disabled { opacity:.6; cursor:not-allowed; }
-        .myatt-empty { text-align:center; color:#8a97ab; font-size:13px; padding:18px 0; }
-        .myatt-empty i { font-size:28px; display:block; margin-bottom:8px; color:#c9d3e2; }
-        .myatt-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(92px,1fr)); gap:8px; margin-bottom:14px; }
-        .myatt-stat { background:#fff; border:1px solid #e3e9f2; border-radius:10px; padding:9px 6px; text-align:center; }
-        .myatt-stat .v { font-size:19px; font-weight:800; color:#0A1628; line-height:1.15; }
-        .myatt-stat .k { font-size:9.5px; color:#6c757d; text-transform:uppercase; letter-spacing:.3px; margin-top:2px; }
-        .myatt-stat.good .v { color:#28a745; }
-        .myatt-stat.warn .v { color:#fd7e14; }
-        .myatt-stat.bad  .v { color:#dc3545; }
-        .myatt-comment {
-            padding:11px 13px; border-radius:9px; font-size:13px; font-weight:600; margin-bottom:12px;
-            background:#e8f5ec; color:#136b2c; border-left:4px solid #28a745;
+        .myatt-body { font-size:13.5px; color:#26364f; }
+        .myatt-empty { text-align:center; color:#7d8ba3; font-size:13.5px; padding:26px 12px; }
+        .myatt-empty i { font-size:34px; display:block; margin-bottom:10px; color:#c3ccdb; }
+
+        /* Summary tiles */
+        .myatt-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+        .myatt-stat {
+            background:#fff; border:1px solid #e3e9f2; border-radius:12px; padding:12px 8px;
+            text-align:center; box-shadow:0 1px 4px rgba(10,22,40,.05);
         }
-        .myatt-comment.warn { background:#fff4e5; color:#8a5200; border-left-color:#fd7e14; }
-        .myatt-comment.bad  { background:#fdeaea; color:#8c1c24; border-left-color:#dc3545; }
-        .myatt-table { width:100%; border-collapse:collapse; font-size:12.5px; background:#fff; border-radius:8px; overflow:hidden; }
-        .myatt-table th { background:#0A1628; color:#fff; padding:7px 6px; font-size:10.5px; text-transform:uppercase; }
-        .myatt-table td { padding:7px 6px; border-bottom:1px solid #eef2f7; text-align:left; }
-        .myatt-table tr:nth-child(even) td { background:#fafcff; }
-        .myatt-table .we { color:#aab4c4; font-style:italic; }
-        .myatt-table .absent td { background:#fdf2f2 !important; color:#8c1c24; }
+        .myatt-stat .v { font-size:23px; font-weight:800; color:#0A1628; line-height:1.1; letter-spacing:-.5px; }
+        .myatt-stat .k { font-size:10px; font-weight:700; color:#7d8ba3; text-transform:uppercase; letter-spacing:.5px; margin-top:4px; }
+        .myatt-stat.good .v { color:#0b7a3b; }
+        .myatt-stat.warn .v { color:#b45309; }
+        .myatt-stat.bad  .v { color:#a4161a; }
+
+        .myatt-comment {
+            padding:13px 15px; border-radius:12px; font-size:13.5px; font-weight:700; margin-bottom:14px;
+            background:#e9f7ee; color:#0b5e2c; border-left:5px solid #0b7a3b;
+        }
+        .myatt-comment.warn { background:#fff5e6; color:#8a5200; border-left-color:#d97706; }
+        .myatt-comment.bad  { background:#fdecec; color:#8c1c24; border-left-color:#a4161a; }
+        .myatt-meta { font-size:12px; color:#5f6f88; margin-bottom:10px; line-height:1.7; }
+        .myatt-meta b { color:#0A1628; }
+
+        /* Result table */
+        .myatt-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px; }
+        .myatt-table th {
+            background:#0A1628; color:#fff; padding:10px 8px; font-size:10.5px; font-weight:800;
+            text-transform:uppercase; letter-spacing:.4px; position:sticky; top:0;
+        }
+        .myatt-table th:first-child { border-radius:10px 0 0 0; }
+        .myatt-table th:last-child { border-radius:0 10px 0 0; }
+        .myatt-table td { padding:10px 8px; border-bottom:1px solid #eaeff6; text-align:left; font-weight:500; }
+        .myatt-table tbody tr:nth-child(even) td { background:#f8fafd; }
+        .myatt-table .we td { color:#9aa6b8; font-style:italic; }
+        .myatt-table .absent td { background:#fdf0f0 !important; color:#8c1c24; font-weight:700; }
         .myatt-table .late td { background:#fff8ec !important; }
-        .myatt-table .present td { color:#136b2c; }
-        .myatt-scroll { max-height:320px; overflow-y:auto; }
-        @media (max-width:480px){ .myatt-stat .v { font-size:16px; } .myatt-table { font-size:11.5px; } }
+        .myatt-table .present td { color:#0b5e2c; font-weight:600; }
+        .myatt-scroll { max-height:340px; overflow-y:auto; border:1px solid #e3e9f2; border-radius:12px; }
+        @media (max-width:480px){
+            .myatt-stats { grid-template-columns:repeat(2,1fr); }
+            .myatt-stat .v { font-size:20px; }
+            .myatt-table { font-size:12px; }
+            .myatt-table td, .myatt-table th { padding:8px 6px; }
+        }
 
         .btn-row-bottom {
                 flex-direction: column;
@@ -344,11 +405,27 @@
             <h3><i class="fas fa-chart-line"></i> My Attendance</h3>
             <p class="myatt-hint">Enter your Staff ID above, then choose a period. This is view-only &mdash; it does not check you in or out.</p>
 
-            <div class="myatt-tabs">
-                <button class="myatt-tab on" data-p="day" onclick="loadMyAttendance('day')">Today</button>
-                <button class="myatt-tab" data-p="week" onclick="loadMyAttendance('week')">This Week</button>
-                <button class="myatt-tab" data-p="month" onclick="loadMyAttendance('month')">This Month</button>
-                <button class="myatt-tab myatt-pdf" onclick="downloadMyAttendancePDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+            <div class="myatt-tabs" role="tablist" aria-label="Choose a period">
+                <button class="myatt-tab on" data-p="day" onclick="loadMyAttendance('day')">
+                    <i class="myatt-ico">&#9728;&#65039;</i>
+                    <span class="myatt-txt">Today</span>
+                    <span class="myatt-sub">This shift</span>
+                </button>
+                <button class="myatt-tab" data-p="week" onclick="loadMyAttendance('week')">
+                    <i class="myatt-ico">&#128197;</i>
+                    <span class="myatt-txt">This Week</span>
+                    <span class="myatt-sub">Mon to today</span>
+                </button>
+                <button class="myatt-tab" data-p="month" onclick="loadMyAttendance('month')">
+                    <i class="myatt-ico">&#128197;&#128197;</i>
+                    <span class="myatt-txt">This Month</span>
+                    <span class="myatt-sub">Whole month</span>
+                </button>
+                <button class="myatt-tab myatt-pdf" onclick="downloadMyAttendancePDF()">
+                    <i class="myatt-ico">&#11015;</i>
+                    <span class="myatt-txt">Download PDF</span>
+                    <span class="myatt-sub">Save or print</span>
+                </button>
             </div>
 
             <div id="myAttBody" class="myatt-body">
@@ -486,9 +563,8 @@
         }
 
         // ============================================
-        // GET TODAY'S ATTENDANCE STATUS FOR TEACHER
+        // MY OWN ATTENDANCE (day / week / month)
         // ============================================
-        async         // ============ MY OWN ATTENDANCE (day / week / month) ============
         let myAttPeriod = 'day';
 
         /**
@@ -606,7 +682,7 @@
                     stat(s.attendanceRate + '%', rateWord + ' Rate', rateCls) +
                 '</div>' +
                 '<div class="myatt-comment ' + commentCls + '"><i class="fas fa-lightbulb"></i> ' + escapeHtml(s.comment) + '</div>' +
-                '<p style="font-size:11.5px;color:#6c757d;margin-bottom:8px;">Period: <b>' + periodName +
+                '<p class="myatt-meta">Period: <b>' + periodName +
                 '</b> &nbsp;(' + d.from + ' to ' + d.to + ') &nbsp;|&nbsp; Working days: <b>' + s.workdays +
                 '</b> &nbsp;|&nbsp; Punctuality: <b>' + s.punctualityRate + '%</b>' +
                 (s.bestDayHours ? ' &nbsp;|&nbsp; Longest day: <b>' + s.bestDayHours + 'h</b> on ' + s.bestDayDate : '') +
