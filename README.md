@@ -108,7 +108,11 @@ curl -X POST https://csa-api.rashidjumachepkwony.workers.dev/api/setup-admin \
 `scripts/seed-admin.js` does the same thing. There is **no default password** -
 choose a strong one and store it in a password manager. The first admin created
 for this deployment uses a password set during setup, not a value in this
-repository.
+repository. To change it later:
+
+```bash
+node scripts/set-admin-password.mjs '<new-password>' [username]
+```
 
 ## API Endpoints
 

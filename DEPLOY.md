@@ -170,6 +170,19 @@ powershell -ExecutionPolicy Bypass -File scripts\test-pages-preview.ps1
 
 Only connect the custom domain once the preview is confirmed good.
 
+### Changing the admin password
+
+There is **no default password**. The password is set during setup and stored
+only as a salted `salt:hash`, never in plaintext. To change it later:
+
+```bash
+node scripts/set-admin-password.mjs '<new-password>' [username]
+```
+
+It is hashed with the same function the login route verifies against, so the
+change takes effect immediately. The password itself is never written to a file
+or a log.
+
 ---
 
 ## Step 3 - Custom domain (manual, after approval)
