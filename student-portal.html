@@ -300,7 +300,7 @@ function printResult() {
   // Use the same professional result slip the teachers print, so what the
   // parent downloads is the official document, not a plain web page.
   const a = (current.assessments || [])[0];
-  let url = '/api/assessments/student-report/' + encodeURIComponent(current.student.id);
+  let url = apiUrl('/api/assessments/student-report/' + encodeURIComponent(current.student.id));
   if (a) {
     if (a.period) url += '?period=' + encodeURIComponent(a.period);
     if (a.type) url += (url.indexOf('?') === -1 ? '?' : '&') + 'type=' + encodeURIComponent(a.type);

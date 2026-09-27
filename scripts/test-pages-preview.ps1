@@ -69,7 +69,12 @@ if ($acao -match "(?im)^access-control-allow-origin:\s*$([regex]::Escape($PREVIE
 else { Write-Host "  FAIL Worker does not allow the Pages origin"; $script:fail++ }
 
 $api = curl.exe -s --max-time 45 -H "Origin: $PREVIEW" ($WORKER + '/api/portal/students')
-if ($api -match '"success":true' -and $api -match '"total":130') { Write-Host "  ok   GET /api/portal/students from preview origin (130 students)"; $script:pass++ }
+    # This endpoint returns { success, students: [...] } and has no `total`
+    # field, so count the entries rather than looking for a summary field.
+    $portalStudents = ($api | ConvertFrom-Json).students
+    if (($api -match '"success":true') -and $portalStudents -and $portalStudents.Count -eq 130) {
+        Write-Host "  ok   GET /api/portal/students from preview origin (130 students)"; $script:pass++
+    }
 else { Write-Host "  FAIL portal students: $(($api | Out-String).Substring(0,[Math]::Min(80,($api|Out-String).Length)))"; $script:fail++ }
 
 Write-Host "`n=== 7. Worker rejects an unknown origin ==="

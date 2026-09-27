@@ -1573,7 +1573,7 @@
             showAlert('Save this student first, then you can open the result slip.', 'error');
             return;
         }
-        let url = `/api/assessments/student-report/${encodeURIComponent(studentId)}?period=${encodeURIComponent(currentPeriod)}&type=${encodeURIComponent(currentType)}`;
+        let url = apiUrl(`/api/assessments/student-report/${encodeURIComponent(studentId)}?period=${encodeURIComponent(currentPeriod)}&type=${encodeURIComponent(currentType)}`);
         const n = getCurrentAssessmentName();
         if (n) url += `&name=${encodeURIComponent(n)}`;
         const win = window.open(url, '_blank');
@@ -2028,7 +2028,7 @@
         if (!studentId) { showAlert('That student has no saved result yet.', 'error'); return; }
         // Use the professional CBE result slip (total, average score, average
         // percentage, overall performance level, class comparison).
-        const url = '/api/assessments/student-report/' + encodeURIComponent(studentId) +
+        const url = apiUrl('/api/assessments/student-report/') + encodeURIComponent(studentId) +
             '?' + reportFilterParams();
         const win = window.open(url, '_blank');
         if (!win) showAlert('Please allow popups for this site to download reports', 'error');
@@ -2114,7 +2114,7 @@
         if (n) params.set('name', n);
         const d = document.getElementById('assessmentDate').value;
         if (d) params.set('date', d);
-        const url = '/api/assessments/class-report/' + encodeURIComponent(currentGrade) + '?' + params.toString();
+        const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(currentGrade) + '?' + params.toString());
         const win = window.open(url, '_blank');
         if (!win) showAlert('Please allow popups for this site to download reports', 'error');
     }
@@ -2144,7 +2144,7 @@
 
     /** All students who have marks, every grade, as one PDF. */
     function downloadAllStudentsPDF() {
-        const url = '/api/assessments/all-report?' + reportFilterParams();
+        const url = apiUrl('/api/assessments/all-report?' + reportFilterParams());
         const win = window.open(url, '_blank');
         if (!win) showAlert('Please allow popups for this site to download reports', 'error');
     }

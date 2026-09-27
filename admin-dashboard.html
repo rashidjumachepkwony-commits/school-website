@@ -2305,7 +2305,7 @@
     }
 
     function downloadReportPDF() {
-        const url = '/api/admin/attendance/report?period=' + repPeriod + '&format=pdf';
+        const url = apiUrl('/api/admin/attendance/report?period=' + repPeriod + '&format=pdf');
         const w = window.open(url, '_blank');
         if (!w) alert('Please allow popups to open the report');
     }

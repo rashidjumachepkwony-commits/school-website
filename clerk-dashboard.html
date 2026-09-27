@@ -1440,7 +1440,7 @@ function viewSingleReceipt(row, studentId, studentName, amount, category, method
       if (grade) params.set('grade', grade);
       if (studentId) params.set('studentId', studentId);
       params.set('format', 'pdf');
-      var w = window.open('/api/clerk/fees-report?' + params.toString(), '_blank');
+      var w = window.open(apiUrl('/api/clerk/fees-report?' + params.toString()), '_blank');
       if (!w) showMessage('Please allow popups to open the report.', 'error');
     }
 

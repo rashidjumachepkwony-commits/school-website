@@ -536,11 +536,11 @@
             }
             const id = (employeeIdInput.value || '').trim();
             if (!id) { showAlert('Enter your Staff ID first.', 'error'); return; }
-            const w = window.open(
-                '/api/teacher/attendance/history?employeeId=' + encodeURIComponent(id) +
-                '&period=' + myAttPeriod + '&format=pdf', '_blank');
-            if (!w) showAlert('Please allow popups to download the PDF.', 'error');
-        }
+            const pdfUrl = apiUrl('/api/teacher/attendance/history?employeeId=' + encodeURIComponent(id) +
+                '&period=' + myAttPeriod + '&format=pdf');
+            const w = window.open(pdfUrl, '_blank');
+                if (!w) showAlert('Please allow popups to download the PDF.', 'error');
+            }
 
         async function loadMyAttendance(period) {
             myAttPeriod = period;

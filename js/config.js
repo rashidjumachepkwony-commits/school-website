@@ -38,6 +38,47 @@
         return _origFetch(input, init);
     };
 
+    /**
+     * Route window.open() and plain links through the Worker too.
+     *
+     * Only fetch() was being rewritten above, so every download that used
+     * window.open('/api/...') or href="/api/..." asked the *static site* for
+     * that path and got the 404 page instead of the report. The API lives on
+     * the Worker, so any navigation to /api/ must be made absolute first.
+     */
+    var _origOpen = window.open;
+    window.open = function (url) {
+        var args = Array.prototype.slice.call(arguments);
+        if (typeof url === 'string' && url.startsWith('/api/')) {
+            args[0] = window.__API_BASE_URL__ + url;
+        }
+        return _origOpen.apply(window, args);
+    };
+
+    // Rewrite /api/ links in markup, both on load and when they are added later.
+    function retargetApiLinks(root) {
+        var scope = root || document;
+        var links = scope.querySelectorAll ? scope.querySelectorAll('a[href^="/api/"]') : [];
+        for (var i = 0; i < links.length; i++) {
+            var a = links[i];
+            if (a.getAttribute('data-api-rewritten') === '1') continue;
+            a.setAttribute('href', window.__API_BASE_URL__ + a.getAttribute('href'));
+            a.setAttribute('data-api-rewritten', '1');
+        }
+    }
+    window.retargetApiLinks = retargetApiLinks;
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { retargetApiLinks(); });
+    } else {
+        retargetApiLinks();
+    }
+    // Catch links injected by page scripts after load.
+    document.addEventListener('click', function (e) {
+        var a = e.target && e.target.closest ? e.target.closest('a[href^="/api/"]') : null;
+        if (a) retargetApiLinks();
+    }, true);
+
     window.assetUrl = function (fileUrl) {
         if (!fileUrl) return fileUrl;
         if (fileUrl.indexOf('http://') === 0 || fileUrl.indexOf('https://') === 0) return fileUrl;
