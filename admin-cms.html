@@ -1616,7 +1616,7 @@
                     }
                 };
                 xhr.onerror = function() { showAlert('❌ Network error.', 'error'); };
-                xhr.open('POST', '/api/upload');
+                xhr.open('POST', apiUrl('/api/upload'));
                 xhr.send(formData);
             } catch (error) {
                 console.error('Upload error:', error);

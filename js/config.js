@@ -68,6 +68,22 @@
     }
     window.retargetApiLinks = retargetApiLinks;
 
+    /**
+     * Route XMLHttpRequest through the Worker too.
+     *
+     * File uploads use XHR for the progress bar, so they are not covered by
+     * the fetch wrapper. A relative /api/ POST reached the static site, which
+     * answers 405 Method Not Allowed - the "Upload failed (HTTP 405)" symptom.
+     */
+    var _origXhrOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (method, url) {
+        var args = Array.prototype.slice.call(arguments);
+        if (typeof url === 'string' && url.startsWith('/api/')) {
+            args[1] = window.__API_BASE_URL__ + url;
+        }
+        return _origXhrOpen.apply(this, args);
+    };
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () { retargetApiLinks(); });
     } else {

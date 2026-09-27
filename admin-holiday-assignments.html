@@ -592,7 +592,7 @@
                 };
                 xhr.onerror = function() { reject(new Error('Network error - could not reach the server')); };
                 xhr.ontimeout = function() { reject(new Error('Upload timed out - the file may be too large')); };
-                xhr.open('POST', '/api/holiday-assignments');
+                xhr.open('POST', apiUrl('/api/holiday-assignments'));
                 xhr.send(formData);
             });
 

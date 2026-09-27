@@ -2366,11 +2366,14 @@
         // Overall class stats
         let exceeding = 0, meeting = 0, approaching = 0, below = 0, totalAvg = 0;
         students.forEach(s => {
-            const level = s.performanceLevel || cbePerformanceLevel(s.averageScore || 0);
+            // Use the server's subject-level result. averageScore is a raw mark
+            // out of the subject maxima, not a percentage, so it must not be
+            // fed to a percentage grader.
+            const level = s.performanceLevel || 'Not Assessed';
             if (level === 'Exceeding Expectation') exceeding++;
             else if (level === 'Meeting Expectation') meeting++;
             else if (level === 'Approaching Expectation') approaching++;
-            else below++;
+            else if (level === 'Below Expectation') below++;
             totalAvg += (s.averageScore || 0);
         });
         const total = students.length;
@@ -2497,7 +2500,7 @@
         const sorted = [...students].sort((a, b) => (b.averageScore || 0) - (a.averageScore || 0));
         sorted.forEach((s, index) => {
             const rank = index + 1;
-            const level = s.performanceLevel || cbePerformanceLevel(s.averageScore || 0);
+            const level = s.performanceLevel || 'Not Assessed';
             const avg = s.averageScore ? s.averageScore.toFixed(1) : '0';
             csv += `${rank},"${(s.studentName || 'N/A').replace(/"/g, '""')}",${s.grade || currentGrade},"${s.assessmentPeriod || currentPeriod}","${s.assessmentType || currentType}",${s.totalScore || 0},${avg},"${level}",${cbeLevelRating(level)}`;
             subjects.forEach(sub => {

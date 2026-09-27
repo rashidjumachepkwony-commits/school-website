@@ -10,7 +10,7 @@
  * so only identification data is returned for the list.
  */
 import { success, error } from '../utils/helpers.js';
-import { loadPolicy, gradePercentage, DEFAULT_POLICY } from '../services/assessment.service.js';
+import { loadPolicy, gradePercentage, gradeBySubject, DEFAULT_POLICY } from '../services/assessment.service.js';
 
 const isBoardingStudent = s =>
   s.boarding === true || s.boarding === 'true' ||
@@ -93,17 +93,28 @@ export async function handlePortal(db, env, route, method, body, p, url) {
 
     const assessments = [...groups.values()].map(g => {
       const percentage = g.maxTotal > 0 ? Number(((g.total / g.maxTotal) * 100).toFixed(2)) : null;
-      const graded = percentage === null
+      // Same rule as the teacher's reports: the level comes from the subject
+      // levels, not from the blended total.
+      const subjectGrading = gradeBySubject(
+        g.subjects.filter(s => s.score !== null && Number(s.max) > 0)
+          .map(s => ({ subject: s.subject, score: s.score, maxScore: s.max })),
+        policy
+      );
+      const graded = percentage === null || !subjectGrading.subjects.length
         ? { level: 'Not Assessed', code: 'NA' }
-        : gradePercentage(percentage, policy);
+        : subjectGrading.overall;
       const scored = g.subjects.filter(s => s.score !== null);
       return {
         period: g.period, type: g.type, name: g.name, date: g.date,
-        subjects: g.subjects,
+        subjects: g.subjects.map(s => {
+          const gl = subjectGrading.subjects.find(x => x.subject === s.subject);
+          return { ...s, code: gl ? gl.code : '', level: gl ? gl.level : '' };
+        }),
         total: g.total,
         maxTotal: g.maxTotal,
         percentage,
         average: scored.length ? Number((g.total / scored.length).toFixed(2)) : null,
+        subjectMix: subjectGrading.counts,
         performanceLevel: graded.level,
         performanceCode: graded.code
       };
