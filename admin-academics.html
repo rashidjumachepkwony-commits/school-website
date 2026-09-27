@@ -587,6 +587,20 @@
         .stu-cell .nm { font-weight:600; }
         .stu-cell .adm { font-size:10px; color:#8a97ab; }
 
+        /* Per-subject performance level, shown under each mark in the grid. */
+        .subject-cell { text-align:center; }
+        .cell-lv {
+            display:block; font-size:9.5px; font-weight:800; letter-spacing:.4px;
+            min-height:12px; line-height:12px; margin-top:2px;
+        }
+        .cell-lv.lv-ee { color:#136b2c; }
+        .cell-lv.lv-me { color:#12459b; }
+        .cell-lv.lv-ae { color:#856404; }
+        .cell-lv.lv-be { color:#8c1c24; }
+        .score-input.warn { border-color:#dc3545; background:#fdf5f5; }
+        .lv-mix { font-size:9.5px; color:#8a97ab; font-weight:600; margin-top:2px; letter-spacing:.3px; }
+        .lv-none { color:#aab4c4; font-size:11px; }
+
         @media (max-width: 820px) {
             .action-bar { flex-direction: column; align-items: stretch; }
             .action-bar .btn { width: 100%; justify-content: center; }
@@ -1400,11 +1414,12 @@
                 </div>
               </td>`;
 
-            // Subject scores
+            // Subject scores, with the performance level for that subject
             config.subjects.forEach(subj => {
                 const existing = student.assessments?.find(a => a.subject === subj.name);
                 const score = existing?.score ?? '';
                 const maxScore = subj.max;
+                const lvl = (existing && existing.code) ? existing.code : '';
                 bodyHtml += `<td class="subject-cell" data-label="${esc(subj.name)}">
                     <input type="number" inputmode="numeric" class="score-input" value="${score}"
                            min="0" max="${maxScore}" step="any"
@@ -1413,6 +1428,7 @@
                            data-max="${maxScore}"
                            onchange="onScoreChange(this)"
                            placeholder="0">
+                    <span class="cell-lv" data-lv-for="${esc(subj.name)}">${esc(lvl)}</span>
                 </td>`;
             });
 
@@ -1625,31 +1641,72 @@
         }
     }
 
-    /** Recalculate one row's total, average and performance from its inputs. */
+    /** Recalculate one row's subject levels, total, average and overall level. */
     function updateRowTotals(row) {
         const inputs = row.querySelectorAll('.score-input');
-        let total = 0, maxTotal = 0;
+        let total = 0, maxTotal = 0, ratingSum = 0, counted = 0;
+
         inputs.forEach(inp => {
             const max = parseInt(inp.dataset.max) || 0;
             maxTotal += max;
             const v = parseFloat(inp.value);
-            if (!isNaN(v)) total += v;
-            inp.classList.remove('good', 'low');
-            if (!isNaN(v) && max > 0) {
-                inp.classList.add((v / max) * 100 >= 60 ? 'good' : 'low');
+            const subject = inp.dataset.subject;
+
+            // Per-subject performance level, shown under the mark.
+            const badge = row.querySelector('.cell-lv[data-lv-for="' + CSS.escape(subject || '') + '"]');
+            if (isNaN(v) || max <= 0) {
+                total += 0;
+                if (badge) badge.textContent = '';
+                inp.classList.remove('good', 'low', 'warn');
+                return;
             }
+            total += v; counted++;
+            const pct = (v / max) * 100;
+            const level = gradeFor(pct);
+            if (badge) { badge.textContent = level.code; badge.className = 'cell-lv lv-' + level.code.toLowerCase(); }
+            inp.classList.remove('good', 'low', 'warn');
+            inp.classList.add(pct >= 80 ? 'good' : pct >= 40 ? 'low' : 'warn');
+            ratingSum += level.rating;
         });
+
         const totalCell = row.querySelector('.total-cell');
         const avgCell = row.querySelector('.avg-cell');
         const perfCell = row.querySelector('.perf-cell');
         if (totalCell) totalCell.innerHTML = '<strong>' + total + '</strong>';
         if (avgCell) avgCell.textContent = (maxTotal > 0 ? (total / maxTotal) * 100 : 0).toFixed(1) + '%';
+
         if (perfCell) {
-            const pct = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
-            const level = gradeFor(pct);
-            perfCell.innerHTML = '<span class="' + statusClassFor(level.name) + '" title="' + level.code + '">' +
-                level.name + (level.code && level.code !== 'NA' ? ' (' + level.code + ')' : '') + '</span>';
+            // Overall level is taken from the subject levels, matching the
+            // saved result and the printed reports.
+            if (counted > 0) {
+                const mean = ratingSum / counted;
+                const overall = ratingToLevelForUI(mean);
+                const mix = {};
+                row.querySelectorAll('.cell-lv').forEach(b => {
+                    const c = b.textContent.trim();
+                    if (c) mix[c] = (mix[c] || 0) + 1;
+                });
+                const mixText = Object.entries(mix).map(([c, n]) => n + 'x' + c).join(' ');
+                perfCell.innerHTML = '<span class="' + statusClassFor(overall.name) + '" title="' + overall.code + '">' +
+                    overall.name + ' (' + overall.code + ')</span>' +
+                    (mixText ? '<div class="lv-mix">' + escapeHtml(mixText) + '</div>' : '');
+            } else {
+                perfCell.innerHTML = '<span class="lv-none">Not Assessed</span>';
+            }
         }
+    }
+
+    /** Mean subject-level rating -> nearest level, mirroring ratingToLevel(). */
+    function ratingToLevelForUI(meanRating) {
+        const levels = (gradingPolicy && gradingPolicy.levels) || [
+            { code: 'BE', name: 'Below Expectation' },
+            { code: 'AE', name: 'Approaching Expectation' },
+            { code: 'ME', name: 'Meeting Expectation' },
+            { code: 'EE', name: 'Exceeding Expectation' }
+        ];
+        const sorted = levels.slice().sort((a, b) => (a.min || 0) - (b.min || 0));
+        const i = Math.min(sorted.length, Math.max(1, Math.round(Number(meanRating) || 1))) - 1;
+        return sorted[i];
     }
 
     // ============================================
@@ -1953,6 +2010,15 @@
                     const maxTotal = scored.reduce((s, a) => s + (Number(a.maxScore) || 0), 0);
                     const avgScore = scored.length ? (total / scored.length) : 0;
                     const avgPct = maxTotal > 0 ? ((total / maxTotal) * 100) : 0;
+
+                    // Per-subject levels, as a compact mix, from the stored codes.
+                    const mix = {};
+                    for (const a of scored) {
+                        const code = a.code || cbeLevelShort(gradeFor(a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0));
+                        if (code) mix[code] = (mix[code] || 0) + 1;
+                    }
+                    const mixText = Object.entries(mix).map(([c, n]) => n + '&times;' + c).join(' ');
+
                     const id = student._id || '';
 
                     return `
@@ -1964,7 +2030,10 @@
                             <td><strong>${total}</strong></td>
                             <td><strong>${scored.length ? avgScore.toFixed(2) : '-'}</strong></td>
                             <td>${maxTotal > 0 ? avgPct.toFixed(1) + '%' : '-'}</td>
-                            <td><span class="${performanceClass}">${escapeHtml(student.performanceLevel || 'Not Assessed')}${student.performanceCode && student.performanceCode !== 'NA' ? ' (' + escapeHtml(student.performanceCode) + ')' : ''}</span></td>
+                            <td>
+                                <span class="${performanceClass}">${escapeHtml(student.performanceLevel || 'Not Assessed')}${student.performanceCode && student.performanceCode !== 'NA' ? ' (' + escapeHtml(student.performanceCode) + ')' : ''}</span>
+                                ${mixText ? '<div class="lv-mix" title="Subjects at each level">' + mixText + '</div>' : ''}
+                            </td>
                             <td style="white-space:nowrap;">
                                 <button class="mini-btn view" title="View this student's result slip" onclick="viewStudentReport('${id}')"><i class="fas fa-file-alt"></i> View</button>
                                 <button class="mini-btn" title="Load into the marks grid to edit" onclick="editStudentFromList('${id}')"><i class="fas fa-pen"></i> Edit</button>

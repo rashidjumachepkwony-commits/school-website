@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import {
-  DEFAULT_POLICY, loadPolicy, normalizeScore, gradePercentage,
+  DEFAULT_POLICY, loadPolicy, normalizeScore, gradePercentage, gradeBySubject, ratingToLevel,
   computePercentage, classStats, rankStudents
 } from '../worker/src/services/assessment.service.js';
 
@@ -55,6 +55,52 @@ t('gradePercentage never returns the top band by accident', () => {
     else if (p < 80) assert.equal(code, 'ME', '60-80 must be ME, got ' + code + ' at ' + p);
     else assert.equal(code, 'EE', '80+ must be EE, got ' + code + ' at ' + p);
   }
+});
+t('gradeBySubject derives the overall level from subject levels', () => {
+  // Every subject at 45% -> Approaching overall, even though a blended total
+  // across these maxima would also be 45%. The point is the level, not the sum.
+  const r = gradeBySubject([
+    { subject: 'English', score: 45, maxScore: 100 },
+    { subject: 'Kiswahili', score: 9, maxScore: 20 },
+    { subject: 'Maths', score: 13, maxScore: 30 }
+  ]);
+  assert.equal(r.overall.code, 'AE');
+  assert.equal(r.subjects.length, 3);
+  assert.equal(r.subjects[0].level, 'Approaching Expectation');
+
+  // A learner weak in one heavily weighted subject but approaching elsewhere is
+  // reported from the subject levels, not the weighted total. Note 22/50 is 44%
+  // (Approaching); 45/50 would be 90% and therefore Exceeding.
+  const mixed = gradeBySubject([
+    { subject: 'Heavy', score: 5, maxScore: 100 },     // BE, 5%
+    { subject: 'A', score: 22, maxScore: 50 },         // AE, 44%
+    { subject: 'B', score: 22, maxScore: 50 },         // AE, 44%
+    { subject: 'C', score: 22, maxScore: 50 }          // AE, 44%
+  ]);
+  assert.equal(mixed.subjects[0].code, 'BE');
+  assert.equal(mixed.overall.code, 'AE', 'mean rating 1.75 rounds to AE');
+  // The blended percentage of those same marks is much lower than 44%, which is
+  // exactly why the overall level is taken from the subject levels.
+  const blended = (5 + 22 + 22 + 22) / (100 + 50 + 50 + 50) * 100;
+  assert.ok(blended < 30, 'blended total ' + blended.toFixed(1) + '% is below the AE band');
+
+  // Uniformly strong is EE.
+  const strong = gradeBySubject([
+    { subject: 'A', score: 90, maxScore: 100 },
+    { subject: 'B', score: 18, maxScore: 20 }
+  ]);
+  assert.equal(strong.overall.code, 'EE');
+
+  // No marks at all is reported as not assessed, never as BE.
+  assert.equal(gradeBySubject([]).overall.code, 'NA');
+  assert.equal(gradeBySubject([{ subject: 'X', score: null, maxScore: 10 }]).overall.code, 'NA');
+});
+t('ratingToLevel maps the mean rating to the nearest band', () => {
+  assert.equal(ratingToLevel(1).code, 'BE');
+  assert.equal(ratingToLevel(1.4).code, 'BE');
+  assert.equal(ratingToLevel(1.6).code, 'AE');
+  assert.equal(ratingToLevel(2.5).code, 'ME');
+  assert.equal(ratingToLevel(3.6).code, 'EE');
 });
 t('computePercentage from totalScore/maxTotal', () => {
   assert.equal(computePercentage({ totalScore: 80, maxTotal: 100 }), 80);

@@ -82,6 +82,67 @@ export function gradePercentage(percentage, policy = DEFAULT_POLICY) {
   return { level: bottom.name, code: bottom.code, rating: 1 };
 }
 
+/**
+ * Grade one subject, and collect the subject levels for a student.
+ *
+ * CBE judgement is made per learning area, then the overall judgement follows
+ * from those subject levels rather than from one blended total. A single
+ * percentage over wildly different subject maxima hides the picture: a learner
+ * can total 39.6% because one heavily weighted subject was weak while most
+ * subjects sat at "approaching", which is a different story.
+ *
+ * Returns the subject list with each level, the level rating average, and the
+ * overall performance level derived from it.
+ *
+ *   subjectsIn: [{ subject, score, maxScore }]
+ */
+export function gradeBySubject(subjectsIn, policy = DEFAULT_POLICY) {
+  const subjects = (subjectsIn || [])
+    .filter(a => a && a.score !== null && a.score !== undefined && a.score !== '' && Number(a.maxScore) > 0)
+    .map(a => {
+      const pct = (Number(a.score) / Number(a.maxScore)) * 100;
+      const g = gradePercentage(pct, policy);
+      return {
+        subject: a.subject,
+        score: Number(a.score),
+        maxScore: Number(a.maxScore),
+        percentage: Number(pct.toFixed(2)),
+        level: g.level,
+        code: g.code,
+        rating: g.rating
+      };
+    });
+
+  if (!subjects.length) {
+    return { subjects: [], overall: { level: 'Not Assessed', code: 'NA', rating: 0 }, meanRating: 0, counts: {} };
+  }
+
+  const meanRating = subjects.reduce((s, x) => s + x.rating, 0) / subjects.length;
+  const overall = ratingToLevel(meanRating, policy);
+  const counts = subjects.reduce((acc, s) => {
+    acc[s.code] = (acc[s.code] || 0) + 1;
+    return acc;
+  }, {});
+
+  return { subjects, overall, meanRating: Number(meanRating.toFixed(2)), counts };
+}
+
+/**
+ * Map an average level rating back to a performance level.
+ * Rating 1=BE, 2=AE, 3=ME, 4=EE. The mean is rounded to the nearest whole
+ * band, so a learner who is "approaching" in most subjects is reported as
+ * approaching overall even when one weak subject pulls the total down.
+ */
+export function ratingToLevel(meanRating, policy = DEFAULT_POLICY) {
+  const levels = [...(policy?.levels || DEFAULT_POLICY.levels)]
+    .sort((a, b) => (Number(a.min) || 0) - (Number(b.min) || 0));
+  if (!levels.length) return { level: 'Not Assessed', code: 'NA', rating: 0 };
+
+  const nearest = Math.min(levels.length, Math.max(1, Math.round(Number(meanRating) || 1)));
+  const l = levels[nearest - 1];
+  return { level: l.name, code: l.code, rating: nearest };
+}
+
 export function computeSubjectStats(records, subjectKey = 'subject') {
   // records: array of { assessments: [{subject, maxScore, score}], ... }
   const stats = {};

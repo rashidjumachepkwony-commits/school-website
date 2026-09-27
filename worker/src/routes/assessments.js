@@ -3,7 +3,7 @@
  */
 import { success, error, extractIntId } from '../utils/helpers.js';
 import { getKenyaTime, getKenyaDate, formatKenyaTime } from '../services/time.service.js';
-import { loadPolicy, classStats, gradePercentage, computePercentage, DEFAULT_POLICY } from '../services/assessment.service.js';
+import { loadPolicy, classStats, gradePercentage, gradeBySubject, computePercentage, DEFAULT_POLICY } from '../services/assessment.service.js';
 
 /** Escape text before it is interpolated into the printable report HTML. */
 function escapeHtml(value) {
@@ -41,7 +41,11 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         || byName.get(fullName.toLowerCase())
         || null;
       const pct = r ? computePercentage(r) : null;
-      const graded = pct !== null ? gradePercentage(pct, policy) : null;
+      // Stored level/code are subject-level based (see gradeBySubject). Fall
+      // back to the blended percentage only for records saved before that
+      // existed, so the two can never disagree.
+      const stored = r ? gradeBySubject((r.assessments || []), policy).overall : null;
+      const graded = stored || (pct !== null ? gradePercentage(pct, policy) : null);
       return {
         _id: s._id.toString(),
         studentName: `${s.firstName || ''} ${s.lastName || ''}`.trim(),
@@ -49,11 +53,17 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         admissionNumber: s.admissionNumber,
         grade: s.grade, class: s.class,
         assessments: r ? (r.assessments || []) : [],
+        subjectLevels: r ? (r.subjectLevels || (r.assessments || [])
+          .filter(a => a.score !== null && a.score !== undefined && a.score !== '')
+          .map(a => {
+            const g = gradePercentage(a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0, policy);
+            return { subject: a.subject, code: g.code, level: g.level };
+          })) : [],
         totalScore: r ? (r.totalScore ?? null) : null,
         averageScore: r ? (r.averageScore ?? null) : null,
         percentageScore: pct,
-        performanceLevel: r ? (r.performanceLevel || (graded ? graded.level : null)) : null,
-        performanceCode: graded ? graded.code : null,
+        performanceLevel: (r && r.performanceLevel) || (graded ? graded.level : null),
+        performanceCode: (r && r.performanceCode) || (graded ? graded.code : null),
         assessmentDate: r ? (r.assessmentDate || null) : null,
         updatedAt: r ? (r.updatedAt || null) : null
       };
@@ -139,16 +149,34 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
       // Average score is the mean of the subjects actually marked, which is
       // what the class is ranked on.
       const avgScore = hasAny ? Number((total / scoredCount).toFixed(2)) : null;
-      const g = hasAny ? gradePercentage(pct, policy) : { level: 'Not Assessed', code: 'NA' };
+
+      // Per-subject performance level, and the overall level taken from those
+      // subject levels rather than from the blended total.
+      const subjectRows = scores.map(x => {
+        const sp = x.max > 0 && x.score !== null ? Number(((x.score / x.max) * 100).toFixed(2)) : null;
+        const g = sp === null ? null : gradePercentage(sp, policy);
+        return {
+          subject: x.subject, score: x.score, max: x.max,
+          percentage: sp,
+          level: g ? g.level : 'Not Assessed',
+          code: g ? g.code : '-'
+        };
+      });
+      const graded = hasAny
+        ? gradeBySubject(scores.filter(x => x.score !== null).map(x => ({ subject: x.subject, score: x.score, maxScore: x.max })), policy).overall
+        : { level: 'Not Assessed', code: 'NA' };
+
       return {
         admissionNumber: s.admissionNumber,
         name,
-        scores, total,
+        scores,
+        subjectRows,
+        total,
         percentage: hasAny ? pct : null,
         average: avgScore,
         scoredCount,
         maxTotal,
-        level: g.level, code: g.code
+        level: graded.level, code: graded.code
       };
     });
 
@@ -177,7 +205,17 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     const meanPct = assessed.length ? Number((assessed.reduce((s, r) => s + r.percentage, 0) / assessed.length).toFixed(2)) : 0;
     const meanAvgScore = assessed.length ? Number((assessed.reduce((s, r) => s + r.average, 0) / assessed.length).toFixed(2)) : 0;
     const meanTotal = assessed.length ? Number((assessed.reduce((s, r) => s + r.total, 0) / assessed.length).toFixed(2)) : 0;
-    const classLevel = assessed.length ? gradePercentage(meanPct, policy) : { level: 'Not Assessed', code: 'NA' };
+    const classLevel = assessed.length
+      ? (assessed[0].level ? { level: assessed[0].level } : { level: 'Not Assessed', code: 'NA' })
+      : { level: 'Not Assessed', code: 'NA' };
+    // Class level is the most common level among assessed students, so the
+    // summary describes the typical learner in the class.
+    const levelTally = {};
+    for (const r of assessed) levelTally[r.level] = (levelTally[r.level] || 0) + 1;
+    const commonLevel = Object.entries(levelTally).sort((a, b) => b[1] - a[1])[0];
+    const classLevelObj = commonLevel
+      ? { level: commonLevel[0], count: commonLevel[1] }
+      : { level: 'Not Assessed', count: 0 };
     const best = assessed[0] || null;
     const worst = assessed.length > 1 ? assessed[assessed.length - 1] : null;
 
@@ -191,10 +229,10 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
 
     const bodyRows = ordered.map((row, i) => {
       const pos = positionOf.get(row.admissionNumber) || '-';
-      const subjectCells = row.scores.map(x =>
+      const subjectCells = row.subjectRows.map(x =>
         x.score === null
           ? '<td class="na">-</td>'
-          : `<td>${x.score}<span class="mx">/${x.max}</span></td>`
+          : `<td><strong>${x.score}</strong><span class="mx">/${x.max}</span><span class="lv ${x.code.toLowerCase()}">${x.code}</span></td>`
       ).join('');
       return `<tr>
         <td class="ctr">${pos}</td>
@@ -288,6 +326,12 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
   .ctr{text-align:center}
   .mx{color:#8a97ab;font-size:9px;margin-left:1px}
   .na{color:#c3ccdb}
+  /* per-subject performance level shown under each mark */
+  .lv{display:block;font-size:8.5px;font-weight:800;letter-spacing:.4px;margin-top:1px;padding:1px 0;border-radius:3px}
+  .lv.ee{color:#136b2c}
+  .lv.me{color:#12459b}
+  .lv.ae{color:#856404}
+  .lv.be{color:#8c1c24}
   .lv-exceed{background:#dff3e4;color:#136b2c;font-weight:700}
   .lv-meet{background:#dbeafe;color:#12459b;font-weight:700}
   .lv-approach{background:#fff3cd;color:#856404;font-weight:700}
@@ -362,7 +406,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     <div class="stat"><div class="k">Class Total Score</div><div class="v">${meanTotal}</div><div class="k2">mean per student</div></div>
     <div class="stat"><div class="k">Class Average Score</div><div class="v">${meanAvgScore}</div><div class="k2">mean of subject averages</div></div>
     <div class="stat"><div class="k">Average Percentage</div><div class="v">${meanPct}%</div></div>
-    <div class="stat"><div class="k">Overall Performance</div><div class="v" style="font-size:13px;line-height:1.3;">${escapeHtml(classLevel.level)}</div><div class="k2">${escapeHtml(classLevel.code)}</div></div>
+    <div class="stat"><div class="k">Overall Performance</div><div class="v" style="font-size:13px;line-height:1.3;">${escapeHtml(classLevelObj.level)}</div><div class="k2">most common: ${classLevelObj.count} of ${assessed.length}</div></div>
     <div class="stat"><div class="k">Best Performed</div><div class="v" style="font-size:13px;">${best ? escapeHtml(best.name) : '-'}</div><div class="k2">${best ? best.average + ' avg' : ''}</div></div>
     <div class="stat"><div class="k">Lowest Performed</div><div class="v" style="font-size:13px;">${worst && worst !== best ? escapeHtml(worst.name) : '-'}</div><div class="k2">${worst && worst !== best ? worst.average + ' avg' : ''}</div></div>
   </div>
@@ -483,10 +527,14 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
       const totalScore = scored.reduce((sum, a) => sum + (Number(a.score) || 0), 0);
       const averageScore = scored.length ? totalScore / scored.length : 0;
       const percentageScore = maxTotal > 0 ? Number(((totalScore / maxTotal) * 100).toFixed(2)) : 0;
-      const graded = gradePercentage(percentageScore, policy);
+
+      // CBE judgement is made per learning area; the overall level follows from
+      // those subject levels rather than from the blended total.
+      const subjectGrading = gradeBySubject(r.assessments, policy);
+      const graded = scored.length ? subjectGrading.overall : { level: 'Not Assessed', code: 'NA' };
 
       const record = {
-        studentId: studentId || null,
+        studentId: studentId ? String(studentId) : null,
         studentName,
         grade,
         class: grade,
@@ -494,10 +542,17 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         assessmentType: assessmentType || '',
         assessmentName: assessmentName || assessmentType || '',
         assessmentDate: assessmentDate || now,
-        assessments: r.assessments || [],
+        assessments: (r.assessments || []).map(a => {
+          const g = subjectGrading.subjects.find(s => s.subject === a.subject);
+          return g
+            ? { subject: a.subject, maxScore: a.maxScore, score: a.score, level: g.level, code: g.code }
+            : { subject: a.subject, maxScore: a.maxScore, score: a.score };
+        }),
         totalScore,
         averageScore: Number(averageScore.toFixed(2)),
         percentageScore,
+        subjectLevels: subjectGrading.subjects.map(s => ({ subject: s.subject, code: s.code, level: s.level, percentage: s.percentage })),
+        meanLevelRating: subjectGrading.meanRating,
         performanceLevel: graded.level,
         performanceCode: graded.code,
         updatedAt: now
@@ -593,6 +648,13 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
       return success({ rows, total: 0, message: 'No marks have been recorded for this period yet.' });
     }
 
+    // The typical level among the students listed, so the strip describes the
+    // cohort rather than a single average.
+    const lvlTally = {};
+    for (const r of rows) lvlTally[r.level] = (lvlTally[r.level] || 0) + 1;
+    const topLevel = Object.entries(lvlTally).sort((a, b) => b[1] - a[1])[0];
+    const classLevelObj = topLevel ? { level: topLevel[0], count: topLevel[1] } : { level: 'Not Assessed', count: 0 };
+
     const bodyRows = rows.map(r => `<tr>
       <td class="ctr">${posOf.get(r.admissionNumber + '|' + r.grade) || '-'}</td>
       <td class="ctr">${escapeHtml(r.admissionNumber || '')}</td>
@@ -659,7 +721,7 @@ tbody tr:nth-child(even){background:#fafcff}
     <div class="stat"><div class="k">Class Total Score</div><div class="v">${meanTotal}</div><div class="k2">mean per student</div></div>
     <div class="stat"><div class="k">Class Average Score</div><div class="v">${meanAvg}</div><div class="k2">mean of subject averages</div></div>
     <div class="stat"><div class="k">Average Percentage</div><div class="v">${meanPct}%</div></div>
-    <div class="stat"><div class="k">Overall Performance</div><div class="v" style="font-size:13px;line-height:1.3;">${escapeHtml(classLevel.level)}</div><div class="k2">${escapeHtml(classLevel.code)}</div></div>
+    <div class="stat"><div class="k">Overall Performance</div><div class="v" style="font-size:13px;line-height:1.3;">${escapeHtml(classLevelObj.level)}</div><div class="k2">most common: ${classLevelObj.count} of ${rows.length}</div></div>
   </div>
   <table>
     <thead><tr><th class="ctr">Pos</th><th class="ctr">Adm. No.</th><th>Student Name</th><th class="ctr">Grade</th>
@@ -796,7 +858,12 @@ tbody tr:nth-child(even){background:#fafcff}
     const myScored = (mine.assessments || [])
       .filter(a => a.score !== null && a.score !== undefined && a.score !== '').length;
     const myAvgScore = myScored ? Number((myTotal / myScored).toFixed(2)) : 0;
-    const graded = gradePercentage(myPct, policy);
+    // Overall level follows from the per-subject levels, not the blended total.
+    const myGrading = gradeBySubject(
+      (mine.assessments || []).filter(a => a.score !== null && a.score !== undefined && a.score !== ''),
+      policy
+    );
+    const graded = myGrading.overall;
 
     // Subject-by-subject: my mark against the class average for that subject
     const classSubj = {};
@@ -848,7 +915,7 @@ tbody tr:nth-child(even){background:#fafcff}
     const levelClass = { 'Exceeding Expectation': 'lv-exceed', 'Meeting Expectation': 'lv-meet', 'Approaching Expectation': 'lv-approach', 'Below Expectation': 'lv-below' };
     const subjCells = subjectRows.map(s => {
       const bar = s.mySubjPct === null ? 0 : Math.max(0, Math.min(100, s.mySubjPct));
-      const cls = s.level ? (levelClass[s.level] || '') : '';
+      const cls = s.level ? (levelClass[s.level.level] || '') : '';
       return `<tr>
         <td>${escapeHtml(s.subject)}</td>
         <td class="ctr"><strong>${s.score === null ? '-' : s.score}</strong><span class="mx">/${s.max}</span></td>
@@ -856,7 +923,7 @@ tbody tr:nth-child(even){background:#fafcff}
         <td class="ctr">${s.classAvg === null ? '-' : s.classAvg}</td>
         <td class="ctr ${s.delta === null ? '' : s.delta >= 0 ? 'up' : 'down'}">${s.delta === null ? '-' : (s.delta >= 0 ? '+' : '') + s.delta}</td>
         <td class="barcell"><div class="bar"><i style="width:${bar}%"></i></div></td>
-        <td class="ctr ${cls}">${s.level ? escapeHtml(s.level) : '-'}</td>
+        <td class="ctr ${cls}">${s.level ? escapeHtml(s.level.code) + '<br>' + escapeHtml(s.level.name) : '-'}</td>
       </tr>`;
     }).join('');
 
@@ -928,7 +995,8 @@ tbody tr:nth-child(even){background:#fafcff}
       <div><b>Total Score:</b> ${myTotal} / ${maxTotal}</div>
       <div><b>Average Score:</b> ${myAvgScore} (over ${myScored} subject${myScored === 1 ? '' : 's'})</div>
       <div><b>Average Percentage:</b> ${myPct}%</div>
-      <div><b>Overall Performance Level:</b> <span class="pill ${levelClass[graded.level] || ''}">${escapeHtml(graded.level)} (${escapeHtml(graded.code)})</span></div>
+      <div><b>Overall Performance Level:</b> <span class="pill ${levelClass[graded.level] || ''}">${escapeHtml(graded.level)} (${escapeHtml(graded.code)})</span>
+        <span style="color:#8a97ab">&nbsp;from subject levels${myGrading.counts ? ' (' + Object.entries(myGrading.counts).map(([c, n]) => n + '&times;' + c).join(', ') + ')' : ''}</span></div>
       <div><b>Position in class:</b> ${position} of ${outOf} <span style="color:#8a97ab">(by average score)</span></div>
       <div><b>Class average score:</b> ${classMeanAvg} &nbsp;|&nbsp; <b>class average %:</b> ${classMean}%</div>
       <div><b>Class performance:</b> <span class="pill ${levelClass[classLevel.level] || ''}">${escapeHtml(classLevel.level)}</span></div>
