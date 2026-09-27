@@ -477,6 +477,34 @@
            On a phone the wide marks table is unusable, so below 820px each
            student becomes a card with a labelled field per subject. */
         .entry-toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+
+        /* ===== DOWNLOAD PANEL ===== */
+        .dl-panel {
+            margin: 0 0 14px; padding: 14px 16px; border: 2px solid #D4A017; border-radius: 12px;
+            background: #fffdf5;
+        }
+        .dl-head { display:flex; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+        .dl-head > i { font-size:26px; color:#a4161a; }
+        .dl-head strong { display:block; font-size:14px; color:#0A1628; }
+        .dl-head span { display:block; font-size:11.5px; color:#5a6b85; margin-top:2px; }
+        .dl-btns { display:flex; gap:9px; flex-wrap:wrap; }
+        .btn-dl {
+            padding:11px 16px; font-size:12.5px; font-weight:700; font-family:inherit; cursor:pointer;
+            border:2px solid #D4A017; background:#D4A017; color:#0A1628; border-radius:9px;
+            display:inline-flex; align-items:center; gap:7px;
+        }
+        .btn-dl:hover { background:#c1900f; }
+        .btn-dl.sec { background:#0A1628; color:#fff; border-color:#0A1628; }
+        .btn-dl.sec:hover { background:#1d3a6b; }
+        .mini-btn {
+            border:1px solid #d5dce6; background:#fff; color:#0A1628; cursor:pointer;
+            border-radius:6px; padding:4px 7px; font-size:11px; margin-right:3px;
+        }
+        .mini-btn:hover { background:#f0f4ff; border-color:#0A1628; }
+        .mini-btn.view { border-color:#0b5394; color:#0b5394; }
+        .mini-btn.dl { border-color:#1e7e34; color:#1e7e34; font-weight:700; }
+        .mini-btn.del { border-color:#f0c3c5; color:#a4161a; }
+        @media (max-width:600px){ .dl-btns .btn-dl { width:100%; justify-content:center; } }
         .entry-hint {
             font-size: 11px; color: #6c757d; background: #f0f4ff;
             border-left: 3px solid #0A1628; padding: 7px 10px; border-radius: 6px;
@@ -663,17 +691,29 @@
             <button class="btn btn-warning" onclick="toggleSubjectConfig()">
                 <i class="fas fa-cog"></i> Edit Subjects
             </button>
-            <button class="btn btn-primary" onclick="downloadClassReport()" style="background:#0A1628;">
-                <i class="fas fa-file-pdf"></i> Class Report (PDF)
-            </button>
             <span class="save-status" id="saveStatus"></span>
         </div>
 
-        <div class="entry-toolbar" style="margin-bottom:10px;">
-            <button class="btn btn-primary" onclick="downloadClassReport()" style="background:#0A1628;">
-                <i class="fas fa-file-pdf"></i> Download Assessment PDF
-            </button>
-            <span id="reportFilterSummary" style="font-size:12px;color:#3c4d68;"></span>
+        <!-- ===== DOWNLOAD: by grade, type, period, name, date ===== -->
+        <div class="dl-panel">
+            <div class="dl-head">
+                <i class="fas fa-file-pdf"></i>
+                <div>
+                    <strong>Download Assessment Results (PDF)</strong>
+                    <span id="reportFilterSummary"></span>
+                </div>
+            </div>
+            <div class="dl-btns">
+                <button class="btn btn-dl" onclick="downloadClassReport()">
+                    <i class="fas fa-download"></i> Whole Class (this grade)
+                </button>
+                <button class="btn btn-dl sec" onclick="downloadAllStudentsPDF()">
+                    <i class="fas fa-users"></i> All Students Results
+                </button>
+                <button class="btn btn-dl" onclick="downloadStudentPicker()">
+                    <i class="fas fa-user"></i> One Student's Result
+                </button>
+            </div>
         </div>
 
         <div class="entry-toolbar" style="margin-bottom:10px;">
@@ -818,6 +858,9 @@
                 <input type="text" id="searchStudent" placeholder="Search by name..." onkeyup="loadStudentList()">
             </div>
             <button class="btn btn-success" onclick="loadStudentList()"><i class="fas fa-sync"></i> Refresh</button>
+            <button class="btn btn-primary" onclick="downloadAllStudentsPDF()" style="background:#0A1628;">
+                <i class="fas fa-file-pdf"></i> Download All Results (PDF)
+            </button>
         </div>
 
         <div class="table-wrapper">
@@ -829,8 +872,9 @@
                         <th>Grade</th>
                         <th>Subjects</th>
                         <th>Total Score</th>
-                        <th>Average</th>
-                        <th>Performance Level</th>
+                        <th>Average Score</th>
+                        <th>Average %</th>
+                        <th>Overall Performance Level</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -1801,22 +1845,28 @@
                         'Below Expectation': 'status-below'
                     }[student.performanceLevel] || '';
 
+                    const list = student.assessments || [];
+                    const scored = list.filter(a => a.score !== null && a.score !== undefined && a.score !== '');
+                    const total = scored.reduce((s, a) => s + (Number(a.score) || 0), 0);
+                    const maxTotal = scored.reduce((s, a) => s + (Number(a.maxScore) || 0), 0);
+                    const avgScore = scored.length ? (total / scored.length) : 0;
+                    const avgPct = maxTotal > 0 ? ((total / maxTotal) * 100) : 0;
+                    const id = student._id || '';
+
                     return `
                         <tr>
                             <td>${index + 1}</td>
-                            <td><strong>${student.studentName}</strong></td>
-                            <td>${student.grade}</td>
-                            <td>${student.assessments ? student.assessments.length : 0}</td>
-                            <td>${student.totalScore || 0}</td>
-                            <td>${student.averageScore ? student.averageScore.toFixed(1) : 0}</td>
-                            <td><span class="${performanceClass}">${student.performanceLevel || 'N/A'}</span></td>
-                            <td>
-                                <button class="btn btn-info btn-sm" onclick="editStudentFromList('${student._id}')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-success btn-sm" onclick="downloadReport('${student._id}')">
-                                    <i class="fas fa-download"></i>
-                                </button>
+                            <td><strong>${escapeHtml(student.studentName || '')}</strong></td>
+                            <td>${escapeHtml(student.grade || '-')}</td>
+                            <td>${list.length}</td>
+                            <td><strong>${total}</strong></td>
+                            <td><strong>${scored.length ? avgScore.toFixed(2) : '-'}</strong></td>
+                            <td>${maxTotal > 0 ? avgPct.toFixed(1) + '%' : '-'}</td>
+                            <td><span class="${performanceClass}">${escapeHtml(student.performanceLevel || 'Not Assessed')}${student.performanceCode && student.performanceCode !== 'NA' ? ' (' + escapeHtml(student.performanceCode) + ')' : ''}</span></td>
+                            <td style="white-space:nowrap;">
+                                <button class="mini-btn view" title="View this student's result slip" onclick="viewStudentReport('${id}')"><i class="fas fa-file-alt"></i> View</button>
+                                <button class="mini-btn" title="Load into the marks grid to edit" onclick="editStudentFromList('${id}')"><i class="fas fa-pen"></i> Edit</button>
+                                <button class="mini-btn dl" title="Download this student's result" onclick="downloadReport('${id}')"><i class="fas fa-download"></i> PDF</button>
                             </td>
                         </tr>
                     `;
@@ -1832,53 +1882,54 @@
     // EDIT STUDENT FROM LIST
     // ============================================
     async function editStudentFromList(studentId) {
+        if (!studentId) { showAlert('That student has no saved result yet.', 'error'); return; }
         try {
-            const response = await fetch(`/api/assessments/student/${studentId}`);
-            const data = await response.json();
-            if (data.success) {
-                const student = data.student;
-                // Load the correct period/type for this student's assessment record
-                if (student.assessmentPeriod) document.getElementById('assessmentPeriod').value = student.assessmentPeriod;
-                if (student.assessmentType) document.getElementById('assessmentType').value = student.assessmentType;
-                currentPeriod = document.getElementById('assessmentPeriod').value;
-                currentType = document.getElementById('assessmentType').value;
-                selectGrade(student.grade);
-                document.getElementById('marksTableContainer').scrollIntoView({ behavior: 'smooth' });
-                setTimeout(() => {
-                    document.querySelectorAll('#marksTableBody tr[data-student-id]').forEach(row => {
-                        if (row.dataset.studentId === studentId) {
-                            row.style.backgroundColor = '#fff3cd';
-                            row.style.transition = 'background-color 0.5s';
-                            setTimeout(() => { row.style.backgroundColor = ''; }, 3000);
-                        }
-                    });
-                }, 500);
-            }
+            const data = await window.apiJson('/api/assessments/student/' + encodeURIComponent(studentId));
+            if (!data.success) { showAlert('Could not open that result.', 'error'); return; }
+            const s = data.student || {};
+
+            // Match the sitting this student's result belongs to, so the grid
+            // shows the right period and type.
+            if (s.assessmentPeriod) document.getElementById('assessmentPeriod').value = s.assessmentPeriod;
+            if (s.assessmentType) document.getElementById('assessmentType').value = s.assessmentType;
+            currentPeriod = document.getElementById('assessmentPeriod').value;
+            currentType = document.getElementById('assessmentType').value;
+            if (s.assessmentName) document.getElementById('assessmentNameInput').value = s.assessmentName;
+            if (s.grade) selectGrade(s.grade);
+
+            await loadGradeData();
+            showAlert('Loaded ' + (s.studentName || 'student') + ' for editing. Change the scores, then press Save.', 'info');
+            document.getElementById('marksTableContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            setTimeout(() => {
+                let target = null;
+                document.querySelectorAll('#marksTableBody tr[data-student-id]').forEach(row => {
+                    if (row.dataset.studentId === studentId) target = row;
+                });
+                if (!target) { showAlert('That student is not in ' + currentGrade + '. Switch grade to edit them.', 'error'); return; }
+                target.style.backgroundColor = '#fff3cd';
+                target.style.transition = 'background-color 0.5s';
+                const first = target.querySelector('.score-input');
+                if (first) { first.focus(); first.select(); }
+                setTimeout(() => { target.style.backgroundColor = ''; }, 4000);
+            }, 400);
         } catch (error) {
-            console.error('Error:', error);
-            showAlert('Error loading student data', 'error');
+            showAlert(error.message, 'error');
         }
     }
+
 
     // ============================================
     // DOWNLOAD REPORT
     // ============================================
     async function downloadReport(studentId) {
-        try {
-            const response = await fetch(`/api/assessments/generate-report/${studentId}`);
-            const data = await response.json();
-            if (data.success) {
-                const win = window.open('', '_blank');
-                win.document.write(data.html);
-                win.document.close();
-                setTimeout(() => win.print(), 500);
-            } else {
-                showAlert('Error generating report', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showAlert('Error downloading report', 'error');
-        }
+        if (!studentId) { showAlert('That student has no saved result yet.', 'error'); return; }
+        // Use the professional CBE result slip (total, average score, average
+        // percentage, overall performance level, class comparison).
+        const url = '/api/assessments/student-report/' + encodeURIComponent(studentId) +
+            '?' + reportFilterParams();
+        const win = window.open(url, '_blank');
+        if (!win) showAlert('Please allow popups for this site to download reports', 'error');
     }
 
     // ============================================
@@ -1971,11 +2022,42 @@
         const el = document.getElementById('reportFilterSummary');
         if (!el) return;
         const d = document.getElementById('assessmentDate').value || 'not set';
-        el.innerHTML = '<b>Grade:</b> ' + escapeHtml(currentGrade) +
-            ' &nbsp;•&nbsp; <b>Period:</b> ' + escapeHtml(currentPeriod || '-') +
-            ' &nbsp;•&nbsp; <b>Type:</b> ' + escapeHtml(currentType || '-') +
-            ' &nbsp;•&nbsp; <b>Name:</b> ' + escapeHtml(getCurrentAssessmentName() || '-') +
-            ' &nbsp;•&nbsp; <b>Date:</b> ' + escapeHtml(d);
+        el.textContent = 'Grade: ' + currentGrade + '  |  Period: ' + (currentPeriod || '-') +
+            '  |  Type: ' + (currentType || '-') + '  |  Name: ' + (getCurrentAssessmentName() || '-') +
+            '  |  Date: ' + d;
+    }
+
+    /** Current filter set as a query string, reused by every download. */
+    function reportFilterParams(extra) {
+        const p = new URLSearchParams();
+        p.set('period', currentPeriod);
+        p.set('type', currentType);
+        const n = getCurrentAssessmentName();
+        if (n) p.set('name', n);
+        const d = document.getElementById('assessmentDate').value;
+        if (d) p.set('date', d);
+        if (extra) for (const [k, v] of Object.entries(extra)) p.set(k, v);
+        return p.toString();
+    }
+
+    /** All students who have marks, every grade, as one PDF. */
+    function downloadAllStudentsPDF() {
+        const url = '/api/assessments/all-report?' + reportFilterParams();
+        const win = window.open(url, '_blank');
+        if (!win) showAlert('Please allow popups for this site to download reports', 'error');
+    }
+
+    /** Let the teacher pick one student, then open that result slip. */
+    function downloadStudentPicker() {
+        const list = studentsData.filter(s => s._id && !String(s._id).startsWith('new_'));
+        if (!list.length) { showAlert('No saved results to download yet.', 'error'); return; }
+        const names = list.map((s, i) =>
+            `${i + 1}. ${(s.studentName || '').trim()}` + (s.admissionNumber ? '  (' + s.admissionNumber + ')' : '')).join('\n');
+        const answer = prompt('Type the number of the student to download:\n\n' + names, '1');
+        if (answer === null) return;
+        const pick = list[parseInt(answer, 10) - 1];
+        if (!pick) { showAlert('Please enter a number from the list.', 'error'); return; }
+        viewStudentReport(pick._id);
     }
 
     // ============================================

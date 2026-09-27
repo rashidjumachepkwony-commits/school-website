@@ -133,30 +133,35 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         return { subject: subj, score, max: maxBySubject[subj] || 0 };
       });
       const total = scores.reduce((sum, x) => sum + (x.score || 0), 0);
+      const scoredCount = scores.filter(x => x.score !== null).length;
       const pct = maxTotal > 0 ? Number(((total / maxTotal) * 100).toFixed(2)) : 0;
-      const hasAny = scores.some(x => x.score !== null);
+      const hasAny = scoredCount > 0;
+      // Average score is the mean of the subjects actually marked, which is
+      // what the class is ranked on.
+      const avgScore = hasAny ? Number((total / scoredCount).toFixed(2)) : null;
       const g = hasAny ? gradePercentage(pct, policy) : { level: 'Not Assessed', code: 'NA' };
       return {
         admissionNumber: s.admissionNumber,
         name,
         scores, total,
         percentage: hasAny ? pct : null,
-        average: hasAny ? Number((total / (scores.filter(x => x.score !== null).length || 1)).toFixed(2)) : null,
+        average: avgScore,
+        scoredCount,
+        maxTotal,
         level: g.level, code: g.code
       };
     });
 
-    // Rank only students who have marks.
-    const assessed = rows.filter(r => r.percentage !== null).sort((a, b) => b.percentage - a.percentage);
+    // Rank on average score, as the school requires, not on the percentage.
+    const assessed = rows.filter(r => r.average !== null).sort((a, b) => {
+      if (b.average !== a.average) return b.average - a.average;
+      return b.percentage - a.percentage;
+    });
     const positionOf = new Map();
     assessed.forEach((r, i) => {
-      const same = assessed.filter(x => x.percentage === r.percentage).length;
-      if (same > 1) {
-        const firstIdx = assessed.findIndex(x => x.percentage === r.percentage);
-        positionOf.set(r.admissionNumber, firstIdx + 1);
-      } else {
-        positionOf.set(r.admissionNumber, i + 1);
-      }
+      const same = assessed.filter(x => x.average === r.average).length;
+      const firstIdx = assessed.findIndex(x => x.average === r.average);
+      positionOf.set(r.admissionNumber, firstIdx + 1);
     });
     const ordered = [...rows].sort((a, b) => {
       const pa = positionOf.get(a.admissionNumber), pb = positionOf.get(b.admissionNumber);
@@ -170,6 +175,9 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     const levels = policy.levels || DEFAULT_POLICY.levels;
     const distribution = levels.map(l => ({ name: l.name, count: assessed.filter(x => x.level === l.name).length }));
     const meanPct = assessed.length ? Number((assessed.reduce((s, r) => s + r.percentage, 0) / assessed.length).toFixed(2)) : 0;
+    const meanAvgScore = assessed.length ? Number((assessed.reduce((s, r) => s + r.average, 0) / assessed.length).toFixed(2)) : 0;
+    const meanTotal = assessed.length ? Number((assessed.reduce((s, r) => s + r.total, 0) / assessed.length).toFixed(2)) : 0;
+    const classLevel = assessed.length ? gradePercentage(meanPct, policy) : { level: 'Not Assessed', code: 'NA' };
     const best = assessed[0] || null;
     const worst = assessed.length > 1 ? assessed[assessed.length - 1] : null;
 
@@ -193,7 +201,8 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         <td class="ctr">${escapeHtml(row.admissionNumber || '')}</td>
         <td>${escapeHtml(row.name)}</td>
         ${subjectCells}
-        <td class="ctr"><strong>${row.total}</strong></td>
+        <td class="ctr"><strong>${row.total}</strong><span class="mx">/${row.maxTotal}</span></td>
+        <td class="ctr"><strong>${row.average === null ? '-' : row.average.toFixed(2)}</strong></td>
         <td class="ctr">${row.percentage === null ? '-' : row.percentage + '%'}</td>
         <td class="ctr ${levelClass[row.level] || ''}">${escapeHtml(row.code)}</td>
         <td>${escapeHtml(row.level)}</td>
@@ -295,6 +304,8 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
   .stat{flex:1;min-width:130px;border:1px solid #e3e9f2;border-radius:8px;padding:9px 12px;background:#fbfcfe}
   .stat .k{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:#6b7a92}
   .stat .v{font-size:17px;font-weight:700;color:#0a1628;margin-top:2px}
+  .stat .k2{font-size:9.5px;color:#8a97ab;margin-top:2px}
+  .cls-level{display:inline-block;padding:3px 10px;border-radius:9px;font-weight:800;font-size:11px}
   .sign{display:flex;gap:40px;margin-top:34px;page-break-inside:avoid}
   .sign div{flex:1;border-top:1px solid #8a97ab;padding-top:5px;font-size:10.5px;color:#5a6b85;text-align:center}
   .foot{margin-top:14px;padding-top:8px;border-top:1px solid #e3e9f2;font-size:9.5px;color:#8a97ab;display:flex;justify-content:space-between}
@@ -336,20 +347,24 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         <th class="ctr">Adm. No.</th>
         <th>Student Name</th>
         ${headCells}
-        <th class="ctr">Total</th>
-        <th class="ctr">Average</th>
+        <th class="ctr">Total Score</th>
+        <th class="ctr">Average Score</th>
+        <th class="ctr">Average %</th>
         <th class="ctr">Key</th>
-        <th>Performance Level</th>
+        <th>Overall Performance Level</th>
       </tr>
     </thead>
     <tbody>${bodyRows || '<tr><td colspan="' + (subjectOrder.length + 7) + '" class="ctr" style="padding:22px;color:#8a97ab">No students found in ' + escapeHtml(grade) + '.</td></tr>'}</tbody>
   </table>
 
   <div class="stat-row">
-    <div class="stat"><div class="k">Class Mean</div><div class="v">${meanPct}%</div></div>
-    <div class="stat"><div class="k">Best Performed</div><div class="v" style="font-size:13px">${best ? escapeHtml(best.name) : '-'}</div></div>
-    <div class="stat"><div class="k">Lowest Performed</div><div class="v" style="font-size:13px">${worst && worst !== best ? escapeHtml(worst.name) : '-'}</div></div>
-    <div class="stat"><div class="k">Assessed</div><div class="v">${assessed.length} / ${students.length}</div></div>
+    <div class="stat"><div class="k">Students Assessed</div><div class="v">${assessed.length} / ${students.length}</div></div>
+    <div class="stat"><div class="k">Class Total Score</div><div class="v">${meanTotal}</div><div class="k2">mean per student</div></div>
+    <div class="stat"><div class="k">Class Average Score</div><div class="v">${meanAvgScore}</div><div class="k2">mean of subject averages</div></div>
+    <div class="stat"><div class="k">Average Percentage</div><div class="v">${meanPct}%</div></div>
+    <div class="stat"><div class="k">Overall Performance</div><div class="v" style="font-size:13px;line-height:1.3;">${escapeHtml(classLevel.level)}</div><div class="k2">${escapeHtml(classLevel.code)}</div></div>
+    <div class="stat"><div class="k">Best Performed</div><div class="v" style="font-size:13px;">${best ? escapeHtml(best.name) : '-'}</div><div class="k2">${best ? best.average + ' avg' : ''}</div></div>
+    <div class="stat"><div class="k">Lowest Performed</div><div class="v" style="font-size:13px;">${worst && worst !== best ? escapeHtml(worst.name) : '-'}</div><div class="k2">${worst && worst !== best ? worst.average + ' avg' : ''}</div></div>
   </div>
 
   <div class="cols">
@@ -516,6 +531,149 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     });
   }
 
+  // GET /api/assessments/all-report?period&type&name&grade&format=pdf
+  // Every student who has marks for the chosen sitting, across all grades.
+  if (route === '/assessments/all-report' && method === 'GET') {
+    const period = url.searchParams.get('period') || '';
+    const type = url.searchParams.get('type') || '';
+    const name = url.searchParams.get('name') || '';
+    const onlyGrade = url.searchParams.get('grade') || '';
+
+    const policySetting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
+    const policy = loadPolicy(policySetting && policySetting.value ? JSON.stringify(policySetting.value) : null);
+
+    const recQuery = {
+      ...(period ? { assessmentPeriod: period } : {}),
+      ...(type ? { assessmentType: type } : {}),
+      ...(name ? { assessmentName: name } : {})
+    };
+    let records = await db.collection('assessments').find(recQuery).toArray();
+    if (onlyGrade) records = records.filter(r => r.grade === onlyGrade);
+
+    const allStudents = await db.collection('students').find({}).toArray();
+    const byId = new Map(allStudents.map(s => [String(s._id.toString()), s]));
+
+    const rows = [];
+    for (const r of records) {
+      const list = (r.assessments || []).filter(a => a.score !== null && a.score !== undefined && a.score !== '');
+      if (!list.length) continue;
+      const student = byId.get(String(r.studentId || '')) || null;
+      const total = list.reduce((s, a) => s + (Number(a.score) || 0), 0);
+      const maxTotal = list.reduce((s, a) => s + (Number(a.maxScore) || 0), 0);
+      const pct = maxTotal > 0 ? Number(((total / maxTotal) * 100).toFixed(2)) : 0;
+      const avg = Number((total / list.length).toFixed(2));
+      const g = gradePercentage(pct, policy);
+      rows.push({
+        admissionNumber: r.studentId && String(r.studentId).length === 24 ? (student?.admissionNumber || '') : (r.studentId || ''),
+        name: student ? `${student.firstName || ''} ${student.lastName || ''}`.trim() : (r.studentName || ''),
+        grade: r.grade || (student ? (student.grade || student.class || '') : ''),
+        subjects: list.length,
+        total, avg, pct,
+        level: g.level, code: g.code
+      });
+    }
+
+    rows.sort((a, b) => (b.avg - a.avg) || (b.pct - a.pct));
+    const posOf = new Map();
+    rows.forEach((r, i) => {
+      const firstIdx = rows.findIndex(x => x.avg === r.avg);
+      posOf.set(r.admissionNumber + '|' + r.grade, firstIdx + 1);
+    });
+
+    const levelClass = {
+      'Exceeding Expectation': 'lv-exceed', 'Meeting Expectation': 'lv-meet',
+      'Approaching Expectation': 'lv-approach', 'Below Expectation': 'lv-below'
+    };
+    const meanAvg = rows.length ? Number((rows.reduce((s, r) => s + r.avg, 0) / rows.length).toFixed(2)) : 0;
+    const meanPct = rows.length ? Number((rows.reduce((s, r) => s + r.pct, 0) / rows.length).toFixed(2)) : 0;
+    const meanTotal = rows.length ? Number((rows.reduce((s, r) => s + r.total, 0) / rows.length).toFixed(2)) : 0;
+    const classLevel = rows.length ? gradePercentage(meanPct, policy) : { level: 'Not Assessed', code: 'NA' };
+
+    if (rows.length === 0) {
+      return success({ rows, total: 0, message: 'No marks have been recorded for this period yet.' });
+    }
+
+    const bodyRows = rows.map(r => `<tr>
+      <td class="ctr">${posOf.get(r.admissionNumber + '|' + r.grade) || '-'}</td>
+      <td class="ctr">${escapeHtml(r.admissionNumber || '')}</td>
+      <td>${escapeHtml(r.name)}</td>
+      <td class="ctr">${escapeHtml(r.grade || '-')}</td>
+      <td class="ctr">${r.subjects}</td>
+      <td class="ctr"><strong>${r.total}</strong></td>
+      <td class="ctr"><strong>${r.avg.toFixed(2)}</strong></td>
+      <td class="ctr">${r.pct}%</td>
+      <td class="ctr ${levelClass[r.level] || ''}">${escapeHtml(r.code)}</td>
+      <td>${escapeHtml(r.level)}</td>
+    </tr>`).join('');
+
+    const html = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>All Students CBE Results</title><style>
+*{box-sizing:border-box}
+@page{size:A4 landscape;margin:12mm 10mm}
+body{font-family:"Segoe UI",Arial;margin:0;padding:18px;background:#eef1f5;color:#12233f;font-size:11px}
+.sheet{max-width:1400px;margin:0 auto;background:#fff;padding:26px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
+.hd{display:flex;align-items:center;gap:16px;border-bottom:3px solid #d4a017;padding-bottom:12px}
+.crest{width:60px;height:60px;flex:0 0 60px;border-radius:50%;background:linear-gradient(135deg,#0a1628,#1c3a6e);color:#d4a017;display:flex;align-items:center;justify-content:center;font-size:26px}
+.hd h1{margin:0;font-size:21px;color:#0a1628}
+.hd .tag{font-size:11px;color:#5a6b85;text-transform:uppercase;letter-spacing:2px}
+.hd .motto{font-size:11px;color:#8a6d1f;font-style:italic;margin-top:2px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 26px;margin:14px 0 6px;padding:10px 14px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #cfd8e6;padding:5px 7px;text-align:left}
+thead th{background:#0a1628;color:#fff;font-size:10.5px;text-transform:uppercase}
+tbody tr:nth-child(even){background:#fafcff}
+.ctr{text-align:center}
+.lv-exceed{background:#dff3e4;color:#136b2c;font-weight:700}
+.lv-meet{background:#dbeafe;color:#12459b;font-weight:700}
+.lv-approach{background:#fff3cd;color:#856404;font-weight:700}
+.lv-below{background:#fbdcdc;color:#8c1c24;font-weight:700}
+.stat-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.stat{flex:1;min-width:120px;border:1px solid #e3e9f2;border-radius:8px;padding:9px 12px;background:#fbfcfe}
+.stat .k{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:#6b7a92}
+.stat .v{font-size:17px;font-weight:700;color:#0a1628;margin-top:2px}
+.stat .k2{font-size:9.5px;color:#8a97ab;margin-top:2px}
+.sign{display:flex;gap:40px;margin-top:34px}
+.sign div{flex:1;border-top:1px solid #8a97ab;padding-top:5px;font-size:10.5px;color:#5a6b85;text-align:center}
+.foot{margin-top:14px;padding-top:8px;border-top:1px solid #e3e9f2;font-size:9.5px;color:#8a97ab;display:flex;justify-content:space-between}
+.btn{display:inline-block;background:#d4a017;color:#12233f;border:0;border-radius:7px;padding:9px 18px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit;margin-right:8px}
+.btn.sec{background:#0a1628;color:#fff}
+.toolbar{text-align:right;margin:0 auto 12px;max-width:1400px}
+@media print{body{background:#fff;padding:0}.sheet{box-shadow:none;padding:0;max-width:none}.toolbar{display:none}thead{display:table-header-group}tr{page-break-inside:avoid}}
+</style></head><body>
+<div class="toolbar"><button class="btn" onclick="window.print()">&#128424; Save as PDF / Print</button><button class="btn sec" onclick="window.close()">Close</button></div>
+<div class="sheet">
+  <div class="hd"><div class="crest">&#9734;</div><div>
+    <h1>CHANGARA STAR ACADEMY</h1>
+    <div class="tag">Competency Based Education (CBE) &middot; All Students Results</div>
+    <div class="motto">&ldquo;Assurance for Excellence&rdquo;</div></div></div>
+  <div class="meta">
+    <div><b>Period:</b> ${escapeHtml(period || '-')}</div>
+    <div><b>Type:</b> ${escapeHtml(type || '-')}</div>
+    <div><b>Assessment:</b> ${escapeHtml(name || '-')}</div>
+    <div><b>Scope:</b> ${escapeHtml(onlyGrade || 'All grades')}</div>
+    <div><b>Students:</b> ${rows.length}</div>
+    <div><b>Ranked by:</b> Average Score</div>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="k">Class Total Score</div><div class="v">${meanTotal}</div><div class="k2">mean per student</div></div>
+    <div class="stat"><div class="k">Class Average Score</div><div class="v">${meanAvg}</div><div class="k2">mean of subject averages</div></div>
+    <div class="stat"><div class="k">Average Percentage</div><div class="v">${meanPct}%</div></div>
+    <div class="stat"><div class="k">Overall Performance</div><div class="v" style="font-size:13px;line-height:1.3;">${escapeHtml(classLevel.level)}</div><div class="k2">${escapeHtml(classLevel.code)}</div></div>
+  </div>
+  <table>
+    <thead><tr><th class="ctr">Pos</th><th class="ctr">Adm. No.</th><th>Student Name</th><th class="ctr">Grade</th>
+      <th class="ctr">Subjects</th><th class="ctr">Total Score</th><th class="ctr">Average Score</th>
+      <th class="ctr">Average %</th><th class="ctr">Key</th><th>Overall Performance Level</th></tr></thead>
+    <tbody>${bodyRows}</tbody>
+  </table>
+  <div class="sign"><div>Class Teacher</div><div>Head Teacher</div></div>
+  <div class="foot"><span>Changara Star Academy &middot; All Students CBE Results</span>
+  <span>Generated: ${escapeHtml(new Date().toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' }))}</span></div>
+</div></body></html>`;
+    return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  }
+
   if (p[0] === 'assessments' && p[1] === 'subjects' && p[2] && method === 'GET') {
     const grade = decodeURIComponent(p[2]);
     const type = url.searchParams.get('type') || 'CAT1';
@@ -635,6 +793,9 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     const pct = score => (maxTotal > 0 ? Number(((score / maxTotal) * 100).toFixed(2)) : 0);
     const myTotal = (mine.assessments || []).reduce((s, a) => s + (Number(a.score) || 0), 0);
     const myPct = pct(myTotal);
+    const myScored = (mine.assessments || [])
+      .filter(a => a.score !== null && a.score !== undefined && a.score !== '').length;
+    const myAvgScore = myScored ? Number((myTotal / myScored).toFixed(2)) : 0;
     const graded = gradePercentage(myPct, policy);
 
     // Subject-by-subject: my mark against the class average for that subject
@@ -660,14 +821,25 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     });
 
     // Position in class
+    // Class ranking uses average score, matching the class report.
+    const scoredAvg = r => {
+      const list = (r.assessments || []).filter(a => a.score !== null && a.score !== undefined && a.score !== '');
+      if (!list.length) return null;
+      return list.reduce((s, a) => s + (Number(a.score) || 0), 0) / list.length;
+    };
     const classTotals = records.map(r => ({
       name: r.studentName || '',
-      p: pct((r.assessments || []).reduce((s, a) => s + (Number(a.score) || 0), 0))
-    })).sort((x, y) => y.p - x.p);
+      p: pct((r.assessments || []).reduce((s, a) => s + (Number(a.score) || 0), 0)),
+      avg: scoredAvg(r)
+    })).filter(x => x.avg !== null)
+      .sort((x, y) => (y.avg - x.avg) || (y.p - x.p));
+
     let position = classTotals.findIndex(x => x.name === (mine.studentName || '')) + 1;
-    if (position === 0) position = classTotals.filter(x => x.p > myPct).length + 1;
+    if (position === 0) position = classTotals.filter(x => x.avg > myAvgScore).length + 1;
     const outOf = classTotals.length || 1;
     const classMean = Number((classTotals.reduce((s, x) => s + x.p, 0) / outOf).toFixed(2));
+    const classMeanAvg = Number((classTotals.reduce((s, x) => s + x.avg, 0) / outOf).toFixed(2));
+    const classLevel = gradePercentage(classMean, policy);
 
     const assessedSubjects = subjectRows.filter(s => s.mySubjPct !== null);
     const strengths = [...assessedSubjects].sort((a, b) => (b.delta ?? 0) - (a.delta ?? 0)).slice(0, 3);
@@ -753,9 +925,12 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     <div class="ring" style="--p:${Math.max(0, Math.min(100, myPct))}%"><i>${myPct}%</i></div>
     <div class="meta">
       <div><b>Total Score:</b> ${myTotal} / ${maxTotal}</div>
-      <div style="margin-top:4px"><b>Position in class:</b> ${position} of ${outOf}</div>
-      <div style="margin-top:4px"><b>Class mean:</b> ${classMean}%</div>
-      <div style="margin-top:7px"><span class="pill ${levelClass[graded.level] || ''}">${escapeHtml(graded.level)} (${escapeHtml(graded.code)})</span></div>
+      <div><b>Average Score:</b> ${myAvgScore} (over ${myScored} subject${myScored === 1 ? '' : 's'})</div>
+      <div><b>Average Percentage:</b> ${myPct}%</div>
+      <div><b>Overall Performance Level:</b> <span class="pill ${levelClass[graded.level] || ''}">${escapeHtml(graded.level)} (${escapeHtml(graded.code)})</span></div>
+      <div><b>Position in class:</b> ${position} of ${outOf} <span style="color:#8a97ab">(by average score)</span></div>
+      <div><b>Class average score:</b> ${classMeanAvg} &nbsp;|&nbsp; <b>class average %:</b> ${classMean}%</div>
+      <div><b>Class performance:</b> <span class="pill ${levelClass[classLevel.level] || ''}">${escapeHtml(classLevel.level)}</span></div>
     </div>
   </div>
 
