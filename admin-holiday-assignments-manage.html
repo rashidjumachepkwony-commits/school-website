@@ -524,7 +524,7 @@
                             <td><span class="badge-grade">${a.grade}</span></td>
                             <td>${a.subject || '-'}</td>
                             <td>
-                                <a href="/api/holiday-assignments/download/${a._id}" style="color:${fi.color};text-decoration:none;font-weight:600;" target="_blank">
+                                <a href="${apiUrl('/api/holiday-assignments/download/' + a._id)}" style="color:${fi.color};text-decoration:none;font-weight:600;" target="_blank">
                                     <i class="fas ${fi.icon}"></i> ${a.fileName}
                                 </a>
                             </td>
@@ -584,7 +584,7 @@
                         <div><strong>File Size:</strong> ${a.fileSize ? (a.fileSize / 1024).toFixed(2) + ' KB' : 'N/A'}</div>
                         <div><strong>Uploaded By:</strong> ${a.uploadedBy || 'Admin'}</div>
                         <div><strong>Created:</strong> ${date}</div>
-                        <div><strong>File:</strong> <a href="/api/holiday-assignments/download/${a._id}" style="color:${fi.color};font-weight:600;" target="_blank"><i class="fas ${fi.icon}"></i> Download</a></div>
+                        <div><strong>File:</strong> <a href="${apiUrl('/api/holiday-assignments/download/' + a._id)}" style="color:${fi.color};font-weight:600;" target="_blank"><i class="fas ${fi.icon}"></i> Download</a></div>
                         <div style="grid-column:1/-1;">
                             <strong>Description:</strong><br>
                             ${a.description || 'No description provided.'}
@@ -617,7 +617,7 @@
                 document.getElementById('editSubject').value = a.subject || '';
                 document.getElementById('editDescription').value = a.description || '';
                 document.getElementById('editFileName').textContent = a.fileName || 'None';
-                document.getElementById('editFileLink').href = `/api/holiday-assignments/download/${a._id}`;
+                document.getElementById('editFileLink').href = apiUrl('/api/holiday-assignments/download/' + a._id);
                 document.getElementById('editStatus').value = a.isActive !== false ? 'true' : 'false';
                 document.getElementById('editFile').value = '';
             } else {

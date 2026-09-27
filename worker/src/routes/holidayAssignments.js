@@ -6,9 +6,27 @@
 import { success, error } from '../utils/helpers.js';
 import { verifyToken } from '../utils/auth.js';
 import { uploadToCloudinary, deleteFromCloudinary, getResourceTypeForExtension, MAX_ASSIGNMENT_SIZE } from '../services/cloudinary.js';
+import { hasCloudinary, uploadToSupabaseStorage, deleteFromSupabaseStorage } from '../services/storage.service.js';
 
-const ALLOWED_ASSIGNMENT_MIME = new Set([
-  'application/pdf',
+/**
+ * Remove an assignment's stored file from whichever provider holds it.
+ * Never throws: a failed cleanup must not block replacing or deleting the
+ * assignment record itself.
+ */
+async function removeStoredFile(assignment, env) {
+  if (!assignment || !assignment.filePublicId) return;
+  try {
+    if (assignment.storageProvider === 'supabase' || !assignment.fileResourceType) {
+      await deleteFromSupabaseStorage(assignment.filePublicId, env);
+    } else {
+      await deleteFromCloudinary(assignment.filePublicId, assignment.fileResourceType, env);
+    }
+  } catch (err) {
+    console.error('File deletion failed (non-fatal):', err.message);
+  }
+}
+
+const ALLOWED_ASSIGNMENT_MIME = new Set([  'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-excel',
@@ -50,21 +68,7 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
     const rows = await db.collection('holidayassignments')
       .find(query)
       .sort({ uploadedAt: -1, createdAt: -1 }).toArray();
-    return success({
-      assignments: rows.map(a => ({
-        _id: a._id.toString(),
-        title: a.title || '',
-        subject: a.subject || '',
-        description: a.description || '',
-        grade: a.grade || '',
-        term: a.term || '',
-        hasFile: !!a.filePath,
-        fileUrl: a.filePath || '',
-        fileName: a.fileName || '',
-        uploadedAt: a.uploadedAt || a.createdAt || null
-      })),
-      total: rows.length
-    });
+    return success({ assignments: serializeList(rows), total: rows.length });
   }
 
   // GET /api/holiday-assignments - POST
@@ -116,21 +120,35 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
       return error('Only PDF, Word, Excel, PowerPoint and image files are allowed');
     }
 
+    const resourceType = getResourceTypeForExtension(ext);
+    let uploaded;
     try {
-      const resourceType = getResourceTypeForExtension(ext);
-      const uploaded = await uploadToCloudinary(
-        fileBuffer, filename, mimetype,
-        { folder: 'csa_assignments', publicId: `assignment_${Date.now()}_${ext}` }, env
-      );
+      // Cloudinary when it is configured, otherwise Supabase Storage, so an
+      // upload never fails just because Cloudinary was never set up.
+      if (hasCloudinary(env)) {
+        uploaded = await uploadToCloudinary(
+          fileBuffer, filename, mimetype,
+          { folder: 'csa_assignments', publicId: `assignment_${Date.now()}_${ext}` }, env
+        );
+      } else {
+        uploaded = await uploadToSupabaseStorage(
+          fileBuffer, filename, mimetype, { folder: 'csa_assignments' }, env
+        );
+      }
+    } catch (uploadErr) {
+      return error('Upload failed: ' + uploadErr.message);
+    }
 
+    try {
       const result = await db.collection('holidayassignments').insertOne({
         title, grade, subject, description, uploadedBy,
-        fileName: uploaded.fileName,
+        fileName: uploaded.fileName || filename,
         fileType: ext,
-        fileSize: uploaded.size,
+        fileSize: uploaded.size || fileBuffer.byteLength,
         filePath: uploaded.url,
         filePublicId: uploaded.publicId,
         fileResourceType: resourceType,
+        storageProvider: uploaded.provider || 'cloudinary',
         isActive: true,
         createdAt: now,
         updatedAt: now
@@ -141,10 +159,10 @@ export async function handleHolidayAssignments(db, env, route, method, body, p, 
         assignment: {
           _id: result.insertedId.toString(),
           title, grade, subject, description, uploadedBy,
-          fileName: uploaded.fileName,
-          fileType: ext,
-          fileSize: uploaded.size,
-          filePath: uploaded.url,
+          fileName: uploaded.fileName || filename,
+            fileType: ext,
+            fileSize: uploaded.size || fileBuffer.byteLength,
+            filePath: uploaded.url,
           filePublicId: uploaded.publicId,
           isActive: true,
           createdAt: now
@@ -278,37 +296,34 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.5px;color:#0b5394;mar
         return error('Only PDF, Word, Excel, PowerPoint and image files are allowed');
       }
 
+      const resourceType = getResourceTypeForExtension(ext);
+      let uploaded;
       try {
-        const resourceType = getResourceTypeForExtension(ext);
-        const uploaded = await uploadToCloudinary(
-          fileBuffer, filename, mimetype,
-          { folder: 'csa_assignments', publicId: `assignment_${Date.now()}_${ext}` }, env
-        );
-
-        // Update DB fields first
-        updates.fileName = uploaded.fileName;
-        updates.fileType = ext;
-        updates.fileSize = uploaded.size;
-        updates.filePath = uploaded.url;
-        updates.filePublicId = uploaded.publicId;
-        updates.fileResourceType = resourceType;
-
-        // Delete old file from Cloudinary (best-effort, non-blocking)
-        if (assignment.filePublicId && assignment.fileResourceType) {
-          try {
-            await deleteFromCloudinary(
-              assignment.filePublicId,
-              assignment.fileResourceType,
-              env
-            );
-          } catch (delErr) {
-            console.error('Old file deletion failed (non-fatal):', delErr.message);
-          }
+        if (hasCloudinary(env)) {
+          uploaded = await uploadToCloudinary(
+            fileBuffer, filename, mimetype,
+            { folder: 'csa_assignments', publicId: `assignment_${Date.now()}_${ext}` }, env
+          );
+        } else {
+          uploaded = await uploadToSupabaseStorage(
+            fileBuffer, filename, mimetype, { folder: 'csa_assignments' }, env
+          );
         }
-      } catch (err) {
-        console.error('Replacement upload error:', err);
-        return error(err.message || 'Upload failed', 500);
+      } catch (uploadErr) {
+        return error('Upload failed: ' + uploadErr.message);
       }
+
+      // Update DB fields first
+      updates.fileName = uploaded.fileName || filename;
+      updates.fileType = ext;
+      updates.fileSize = uploaded.size || fileBuffer.byteLength;
+      updates.filePath = uploaded.url;
+      updates.filePublicId = uploaded.publicId;
+      updates.fileResourceType = resourceType;
+      updates.storageProvider = uploaded.provider || 'cloudinary';
+
+      // Delete the old file from whichever store kept it (best-effort).
+      await removeStoredFile(assignment, env);
     }
 
     await db.collection('holidayassignments').updateOne(
@@ -334,17 +349,7 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.5px;color:#0b5394;mar
     if (!assignment) return error('Assignment not found', 404);
 
     // Delete file from Cloudinary (best-effort)
-    if (assignment.filePublicId && assignment.fileResourceType) {
-      try {
-        await deleteFromCloudinary(
-          assignment.filePublicId,
-          assignment.fileResourceType,
-          env
-        );
-      } catch (delErr) {
-        console.error('File deletion failed (non-fatal):', delErr.message);
-      }
-    }
+    await removeStoredFile(assignment, env);
 
     await db.collection('holidayassignments').deleteOne({ _id: p[1] });
     return success({ message: 'Assignment deleted successfully!' });
@@ -358,12 +363,19 @@ function serializeList(arr) {
 }
 
 function serializeOne(a) {
-  return {
-    _id: a._id?.toString(),
-    title: a.title, grade: a.grade, subject: a.subject, description: a.description,
-    fileName: a.fileName, fileType: a.fileType, fileSize: a.fileSize,
-    filePath: a.filePath, filePublicId: a.filePublicId,
-    uploadedBy: a.uploadedBy, isActive: a.isActive !== false,
-    createdAt: a.createdAt, updatedAt: a.updatedAt
-  };
-}
+      return {
+        _id: a._id?.toString(),
+        title: a.title, grade: a.grade, subject: a.subject, description: a.description,
+        fileName: a.fileName, fileType: a.fileType, fileSize: a.fileSize,
+        filePath: a.filePath, filePublicId: a.filePublicId,
+        // Aliases so every screen (admin list, manage page, student portal)
+        // can rely on the same two fields.
+        hasFile: !!a.filePath,
+        fileUrl: a.filePath || '',
+        storageProvider: a.storageProvider || '',
+        term: a.term || '',
+        uploadedBy: a.uploadedBy, isActive: a.isActive !== false,
+        uploadedAt: a.uploadedAt || a.createdAt || null,
+        createdAt: a.createdAt, updatedAt: a.updatedAt
+      };
+    }

@@ -869,19 +869,20 @@ tbody tr:nth-child(even){background:#fafcff}
 <title>CBE Result Slip - ${escapeHtml(fullName)}</title>
 <style>
   *{box-sizing:border-box}
-  @page{size:A4 portrait;margin:14mm 12mm}
+  @page{size:A4 landscape;margin:12mm 10mm}
   body{font-family:"Segoe UI",Arial;margin:0;padding:20px;background:#eef1f5;color:#12233f;font-size:12px}
-  .sheet{max-width:820px;margin:0 auto;background:#fff;padding:28px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
+  .sheet{max-width:1200px;margin:0 auto;background:#fff;padding:26px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
   .hd{display:flex;align-items:center;gap:15px;border-bottom:3px solid #d4a017;padding-bottom:12px}
   .crest{width:58px;height:58px;flex:0 0 58px;border-radius:50%;background:linear-gradient(135deg,#0a1628,#1c3a6e);color:#d4a017;display:flex;align-items:center;justify-content:center;font-size:25px}
-  .hd h1{margin:0;font-size:20px;color:#0a1628;letter-spacing:.4px}
+  .hd h1{margin:0;font-size:20px;color:#0a1628}
   .hd .tag{font-size:10.5px;color:#5a6b85;text-transform:uppercase;letter-spacing:2px}
   .hd .motto{font-size:11px;color:#8a6d1f;font-style:italic}
-  .who{display:flex;flex-wrap:wrap;gap:6px 22px;margin:14px 0;padding:11px 14px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px}
-  .who b{color:#0a1628;margin-right:5px}
+  .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 22px;margin:14px 0;padding:11px 14px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px;font-size:12.5px}
+  .meta b{color:#0a1628;margin-right:5px}
   .score{display:flex;align-items:center;gap:18px;margin:12px 0;padding:14px 16px;border:1px solid #e3e9f2;border-radius:10px;background:#fbfcfe}
   .score .ring{width:86px;height:86px;flex:0 0 86px;border-radius:50%;background:conic-gradient(#d4a017 var(--p), #e8edf5 0);display:flex;align-items:center;justify-content:center}
   .score .ring i{width:66px;height:66px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:20px;color:#0a1628}
+  .score .meta{flex:1;display:block;margin:0;padding:0;background:none;border:0}
   .score .meta b{font-size:12.5px}
   .pill{display:inline-block;padding:4px 12px;border-radius:12px;font-weight:800;font-size:12px}
   .lv-exceed{background:#dff3e4;color:#136b2c}.lv-meet{background:#dbeafe;color:#12459b}
@@ -893,7 +894,7 @@ tbody tr:nth-child(even){background:#fafcff}
   .up{color:#136b2c;font-weight:700}.down{color:#8c1c24;font-weight:700}
   .barcell{width:90px}.bar{height:9px;background:#e8edf5;border-radius:6px;overflow:hidden}
   .bar i{display:block;height:100%;background:#d4a017}
-  .cols{display:flex;gap:14px;margin-top:14px}
+  .cols{display:flex;gap:16px;margin-top:14px}
   .box{flex:1;border:1px solid #cfd8e6;border-radius:8px;padding:11px 13px;background:#fbfcfe}
   .box h3{margin:0 0 7px;font-size:12.5px;text-transform:uppercase;letter-spacing:.5px;color:#0a1628}
   .box ul{margin:0;padding-left:18px}.box li{margin-bottom:4px}
@@ -903,7 +904,7 @@ tbody tr:nth-child(even){background:#fafcff}
   .foot{margin-top:12px;padding-top:8px;border-top:1px solid #e3e9f2;font-size:9.5px;color:#8a97ab;display:flex;justify-content:space-between}
   .btn{display:inline-block;background:#d4a017;color:#12233f;border:0;border-radius:7px;padding:9px 16px;font-weight:800;font-size:12.5px;cursor:pointer;font-family:inherit;margin-right:8px}
   .btn.sec{background:#0a1628;color:#fff}
-  .toolbar{text-align:right;margin:0 auto 12px;max-width:820px}
+  .toolbar{text-align:right;margin:0 auto 12px;max-width:1200px}
   @media print{body{background:#fff;padding:0}.sheet{box-shadow:none;padding:0}.toolbar{display:none}tr{page-break-inside:avoid}}
 </style></head><body>
 <div class="toolbar"><button class="btn" onclick="window.print()">&#128424; Save as PDF / Print</button><button class="btn sec" onclick="window.close()">Close</button></div>

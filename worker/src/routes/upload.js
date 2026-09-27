@@ -5,6 +5,7 @@
  * Credentials never leave the Worker.
  */
 import { uploadToCloudinary, deleteFromCloudinary, getResourceTypeForExtension } from '../services/cloudinary.js';
+import { hasCloudinary, uploadToSupabaseStorage } from '../services/storage.service.js';
 import { success, error } from '../utils/helpers.js';
 import { verifyToken } from '../utils/auth.js';
 
@@ -33,6 +34,29 @@ function getExtension(filename) {
   return parts.length > 1 ? parts.pop().toLowerCase() : '';
 }
 
+/**
+ * Store an uploaded file.
+ *
+ * Cloudinary is used when its credentials are configured; otherwise the file
+ * goes to Supabase Storage, so media uploads work without a Cloudinary
+ * account. Both return the same field names, normalised here.
+ */
+async function storeUpload(buffer, filename, mimetype, folder, env) {
+  if (hasCloudinary(env)) {
+    const up = await uploadToCloudinary(buffer, filename, mimetype, { folder }, env);
+    return { ...up, fileName: up.fileName || filename, size: up.size, type: up.type, mimetype: up.mimetype };
+  }
+  const up = await uploadToSupabaseStorage(buffer, filename, mimetype, { folder }, env);
+  return {
+    ...up,
+    fileName: filename,
+    originalName: filename,
+    size: buffer.byteLength,
+    type: mimetype.split('/')[0],
+    mimetype
+  };
+}
+
 export async function handleUpload(db, env, route, method, body, p, request) {
   const authHeader = request.headers.get('authorization') || '';
   if (authHeader.startsWith('Bearer ')) {
@@ -59,10 +83,7 @@ export async function handleUpload(db, env, route, method, body, p, request) {
     }
 
     try {
-      const uploaded = await uploadToCloudinary(
-        fileBuffer, filename, mimetype,
-        { folder: 'csa_media' }, env
-      );
+      const uploaded = await storeUpload(fileBuffer, filename, mimetype, 'csa_media', env);
 
       return success({
         message: 'File uploaded successfully',
@@ -104,10 +125,7 @@ export async function handleUpload(db, env, route, method, body, p, request) {
     }
 
     try {
-      const uploaded = await uploadToCloudinary(
-        fileBuffer, filename, mimetype,
-        { folder: 'csa_hero', publicId: 'hero_video' }, env
-      );
+          const uploaded = await storeUpload(fileBuffer, filename, mimetype, 'csa_hero', env);
 
       // Store URL in content CMS
       const today = new Date().toISOString();

@@ -577,12 +577,21 @@
                     if (xhr.status === 200 || xhr.status === 201) {
                         resolve(JSON.parse(xhr.responseText));
                     } else {
-                        let msg = 'Upload failed';
-                        try { msg = JSON.parse(xhr.responseText).message || msg; } catch (e) {}
+                        // The API reports the reason in "error"; "message" was
+                        // the only field read before, so every failure showed a
+                        // bare "Upload failed".
+                        let msg = 'Upload failed (HTTP ' + xhr.status + ')';
+                        try {
+                            const parsed = JSON.parse(xhr.responseText);
+                            msg = parsed.error || parsed.message || msg;
+                        } catch (e) {
+                            if (xhr.responseText) msg = xhr.responseText.slice(0, 200);
+                        }
                         reject(new Error(msg));
                     }
                 };
-                xhr.onerror = function() { reject(new Error('Network error')); };
+                xhr.onerror = function() { reject(new Error('Network error - could not reach the server')); };
+                xhr.ontimeout = function() { reject(new Error('Upload timed out - the file may be too large')); };
                 xhr.open('POST', '/api/holiday-assignments');
                 xhr.send(formData);
             });
@@ -657,7 +666,7 @@
                         <td><span class="${a.isActive ? 'status-active' : 'status-inactive'}">${a.isActive ? '✅ Active' : '❌ Inactive'}</span></td>
                         <td style="white-space:nowrap;">
                             <button class="btn btn-info btn-sm" onclick="viewAssignment('${a._id}')" title="View"><i class="fas fa-eye"></i></button>
-                            <a href="/api/holiday-assignments/download/${a._id}" target="_blank" class="btn btn-primary btn-sm" title="Download"><i class="fas fa-download"></i></a>
+                            <a href="${apiUrl('/api/holiday-assignments/download/' + a._id)}" target="_blank" class="btn btn-primary btn-sm" title="Download"><i class="fas fa-download"></i></a>
                             <button class="btn btn-warning btn-sm" onclick="editAssignment('${a._id}')" title="Edit"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-danger btn-sm" onclick="deleteAssignment('${a._id}')" title="Delete"><i class="fas fa-trash"></i></button>
                         </td>
@@ -701,7 +710,7 @@
                         <div><strong>File Size:</strong> ${a.fileSize ? (a.fileSize / 1024).toFixed(2) + ' KB' : 'N/A'}</div>
                         <div><strong>Uploaded By:</strong> ${a.uploadedBy || 'Admin'}</div>
                         <div><strong>Created:</strong> ${date}</div>
-                        <div><strong>Downloads:</strong> <a href="/api/holiday-assignments/download/${a._id}" target="_blank" style="color:${fi.color};font-weight:600;"><i class="fas ${fi.icon}"></i> Download file</a></div>
+                        <div><strong>Downloads:</strong> <a href="${apiUrl('/api/holiday-assignments/download/' + a._id)}" target="_blank" style="color:${fi.color};font-weight:600;"><i class="fas ${fi.icon}"></i> Download file</a></div>
                         <div style="grid-column:1/-1;">
                             <strong>Description:</strong><br>
                             ${a.description || 'No description provided.'}
@@ -750,7 +759,7 @@
                 document.getElementById('editSubject').value = a.subject || '';
                 document.getElementById('editDescription').value = a.description || '';
                 document.getElementById('editFileName').textContent = a.fileName || 'None';
-                document.getElementById('editFileLink').href = `/api/holiday-assignments/download/${a._id}`;
+                document.getElementById('editFileLink').href = apiUrl('/api/holiday-assignments/download/' + a._id);
                 document.getElementById('editStatus').value = a.isActive !== false ? 'true' : 'false';
                 document.getElementById('editFile').value = '';
             } else {

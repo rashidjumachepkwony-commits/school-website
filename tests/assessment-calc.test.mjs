@@ -33,6 +33,29 @@ t('gradePercentage custom policy', () => {
   assert.equal(gradePercentage(50, custom).code, 'HIGH');
   assert.equal(gradePercentage(49, custom).code, 'LOW');
 });
+t('gradePercentage fractional values inside band gaps', () => {
+  // The published bands are integer ranges, so 39<p<40, 59<p<60 and
+  // 79<p<80 fall in the gaps. These must not be labelled "Exceeding".
+  assert.equal(gradePercentage(39.62).code, 'BE');
+  assert.equal(gradePercentage(39.99).code, 'BE');
+  assert.equal(gradePercentage(59.5).code, 'AE');
+  assert.equal(gradePercentage(79.5).code, 'ME');
+  assert.equal(gradePercentage(100).code, 'EE');
+  assert.equal(gradePercentage(0).code, 'BE');
+});
+t('gradePercentage never returns the top band by accident', () => {
+  for (let i = 0; i <= 1000; i++) {
+    // Step in tenths using integer maths, so no floating point drift: the value
+    // graded and the value banded against are always the same number.
+    const p = Number((i / 10).toFixed(1));
+    const code = gradePercentage(p).code;
+    assert.ok(['BE', 'AE', 'ME', 'EE'].includes(code), 'unexpected code ' + code + ' at ' + p);
+    if (p < 40) assert.equal(code, 'BE', 'below 40 must be BE, got ' + code + ' at ' + p);
+    else if (p < 60) assert.equal(code, 'AE', '40-60 must be AE, got ' + code + ' at ' + p);
+    else if (p < 80) assert.equal(code, 'ME', '60-80 must be ME, got ' + code + ' at ' + p);
+    else assert.equal(code, 'EE', '80+ must be EE, got ' + code + ' at ' + p);
+  }
+});
 t('computePercentage from totalScore/maxTotal', () => {
   assert.equal(computePercentage({ totalScore: 80, maxTotal: 100 }), 80);
 });

@@ -476,6 +476,55 @@
         /* ===== SCORE ENTRY: RESPONSIVE + ACTIONS =====
            On a phone the wide marks table is unusable, so below 820px each
            student becomes a card with a labelled field per subject. */
+        /* ===== DOWNLOAD BUTTONS =====
+           Deliberately large and high contrast so they are obvious, including
+           for older users. An inline background must never be used on these:
+           .btn-primary carries dark text, which disappears on a dark
+           background. */
+        .btn-download {
+            display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+            padding: 14px 22px; min-height: 48px;
+            font-size: 15px; font-weight: 800; font-family: inherit; cursor: pointer;
+            color: #ffffff; background: #b31217;
+            border: 3px solid #ffffff; border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(179,18,23,.38);
+            text-shadow: 0 1px 2px rgba(0,0,0,.5);
+        }
+        .btn-download:hover { background: #8f0e12; transform: translateY(-1px); }
+        .btn-download i { font-size: 17px; }
+        .btn-download.alt { background: #0A1628; border-color: #D4A017; box-shadow: 0 4px 14px rgba(10,22,40,.4); }
+        .btn-download.alt:hover { background: #16305c; }
+        .btn-download.green { background: #1c7a34; box-shadow: 0 4px 14px rgba(28,122,52,.35); }
+        .btn-download.green:hover { background: #145926; }
+        .dl-legend { display:flex; align-items:center; gap:8px; font-size:12px; color:#5a6b85; margin-top:10px; }
+
+        .cbe-results-line {
+            padding: 11px 14px; margin-bottom: 14px; font-size: 13px; color: #3c4d68;
+            background: #fff8e1; border-left: 5px solid #D4A017; border-radius: 8px;
+        }
+        .cbe-results-line i { margin-right: 7px; color: #D4A017; }
+        .cbe-results-line strong { color: #0A1628; }
+
+        /* ===== CBE LOOKUP BAR ===== */
+        .cbe-lookup {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px; padding: 16px; margin-bottom: 16px;
+            background: #f7f9fc; border: 2px solid #e0e6ef; border-radius: 12px;
+        }
+        .cl-field { display: flex; flex-direction: column; gap: 5px; }
+        .cl-field label { font-size: 11px; font-weight: 800; color: #3c4d68; text-transform: uppercase; letter-spacing: .3px; }
+        .cl-field label i { margin-right: 5px; color: #D4A017; }
+        .cl-field select, .cl-field input {
+            padding: 11px; font-size: 14px; font-family: inherit;
+            border: 2px solid #d5dce6; border-radius: 8px; background: #fff; color: #0A1628; width: 100%;
+        }
+        .cl-field select:focus, .cl-field input:focus { outline: none; border-color: #D4A017; }
+        .cl-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .cl-actions .btn { flex: 1 1 auto; justify-content: center; }
+        @media (max-width: 640px) {
+            .cl-actions .btn, .cl-actions .btn-download { width: 100%; }
+        }
+
         .entry-toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 
         /* ===== DOWNLOAD PANEL ===== */
@@ -704,16 +753,17 @@
                 </div>
             </div>
             <div class="dl-btns">
-                <button class="btn btn-dl" onclick="downloadClassReport()">
-                    <i class="fas fa-download"></i> Whole Class (this grade)
+                <button class="btn-download" onclick="downloadClassReport()">
+                    <i class="fas fa-file-pdf"></i> Whole Class (this grade)
                 </button>
-                <button class="btn btn-dl sec" onclick="downloadAllStudentsPDF()">
+                <button class="btn-download alt" onclick="downloadAllStudentsPDF()">
                     <i class="fas fa-users"></i> All Students Results
                 </button>
-                <button class="btn btn-dl" onclick="downloadStudentPicker()">
+                <button class="btn-download green" onclick="downloadStudentPicker()">
                     <i class="fas fa-user"></i> One Student's Result
                 </button>
             </div>
+            <div class="dl-legend"><i class="fas fa-info-circle"></i> Filters above (grade, period, type, name, date) apply to every download.</div>
         </div>
 
         <div class="entry-toolbar" style="margin-bottom:10px;">
@@ -779,7 +829,59 @@
     <!-- ===== CBE COMPETENCY-BASED ANALYSIS ===== -->
     <div class="card" id="cbeAnalysisCard">
         <h2><i class="fas fa-bullseye" style="color:#D4A017;"></i> CBE Competency-Based Analysis <span style="background:#D4A017;color:white;font-size:10px;padding:2px 10px;border-radius:12px;vertical-align:middle;">Competency Assessment</span></h2>
-        <p class="desc">Subject-by-subject competency breakdown for <strong id="cbeGradeLabel">-</strong> — <strong id="cbePeriodLabel">-</strong></p>
+        <p class="desc">Choose what to analyse. This lookup works on its own, so you can produce a full CBE report for any grade, assessment type, assessment name, month and year.</p>
+
+        <!-- ===== CBE LOOKUP FIELDS ===== -->
+        <div class="cbe-lookup">
+            <div class="cl-field">
+                <label for="cbeLkGrade"><i class="fas fa-graduation-cap"></i> Grade</label>
+                <select id="cbeLkGrade">
+                    <option value="Play Group">Play Group</option>
+                    <option value="PP1">PP1</option>
+                    <option value="PP2">PP2</option>
+                    <option value="Grade 1">Grade 1</option>
+                    <option value="Grade 2">Grade 2</option>
+                    <option value="Grade 3">Grade 3</option>
+                    <option value="Grade 4">Grade 4</option>
+                    <option value="Grade 5">Grade 5</option>
+                    <option value="Grade 6">Grade 6</option>
+                </select>
+            </div>
+            <div class="cl-field">
+                <label for="cbeLkType"><i class="fas fa-clipboard-list"></i> Assessment Type</label>
+                <select id="cbeLkType"></select>
+            </div>
+            <div class="cl-field">
+                <label for="cbeLkName"><i class="fas fa-file-signature"></i> Name of Assessment</label>
+                <input type="text" id="cbeLkName" list="cbeLkNameList" placeholder="e.g. English &amp; Mathematics">
+                <datalist id="cbeLkNameList"></datalist>
+            </div>
+            <div class="cl-field">
+                <label for="cbeLkMonth"><i class="fas fa-calendar-alt"></i> Month</label>
+                <select id="cbeLkMonth">
+                    <option value="">Any month</option>
+                    <option>January</option><option>February</option><option>March</option>
+                    <option>April</option><option>May</option><option>June</option>
+                    <option>July</option><option>August</option><option>September</option>
+                    <option>October</option><option>November</option><option>December</option>
+                </select>
+            </div>
+            <div class="cl-field">
+                <label for="cbeLkYear"><i class="fas fa-calendar"></i> Year</label>
+                <select id="cbeLkYear"></select>
+            </div>
+            <div class="cl-field cl-actions">
+                <button class="btn btn-primary" onclick="runCbeLookup()"><i class="fas fa-magnifying-glass"></i> Analyse</button>
+                <button class="btn-download" onclick="cbeDownload('grade')"><i class="fas fa-file-pdf"></i> Download by Grade (PDF)</button>
+                <button class="btn-download alt" onclick="cbeDownload('all')"><i class="fas fa-users"></i> Download All Students (PDF)</button>
+            </div>
+        </div>
+
+        <div class="cbe-results-line" id="cbeResultsLine">
+            <i class="fas fa-chart-bar"></i>
+            Showing analysis for <strong id="cbeGradeLabel">-</strong> &mdash;
+            <strong id="cbePeriodLabel">-</strong>
+        </div>
 
         <div class="cbe-distribution" id="cbeDistribution"></div>
 
@@ -858,7 +960,7 @@
                 <input type="text" id="searchStudent" placeholder="Search by name..." onkeyup="loadStudentList()">
             </div>
             <button class="btn btn-success" onclick="loadStudentList()"><i class="fas fa-sync"></i> Refresh</button>
-            <button class="btn btn-primary" onclick="downloadAllStudentsPDF()" style="background:#0A1628;">
+            <button class="btn-download green" onclick="downloadAllStudentsPDF()">
                 <i class="fas fa-file-pdf"></i> Download All Results (PDF)
             </button>
         </div>
@@ -2105,10 +2207,92 @@
         return ratings[level] || 2;
     }
 
-    function renderCBEAnalysis() {
-        const students = studentsData || [];
-        document.getElementById('cbeGradeLabel').textContent = currentGrade;
-        document.getElementById('cbePeriodLabel').textContent = currentPeriod + ' — ' + currentType;
+    // ============================================
+    // CBE COMPETENCY ANALYSIS - LOOKUP + DOWNLOAD
+    // ============================================
+    let cbeRows = [];
+
+    /** Populate the type / year / name dropdowns from what has been recorded. */
+    async function initCbeLookup() {
+        const yearSel = document.getElementById('cbeLkYear');
+        const thisYear = new Date().getFullYear();
+        yearSel.innerHTML = [thisYear, thisYear + 1, thisYear - 1, thisYear - 2]
+            .map(y => `<option value="${y}">${y}</option>`).join('');
+
+        const typeSel = document.getElementById('cbeLkType');
+        const periods = [...new Set(
+            (window.__assessmentPeriods || []).filter(Boolean)
+        )];
+        if (periods.length) {
+            typeSel.innerHTML = '<option value="">Any period</option>' +
+                periods.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+        }
+        if (!typeSel.options.length) {
+            typeSel.innerHTML = '<option value="">Any period</option>' +
+                ['Monthly Assessment', 'End Term', 'Term Test 1', 'Term Test 2', 'Term Test 3']
+                    .map(p => `<option value="${p}">${p}</option>`).join('');
+        }
+
+        document.getElementById('cbeLkGrade').value = currentGrade || 'Grade 1';
+    }
+
+    /** Build the query the API expects from the lookup fields. */
+    function cbeLookupParams() {
+        const month = document.getElementById('cbeLkMonth').value;
+        const year = document.getElementById('cbeLkYear').value;
+        const type = document.getElementById('cbeLkType').value;
+        const name = document.getElementById('cbeLkName').value.trim();
+        const period = [month, year].filter(Boolean).join(' ');
+        const p = new URLSearchParams();
+        if (period) p.set('period', period);
+        if (type) p.set('type', type);
+        if (name) p.set('name', name);
+        return p;
+    }
+
+    async function runCbeLookup() {
+        const grid = document.getElementById('cbeGrid');
+        grid.innerHTML = '<div class="cbe-item" style="grid-column:1/-1;text-align:center;color:#999;">Analysing...</div>';
+        const grade = document.getElementById('cbeLkGrade').value;
+        const params = cbeLookupParams();
+
+        try {
+            const url = '/api/assessments/all?' + params.toString() + (params.toString() ? '&' : '') + 'grade=' + encodeURIComponent(grade);
+            const data = await window.apiJson(url);
+            cbeRows = data.students || [];
+            document.getElementById('cbeGradeLabel').textContent = grade;
+            const parts = [];
+            if (params.get('period')) parts.push(params.get('period'));
+            if (params.get('type')) parts.push(params.get('type'));
+            if (params.get('name')) parts.push(params.get('name'));
+            document.getElementById('cbePeriodLabel').textContent = parts.join(' · ') || 'all recorded results';
+            renderCBEAnalysis(cbeRows);
+        } catch (err) {
+            grid.innerHTML = '<div class="cbe-item" style="grid-column:1/-1;text-align:center;color:#a4161a;">' +
+                escapeHtml(err.message) + '</div>';
+        }
+    }
+
+    /** Download the CBE results as a landscape PDF for the chosen scope. */
+    function cbeDownload(scope) {
+        const grade = document.getElementById('cbeLkGrade').value;
+        const params = cbeLookupParams();
+        let url;
+        if (scope === 'all') {
+            url = '/api/assessments/all-report?' + params.toString();
+        } else {
+            url = '/api/assessments/class-report/' + encodeURIComponent(grade) + '?' + params.toString();
+        }
+        const win = window.open(url, '_blank');
+        if (!win) showAlert('Please allow popups to open the report', 'error');
+    }
+
+    function renderCBEAnalysis(rowsOverride) {
+        const students = rowsOverride || studentsData || [];
+        const gradeEl = document.getElementById('cbeGradeLabel');
+        const periodEl = document.getElementById('cbePeriodLabel');
+        if (gradeEl && !rowsOverride) gradeEl.textContent = currentGrade;
+        if (periodEl && !rowsOverride) periodEl.textContent = currentPeriod + ' — ' + currentType;
 
         // Overall class stats
         let exceeding = 0, meeting = 0, approaching = 0, below = 0, totalAvg = 0;
@@ -2302,6 +2486,7 @@
         updateAssessmentInfo();
         loadGradingPolicy();
         describeReportFilters();
+        initCbeLookup();
         loadSubjectConfig();
         loadGradeData();
         loadHistory();

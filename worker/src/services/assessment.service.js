@@ -44,15 +44,42 @@ export function normalizeScore(score, maximum) {
   return (s / maximum) * 100;
 }
 
+/**
+ * Grade a percentage against the policy bands.
+ *
+ * Bands are matched on their lower bound plus the *next* band's lower bound,
+ * not on `p <= l.max`. The published bands are integer ranges (0-39, 40-59,
+ * 60-79, 80-100) so they leave gaps at 39<p<40, 59<p<60 and 79<p<80. A
+ * fractional result such as 39.62 matched no band at all and the old
+ * fall-through returned the LAST band, which labelled it "Exceeding
+ * Expectation". Matching on lower bounds closes the gaps, and the final
+ * clamp below snaps anything outside the policy to the nearest band.
+ */
 export function gradePercentage(percentage, policy = DEFAULT_POLICY) {
-  const levels = policy.levels;
+  const levels = Array.isArray(policy?.levels) ? policy.levels : DEFAULT_POLICY.levels;
   const p = Number(percentage);
   if (isNaN(p)) return { level: 'Not Assessed', code: 'NA', rating: 0 };
-  for (const l of levels) {
-    if (p >= l.min && p <= l.max) return { level: l.name, code: l.code, rating: levels.indexOf(l) + 1 };
+
+  // Ascending by lower bound, so "the next band" is always well defined.
+  const sorted = [...levels].sort((a, b) => (Number(a.min) || 0) - (Number(b.min) || 0));
+
+  for (let i = 0; i < sorted.length; i++) {
+    const l = sorted[i];
+    const min = Number(l.min) || 0;
+    const next = sorted[i + 1];
+    const nextMin = next ? (Number(next.min) || 0) : Infinity;
+    if (p >= min && p < nextMin) {
+      return { level: l.name, code: l.code, rating: i + 1 };
+    }
   }
-  if (p < levels[0].min) return { level: levels[0].name, code: levels[0].code, rating: 1 };
-  return { level: levels[levels.length - 1].name, code: levels[levels.length - 1].code, rating: levels.length };
+
+  // Above the top band (should not happen) or below the bottom band.
+  if (p >= (Number(sorted[sorted.length - 1]?.min) || 0)) {
+    const top = sorted[sorted.length - 1];
+    return { level: top.name, code: top.code, rating: sorted.length };
+  }
+  const bottom = sorted[0];
+  return { level: bottom.name, code: bottom.code, rating: 1 };
 }
 
 export function computeSubjectStats(records, subjectKey = 'subject') {
