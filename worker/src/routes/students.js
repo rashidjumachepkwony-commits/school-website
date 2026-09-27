@@ -184,8 +184,18 @@ export async function handleStudents(db, env, route, method, body, p) {
 
   // DELETE /api/students/:id
   if (p[0] === 'students' && p[1] && !p[2] && method === 'DELETE') {
-    await db.collection('students').deleteOne({ _id: p[1] });
-    return success({ message: 'Student deleted successfully!' });
+    // Accept the admission number as well as the internal id, and only report
+    // success when something was actually removed.
+    const key = decodeURIComponent(p[1]);
+    let deleted = 0;
+    const byAdm = await db.collection('students').findOne({ admissionNumber: key });
+    if (byAdm) { await db.collection('students').deleteOne({ _id: byAdm._id }); deleted = 1; }
+    else {
+      const byId = await db.collection('students').findOne({ _id: key });
+      if (byId) { await db.collection('students').deleteOne({ _id: byId._id }); deleted = 1; }
+    }
+    if (!deleted) return error('Student not found', 404);
+    return success({ message: 'Student deleted successfully!', deleted: 1 });
   }
 
   // POST /api/student/login  (also handles student check-in/out via action: 'IN' | 'OUT')

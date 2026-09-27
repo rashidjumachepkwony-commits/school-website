@@ -670,11 +670,18 @@
         </div>
 
         <div class="entry-toolbar" style="margin-bottom:10px;">
+            <button class="btn btn-primary" onclick="downloadClassReport()" style="background:#0A1628;">
+                <i class="fas fa-file-pdf"></i> Download Assessment PDF
+            </button>
+            <span id="reportFilterSummary" style="font-size:12px;color:#3c4d68;"></span>
+        </div>
+
+        <div class="entry-toolbar" style="margin-bottom:10px;">
             <div class="entry-hint">
                 <b>Fast entry:</b> type a score and press <kbd>Enter</kbd> to drop to the next
                 student, <kbd>&uarr;</kbd>/<kbd>&darr;</kbd> to move, <kbd>&larr;</kbd>/<kbd>&rarr;</kbd>
-                to change subject, <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save now.
-                Marks also save automatically 1.2s after you stop typing.
+                to change subject, <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save the current student.
+                <b>Nothing saves by itself</b> &mdash; press that student's <b>Save</b> button when you are done.
             </div>
         </div>
 
@@ -1272,6 +1279,7 @@
             bodyHtml += `<td class="perf-cell" data-label="Performance"><span class="${performanceClass}">${esc(student.performanceLevel || 'Not Assessed')}${code}</span></td>`;
             bodyHtml += `<td class="act-cell" data-label="Actions">
                 <div class="row-actions">
+                  <button class="icon-btn js-save" style="background:#28a745;color:#fff;border-color:#1e7e34;font-weight:700;" title="Save this student's marks" onclick="saveStudentRow('${esc(sid)}')"><i class="fas fa-save"></i> Save</button>
                   <button class="icon-btn" title="Open the professional result slip" onclick="viewStudentReport('${esc(sid)}')"><i class="fas fa-file-alt"></i> View</button>
                   <button class="icon-btn" title="Clear this row to re-enter marks" onclick="editStudentMarks('${esc(sid)}')"><i class="fas fa-pen"></i> Edit</button>
                   <button class="icon-btn danger" title="Delete this saved result" onclick="deleteStudentResult('${esc(sid)}','${esc(student.studentName)}')"><i class="fas fa-trash"></i> Delete</button>
@@ -1330,15 +1338,85 @@
 
         // Flag the row as edited so the teacher can see what is not yet saved.
         const flag = row.querySelector('.save-flag');
-        if (flag && flag.classList.contains('ok')) {
-            flag.textContent = 'Edited';
-            flag.className = 'save-flag dirty';
+        if (flag) { flag.textContent = 'Unsaved'; flag.className = 'save-flag dirty'; }
+
+        // Deliberately no auto-save: the row stays on screen until the teacher
+        // presses that student's Save button, so the grid never reloads
+        // underneath them while they are still typing.
+    }
+
+    /** Save one student's row. */
+    async function saveStudentRow(studentId, silent) {
+        let row = null;
+        document.querySelectorAll('#marksTableBody tr[data-student-id]').forEach(tr => {
+            if (tr.dataset.studentId === studentId) row = tr;
+        });
+        if (!row) { if (!silent) showAlert('That row could not be found', 'error'); return false; }
+
+        const studentName = (row.dataset.studentName || '').trim();
+        const assessments = [];
+        row.querySelectorAll('.score-input').forEach(inp => {
+            if (inp.value === '') return;
+            let score = parseFloat(inp.value);
+            if (isNaN(score)) return;
+            const max = parseInt(inp.dataset.max);
+            if (score < 0) score = 0;
+            if (score > max) score = max;
+            assessments.push({ subject: inp.dataset.subject, maxScore: max, score });
+        });
+
+        if (!assessments.length) {
+            if (!silent) showAlert('Nothing to save for ' + studentName + ' - no scores entered.', 'error');
+            return false;
         }
 
-        clearTimeout(window.saveTimeout);
-        window.saveTimeout = setTimeout(() => {
-            saveAllMarks();
-        }, 1200);
+        const btn = row.querySelector('.js-save');
+        const old = btn ? btn.innerHTML : null;
+        if (btn) { btn.disabled = true; btn.innerHTML = 'Saving...'; }
+
+        try {
+            const res = await fetch('/api/assessments/bulk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    rows: [{ _id: studentId && !studentId.startsWith('new_') ? studentId : null, studentName, grade: currentGrade, assessments }],
+                    grade: currentGrade,
+                    assessmentPeriod: currentPeriod,
+                    assessmentType: currentType,
+                    assessmentName: getCurrentAssessmentName(),
+                    assessmentDate: document.getElementById('assessmentDate').value || new Date().toISOString()
+                })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                if (btn) { btn.disabled = false; btn.innerHTML = old; }
+                if (!silent) showAlert('Could not save ' + studentName + ': ' + (data.error || 'unknown error'), 'error');
+                return false;
+            }
+            // Reflect the saved state in place, without reloading the whole grid.
+            const flag = row.querySelector('.save-flag');
+            if (flag) { flag.textContent = 'Saved'; flag.className = 'save-flag ok'; }
+            if (!silent) {
+                showSaveStatus('Saved ' + studentName, 'saved');
+                setTimeout(() => hideSaveStatus(), 1800);
+            }
+            return true;
+        } catch (err) {
+            if (btn) { btn.disabled = false; btn.innerHTML = old; }
+            if (!silent) showAlert('Network problem while saving ' + studentName, 'error');
+            return false;
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    // ============================================
+    // SHARED HELPERS
+    // ============================================
+    function escapeHtml(v) {
+        return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
     }
 
     // ============================================
@@ -1450,7 +1528,12 @@
 
         if (event.key === 'Enter' || event.key === 'ArrowDown') {
             event.preventDefault();
-            if (event.ctrlKey) { saveAllMarks(); return; }
+            if (event.ctrlKey) {
+                // Save the student the caret is in, not the whole class.
+                const row = input.closest('tr');
+                if (row) saveStudentRow(row.dataset.studentId);
+                return;
+            }
             target = all[index + 1];
         } else if (event.key === 'ArrowUp') {
             event.preventDefault();
@@ -1865,14 +1948,34 @@
     // ============================================
     // DOWNLOAD CLASS REPORT
     // ============================================
+    /**
+     * Download the CBE class report as a PDF.
+     * The report is filtered by everything selected on this screen: grade,
+     * assessment period, assessment type, assessment name and assessment date.
+     */
     function downloadClassReport() {
-        let url = `/api/assessments/class-report/${encodeURIComponent(currentGrade)}?period=${encodeURIComponent(currentPeriod)}&type=${encodeURIComponent(currentType)}`;
-        const assessmentName = getCurrentAssessmentName();
-        if (assessmentName) url += `&name=${encodeURIComponent(assessmentName)}`;
+        const params = new URLSearchParams();
+        params.set('period', currentPeriod);
+        params.set('type', currentType);
+        const n = getCurrentAssessmentName();
+        if (n) params.set('name', n);
+        const d = document.getElementById('assessmentDate').value;
+        if (d) params.set('date', d);
+        const url = '/api/assessments/class-report/' + encodeURIComponent(currentGrade) + '?' + params.toString();
         const win = window.open(url, '_blank');
-        if (!win) {
-            showAlert('Please allow popups for this site to download reports', 'error');
-        }
+        if (!win) showAlert('Please allow popups for this site to download reports', 'error');
+    }
+
+    /** Show exactly which filters a download will use. */
+    function describeReportFilters() {
+        const el = document.getElementById('reportFilterSummary');
+        if (!el) return;
+        const d = document.getElementById('assessmentDate').value || 'not set';
+        el.innerHTML = '<b>Grade:</b> ' + escapeHtml(currentGrade) +
+            ' &nbsp;•&nbsp; <b>Period:</b> ' + escapeHtml(currentPeriod || '-') +
+            ' &nbsp;•&nbsp; <b>Type:</b> ' + escapeHtml(currentType || '-') +
+            ' &nbsp;•&nbsp; <b>Name:</b> ' + escapeHtml(getCurrentAssessmentName() || '-') +
+            ' &nbsp;•&nbsp; <b>Date:</b> ' + escapeHtml(d);
     }
 
     // ============================================
@@ -2116,10 +2219,16 @@
 
         updateAssessmentInfo();
         loadGradingPolicy();
+        describeReportFilters();
         loadSubjectConfig();
         loadGradeData();
         loadHistory();
         loadStudentList();
+        // Keep the "download uses these filters" summary current.
+        ['assessmentDate', 'assessmentNameInput', 'assessmentPeriod', 'assessmentType'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', describeReportFilters);
+        });
     });
 
     // Opens straight onto the requested grade/period when arriving from

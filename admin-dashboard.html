@@ -1288,6 +1288,7 @@
         if (target) target.classList.add('active');
 
         if (section === 'staff') loadStaffList();
+        if (section === 'reports') loadReport(repPeriod);
         if (section === 'attendance') loadAttendance();
         if (section === 'visitors') loadVisitors();
     }
@@ -2271,6 +2272,115 @@
         localStorage.removeItem('adminToken');
         localStorage.removeItem('admin');
         window.location.href = 'admin-login.html';
+    }
+
+    // ============================================
+    // REPORTS & ANALYTICS
+    // ============================================
+    let repPeriod = 'day';
+
+    function escRep(v) {
+        return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    async function loadReport(period) {
+        repPeriod = period;
+        document.querySelectorAll('.rep-tab[data-p]').forEach(t =>
+            t.classList.toggle('on', t.dataset.p === period));
+
+        document.getElementById('repSummary').innerHTML =
+            '<p style="color:#999;text-align:center;padding:14px;">Loading report...</p>';
+
+        try {
+            const res = await fetch('/api/admin/attendance/report?period=' + period);
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Could not load report');
+            renderReport(data);
+        } catch (err) {
+            document.getElementById('repSummary').innerHTML =
+                '<p style="color:#a4161a;">' + escRep(err.message) + '</p>';
+        }
+    }
+
+    function downloadReportPDF() {
+        const url = '/api/admin/attendance/report?period=' + repPeriod + '&format=pdf';
+        const w = window.open(url, '_blank');
+        if (!w) alert('Please allow popups to open the report');
+    }
+
+    function renderReport(d) {
+        const s = d.summary;
+        const stat = (v, k, cls) =>
+            '<div class="rep-stat ' + (cls || '') + '"><div class="v">' + v + '</div><div class="k">' + k + '</div></div>';
+
+        const rateCls = s.rate >= 90 ? 'good' : s.rate >= 60 ? 'warn' : 'bad';
+        document.getElementById('repSummary').innerHTML =
+            stat(s.totalPresent, 'Present', 'good') +
+            stat(s.totalAbsent, 'Absent', s.totalAbsent ? 'bad' : 'good') +
+            stat(s.totalLate, 'Late', s.totalLate ? 'warn' : 'good') +
+            stat(s.totalStaff, 'Total Staff') +
+            stat(s.totalHours, 'Total Hours') +
+            stat(s.averageHours, 'Avg Hours') +
+            stat(s.rate + '%', 'Attendance Rate', rateCls);
+
+        // Plain-language analysis of the period.
+        let msg, cls;
+        if (s.totalStaff === 0) { msg = 'No staff records found.'; cls = 'bad'; }
+        else if (s.rate >= 90) { msg = 'Attendance is strong. Most staff recorded at least one attendance entry in this period.'; cls = ''; }
+        else if (s.rate >= 60) { msg = 'Attendance is fair. ' + s.totalAbsent + ' staff member(s) have no record in this period - worth following up.'; cls = 'warn'; }
+        else { msg = 'Attendance needs attention. ' + s.totalAbsent + ' of ' + s.totalStaff + ' staff have no record in this period.'; cls = 'bad'; }
+        if (s.totalLate > 0) msg += ' There are ' + s.totalLate + ' late arrival(s) logged.';
+        const cm = document.getElementById('repComment');
+        cm.className = 'rep-comment ' + cls;
+        cm.textContent = msg;
+        cm.style.display = 'block';
+
+        // Department bar chart
+        const maxDept = Math.max(1, ...d.departments.map(x => x.staff));
+        const deptBars = d.departments.map(x => {
+            const pct = Math.round((x.staff / maxDept) * 100);
+            const rc = x.rate >= 90 ? 'good' : x.rate >= 60 ? 'warn' : 'bad';
+            return '<div class="rep-bar-row"><span class="lbl" title="' + escRep(x.department) + '">' + escRep(x.department) + '</span>' +
+                '<span class="track"><span class="fill ' + rc + '" style="width:' + pct + '%"></span></span>' +
+                '<span class="num">' + x.rate + '%</span></div>';
+        }).join('');
+
+        // Day-by-day bar chart
+        const maxDay = Math.max(1, ...d.days.map(x => x.present));
+        const dayBars = d.days.map(x => {
+            const pct = Math.round((x.present / maxDay) * 100);
+            const rc = x.rate >= 90 ? 'good' : x.rate >= 60 ? 'warn' : 'bad';
+            return '<div class="rep-bar-row"><span class="lbl">' + escRep(x.dayName + ' ' + x.date) + '</span>' +
+                '<span class="track"><span class="fill ' + rc + '" style="width:' + pct + '%"></span></span>' +
+                '<span class="num">' + x.present + '/' + s.totalStaff + '</span></div>';
+        }).join('');
+
+        document.getElementById('repCharts').innerHTML =
+            '<div class="rep-chart"><h3>Attendance by Department</h3>' + (deptBars || '<p style="color:#999;">No data</p>') + '</div>' +
+            '<div class="rep-chart"><h3>Present Each Day</h3>' + (dayBars || '<p style="color:#999;">No data</p>') + '</div>';
+
+        // Tables
+        document.getElementById('repStaffTitle').textContent = 'Staff Detail - ' + d.label;
+        document.getElementById('repStaffBody').innerHTML = (d.staff || []).map(r => {
+            const p = r.presentDays === 0 ? 'bad' : r.late > 0 ? 'warn' : 'ok';
+            return '<tr><td>' + escRep(r.employeeId) + '</td><td>' + escRep(r.name) + '</td><td>' + escRep(r.department) + '</td>' +
+                '<td>' + r.presentDays + '</td><td>' + r.late + '</td><td>' + r.totalHours.toFixed(1) + '</td>' +
+                '<td>' + r.averageHours.toFixed(1) + '</td><td><span class="rep-pill ' + p + '">' + escRep(r.status) + '</span></td></tr>';
+        }).join('') || '<tr><td colspan="8" style="text-align:center;color:#999;">No staff</td></tr>';
+
+        document.getElementById('repDeptBody').innerHTML = (d.departments || []).map(x => {
+            const p = x.rate >= 90 ? 'ok' : x.rate >= 60 ? 'warn' : 'bad';
+            return '<tr><td>' + escRep(x.department) + '</td><td>' + x.staff + '</td><td>' + x.present + '</td>' +
+                '<td>' + (x.staff - x.present) + '</td><td>' + x.hours.toFixed(1) + '</td><td><span class="rep-pill ' + p + '">' + x.rate + '%</span></td></tr>';
+        }).join('') || '<tr><td colspan="6" style="text-align:center;color:#999;">No data</td></tr>';
+
+        document.getElementById('repDaysBody').innerHTML = (d.days || []).map(x => {
+            const p = x.rate >= 90 ? 'ok' : x.rate >= 60 ? 'warn' : 'bad';
+            return '<tr><td>' + escRep(x.dayName + ' ' + x.date) + (x.weekend ? ' (weekend)' : '') + '</td><td>' + x.present + '</td>' +
+                '<td>' + x.absent + '</td><td><span class="rep-pill ' + p + '">' + x.rate + '%</span></td></tr>';
+        }).join('') || '<tr><td colspan="4" style="text-align:center;color:#999;">No data</td></tr>';
     }
 
     // ============================================

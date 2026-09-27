@@ -60,7 +60,17 @@
         .save-status.saving { background: #cce5ff; color: #004085; }
         .save-status.saved { background: #d4edda; color: #155724; }
         .save-status.error { background: #f8d7da; color: #721c24; }
-        @media (max-width: 768px) { .toolbar { flex-direction: column; align-items: stretch; } table { font-size: 11px; } }
+        /* ===== ADD STUDENT FORM ===== */
+  #addStudentForm { display:none; margin-top:16px; padding:18px; border:2px solid #d4a017; border-radius:12px; background:#fffaf0; }
+  #addStudentForm.open { display:block; }
+  #addStudentForm h3 { font-size:1.1rem; color:var(--ink); margin-bottom:14px; }
+  .fgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+  .fgrid label { display:block; font-size:.95rem; font-weight:700; margin-bottom:5px; }
+  .fgrid input, .fgrid select { width:100%; padding:11px; font-size:1rem; border:2px solid #e0e6ef; border-radius:9px; font-family:inherit; }
+  .fgrid input:focus, .fgrid select:focus { outline:none; border-color:var(--gold); }
+  .fbtns { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  .fbtns .btn { width:auto; margin:0; }
+  @media (max-width: 768px) { .toolbar { flex-direction: column; align-items: stretch; } table { font-size: 11px; } }
     </style>
 </head>
 <body>
@@ -114,11 +124,31 @@
                 <option value="clear">Fully paid</option>
             </select>
             <button class="btn btn-success" onclick="loadStudents()"><i class="fas fa-sync"></i> Refresh</button>
+            <button class="btn btn-success" onclick="openAddStudent()" style="background:#28a745;"><i class="fas fa-user-plus"></i> Add Student</button>
             <button class="btn btn-success" onclick="exportCsv()" style="background:#0b5394;"><i class="fas fa-file-csv"></i> Export CSV</button>
             <span class="save-status" id="saveStatus"></span>
         </div>
-        <div class="table-wrapper">
-            <table>
+        <!-- ===== ADD STUDENT ===== -->
+        <div id="addStudentForm">
+            <h3><i class="fas fa-user-plus"></i> Add a New Student</h3>
+            <div class="fgrid">
+                <div><label for="nsFirst">First name *</label><input type="text" id="nsFirst" placeholder="e.g. Amara"></div>
+                <div><label for="nsLast">Last name *</label><input type="text" id="nsLast" placeholder="e.g. Miriam"></div>
+                <div><label for="nsAdm">Admission No. *</label><input type="text" id="nsAdm" placeholder="e.g. ST135"></div>
+                <div><label for="nsGrade">Class / Grade *</label><select id="nsGrade"></select></div>
+                <div><label for="nsGender">Gender</label><select id="nsGender"><option value="">Not set</option><option>Male</option><option>Female</option></select></div>
+                <div><label for="nsType">Day / Boarding</label><select id="nsType"><option value="Day Scholar">Day Scholar</option><option value="Boarder">Boarder</option></select></div>
+                <div><label for="nsPhone">Parent contact</label><input type="tel" id="nsPhone" placeholder="07xxxxxxxx"></div>
+                <div><label for="nsDob">Date of birth</label><input type="date" id="nsDob"></div>
+                <div><label for="nsPin">Login PIN (optional)</label><input type="text" id="nsPin" placeholder="4 digits for the student"></div>
+            </div>
+            <div class="fbtns">
+                <button class="btn btn-success" onclick="saveNewStudent()"><i class="fas fa-save"></i> Save Student</button>
+                <button class="btn sec" onclick="closeAddStudent()">Cancel</button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">            <table>
                 <thead>
                     <tr>
                         <th>#</th><th>Adm. No.</th><th>Student Name</th><th>Grade</th><th>Gender</th>
@@ -272,6 +302,69 @@
         return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[c]));
+    }
+
+    // ===== ADD STUDENT =====
+    function openAddStudent() {
+        const f = document.getElementById('addStudentForm');
+        f.classList.add('open');
+        const sel = document.getElementById('nsGrade');
+        const grades = [...new Set(studentsData.map(s => s.grade).filter(Boolean))].sort();
+        sel.innerHTML = '<option value="">Choose class...</option>' +
+            grades.map(g => '<option value="' + escapeHtml(g) + '">' + escapeHtml(g) + '</option>').join('');
+        f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function closeAddStudent() {
+        document.getElementById('addStudentForm').classList.remove('open');
+    }
+
+    async function saveNewStudent() {
+        const firstName = document.getElementById('nsFirst').value.trim();
+        const lastName = document.getElementById('nsLast').value.trim();
+        const admissionNumber = document.getElementById('nsAdm').value.trim();
+        const grade = document.getElementById('nsGrade').value;
+
+        if (!firstName || !lastName || !admissionNumber || !grade) {
+            showStatus('First name, last name, admission number and class are required', 'error');
+            return;
+        }
+        if (studentsData.some(s => (s.admissionNumber || '').toLowerCase() === admissionNumber.toLowerCase())) {
+            showStatus('Admission number ' + admissionNumber + ' already exists', 'error');
+            return;
+        }
+
+        const type = document.getElementById('nsType').value || 'Day Scholar';
+        const payload = {
+            firstName, lastName, admissionNumber,
+            class: grade, grade,
+            gender: document.getElementById('nsGender').value || '',
+            studentType: type, boarding: type === 'Boarder',
+            phone: document.getElementById('nsPhone').value.trim(),
+            dateOfBirth: document.getElementById('nsDob').value || ''
+        };
+        const pin = document.getElementById('nsPin').value.trim();
+        if (pin) payload.password = pin;
+
+        showStatus('Saving...', 'saving');
+        try {
+            const res = await fetch('/api/student', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!data.success) {
+                showStatus(data.error || 'Could not save the student', 'error');
+                return;
+            }
+            ['nsFirst', 'nsLast', 'nsAdm', 'nsPhone', 'nsDob', 'nsPin'].forEach(id => { document.getElementById(id).value = ''; });
+            closeAddStudent();
+            await loadStudents();
+            showStatus('Added ' + firstName + ' ' + lastName, 'saved');
+        } catch (e) {
+            showStatus('Network problem. Please try again.', 'error');
+        }
     }
 
     function showStatus(msg, cls) {

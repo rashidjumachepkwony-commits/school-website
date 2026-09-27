@@ -80,6 +80,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     const period = url.searchParams.get('period') || '';
     const type = url.searchParams.get('type') || '';
     const name = url.searchParams.get('name') || '';
+    const date = url.searchParams.get('date') || '';
 
     const recQuery = {
       grade,
@@ -87,7 +88,11 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
       ...(type ? { assessmentType: type } : {}),
       ...(name ? { assessmentName: name } : {})
     };
-    const records = await db.collection('assessments').find(recQuery).toArray();
+    const allRecords = await db.collection('assessments').find(recQuery).toArray();
+    // An assessment date, when supplied, narrows the set further.
+    const records = date
+      ? allRecords.filter(r => String(r.assessmentDate || '').slice(0, 10) === date)
+      : allRecords;
     const policySetting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
     const policy = loadPolicy(policySetting && policySetting.value ? JSON.stringify(policySetting.value) : null);
     const students = await db.collection('students').find({ class: grade }).sort({ firstName: 1, lastName: 1 }).toArray();
@@ -319,6 +324,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     <div><b>Assessment Period:</b> ${escapeHtml(period || '-')}</div>
     <div><b>Type:</b> ${escapeHtml(type || '-')}</div>
     <div><b>Assessment:</b> ${escapeHtml(name || '-')}</div>
+    <div><b>Date:</b> ${escapeHtml(date || (records[0] && String(records[0].assessmentDate || '').slice(0, 10)) || '-')}</div>
     <div><b>Academic Year:</b> ${academicYear}</div>
     <div><b>Students:</b> ${students.length}</div>
   </div>

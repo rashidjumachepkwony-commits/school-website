@@ -254,6 +254,14 @@
             border:2px solid #d5dce6; background:#fff; color:#0A1628; border-radius:10px; cursor:pointer;
         }
         .myatt-tab.on { background:#0A1628; color:#fff; border-color:#0A1628; }
+        .myatt-tab.myatt-pdf { background:#d4a017; border-color:#d4a017; color:#0A1628; font-weight:800; }
+        .myatt-tab.myatt-pdf:hover { background:#c1900f; }
+        .btn-view {
+            width:100%; padding:15px; font-size:15px; font-weight:800; font-family:inherit; cursor:pointer;
+            border:2px solid #0b5394; background:#0b5394; color:#fff; border-radius:12px;
+        }
+        .btn-view:hover { background:#093f6e; }
+        .btn-view:disabled { opacity:.6; cursor:not-allowed; }
         .myatt-empty { text-align:center; color:#8a97ab; font-size:13px; padding:18px 0; }
         .myatt-empty i { font-size:28px; display:block; margin-bottom:8px; color:#c9d3e2; }
         .myatt-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(92px,1fr)); gap:8px; margin-bottom:14px; }
@@ -324,21 +332,27 @@
                 <button type="button" id="checkinBtn" class="btn-checkin" onclick="handleAction('checkin')">✅ Check In</button>
                 <button type="button" id="checkoutBtn" class="btn-checkout" onclick="handleAction('checkout')">🚪 Check Out</button>
             </div>
+
+            <!-- Separate from check in/out: only signs in to VIEW the record -->
+            <div class="btn-row" style="margin-top:12px;">
+                <button type="button" id="viewAttBtn" class="btn-view" onclick="handleViewAttendance()">📊 View My Attendance</button>
+            </div>
         </form>
 
         <!-- ===== MY OWN ATTENDANCE ===== -->
-        <div class="myatt" id="myAtt">
+        <div class="myatt" id="myAtt" style="display:none;">
             <h3><i class="fas fa-chart-line"></i> My Attendance</h3>
-            <p class="myatt-hint">Enter your Staff ID above, then choose a period to see your own record and analysis.</p>
+            <p class="myatt-hint">Enter your Staff ID above, then choose a period. This is view-only &mdash; it does not check you in or out.</p>
 
             <div class="myatt-tabs">
                 <button class="myatt-tab on" data-p="day" onclick="loadMyAttendance('day')">Today</button>
                 <button class="myatt-tab" data-p="week" onclick="loadMyAttendance('week')">This Week</button>
                 <button class="myatt-tab" data-p="month" onclick="loadMyAttendance('month')">This Month</button>
+                <button class="myatt-tab myatt-pdf" onclick="downloadMyAttendancePDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
             </div>
 
             <div id="myAttBody" class="myatt-body">
-                <p class="myatt-empty"><i class="fas fa-user-circle"></i> Enter your Staff ID above to see your attendance.</p>
+                <p class="myatt-empty"><i class="fas fa-user-circle"></i> Enter your Staff ID and click "View My Attendance".</p>
             </div>
         </div>
 
@@ -478,16 +492,71 @@
         // MY OWN ATTENDANCE (day / week / month)
         // ============================================
         let myAttPeriod = 'day';
+        let myAttVerified = false;
+
+        /**
+         * Verifies the Staff ID and PIN, then reveals the attendance panel.
+         * This never checks the member in or out - it is view only.
+         */
+        async function handleViewAttendance() {
+            const id = (employeeIdInput.value || '').trim();
+            const pin = (pinInput.value || '').trim();
+            if (!id || !pin) {
+                showAlert('Please enter both your Staff ID and your PIN.', 'error');
+                return;
+            }
+            const btn = document.getElementById('viewAttBtn');
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+
+            try {
+                // Verify the credentials only - this never checks the member in.
+                const res = await fetch('/api/teacher/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ employeeId: id, pin: pin })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    showAlert(data.error || 'Could not verify your details.', 'error');
+                    return;
+                }
+
+                myAttVerified = true;
+                document.getElementById('myAtt').style.display = 'block';
+                showAlert('Welcome ' + (data.teacher.name || id) + '. Choose a period below.', 'success');
+                await loadMyAttendance(myAttPeriod);
+                document.getElementById('myAtt').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } catch (err) {
+                showAlert('Network problem. Please try again.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📊 View My Attendance';
+            }
+        }
+
+        function downloadMyAttendancePDF() {
+            if (!myAttVerified) {
+                showAlert('Please click "View My Attendance" first to verify your Staff ID and PIN.', 'error');
+                return;
+            }
+            const id = (employeeIdInput.value || '').trim();
+            if (!id) { showAlert('Enter your Staff ID first.', 'error'); return; }
+            const w = window.open(
+                '/api/teacher/attendance/history?employeeId=' + encodeURIComponent(id) +
+                '&period=' + myAttPeriod + '&format=pdf', '_blank');
+            if (!w) showAlert('Please allow popups to download the PDF.', 'error');
+        }
 
         async function loadMyAttendance(period) {
             myAttPeriod = period;
-            document.querySelectorAll('.myatt-tab').forEach(t =>
+            document.querySelectorAll('.myatt-tab[data-p]').forEach(t =>
                 t.classList.toggle('on', t.dataset.p === period));
 
             const id = (employeeIdInput.value || '').trim();
             const body = document.getElementById('myAttBody');
             if (!id) {
-                body.innerHTML = '<p class="myatt-empty"><i class="fas fa-user-circle"></i> Enter your Staff ID above to see your attendance.</p>';
+                body.innerHTML = '<p class="myatt-empty"><i class="fas fa-user-circle"></i> Enter your Staff ID and click "View My Attendance".</p>';
                 return;
             }
             body.innerHTML = '<p class="myatt-empty"><i class="fas fa-spinner fa-spin"></i> Loading your record...</p>';
@@ -500,6 +569,7 @@
                         escapeHtml(data.error || 'Could not load your record') + '</p>';
                     return;
                 }
+                myAttVerified = true;
                 body.innerHTML = renderMyAttendance(data);
             } catch (err) {
                 body.innerHTML = '<p class="myatt-empty"><i class="fas fa-wifi"></i> Network problem. Please try again.</p>';

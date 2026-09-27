@@ -80,7 +80,7 @@ export default {
         () => handleCurriculum(db, env, route, method, body, pathParts, url),
         () => handleUpload(db, env, route, method, body, pathParts, request),
         () => handleHolidayAssignments(db, env, route, method, body, pathParts, request),
-        () => handleClerk(db, env, route, method, body, pathParts),
+        () => handleClerk(db, env, route, method, body, pathParts, url),
         () => handlePortal(db, env, route, method, body, pathParts, url),
       ];
 

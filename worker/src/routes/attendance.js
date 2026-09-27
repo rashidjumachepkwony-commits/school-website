@@ -104,6 +104,35 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
   // The production frontend still calls this route. Staff PINs may be either
   // legacy plaintext values or the current salted hash format; successful
   // plaintext authentication is migrated to the hashed format.
+  // POST /api/teacher/verify - confirm a Staff ID and PIN without any
+  // check-in side effect. Used by the "View My Attendance" button, which must
+  // never mark anybody present.
+  if (route === '/teacher/verify' && method === 'POST') {
+    const employeeId = (body.employeeId || '').trim();
+    const pin = (body.pin || '').trim();
+    if (!employeeId || !pin) return error('Please enter your Staff ID and PIN');
+
+    const teacher = await db.collection('teachers').findOne({ employeeId, isActive: { $ne: false } });
+    if (!teacher) return error('Invalid Staff ID or PIN. Please try again.', 401);
+
+    let ok = false;
+    if (typeof teacher.password === 'string' && teacher.password.includes(':')) {
+      ok = await verifyPassword(pin, teacher.password);
+    } else {
+      ok = teacher.password === pin;
+    }
+    if (!ok) return error('Invalid Staff ID or PIN. Please try again.', 401);
+
+    return success({
+      message: 'Verified',
+      teacher: {
+        employeeId: teacher.employeeId,
+        name: `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim(),
+        department: teacher.department || 'Teaching'
+      }
+    });
+  }
+
   if (route === '/teacher/checkin' && method === 'POST') {
     const { employeeId, pin, location = 'School' } = body;
     if (!employeeId || !pin) return error('Staff ID and PIN are required', 400);
@@ -396,6 +425,74 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
     else if (attendanceRate >= 50) comment = 'Attendance is below target. Please speak to your head teacher.';
     else if (workdays > 0) comment = 'Attendance is low and needs urgent attention.';
     else comment = 'No working days in this period yet.';
+
+    const label = period === 'day' ? 'Daily' : period === 'week' ? 'Weekly' : 'Monthly';
+
+    if ((url.searchParams.get('format') || '').toLowerCase() === 'pdf') {
+      const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const dayRows = byDay.map(d => `<tr>
+        <td>${esc(d.dayName)}</td><td>${esc(d.date)}</td>
+        <td class="ctr">${esc(d.checkInTime || '-')}</td><td class="ctr">${esc(d.checkOutTime || '-')}</td>
+        <td class="num">${d.hoursWorked ? d.hoursWorked.toFixed(1) : '-'}</td>
+        <td class="ctr">${d.weekend ? 'Weekend' : esc(d.status)}${d.isLate ? ' (late)' : ''}</td></tr>`).join('');
+
+      const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>My Attendance - ${esc(teacher.employeeId)}</title><style>
+*{box-sizing:border-box}
+@page{size:A4 portrait;margin:14mm 12mm}
+body{font-family:"Segoe UI",Arial;margin:0;padding:18px;background:#eef1f5;color:#12233f;font-size:12px}
+.sheet{max-width:820px;margin:0 auto;background:#fff;padding:28px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
+.hd{display:flex;align-items:center;gap:15px;border-bottom:3px solid #d4a017;padding-bottom:12px}
+.crest{width:58px;height:58px;flex:0 0 58px;border-radius:50%;background:linear-gradient(135deg,#0a1628,#1c3a6e);color:#d4a017;display:flex;align-items:center;justify-content:center;font-size:25px}
+.hd h1{margin:0;font-size:20px;color:#0a1628}
+.hd .tag{font-size:10.5px;color:#5a6b85;text-transform:uppercase;letter-spacing:2px}
+.hd .motto{font-size:11px;color:#8a6d1f;font-style:italic}
+.meta{display:flex;flex-wrap:wrap;gap:6px 22px;margin:14px 0;padding:11px 14px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px}
+.meta b{color:#0a1628;margin-right:5px}
+.st{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:9px;margin:12px 0}
+.st div{border:1px solid #e3e9f2;border-radius:9px;padding:9px 6px;background:#fbfcfe;text-align:center}
+.st .v{font-size:19px;font-weight:800;color:#0a1628;line-height:1.15}
+.st .k{font-size:9.5px;color:#6c757d;text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+.comment{padding:12px 14px;border-radius:9px;font-weight:700;margin:12px 0;background:#e8f5ec;color:#136b2c;border-left:4px solid #28a745}
+.comment.warn{background:#fff4e5;color:#8a5200;border-left-color:#fd7e14}
+.comment.bad{background:#fdeaea;color:#8c1c24;border-left-color:#dc3545}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{border:1px solid #cfd8e6;padding:6px 8px;text-align:left}
+thead th{background:#0a1628;color:#fff;font-size:10.5px;text-transform:uppercase}
+tbody tr:nth-child(even){background:#fafcff}
+.ctr{text-align:center}.num{text-align:right}
+.foot{margin-top:14px;padding-top:8px;border-top:1px solid #e3e9f2;font-size:9.5px;color:#8a97ab;display:flex;justify-content:space-between}
+.btn{display:inline-block;background:#d4a017;color:#12233f;border:0;border-radius:7px;padding:9px 16px;font-weight:800;font-size:12.5px;cursor:pointer;font-family:inherit;margin-right:8px}
+.btn.sec{background:#0a1628;color:#fff}
+.toolbar{text-align:right;margin:0 auto 12px;max-width:820px}
+@media print{body{background:#fff;padding:0}.sheet{box-shadow:none;padding:0}.toolbar{display:none}tr{page-break-inside:avoid}}
+</style></head><body>
+<div class="toolbar"><button class="btn" onclick="window.print()">&#128424; Save as PDF / Print</button><button class="btn sec" onclick="window.close()">Close</button></div>
+<div class="sheet">
+  <div class="hd"><div class="crest">&#9734;</div><div>
+    <h1>CHANGARA STAR ACADEMY</h1><div class="tag">My Attendance Report</div>
+    <div class="motto">&ldquo;Assurance for Excellence&rdquo;</div></div></div>
+  <div class="meta">
+    <div><b>Staff:</b> ${esc(`${teacher.firstName || ''} ${teacher.lastName || ''}`.trim())}</div>
+    <div><b>Staff ID:</b> ${esc(teacher.employeeId)}</div>
+    <div><b>Department:</b> ${esc(teacher.department || 'Teaching')}</div>
+    <div><b>Period:</b> ${label} (${esc(startStr)} to ${esc(todayStr)})</div>
+  </div>
+  <div class="st">
+    <div><div class="v">${present.length}</div><div class="k">Present</div></div>
+    <div><div class="v">${absent}</div><div class="k">Absent</div></div>
+    <div><div class="v">${late.length}</div><div class="k">Late</div></div>
+    <div><div class="v">${totalHours.toFixed(1)}</div><div class="k">Total Hours</div></div>
+    <div><div class="v">${avgHours.toFixed(1)}</div><div class="k">Avg/Day</div></div>
+    <div><div class="v">${attendanceRate}%</div><div class="k">Rate</div></div>
+  </div>
+  <div class="comment ${attendanceRate >= 90 ? '' : attendanceRate >= 50 ? 'warn' : 'bad'}">${esc(comment)}</div>
+  <table><thead><tr><th>Day</th><th>Date</th><th class="ctr">In</th><th class="ctr">Out</th><th class="num">Hrs</th><th class="ctr">Status</th></tr></thead>
+  <tbody>${dayRows || '<tr><td colspan="6" class="ctr" style="padding:18px;color:#8a97ab">No days in this period.</td></tr>'}</tbody></table>
+  <div class="foot"><span>Changara Star Academy &middot; My Attendance</span><span>Generated: ${esc(new Date().toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' }))}</span></div>
+</div></body></html>`;
+      return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    }
 
     return success({
       teacher: {

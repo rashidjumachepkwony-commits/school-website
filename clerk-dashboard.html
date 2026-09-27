@@ -370,6 +370,24 @@ th, td { padding: 6px 8px; }
 <h3>📜 Student Payment History
 <button class="btn btn-primary btn-sm" onclick="populateHistoryStudentSelect()" style="float:right;padding:8px 20px;">🔄 Refresh Students</button>
 </h3>
+
+<!-- PRINT / PDF: whole class or one student -->
+<div class="card" style="background:#f7f9fc;border:1px solid #e0e6ef;box-shadow:none;margin-bottom:16px;">
+  <h4 style="margin:0 0 10px;font-size:15px;color:#0b5394;">🖨️ Print / Save as PDF</h4>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+    <label style="font-weight:700;font-size:13px;">Class:</label>
+    <select id="feesReportGrade" style="padding:9px;border:2px solid #e0e6ef;border-radius:8px;font-size:14px;">
+      <option value="">All classes</option>
+      <option>Play Group</option><option>PP1</option><option>PP2</option>
+      <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+      <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+    </select>
+    <button class="btn btn-primary" onclick="printFeesReport('')" style="background:#0b5394;">📄 Whole class - fees &amp; balances</button>
+    <input type="text" id="feesReportStudent" placeholder="Student admission no. (optional)" style="padding:9px;border:2px solid #e0e6ef;border-radius:8px;font-size:14px;min-width:200px;">
+    <button class="btn btn-success" onclick="printFeesReport(document.getElementById('feesReportStudent').value.trim())">👤 One student</button>
+  </div>
+  <p style="font-size:11.5px;color:#6c757d;margin:9px 0 0;">Opens a print-ready page with fees expected, paid, balance and status, plus that student's full payment history.</p>
+</div>
 <div class="history-search-row">
 <input type="text" id="historySearchInput" placeholder="🔍 Search by Name, ID, Grade, or Gender..." onkeyup="filterHistoryStudents()">
 <select id="historyGradeFilter" onchange="filterHistoryStudents()">
@@ -1402,7 +1420,22 @@ function viewSingleReceipt(row, studentId, studentName, amount, category, method
   generateReceipt(data);
 }
 // ========================
-// REPORT FUNCTIONS (client-side print/PDF)
+    // ===== FEES REPORT: whole class or a single student =====
+    function printFeesReport(studentId) {
+      var grade = document.getElementById('feesReportGrade').value;
+      if (!grade && !studentId) {
+        showMessage('Choose a class, or type an admission number, first.', 'error');
+        return;
+      }
+      var params = new URLSearchParams();
+      if (grade) params.set('grade', grade);
+      if (studentId) params.set('studentId', studentId);
+      params.set('format', 'pdf');
+      var w = window.open('/api/clerk/fees-report?' + params.toString(), '_blank');
+      if (!w) showMessage('Please allow popups to open the report.', 'error');
+    }
+
+    // REPORT FUNCTIONS (client-side print/PDF)
 // ========================
 function openPrintWindow(title, bodyHtml) {
   var printWindow = window.open('', '_blank', 'width=900,height=700');
