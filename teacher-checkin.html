@@ -303,50 +303,102 @@
         .btn-view:hover { background:#093f6e; }
         .btn-view:disabled { opacity:.6; cursor:not-allowed; }
         .myatt-body { font-size:13.5px; color:#26364f; }
-        .myatt-empty { text-align:center; color:#7d8ba3; font-size:13.5px; padding:26px 12px; }
-        .myatt-empty i { font-size:34px; display:block; margin-bottom:10px; color:#c3ccdb; }
 
-        /* Summary tiles */
-        .myatt-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
-        .myatt-stat {
-            background:#fff; border:1px solid #e3e9f2; border-radius:12px; padding:12px 8px;
-            text-align:center; box-shadow:0 1px 4px rgba(10,22,40,.05);
+        /* ---------- Empty state ---------- */
+        .ma-empty {
+            text-align:center; padding:34px 22px; background:#fff;
+            border:1px solid #e3e9f2; border-radius:16px;
+            box-shadow:0 2px 8px rgba(10,22,40,.05);
         }
-        .myatt-stat .v { font-size:23px; font-weight:800; color:#0A1628; line-height:1.1; letter-spacing:-.5px; }
-        .myatt-stat .k { font-size:10px; font-weight:700; color:#7d8ba3; text-transform:uppercase; letter-spacing:.5px; margin-top:4px; }
-        .myatt-stat.good .v { color:#0b7a3b; }
-        .myatt-stat.warn .v { color:#b45309; }
-        .myatt-stat.bad  .v { color:#a4161a; }
+        .ma-empty-ico { font-size:44px; line-height:1; margin-bottom:12px; }
+        .ma-empty h4 { font-size:17px; color:#0A1628; margin-bottom:8px; }
+        .ma-empty > p { font-size:13.5px; color:#5f6f88; max-width:460px; margin:0 auto 18px; line-height:1.7; }
+        .ma-empty-hint {
+            display:inline-block; text-align:left; max-width:420px;
+            background:#f7f9fc; border:1px solid #e3e9f2; border-left:4px solid #D4A017;
+            border-radius:10px; padding:13px 16px; font-size:13px; color:#3c4d68; line-height:1.65;
+        }
+        .ma-empty-hint b { color:#0A1628; }
 
-        .myatt-comment {
-            padding:13px 15px; border-radius:12px; font-size:13.5px; font-weight:700; margin-bottom:14px;
-            background:#e9f7ee; color:#0b5e2c; border-left:5px solid #0b7a3b;
+        /* ---------- Tiles ---------- */
+        .ma-tiles { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:16px; }
+        .ma-tile {
+            background:#fff; border:1px solid #e3e9f2; border-radius:14px;
+            padding:14px 10px; text-align:center; position:relative; overflow:hidden;
+            box-shadow:0 1px 4px rgba(10,22,40,.05);
         }
-        .myatt-comment.warn { background:#fff5e6; color:#8a5200; border-left-color:#d97706; }
-        .myatt-comment.bad  { background:#fdecec; color:#8c1c24; border-left-color:#a4161a; }
-        .myatt-meta { font-size:12px; color:#5f6f88; margin-bottom:10px; line-height:1.7; }
-        .myatt-meta b { color:#0A1628; }
+        .ma-tile::before { content:""; position:absolute; inset:0 0 auto 0; height:4px; background:#c9d3e2; }
+        .ma-tile.accent::before  { background:linear-gradient(90deg,#0A1628,#1d3a6b); }
+        .ma-tile.accent2::before { background:linear-gradient(90deg,#D4A017,#F5C842); }
+        .ma-tile.good::before    { background:#0b7a3b; }
+        .ma-tile.warn::before    { background:#d97706; }
+        .ma-tile.bad::before     { background:#a4161a; }
+        .ma-tile-v { font-size:26px; font-weight:800; color:#0A1628; line-height:1.05; letter-spacing:-.6px; }
+        .ma-tile-k { font-size:10.5px; font-weight:700; color:#5f6f88; text-transform:uppercase; letter-spacing:.5px; margin-top:5px; }
+        .ma-tile-s { font-size:10px; color:#98a4b8; margin-top:2px; }
+        .ma-tile.good .ma-tile-v { color:#0b7a3b; }
+        .ma-tile.warn .ma-tile-v { color:#b45309; }
+        .ma-tile.bad  .ma-tile-v { color:#a4161a; }
 
-        /* Result table */
-        .myatt-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px; }
-        .myatt-table th {
-            background:#0A1628; color:#fff; padding:10px 8px; font-size:10.5px; font-weight:800;
-            text-transform:uppercase; letter-spacing:.4px; position:sticky; top:0;
+        /* ---------- Verdict ---------- */
+        .ma-verdict {
+            display:flex; gap:14px; align-items:flex-start;
+            padding:14px 16px; border-radius:12px; margin-bottom:14px;
+            background:#e9f7ee; border-left:5px solid #0b7a3b;
         }
-        .myatt-table th:first-child { border-radius:10px 0 0 0; }
-        .myatt-table th:last-child { border-radius:0 10px 0 0; }
-        .myatt-table td { padding:10px 8px; border-bottom:1px solid #eaeff6; text-align:left; font-weight:500; }
-        .myatt-table tbody tr:nth-child(even) td { background:#f8fafd; }
-        .myatt-table .we td { color:#9aa6b8; font-style:italic; }
-        .myatt-table .absent td { background:#fdf0f0 !important; color:#8c1c24; font-weight:700; }
-        .myatt-table .late td { background:#fff8ec !important; }
-        .myatt-table .present td { color:#0b5e2c; font-weight:600; }
-        .myatt-scroll { max-height:340px; overflow-y:auto; border:1px solid #e3e9f2; border-radius:12px; }
-        @media (max-width:480px){
-            .myatt-stats { grid-template-columns:repeat(2,1fr); }
-            .myatt-stat .v { font-size:20px; }
-            .myatt-table { font-size:12px; }
-            .myatt-table td, .myatt-table th { padding:8px 6px; }
+        .ma-verdict.warn { background:#fff5e6; border-left-color:#d97706; }
+        .ma-verdict.bad  { background:#fdecec; border-left-color:#a4161a; }
+        .ma-verdict-ico { font-size:22px; line-height:1.2; }
+        .ma-verdict strong { display:block; font-size:15px; color:#0A1628; margin-bottom:3px; }
+        .ma-verdict p { font-size:13.5px; color:#3c4d68; margin:0; line-height:1.6; }
+
+        /* ---------- Facts strip ---------- */
+        .ma-facts { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+        .ma-fact {
+            display:flex; align-items:baseline; gap:7px;
+            background:#fff; border:1px solid #e3e9f2; border-radius:9px; padding:8px 13px;
+        }
+        .ma-fact .k { font-size:10px; font-weight:800; color:#8a97ab; text-transform:uppercase; letter-spacing:.5px; }
+        .ma-fact .v { font-size:13.5px; font-weight:700; color:#0A1628; }
+
+        /* ---------- Table ---------- */
+        .ma-table-wrap {
+            background:#fff; border:1px solid #e3e9f2; border-radius:14px;
+            overflow:hidden; max-height:420px; overflow-y:auto;
+            box-shadow:0 1px 4px rgba(10,22,40,.05);
+        }
+        .ma-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13.5px; }
+        .ma-table thead th {
+            position:sticky; top:0; z-index:2;
+            background:#0A1628; color:#fff; text-align:left;
+            font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.5px;
+            padding:12px 14px; white-space:nowrap;
+        }
+        .ma-table tbody td { padding:12px 14px; border-bottom:1px solid #eef2f7; }
+        .ma-table tbody tr:last-child td { border-bottom:0; }
+        .ma-table .c-day { font-weight:700; color:#0A1628; }
+        .ma-table .c-day span { display:block; font-weight:500; font-size:11.5px; color:#98a4b8; }
+        .ma-table .c-time { font-variant-numeric:tabular-nums; color:#3c4d68; }
+        .ma-table .c-hrs { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; color:#0A1628; }
+        .ma-table tbody tr:nth-child(even) td { background:#fafbfe; }
+        .ma-table tbody tr.absent td { background:#fdf0f0 !important; }
+        .ma-table tbody tr.open   td { background:#fff8ec !important; }
+        .ma-table tbody tr.we     td { color:#9aa6b8; background:#f8fafc !important; font-style:italic; }
+        .ma-table tbody tr.present td { color:#0b5e2c; }
+
+        .chip { display:inline-block; padding:3px 11px; border-radius:11px; font-size:11px; font-weight:800; letter-spacing:.2px; }
+        .chip-good { background:#dff3e4; color:#136b2c; }
+        .chip-warn { background:#fff0d6; color:#8a5200; }
+        .chip-bad  { background:#fbdcdc; color:#8c1c24; }
+        .chip-muted{ background:#eceff4; color:#8a97ab; }
+
+        @media (max-width:900px){ .ma-tiles { grid-template-columns:repeat(3,1fr); } }
+        @media (max-width:560px){
+            .ma-tiles { grid-template-columns:repeat(2,1fr); }
+            .ma-tile-v { font-size:22px; }
+            .ma-verdict { flex-direction:column; gap:8px; }
+            .ma-table thead th, .ma-table tbody td { padding:10px 10px; }
+            .ma-table { font-size:12.5px; }
         }
 
         .btn-row-bottom {
@@ -648,50 +700,97 @@
 
         function renderMyAttendance(d) {
             const s = d.summary;
-            const rateCls = s.attendanceRate >= 90 ? 'good' : s.attendanceRate >= 60 ? 'warn' : 'bad';
-            const rateWord = s.attendanceRate >= 90 ? 'Strong' : s.attendanceRate >= 60 ? 'Fair' : 'Low';
-
-            const stat = (v, k, cls) => '<div class="myatt-stat ' + (cls || '') + '"><div class="v">' + v + '</div><div class="k">' + k + '</div></div>';
-
-            const commentCls = s.attendanceRate >= 90 ? '' : s.attendanceRate >= 50 ? 'warn' : 'bad';
-
-            // For the single-day view show the detail row; for week/month show every day.
             const days = d.days || [];
-            const rows = days.map(x => {
-                let cls = '', mark = '';
-                if (x.weekend) { cls = 'we'; mark = 'Weekend'; }
-                else if (x.status === 'Absent') { cls = 'absent'; mark = 'Absent'; }
-                else if (x.status === 'Checked In') { cls = 'late'; mark = 'In (no out)'; }
-                else { cls = 'present'; mark = (x.hoursWorked || 0).toFixed(1) + 'h'; }
-                return '<tr class="' + cls + '"><td>' + x.dayName + ' ' + x.date + '</td>' +
-                    '<td>' + (x.checkInTime || '-') + '</td>' +
-                    '<td>' + (x.checkOutTime || '-') + '</td>' +
-                    '<td>' + (x.hoursWorked ? x.hoursWorked.toFixed(1) : '-') + '</td>' +
-                    '<td>' + mark + '</td></tr>';
-            }).join('');
-
             const periodName = d.period === 'day' ? 'Today' : d.period === 'week' ? 'This Week' : 'This Month';
 
-            return '' +
-                '<div class="myatt-stats">' +
-                    stat(s.present, 'Present') +
-                    stat(s.absent, 'Absent', s.absent > 0 ? 'bad' : 'good') +
-                    stat(s.late, 'Late', s.late > 0 ? 'warn' : 'good') +
-                    stat(s.totalHours, 'Total Hours') +
-                    stat(s.averageHours, 'Avg/Day') +
-                    stat(s.attendanceRate + '%', rateWord + ' Rate', rateCls) +
-                '</div>' +
-                '<div class="myatt-comment ' + commentCls + '"><i class="fas fa-lightbulb"></i> ' + escapeHtml(s.comment) + '</div>' +
-                '<p class="myatt-meta">Period: <b>' + periodName +
-                '</b> &nbsp;(' + d.from + ' to ' + d.to + ') &nbsp;|&nbsp; Working days: <b>' + s.workdays +
-                '</b> &nbsp;|&nbsp; Punctuality: <b>' + s.punctualityRate + '%</b>' +
-                (s.bestDayHours ? ' &nbsp;|&nbsp; Longest day: <b>' + s.bestDayHours + 'h</b> on ' + s.bestDayDate : '') +
-                '</p>' +
-                '<div class="myatt-scroll"><table class="myatt-table"><thead><tr>' +
-                '<th>Date</th><th>In</th><th>Out</th><th>Hrs</th><th>Status</th>' +
-                '</tr></thead><tbody>' +
-                (rows || '<tr><td colspan="5" style="text-align:center;padding:14px;color:#8a97ab;">No days in this period yet.</td></tr>') +
-                '</tbody></table></div>';
+            /* ---------- Nothing to report: a clear, friendly panel ----------
+               Showing a row of zeros reads as broken, so explain the reason
+               instead. */
+            if (s.workdays === 0 || (s.present === 0 && s.absent === 0)) {
+                const weekendOnly = days.length > 0 && days.every(x => x.weekend);
+                return '' +
+                    '<div class="ma-empty">' +
+                        '<div class="ma-empty-ico">\u{1F4C5}</div>' +
+                        '<h4>' + (weekendOnly ? 'No working days this period' : 'No attendance recorded yet') + '</h4>' +
+                        '<p>' + (weekendOnly
+                            ? periodName + ' falls on a weekend. The school is closed on Saturday and Sunday, so there is nothing to count. Choose <b>This Week</b> or <b>This Month</b> to see your record.'
+                            : periodName + ' has no marks yet. Once you check in on a working day, your record will appear here.') + '</p>' +
+                        '<div class="ma-empty-hint">' +
+                            '<div><b>How to check in</b></div>' +
+                            '<div>Enter your Staff ID and PIN above, then press <b>Check In</b>. You only need to do this once in the morning.</div>' +
+                        '</div>' +
+                    '</div>';
+            }
+
+            /* ---------- Summary tiles ---------- */
+            const rate = Number(s.attendanceRate) || 0;
+            const rateCls = rate >= 90 ? 'good' : rate >= 60 ? 'warn' : 'bad';
+            const rateWord = rate >= 90 ? 'Strong' : rate >= 60 ? 'Fair' : 'Low';
+            const tile = (value, label, sub, cls) =>
+                '<div class="ma-tile ' + (cls || '') + '">' +
+                    '<div class="ma-tile-v">' + value + '</div>' +
+                    '<div class="ma-tile-k">' + label + '</div>' +
+                    (sub ? '<div class="ma-tile-s">' + sub + '</div>' : '') +
+                '</div>';
+
+            const tiles =
+                '<div class="ma-tiles">' +
+                    tile(s.present, 'Days Present', 'of ' + s.workdays + ' working', 'accent') +
+                    tile(s.absent, 'Days Absent', s.absent === 0 ? 'none' : 'needs attention', s.absent > 0 ? 'bad' : 'good') +
+                    tile(s.late, 'Late Arrivals', s.late === 0 ? 'on time' : 'after 8:00', s.late > 0 ? 'warn' : 'good') +
+                    tile(Number(s.totalHours).toFixed(1), 'Total Hours', 'worked', 'accent2') +
+                    tile(Number(s.averageHours).toFixed(1), 'Avg per Day', 'hours', 'accent2') +
+                    tile(rate + '%', rateWord + ' Rate', 'punctuality ' + s.punctualityRate + '%', rateCls) +
+                '</div>';
+
+            /* ---------- Verdict ---------- */
+            const commentCls = rate >= 90 ? 'good' : rate >= 50 ? 'warn' : 'bad';
+            const verdict =
+                '<div class="ma-verdict ' + commentCls + '">' +
+                    '<div class="ma-verdict-ico">' + (rate >= 90 ? '\u{2705}' : rate >= 60 ? '\u{26A0}\u{FE0F}' : '\u{26A0}\u{FE0F}') + '</div>' +
+                    '<div><strong>' + (rate >= 90 ? 'Excellent record' : rate >= 60 ? 'Fair attendance' : 'Attendance needs attention') + '</strong>' +
+                    '<p>' + escapeHtml(s.comment) + '</p></div>' +
+                '</div>';
+
+            /* ---------- Period facts ---------- */
+            const facts =
+                '<div class="ma-facts">' +
+                    fact('Period', periodName) +
+                    fact('Range', d.from + ' to ' + d.to) +
+                    fact('Working days', String(s.workdays)) +
+                    fact('Punctuality', s.punctualityRate + '%') +
+                    (s.bestDayHours ? fact('Longest day', s.bestDayHours + 'h on ' + s.bestDayDate) : '') +
+                '</div>';
+
+            /* ---------- Day table ---------- */
+            const rows = days.map(x => {
+                let cls = '', mark = '', chip = '';
+                if (x.weekend) { cls = 'we'; mark = 'Weekend'; chip = 'chip-muted'; }
+                else if (x.status === 'Absent') { cls = 'absent'; mark = 'Absent'; chip = 'chip-bad'; }
+                else if (x.status === 'Checked In') { cls = 'open'; mark = 'Not signed out'; chip = 'chip-warn'; }
+                else { cls = 'present'; mark = 'Complete'; chip = 'chip-good'; }
+                return '<tr class="' + cls + '">' +
+                    '<td class="c-day">' + x.dayName + '<span>' + x.date + '</span></td>' +
+                    '<td class="c-time">' + (x.checkInTime || '\u2013') + '</td>' +
+                    '<td class="c-time">' + (x.checkOutTime || '\u2013') + '</td>' +
+                    '<td class="c-hrs">' + (x.hoursWorked ? x.hoursWorked.toFixed(1) : '\u2013') + '</td>' +
+                    '<td><span class="chip ' + chip + '">' + mark + '</span></td>' +
+                '</tr>';
+            }).join('');
+
+            const table =
+                '<div class="ma-table-wrap">' +
+                    '<table class="ma-table">' +
+                        '<thead><tr><th>Day</th><th>Checked in</th><th>Checked out</th><th class="c-hrs">Hours</th><th>Status</th></tr></thead>' +
+                        '<tbody>' + (rows || '') + '</tbody>' +
+                    '</table>' +
+                '</div>';
+
+            return tiles + verdict + facts + table;
+        }
+
+        function fact(label, value) {
+            return '<div class="ma-fact"><span class="k">' + label + '</span><span class="v">' + escapeHtml(value) + '</span></div>';
         }
 
         function escapeHtml(v) {
