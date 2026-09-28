@@ -617,13 +617,21 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
       const maxTotal = list.reduce((s, a) => s + (Number(a.maxScore) || 0), 0);
       const pct = maxTotal > 0 ? Number(((total / maxTotal) * 100).toFixed(2)) : 0;
       const avg = Number((total / list.length).toFixed(2));
-      const g = gradePercentage(pct, policy);
+      // Level comes from the subject levels, matching the grid, the class
+      // report and the result slip. Grading the blended percentage here made
+      // this download disagree with every other view.
+      const subjectGrading = gradeBySubject(
+        list.map(a => ({ subject: a.subject, score: a.score, maxScore: a.maxScore })),
+        policy
+      );
+      const g = subjectGrading.overall;
       rows.push({
         admissionNumber: r.studentId && String(r.studentId).length === 24 ? (student?.admissionNumber || '') : (r.studentId || ''),
         name: student ? `${student.firstName || ''} ${student.lastName || ''}`.trim() : (r.studentName || ''),
         grade: r.grade || (student ? (student.grade || student.class || '') : ''),
         subjects: list.length,
         total, avg, pct,
+        mix: subjectGrading.counts,
         level: g.level, code: g.code
       });
     }
@@ -666,6 +674,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
       <td class="ctr">${r.pct}%</td>
       <td class="ctr ${levelClass[r.level] || ''}">${escapeHtml(r.code)}</td>
       <td>${escapeHtml(r.level)}</td>
+      <td class="ctr">${r.mix ? Object.entries(r.mix).map(([c, n]) => `${n}&times;${c}`).join(' ') : '-'}</td>
     </tr>`).join('');
 
     const html = `<!doctype html>
@@ -726,7 +735,7 @@ tbody tr:nth-child(even){background:#fafcff}
   <table>
     <thead><tr><th class="ctr">Pos</th><th class="ctr">Adm. No.</th><th>Student Name</th><th class="ctr">Grade</th>
       <th class="ctr">Subjects</th><th class="ctr">Total Score</th><th class="ctr">Average Score</th>
-      <th class="ctr">Average %</th><th class="ctr">Key</th><th>Overall Performance Level</th></tr></thead>
+      <th class="ctr">Average %</th><th class="ctr">Key</th><th>Overall Performance Level</th><th class="ctr">Subjects at each level</th></tr></thead>
     <tbody>${bodyRows}</tbody>
   </table>
   <div class="sign"><div>Class Teacher</div><div>Head Teacher</div></div>

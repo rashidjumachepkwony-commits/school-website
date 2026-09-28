@@ -102,6 +102,34 @@ t('ratingToLevel maps the mean rating to the nearest band', () => {
   assert.equal(ratingToLevel(2.5).code, 'ME');
   assert.equal(ratingToLevel(3.6).code, 'EE');
 });
+t('every report grades from subject levels, not a blended percentage', () => {
+  // A learner can be "approaching" in most subjects while the blended total
+  // over wildly different maxima lands in a lower band. Each report must show
+  // the subject-level result, so this guards the rule that a report never
+  // grades a student from one weighted percentage.
+  const marks = [
+    { subject: 'C/A', score: 5, maxScore: 9 },      // 55.6%  AE
+    { subject: 'C.R.E', score: 2, maxScore: 4 },    // 50%    AE
+    { subject: 'ENV', score: 7, maxScore: 11 },     // 63.6%  ME
+    { subject: 'KISWAHILI', score: 10, maxScore: 25 }, // 40%  AE
+    { subject: 'KUSOMA', score: 8, maxScore: 28 },  // 28.6%  BE
+    { subject: 'LANGUAGE', score: 15, maxScore: 31 }, // 48.4% AE
+    { subject: 'LIT', score: 8, maxScore: 31 },    // 25.8%  BE
+    { subject: 'MATHS', score: 8, maxScore: 20 }    // 40%    AE
+  ];
+  const total = marks.reduce((s, m) => s + m.score, 0);
+  const maxTotal = marks.reduce((s, m) => s + m.maxScore, 0);
+  const blended = Number(((total / maxTotal) * 100).toFixed(2));
+
+  const subjectLevel = gradeBySubject(marks).overall;
+  const blendedLevel = gradePercentage(blended);
+
+  // The two genuinely differ, which is why every report uses the first.
+  assert.notEqual(subjectLevel.code, blendedLevel.code,
+    'this case no longer separates the two methods - pick a better example');
+  assert.equal(subjectLevel.code, 'AE');
+  assert.equal(blendedLevel.code, 'BE');
+});
 t('computePercentage from totalScore/maxTotal', () => {
   assert.equal(computePercentage({ totalScore: 80, maxTotal: 100 }), 80);
 });
