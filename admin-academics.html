@@ -552,6 +552,35 @@
         .hbtn.pdf { border-color:#a4161a; color:#a4161a; }
         .hbtn.all { border-color:#0b7a3b; color:#0b7a3b; }
 
+        /* ===== MOBILE CAPTURE BAR ===== */
+        .cap-bar {
+            display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+            padding:12px 14px; margin-bottom:12px;
+            background:linear-gradient(135deg,#0A1628,#1d3a6b); border-radius:12px; color:#fff;
+            position:sticky; top:0; z-index:20; box-shadow:0 3px 12px rgba(10,22,40,.22);
+        }
+        .cap-nav {
+            flex:0 0 44px; width:44px; height:44px; border-radius:10px; cursor:pointer;
+            background:rgba(212,160,23,.18); border:1px solid rgba(212,160,23,.5);
+            color:#D4A017; font-size:24px; line-height:1; font-weight:700;
+        }
+        .cap-nav:hover { background:rgba(212,160,23,.3); }
+        .cap-info { flex:1 1 180px; min-width:0; }
+        .cap-label { font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:#a9bcd6; }
+        .cap-info select {
+            width:100%; margin-top:2px; padding:9px 10px; font-size:15px; font-weight:700; font-family:inherit;
+            border:0; border-radius:8px; background:#fff; color:#0A1628;
+        }
+        .cap-count { font-size:10.5px; color:#a9bcd6; margin-top:3px; }
+        .cap-save {
+            flex:0 0 auto; padding:13px 18px; min-height:44px; font-size:14px; font-weight:800; font-family:inherit;
+            background:#28a745; color:#fff; border:0; border-radius:10px; cursor:pointer; white-space:nowrap;
+        }
+        .cap-save:hover { background:#1e7e34; }
+        /* On a phone only the student being captured is shown. */
+        #marksTableContainer.cap-single #marksTable tr:not(.cap-row) { display:none; }
+        #marksTableContainer.cap-single #marksTable tr.cap-row { border:2px solid #D4A017; border-radius:12px; }
+
         .entry-toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 
         /* ===== DOWNLOAD PANEL ===== */
@@ -818,6 +847,21 @@
             <span>03 Meeting Expectations</span>
             <span>04 Exceeding Expectations</span>
         </div>
+        <!-- ===== MOBILE CAPTURE: ONE STUDENT AT A TIME ===== -->
+        <!-- On a phone a long table means a lot of scrolling between students.
+             This bar steps through the class one pupil at a time, and the
+             table is collapsed to that single row while it is in use. -->
+        <div class="cap-bar">
+            <button class="cap-nav" onclick="stepStudent(-1)" title="Previous student" aria-label="Previous student">&#8249;</button>
+            <div class="cap-info">
+                <div class="cap-label">Capturing marks for</div>
+                <select id="capSelect" onchange="jumpToStudent(this.value)" aria-label="Choose student"></select>
+                <div class="cap-count" id="capCount"></div>
+            </div>
+            <button class="cap-nav" onclick="stepStudent(1)" title="Next student" aria-label="Next student">&#8250;</button>
+            <button class="cap-save" onclick="saveCurrentAndNext()" title="Save and go to the next student">Save &amp; next</button>
+        </div>
+
         <div class="entry-toolbar" style="margin-bottom:10px;">
             <div class="entry-hint">
                 <b>Fast entry:</b> type a score and press <kbd>Enter</kbd> to drop to the next
@@ -1513,6 +1557,8 @@
         });
 
         tbody.innerHTML = bodyHtml;
+        buildCaptureBar();
+        if (studentRows().length) focusStudent(capIndex, false);
     }
 
     // ============================================
@@ -1641,6 +1687,73 @@
         return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[c]));
+    }
+
+    // ============================================
+    // MOBILE CAPTURE - one student at a time
+    // ============================================
+    let capIndex = 0;
+
+    function studentRows() {
+        return Array.from(document.querySelectorAll('#marksTableBody tr[data-student-name]'));
+    }
+
+    /** Fill the stepper and show the whole class by default. */
+    function buildCaptureBar() {
+        const rows = studentRows();
+        const sel = document.getElementById('capSelect');
+        const count = document.getElementById('capCount');
+        if (!sel || !count) return;
+        sel.innerHTML = rows.map((r, i) =>
+            '<option value="' + i + '">' + (i + 1) + '. ' + (r.dataset.studentName || 'New student') + '</option>'
+        ).join('');
+        count.textContent = rows.length + ' student' + (rows.length === 1 ? '' : 's') + ' in this class';
+    }
+
+    /**
+     * Collapse the table to a single student so a phone never has to scroll
+     * past a whole class. On a wide screen the full table is left visible.
+     */
+    function focusStudent(i, scroll) {
+        const rows = studentRows();
+        if (!rows.length) return;
+        capIndex = Math.max(0, Math.min(rows.length - 1, i));
+        const sel = document.getElementById('capSelect');
+        if (sel) sel.value = String(capIndex);
+        const one = window.matchMedia('(max-width: 820px)').matches;
+        document.getElementById('marksTableContainer').classList.toggle('cap-single', one);
+        rows.forEach((r, n) => r.classList.toggle('cap-row', n === capIndex));
+        if (scroll !== false) {
+            const card = document.getElementById('marksTableContainer');
+            if (card && card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        const first = rows[capIndex] && rows[capIndex].querySelector('.score-input');
+        if (first) { first.focus({ preventScroll: true }); first.select(); }
+    }
+
+    function stepStudent(delta) {
+        focusStudent(capIndex + delta);
+    }
+
+    function jumpToStudent(value) {
+        focusStudent(parseInt(value, 10) || 0);
+    }
+
+    /** Save the visible student, then move straight to the next one. */
+    async function saveCurrentAndNext() {
+        const rows = studentRows();
+        const row = rows[capIndex];
+        if (!row) return;
+        const id = row.dataset.studentId;
+        const ok = await saveStudentRow(id, true);
+        if (!ok) return;
+        if (capIndex < rows.length - 1) {
+            focusStudent(capIndex + 1);
+        } else {
+            showSaveStatus('All students saved', 'saved');
+            setTimeout(() => hideSaveStatus(), 2000);
+            focusStudent(0);
+        }
     }
 
     // ============================================

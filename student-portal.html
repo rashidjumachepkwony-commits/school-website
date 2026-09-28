@@ -68,6 +68,93 @@
   .msg.err { background:#fbdcdc; color:#8c1c24; }
   .msg.ok { background:#dff3e4; color:#136b2c; }
   .foot { text-align:center; color:var(--ink-soft); font-size:.95rem; padding:18px; }
+  /* ===== NAME LOOKUP =====
+     The suggestion list is positioned above the field, so on a phone the
+     names appear next to the box the parent is typing in rather than being
+     pushed below the on-screen keyboard. */
+  .lookup { position:relative; }
+  .suggest {
+    position:absolute; left:0; right:0; bottom:calc(100% + 6px); z-index:40;
+    background:#fff; border:2px solid var(--gold); border-radius:12px;
+    box-shadow:0 10px 28px rgba(10,22,40,.18); overflow:hidden; max-height:260px; overflow-y:auto;
+  }
+  .suggest[hidden] { display:none; }
+  .suggest button {
+    display:flex; width:100%; align-items:center; justify-content:space-between; gap:10px;
+    padding:14px 16px; font-size:1.05rem; font-family:inherit; text-align:left;
+    background:#fff; color:var(--ink); border:0; border-bottom:1px solid #eef2f7; cursor:pointer;
+  }
+  .suggest button:last-child { border-bottom:0; }
+  .suggest button:hover, .suggest button:focus { background:#fff8e1; outline:none; }
+  .suggest .s-adm { font-size:.85rem; color:#6b7a92; font-weight:700; white-space:nowrap; }
+  .suggest .s-gr { font-size:.8rem; color:#8a97ab; white-space:nowrap; }
+  .suggest .none { padding:14px 16px; font-size:.98rem; color:#7d8ba3; }
+
+  /* ===== ASSESSMENT RESULT CARD ===== */
+  .res-card {
+    background:#fff; border:1px solid #e3e9f2; border-radius:16px; overflow:hidden;
+    margin-bottom:18px; box-shadow:0 2px 10px rgba(10,22,40,.06);
+  }
+  .res-head {
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    padding:16px 18px; background:linear-gradient(135deg,#0A1628,#1d3a6b); color:#fff;
+  }
+  .res-period { font-size:1.15rem; font-weight:800; color:#fff; margin:0; line-height:1.25; }
+  .res-type { font-size:.95rem; color:#c9d6e8; margin:3px 0 0; }
+  .res-level {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-width:120px; padding:9px 14px; border-radius:12px; text-align:center;
+  }
+  .res-level-code { font-size:1.4rem; font-weight:800; line-height:1; }
+  .res-level-name { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-top:3px; }
+  .lvl-ee { background:#dff3e4; color:#136b2c; }
+  .lvl-me { background:#dbeafe; color:#12459b; }
+  .lvl-ae { background:#fff3cd; color:#856404; }
+  .lvl-be { background:#fbdcdc; color:#8c1c24; }
+  .lvl-none{ background:#eceff4; color:#8a97ab; }
+
+  .res-figures { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:#eef2f7; }
+  .fig { background:#fff; padding:14px 10px; text-align:center; }
+  .fig-v { font-size:1.3rem; font-weight:800; color:#0A1628; line-height:1.15; letter-spacing:-.3px; }
+  .fig-k { font-size:.68rem; font-weight:700; color:#8a97ab; text-transform:uppercase; letter-spacing:.5px; margin-top:4px; }
+
+  .res-mix { display:flex; flex-wrap:wrap; gap:6px; padding:12px 18px 0; }
+  .mchip { padding:3px 10px; border-radius:9px; font-size:.72rem; font-weight:800; letter-spacing:.3px; }
+  .mchip.ee{background:#dff3e4;color:#136b2c} .mchip.me{background:#dbeafe;color:#12459b}
+  .mchip.ae{background:#fff3cd;color:#856404} .mchip.be{background:#fbdcdc;color:#8c1c24}
+
+  .res-table-wrap { padding:12px 18px 0; }
+  .res-table { width:100%; border-collapse:separate; border-spacing:0; font-size:.98rem; }
+  .res-table thead th {
+    background:#f2f5fa; color:#5a6b85; text-align:left; padding:10px;
+    font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.4px;
+    border-bottom:2px solid #e3e9f2;
+  }
+  .res-table tbody td { padding:11px 10px; border-bottom:1px solid #eef2f7; }
+  .res-table tbody tr:last-child td { border-bottom:0; }
+  .res-table .c-subj { font-weight:600; color:#1d2c47; }
+  .res-table .c-score, .res-table .c-out, .res-table .c-pct { text-align:right; font-variant-numeric:tabular-nums; }
+  .res-table .c-out, .res-table .c-pct { color:#5f6f88; }
+  .res-table .c-lv { text-align:center; width:70px; }
+  .res-table tbody tr.lv-ee { background:#f6fdf8; } .res-table tbody tr.lv-me { background:#f5f9ff; }
+  .res-table tbody tr.lv-ae { background:#fffdf3; } .res-table tbody tr.lv-be { background:#fef7f7; }
+  .tag { display:inline-block; padding:2px 9px; border-radius:9px; font-size:.72rem; font-weight:800; }
+  .tag.lv-ee{background:#dff3e4;color:#136b2c} .tag.lv-me{background:#dbeafe;color:#12459b}
+  .tag.lv-ae{background:#fff3cd;color:#856404} .tag.lv-be{background:#fbdcdc;color:#8c1c24}
+
+  .res-dl {
+    display:flex; align-items:center; justify-content:center; gap:9px; width:calc(100% - 36px);
+    margin:16px 18px 18px; padding:15px; font-size:1.02rem; font-weight:800; font-family:inherit;
+    background:#a4161a; color:#fff; border:0; border-radius:11px; cursor:pointer;
+  }
+  .res-dl:hover { background:#8f0e12; }
+  @media (max-width:560px){
+    .res-figures { grid-template-columns:repeat(2,1fr); }
+    .res-level { min-width:100%; flex-direction:row; gap:9px; }
+    .res-table { font-size:.9rem; }
+    .res-table thead th, .res-table tbody td { padding:9px 7px; }
+  }
+
   .back { background:none; border:0; color:var(--ink); font-size:1.05rem; font-weight:700; text-decoration:underline; margin-bottom:14px; cursor:pointer; font-family:inherit; }
 
   /* Sticky lookup bar: stays reachable at the top of a phone screen, so a
@@ -108,20 +195,23 @@
   <!-- STEP 1 : find the child -->
   <div class="card" id="step1">
     <h2><i class="fas fa-search"></i> Step 1: Find Your Child</h2>
-    <p class="hint">Type part of your child's name (or the admission number) above, then choose their name from the list.</p>
+    <p class="hint">Type part of your child's name (or the admission number) above. Matching names appear straight away - just tap one.</p>
 
     <label for="search">Child's name or admission number</label>
-    <input type="text" id="search" placeholder="e.g. Amara" autocomplete="off">
-
-    <div id="results"></div>
+    <div class="lookup">
+      <input type="text" id="search" placeholder="e.g. Amara" autocomplete="off"
+             role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
+      <!-- Suggestions sit above the field so they are reachable on a phone
+           without the keyboard covering them. -->
+      <div id="suggest" class="suggest" role="listbox" hidden></div>
+    </div>
 
     <div class="match" id="match" style="display:none">
       <p id="matchText"></p>
       <label for="studentSelect">Tap your child's name here</label>
       <select id="studentSelect" size="6"></select>
       <button class="btn" onclick="openStudent()"><i class="fas fa-arrow-right"></i> Continue</button>
-    </div>
-  </div>
+    </div>  </div>
 
   <!-- STEP 2 : choose what to see -->
   <div class="card" id="step2" style="display:none">
@@ -193,34 +283,73 @@ async function loadStudents() {
   }
 }
 
+/**
+ * Type-ahead lookup. Matching names are offered in a panel that sits directly
+ * under the search box, so a parent on a phone can see and tap a name without
+ * the on-screen keyboard covering the list. Tapping a name opens that child
+ * straight away, with no extra Continue step.
+ */
 function filterStudents() {
-  const q = document.getElementById('search').value.trim().toLowerCase();
-  const box = document.getElementById('results');
-  if (q.length < 1) { box.innerHTML = ''; document.getElementById('match').style.display = 'none'; return; }
+  const input = document.getElementById('search');
+  const q = input.value.trim().toLowerCase();
+  const box = document.getElementById('suggest');
+  const match = document.getElementById('match');
 
-  const hits = allStudents.filter(s =>
-    s.name.toLowerCase().includes(q) || (s.admissionNumber || '').toLowerCase().includes(q)
-  );
-
-  if (!hits.length) {
-    box.innerHTML = '<div class="msg err show">No student found with that name. Please check the spelling, or search using the admission number.</div>';
-    document.getElementById('match').style.display = 'none';
+  if (q.length < 1) {
+    box.innerHTML = '';
+    box.hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+    match.style.display = 'none';
     return;
   }
 
-  if (hits.length === 1) {
-    document.getElementById('matchText').textContent = 'Found 1 student. Please confirm:';
-  } else {
-    document.getElementById('matchText').textContent =
-      'Found ' + hits.length + ' students. Please choose your child:';
+  const hits = allStudents.filter(s =>
+    s.name.toLowerCase().includes(q) || (s.admissionNumber || '').toLowerCase().includes(q)
+  ).slice(0, 40);
+
+  if (!hits.length) {
+    box.innerHTML = '<div class="none">No match for "' + esc(input.value.trim()) +
+      '". Check the spelling, or try the admission number.</div>';
+    box.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    match.style.display = 'none';
+    return;
   }
 
+  box.innerHTML = hits.map((s, i) =>
+    '<button type="button" role="option" data-id="' + s.id + '">' +
+      '<span>' + esc(s.name) + '</span>' +
+      '<span class="s-adm">' + esc(s.admissionNumber || 'no adm. no.') + '</span>' +
+      (s.grade ? '<span class="s-gr">' + esc(s.grade) + '</span>' : '') +
+    '</button>'
+  ).join('');
+  box.hidden = false;
+  input.setAttribute('aria-expanded', 'true');
+
+  // Keep the older list in step, for anyone using the Continue button.
+  document.getElementById('matchText').textContent =
+    hits.length === 1 ? 'Found 1 student. Tap the name above to continue.'
+                      : 'Found ' + hits.length + ' students. Tap your child\'s name above.';
   const sel = document.getElementById('studentSelect');
   sel.innerHTML = hits.map(s =>
     '<option value="' + s.id + '">' + s.name + '  (' + (s.admissionNumber || 'no adm. no.') + ', ' + s.grade + ')</option>'
   ).join('');
-  box.innerHTML = '';
-  document.getElementById('match').style.display = 'block';
+  match.style.display = 'block';
+}
+
+/** Open a child directly from the suggestion list. */
+function pickStudent(id) {
+  const sel = document.getElementById('studentSelect');
+  sel.value = id;
+  openStudent();
+}
+
+/** Close the suggestion panel when tapping away or pressing Escape. */
+function closeSuggest() {
+  const box = document.getElementById('suggest');
+  if (box) { box.hidden = true; box.innerHTML = ''; }
+  const input = document.getElementById('search');
+  if (input) input.setAttribute('aria-expanded', 'false');
 }
 
 async function openStudent() {
@@ -275,24 +404,78 @@ function renderResults(d) {
   if (!d.assessments.length) {
     return empty('There are no assessment results for this child yet. Results appear here as soon as the teacher enters them.');
   }
+
   let html = '';
   for (const a of d.assessments) {
-    const rows = a.subjects.map(s =>
-      '<tr><td>' + esc(s.subject) + '</td><td class="num">' + (s.score === null ? '-' : s.score) + '</td><td class="num">' + (s.max || '-') + '</td></tr>'
-    ).join('');
-    html += '<div class="pupil">' +
-      '<div class="nm">' + esc(a.period || 'Assessment') + '</div>' +
-      '<div class="mt">' + esc(a.type || '') + (a.name && a.name !== a.type ? ' &middot; ' + esc(a.name) : '') + '</div>' +
-      '<table><thead><tr><th>Subject</th><th class="num">Score</th><th class="num">Out of</th></tr></thead><tbody>' + rows + '</tbody></table>' +
-      '<div class="mt" style="margin-top:10px">' +
-        'Total: <strong>' + a.total + '</strong> / ' + a.maxTotal + ' &nbsp;|&nbsp; ' +
-        'Average: <strong>' + (a.percentage === null ? '-' : a.percentage + '%') + '</strong> &nbsp;|&nbsp; ' +
-        'Level: ' + levelBadge(a.performanceLevel, a.performanceCode) +
+    // Mean performance level on the 01-04 scale, from the subject levels.
+    const mix = a.subjectMix || {};
+    const ratings = { BE: 1, AE: 2, ME: 3, EE: 4 };
+    const codes = Object.keys(mix).filter(c => ratings[c]);
+    const avgLevel = codes.length
+      ? (codes.reduce((s, c) => s + ratings[c] * mix[c], 0) /
+         codes.reduce((s, c) => s + mix[c], 0)).toFixed(2)
+      : null;
+
+    const rows = a.subjects.map(s => {
+      const code = s.code || '';
+      const pct = (s.score !== null && s.max > 0) ? (s.score / s.max) * 100 : null;
+      const cls = code ? ' lv-' + code.toLowerCase() : '';
+      return '<tr class="' + cls + '">' +
+        '<td class="c-subj">' + esc(s.subject) + '</td>' +
+        '<td class="c-score">' + (s.score === null ? '–' : '<b>' + s.score + '</b>') + '</td>' +
+        '<td class="c-out">' + (s.max || '–') + '</td>' +
+        '<td class="c-pct">' + (pct === null ? '–' : pct.toFixed(1) + '%') + '</td>' +
+        '<td class="c-lv">' + (code ? '<span class="tag ' + cls + '">' + code + '</span>' : '–') + '</td>' +
+      '</tr>';
+    }).join('');
+
+    const chips = ['EE', 'ME', 'AE', 'BE']
+      .filter(c => mix[c])
+      .map(c => '<span class="mchip ' + c.toLowerCase() + '">' + mix[c] + ' × ' + c + '</span>')
+      .join('');
+
+    html += '<article class="res-card">' +
+      '<header class="res-head">' +
+        '<div>' +
+          '<h3 class="res-period">' + esc(a.period || 'Assessment') + '</h3>' +
+          '<p class="res-type">' + esc(a.type || '') +
+            (a.name && a.name !== a.type ? ' &middot; ' + esc(a.name) : '') + '</p>' +
+        '</div>' +
+        '<div class="res-level ' + levelClass(a.performanceLevel) + '">' +
+          '<span class="res-level-code">' + esc(a.performanceCode || 'NA') + '</span>' +
+          '<span class="res-level-name">' + esc(a.performanceLevel || 'Not Assessed') + '</span>' +
+        '</div>' +
+      '</header>' +
+
+      '<div class="res-figures">' +
+        figure('Total score', a.total + ' / ' + a.maxTotal) +
+        figure('Average', a.average === null ? '–' : a.average) +
+        figure('Average %', a.percentage === null ? '–' : a.percentage + '%') +
+        figure('Average level', avgLevel === null ? '–' : avgLevel + ' / 4') +
       '</div>' +
-      '<button class="btn sec" style="margin-top:14px" onclick="printResult()"><i class="fas fa-download"></i> Download / Print result slip</button>' +
-      '</div>';
+
+      (chips ? '<div class="res-mix">' + chips + '</div>' : '') +
+
+      '<div class="res-table-wrap"><table class="res-table">' +
+        '<thead><tr><th>Subject</th><th class="c-score">Score</th><th class="c-out">Out of</th>' +
+        '<th class="c-pct">%</th><th class="c-lv">Level</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table></div>' +
+
+      '<button class="res-dl" onclick="printResult()">' +
+        '<i class="fas fa-file-pdf"></i> Download result slip (PDF)</button>' +
+    '</article>';
   }
   return html + gradingKeyHtml(d.gradingKey);
+}
+
+function figure(label, value) {
+  return '<div class="fig"><div class="fig-v">' + value + '</div><div class="fig-k">' + label + '</div></div>';
+}
+
+function levelClass(level) {
+  return ({ 'Exceeding Expectation': 'lvl-ee', 'Meeting Expectation': 'lvl-me',
+            'Approaching Expectation': 'lvl-ae', 'Below Expectation': 'lvl-be' })[level] || 'lvl-none';
 }
 
 function printResult() {
