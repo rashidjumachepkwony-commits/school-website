@@ -525,6 +525,33 @@
             .cl-actions .btn, .cl-actions .btn-download { width: 100%; }
         }
 
+        /* ===== ASSESSMENT HISTORY ===== */
+        .hist-filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:16px; padding:14px; background:#f7f9fc; border:1px solid #e0e6ef; border-radius:12px; }
+        .hf { display:flex; flex-direction:column; gap:5px; }
+        .hf label { font-size:11px; font-weight:800; color:#3c4d68; text-transform:uppercase; letter-spacing:.3px; }
+        .hf label i { margin-right:5px; color:#D4A017; }
+        .hf select { padding:10px; font-size:13.5px; font-family:inherit; border:2px solid #d5dce6; border-radius:8px; background:#fff; color:#0A1628; }
+        .hf select:focus { outline:none; border-color:#D4A017; }
+        .hf-btn { flex-direction:row; align-items:flex-end; gap:8px; }
+        .hf-btn .btn { flex:1; justify-content:center; }
+        .hist-summary { font-size:12.5px; color:#5f6f88; margin-bottom:10px; font-weight:600; }
+        .table-wrap { overflow-x:auto; border:1px solid #e0e6ef; border-radius:12px; }
+        .hist-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px; min-width:960px; }
+        .hist-table thead th { position:sticky; top:0; z-index:2; background:#0A1628; color:#fff; text-align:left; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:12px; white-space:nowrap; }
+        .hist-table tbody td { padding:11px 12px; border-bottom:1px solid #eef2f7; vertical-align:middle; }
+        .hist-table tbody tr:last-child td { border-bottom:0; }
+        .hist-table tbody tr:nth-child(even) td { background:#fafbfe; }
+        .hist-table .num { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; white-space:nowrap; }
+        .hchip { display:inline-block; padding:2px 8px; border-radius:9px; font-size:10.5px; font-weight:800; margin-right:3px; }
+        .hchip.lv-ee{background:#dff3e4;color:#136b2c} .hchip.lv-me{background:#dbeafe;color:#12459b}
+        .hchip.lv-ae{background:#fff3cd;color:#856404} .hchip.lv-be{background:#fbdcdc;color:#8c1c24}
+        .hchip.lv-none{background:#eceff4;color:#8a97ab}
+        .hbtn { border:1px solid #d5dce6; background:#fff; color:#0A1628; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer; margin-right:4px; }
+        .hbtn:hover { background:#f0f4ff; border-color:#0A1628; }
+        .hbtn.view { border-color:#0b5394; color:#0b5394; }
+        .hbtn.pdf { border-color:#a4161a; color:#a4161a; }
+        .hbtn.all { border-color:#0b7a3b; color:#0b7a3b; }
+
         .entry-toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 
         /* ===== DOWNLOAD PANEL ===== */
@@ -600,6 +627,10 @@
         .score-input.warn { border-color:#dc3545; background:#fdf5f5; }
         .lv-mix { font-size:9.5px; color:#8a97ab; font-weight:600; margin-top:2px; letter-spacing:.3px; }
         .lv-none { color:#aab4c4; font-size:11px; }
+        /* Average performance level (01-04 with two decimals) */
+        .lvl-cell { text-align:center; font-variant-numeric:tabular-nums; font-weight:800; color:#0A1628; white-space:nowrap; }
+        .lvl-legend { display:flex; flex-wrap:wrap; gap:8px; font-size:11px; color:#5f6f88; margin:0 0 10px; }
+        .lvl-legend b { color:#0A1628; }
 
         @media (max-width: 820px) {
             .action-bar { flex-direction: column; align-items: stretch; }
@@ -780,6 +811,13 @@
             <div class="dl-legend"><i class="fas fa-info-circle"></i> Filters above (grade, period, type, name, date) apply to every download.</div>
         </div>
 
+        <div class="lvl-legend">
+            <span><b>Avg Level</b> key:</span>
+            <span>01 Below Expectations</span>
+            <span>02 Approaching Expectations</span>
+            <span>03 Meeting Expectations</span>
+            <span>04 Exceeding Expectations</span>
+        </div>
         <div class="entry-toolbar" style="margin-bottom:10px;">
             <div class="entry-hint">
                 <b>Fast entry:</b> type a score and press <kbd>Enter</kbd> to drop to the next
@@ -939,12 +977,33 @@
     <!-- ===== ASSESSMENT HISTORY ===== -->
     <div class="card" id="historyCard">
         <h2><i class="fas fa-history" style="color:#D4A017;"></i> Assessment History</h2>
-        <p class="desc">Previous assessment periods for this grade. Click a period to load it.</p>
-        <div id="historyContent">
-            <div class="empty-state">
-                <i class="fas fa-calendar"></i>
-                <p>Loading history...</p>
+        <p class="desc">Every result that has been entered, grouped by the period, type and name it was captured under. Choose a sitting to open it, or download it as a PDF.</p>
+
+        <div class="hist-filters">
+            <div class="hf">
+                <label for="histPeriod"><i class="fas fa-calendar-alt"></i> Assessment Period</label>
+                <select id="histPeriod" onchange="loadHistory()"><option value="">All periods</option></select>
             </div>
+            <div class="hf">
+                <label for="histType"><i class="fas fa-clipboard-list"></i> Assessment Type</label>
+                <select id="histType" onchange="loadHistory()"><option value="">All types</option></select>
+            </div>
+            <div class="hf">
+                <label for="histName"><i class="fas fa-file-signature"></i> Name of Assessment</label>
+                <select id="histName" onchange="loadHistory()"><option value="">All names</option></select>
+            </div>
+            <div class="hf">
+                <label for="histGrade"><i class="fas fa-graduation-cap"></i> Grade</label>
+                <select id="histGrade" onchange="loadHistory()"></select>
+            </div>
+            <div class="hf hf-btn">
+                <button class="btn btn-primary" onclick="loadHistory()"><i class="fas fa-magnifying-glass"></i> Apply</button>
+                <button class="btn btn-info" onclick="clearHistoryFilters()"><i class="fas fa-times"></i> Clear</button>
+            </div>
+        </div>
+
+        <div id="historyContent">
+            <div class="empty-state"><i class="fas fa-calendar"></i><p>Loading history...</p></div>
         </div>
     </div>
 
@@ -988,8 +1047,9 @@
                         <th>Grade</th>
                         <th>Subjects</th>
                         <th>Total Score</th>
-                        <th>Average Score</th>
-                        <th>Average %</th>
+                    <th>Average Score</th>
+                    <th>Avg Level</th>
+                    <th>Average %</th>
                         <th>Overall Performance Level</th>
                         <th>Actions</th>
                     </tr>
@@ -1432,12 +1492,14 @@
                 </td>`;
             });
 
-            // Total, Average, Performance, Actions
+            // Total, Average, Average Level, Performance, Actions
             const totalScore = student.totalScore || 0;
             const avgScore = student.averageScore || 0;
+            const lvlAvg = averageLevelFor(student.assessments || []);
             const code = student.performanceCode && student.performanceCode !== 'NA' ? ' (' + esc(student.performanceCode) + ')' : '';
             bodyHtml += `<td class="total-cell" data-label="Total"><strong>${totalScore}</strong></td>`;
             bodyHtml += `<td class="avg-cell" data-label="Average">${avgScore.toFixed(1)}%</td>`;
+            bodyHtml += `<td class="lvl-cell" data-label="Avg Level" title="Average performance level across the subjects marked: 01=Below, 02=Approaching, 03=Meeting, 04=Exceeding">${esc(lvlAvg)}</td>`;
             bodyHtml += `<td class="perf-cell" data-label="Performance"><span class="${performanceClass}">${esc(student.performanceLevel || 'Not Assessed')}${code}</span></td>`;
             bodyHtml += `<td class="act-cell" data-label="Actions">
                 <div class="row-actions">
@@ -1671,9 +1733,17 @@
 
         const totalCell = row.querySelector('.total-cell');
         const avgCell = row.querySelector('.avg-cell');
+        const lvlCell = row.querySelector('.lvl-cell');
         const perfCell = row.querySelector('.perf-cell');
         if (totalCell) totalCell.innerHTML = '<strong>' + total + '</strong>';
         if (avgCell) avgCell.textContent = (maxTotal > 0 ? (total / maxTotal) * 100 : 0).toFixed(1) + '%';
+        if (lvlCell) {
+            lvlCell.textContent = counted > 0 ? (ratingSum / counted).toFixed(2) : '-';
+            lvlCell.title = counted > 0
+                ? 'Average performance level: ' + (ratingSum / counted).toFixed(2) +
+                  ' (01 Below, 02 Approaching, 03 Meeting, 04 Exceeding)'
+                : 'No subjects marked yet';
+        }
 
         if (perfCell) {
             // Overall level is taken from the subject levels, matching the
@@ -1694,6 +1764,24 @@
                 perfCell.innerHTML = '<span class="lv-none">Not Assessed</span>';
             }
         }
+    }
+
+    /**
+     * Average performance level across the subjects that were marked.
+     * Each subject contributes its level on a 1-4 scale
+     * (01 Below, 02 Approaching, 03 Meeting, 04 Exceeding) and the mean is
+     * reported to two decimals, e.g. 8 subjects of 02/03/04 giving 2.75.
+     */
+    function averageLevelFor(assessments) {
+        const marked = (assessments || []).filter(a =>
+            a && a.score !== null && a.score !== undefined && a.score !== '' && Number(a.maxScore) > 0);
+        if (!marked.length) return '-';
+        const sum = marked.reduce((s, a) => s + (levelRating(gradeFor((a.score / a.maxScore) * 100))), 0);
+        return (sum / marked.length).toFixed(2);
+    }
+
+    function levelRating(level) {
+        return ({ 'Below Expectation': 1, 'Approaching Expectation': 2, 'Meeting Expectation': 3, 'Exceeding Expectation': 4 })[level.name] || 0;
     }
 
     /** Mean subject-level rating -> nearest level, mirroring ratingToLevel(). */
@@ -2107,51 +2195,114 @@
     // LOAD ASSESSMENT HISTORY
     // ============================================
     async function loadHistory() {
+        const container = document.getElementById('historyContent');
+        const params = new URLSearchParams();
+        const grade = document.getElementById('histGrade')?.value || '';
+        const period = document.getElementById('histPeriod')?.value || '';
+        const type = document.getElementById('histType')?.value || '';
+        const name = document.getElementById('histName')?.value || '';
+        if (grade) params.set('grade', grade);
+        if (period) params.set('period', period);
+        if (type) params.set('type', type);
+        if (name) params.set('name', name);
+
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading history...</p></div>';
+
         try {
-            const response = await fetch(`/api/assessments/history/${encodeURIComponent(currentGrade)}`);
-            const data = await response.json();
-            const container = document.getElementById('historyContent');
-            
-            if (!data.success || !data.periods || data.periods.length === 0) {
-                container.innerHTML = `<div class="empty-state"><i class="fas fa-calendar"></i><p>No assessment history found for ${currentGrade}</p></div>`;
+            const data = await window.apiJson('/api/assessments/history?' + params.toString());
+            if (!data.success) throw new Error(data.error || 'Could not load history');
+
+            fillHistoryFilter('histGrade', data.filters.grades, currentGrade);
+            fillHistoryFilter('histPeriod', data.filters.periods, period);
+            fillHistoryFilter('histType', data.filters.types, type);
+            fillHistoryFilter('histName', data.filters.names, name);
+
+            const rows = data.periods || [];
+            if (!rows.length) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-calendar"></i>' +
+                    '<p>No results have been entered for these filters yet.</p></div>';
                 return;
             }
 
-            container.innerHTML = data.periods.map(p => {
-                const nameKey = getCurrentAssessmentName() || currentType;
-                const isCurrent = p.assessmentPeriod === currentPeriod && p.assessmentType === currentType && (p.assessmentName || p.assessmentType) === nameKey;
-                const bgColor = isCurrent ? '#fff3cd' : '#f8f9fc';
-                const borderColor = isCurrent ? '#ffc107' : '#e8ecf1';
-                const escapedName = (p.assessmentName || '').replace(/'/g, "\\'");
-                return `
-                    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 15px;margin-bottom:8px;border-radius:8px;background:${bgColor};border:1px solid ${borderColor};">
-                        <div>
-                            <strong><i class="fas fa-file-signature" style="color:#D4A017;margin-right:6px;"></i>${p.assessmentName || p.assessmentType}</strong>
-                            <span style="font-size:12px;color:#666;margin-left:8px;">${p.assessmentPeriod} — ${p.assessmentType}</span>
-                            <span style="font-size:12px;color:#666;margin-left:8px;">${p.studentCount} student(s)</span>
-                            ${p.latestDate ? `<span style="font-size:11px;color:#999;margin-left:8px;">(${new Date(p.latestDate).toLocaleDateString('en-KE')})</span>` : ''}
-                            ${isCurrent ? '<span style="font-size:11px;color:#D4A017;font-weight:600;margin-left:8px;">◀ CURRENT</span>' : ''}
-                        </div>
-                        <div>
-                            <button class="btn btn-info btn-sm" onclick="loadPeriod('${p.assessmentPeriod.replace(/'/g, "\\'")}', '${p.assessmentType.replace(/'/g, "\\'")}', '${escapedName}')">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                        </div>
-                    </div>
-                `;
+            const levels = [['EE', 'lv-ee'], ['ME', 'lv-me'], ['AE', 'lv-ae'], ['BE', 'lv-be']];
+            const body = rows.map(p => {
+                const chips = levels
+                    .filter(([code]) => p.levels && p.levels[code])
+                    .map(([code, cls]) => '<span class="hchip ' + cls + '">' + p.levels[code] + 'x' + code + '</span>')
+                    .join('') || '<span class="hchip lv-none">&mdash;</span>';
+                const when = p.assessmentDate ? String(p.assessmentDate).slice(0, 10) : 'not set';
+                return '<tr>' +
+                    '<td><b>' + escapeHtml(p.assessmentPeriod || '-') + '</b></td>' +
+                    '<td>' + escapeHtml(p.assessmentType || '-') + '</td>' +
+                    '<td>' + escapeHtml(p.assessmentName || '(uses type name)') + '</td>' +
+                    '<td>' + escapeHtml(when) + '</td>' +
+                    '<td class="num">' + p.studentCount + '</td>' +
+                    '<td class="num">' + p.subjectCount + '</td>' +
+                    '<td class="num">' + (p.meanLevel === null ? '-' : p.meanLevel.toFixed(2)) + '</td>' +
+                    '<td class="num">' + p.meanTotal.toFixed(2) + '</td>' +
+                    '<td class="chips">' + chips + '</td>' +
+                    '<td class="acts">' +
+                        '<button class="hbtn view" onclick="loadPeriod(\'' + escAttr(p.assessmentPeriod) + '\', \'' + escAttr(p.assessmentType) + '\', \'' + escAttr(p.assessmentName) + '\')">View</button>' +
+                        '<button class="hbtn pdf" onclick="downloadHistoryPDF(\'' + escAttr(p.grade) + '\', \'' + escAttr(p.assessmentPeriod) + '\', \'' + escAttr(p.assessmentType) + '\', \'' + escAttr(p.assessmentName) + '\')">PDF</button>' +
+                        '<button class="hbtn all" onclick="downloadAllHistoryPDF(\'' + escAttr(p.grade) + '\', \'' + escAttr(p.assessmentPeriod) + '\', \'' + escAttr(p.assessmentType) + '\', \'' + escAttr(p.assessmentName) + '\')">All</button>' +
+                    '</td>' +
+                '</tr>';
             }).join('');
 
-            // Populate the Assessment Name datalist with existing names so the
-            // admin can quickly pick a previously stored assessment.
-            const datalist = document.getElementById('assessmentNameList');
-            if (datalist) {
-                const names = [...new Set(data.periods.map(p => p.assessmentName).filter(Boolean))];
-                datalist.innerHTML = names.map(n => `<option value="${n}"></option>`).join('');
-            }
-        } catch (error) {
-            console.error('Error loading history:', error);
-            document.getElementById('historyContent').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading history</p></div>';
+            container.innerHTML =
+                '<div class="hist-summary">' + rows.length + ' assessment sitting(s), ' +
+                    rows.reduce((n, p) => n + p.studentCount, 0) + ' student result(s)</div>' +
+                '<div class="table-wrap"><table class="hist-table"><thead><tr>' +
+                    '<th>Assessment Period</th><th>Type</th><th>Name of Assessment</th><th>Date</th>' +
+                    '<th class="num">Students</th><th class="num">Subjects</th><th class="num">Avg Level</th>' +
+                    '<th class="num">Mean Total</th><th>Levels</th><th>Actions</th>' +
+                '</tr></thead><tbody>' + body + '</tbody></table></div>';
+        } catch (err) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i>' +
+                '<p>' + escapeHtml(err.message) + '</p></div>';
         }
+    }
+
+    function escAttr(v) {
+        return String(v == null ? '' : v).replace(/'/g, "\\'");
+    }
+
+    function fillHistoryFilter(id, values, keep) {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const label = id === 'histGrade' ? 'All grades'
+            : id === 'histPeriod' ? 'All periods'
+            : id === 'histType' ? 'All types' : 'All names';
+        sel.innerHTML = '<option value="">' + label + '</option>' +
+            (values || []).map(v => '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>').join('');
+        if (keep) sel.value = keep;
+    }
+
+    function clearHistoryFilters() {
+        ['histGrade', 'histPeriod', 'histType', 'histName'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        loadHistory();
+    }
+
+    /** Open one sitting in the marks grid. */
+    function downloadHistoryPDF(grade, period, type, name) {
+        const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(grade) +
+            '?period=' + encodeURIComponent(period) + '&type=' + encodeURIComponent(type) +
+            (name ? '&name=' + encodeURIComponent(name) : ''));
+        const w = window.open(url, '_blank');
+        if (!w) showAlert('Please allow popups to open the report', 'error');
+    }
+
+    /** Every student who has marks in that sitting, across all grades. */
+    function downloadAllHistoryPDF(grade, period, type, name) {
+        const params = new URLSearchParams();
+        if (period) params.set('period', period);
+        if (type) params.set('type', type);
+        if (name) params.set('name', name);
+        const w = window.open(apiUrl('/api/assessments/all-report?' + params.toString()), '_blank');
+        if (!w) showAlert('Please allow popups to open the report', 'error');
     }
 
     function loadPeriod(period, type, name) {

@@ -763,14 +763,59 @@ function renderStudentTable(students) {
   } else {
     for (var i = 0; i < students.length; i++) {
       var s = students[i];
-      var statusClass = s.balance === 0 ? 'status-paid' : s.balance < s.totalFees ? 'status-partial' : 'status-unpaid';
-      var statusText = s.balance === 0 ? '✅ Paid' : s.balance < s.totalFees ? '⏳ Partial' : '❌ Unpaid';
+      // Fees come from the figure the clerk sets on this student, so a student
+      // with no figure set is called out rather than shown as KES 0.
+      var feesSet = s.feesSet !== false;
+      var statusClass, statusText;
+      if (!feesSet) { statusClass = 'status-unpaid'; statusText = '⚠️ Fees not set'; }
+      else if (s.balance === 0) { statusClass = 'status-paid'; statusText = '✅ Paid'; }
+      else if (s.balance < s.totalFees) { statusClass = 'status-partial'; statusText = '⏳ Partial'; }
+      else { statusClass = 'status-unpaid'; statusText = '❌ Unpaid'; }
       var typeBadge = s.isBoarding ? '<span class="badge-boarder">🏠 Boarder</span>' : '<span class="badge-day">📖 Day Scholar</span>';
-      html += '<tr><td><strong>' + (s.id || '-') + '</strong></td><td>' + (s.name || '-') + '</td><td>' + (s.grade || '-') + '</td><td>' + (s.gender || '-') + '</td><td>' + typeBadge + '</td><td>KES ' + (s.totalFees || 0).toLocaleString() + '</td><td style="font-weight:bold;color:#0b8f34;">KES ' + (s.paid || 0).toLocaleString() + '</td><td>KES ' + (s.balance || 0).toLocaleString() + '</td><td class="' + statusClass + '">' + statusText + '</td><td><button class="btn btn-sm btn-success" onclick="openPaymentModal(\'' + (s.id || '') + '\')">💰 Pay</button> <button class="btn btn-xs btn-danger" onclick="removeStudent(\'' + (s.id || '') + '\')">🗑️</button></td></tr>';
+      var feesCell = feesSet
+        ? '<strong>KES ' + (s.totalFees || 0).toLocaleString() + '</strong>'
+        : '<strong style="color:#a4161a;">Not set</strong>';
+      html += '<tr><td><strong>' + (s.id || '-') + '</strong></td><td>' + (s.name || '-') + '</td><td>' + (s.grade || '-') + '</td><td>' + (s.gender || '-') + '</td><td>' + typeBadge + '</td>' +
+        '<td>' + feesCell + '</td><td style="font-weight:bold;color:#0b8f34;">KES ' + (s.paid || 0).toLocaleString() + '</td><td>KES ' + (s.balance || 0).toLocaleString() + '</td>' +
+        '<td class="' + statusClass + '">' + statusText + '</td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button class="btn btn-sm btn-primary" onclick="setFeesPrompt(\'' + (s.id || '') + '\',\'' + (s.name || '').replace(/'/g, "\\'") + '\',' + (feesSet ? (s.totalFees || 0) : '') + ')">🏷️ Set Fees</button> ' +
+          '<button class="btn btn-sm btn-success" onclick="openPaymentModal(\'' + (s.id || '') + '\')">💰 Pay</button> ' +
+          '<button class="btn btn-xs btn-danger" onclick="removeStudent(\'' + (s.id || '') + '\')">🗑️</button>' +
+        '</td></tr>';
     }
   }
   document.getElementById('studentFeeTable').innerHTML = html;
 }
+/**
+ * Set what one student owes for the year. Everything else - balance,
+ * receipts, class reports - follows from this figure. The fee structure is not
+ * used to work it out.
+ */
+function setFeesPrompt(studentId, studentName, current) {
+  var value = window.prompt(
+    'Total fees for ' + (studentName || 'this student') + ' for the year, in KES.\n' +
+    'Leave 0 if no fees are due. Every balance and receipt uses this figure.',
+    current === '' || current === undefined || current === null ? '0' : String(current)
+  );
+  if (value === null) return;
+  var amount = Number(value);
+  if (!isFinite(amount) || amount < 0) {
+    showMessage('Please enter a number of 0 or more', 'error');
+    return;
+  }
+  api('/api/clerk/students/' + encodeURIComponent(studentId) + '/fees', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ totalFees: amount })
+  })
+  .then(function (data) {
+    showMessage(data.message || 'Fees updated', 'success');
+    loadAllData();
+  })
+  .catch(function (error) { showMessage('Error: ' + error.message, 'error'); });
+}
+
 // ========================
 // ADD STUDENT MODAL
 // ========================

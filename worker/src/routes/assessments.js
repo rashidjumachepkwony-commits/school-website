@@ -797,12 +797,98 @@ tbody tr:nth-child(even){background:#fafcff}
     return success({ html });
   }
 
-  if (p[0] === 'assessments' && p[1] === 'history' && p[2] && method === 'GET') {
-    const grade = decodeURIComponent(p[2]);
-    const rows = await db.collection('assessments').find({ grade }).sort({ updatedAt: -1 }).toArray();
-    const seen = new Set(); const periods = [];
-    for (const r of rows) { const key = `${r.assessmentPeriod}|${r.assessmentType}|${r.assessmentName || ''}`; if (!seen.has(key)) { seen.add(key); periods.push(r); } }
-    return success({ periods });
+  // GET /api/assessments/history?grade=&period=&type=&name=
+  // Every assessment sitting that has results, with the filters the history
+  // screen offers. /history/:grade is kept working for the existing caller.
+  if ((route === '/assessments/history' && method === 'GET') ||
+      (p[0] === 'assessments' && p[1] === 'history' && p[2] && method === 'GET')) {
+    const grade = p[2] ? decodeURIComponent(p[2]) : (url.searchParams.get('grade') || '');
+    const fPeriod = url.searchParams.get('period') || '';
+    const fType = url.searchParams.get('type') || '';
+    const fName = url.searchParams.get('name') || '';
+
+    const rows = await db.collection('assessments')
+      .find(grade ? { grade } : {})
+      .sort({ assessmentDate: -1, updatedAt: -1 })
+      .toArray();
+
+    const policySetting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
+    const policy = loadPolicy(policySetting && policySetting.value ? JSON.stringify(policySetting.value) : null);
+
+    // One entry per sitting, aggregating what was actually entered.
+    const map = new Map();
+    for (const r of rows) {
+      const period = r.assessmentPeriod || '';
+      const type = r.assessmentType || '';
+      const name = r.assessmentName || '';
+      const key = `${period}|${type}|${name}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          key,
+          assessmentPeriod: period,
+          assessmentType: type,
+          assessmentName: name,
+          assessmentDate: r.assessmentDate || null,
+          latestDate: r.updatedAt || r.assessmentDate || null,
+          grade: r.grade || '',
+          studentCount: 0,
+          totalScore: 0,
+          subjects: new Set(),
+          levels: {},
+          avgLevelSum: 0,
+          avgLevelCount: 0
+        });
+      }
+      const e = map.get(key);
+      if (!e.assessmentDate && r.assessmentDate) e.assessmentDate = r.assessmentDate;
+      e.studentCount++;
+      e.totalScore += Number(r.totalScore || 0);
+      for (const a of (r.assessments || [])) {
+        if (a && a.subject) e.subjects.add(a.subject);
+      }
+      // Prefer the stored subject levels; fall back to grading the marks.
+      const list = (r.assessments || []).filter(a => a.score !== null && a.score !== undefined && a.score !== '');
+      if (list.length) {
+        const g = gradeBySubject(list.map(a => ({ subject: a.subject, score: a.score, maxScore: a.maxScore })), policy);
+        for (const [code, n] of Object.entries(g.counts)) e.levels[code] = (e.levels[code] || 0) + n;
+        e.avgLevelSum += g.meanRating;
+        e.avgLevelCount++;
+      }
+    }
+
+    let periods = [...map.values()].map(e => ({
+      key: e.key,
+      assessmentPeriod: e.assessmentPeriod,
+      assessmentType: e.assessmentType,
+      assessmentName: e.assessmentName,
+      assessmentDate: e.assessmentDate,
+      latestDate: e.latestDate,
+      grade: e.grade,
+      studentCount: e.studentCount,
+      subjectCount: e.subjects.size,
+      subjects: [...e.subjects],
+      meanTotal: e.studentCount ? Number((e.totalScore / e.studentCount).toFixed(2)) : 0,
+      meanLevel: e.avgLevelCount ? Number((e.avgLevelSum / e.avgLevelCount).toFixed(2)) : null,
+      levels: e.levels,
+      levelMix: Object.entries(e.levels).map(([c, n]) => `${n}x${c}`).join(' ')
+    })).sort((a, b) => String(b.assessmentDate || b.latestDate || '').localeCompare(String(a.assessmentDate || a.latestDate || '')));
+
+    if (fPeriod) periods = periods.filter(p => p.assessmentPeriod === fPeriod);
+    if (fType) periods = periods.filter(p => p.assessmentType === fType);
+    if (fName) periods = periods.filter(p => p.assessmentName === fName);
+
+    // Distinct values for the filter dropdowns, taken before the filters apply.
+    const all = [...map.values()];
+    return success({
+      periods,
+      total: periods.length,
+      filters: {
+        periods: [...new Set(all.map(e => e.assessmentPeriod).filter(Boolean))].sort().reverse(),
+        types: [...new Set(all.map(e => e.assessmentType).filter(Boolean))].sort(),
+        names: [...new Set(all.map(e => e.assessmentName).filter(Boolean))].sort(),
+        grades: [...new Set(all.map(e => e.grade).filter(Boolean))].sort()
+      }
+    });
   }
 
   if (p[0] === 'assessments' && p[1] === 'by-period' && p[2] && method === 'DELETE') {

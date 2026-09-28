@@ -14,22 +14,57 @@ export async function handleClerk(db, env, route, method, body, p, url) {
   if (route === '/clerk/fees-summary' && method === 'GET') {
     const students = await db.collection('students').find({ isActive: { $ne: false } }).sort({ createdAt: -1 }).toArray();
     const payments = await db.collection('fee_payments').find({}).toArray();
-    const structures = await db.collection('fee_structures').find({}).toArray();
     const byStudent = new Map();
     for (const pmt of payments) {
       const id = String(pmt.studentId || '');
       byStudent.set(id, (byStudent.get(id) || 0) + Number(pmt.totalAmount || pmt.amount || 0));
     }
-    const totalDefault = structures.filter(s => s.isActive !== false).reduce((n, s) => n + Number(s.amount || 0), 0);
+    // Fees come from the amount the clerk has set on each student. Nothing is
+    // inferred from the fee structure, so a balance is always traceable to a
+    // figure someone entered.
     const mapped = students.map(s => {
       const id = s.admissionNumber || s._id.toString();
       const paid = byStudent.get(id) || byStudent.get(s._id.toString()) || 0;
-      const totalFees = Number(s.totalFees ?? totalDefault ?? 0);
+      const hasFees = s.totalFees !== null && s.totalFees !== undefined && s.totalFees !== '';
+      const totalFees = hasFees ? Number(s.totalFees) : 0;
       const name = `${s.firstName || ''} ${s.lastName || ''}`.trim();
       const boarding = isBoardingStudent(s);
-      return { id, studentId: id, name, grade: s.grade || s.class || '', gender: s.gender || '', studentType: boarding ? 'Boarder' : 'Day Scholar', isBoarding: boarding, guardianPhone: s.phone || '', totalFees, paid, balance: Math.max(0, totalFees - paid) };
+      return {
+        id, studentId: id, name, grade: s.grade || s.class || '', gender: s.gender || '',
+        studentType: boarding ? 'Boarder' : 'Day Scholar', isBoarding: boarding,
+        guardianPhone: s.phone || '',
+        feesSet: hasFees, totalFees, paid,
+        balance: hasFees ? Math.max(0, totalFees - paid) : 0,
+        status: !hasFees ? 'Fees not set' : paid <= 0 ? 'Unpaid' : paid >= totalFees ? 'Fully Paid' : 'Part Paid'
+      };
     });
-    return success({ students: mapped, totalStudents: mapped.length, totalDayScholars: mapped.filter(s => !s.isBoarding).length, totalBoarders: mapped.filter(s => s.isBoarding).length, totalPaid: mapped.reduce((n,s)=>n+s.paid,0), totalBalance: mapped.reduce((n,s)=>n+s.balance,0) });
+    return success({ students: mapped, totalStudents: mapped.length, totalDayScholars: mapped.filter(s => !s.isBoarding).length, totalBoarders: mapped.filter(s => s.isBoarding).length, feesNotSet: mapped.filter(s => !s.feesSet).length, totalExpected: mapped.reduce((n, s) => n + s.totalFees, 0), totalPaid: mapped.reduce((n, s) => n + s.paid, 0), totalBalance: mapped.reduce((n, s) => n + s.balance, 0) });
+  }
+
+  // PUT /api/clerk/students/:id/fees - set what this student owes for the year.
+  // Every balance, report and receipt derives from this figure.
+  if (p[0] === 'clerk' && p[1] === 'students' && p[2] && p[3] === 'fees' && method === 'PUT') {
+    const id = decodeURIComponent(p[2]);
+    const amount = Number(body.totalFees);
+    if (!Number.isFinite(amount) || amount < 0) return error('Enter the total fees for this student as a number of 0 or more');
+    if (amount > 100000000) return error('That fee looks too large. Please check the amount.');
+
+    const student = await db.collection('students').findOne({ admissionNumber: id })
+      || await db.collection('students').findOne({ _id: id });
+    if (!student) return error('Student not found', 404);
+
+    await db.collection('students').updateOne({ _id: student._id }, {
+      $set: { totalFees: amount, feesSetBy: 'clerk', feesUpdatedAt: now, updatedAt: now }
+    });
+
+    const paid = (await db.collection('fee_payments').find({ studentId: student.admissionNumber || id }).toArray())
+      .reduce((n, pmt) => n + Number(pmt.totalAmount || pmt.amount || 0), 0);
+
+    return success({
+      message: `Fees set for ${student.firstName} ${student.lastName}`,
+      student: { id: student.admissionNumber || id, name: `${student.firstName} ${student.lastName}`.trim() },
+      totalFees: amount, paid, balance: Math.max(0, amount - paid)
+    });
   }
 
   if (route === '/clerk/students' && method === 'POST') {
@@ -145,10 +180,9 @@ export async function handleClerk(db, env, route, method, body, p, url) {
       : students;
 
     const payments = await db.collection('fee_payments').find({}).toArray();
+    // Kept for reference in the response, but no longer used to derive what an
+    // individual student owes: that figure is set on the student.
     const structures = await db.collection('fee_structures').find({ isActive: { $ne: false } }).toArray();
-    const dayFee = structures.find(s => s.type === 'day');
-    const boardingFee = structures.find(s => s.type === 'boarding');
-    const defaultFee = Number(dayFee?.amount || 0);
 
     const isBoarding = s =>
       s.boarding === true || s.boarding === 'true' ||
@@ -161,7 +195,9 @@ export async function handleClerk(db, env, route, method, body, p, url) {
     const rows = scoped.map(s => {
       const adm = s.admissionNumber || s._id.toString();
       const boarder = isBoarding(s);
-      const total = Number(s.totalFees ?? (boarder ? (boardingFee?.amount ?? defaultFee) : defaultFee) ?? 0);
+      // The figure the clerk set on this student, never the fee structure.
+      const hasFees = s.totalFees !== null && s.totalFees !== undefined && s.totalFees !== '';
+      const total = hasFees ? Number(s.totalFees) : 0;
       const paid = paidFor(adm);
       return {
         id: s._id.toString(),
@@ -169,9 +205,10 @@ export async function handleClerk(db, env, route, method, body, p, url) {
         name: `${s.firstName || ''} ${s.lastName || ''}`.trim(),
         grade: s.grade || s.class || '',
         studentType: boarder ? 'Boarder' : 'Day Scholar',
+        feesSet: hasFees,
         total, paid,
-        balance: Math.max(0, total - paid),
-        status: total <= 0 ? 'No fees set' : paid <= 0 ? 'Unpaid' : paid >= total ? 'Fully Paid' : 'Part Paid',
+        balance: hasFees ? Math.max(0, total - paid) : 0,
+        status: !hasFees ? 'Fees not set' : paid <= 0 ? 'Unpaid' : paid >= total ? 'Fully Paid' : 'Part Paid',
         payments: payments.filter(p => String(p.studentId || '') === String(adm))
           .sort((a, b) => String(b.paymentDate || '').localeCompare(String(a.paymentDate || '')))
           .map(p => ({
