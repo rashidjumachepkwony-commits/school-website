@@ -112,30 +112,51 @@ export async function handleVisitors(db, env, route, method, body, p) {
   }
 
   // POST /api/visitor/checkin
-  if (route === '/visitor/checkin' && method === 'POST') {
+    if (route === '/visitor/checkin' && method === 'POST') {
     const {
-      firstName = '', lastName = '', phoneNumber = '', idNumber = '',
-      purpose = '', purposeDetails = '', personToVisit = '',
+      firstName = '', lastName = '', fullName = '', phoneNumber = '', idNumber = '',
+      contactValue = '', purpose = '', purposeDetails = '', personToVisit = '',
       department = '', hostName = '', branch = 'main'
     } = body;
 
-    if (!firstName || !lastName || !phoneNumber || !idNumber || !purpose || !personToVisit) {
-      return error('Please fill in all required fields');
+    // The desk asks three questions: name, one contact value, purpose. A visitor
+    // gives either an ID number or a phone number, and signs out with the same
+    // value, so one of the two is enough.
+    const contact = (contactValue || idNumber || phoneNumber || '').trim();
+    if (!firstName || !purpose || !contact) {
+      return error('Please enter a name, an ID or phone number, and the purpose of the visit');
     }
+    const digits = contact.replace(/\D/g, '');
+    const isPhone = digits.length >= 9 && digits.length <= 12;
+    const phone = isPhone ? contact : (phoneNumber || '');
+    const id = isPhone ? (idNumber || '') : contact;
+    const displayName = (fullName || `${firstName} ${lastName}`).trim();
 
     const badgeNumber = 'V' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     const result = await db.collection('visitors').insertOne({
-      badgeNumber, fullName: `${firstName} ${lastName}`, firstName, lastName,
-      phoneNumber, idNumber, purpose, purposeDetails, personToVisit,
+      badgeNumber,
+      fullName: displayName,
+      firstName,
+      lastName: lastName || firstName,
+      contactValue: contact,
+      phoneNumber: phone,
+      idNumber: id,
+      purpose, purposeDetails,
+      personToVisit: personToVisit || 'The school office',
       department, hostName, branch, date: today, time: timeStr,
       status: 'Checked In', createdAt, updatedAt: createdAt
     });
 
     return success({
-      message: 'Visitor checked in successfully!',
-      visitor: { _id: result.insertedId, badgeNumber, fullName: `${firstName} ${lastName}`, checkInTime: createdAt, checkIn: createdAt, purpose, personToVisit }
+      message: 'Signed in. Please keep your badge visible.',
+      visitor: {
+        _id: result.insertedId, badgeNumber, fullName: displayName,
+        checkInTime: createdAt, checkIn: createdAt, purpose,
+        personToVisit: personToVisit || 'The school office',
+        phoneNumber: phone, idNumber: id
+      }
     });
-  }
+    }
 
   // POST /api/visitor/checkout/:badgeNumber
   // (handled above as PUT /api/visitor/checkout/:badgeNumber)

@@ -165,6 +165,9 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
       const graded = hasAny
         ? gradeBySubject(scores.filter(x => x.score !== null).map(x => ({ subject: x.subject, score: x.score, maxScore: x.max })), policy).overall
         : { level: 'Not Assessed', code: 'NA' };
+      const meanLevel = hasAny
+        ? gradeBySubject(scores.filter(x => x.score !== null).map(x => ({ subject: x.subject, score: x.score, maxScore: x.max })), policy).meanRating
+        : null;
 
       return {
         admissionNumber: s.admissionNumber,
@@ -174,6 +177,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         total,
         percentage: hasAny ? pct : null,
         average: avgScore,
+        meanLevel,
         scoredCount,
         maxTotal,
         level: graded.level, code: graded.code
@@ -242,6 +246,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         <td class="ctr"><strong>${row.total}</strong><span class="mx">/${row.maxTotal}</span></td>
         <td class="ctr"><strong>${row.average === null ? '-' : row.average.toFixed(2)}</strong></td>
         <td class="ctr">${row.percentage === null ? '-' : row.percentage + '%'}</td>
+        <td class="ctr"><strong>${row.meanLevel === null || row.meanLevel === undefined ? '-' : Number(row.meanLevel).toFixed(2)}</strong></td>
         <td class="ctr ${levelClass[row.level] || ''}">${escapeHtml(row.code)}</td>
         <td>${escapeHtml(row.level)}</td>
       </tr>`;
@@ -332,6 +337,10 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
   .lv.me{color:#12459b}
   .lv.ae{color:#856404}
   .lv.be{color:#8c1c24}
+  .lv-ee{color:#136b2c}
+  .lv-me{color:#12459b}
+  .lv-ae{color:#856404}
+  .lv-be{color:#8c1c24}
   .lv-exceed{background:#dff3e4;color:#136b2c;font-weight:700}
   .lv-meet{background:#dbeafe;color:#12459b;font-weight:700}
   .lv-approach{background:#fff3cd;color:#856404;font-weight:700}
@@ -394,6 +403,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         <th class="ctr">Total Score</th>
         <th class="ctr">Average Score</th>
         <th class="ctr">Average %</th>
+        <th class="ctr">Overall Level<br>(01-04)</th>
         <th class="ctr">Key</th>
         <th>Overall Performance Level</th>
       </tr>
@@ -632,6 +642,17 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
         subjects: list.length,
         total, avg, pct,
         mix: subjectGrading.counts,
+        meanLevel: subjectGrading.meanRating,
+        subjectMarks: list.map(a => {
+          const sp = Number(a.maxScore) > 0 ? (a.score / a.maxScore) * 100 : null;
+          const lg = sp === null ? null : gradePercentage(sp, policy);
+          return {
+            subject: a.subject,
+            score: Number(a.score),
+            max: Number(a.maxScore) || 0,
+            code: lg ? lg.code : '-'
+          };
+        }),
         level: g.level, code: g.code
       });
     }
@@ -663,19 +684,49 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
     const topLevel = Object.entries(lvlTally).sort((a, b) => b[1] - a[1])[0];
     const classLevelObj = topLevel ? { level: topLevel[0], count: topLevel[1] } : { level: 'Not Assessed', count: 0 };
 
-    const bodyRows = rows.map(r => `<tr>
-      <td class="ctr">${posOf.get(r.admissionNumber + '|' + r.grade) || '-'}</td>
-      <td class="ctr">${escapeHtml(r.admissionNumber || '')}</td>
-      <td>${escapeHtml(r.name)}</td>
-      <td class="ctr">${escapeHtml(r.grade || '-')}</td>
-      <td class="ctr">${r.subjects}</td>
-      <td class="ctr"><strong>${r.total}</strong></td>
-      <td class="ctr"><strong>${r.avg.toFixed(2)}</strong></td>
-      <td class="ctr">${r.pct}%</td>
-      <td class="ctr ${levelClass[r.level] || ''}">${escapeHtml(r.code)}</td>
-      <td>${escapeHtml(r.level)}</td>
-      <td class="ctr">${r.mix ? Object.entries(r.mix).map(([c, n]) => `${n}&times;${c}`).join(' ') : '-'}</td>
-    </tr>`).join('');
+    // One column per learning area, ordered the same way for every learner, so
+    // the grid reads across like a mark sheet. The first row that has marks sets
+    // the order; any subject only some learners took is appended.
+    const subjectOrder = [];
+    for (const r of rows) {
+      for (const s of (r.subjectMarks || [])) {
+        if (s.subject && !subjectOrder.includes(s.subject)) subjectOrder.push(s.subject);
+      }
+    }
+    const maxBySubject = {};
+    for (const r of rows) {
+      for (const s of (r.subjectMarks || [])) {
+        if (s.subject) maxBySubject[s.subject] = Math.max(maxBySubject[s.subject] || 0, s.max || 0);
+      }
+    }
+
+    const subjHead = subjectOrder.map(s =>
+      `<th>${escapeHtml(s)}<span class="mx">out of ${maxBySubject[s] || 0}</span></th>`
+    ).join('');
+
+    const bodyRows = rows.map(r => {
+      const byName = new Map((r.subjectMarks || []).map(s => [s.subject, s]));
+      const subjCells = subjectOrder.map(subj => {
+        const s = byName.get(subj);
+        if (!s) return '<td class="na">-</td>';
+        return `<td><strong>${s.score}</strong><span class="lv lv-${String(s.code).toLowerCase()}">${escapeHtml(s.code)}</span></td>`;
+      }).join('');
+
+      return `<tr>
+        <td class="ctr">${posOf.get(r.admissionNumber + '|' + r.grade) || '-'}</td>
+        <td class="ctr">${escapeHtml(r.admissionNumber || '')}</td>
+        <td>${escapeHtml(r.name)}</td>
+        <td class="ctr">${escapeHtml(r.grade || '-')}</td>
+        ${subjCells}
+        <td class="ctr"><strong>${r.total}</strong></td>
+        <td class="ctr"><strong>${r.avg.toFixed(2)}</strong></td>
+        <td class="ctr">${r.pct}%</td>
+        <td class="ctr"><strong>${r.meanLevel === undefined ? '-' : Number(r.meanLevel).toFixed(2)}</strong></td>
+        <td class="ctr ${levelClass[r.level] || ''}">${escapeHtml(r.code)}</td>
+        <td>${escapeHtml(r.level)}</td>
+        <td class="ctr">${r.mix ? Object.entries(r.mix).map(([c, n]) => `${n}&times;${c}`).join(' ') : '-'}</td>
+      </tr>`;
+    }).join('');
 
     const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -733,9 +784,11 @@ tbody tr:nth-child(even){background:#fafcff}
     <div class="stat"><div class="k">Overall Performance</div><div class="v" style="font-size:13px;line-height:1.3;">${escapeHtml(classLevelObj.level)}</div><div class="k2">most common: ${classLevelObj.count} of ${rows.length}</div></div>
   </div>
   <table>
-    <thead><tr><th class="ctr">Pos</th><th class="ctr">Adm. No.</th><th>Student Name</th><th class="ctr">Grade</th>
-      <th class="ctr">Subjects</th><th class="ctr">Total Score</th><th class="ctr">Average Score</th>
-      <th class="ctr">Average %</th><th class="ctr">Key</th><th>Overall Performance Level</th><th class="ctr">Subjects at each level</th></tr></thead>
+    <thead><tr><th class="ctr">#</th><th class="ctr">Adm. No.</th><th>Student</th><th class="ctr">Grade</th>
+      ${subjHead}
+      <th class="ctr">Total</th><th class="ctr">Average</th><th class="ctr">Average %</th>
+      <th class="ctr">Avg Level</th><th class="ctr">Key</th><th>Overall Performance Level</th>
+      <th class="ctr">Subjects at each level</th></tr></thead>
     <tbody>${bodyRows}</tbody>
   </table>
   <div class="sign"><div>Class Teacher</div><div>Head Teacher</div></div>
