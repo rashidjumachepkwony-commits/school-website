@@ -679,6 +679,8 @@
         .score-input { text-align:center; font-weight:600; }
         .score-input.good { border-color:#28a745; background:#f4fdf6; }
         .score-input.low  { border-color:#dc3545; background:#fdf5f5; }
+        /* A mark above the subject maximum, flagged so the cap is not a surprise. */
+        .score-input.over { border-color:#d97706; background:#fff8ec; color:#8a5200; font-weight:800; }
         .stu-cell { display:flex; flex-direction:column; gap:1px; }
         .stu-cell .nm { font-weight:600; }
         .stu-cell .adm { font-size:10px; color:#8a97ab; }
@@ -1667,19 +1669,33 @@
 
         const studentName = (row.dataset.studentName || '').trim();
         const assessments = [];
+        // Scores above the subject maximum used to be quietly rewritten to the
+        // maximum, so typing 25 into a subject capped at 20 looked like the
+        // field had rejected it. Collect them and say so instead.
+        const over = [];
         row.querySelectorAll('.score-input').forEach(inp => {
             if (inp.value === '') return;
             let score = parseFloat(inp.value);
             if (isNaN(score)) return;
             const max = parseInt(inp.dataset.max);
             if (score < 0) score = 0;
-            if (score > max) score = max;
+            if (score > max) {
+                over.push({ subject: inp.dataset.subject, score, max });
+                score = max;
+            }
             assessments.push({ subject: inp.dataset.subject, maxScore: max, score });
         });
 
         if (!assessments.length) {
             if (!silent) showAlert('Nothing to save for ' + studentName + ' - no scores entered.', 'error');
             return false;
+        }
+
+        if (over.length && !silent) {
+            showAlert(
+                'Saved with these marks capped at the subject maximum: ' +
+                over.map(o => `${o.subject} (you typed ${o.score}, maximum is ${o.max})`).join('; ') +
+                '. Use "Edit Subjects" if the maximum is wrong.', 'error');
         }
 
         const btn = row.querySelector('.js-save');
@@ -1881,8 +1897,17 @@
             const pct = (v / max) * 100;
             const level = gradeFor(pct);
             if (badge) { badge.textContent = level.code; badge.className = 'cell-lv lv-' + level.code.toLowerCase(); }
-            inp.classList.remove('good', 'low', 'warn');
-            inp.classList.add(pct >= 80 ? 'good' : pct >= 40 ? 'low' : 'warn');
+            inp.classList.remove('good', 'low', 'warn', 'over');
+            // Flag a mark above the subject maximum straight away, so the teacher
+            // sees why the mark will be capped instead of it quietly changing.
+            if (v > max) {
+                inp.classList.add('over');
+                inp.title = 'You entered ' + v + ' but this subject is out of ' + max + '. It will be saved as ' + max + '.';
+            } else {
+                inp.add('low');
+                inp.title = '';
+            }
+            if (pct >= 80) { inp.classList.remove('low'); inp.classList.add('good'); }
             ratingSum += level.rating;
         });
 
