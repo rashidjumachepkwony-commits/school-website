@@ -862,6 +862,32 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+        /* Every card is a link, but a phone has no hover, so the cue has to be
+           visible all the time: a corner arrow that leans on hover, a pointer
+           hand, and the "Open" pill underneath. */
+        .content-card::after {
+            content: '↗';
+            position: absolute;
+            top: 12px; right: 14px;
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 800;
+            color: #8a97ab;
+            background: #fff;
+            border: 1px solid #e0e6ef;
+            border-radius: 50%;
+            transition: transform .3s ease, color .3s ease, border-color .3s ease, background .3s ease;
+        }
+        .content-card:hover::after,
+        .content-card:focus-visible::after {
+            transform: translate(2px, -2px);
+            color: var(--kenya-black);
+            background: var(--school-gold);
+            border-color: var(--school-gold);
+        }
+        .content-card { touch-action: manipulation; }
+        .content-card:active { transform: translateY(-3px); }
+
         .card-cta {
             margin-top: 10px;
             padding: 6px 18px;
@@ -1700,8 +1726,8 @@
             </div>
 
             <div style="text-align:center;margin-top:10px;" data-aos="fade-up">
-                <a href="#slide-gallery" class="btn" style="padding:12px 35px;border-radius:50px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--school-gold),var(--school-gold-dark));color:var(--kenya-black);transition:all 0.3s ease;box-shadow:0 4px 20px rgba(212,160,23,0.3);">
-                    <i class="fas fa-images"></i> View Full Gallery
+                <a href="gallery.html" class="btn" style="padding:12px 35px;border-radius:50px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--school-gold),var(--school-gold-dark));color:var(--kenya-black);transition:all 0.3s ease;box-shadow:0 4px 20px rgba(212,160,23,0.3);">
+                    <i class="fas fa-images"></i> Click to open the Photo Gallery
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
@@ -1730,7 +1756,7 @@
                                 <span>✅ Qualified Teachers</span> • <span>✅ Modern Facilities</span> • <span>✅ CBE</span>
                             </div>
                             <span class="badge">📢 Explore</span>
-                            <div class="card-cta">👆 Click to Explore</div>
+                            <div class="card-cta">👆 Click to open Academics</div>
                         </div>
                     </div>
 
@@ -1746,7 +1772,7 @@
                                 <span>✅ Simple Process</span> • <span>✅ Affordable Fees</span> • <span>✅ Quality</span>
                             </div>
                             <span class="badge">📢 Apply Now</span>
-                            <div class="card-cta">👆 Apply Now</div>
+                            <div class="card-cta">👆 Click to apply now</div>
                         </div>
                     </div>
 
@@ -1762,7 +1788,7 @@
                                 <span>✅ Safe Environment</span> • <span>✅ Sports Facilities</span> • <span>✅ Meals</span>
                             </div>
                             <span class="badge">🏗️ Explore</span>
-                            <div class="card-cta">👆 View Facilities</div>
+                            <div class="card-cta">👆 Click to open Facilities</div>
                         </div>
                     </div>
 
@@ -1778,7 +1804,7 @@
                                 <span>✅ Top Grades</span> • <span>✅ National Exams</span> • <span>✅ Track Record</span>
                             </div>
                             <span class="badge">🏆 Results</span>
-                            <div class="card-cta">👆 See Results</div>
+                            <div class="card-cta">👆 Click to see Results</div>
                         </div>
                     </div>
 
@@ -1794,7 +1820,7 @@
                                 <span>✅ Calendar</span> • <span>✅ Policies</span> • <span>✅ Communication</span>
                             </div>
                             <span class="badge">📋 Info</span>
-                            <div class="card-cta">👆 View Info</div>
+                            <div class="card-cta">👆 Click to open Parents Corner</div>
                         </div>
                     </div>
 
@@ -1810,7 +1836,7 @@
                                 <span>✅ Forms</span> • <span>✅ Calendar</span> • <span>✅ Documents</span>
                             </div>
                             <span class="badge">📥 Get</span>
-                            <div class="card-cta">👆 Download</div>
+                            <div class="card-cta">👆 Click to open Downloads</div>
                         </div>
                     </div>
 
@@ -1826,7 +1852,7 @@
                                 <span>✅ Results</span> • <span>✅ Assignments</span> • <span>✅ Fees</span>
                             </div>
                             <span class="badge">🔐 No Password</span>
-                            <div class="card-cta">👆 Open Portal</div>
+                            <div class="card-cta">👆 Click to open the Portal</div>
                         </div>
                     </div>
 
@@ -1842,7 +1868,7 @@
                                 <span>✅ Affordable</span> • <span>✅ Day Scholars</span> • <span>✅ Boarding</span>
                             </div>
                             <span class="badge">💰 View</span>
-                            <div class="card-cta">👆 View Fees</div>
+                            <div class="card-cta">👆 Click to open Fees</div>
                         </div>
                     </div>
                 </div>

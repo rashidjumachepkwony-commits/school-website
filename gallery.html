@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="js/config.js"></script>
+<title>Photo Gallery - Changara Star Academy</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --ink:#0A1628; --gold:#D4A017; --line:#e3e9f2; --bg:#f2f5f9; }
+  body { font-family:'Segoe UI',Tahoma,Verdana,sans-serif; background:var(--bg); color:var(--ink); }
+
+  header {
+    background:linear-gradient(135deg,var(--ink),#1d3a6b); color:#fff;
+    padding:26px 20px; text-align:center; border-bottom:5px solid var(--gold);
+  }
+  header h1 { font-size:26px; margin-bottom:6px; }
+  header p { color:#c9d6e8; font-size:14px; }
+  .home-btn {
+    display:inline-block; margin-top:14px; background:var(--gold); color:var(--ink);
+    padding:11px 22px; border-radius:10px; text-decoration:none; font-weight:700;
+  }
+
+  .wrap { max-width:1200px; margin:0 auto; padding:22px 18px 50px; }
+
+  /* Filters */
+  .filters { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:20px; }
+  .chip {
+    padding:9px 16px; border-radius:50px; font-size:13px; font-weight:700; font-family:inherit;
+    border:2px solid var(--line); background:#fff; color:#3c4d68; cursor:pointer;
+  }
+  .chip.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:18px; }
+  .tile {
+    background:#fff; border:1px solid var(--line); border-radius:16px; overflow:hidden;
+    box-shadow:0 3px 12px rgba(10,22,40,.06); cursor:pointer;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .tile:hover { transform:translateY(-4px); box-shadow:0 12px 26px rgba(10,22,40,.14); }
+  .tile .ph { position:relative; width:100%; aspect-ratio:4/3; background:#e8edf5; overflow:hidden; }
+  .tile img { width:100%; height:100%; object-fit:cover; display:block; }
+  .tile .zoom {
+    position:absolute; right:10px; bottom:10px; width:34px; height:34px; border-radius:50%;
+    background:rgba(10,22,40,.78); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:14px; pointer-events:none;
+  }
+  .tile .cap { padding:13px 15px 15px; }
+  .tile .cap h3 { font-size:15px; margin-bottom:4px; }
+  .tile .cap p { font-size:12.5px; color:#6b7a92; line-height:1.55; }
+  .tile .cat {
+    display:inline-block; margin-top:8px; padding:3px 10px; border-radius:10px;
+    background:#fff8e1; color:#8a6d1f; font-size:11px; font-weight:700;
+  }
+
+  .empty { text-align:center; padding:50px 20px; color:#8a97ab; }
+  .empty i { font-size:44px; display:block; margin-bottom:12px; color:#c9d3e2; }
+
+  /* Lightbox */
+  .lb {
+    position:fixed; inset:0; z-index:100; background:rgba(6,12,24,.94);
+    display:none; align-items:center; justify-content:center; flex-direction:column; padding:16px;
+  }
+  .lb.open { display:flex; }
+  .lb img { max-width:94vw; max-height:72vh; object-fit:contain; border-radius:8px; }
+  .lb .t { color:#fff; text-align:center; margin-top:14px; max-width:640px; }
+  .lb .t h3 { font-size:18px; margin-bottom:4px; }
+  .lb .t p { color:#a9bcd6; font-size:13.5px; line-height:1.6; }
+  .lb .count { color:#7d8ba3; font-size:12px; margin-top:8px; }
+  .lb button {
+    position:absolute; background:rgba(255,255,255,.12); color:#fff; border:0;
+    width:48px; height:48px; border-radius:50%; font-size:19px; cursor:pointer;
+  }
+  .lb button:hover { background:rgba(255,255,255,.25); }
+  .lb .close { top:16px; right:16px; }
+  .lb .prev { left:14px; top:50%; transform:translateY(-50%); }
+  .lb .next { right:14px; top:50%; transform:translateY(-50%); }
+  .lb .hint { position:absolute; bottom:14px; color:#5f6f88; font-size:11.5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><i class="fas fa-images"></i> Our Photo Gallery</h1>
+  <p>Tap any photo to see it larger. Use the arrows to move through them.</p>
+  <a href="index.html" class="home-btn"><i class="fas fa-arrow-left"></i> Back to Home</a>
+</header>
+
+<div class="wrap">
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid">
+    <div class="empty"><i class="fas fa-spinner fa-spin"></i> Loading photos...</div>
+  </div>
+</div>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="close" id="lbClose" aria-label="Close"><i class="fas fa-times"></i></button>
+  <button class="prev" id="lbPrev" aria-label="Previous photo"><i class="fas fa-chevron-left"></i></button>
+  <img id="lbImg" src="" alt="">
+  <button class="next" id="lbNext" aria-label="Next photo"><i class="fas fa-chevron-right"></i></button>
+  <div class="t">
+    <h3 id="lbTitle"></h3>
+    <p id="lbDesc"></p>
+    <div class="count" id="lbCount"></div>
+  </div>
+  <div class="hint">Tap outside the photo, press Escape, or swipe, to close.</div>
+</div>
+
+<script>
+  let photos = [];
+  let shown = [];
+  let index = 0;
+
+  // Used when the CMS gallery is empty, so the page is never blank.
+  const FALLBACK = [
+    { title: 'School Compound', category: '🏫 Facilities', file: '/images/school-compound.jpg',
+      description: 'The Changara Star Academy compound, with classrooms and play areas for every class.' },
+    { title: 'E.C.D.E Section', category: '🧸 ECDE', file: '/images/ecde-section.jpg',
+      description: 'Our Early Childhood Development Education section, where young learners begin their journey.' },
+    { title: 'Classroom Learning', category: '📚 Academics', file: '/images/classroom-learning.jpg',
+      description: 'Pupils engaged in active learning in our well-equipped classrooms.' },
+    { title: 'Computer Lab', category: '💻 Technology', file: '/images/computer-lab.jpg',
+      description: 'Students learning essential computer skills in our modern computer laboratory.' },
+    { title: 'Graduation & Award Ceremony', category: '🎓 Events', file: '/images/graduation-award-ceremony.jpg',
+      description: 'Learners in full uniform celebrate with their certificates and colour-coded garlands.' },
+    { title: 'Open-Air Class Lesson', category: '📚 Academics', file: '/images/outdoor-class-lesson.jpg',
+      description: 'Our ECDE and lower-primary classes take to the lawns, where every learner joins in.' },
+    { title: 'Guidance & Counselling', category: '🧭 Wellbeing', file: '/images/guidance-counselling.jpg',
+      description: 'One-to-one guidance and counselling sessions help every child feel supported.' },
+    { title: 'Scouts & Patrol Drill', category: '🌿 Scouts', file: '/images/scout-patrol-drill.jpg',
+      description: 'Our Scout patrols practise drills and teamwork alongside the rest of the school.' },
+    { title: 'School Transport', category: '🚌 Transport', file: '/images/school-transport-fleet.jpg',
+      description: 'Our branded fleet keeps boarders and day scholars safe and on time every day.' }
+  ];
+
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  async function load() {
+    try {
+      const res = await window.apiJson('/api/content');
+      const g = res && res.content && Array.isArray(res.content.gallery) ? res.content.gallery : [];
+      photos = g.filter(p => p && (p.file || p.fileUrl)).map(p => ({
+        title: p.title || 'School photo',
+        category: p.category || 'School',
+        file: p.file || p.fileUrl,
+        description: p.description || ''
+      }));
+      if (!photos.length) photos = FALLBACK.slice();
+    } catch (e) {
+      photos = FALLBACK.slice();
+    }
+    renderFilters();
+    renderGrid('All');
+  }
+
+  function renderFilters() {
+    const cats = ['All', ...new Set(photos.map(p => p.category))];
+    document.getElementById('filters').innerHTML = cats.map(c =>
+      `<button class="chip${c === 'All' ? ' on' : ''}" data-cat="${esc(c)}">${esc(c)}</button>`
+    ).join('');
+    document.querySelectorAll('.chip').forEach(ch => {
+      ch.addEventListener('click', () => {
+        document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+        ch.classList.add('on');
+        renderGrid(ch.dataset.cat);
+      });
+    });
+  }
+
+  function renderGrid(cat) {
+    shown = cat === 'All' ? photos : photos.filter(p => p.category === cat);
+    const grid = document.getElementById('grid');
+    if (!shown.length) {
+      grid.innerHTML = '<div class="empty"><i class="fas fa-images"></i>No photos in this category yet.</div>';
+      return;
+    }
+    grid.innerHTML = shown.map((p, i) =>
+      `<div class="tile" data-i="${i}">
+         <div class="ph">
+           <img src="${esc(p.file)}" alt="${esc(p.title)}" loading="lazy">
+           <span class="zoom"><i class="fas fa-expand"></i></span>
+         </div>
+         <div class="cap">
+           <h3>${esc(p.title)}</h3>
+           <p>${esc(p.description || 'Tap the photo to see it larger.')}</p>
+           <span class="cat">${esc(p.category)}</span>
+         </div>
+       </div>`
+    ).join('');
+    grid.querySelectorAll('.tile').forEach(t => {
+      t.addEventListener('click', () => openLightbox(parseInt(t.dataset.i, 10)));
+    });
+  }
+
+  function openLightbox(i) {
+    index = i;
+    paint();
+    document.getElementById('lb').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    document.getElementById('lb').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function step(d) {
+    if (!shown.length) return;
+    index = (index + d + shown.length) % shown.length;
+    paint();
+  }
+
+  function paint() {
+    const p = shown[index];
+    if (!p) return;
+    document.getElementById('lbImg').src = p.file;
+    document.getElementById('lbImg').alt = p.title;
+    document.getElementById('lbTitle').textContent = p.title;
+    document.getElementById('lbDesc').textContent = p.description || '';
+    document.getElementById('lbCount').textContent = 'Photo ' + (index + 1) + ' of ' + shown.length;
+  }
+
+  document.getElementById('lbClose').addEventListener('click', closeLightbox);
+  document.getElementById('lbPrev').addEventListener('click', e => { e.stopPropagation(); step(-1); });
+  document.getElementById('lbNext').addEventListener('click', e => { e.stopPropagation(); step(1); });
+  document.getElementById('lb').addEventListener('click', e => {
+    if (e.target.id === 'lb') closeLightbox();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') step(1);
+  });
+
+  // Swipe between photos on a phone.
+  let x0 = null;
+  const lb = document.getElementById('lb');
+  lb.addEventListener('touchstart', e => { x0 = e.changedTouches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, { passive: true });
+
+  load();
+</script>
+</body>
+</html>
