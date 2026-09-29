@@ -2166,12 +2166,17 @@
                 const data = await response.json();
                 if (data.success) {
                     const c = data.content;
-
-                    if (c.heroTitle) {
-                        document.getElementById('heroTitle').innerHTML = c.heroTitle;
+                    // The wording written into the page is the version to show.
+                    // The CMS value is only used if it carries real text, and any
+                    // stray <p> tags in it are removed, so the visitor never
+                    // sees raw HTML after the content loads.
+                    const heroTitleText = stripHtml(c.heroTitle).trim();
+                    if (heroTitleText) {
+                        document.getElementById('heroTitle').innerHTML = heroTitleText;
                     }
-                    if (c.heroSubtitle) {
-                        document.getElementById('heroSubtitle').textContent = c.heroSubtitle;
+                    const heroSubtitleText = stripHtml(c.heroSubtitle).trim();
+                    if (heroSubtitleText) {
+                        document.getElementById('heroSubtitle').textContent = heroSubtitleText;
                     }
 
                     const cardIds = [
