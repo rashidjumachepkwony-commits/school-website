@@ -581,20 +581,31 @@
         #marksTableContainer.cap-single #marksTable tr:not(.cap-row) { display:none; }
         #marksTableContainer.cap-single #marksTable tr.cap-row { border:2px solid #D4A017; border-radius:12px; }
 
-        /* ===== COMPACT MARK GRID =====
-           The level code used to sit under every input, which doubled the row
-           height. It now sits inside the cell to the right of the box, so a
-           row is one line tall however many subjects there are. */
+        /* ===== FIXED WIDTH MARK GRID =====
+           The columns used to resize on every keystroke: the inputs were
+           width:100% inside an auto-layout table, so a digit appearing, or the
+           level badge showing once a mark was valid, changed the intrinsic
+           column width and shifted everything sideways. Repeated typing could
+           end with columns too narrow to use. The inputs and the badge now
+           have fixed widths, so a cell's content can never change the column,
+           and the grid scrolls sideways on a narrow screen instead of
+           squeezing the boxes. */
         #marksTable th, #marksTable td { padding: 3px 4px; vertical-align: middle; }
         #marksTable thead th { padding: 5px 4px; line-height:1.15; }
-        #marksTable td.subject-cell { position: relative; white-space: nowrap; }
+        #marksTable td.subject-cell { position: relative; white-space: nowrap; width: 66px; min-width: 66px; }
         #marksTable .score-input {
-            width: 100%; min-width: 0; padding: 5px 3px; text-align: center;
-            font-size: 13px; line-height: 1.2; border-width: 1px; border-radius: 6px;
+            width: 44px; min-width: 44px; max-width: 44px; box-sizing: border-box;
+            padding: 5px 2px; text-align: center; font-size: 13px; line-height: 1.2;
+            border-width: 1px; border-radius: 6px;
+            -moz-appearance: textfield; appearance: textfield;
         }
+        #marksTable .score-input::-webkit-outer-spin-button,
+        #marksTable .score-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* Always hold the badge's space, so it appearing never moves a column. */
         #marksTable .cell-lv {
-            display: inline-block; margin-left: 2px; min-height: 0; line-height: 1;
-            font-size: 8.5px; vertical-align: middle; position: static;
+            display: inline-block; width: 14px; min-width: 14px; margin-left: 2px;
+            min-height: 0; line-height: 1; font-size: 8.5px; vertical-align: middle;
+            position: static; text-align: center;
         }
         #marksTable .stu-cell { flex-direction: row; align-items: baseline; gap: 5px; }
         #marksTable .stu-cell .nm { font-size: 12.5px; }
@@ -611,8 +622,20 @@
         #marksTable .subject-head .subj-max { font-size: 8.5px; }
         #marksTable th.h-num { white-space: nowrap; font-size: 9.5px; }
         #marksTable thead th { font-size: 9.5px; }
-        #marksTable { width: 100%; table-layout: auto; }
+        /* Sized by its content so columns keep their fixed widths, and scrolled
+           sideways when the class is wider than the screen. */
+        #marksTable { width: max-content; min-width: 100%; table-layout: fixed; }
         #marksTable tbody td { font-size: 12.5px; }
+        /* Horizontal scroll for the grid on a narrow screen. */
+        #marksTableContainer .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        /* With a fixed layout the widths come from these, not the content, so
+           typing never resizes a column. */
+        #marksTable th:nth-child(1), #marksTable td:nth-child(1) { width: 32px; }
+        #marksTable th:nth-child(2), #marksTable td:nth-child(2) { width: 150px; }
+        #marksTable th.h-num, #marksTable td.total-cell,
+        #marksTable td.avg-cell, #marksTable td.lvl-cell { width: 52px; }
+        #marksTable th:nth-last-child(2), #marksTable td.perf-cell { width: 122px; }
+        #marksTable th:last-child, #marksTable td.act-cell { width: 104px; }
 
         /* On a phone the single-student card still needs room to tap. */
         @media (max-width: 820px) {
@@ -1513,13 +1536,15 @@
         const tbody = document.getElementById('marksTableBody');
 
         // Build header
-        let headerHtml = `<tr><th style="min-width:30px;">#</th><th style="min-width:130px;">Student</th>`;
+        // Widths come from the stylesheet so the columns never depend on the
+        // content typed into them.
+        let headerHtml = `<tr><th>#</th><th>Student</th>`;
         config.subjects.forEach(s => {
             headerHtml += `<th><div class="subject-head"><span class="subj-name">${s.name}</span><span class="subj-max">${s.max}</span></div></th>`;
         });
         // Must match the body order exactly: total, average, avg level,
         // performance, actions.
-        headerHtml += `<th class="h-num">Total</th><th class="h-num">Avg</th><th class="h-num">Avg Lvl</th><th style="min-width:112px;">Performance</th><th style="min-width:104px;">Actions</th></tr>`;
+        headerHtml += `<th class="h-num">Total</th><th class="h-num">Avg</th><th class="h-num">Avg Lvl</th><th>Performance</th><th>Actions</th></tr>`;
         thead.innerHTML = headerHtml;
 
         // Build body

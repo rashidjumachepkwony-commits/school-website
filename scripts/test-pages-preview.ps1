@@ -69,11 +69,12 @@ if ($acao -match "(?im)^access-control-allow-origin:\s*$([regex]::Escape($PREVIE
 else { Write-Host "  FAIL Worker does not allow the Pages origin"; $script:fail++ }
 
 $api = curl.exe -s --max-time 45 -H "Origin: $PREVIEW" ($WORKER + '/api/portal/students')
-    # This endpoint returns { success, students: [...] } and has no `total`
-    # field, so count the entries rather than looking for a summary field.
+    # The roster grows as the school enrols new pupils, so this must not be a
+    # fixed number. Check the list is coherent and matches the admin roster.
     $portalStudents = ($api | ConvertFrom-Json).students
-    if (($api -match '"success":true') -and $portalStudents -and $portalStudents.Count -eq 130) {
-        Write-Host "  ok   GET /api/portal/students from preview origin (130 students)"; $script:pass++
+    $roster = (Invoke-RestMethod "$WORKER/api/students/management" -TimeoutSec 60).total
+    if (($api -match '"success":true') -and $portalStudents -and $portalStudents.Count -eq $roster -and $portalStudents.Count -gt 0) {
+        Write-Host "  ok   GET /api/portal/students matches the roster ($($portalStudents.Count) students)"; $script:pass++
     }
 else { Write-Host "  FAIL portal students: $(($api | Out-String).Substring(0,[Math]::Min(80,($api|Out-String).Length)))"; $script:fail++ }
 
