@@ -4,6 +4,8 @@
 import { success, error, extractIntId } from '../utils/helpers.js';
 import { getKenyaTime, getKenyaDate, formatKenyaTime } from '../services/time.service.js';
 import { loadPolicy, classStats, gradePercentage, gradeBySubject, computePercentage, DEFAULT_POLICY } from '../services/assessment.service.js';
+import { buildStudentResultPdf } from '../services/result-slip-pdf.js';
+import { buildPdf } from '../services/pdf.service.js';
 
 /** Escape text before it is interpolated into the printable report HTML. */
 function escapeHtml(value) {
@@ -1167,6 +1169,28 @@ tbody tr:nth-child(even){background:#fafcff}
 
   <div class="foot"><span>Changara Star Academy &middot; CBE Result Slip &middot; ${escapeHtml(grade)}</span><span>Generated: ${escapeHtml(new Date().toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' }))}</span></div>
 </div></body></html>`;
+
+    // ?download=1 returns a real PDF file, so a student can save it straight
+    // to a phone without going through a print dialog.
+    if ((url.searchParams.get('download') || '') === '1') {
+      const fileName = `CBE-Result-${fullName.replace(/[^A-Za-z0-9]+/g, '-')}-${(period || 'result').replace(/[^A-Za-z0-9]+/g, '-')}.pdf`;
+      return new Response(buildPdf([buildStudentResultPdf({
+        fullName, admissionNumber: student.admissionNumber || '-', grade,
+        period, type, assessmentName: name || mine.assessmentName || type,
+        myTotal, maxTotal, myAvgScore, myPct, myGrading: graded,
+        meanRating: myGrading.meanRating, counts: myGrading.counts,
+        position, outOf, classMean, classMeanAvg, classLevel,
+        subjectRows, strengths, focus, levels: policy.levels
+      })]), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${fileName}"`,
+          'Cache-Control': 'no-store'
+        }
+      });
+    }
+
     return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 

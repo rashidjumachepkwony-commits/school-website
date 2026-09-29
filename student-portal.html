@@ -143,11 +143,14 @@
   .tag.lv-ae{background:#fff3cd;color:#856404} .tag.lv-be{background:#fbdcdc;color:#8c1c24}
 
   .res-dl {
-    display:flex; align-items:center; justify-content:center; gap:9px; width:calc(100% - 36px);
-    margin:16px 18px 18px; padding:15px; font-size:1.02rem; font-weight:800; font-family:inherit;
+    display:flex; align-items:center; justify-content:center; gap:9px; width:100%;
+    margin:0; padding:15px; font-size:1.02rem; font-weight:800; font-family:inherit;
     background:#a4161a; color:#fff; border:0; border-radius:11px; cursor:pointer;
   }
   .res-dl:hover { background:#8f0e12; }
+  .res-dl.alt { background:#0A1628; }
+  .res-dl.alt:hover { background:#16305c; }
+  .res-acts { display:grid; grid-template-columns:1fr; gap:8px; margin:16px 18px 18px; }
   @media (max-width:560px){
     .res-figures { grid-template-columns:repeat(2,1fr); }
     .res-level { min-width:100%; flex-direction:row; gap:9px; }
@@ -183,7 +186,13 @@
 <div class="topbar">
   <div class="inner">
     <span class="title">Find a Child</span>
-    <input type="text" id="topSearch" placeholder="Type a name or admission number" autocomplete="off">
+    <div class="lookup">
+      <input type="text" id="topSearch" placeholder="Type a name or admission number" autocomplete="off"
+             role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
+      <!-- Suggestions open under this bar, so the names are always visible
+           on a phone and a single tap opens the child. -->
+      <div id="suggest" class="suggest" role="listbox" hidden></div>
+    </div>
     <button class="btn" onclick="searchFromTop()"><i class="fas fa-search"></i> Search</button>
     <a class="btn" href="index.html" style="background:#fff;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;"><i class="fas fa-home"></i> Home</a>
   </div>
@@ -192,31 +201,12 @@
 <div class="wrap">
   <div class="msg" id="msg"></div>
 
-  <!-- STEP 1 : find the child -->
-  <div class="card" id="step1">
-    <h2><i class="fas fa-search"></i> Step 1: Find Your Child</h2>
-    <p class="hint">Type part of your child's name (or the admission number) above. Matching names appear straight away - just tap one.</p>
+  <!-- The bar above is the only lookup: one clear place to find a child. -->
 
-    <label for="search">Child's name or admission number</label>
-    <div class="lookup">
-      <input type="text" id="search" placeholder="e.g. Amara" autocomplete="off"
-             role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
-      <!-- Suggestions sit above the field so they are reachable on a phone
-           without the keyboard covering them. -->
-      <div id="suggest" class="suggest" role="listbox" hidden></div>
-    </div>
-
-    <div class="match" id="match" style="display:none">
-      <p id="matchText"></p>
-      <label for="studentSelect">Tap your child's name here</label>
-      <select id="studentSelect" size="6"></select>
-      <button class="btn" onclick="openStudent()"><i class="fas fa-arrow-right"></i> Continue</button>
-    </div>  </div>
-
-  <!-- STEP 2 : choose what to see -->
+  <!-- STEP 1 : choose what to see -->
   <div class="card" id="step2" style="display:none">
     <button class="back" onclick="backToSearch()">&larr; Not this child? Search again</button>
-    <h2><i class="fas fa-user-circle"></i> Step 2: Choose Your Child</h2>
+    <h2><i class="fas fa-user-circle"></i> Choose Your Child</h2>
     <div class="pupil" id="pupil"></div>
     <p class="hint">Now tap what you would like to see:</p>
     <div class="tabs">
@@ -248,28 +238,27 @@ let current = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   loadStudents();
-  document.getElementById('search').addEventListener('input', filterStudents);
   const top = document.getElementById('topSearch');
-  top.addEventListener('input', () => {
-    // Keep the in-page box in step with the sticky bar, and filter live.
-    document.getElementById('search').value = top.value;
-    filterStudents();
-  });
+  top.addEventListener('input', filterStudents);
   top.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchFromTop(); } });
+
+  const suggest = document.getElementById('suggest');
+  suggest.addEventListener('click', function (e) {
+    const b = e.target.closest('button[data-id]');
+    if (b) pickStudent(b.dataset.id);
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSuggest(); });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.lookup')) closeSuggest();
+  });
 });
 
-/** Called by the sticky Search button: reveal the match list near the top. */
-function searchFromTop() {
-  const q = document.getElementById('topSearch').value;
-  document.getElementById('search').value = q;
-  document.getElementById('step1').style.display = 'block';
-  document.getElementById('step2').style.display = 'none';
-  document.getElementById('step3').style.display = 'none';
-  filterStudents();
-  const m = document.getElementById('match');
-  if (m && m.style.display === 'block') m.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  else window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+  /** Called by the sticky Search button: filter from the bar at the top. */
+  function searchFromTop() {
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step3').style.display = 'none';
+    filterStudents();
+  }
 
 async function loadStudents() {
   try {
@@ -290,16 +279,14 @@ async function loadStudents() {
  * straight away, with no extra Continue step.
  */
 function filterStudents() {
-  const input = document.getElementById('search');
+  const input = document.getElementById('topSearch');
   const q = input.value.trim().toLowerCase();
   const box = document.getElementById('suggest');
-  const match = document.getElementById('match');
 
   if (q.length < 1) {
     box.innerHTML = '';
     box.hidden = true;
     input.setAttribute('aria-expanded', 'false');
-    match.style.display = 'none';
     return;
   }
 
@@ -312,11 +299,10 @@ function filterStudents() {
       '". Check the spelling, or try the admission number.</div>';
     box.hidden = false;
     input.setAttribute('aria-expanded', 'true');
-    match.style.display = 'none';
     return;
   }
 
-  box.innerHTML = hits.map((s, i) =>
+  box.innerHTML = hits.map(s =>
     '<button type="button" role="option" data-id="' + s.id + '">' +
       '<span>' + esc(s.name) + '</span>' +
       '<span class="s-adm">' + esc(s.admissionNumber || 'no adm. no.') + '</span>' +
@@ -325,38 +311,24 @@ function filterStudents() {
   ).join('');
   box.hidden = false;
   input.setAttribute('aria-expanded', 'true');
-
-  // Keep the older list in step, for anyone using the Continue button.
-  document.getElementById('matchText').textContent =
-    hits.length === 1 ? 'Found 1 student. Tap the name above to continue.'
-                      : 'Found ' + hits.length + ' students. Tap your child\'s name above.';
-  const sel = document.getElementById('studentSelect');
-  sel.innerHTML = hits.map(s =>
-    '<option value="' + s.id + '">' + s.name + '  (' + (s.admissionNumber || 'no adm. no.') + ', ' + s.grade + ')</option>'
-  ).join('');
-  match.style.display = 'block';
 }
 
-/** Open a child directly from the suggestion list. */
+/** Open a child straight from the suggestion list. */
 function pickStudent(id) {
-  const sel = document.getElementById('studentSelect');
-  sel.value = id;
-  openStudent();
+  openStudent(id);
 }
 
 /** Close the suggestion panel when tapping away or pressing Escape. */
 function closeSuggest() {
   const box = document.getElementById('suggest');
   if (box) { box.hidden = true; box.innerHTML = ''; }
-  const input = document.getElementById('search');
+  const input = document.getElementById('topSearch');
   if (input) input.setAttribute('aria-expanded', 'false');
 }
 
-async function openStudent() {
-  const id = document.getElementById('studentSelect').value;
-  if (!id) { showMsg('Please choose your child\'s name from the list.', 'err'); return; }
+async function openStudent(id) {
+  if (!id) { showMsg('Please tap your child\'s name from the list.', 'err'); return; }
   showMsg('', '');
-  document.getElementById('step1').style.display = 'none';
   document.getElementById('step2').style.display = 'block';
   document.getElementById('step3').style.display = 'none';
   window.scrollTo(0, 0);
@@ -372,15 +344,18 @@ async function openStudent() {
       (s.guardianPhone ? '<div class="mt">Parent contact: ' + esc(s.guardianPhone) + '</div>' : '');
     showView('results');
   } catch (e) {
-    document.getElementById('step1').style.display = 'block';
     showMsg('Could not open this student. Please try again.', 'err');
   }
 }
 
 function backToSearch() {
-  document.getElementById('step1').style.display = 'block';
   document.getElementById('step2').style.display = 'none';
   document.getElementById('step3').style.display = 'none';
+  closeSuggest();
+  const top = document.getElementById('topSearch');
+  top.value = '';
+  top.focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function backToChild() {
@@ -462,8 +437,12 @@ function renderResults(d) {
         '<tbody>' + rows + '</tbody>' +
       '</table></div>' +
 
-      '<button class="res-dl" onclick="printResult()">' +
-        '<i class="fas fa-file-pdf"></i> Download result slip (PDF)</button>' +
+      '<div class="res-acts">' +
+        '<button class="res-dl" onclick="downloadResult()">' +
+          '<i class="fas fa-download"></i> Save PDF to my phone</button>' +
+        '<button class="res-dl alt" onclick="printResult()">' +
+          '<i class="fas fa-print"></i> View / Print</button>' +
+      '</div>' +
     '</article>';
   }
   return html + gradingKeyHtml(d.gradingKey);
@@ -478,19 +457,44 @@ function levelClass(level) {
             'Approaching Expectation': 'lvl-ae', 'Below Expectation': 'lvl-be' })[level] || 'lvl-none';
 }
 
+/** Build the report URL for the result currently on screen. */
+function resultUrl(extra) {
+  const a = (current.assessments || [])[0];
+  const p = new URLSearchParams();
+  if (a) {
+    if (a.period) p.set('period', a.period);
+    if (a.type) p.set('type', a.type);
+    if (a.name) p.set('name', a.name);
+  }
+  if (extra) p.set(extra, '1');
+  const base = '/api/assessments/student-report/' + encodeURIComponent(current.student.id);
+  return apiUrl(base + (p.toString() ? '?' + p.toString() : ''));
+}
+
+/**
+ * Save the result as a real PDF file. Using a link with download means the
+ * phone saves it to its Files or Downloads folder, instead of opening a print
+ * dialog that a parent then has to work out.
+ */
+async function downloadResult() {
+  if (!current || !current.student) return;
+  const url = resultUrl('download');
+  const name = 'CBE-Result-' + current.student.name.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf';
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  showMsg('Saving ' + name + ' to your device.', 'ok');
+}
+
 function printResult() {
   if (!current || !current.student) return;
-  // Use the same professional result slip the teachers print, so what the
-  // parent downloads is the official document, not a plain web page.
-  const a = (current.assessments || [])[0];
-  let url = apiUrl('/api/assessments/student-report/' + encodeURIComponent(current.student.id));
-  if (a) {
-    if (a.period) url += '?period=' + encodeURIComponent(a.period);
-    if (a.type) url += (url.indexOf('?') === -1 ? '?' : '&') + 'type=' + encodeURIComponent(a.type);
-    if (a.name) url += (url.indexOf('?') === -1 ? '?' : '&') + 'name=' + encodeURIComponent(a.name);
-  }
-  const w = window.open(url, '_blank');
-  if (!w) { showMsg('Please allow popups to download the result.', 'err'); return; }
+  // The same professional result slip, opened for viewing or printing.
+  const w = window.open(resultUrl(), '_blank');
+  if (!w) { showMsg('Please allow popups to view the result.', 'err'); return; }
 }
 
 function renderAssignments(d) {
