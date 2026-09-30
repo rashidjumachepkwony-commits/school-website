@@ -845,7 +845,7 @@ tbody tr:nth-child(even){background:#fafcff}
     // ?download=1 returns a landscape PDF so the file can be saved anywhere.
     if ((url.searchParams.get('download') || '') === '1') {
       const fileName = `CBE-Results-All-Students-${(period || 'all').replace(/[^A-Za-z0-9]+/g, '-')}.pdf`;
-      return new Response(buildPdf([buildAllStudentsPdf({
+      return new Response(buildPdf(buildAllStudentsPdf({
         period, type, name,
         grades: [...new Set(rows.map(r => r.grade).filter(Boolean))].join(', '),
         columns: subjectOrder,
@@ -872,7 +872,7 @@ tbody tr:nth-child(even){background:#fafcff}
             ? ((policy.levels || []).find(l => l.name === classLevelObj.level)?.code || '')
             : ''
         }
-      })]), {
+      })), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
