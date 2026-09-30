@@ -499,7 +499,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
             ? ((policy.levels || []).find(l => l.name === classLevelObj.level)?.code || '')
             : ''
         }
-      }), {
+      })), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
