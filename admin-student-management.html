@@ -71,6 +71,15 @@
   .fbtns { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
   .fbtns .btn { width:auto; margin:0; }
   @media (max-width: 768px) { .toolbar { flex-direction: column; align-items: stretch; } table { font-size: 11px; } }
+        /* ===== EDIT STUDENT MODAL ===== */
+        .modal-backdrop { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(10,22,40,.45); display:none; align-items:center; justify-content:center; z-index:1000; }
+        .modal-backdrop.show { display:flex; }
+        .modal { background:#fff; border-radius:16px; padding:22px 26px; max-width:520px; width:92vw; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+        .modal h3 { font-size:1.15rem; color:#0A1628; margin-bottom:6px; }
+        .modal .sub { color:#6b7a92; font-size:.9rem; margin-bottom:16px; }
+        .modal .close-x { position:absolute; top:12px; right:14px; font-size:1.4rem; color:#999; cursor:pointer; }
+        .modal .close-x:hover { color:#333; }
+        .modal .fbtns { margin-top:0; }
     </style>
 </head>
 <body>
@@ -152,7 +161,7 @@
                 <thead>
                     <tr>
                         <th>#</th><th>Adm. No.</th><th>Student Name</th><th>Grade</th><th>Gender</th>
-                        <th>Type</th><th>Parent Contact</th><th>Fees (Paid/Bal)</th><th>Link To</th>
+                        <th>Type</th><th>Parent Contact</th><th>Fees (Paid/Bal)</th><th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="studentsBody">
@@ -164,6 +173,28 @@
     </div>
 </div>
 
+<!-- ===== EDIT STUDENT MODAL ===== -->
+<div class="modal-backdrop" id="editModal">
+    <div class="modal">
+        <span class="close-x" onclick="closeEditStudent()">&times;</span>
+        <h3>Edit Student</h3>
+        <div class="sub" id="editModalSub">Update details for <strong id="editStudentName">--</strong></div>
+        <div class="fgrid">
+            <div><label for="editFirst">First name *</label><input type="text" id="editFirst"></div>
+            <div><label for="editLast">Last name *</label><input type="text" id="editLast"></div>
+            <div><label for="editAdm">Admission No.</label><input type="text" id="editAdm" readonly style="background:#f5f6f8;"></div>
+            <div><label for="editGrade">Class / Grade *</label><select id="editGrade"></select></div>
+            <div><label for="editGender">Gender</label><select id="editGender"><option value="">Not set</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
+            <div><label for="editPhone">Parent contact</label><input type="tel" id="editPhone"></div>
+            <div><label for="editDob">Date of birth</label><input type="date" id="editDob"></div>
+            <div><label for="editType">Day / Boarding</label><select id="editType"><option value="Day Scholar">Day Scholar</option><option value="Boarder">Boarder</option></select></div>
+        </div>
+        <div class="fbtns">
+            <button class="btn btn-success" onclick="saveEditedStudent()"><i class="fas fa-save"></i> Save Changes</button>
+            <button class="btn sec" onclick="closeEditStudent()">Cancel</button>
+        </div>
+    </div>
+</div>
 <script>
     let studentsData = [];
     let summary = {};
@@ -269,6 +300,7 @@
                     '<a class="row-link" href="clerk-dashboard.html?student=' + adm + '" title="Clerk ledger"><i class="fas fa-coins"></i> Fees</a>' +
                     '<a class="row-link" href="admin-holiday-assignments.html?grade=' + gr + '" title="Holiday assignments"><i class="fas fa-file-alt"></i> Work</a>' +
                     '<a class="row-link" href="admin-students.html" title="Attendance"><i class="fas fa-clipboard-check"></i> Att.</a>' +
+                    '<a class="row-link" onclick="openEditStudent(\'' + escapeHtml(s._id || '') + '\')" title="Edit student details"><i class="fas fa-pen"></i> Edit</a>' +
                 '</td></tr>';
         }).join('');
     }
@@ -374,6 +406,87 @@
         clearTimeout(window.statusTimer);
         window.statusTimer = setTimeout(() => { el.className = 'save-status'; }, 2500);
     }
+
+    // ===== EDIT STUDENT =====
+    let currentEditId = null;
+
+    function openEditStudent(id) {
+        const s = studentsData.find(x => (x._id || '') === id);
+        if (!s) return;
+        currentEditId = id;
+        document.getElementById('editStudentName').textContent = s.fullName || `${s.firstName || ''} ${s.lastName || ''}`.trim() || s.admissionNumber;
+        document.getElementById('editFirst').value = s.firstName || '';
+        document.getElementById('editLast').value = s.lastName || '';
+        document.getElementById('editAdm').value = s.admissionNumber || '';
+
+        const sel = document.getElementById('editGrade');
+        const grades = [...new Set(studentsData.map(s => s.grade).filter(Boolean))].sort();
+        sel.innerHTML = '<option value="">Choose class...</option>' +
+            grades.map(g => '<option value="' + escapeHtml(g) + '">' + escapeHtml(g) + '</option>').join('');
+        sel.value = s.grade || s.class || '';
+        if (!sel.value && grades.length) sel.selectedIndex = 1;
+
+        const gender = (s.gender || '').toLowerCase();
+        document.getElementById('editGender').value = gender.startsWith('m') ? 'Male' : gender.startsWith('f') ? 'Female' : '';
+        document.getElementById('editPhone').value = s.guardianPhone || s.phone || '';
+        document.getElementById('editDob').value = s.dateOfBirth || '';
+        document.getElementById('editType').value = s.boarding ? 'Boarder' : 'Day Scholar';
+
+        document.getElementById('editModal').classList.add('show');
+    }
+
+    function closeEditStudent() {
+        document.getElementById('editModal').classList.remove('show');
+        currentEditId = null;
+    }
+
+    async function saveEditedStudent() {
+        if (!currentEditId) return;
+        const firstName = document.getElementById('editFirst').value.trim();
+        const lastName = document.getElementById('editLast').value.trim();
+        const grade = document.getElementById('editGrade').value;
+        if (!firstName || !lastName || !grade) {
+            showStatus('First name, last name and class are required', 'error');
+            return;
+        }
+
+        showStatus('Saving...', 'saving');
+        try {
+            const res = await fetch('/api/students/' + encodeURIComponent(currentEditId), {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    firstName, lastName,
+                    class: grade, grade,
+                    gender: document.getElementById('editGender').value,
+                    guardianPhone: document.getElementById('editPhone').value.trim() || '',
+                    phone: document.getElementById('editPhone').value.trim() || '',
+                    dateOfBirth: document.getElementById('editDob').value || '',
+                    boarding: document.getElementById('editType').value === 'Boarder',
+                    isBoarding: document.getElementById('editType').value === 'Boarder',
+                    studentType: document.getElementById('editType').value
+                })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                showStatus(data.error || 'Could not save the student', 'error');
+                return;
+            }
+            closeEditStudent();
+            await loadStudents();
+            showStatus('Updated ' + firstName + ' ' + lastName, 'saved');
+        } catch (e) {
+            showStatus('Network problem. Please try again.', 'error');
+        }
+    }
+
+    // Close modal on Escape or backdrop click.
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && document.getElementById('editModal').classList.contains('show')) closeEditStudent();
+    });
+    document.getElementById('editModal').addEventListener('click', e => {
+        if (e.target === document.getElementById('editModal')) closeEditStudent();
+    });
 </script>
 </body>
 </html>
