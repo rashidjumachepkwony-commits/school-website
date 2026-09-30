@@ -1280,7 +1280,7 @@
                 { name: 'ENGLISH ACTIVITIES', max: 50 },
                 { name: 'SCI & TECH', max: 30 },
                 { name: 'KISW LUGHA', max: 50 },
-                { name: 'SST', max: 30 },
+                { name: 'SST', max: 20 },
                 { name: 'RELIGIOUS EDUCATION', max: 20 },
                 { name: 'AGRICULTURE', max: 20 },
                 { name: 'CREATIVE ART', max: 35 }
@@ -1292,7 +1292,7 @@
                 { name: 'ENGLISH ACTIVITIES', max: 50 },
                 { name: 'SCI & TECH', max: 30 },
                 { name: 'KISW LUGHA', max: 50 },
-                { name: 'SST', max: 30 },
+                { name: 'SST', max: 20 },
                 { name: 'RELIGIOUS EDUCATION', max: 20 },
                 { name: 'AGRICULTURE', max: 20 },
                 { name: 'CREATIVE ART', max: 35 }
@@ -1300,11 +1300,11 @@
         },
         'Grade 6': {
             subjects: [
-                { name: 'MATHS ACTIVITIES', max: 30 },
+                { name: 'MATHS ACTIVITIES', max: 50 },
                 { name: 'ENGLISH ACTIVITIES', max: 50 },
                 { name: 'SCI & TECH', max: 30 },
                 { name: 'KISW LUGHA', max: 50 },
-                { name: 'SST', max: 30 },
+                { name: 'SST', max: 20 },
                 { name: 'RELIGIOUS EDUCATION', max: 20 },
                 { name: 'AGRICULTURE', max: 20 },
                 { name: 'CREATIVE ART', max: 35 }
@@ -2136,6 +2136,7 @@
             const scoreInputs = row.querySelectorAll('.score-input');
             const assessments = [];
             let hasValidScore = false;
+            let overMax = [];
 
             scoreInputs.forEach(inp => {
                 const subject = inp.dataset.subject;
@@ -2143,9 +2144,11 @@
                 if (inp.value === '') return;
                 let score = parseFloat(inp.value);
                 if (isNaN(score)) return;
-                // Clamp rather than reject, so one typo cannot block the save.
                 if (score < 0) score = 0;
-                if (score > maxScore) score = maxScore;
+                if (score > maxScore) {
+                    overMax.push({ subject, score, max: maxScore });
+                    score = maxScore;
+                }
                 assessments.push({ subject, maxScore, score });
                 hasValidScore = true;
             });
@@ -2190,6 +2193,11 @@
             }
 
             await loadGradeData();
+            if (overMax.length) {
+                showAlert('Some scores were capped at the subject maximum: ' +
+                    overMax.map(o => `${o.subject} (typed ${o.score}, max ${o.max})`).join('; ') +
+                    '. Use "Edit Subjects" if a maximum is wrong.', 'error');
+            }
             showSaveStatus(`✅ ${result.saved} student${result.saved === 1 ? '' : 's'} saved`, 'saved');
             setTimeout(() => hideSaveStatus(), 2500);
         } catch (error) {
