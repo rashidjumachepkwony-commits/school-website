@@ -2386,14 +2386,34 @@
     // ============================================
     // DOWNLOAD REPORT
     // ============================================
+
+    /**
+     * Save a report as a file on this device. Used instead of opening the
+     * report in a tab, which only offers a print dialog.
+     */
+    function saveReportFile(url, filename) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    /** Keep the readable report available for viewing on a big screen. */
+    function openReportWindow(url) {
+      const w = window.open(url, '_blank');
+      if (!w) showAlert('Please allow popups for this site to open reports', 'error');
+    }
+
     async function downloadReport(studentId) {
         if (!studentId) { showAlert('That student has no saved result yet.', 'error'); return; }
-        // Use the professional CBE result slip (total, average score, average
-        // percentage, overall performance level, class comparison).
+        // The professional CBE result slip as a file the teacher can keep.
+        const name = (studentsData.find(s => s._id === studentId) || {}).studentName || 'Student';
         const url = apiUrl('/api/assessments/student-report/') + encodeURIComponent(studentId) +
-            '?' + reportFilterParams();
-        const win = window.open(url, '_blank');
-        if (!win) showAlert('Please allow popups for this site to download reports', 'error');
+            '?' + reportFilterParams() + '&download=1';
+        saveReportFile(url, 'CBE-Result-' + name.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
     }
 
     // ============================================
@@ -2493,21 +2513,22 @@
 
     /** Open one sitting in the marks grid. */
     function downloadHistoryPDF(grade, period, type, name) {
-        const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(grade) +
-            '?period=' + encodeURIComponent(period) + '&type=' + encodeURIComponent(type) +
-            (name ? '&name=' + encodeURIComponent(name) : ''));
-        const w = window.open(url, '_blank');
-        if (!w) showAlert('Please allow popups to open the report', 'error');
+      const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(grade) +
+        '?period=' + encodeURIComponent(period) + '&type=' + encodeURIComponent(type) +
+        (name ? '&name=' + encodeURIComponent(name) : '') + '&download=1');
+      saveReportFile(url, 'CBE-Class-Results-' + grade.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
     }
 
     /** Every student who has marks in that sitting, across all grades. */
     function downloadAllHistoryPDF(grade, period, type, name) {
-        const params = new URLSearchParams();
-        if (period) params.set('period', period);
-        if (type) params.set('type', type);
-        if (name) params.set('name', name);
-        const w = window.open(apiUrl('/api/assessments/all-report?' + params.toString()), '_blank');
-        if (!w) showAlert('Please allow popups to open the report', 'error');
+      const params = new URLSearchParams();
+      if (period) params.set('period', period);
+      if (type) params.set('type', type);
+      if (name) params.set('name', name);
+      saveReportFile(
+        apiUrl('/api/assessments/all-report?' + params.toString() + '&download=1'),
+        'CBE-Results-All-Students.pdf'
+      );
     }
 
     function loadPeriod(period, type, name) {
@@ -2539,9 +2560,9 @@
         if (n) params.set('name', n);
         const d = document.getElementById('assessmentDate').value;
         if (d) params.set('date', d);
-        const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(currentGrade) + '?' + params.toString());
-        const win = window.open(url, '_blank');
-        if (!win) showAlert('Please allow popups for this site to download reports', 'error');
+        const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(currentGrade) +
+            '?' + params.toString() + '&download=1');
+        saveReportFile(url, 'CBE-Class-Results-' + currentGrade.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
     }
 
     /** Show exactly which filters a download will use. */
@@ -2569,9 +2590,8 @@
 
     /** All students who have marks, every grade, as one PDF. */
     function downloadAllStudentsPDF() {
-        const url = apiUrl('/api/assessments/all-report?' + reportFilterParams());
-        const win = window.open(url, '_blank');
-        if (!win) showAlert('Please allow popups for this site to download reports', 'error');
+      const url = apiUrl('/api/assessments/all-report?' + reportFilterParams() + '&download=1');
+      saveReportFile(url, 'CBE-Results-All-Students.pdf');
     }
 
     /** Let the teacher pick one student, then open that result slip. */
@@ -2584,7 +2604,7 @@
         if (answer === null) return;
         const pick = list[parseInt(answer, 10) - 1];
         if (!pick) { showAlert('Please enter a number from the list.', 'error'); return; }
-        viewStudentReport(pick._id);
+        downloadReport(pick._id);
     }
 
     // ============================================
@@ -2700,16 +2720,18 @@
 
     /** Download the CBE results as a landscape PDF for the chosen scope. */
     function cbeDownload(scope) {
-        const grade = document.getElementById('cbeLkGrade').value;
-        const params = cbeLookupParams();
-        let url;
-        if (scope === 'all') {
-            url = '/api/assessments/all-report?' + params.toString();
-        } else {
-            url = '/api/assessments/class-report/' + encodeURIComponent(grade) + '?' + params.toString();
-        }
-        const win = window.open(url, '_blank');
-        if (!win) showAlert('Please allow popups to open the report', 'error');
+      const grade = document.getElementById('cbeLkGrade').value;
+      const params = cbeLookupParams();
+      let url;
+      let file;
+      if (scope === 'all') {
+        url = '/api/assessments/all-report?' + params.toString();
+        file = 'CBE-Results-All-Students.pdf';
+      } else {
+        url = '/api/assessments/class-report/' + encodeURIComponent(grade) + '?' + params.toString();
+        file = 'CBE-Class-Results-' + grade.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf';
+      }
+      saveReportFile(apiUrl(url) + '&download=1', file);
     }
 
     function renderCBEAnalysis(rowsOverride) {

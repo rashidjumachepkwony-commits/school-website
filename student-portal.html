@@ -80,12 +80,14 @@
   }
   .suggest[hidden] { display:none; }
   .suggest button {
-    display:flex; width:100%; align-items:center; justify-content:space-between; gap:10px;
+    display:flex; width:100%; align-items:center; justify-content:flex-start; gap:10px;
     padding:14px 16px; font-size:1.05rem; font-family:inherit; text-align:left;
     background:#fff; color:var(--ink); border:0; border-bottom:1px solid #eef2f7; cursor:pointer;
   }
   .suggest button:last-child { border-bottom:0; }
   .suggest button:hover, .suggest button:focus { background:#fff8e1; outline:none; }
+  .suggest .ava { font-size:1.4rem; flex:0 0 auto; }
+  .suggest .nm { flex:1 1 auto; font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .suggest .s-adm { font-size:.85rem; color:#6b7a92; font-weight:700; white-space:nowrap; }
   .suggest .s-gr { font-size:.8rem; color:#8a97ab; white-space:nowrap; }
   .suggest .none { padding:14px 16px; font-size:.98rem; color:#7d8ba3; }
@@ -137,6 +139,43 @@
   .res-table .c-out, .res-table .c-pct { color:#5f6f88; }
   .res-table .c-lv { text-align:center; width:70px; }
   .res-table tbody tr.lv-ee { background:#f6fdf8; } .res-table tbody tr.lv-me { background:#f5f9ff; }
+
+  /* A five column mark sheet does not fit a phone, so on a small screen each
+     subject becomes a card: name on one line, the marks beneath it, and the
+     level as a badge on the right. */
+  @media (max-width: 620px) {
+    .res-card { border-radius: 14px; }
+    .res-head { padding: 14px 14px; gap: 10px; }
+    .res-period { font-size: 1.05rem; }
+    .res-level { min-width: 100%; flex-direction: row; gap: 8px; padding: 7px 12px; }
+    .res-level-code { font-size: 1.15rem; }
+    .res-level-name { margin-top: 0; font-size: .68rem; }
+    .res-figures { grid-template-columns: repeat(2, 1fr); }
+    .fig { padding: 11px 8px; }
+    .fig-v { font-size: 1.15rem; }
+    .res-mix { padding: 11px 14px 0; }
+    .res-table-wrap { padding: 11px 14px 0; }
+    .res-table thead { display: none; }
+    .res-table, .res-table tbody, .res-table tr, .res-table td { display: block; width: 100%; }
+    .res-table tbody tr {
+      border: 1px solid #e3e9f2; border-radius: 11px; margin-bottom: 9px;
+      padding: 9px 11px; background: #fff; display: grid;
+      grid-template-columns: 1fr auto; grid-template-areas: "subj lvl" "row row";
+      align-items: center; gap: 4px 8px;
+    }
+    .res-table tbody td { border: 0; padding: 2px 0; }
+    .res-table .c-subj { grid-area: subj; font-size: 1rem; font-weight: 700; }
+    .res-table .c-lv { grid-area: lvl; width: auto; text-align: right; }
+    .res-table .c-score, .res-table .c-out, .res-table .c-pct {
+      display: inline-flex; align-items: baseline; gap: 3px; text-align: left;
+    }
+    .res-table .c-score::before { content: 'Score '; font-size: .62rem; color: #8a97ab; text-transform: uppercase; letter-spacing: .3px; }
+    .res-table .c-out::before { content: 'out of '; font-size: .62rem; color: #8a97ab; text-transform: uppercase; letter-spacing: .3px; }
+    .res-table .c-pct::before { content: '= '; font-size: .62rem; color: #8a97ab; }
+    .res-table .c-score, .res-table .c-out, .res-table .c-pct { grid-row: 2; margin-right: 12px; }
+    .res-acts { margin: 14px; }
+    .res-acts .res-dl { font-size: 1rem; padding: 14px; }
+  }
   .res-table tbody tr.lv-ae { background:#fffdf3; } .res-table tbody tr.lv-be { background:#fef7f7; }
   .tag { display:inline-block; padding:2px 9px; border-radius:9px; font-size:.72rem; font-weight:800; }
   .tag.lv-ee{background:#dff3e4;color:#136b2c} .tag.lv-me{background:#dbeafe;color:#12459b}
@@ -167,13 +206,34 @@
     padding: 10px 14px; box-shadow: 0 2px 8px rgba(10,22,40,.25);
   }
   .topbar .inner { max-width: 900px; margin: 0 auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .topbar .title { font-weight: 800; font-size: 1rem; white-space: nowrap; }
+  .topbar .title { font-weight: 800; font-size: 1rem; white-space: nowrap; display:flex; align-items:center; gap:8px; }
+  .topbar .title .kids { font-size: 1.5rem; }
   .topbar input { flex: 1 1 180px; padding: 12px; font-size: 1.05rem; border-radius: 10px; border: 2px solid #c9d3e2; }
   .topbar input:focus { outline: none; border-color: var(--gold); }
   .topbar .btn { width: auto; margin: 0; padding: 12px 20px; white-space: nowrap; }
   .topbar .home { display:none; }
 
-  @media (max-width:600px){ html{font-size:18px} .tabs{grid-template-columns:1fr} .topbar .title{display:none} }
+  /* On a phone the search bar sits at the bottom of the screen, within thumb
+     reach, and the list of names opens upwards so it is never hidden behind
+     the on-screen keyboard. */
+  @media (max-width:600px) {
+    html { font-size: 18px; }
+    .tabs { grid-template-columns: 1fr; }
+    .topbar .title { display: none; }
+    .topbar {
+      position: fixed; top: auto; bottom: 0; left: 0; right: 0;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+      border-top: 3px solid var(--gold);
+    }
+    .topbar .inner { flex-wrap: nowrap; gap: 8px; }
+    .topbar input { flex: 1 1 auto; font-size: 1.05rem; }
+    /* Names open above the bar rather than below it. */
+    .topbar .suggest {
+      bottom: calc(100% + 6px); top: auto; max-height: 58vh; overflow-y: auto;
+    }
+    /* Leave room so the fixed bar never covers the page content. */
+    .wrap { padding-bottom: 96px; }
+  }
 </style>
 </head>
 <body>
@@ -185,9 +245,9 @@
 
 <div class="topbar">
   <div class="inner">
-    <span class="title">Find a Child</span>
+    <span class="title"><span class="kids">🧒</span> Find a Child</span>
     <div class="lookup">
-      <input type="text" id="topSearch" placeholder="Type a name or admission number" autocomplete="off"
+      <input type="text" id="topSearch" placeholder="Search your child's name" autocomplete="off"
              role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
       <!-- Suggestions open under this bar, so the names are always visible
            on a phone and a single tap opens the child. -->
@@ -304,7 +364,8 @@ function filterStudents() {
 
   box.innerHTML = hits.map(s =>
     '<button type="button" role="option" data-id="' + s.id + '">' +
-      '<span>' + esc(s.name) + '</span>' +
+      '<span class="ava">🧒</span>' +
+      '<span class="nm">' + esc(s.name) + '</span>' +
       '<span class="s-adm">' + esc(s.admissionNumber || 'no adm. no.') + '</span>' +
       (s.grade ? '<span class="s-gr">' + esc(s.grade) + '</span>' : '') +
     '</button>'

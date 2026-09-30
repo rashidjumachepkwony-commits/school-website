@@ -5,6 +5,7 @@ import { success, error, extractIntId } from '../utils/helpers.js';
 import { getKenyaTime, getKenyaDate, formatKenyaTime } from '../services/time.service.js';
 import { loadPolicy, classStats, gradePercentage, gradeBySubject, computePercentage, DEFAULT_POLICY } from '../services/assessment.service.js';
 import { buildStudentResultPdf } from '../services/result-slip-pdf.js';
+import { buildClassReportPdf, buildAllStudentsPdf } from '../services/reports-pdf.js';
 import { buildPdf } from '../services/pdf.service.js';
 
 /** Escape text before it is interpolated into the printable report HTML. */
@@ -465,6 +466,49 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
   </div>
 </div>
 </body></html>`;
+
+    // ?download=1 returns a landscape PDF so a teacher can save it to a phone.
+    if ((url.searchParams.get('download') || '') === '1') {
+      const fileName = `CBE-Class-Results-${grade}-${(period || 'all').replace(/[^A-Za-z0-9]+/g, '-')}.pdf`;
+      // buildClassReportPdf already returns an array of pages.
+      return new Response(buildPdf(buildClassReportPdf({
+        grade, period, type, name,
+        students: ordered.map(r => {
+          const cells = {};
+          for (const sr of r.subjectRows) {
+            cells[sr.subject] = { score: sr.score, max: sr.max };
+          }
+          return {
+            position: positionOf.get(r.admissionNumber) || '-',
+            admissionNumber: r.admissionNumber,
+            name: r.name,
+            grade: r.grade,
+            cells,
+            total: r.total,
+            average: r.average === null ? '-' : r.average.toFixed(2),
+            meanLevel: r.meanLevel === null || r.meanLevel === undefined ? null : Number(r.meanLevel).toFixed(2),
+            code: r.code,
+            level: r.level
+          };
+        }),
+        subjects: subjectOrder,
+        assessed: assessed.length,
+        summary: {
+          meanTotal, meanAvg: meanAvgScore, meanPct,
+          level: classLevelObj.level, code: classLevelObj.level
+            ? ((policy.levels || []).find(l => l.name === classLevelObj.level)?.code || '')
+            : ''
+        }
+      }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${fileName}"`,
+          'Cache-Control': 'no-store'
+        }
+      });
+    }
+
     return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 
@@ -797,6 +841,47 @@ tbody tr:nth-child(even){background:#fafcff}
   <div class="foot"><span>Changara Star Academy &middot; All Students CBE Results</span>
   <span>Generated: ${escapeHtml(new Date().toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' }))}</span></div>
 </div></body></html>`;
+
+    // ?download=1 returns a landscape PDF so the file can be saved anywhere.
+    if ((url.searchParams.get('download') || '') === '1') {
+      const fileName = `CBE-Results-All-Students-${(period || 'all').replace(/[^A-Za-z0-9]+/g, '-')}.pdf`;
+      return new Response(buildPdf([buildAllStudentsPdf({
+        period, type, name,
+        grades: [...new Set(rows.map(r => r.grade).filter(Boolean))].join(', '),
+        columns: subjectOrder,
+        rows: rows.map(r => {
+          const cells = {};
+          for (const sm of (r.subjectMarks || [])) cells[sm.subject] = { score: sm.score, max: sm.max };
+          return {
+            position: posOf.get(r.admissionNumber + '|' + r.grade) || '-',
+            admissionNumber: r.admissionNumber,
+            name: r.name,
+            grade: r.grade,
+            cells,
+            total: r.total,
+            average: r.avg.toFixed(2),
+            meanLevel: r.meanLevel === undefined || r.meanLevel === null ? null : Number(r.meanLevel).toFixed(2),
+            code: r.code,
+            level: r.level
+          };
+        }),
+        summary: {
+          meanTotal, meanAvg: meanAvg, meanPct,
+          level: classLevelObj.level,
+          code: classLevelObj.level
+            ? ((policy.levels || []).find(l => l.name === classLevelObj.level)?.code || '')
+            : ''
+        }
+      })]), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${fileName}"`,
+          'Cache-Control': 'no-store'
+        }
+      });
+    }
+
     return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 
