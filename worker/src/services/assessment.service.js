@@ -161,14 +161,20 @@ export function classStats(records, policy = DEFAULT_POLICY) {
   let exceeding = 0, meeting = 0, approaching = 0, below = 0, total = 0, assessed = 0;
   let sumPercent = 0;
   for (const r of records) {
+    const scored = (r.assessments || [])
+      .filter(a => a.score !== null && a.score !== undefined && a.score !== '' && Number(a.maxScore) > 0)
+      .map(a => ({ subject: a.subject, score: a.score, maxScore: a.maxScore }));
+    total++;
     const pct = typeof r.percentageScore === 'number'
       ? r.percentageScore
       : computePercentage(r);
-    total++;
-    if (pct === null) { below++; continue; }
+    if (pct === null || !scored.length) { below++; continue; }
     assessed++;
     sumPercent += pct;
-    const { code } = gradePercentage(pct, policy);
+    // Level follows from per-subject ratings (gradeBySubject), matching the
+    // history view and every other report — never the blended percentage.
+    const g = gradeBySubject(scored, policy);
+    const code = g.overall.code;
     if (code === 'EE') exceeding++;
     else if (code === 'ME') meeting++;
     else if (code === 'AE') approaching++;

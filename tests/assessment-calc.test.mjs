@@ -142,17 +142,34 @@ t('computePercentage absent/exempt excluded', () => {
   const pct = computePercentage({ assessments: [{ subject: 'Math', score: 9, maxScore: 10, absent: true }] });
   assert.equal(pct, null);
 });
-t('classStats counts levels and excludes missing', () => {
+t('classStats grades from subject levels, matching gradeBySubject', () => {
   const records = [
-    { percentageScore: 85 },
-    { percentageScore: 70 },
-    { percentageScore: 50 },
-    { percentageScore: 10 },
+    { percentageScore: 85, assessments: [{ subject: 'A', score: 85, maxScore: 100 }] },
+    { percentageScore: 70, assessments: [{ subject: 'A', score: 70, maxScore: 100 }] },
+    { percentageScore: 50, assessments: [{ subject: 'A', score: 50, maxScore: 100 }] },
+    { percentageScore: 10, assessments: [{ subject: 'A', score: 10, maxScore: 100 }] },
     {}
   ];
   const s = classStats(records, DEFAULT_POLICY);
   assert.deepEqual({ total: s.total, assessed: s.assessed, exceeding: s.exceeding, meeting: s.meeting, approaching: s.approaching, below: s.below, average: s.average },
     { total: 5, assessed: 4, exceeding: 1, meeting: 1, approaching: 1, below: 2, average: 53.75 });
+});
+t('classStats uses subject levels, not blended percentage', () => {
+  // Two subjects: one weak-but-tiny, one strong. gradeBySubject gives ME
+  // (mean rating 2.5 rounds up), but the blended percentage (45%) would be BE.
+  const records = [{
+    assessments: [
+      { subject: 'Weak', score: 5, maxScore: 100 },    // 5% BE, rating 1
+      { subject: 'Strong', score: 85, maxScore: 100 }  // 85% EE, rating 4
+    ]
+  }];
+  const s = classStats(records, DEFAULT_POLICY);
+  // Mean rating 2.5 -> rounds to 3 -> ME. Blended (45%) would be BE.
+  assert.equal(s.exceeding, 0, 'should not be EE');
+  assert.equal(s.meeting, 1, 'subject-level method gives ME, not BE');
+  assert.equal(s.approaching, 0);
+  assert.equal(s.below, 0, 'student is assessed, not in below count');
+  assert.equal(s.assessed, 1);
 });
 t('rankStudents uses competition ranking and is name-deterministic for ties', () => {
   const ranked = rankStudents([
