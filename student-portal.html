@@ -69,9 +69,9 @@
   .msg.ok { background:#dff3e4; color:#136b2c; }
   .foot { text-align:center; color:var(--ink-soft); font-size:.95rem; padding:18px; }
   /* ===== NAME LOOKUP =====
-     The suggestion list is positioned above the field, so on a phone the
-     names appear next to the box the parent is typing in rather than being
-     pushed below the on-screen keyboard. */
+     The search bar is fixed to the bottom of the screen on every device so
+     it stays within thumb reach. Suggestion names open above the bar so they
+     are never hidden by the on-screen keyboard. */
   .lookup { position:relative; }
   .suggest {
     position:absolute; left:0; right:0; bottom:calc(100% + 6px); z-index:40;
@@ -199,11 +199,13 @@
 
   .back { background:none; border:0; color:var(--ink); font-size:1.05rem; font-weight:700; text-decoration:underline; margin-bottom:14px; cursor:pointer; font-family:inherit; }
 
-  /* Sticky lookup bar: stays reachable at the top of a phone screen, so a
-     parent never has to scroll to search for another child. */
+  /* Sticky lookup bar: fixed to the bottom of the screen on every device, so
+     a parent never has to scroll to find the search box, and the suggestion
+     list opens up from above the bar. */
   .topbar {
-    position: sticky; top: 0; z-index: 30; background: var(--ink); color: #fff;
-    padding: 10px 14px; box-shadow: 0 2px 8px rgba(10,22,40,.25);
+    position: fixed; top: auto; bottom: 0; left: 0; right: 0; z-index: 30;
+    background: var(--ink); color: #fff; padding: 10px 14px;
+    box-shadow: 0 -2px 8px rgba(10,22,40,.25); border-top: 3px solid var(--gold);
   }
   .topbar .inner { max-width: 900px; margin: 0 auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .topbar .title { font-weight: 800; font-size: 1rem; white-space: nowrap; display:flex; align-items:center; gap:8px; }
@@ -213,26 +215,16 @@
   .topbar .btn { width: auto; margin: 0; padding: 12px 20px; white-space: nowrap; }
   .topbar .home { display:none; }
 
-  /* On a phone the search bar sits at the bottom of the screen, within thumb
-     reach, and the list of names opens upwards so it is never hidden behind
-     the on-screen keyboard. */
+  /* Leave room so the fixed bar never covers the page content. */
+  .wrap { padding-bottom: 96px; }
+
   @media (max-width:600px) {
     html { font-size: 18px; }
     .tabs { grid-template-columns: 1fr; }
-    .topbar .title { display: none; }
-    .topbar {
-      position: fixed; top: auto; bottom: 0; left: 0; right: 0;
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
-      border-top: 3px solid var(--gold);
-    }
+    .topbar .title { font-size: .95rem; }
     .topbar .inner { flex-wrap: nowrap; gap: 8px; }
     .topbar input { flex: 1 1 auto; font-size: 1.05rem; }
-    /* Names open above the bar rather than below it. */
-    .topbar .suggest {
-      bottom: calc(100% + 6px); top: auto; max-height: 58vh; overflow-y: auto;
-    }
-    /* Leave room so the fixed bar never covers the page content. */
-    .wrap { padding-bottom: 96px; }
+    .wrap { padding-bottom: 110px; }
   }
 </style>
 </head>
@@ -249,8 +241,8 @@
     <div class="lookup">
       <input type="text" id="topSearch" placeholder="Search your child's name" autocomplete="off"
              role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
-      <!-- Suggestions open under this bar, so the names are always visible
-           on a phone and a single tap opens the child. -->
+      <!-- Suggestions open above this bar, so the names are always visible
+           on both phone and desktop and a single tap opens the child. -->
       <div id="suggest" class="suggest" role="listbox" hidden></div>
     </div>
     <button class="btn" onclick="searchFromTop()"><i class="fas fa-search"></i> Search</button>
