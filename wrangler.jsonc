@@ -1,9 +1,10 @@
 {
-  "$schema": "https://developer.cloudflare.com/api/branding/config.json",
-  "name": "changara-star-academy",
-  "compatibility_date": "2025-01-01",
-  "vars": {
-    "FRONTEND_URL": "https://changarastaracademy.co.ke"
-  },
-  "d1_databases": []
+    "$schema": "https://developer.cloudflare.com/api/branding/config.json",
+    "name": "changara-star-academy",
+    "compatibility_date": "2025-01-01",
+    "pages_build_output_dir": "dist",
+    "vars": {
+      "FRONTEND_URL": "https://changarastaracademy.co.ke"
+    },
+    "d1_databases": []
 }

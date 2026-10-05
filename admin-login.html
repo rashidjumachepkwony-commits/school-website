@@ -6,111 +6,70 @@
     <script src="js/config.js"></script>
     <title>Admin Login - Changara Star Academy</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #001f5c 0%, #0b5394 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
         }
         .login-container {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 400px;
+            background: white; padding: 40px; border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 420px;
         }
-        .login-container h1 {
-            text-align: center;
-            color: #001f5c;
-            margin-bottom: 5px;
-        }
-        .login-container .subtitle {
-            text-align: center;
-            color: #d4a017;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        .login-container .school-icon {
-            text-align: center;
-            font-size: 48px;
-            display: block;
-            margin-bottom: 10px;
-        }
-        .form-group {
+        .login-container h1 { text-align: center; color: #001f5c; margin-bottom: 5px; }
+        .login-container .subtitle { text-align: center; color: #d4a017; margin-bottom: 30px; font-size: 14px; }
+        .school-icon { text-align: center; font-size: 48px; display: block; margin-bottom: 10px; }
+
+        /* Google button */
+        #googleSignInBtn {
+            width: 100%; padding: 12px 16px; border: 2px solid #dadce0;
+            border-radius: 8px; background: white; color: #3c4043;
+            font-size: 15px; font-weight: 500; cursor: pointer;
+            transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 10px;
             margin-bottom: 20px;
         }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-            font-size: 14px;
+        #googleSignInBtn:hover { background: #f8f9fa; border-color: #c9c9c9; }
+        #googleSignInBtn img { width: 18px; height: 18px; }
+
+        /* Divider */
+        .divider {
+            display: flex; align-items: center; text-align: center; margin: 24px 0;
+            color: #999; font-size: 13px;
         }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; border-top: 1px solid #e0e0e0;
+        }
+        .divider span { padding: 0 12px; }
+
+        /* Classic form */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; color: #333; margin-bottom: 5px; font-size: 14px; }
         .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
+            width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 16px; transition: border-color 0.3s ease;
         }
-        .form-group input:focus {
-            border-color: #0b5394;
-            outline: none;
-        }
+        .form-group input:focus { border-color: #0b5394; outline: none; }
         .btn-login {
-            width: 100%;
-            padding: 14px;
-            background: #0b5394;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            width: 100%; padding: 14px; background: #0b5394; color: white;
+            border: none; border-radius: 8px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s ease;
         }
-        .btn-login:hover {
-            background: #001f5c;
-            transform: scale(1.02);
+        .btn-login:hover { background: #001f5c; transform: scale(1.02); }
+
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; display: none; }
+        .alert.error { display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert.success { display: block; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        .forgot-link {
+            text-align: center; margin-top: 16px;
         }
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-        }
-        .alert.error {
-            display: block;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .alert.success {
-            display: block;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .back-link {
-            text-align: center;
-            margin-top: 15px;
-        }
-        .back-link a {
-            color: #0b5394;
-            text-decoration: none;
-        }
-        .back-link a:hover {
-            text-decoration: underline;
-        }
+        .forgot-link a { color: #0b5394; text-decoration: none; font-size: 14px; }
+        .forgot-link a:hover { text-decoration: underline; }
+
+        .back-link { text-align: center; margin-top: 15px; }
+        .back-link a { color: #0b5394; text-decoration: none; }
+        .back-link a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -118,9 +77,19 @@
         <span class="school-icon">🏫</span>
         <h1>Admin Login</h1>
         <p class="subtitle">Changara Star Academy</p>
-        
+
         <div id="alert" class="alert"></div>
-        
+
+        <!-- Google OAuth -->
+        <button type="button" id="googleSignInBtn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/authentication/google.svg" alt="G">
+            Sign in with Google
+        </button>
+
+        <!-- Divider -->
+        <div class="divider"><span>or sign in with username</span></div>
+
+        <!-- Classic form -->
         <form id="loginForm">
             <div class="form-group">
                 <label>Username or Email</label>
@@ -132,67 +101,112 @@
             </div>
             <button type="submit" class="btn-login">🔐 Login</button>
         </form>
-        
+
+        <div class="forgot-link">
+            <a href="reset-password.html">Forgot your password?</a>
+        </div>
+
         <div class="back-link">
             <a href="index.html">← Back to Website</a>
         </div>
     </div>
 
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        (async function() {
             // If already logged in, go to dashboard
             const token = localStorage.getItem('adminToken');
             if (token) {
-                console.log('🔄 Token found, redirecting to dashboard...');
                 window.location.href = 'admin-dashboard.html';
+                return;
             }
-        });
 
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const alertEl = document.getElementById('alert');
-            
-            alertEl.className = 'alert';
-            alertEl.style.display = 'none';
-            
+            // Fetch Google Client ID from config endpoint
+            let googleClientId = '';
             try {
-                console.log('📤 Sending login request...');
-                const result = await window.apiJson('/api/admin/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                console.log('📥 Login response:', result);
-                
-                if (result.success) {
-                    // Save the real signed token, not a placeholder
-                    localStorage.setItem('adminToken', result.token);
-                    localStorage.setItem('admin', JSON.stringify(result.admin));
-                    
-                    console.log('✅ Token saved');
-                    
-                    alertEl.className = 'alert success';
-                    alertEl.style.display = 'block';
-                    alertEl.textContent = '✅ Login successful! Redirecting...';
-                    
-                    setTimeout(() => {
-                        window.location.href = 'admin-dashboard.html';
-                    }, 1000);
-                } else {
-                    alertEl.className = 'alert error';
-                    alertEl.style.display = 'block';
-                    alertEl.textContent = '❌ ' + (result.error || result.message || 'Login failed');
-                }
-            } catch (error) {
-                console.error('❌ Login error:', error);
-                alertEl.className = 'alert error';
-                alertEl.style.display = 'block';
-                alertEl.textContent = '❌ ' + error.message;
+                const cfg = await window.apiJson('/api/config');
+                googleClientId = cfg.googleClientId || '';
+            } catch (e) {
+                console.error('Config fetch failed:', e);
             }
-        });
+
+            const alertEl = document.getElementById('alert');
+            const showAlert = function(msg, type) {
+                alertEl.className = 'alert ' + type;
+                alertEl.style.display = 'block';
+                alertEl.textContent = msg;
+            };
+
+            // Google sign-in
+            document.getElementById('googleSignInBtn').addEventListener('click', function() {
+                if (!googleClientId) {
+                    showAlert('❌ Google login is not configured on the server yet.', 'error');
+                    return;
+                }
+                showAlert('✅ Opening Google sign-in...', 'success');
+                google.accounts.id.initialize({
+                    client_id: googleClientId,
+                    callback: async function(response) {
+                        try {
+                            const credential = response.credential || response.id_token;
+                            const result = await window.apiJson('/api/admin/google-login', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ id_token: credential, credential: credential })
+                            });
+                            if (result.success) {
+                                localStorage.setItem('adminToken', result.token);
+                                localStorage.setItem('admin', JSON.stringify(result.admin));
+                                showAlert('✅ Login successful! Redirecting...', 'success');
+                                setTimeout(function() { window.location.href = 'admin-dashboard.html'; }, 1000);
+                            } else {
+                                showAlert('❌ ' + (result.error || result.message || 'Login failed'), 'error');
+                            }
+                        } catch (error) {
+                            showAlert('❌ ' + error.message, 'error');
+                        }
+                    }
+                });
+                google.accounts.id.prompt({
+                    // Show the One Tap UI if available
+                    cancel_button: false,
+                });
+                // Fallback: open the popup if One Tap doesn't auto-trigger
+                setTimeout(function() {
+                    google.accounts.id.renderButton(
+                        document.getElementById('googleSignInBtn'),
+                        { theme: 'outline', size: 'large', text: 'signin_with' }
+                    );
+                    google.accounts.id.prompt();
+                }, 500);
+            });
+
+            // Classic form login
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                showAlert('', '');
+
+                try {
+                    const result = await window.apiJson('/api/admin/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    if (result.success) {
+                        localStorage.setItem('adminToken', result.token);
+                        localStorage.setItem('admin', JSON.stringify(result.admin));
+                        showAlert('✅ Login successful! Redirecting...', 'success');
+                        setTimeout(function() { window.location.href = 'admin-dashboard.html'; }, 1000);
+                    } else {
+                        showAlert('❌ ' + (result.error || result.message || 'Login failed'), 'error');
+                    }
+                } catch (error) {
+                    showAlert('❌ ' + error.message, 'error');
+                }
+            });
+        })();
     </script>
 </body>
 </html>

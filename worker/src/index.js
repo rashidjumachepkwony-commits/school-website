@@ -40,7 +40,12 @@ export default {
       }
 
       if (url.pathname === '/api/config' && request.method === 'GET') {
-        return applyCors(success({ success: true, apiBaseUrl: '', frontendUrl: env.FRONTEND_URL || '' }));
+        return applyCors(success({
+          success: true,
+          apiBaseUrl: '',
+          frontendUrl: env.FRONTEND_URL || '',
+          googleClientId: env.GOOGLE_CLIENT_ID || ''
+        }));
       }
 
       if (url.pathname === '/api/db-health' && request.method === 'GET') {

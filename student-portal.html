@@ -370,10 +370,11 @@ function filterStudents() {
   input.setAttribute('aria-expanded', 'true');
 }
 
-/** Open a child straight from the suggestion list. */
-function pickStudent(id) {
-  openStudent(id);
-}
+  /** Open a child straight from the suggestion list. */
+  function pickStudent(id) {
+    closeSuggest();
+    openStudent(id);
+  }
 
 /** Close the suggestion panel when tapping away or pressing Escape. */
 function closeSuggest() {

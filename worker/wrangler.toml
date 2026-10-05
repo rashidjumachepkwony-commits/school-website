@@ -3,7 +3,7 @@ main = "src/index.js"
 compatibility_date = "2026-08-04"
 compatibility_flags = ["nodejs_compat_v2"]
 
-vars = { FRONTEND_URL = "https://changarastaracademy.co.ke" }
+vars = { FRONTEND_URL = "https://changarastaracademy.co.ke", GOOGLE_CLIENT_ID = "" }
 
 # Required secrets (set with wrangler secret put):
 # SUPABASE_URL
