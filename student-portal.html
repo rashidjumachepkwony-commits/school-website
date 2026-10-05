@@ -80,14 +80,14 @@
   }
   .suggest[hidden] { display:none; }
   .suggest button {
-    display:flex; width:100%; align-items:center; justify-content:flex-start; gap:10px;
+    display:flex; width:100%; align-items:center; justify-content:flex-start; gap:12px;
     padding:10px 14px; font-size:1.05rem; font-family:inherit; text-align:left;
     background:#fff; color:var(--ink); border:0; border-bottom:1px solid #eef2f7; cursor:pointer;
   }
   .suggest button:last-child { border-bottom:0; }
   .suggest button:hover, .suggest button:focus { background:#fff8e1; outline:none; }
   .suggest .ava { font-size:1.4rem; flex:0 0 auto; }
-  .suggest .nm { flex:1 1 auto; font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .suggest .nm { flex:1 1 auto; font-weight:700; min-width:140px; white-space:nowrap; overflow:visible; text-overflow:clip; }
   .suggest .s-adm { font-size:.85rem; color:#6b7a92; font-weight:700; white-space:nowrap; }
   .suggest .s-gr { font-size:.8rem; color:#8a97ab; white-space:nowrap; }
   .suggest .none { padding:14px 16px; font-size:.98rem; color:#7d8ba3; }
@@ -357,7 +357,6 @@ function filterStudents() {
 
   box.innerHTML = hits.map(s =>
     '<button type="button" role="option" data-id="' + s.id + '">' +
-      '<span class="ava">🧒</span>' +
       '<span class="nm">' + esc(s.name) + '</span>' +
       '<span class="s-adm">' + esc(s.admissionNumber || 'no adm. no.') + '</span>' +
       (s.grade ? '<span class="s-gr">' + esc(s.grade) + '</span>' : '') +
