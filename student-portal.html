@@ -76,12 +76,12 @@
   .suggest {
     position:absolute; left:0; right:0; bottom:calc(100% + 6px); z-index:40;
     background:#fff; border:2px solid var(--gold); border-radius:12px;
-    box-shadow:0 10px 28px rgba(10,22,40,.18); overflow:hidden; max-height:260px; overflow-y:auto;
+    box-shadow:0 10px 28px rgba(10,22,40,.18); overflow:hidden; max-height:420px; overflow-y:auto;
   }
   .suggest[hidden] { display:none; }
   .suggest button {
     display:flex; width:100%; align-items:center; justify-content:flex-start; gap:10px;
-    padding:14px 16px; font-size:1.05rem; font-family:inherit; text-align:left;
+    padding:10px 14px; font-size:1.05rem; font-family:inherit; text-align:left;
     background:#fff; color:var(--ink); border:0; border-bottom:1px solid #eef2f7; cursor:pointer;
   }
   .suggest button:last-child { border-bottom:0; }
@@ -224,6 +224,7 @@
     .topbar .title { font-size: .95rem; }
     .topbar .inner { flex-wrap: nowrap; gap: 8px; }
     .topbar input { flex: 1 1 auto; font-size: 1.05rem; }
+    .suggest { max-height: 50vh; }
     .wrap { padding-bottom: 110px; }
   }
 </style>
@@ -344,7 +345,7 @@ function filterStudents() {
 
   const hits = allStudents.filter(s =>
     s.name.toLowerCase().includes(q) || (s.admissionNumber || '').toLowerCase().includes(q)
-  ).slice(0, 40);
+  ).slice(0, 60);
 
   if (!hits.length) {
     box.innerHTML = '<div class="none">No match for "' + esc(input.value.trim()) +
