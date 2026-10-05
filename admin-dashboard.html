@@ -1241,6 +1241,14 @@
             return;
         }
         const admin = JSON.parse(localStorage.getItem('admin') || '{}');
+        // Only Super Admin and Admin roles can access the admin dashboard.
+        const role = admin.role || '';
+        if (role !== 'Super Admin' && role !== 'Admin') {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('admin');
+            window.location.href = 'admin-login.html';
+            return;
+        }
         document.getElementById('adminName').textContent = admin.fullName || 'Admin';
         document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
     })();

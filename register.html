@@ -67,6 +67,10 @@
                 <input type="password" id="regPassword" placeholder="Choose a password" required>
             </div>
             <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="regConfirmPassword" placeholder="Confirm your password" required>
+            </div>
+            <div class="form-group">
                 <label>Register As</label>
                 <select id="regRole" required>
                     <option value="">Select account type</option>
@@ -83,48 +87,72 @@
     </div>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const fullName = document.getElementById('regName').value;
-            const username = document.getElementById('regUsername').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const role = document.getElementById('regRole').value;
-            const alertEl = document.getElementById('alert');
-
-            if (!role) {
-                alertEl.className = 'alert error';
-                alertEl.style.display = 'block';
-                alertEl.textContent = '❌ Please select an account type.';
+        (async function() {
+            // If already logged in, go to dashboard
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                window.location.href = 'admin-dashboard.html';
                 return;
             }
 
-            alertEl.className = 'alert';
-            alertEl.style.display = 'none';
+            document.getElementById('registerForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-            try {
-                const result = await window.apiJson('/api/admin/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password, fullName, role: role })
-                });
-                if (result.success) {
-                    alertEl.className = 'alert success';
-                    alertEl.style.display = 'block';
-                    alertEl.textContent = '✅ ' + (result.message || 'Registration successful!');
-                    document.getElementById('registerForm').reset();
-                } else {
+                const fullName = document.getElementById('regName').value;
+                const username = document.getElementById('regUsername').value;
+                const email = document.getElementById('regEmail').value;
+                const password = document.getElementById('regPassword').value;
+                const role = document.getElementById('regRole').value;
+                const alertEl = document.getElementById('alert');
+
+                if (!role) {
                     alertEl.className = 'alert error';
                     alertEl.style.display = 'block';
-                    alertEl.textContent = '❌ ' + (result.error || result.message || 'Registration failed');
+                    alertEl.textContent = '❌ Please select an account type.';
+                    return;
                 }
-            } catch (error) {
-                alertEl.className = 'alert error';
-                alertEl.style.display = 'block';
-                alertEl.textContent = '❌ ' + error.message;
-            }
-        });
+
+            if (password.length < 6) {
+                    alertEl.className = 'alert error';
+                    alertEl.style.display = 'block';
+                    alertEl.textContent = '❌ Password must be at least 6 characters.';
+                    return;
+                }
+
+                var confirmPassword = document.getElementById('regConfirmPassword').value;
+                if (password !== confirmPassword) {
+                    alertEl.className = 'alert error';
+                    alertEl.style.display = 'block';
+                    alertEl.textContent = '❌ Passwords do not match.';
+                    return;
+                }
+
+                alertEl.className = 'alert';
+                alertEl.style.display = 'none';
+
+                try {
+                    const result = await window.apiJson('/api/admin/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, email, password, fullName, role: role })
+                    });
+                    if (result.success) {
+                        alertEl.className = 'alert success';
+                        alertEl.style.display = 'block';
+                        alertEl.textContent = '✅ ' + (result.message || 'Registration successful!');
+                        document.getElementById('registerForm').reset();
+                    } else {
+                        alertEl.className = 'alert error';
+                        alertEl.style.display = 'block';
+                        alertEl.textContent = '❌ ' + (result.error || result.message || 'Registration failed');
+                    }
+                } catch (error) {
+                    alertEl.className = 'alert error';
+                    alertEl.style.display = 'block';
+                    alertEl.textContent = '❌ ' + error.message;
+                }
+            });
+        })();
     </script>
 </body>
 </html>
