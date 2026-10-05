@@ -99,8 +99,44 @@
                 <label>Password</label>
                 <input type="password" id="password" placeholder="Enter your password" required>
             </div>
-            <button type="submit" class="btn-login">🔐 Login</button>
+            <button type="submit" class="btn-login">Login</button>
         </form>
+
+        <div id="registerFormContainer" style="display: none;">
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="regName" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="regUsername" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" placeholder="Choose a password" required>
+                </div>
+                <div class="form-group">
+                    <label>Account Type</label>
+                    <select id="regRole" style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;">
+                        <option value="Family">Family / Parent</option>
+                        <option value="Staff">Staff Member</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-login">Register</button>
+            </form>
+            <div class="back-link" style="margin-top: 16px;">
+                <a href="#" onclick="showLoginForm(); return false;">← Back to Login</a>
+            </div>
+        </div>
+
+        <div class="link-switch" style="text-align: center; margin-top: 16px; font-size: 14px;">
+            <a href="register.html">New user? Register here</a>
+        </div>
 
         <div class="forgot-link">
             <a href="reset-password.html">Forgot your password?</a>
@@ -113,6 +149,15 @@
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
+        function showRegisterForm() {
+            document.getElementById('loginFormContainer').style.display = 'none';
+            document.getElementById('registerFormContainer').style.display = 'block';
+        }
+        function showLoginForm() {
+            document.getElementById('registerFormContainer').style.display = 'none';
+            document.getElementById('loginFormContainer').style.display = 'block';
+        }
+
         (async function() {
             // If already logged in, go to dashboard
             const token = localStorage.getItem('adminToken');
@@ -198,7 +243,14 @@
                         localStorage.setItem('adminToken', result.token);
                         localStorage.setItem('admin', JSON.stringify(result.admin));
                         showAlert('✅ Login successful! Redirecting...', 'success');
-                        setTimeout(function() { window.location.href = 'admin-dashboard.html'; }, 1000);
+                        var role = result.admin && result.admin.role ? result.admin.role : '';
+                        setTimeout(function() {
+                            if (role === 'Staff' || role === 'Family') {
+                                window.location.href = 'admin-dashboard.html';
+                            } else {
+                                window.location.href = 'admin-dashboard.html';
+                            }
+                        }, 1000);
                     } else {
                         showAlert('❌ ' + (result.error || result.message || 'Login failed'), 'error');
                     }
@@ -207,6 +259,43 @@
                 }
             });
         })();
+
+        // Registration form handler
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('regName').value;
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const role = document.getElementById('regRole').value;
+            const alertEl = document.getElementById('alert');
+
+            alertEl.className = 'alert';
+            alertEl.style.display = 'none';
+
+            try {
+                const result = await window.apiJson('/api/admin/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password, fullName, role: role })
+                });
+                if (result.success) {
+                    alertEl.className = 'alert success';
+                    alertEl.style.display = 'block';
+                    alertEl.textContent = '✅ ' + (result.message || 'Registration successful!');
+                    document.getElementById('registerForm').reset();
+                } else {
+                    alertEl.className = 'alert error';
+                    alertEl.style.display = 'block';
+                    alertEl.textContent = '❌ ' + (result.error || result.message || 'Registration failed');
+                }
+            } catch (error) {
+                alertEl.className = 'alert error';
+                alertEl.style.display = 'block';
+                alertEl.textContent = '❌ ' + error.message;
+            }
+        });
     </script>
 </body>
 </html>

@@ -3,10 +3,10 @@
  */
 import { success, error } from '../utils/helpers.js';
 import { hashPassword, verifyPassword } from '../services/password.service.js';
-import { createToken } from '../utils/auth.js';
+import { createToken, authenticateRequest } from '../utils/auth.js';
 import { getKenyaTime } from '../services/time.service.js';
 
-export async function handleAuth(db, env, route, method, body) {
+export async function handleAuth(db, env, route, method, body, request) {
   // POST /api/setup-admin
   if (route === '/setup-admin' && method === 'POST') {
     const { username, email, password, fullName } = body;
@@ -35,7 +35,7 @@ export async function handleAuth(db, env, route, method, body) {
       $or: [{ username: username }, { email: username }],
       is_active: 1
     });
-    if (!admin) return error('Invalid credentials', 401);
+    if (!admin) return error('Invalid credentials or account not yet approved', 401);
 
     const valid = await verifyPassword(password, admin.password_hash);
     if (!valid) return error('Invalid credentials', 401);
@@ -154,5 +154,106 @@ export async function handleAuth(db, env, route, method, body) {
     }
   }
 
-  return null;
+    // POST /api/admin/register
+    // Non-admin users self-register; their account is created with is_active: 0
+    // (pending admin approval) so they cannot log in until approved.
+    // Accepts role: 'Staff' or 'Family' (default: 'Family').
+    if (route === '/admin/register' && method === 'POST') {
+        const { username, email, password, fullName, role: reqRole } = body;
+        if (!username || !email || !password || !fullName) {
+          return error('Please provide username, email, password, and fullName', 400);
+        }
+
+        // Normalize role: only Staff or Family are allowed for self-registration.
+        // Super Admin / Admin are set internally (via /setup-admin or Google login).
+        let role;
+        const normalized = (reqRole || 'Family').trim().toLowerCase();
+        if (normalized === 'staff') role = 'Staff';
+        else if (normalized === 'family') role = 'Family';
+        else role = 'Family';
+
+        const existing = await db.collection('admins').findOne({
+          $or: [{ username: username }, { email: email }]
+        });
+        if (existing) return error('An account with that username or email already exists', 409);
+
+        const hash = await hashPassword(password);
+        const now = new Date().toISOString();
+        const result = await db.collection('admins').insertOne({
+          username, email, password_hash: hash, full_name: fullName,
+          role: role, is_active: 0, is_approved: 0, created_at: now, updated_at: now
+        });
+
+        return success({
+          message: 'Registration successful! Your account is pending admin approval.',
+          user: { id: result.insertedId, username, email, fullName, role: role }
+        });
+    }
+
+    // GET /api/admin/pending-users
+    // List users awaiting admin approval (requires admin token).
+    if (route === '/admin/pending-users' && method === 'GET') {
+      const payload = authenticateRequest(request, env.JWT_SECRET || env.jwt_secret);
+      if (!payload) return error('Unauthorized', 401);
+
+      // Only admins can view pending users
+      if (payload.role !== 'Super Admin' && payload.role !== 'Admin') return error('Forbidden: admin access required', 403);
+
+      const pending = await db.collection('admins').find({ is_active: 0 }).toArray();
+      return success({
+        users: pending.map(u => ({
+          id: u._id.toString(),
+          username: u.username, email: u.email,
+          fullName: u.full_name, role: u.role,
+          created_at: u.created_at
+        }))
+      });
+    }
+
+    // POST /api/admin/approve-user/:id
+    // Approve a pending user (requires admin token).
+    if (route.startsWith('/admin/approve-user/') && method === 'POST') {
+      const payload = authenticateRequest(request, env.JWT_SECRET || env.jwt_secret);
+      if (!payload) return error('Unauthorized', 401);
+
+      // Only admins can approve users
+      if (payload.role !== 'Super Admin' && payload.role !== 'Admin') return error('Forbidden: admin access required', 403);
+
+      const userId = route.split('/')[3];
+      if (!userId) return error('User ID is required', 400);
+
+      const existing = await db.collection('admins').findOne({ _id: { $oid: userId } });
+      if (!existing) return error('User not found', 404);
+
+      if (existing.is_active === 1) return error('User is already approved', 400);
+
+      await db.collection('admins').updateOne(
+        { _id: existing._id },
+        { $set: { is_active: 1, is_approved: 1, approved_by: payload.id, approved_at: new Date().toISOString(), updated_at: new Date().toISOString() } }
+      );
+
+      return success({ message: 'User approved successfully!', userId });
+    }
+
+    // POST /api/admin/reject-user/:id
+    // Reject (delete) a pending user application (requires admin token).
+    if (route.startsWith('/admin/reject-user/') && method === 'POST') {
+      const payload = authenticateRequest(request, env.JWT_SECRET || env.jwt_secret);
+      if (!payload) return error('Unauthorized', 401);
+
+      // Only admins can reject users
+      if (payload.role !== 'Super Admin' && payload.role !== 'Admin') return error('Forbidden: admin access required', 403);
+
+      const userId = route.split('/')[3];
+      if (!userId) return error('User ID is required', 400);
+
+      const existing = await db.collection('admins').findOne({ _id: { $oid: userId } });
+      if (!existing) return error('User not found', 404);
+
+      if (existing.is_active === 1) return error('Cannot reject an already-approved user', 400);
+
+      await db.collection('admins').deleteOne({ _id: { $oid: userId } });
+
+      return success({ message: 'User application rejected and removed.', userId });
+    }
 }

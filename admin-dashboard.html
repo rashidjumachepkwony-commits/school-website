@@ -518,6 +518,11 @@
         <a onclick="window.location.href='clerk-dashboard.html'"><i class="fas fa-coins"></i> Clerk Dashboard</a>
         <!-- ===== END STUDENT MANAGEMENT ===== -->
 
+        <!-- ===== USER MANAGEMENT ===== -->
+        <div class="menu-label" style="margin-top:10px;">User Management</div>
+        <a onclick="showSection('users')"><i class="fas fa-user-cog"></i> Pending Users</a>
+        <!-- ===== END USER MANAGEMENT ===== -->
+
         <div class="logout">
             <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
@@ -1185,6 +1190,37 @@
         </div>
     </div>
 
+    <!-- ======================================== -->
+    <!-- USER MANAGEMENT SECTION -->
+    <!-- ======================================== -->
+    <div id="section-users" class="editor-container">
+        <h2>👤 User Management</h2>
+        <p class="desc">Approve new user registrations before they can access the admin system.</p>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;">
+            <button class="btn btn-success" onclick="loadPendingUsers()"><i class="fas fa-sync"></i> Refresh</button>
+        </div>
+
+        <div class="data-table-wrapper" style="overflow-x:auto;">
+            <table class="data-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Full Name</th>
+                        <th>Role</th>
+                        <th>Registered</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr><td colspan="7" style="text-align:center;color:#999;">No pending users.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- ===== SAVE BUTTON ===== -->
     <button class="btn btn-success btn-block" onclick="saveAllContent()">
         <i class="fas fa-save"></i> Save All Content
@@ -1291,6 +1327,92 @@
         if (section === 'reports') loadReport(repPeriod);
         if (section === 'attendance') loadAttendance();
         if (section === 'visitors') loadVisitors();
+        if (section === 'users') loadPendingUsers();
+    }
+
+    // ============================================
+    // PENDING USERS
+    // ============================================
+    async function loadPendingUsers() {
+        const token = localStorage.getItem('adminToken');
+        if (!token) { window.location.href = 'admin-login.html'; return; }
+
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">Loading...</td></tr>';
+
+        try {
+            const result = await window.apiJson('/api/admin/pending-users', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (result.success) {
+                if (!result.users || result.users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">No pending users.</td></tr>';
+                } else {
+                    tbody.innerHTML = result.users.map(function(u, i) {
+                        return '<tr>'
+                            + '<td>' + (i + 1) + '</td>'
+                            + '<td>' + (u.username || '') + '</td>'
+                            + '<td>' + (u.email || '') + '</td>'
+                            + '<td>' + (u.fullName || '') + '</td>'
+                            + '<td>' + (u.role || '') + '</td>'
+                            + '<td>' + (u.created_at || '') + '</td>'
+                            + '<td>'
+                            + '<button class="btn btn-sm btn-success" onclick="approveUser(\'' + u.id + '\')" style="padding:6px 12px;font-size:13px;margin-right:5px;">Approve</button>'
+                            + '<button class="btn btn-sm" onclick="rejectUser(\'' + u.id + '\')" style="padding:6px 12px;font-size:13px;background:#ff6b6b;color:white;border:none;">Reject</button>'
+                            + '</td>'
+                            + '</tr>';
+                    }).join('');
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#c00;">' + (result.error || 'Failed to load') + '</td></tr>';
+            }
+        } catch (err) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#c00;">' + err.message + '</td></tr>';
+        }
+    }
+
+    async function approveUser(userId) {
+        const token = localStorage.getItem('adminToken');
+        if (!token) { window.location.href = 'admin-login.html'; return; }
+
+        if (!confirm('Approve this user? They will be able to log in.')) return;
+
+        try {
+            const result = await window.apiJson('/api/admin/approve-user/' + userId, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+            });
+            if (result.success) {
+                alert('User approved!');
+                loadPendingUsers();
+            } else {
+                alert('❌ ' + (result.error || result.message || 'Approval failed'));
+            }
+        } catch (err) {
+            alert('❌ ' + err.message);
+        }
+    }
+
+    async function rejectUser(userId) {
+        const token = localStorage.getItem('adminToken');
+        if (!token) { window.location.href = 'admin-login.html'; return; }
+
+        if (!confirm('Reject this user application? This cannot be undone.')) return;
+
+        try {
+            const result = await window.apiJson('/api/admin/reject-user/' + userId, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+            });
+            if (result.success) {
+                alert('User application rejected.');
+                loadPendingUsers();
+            } else {
+                alert('❌ ' + (result.error || result.message || 'Rejection failed'));
+            }
+        } catch (err) {
+            alert('❌ ' + err.message);
+        }
     }
 
     // ============================================

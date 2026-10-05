@@ -75,7 +75,7 @@ export default {
       }
 
       const handlers = [
-        () => handleAuth(db, env, route, method, body),
+        () => handleAuth(db, env, route, method, body, request),
         () => handleContent(db, env, route, method, body),
         () => handleStaff(db, env, route, method, body, pathParts),
         () => handleAttendance(db, env, route, method, body, pathParts, url),
