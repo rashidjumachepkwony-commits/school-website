@@ -130,23 +130,28 @@ export async function handleAuth(db, env, route, method, body) {
     const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_KEY || env.supabase_service_role_key;
     if (!supabaseUrl || !supabaseKey) return error('Reset email service is not configured', 503);
 
-    const resetUrl = supabaseUrl.replace(/\/$/, '') + '/auth/v1/reset_password';
-    const resp = await fetch(resetUrl, {
-      method: 'POST',
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, gotrue_meta_security: {} })
-    });
+    try {
+      const resetUrl = supabaseUrl.replace(/\/$/, '') + '/auth/v1/recover';
+      const resp = await fetch(resetUrl, {
+        method: 'POST',
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
 
-    const text = await resp.text();
-    if (!resp.ok && !text.includes('already been registered') && !text.includes('If')) {
-      return error('Failed to send reset email', 500);
+      const text = await resp.text();
+      // Supabase Auth always returns 200 to avoid leaking which emails exist
+      if (!resp.ok && !text.includes('already been registered') && !text.includes('If')) {
+        return error('Failed to send reset email: ' + text.slice(0, 200), 500);
+      }
+
+      return success({ message: 'If the email exists in our system, a reset link has been sent.' });
+    } catch (err) {
+      return error('Reset password failed: ' + err.message, 500);
     }
-
-    return success({ message: 'If the email exists in our system, a reset link has been sent.' });
   }
 
   return null;
