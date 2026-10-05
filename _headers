@@ -8,12 +8,14 @@
   Referrer-Policy: strict-origin-when-cross-origin
   X-XSS-Protection: 0
 
-# Long-lived caching for versioned static assets
+# No caching for JS/CSS either — the site was showing stale config.js on
+# visitor devices long after a deploy. no-store forces a fresh fetch so
+# every visitor sees the latest build immediately.
 /css/*
-  Cache-Control: public, max-age=3600, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /js/*
-  Cache-Control: public, max-age=3600, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /images/*
   Cache-Control: public, max-age=86400, must-revalidate
