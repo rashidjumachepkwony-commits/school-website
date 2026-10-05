@@ -221,11 +221,15 @@
   @media (max-width:600px) {
     html { font-size: 18px; }
     .tabs { grid-template-columns: 1fr; }
-    .topbar .title { font-size: .95rem; }
-    .topbar .inner { flex-wrap: nowrap; gap: 8px; }
-    .topbar input { flex: 1 1 auto; font-size: 1.05rem; }
-    .suggest { max-height: 50vh; }
-    .wrap { padding-bottom: 110px; }
+    /* On a phone the search row and buttons stack vertically so the input
+       gets the full width and the name can be typed clearly. */
+    .topbar .title { display: none; }
+    .topbar .inner { flex-direction: column; gap: 8px; align-items: stretch; }
+    .topbar .lookup { flex: 1 1 auto; width: 100%; }
+    .topbar input { flex: 1 1 auto; font-size: 1.05rem; width: 100%; }
+    .topbar .btn { flex: 1 1 auto; width: 100%; }
+    .suggest { max-height: 40vh; }
+    .wrap { padding-bottom: 120px; }
   }
 </style>
 </head>
