@@ -24,10 +24,9 @@ const PREVIEW_SUFFIXES = ['.pages.dev'];
 export function handleCors(request, env) {
   const allowedOrigins = [...LOCAL_ORIGINS];
   if (env?.FRONTEND_URL) allowedOrigins.push(env.FRONTEND_URL);
-  if (process.env?.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
 
   // Extra production/preview origins can be supplied without a code change.
-  const extra = env?.ALLOWED_ORIGINS || process.env?.ALLOWED_ORIGINS;
+  const extra = env?.ALLOWED_ORIGINS;
   if (extra) {
     for (const o of String(extra).split(',')) {
       const trimmed = o.trim();

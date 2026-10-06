@@ -30,14 +30,16 @@ const CHECK = process.argv.includes('--check');
 /** Directories copied in full. Everything else is left behind. */
 const ASSET_DIRS = ['css', 'js', 'images', 'uploads'];
 
-/** Individual files copied from the repo root. */
+/** Individual files copied from the repo root. Paths may include subdirectories. */
 const ROOT_FILES = [
   'sitemap.xml',
   'robots.txt',
   '_redirects',
   '_headers',
   // Google Search Console verification must stay reachable at the site root.
-  'google120463af0d0325f6.html'
+  'google120463af0d0325f6.html',
+  // Supabase OAuth callback handler (must be served at /auth/callback).
+  'auth/callback.html'
 ];
 
 /** All top-level .html files are public pages. */

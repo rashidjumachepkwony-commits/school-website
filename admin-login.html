@@ -140,12 +140,10 @@
                     showAlert('❌ Supabase is not configured on the server yet.', 'error');
                     return;
                 }
-                // Build the Supabase Google OAuth URL
-                const redirectUri = encodeURIComponent(window.location.origin + '/admin-login.html');
-                const scopes = encodeURIComponent('email profile');
-                const clientId = ''; // Will be obtained from Supabase's Google provider config
-                // Supabase handles the Google OAuth redirect — we just point the browser
-                // to the Supabase auth endpoint with provider=google
+                // Supabase handles the Google OAuth redirect — point the browser
+                // to the Supabase auth endpoint with provider=google and redirect back
+                // to /auth/callback which exchanges the token for a Worker JWT.
+                const redirectUri = encodeURIComponent(window.location.origin + '/auth/callback');
                 const authUrl = supabaseUrl + '/auth/v1/authorize?provider=google&redirect_to=' + redirectUri;
                 window.location.href = authUrl;
             });
@@ -158,34 +156,6 @@
                     body: JSON.stringify({ access_token: accessToken })
                 });
                 return result;
-            }
-
-            // Check for Supabase auth callback (access_token in URL hash)
-            const hashParams = window.location.hash.substring(1);
-            if (hashParams) {
-                const params = new URLSearchParams(hashParams);
-                const accessToken = params.get('access_token');
-                const error = params.get('error');
-
-                if (error) {
-                    showAlert('❌ ' + (params.get('error_description') || 'Authentication error'), 'error');
-                } else if (accessToken) {
-                    showAlert('✅ Verifying your account...', 'success');
-                    try {
-                        const result = await exchangeToken(accessToken);
-                        if (result.success) {
-                            localStorage.setItem('adminToken', result.token);
-                            localStorage.setItem('admin', JSON.stringify(result.admin));
-                            window.location.href = 'admin-dashboard.html';
-                        } else {
-                            showAlert('❌ ' + (result.error || result.message || 'Login failed'), 'error');
-                        }
-                    } catch (err) {
-                        showAlert('❌ ' + err.message, 'error');
-                    }
-                }
-                // Clean up the URL hash
-                window.history.replaceState({}, document.title, window.location.pathname);
             }
 
             // Classic form login
@@ -202,8 +172,8 @@
 
                 try {
                     // Use Supabase Auth for password sign-in
-                    const supabase = supabaseMin.createClient(supabaseUrl, supabaseAnonKey);
-                    const { data, error } = await supabase.auth.signInWithPassword({
+                    const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
                         email: email,
                         password: password
                     });
@@ -217,6 +187,8 @@
                             localStorage.setItem('admin', JSON.stringify(result.admin));
                             showAlert('✅ Login successful! Redirecting...', 'success');
                             setTimeout(function() { window.location.href = 'admin-dashboard.html'; }, 1000);
+                        } else if (result.pending) {
+                            showAlert('❌ ' + (result.message || 'Your account is pending admin approval.'), 'error');
                         } else {
                             showAlert('❌ ' + (result.error || result.message || 'Login failed'), 'error');
                         }

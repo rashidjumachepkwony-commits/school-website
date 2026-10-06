@@ -1,6 +1,8 @@
 import { createHmac, randomBytes } from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'changara-star-academy-secret-key-2024';
+// No hard-coded JWT_SECRET fallback. The secret must be supplied by the caller
+// (env.JWT_SECRET in the Worker). A predictable default would compromise every token.
+const DEFAULT_SECRET_SENTINEL = undefined;
 
 export async function hashPassword(password) {
   const salt = randomBytes(16).toString('hex');
@@ -23,14 +25,16 @@ export function needsRehash(stored) {
   return salt.length !== 32 || hash.length !== 64;
 }
 
-export function createToken(payload, secret = JWT_SECRET) {
+export function createToken(payload, secret) {
+  if (!secret) throw new Error('JWT_SECRET is required to create tokens');
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
   const body = Buffer.from(JSON.stringify({ ...payload, exp: Math.floor(Date.now() / 1000) + 86400 })).toString('base64url');
   const sig = createHmac('sha256', secret).update(`${header}.${body}`).digest('base64url');
   return `${header}.${body}.${sig}`;
 }
 
-export function verifyToken(token, secret = JWT_SECRET) {
+export function verifyToken(token, secret) {
+  if (!secret) throw new Error('JWT_SECRET is required to verify tokens');
   try {
     const [h, b, s] = token.split('.');
     const expectedSig = createHmac('sha256', secret).update(`${h}.${b}`).digest('base64url');
@@ -44,7 +48,8 @@ export function verifyToken(token, secret = JWT_SECRET) {
   }
 }
 
-export function authenticateRequest(request, secret = JWT_SECRET) {
+export function authenticateRequest(request, secret) {
+  if (!secret) throw new Error('JWT_SECRET is required to authenticate requests');
   const auth = request.headers.get('authorization');
   if (!auth || !auth.startsWith('Bearer ')) return null;
   return verifyToken(auth.slice(7), secret);

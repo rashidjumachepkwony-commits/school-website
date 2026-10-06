@@ -44,7 +44,6 @@ export default {
           success: true,
           apiBaseUrl: '',
           frontendUrl: env.FRONTEND_URL || '',
-          googleClientId: env.GOOGLE_CLIENT_ID || '',
           supabaseUrl: env.SUPABASE_URL || env.supabase_url || '',
           supabaseAnonKey: env.SUPABASE_ANON_KEY || env.supabase_anon_key || ''
         }));

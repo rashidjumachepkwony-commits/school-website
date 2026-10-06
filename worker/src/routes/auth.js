@@ -9,12 +9,23 @@ import { getKenyaTime } from '../services/time.service.js';
 export async function handleAuth(db, env, route, method, body, request) {
   // POST /api/setup-admin
   if (route === '/setup-admin' && method === 'POST') {
-    const { username, email, password, fullName } = body;
+    const { username, email, password, fullName, setupSecret } = body;
     if (!username || !email || !password || !fullName) {
       return error('Please provide username, email, password, and fullName');
     }
-    const existing = await db.collection('admins').findOne({ $or: [{ username }, { email }] });
-    if (existing) return error('Admin already exists');
+
+    // Optional safeguard: if a SETUP_SECRET is configured as a Worker secret,
+    // require it in the request to prevent unauthorised Super Admin creation
+    // during the bootstrap window.  When the secret is not set the endpoint
+    // falls back to the first-time-bootstrap check below.
+    const configuredSecret = env.SETUP_SECRET;
+    if (configuredSecret && setupSecret !== configuredSecret) {
+      return error('Unauthorized: invalid or missing setup secret', 401);
+    }
+
+    // Only allow setup-admin if no admin record exists yet (first-time bootstrap).
+    const anyAdmin = await db.collection('admins').findOne({});
+    if (anyAdmin) return error('Admin already exists. Use the login page instead.');
 
     const hash = await hashPassword(password);
     const now = new Date().toISOString();
@@ -82,9 +93,9 @@ export async function handleAuth(db, env, route, method, body, request) {
         return error('Invalid or expired Supabase token: ' + txt.slice(0, 200), 401);
       }
 
-      const supabaseUser = await verifyResp.json();
+       const supabaseUser = await verifyResp.json();
       const email = supabaseUser.email;
-      const fullName = supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || email;
+      let fullName = supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || email;
       const provider = supabaseUser.app_metadata?.provider; // 'google', 'password', etc.
 
       // Look for an existing admin/profile record.
@@ -94,6 +105,8 @@ export async function handleAuth(db, env, route, method, body, request) {
       if (existing) {
         adminId = existing._id.toString();
         role = existing.role || 'User';
+        // Prefer the profile's full_name over Supabase metadata
+        fullName = existing.full_name || fullName;
 
         // Check approval status for non-admin users.
         if (existing.is_active !== 1) {
@@ -105,43 +118,30 @@ export async function handleAuth(db, env, route, method, body, request) {
           { _id: existing._id },
           { $set: { last_login: new Date().toISOString(), updated_at: new Date().toISOString() } }
         ).catch(() => {});
-      } else {
-        // First-time user via Supabase Auth — auto-create as admin if the email
-        // matches the known admin, otherwise create as pending Family user.
-        const now = new Date().toISOString();
+       } else {
+         // No existing profile — create one for the Google OAuth user.
+         // New users default to the Family role with is_active=0 and
+         // is_approved=0 so that an administrator must approve them before
+         // they can access any dashboard.  This preserves the existing
+         // approval workflow; Google OAuth does not auto-promote anyone.
+         const now = new Date().toISOString();
+         const inserted = await db.collection('admins').insertOne({
+           username: email.split('@')[0], email: email, full_name: fullName,
+           role: 'Family', is_active: 0, is_approved: 0,
+           created_at: now, updated_at: now,
+           auth_provider: provider || 'google'
+         });
 
-        if (email === 'rashidjumachepkwony@gmail.com') {
-          // Auto-create admin for the known email
-          const result = await db.collection('admins').insertOne({
-            username: email,
-            email: email,
-            full_name: fullName || email,
-            role: 'Super Admin',
-            is_active: 1,
-            created_at: now,
-            updated_at: now,
-            last_login: now,
-            auth_provider: provider || 'google'
-          });
-          adminId = result.insertedId;
-          role = 'Super Admin';
-        } else {
-          // Non-admin: create pending profile, do NOT grant admin access.
-          // The user must be approved via /api/admin/approve-user/:id.
-          const result = await db.collection('admins').insertOne({
-            username: email,
-            email: email,
-            full_name: fullName || email,
-            role: 'Family',
-            is_active: 0,
-            is_approved: 0,
-            created_at: now,
-            updated_at: now,
-            auth_provider: provider || 'password'
-          });
-          return error('Your account has been created and is awaiting admin approval.', 403);
-        }
-      }
+         return new Response(JSON.stringify({
+           success: false,
+           pending: true,
+           message: 'Your account has been created and is pending admin approval. Please contact an administrator.',
+           user: { id: inserted.insertedId, email: email, fullName: fullName, role: 'Family' }
+         }), {
+           status: 202,
+           headers: { 'Content-Type': 'application/json' }
+         });
+       }
 
       const token = createToken(
         { id: adminId, username: email, role: role, fullName: fullName },
@@ -221,7 +221,7 @@ export async function handleAuth(db, env, route, method, body, request) {
         if (!supabaseUrl || !supabaseKey) return error('Registration service is not configured', 503);
 
         try {
-          const signupResp = await fetch(supabaseUrl.replace(/\/$/, '') + '/auth/v1/signup', {
+          const signupResp = await fetch(supabaseUrl.replace(/\/$/, '') + '/auth/v1/admin/users', {
             method: 'POST',
             headers: {
               apikey: supabaseKey,
@@ -231,24 +231,25 @@ export async function handleAuth(db, env, route, method, body, request) {
             body: JSON.stringify({
               email: email,
               password: password,
-              options: {
-                data: {
-                  full_name: fullName,
-                  username: username,
-                  role: role
-                }
+              email_confirm: true,
+              user_metadata: {
+                full_name: fullName,
+                username: username,
+                role: role
               }
             })
           });
 
           const signupText = await signupResp.text();
           if (!signupResp.ok) {
-            const signupErr = JSON.parse(signupText);
-            // Supabase returns 422 for existing email
-            if (signupErr.msg && signupErr.msg.includes('already')) {
+            // Safe parse — Supabase error responses may vary
+            let signupErr = {};
+            try { signupErr = JSON.parse(signupText); } catch { signupErr = { msg: signupText }; }
+            const errMsg = signupErr.msg || signupErr.message || signupErr.error || signupText.slice(0, 200);
+            if (errMsg.includes('already') || errMsg.includes('exists')) {
               return error('An account with that email already exists', 409);
             }
-            return error('Failed to create account: ' + (signupErr.msg || signupErr.message || signupText.slice(0, 200)), 500);
+            return error('Failed to create account: ' + errMsg, 500);
           }
 
           // Create the application profile with the Worker's adapter.
