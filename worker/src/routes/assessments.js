@@ -397,6 +397,12 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
   </div>
 
   <table>
+    <colgroup>
+      <col style="width:2.2%"><col style="width:5.2%"><col style="width:18%">
+      ${subjectOrder.map(() => '<col style="width:' + Math.max(3.5, 42 / subjectOrder.length) + '%">').join('')}
+      <col style="width:4.2%"><col style="width:4.2%"><col style="width:4.2%">
+      <col style="width:6%"><col style="width:3.2%"><col style="width:7.5%">
+    </colgroup>
     <thead>
       <tr>
         <th class="ctr">Pos</th>
