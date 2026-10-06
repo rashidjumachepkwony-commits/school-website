@@ -457,11 +457,13 @@
         .table-wrap { overflow-x:auto; border:1px solid #e0e6ef; border-radius:12px; }
         .hist-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px; min-width:960px; }
         .hist-table thead th { position:sticky; top:0; z-index:2; background:#0A1628; color:#fff; text-align:left; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:12px; white-space:nowrap; }
-        .hist-table tbody td { padding:11px 12px; border-bottom:1px solid #eef2f7; vertical-align:middle; }
+        .hist-table tbody td { padding:11px 12px; border-bottom:1px solid #eef2f7; vertical-align:middle; word-break:break-word; overflow-wrap:break-word; }
         .hist-table tbody tr:last-child td { border-bottom:0; }
         .hist-table tbody tr:nth-child(even) td { background:#fafbfe; }
         .hist-table .num { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; white-space:nowrap; }
         .hchip { display:inline-block; padding:2px 8px; border-radius:9px; font-size:10.5px; font-weight:800; margin-right:3px; }
+        .hist-table .chips { display:flex; flex-wrap:wrap; gap:2px; align-items:center; }
+        .hist-table .acts { display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
         .hchip.lv-ee{background:#dff3e4;color:#136b2c} .hchip.lv-me{background:#dbeafe;color:#12459b}
         .hchip.lv-ae{background:#fff3cd;color:#856404} .hchip.lv-be{background:#fbdcdc;color:#8c1c24}
         .hchip.lv-none{background:#eceff4;color:#8a97ab}

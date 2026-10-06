@@ -853,6 +853,14 @@ tbody tr:nth-child(even){background:#fafcff}
     <div class="stat"><div class="k">Overall Performance</div><div class="v" style="font-size:13px;line-height:1.3;">${escapeHtml(classLevelObj.level)}</div><div class="k2">most common: ${classLevelObj.count} of ${rows.length}</div></div>
   </div>
   <table>
+    <colgroup>
+      <col style="width:2%"><col style="width:5.2%"><col style="width:18%">
+      <col style="width:4.5%">
+      ${subjectOrder.map(() => '<col style="width:' + Math.max(3, 38 / subjectOrder.length) + '%">').join('')}
+      <col style="width:4%"><col style="width:4%"><col style="width:4.5%">
+      <col style="width:5.5%"><col style="width:3%"><col style="width:8%">
+      <col style="width:10%">
+    </colgroup>
     <thead><tr><th class="ctr">#</th><th class="ctr">Adm. No.</th><th>Student</th><th class="ctr">Grade</th>
       ${subjHead}
       <th class="ctr">Total</th><th class="ctr">Average</th><th class="ctr">Average %</th>
@@ -1269,6 +1277,10 @@ tbody tr:nth-child(even){background:#fafcff}
   </div>
 
   <table>
+    <colgroup>
+      <col style="width:22%"><col style="width:8%"><col style="width:8%"><col style="width:10%">
+      <col style="width:10%"><col style="width:18%"><col style="width:12%">
+    </colgroup>
     <thead><tr><th>Subject</th><th class="ctr">Score</th><th class="ctr">%</th><th class="ctr">Class Avg</th><th class="ctr">Diff</th><th>Progress</th><th class="ctr">Level</th></tr></thead>
     <tbody>${subjCells}</tbody>
   </table>
