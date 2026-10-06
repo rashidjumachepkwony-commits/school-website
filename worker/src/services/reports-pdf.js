@@ -9,7 +9,15 @@ import { Page, A4, COLORS, levelColors, textWidth, wrapText } from './pdf.servic
 
 const W = A4.h;           // landscape width  (841.89)
 const H = A4.w;           // landscape height (595.28)
-const M = 26;             // print margin (mm→px at 96dpi ≈ 10mm)
+const M = 24;             // print margin (~9mm at 96dpi)
+
+const ROW_H = 16;         // fixed data row height (compact)
+const FOOTER_H = 30;      // footer space at bottom
+const HEADER_H_FULL = 50; // full header band height (first page)
+const META_H = 20;        // meta strip height
+const TITLE_H = 30;       // report title + assessment info
+const SUMMARY_H = 40;     // summary card strip height
+const COMPACT_H = 36;     // compact header band height (continuation pages)
 
 const LEVEL_BG = {
   EE: [223, 243, 228], ME: [219, 234, 254],
@@ -22,132 +30,126 @@ const LEVEL_FG = {
 /** Wrap a header label to fit within a column width, returning lines. */
 function wrapHeader(text, maxWidth, size = 7.5) {
   const lines = wrapText(text, size, maxWidth - 4, true);
-  // Don't break a single word; if it's too wide, let it overflow slightly
-  // rather than splitting mid-word.
   return lines.length ? lines : [String(text)];
 }
 
-/** Draw a wrapped, centered header cell. Returns the line count. */
+/** Draw a wrapped, centered multi-line header cell. Returns line count. */
 function drawHeaderCell(page, text, x, y, colW, size = 7.5) {
   const lines = wrapHeader(text, colW, size);
   const lineHeight = 9;
   const totalH = lines.length * lineHeight;
-  const startY = y - (16 - totalH) / 2 + totalH - lineHeight;
+  const startY = y + (16 - totalH) / 2 + totalH - lineHeight;
   lines.forEach((l, i) =>
     page.text(l, x, startY - i * lineHeight, size, COLORS.headText, { bold: true, align: 'center', width: colW })
   );
   return lines.length;
 }
 
-/** Shared full header band for the first page. */
+/** Shared full header band for the first page. Returns y just below the meta strip. */
 function header(page, subtitle, metaPairs) {
-  page.rect(0, H - 56, W, 56, COLORS.headBg);
-  page.rect(0, H - 59, W, 3, COLORS.gold);
-  page.text('CHANGARA STAR ACADEMY', M, H - 26, 17, COLORS.headText, { bold: true });
-  page.text(subtitle, M, H - 42, 9.5, COLORS.gold);
-  page.text('Assurance for Excellence', W - M - 180, H - 26, 8.5, COLORS.headText, { align: 'right', width: 180 });
-  page.text('Competency Based Education (CBE)', W - M - 180, H - 42, 8.5, COLORS.headText, { align: 'right', width: 180 });
+  page.rect(0, H - HEADER_H_FULL, W, HEADER_H_FULL, COLORS.headBg);
+  page.rect(0, H - HEADER_H_FULL - 3, W, 3, COLORS.gold);
+  page.text('CHANGARA STAR ACADEMY', M, H - 18, 16, COLORS.headText, { bold: true });
+  page.text(subtitle, M, H - 34, 9, COLORS.gold);
+  page.text('Assurance for Excellence', W - M - 170, H - 18, 8, COLORS.headText, { align: 'right', width: 170 });
+  page.text('Competency Based Education (CBE)', W - M - 170, H - 34, 8, COLORS.headText, { align: 'right', width: 170 });
 
-  let y = H - 74;
-  page.rect(M, y - 14, W - M * 2, 18, [247, 249, 252]);
+  let y = H - HEADER_H_FULL - 4;
+  page.rect(M, y - META_H, W - M * 2, META_H, [247, 249, 252]);
   let x = M + 8;
   for (const [k, v] of metaPairs) {
     const kv = String(k).toUpperCase();
     const s = String(v == null ? '-' : v);
-    page.text(kv, x, y - 5, 7, COLORS.grey, { bold: true });
-    const kw = textWidth(kv, 7, true) + 4;
-    page.text(s, x + kw, y - 5, 8.5, COLORS.ink, { bold: true });
-    x += kw + textWidth(s, 8.5, true) + 16;
+    page.text(kv, x, y - 5, 6.5, COLORS.grey, { bold: true });
+    const kw = textWidth(kv, 6.5, true) + 3;
+    page.text(s, x + kw, y - 5, 8, COLORS.ink, { bold: true });
+    x += kw + textWidth(s, 8, true) + 14;
   }
-  return y - 32;
+  return y - META_H - 4;
 }
 
 /** Compact continuation header for page 2+. */
 function compactHeader(page, title) {
-  page.rect(0, H - 38, W, 38, COLORS.headBg);
-  page.rect(0, H - 41, W, 3, COLORS.gold);
-  page.text('CHANGARA STAR ACADEMY', M, H - 18, 13, COLORS.headText, { bold: true });
-  page.text(title, M, H - 32, 8.5, COLORS.gold);
-  return H - 56;
+  page.rect(0, H - COMPACT_H, W, COMPACT_H, COLORS.headBg);
+  page.rect(0, H - COMPACT_H - 3, W, 3, COLORS.gold);
+  page.text('CHANGARA STAR ACADEMY', M, H - 18, 12, COLORS.headText, { bold: true });
+  page.text(title, M, H - 32, 8, COLORS.gold);
+  return H - COMPACT_H - 6;
 }
 
-/** Summary strip with professional cards. */
+/** Summary strip with compact professional cards. */
 function summaryStrip(page, tiles, y) {
-  const gap = 8;
+  const gap = 6;
   const tw = (W - M * 2 - gap * (tiles.length - 1)) / tiles.length;
+  const cardH = SUMMARY_H;
   tiles.forEach((t, i) => {
     const x = M + i * (tw + gap);
-    page.rect(x, y - 34, tw, 36, [250, 251, 253]);
-    page.rect(x, y - 34, tw, 3, t.colour || COLORS.gold);
-    page.text(String(t.label).toUpperCase(), x + 6, y - 14, 6.5, COLORS.grey, { bold: true });
-    page.textBlock(String(t.value), x + 6, y - 30, tw - 12, {
-      size: 11, colour: t.colour || COLORS.ink, bold: true, lineHeight: 12, maxLines: 1
+    page.rect(x, y - cardH, tw, cardH, [250, 251, 253]);
+    page.rect(x, y - cardH, tw, 3, t.colour || COLORS.gold);
+    page.text(String(t.label).toUpperCase(), x + 5, y - cardH - 2, 6, COLORS.grey, { bold: true });
+    page.textBlock(String(t.value), x + 5, y - 6, tw - 10, {
+      size: 10.5, colour: t.colour || COLORS.ink, bold: true, lineHeight: 11, maxLines: 1
     });
   });
-  return y - 46;
+  return y - cardH - 6;
 }
 
 /** Footer with dynamic page numbering. */
 function footer(page, note, pageNum, totalPages) {
-  page.line(M, 30, W - M, 30, COLORS.lineSoft, 0.6);
-  page.text('Changara Star Academy  -  CBE Results', M, 20, 7, COLORS.grey);
+  page.line(M, 26, W - M, 26, COLORS.lineSoft, 0.6);
+  page.text('Changara Star Academy  -  CBE Results', M, 16, 7, COLORS.grey);
   const rightText = (pageNum && totalPages)
     ? 'Page ' + pageNum + ' of ' + totalPages + '  ' + (note || '')
     : (note || '');
-  page.text(rightText, W - M - 220, 20, 7, COLORS.grey, { align: 'right', width: 220 });
+  page.text(rightText, W - M - 200, 16, 7, COLORS.grey, { align: 'right', width: 200 });
+}
+
+/**
+ * Calculate how many student rows fit on a page given the overhead.
+ * firstPage=true accounts for the full header + title + summary strip.
+ */
+function calcRowsPerPage(firstPage, tableHeaderH) {
+  const overhead = firstPage
+    ? HEADER_H_FULL + 4 + META_H + 4 + TITLE_H + SUMMARY_H + tableHeaderH + FOOTER_H
+    : COMPACT_H + 4 + tableHeaderH + FOOTER_H;
+  return Math.max(8, Math.floor((H - overhead) / ROW_H));
 }
 
 /**
  * One page of the mark sheet.
  * cols: [{ key, head, w, align, render(row) }]
- * Returns the number of rows actually rendered.
+ * from/to specify the row range. Returns the index of the next unrendered row.
  */
-function markSheetPage(page, { rows, cols, top, footerNote, from, to, pageNum, totalPages }) {
-  // Calculate max header lines to set header row height.
-  let maxHeaderLines = 1;
-  const headerLines = cols.map(c => {
-    const lines = wrapHeader(c.head, c.w, c.size || 8);
-    maxHeaderLines = Math.max(maxHeaderLines, lines.length);
-    return lines;
-  });
-  const headerH = Math.max(22, maxHeaderLines * 10 + 6);
-
+function markSheetPage(page, { rows, cols, top, footerNote, from, to, pageNum, totalPages, tableHeaderH }) {
   // Header row
-  page.rect(M, top - headerH, W - M * 2, headerH, COLORS.headBg);
+  page.rect(M, top - tableHeaderH, W - M * 2, tableHeaderH, COLORS.headBg);
   let cx = M;
-  headerLines.forEach((lines, ci) => {
-    const c = cols[ci];
-    const lineHeight = 9;
-    const totalTextH = lines.length * lineHeight;
-    const startY = top - headerH + (headerH - totalTextH) / 2 + totalTextH - lineHeight;
-    lines.forEach((l, li) =>
-      page.text(l, cx, startY - li * lineHeight, c.size || 7.5, COLORS.headText, { bold: true, align: 'center', width: c.w })
-    );
+  cols.forEach(c => {
+    drawHeaderCell(page, c.head, cx, top, c.w, c.size || 7.5);
     cx += c.w;
   });
 
-  let y = top - headerH - 4;
-  const rowH = Math.max(19, headerH + 2);
+  let y = top - tableHeaderH - 2;
   let i = from;
   while (i < to) {
-    if (y < 44) break;  // leave room for footer
+    if (y < FOOTER_H) break;  // leave room for footer
     const r = rows[i];
     const level = (r.code || 'NA').toUpperCase();
-    page.rect(M, y - rowH + 3, W - M * 2, rowH - 2, LEVEL_BG[level] || [250, 251, 253]);
+    page.rect(M, y - ROW_H + 2, W - M * 2, ROW_H - 3, LEVEL_BG[level] || [250, 251, 253]);
     let x = M;
     for (const c of cols) {
       const cell = c.render(r, y);
       if (cell !== undefined && cell !== null) {
-        const tx = c.align === 'right' ? x + c.w - 6 : x + 6;
+        const tx = c.align === 'right' ? x + c.w - 5 : x + 5;
         const colour = c.colourFor ? c.colourFor(r) : (c.colour || COLORS.ink);
-        page.text(String(cell), tx, y - 4, c.size || 8, colour, {
-          bold: c.bold !== false, align: c.align || 'left', width: c.w - 12
+        page.text(String(cell), tx, y - 3, c.size || 8, colour, {
+          bold: c.bold !== false, align: c.align || 'left', width: c.w - 10
         });
       }
       x += c.w;
     }
-    if (i < to - 1) page.line(M, y - rowH + 2, W - M, y - rowH + 2, [255, 255, 255], 0.4);
-    y -= rowH;
+    if (i < to - 1) page.line(M, y - ROW_H + 1, W - M, y - ROW_H + 1, [255, 255, 255], 0.4);
+    y -= ROW_H;
     i++;
   }
   footer(page, footerNote, pageNum, totalPages);
@@ -160,22 +162,21 @@ function markSheetPage(page, { rows, cols, top, footerNote, from, to, pageNum, t
  */
 export function buildClassReportPdf(d) {
   const pages = [];
-  const totalPages = Math.ceil(d.students.length / 24) || 1;
-
-   const posW = 28, nameW = 170, admW = 56, numW = 44;
-  const lvlW = 62, codeW = 58;
   const subjectCount = d.subjects.length;
-  // Distribute remaining width among subject columns, with a minimum.
-  const fixedW = posW + nameW + admW + numW * 2 + lvlW + codeW + 24;
+
+  // Column widths: fixed narrow columns + flexible subject + student name.
+  const posW = 26, nameW = 170, admW = 54, numW = 42;
+  const lvlW = 60, codeW = 56;
+  const fixedW = posW + nameW + admW + numW * 2 + lvlW + codeW + 20;
   const subjectAvail = W - M * 2 - fixedW;
-  const subW = Math.max(38, Math.floor(subjectAvail / Math.max(1, subjectCount)));
+  const subW = Math.max(36, Math.floor(subjectAvail / Math.max(1, subjectCount)));
   const used = fixedW + subW * subjectCount;
   const scale = used > (W - M * 2) ? (W - M * 2) / used : 1;
 
   const cols = [
-    { head: '#', w: posW * scale, align: 'right', render: (r) => r.position, size: 8 },
-    { head: 'Student', w: nameW * scale, render: (r) => r.name, size: 8.5 },
-    { head: 'Adm. No.', w: admW * scale, align: 'right', render: (r) => r.admissionNumber, size: 7.5, colour: COLORS.inkSoft },
+    { head: '#', w: posW * scale, align: 'right', render: (r) => r.position, size: 8.5 },
+    { head: 'Student', w: nameW * scale, render: (r) => r.name || '-', size: 8.5 },
+    { head: 'Adm. No.', w: admW * scale, align: 'right', render: (r) => r.admissionNumber || '-', size: 7.5, colour: COLORS.inkSoft },
     ...d.subjects.map(s => ({
       head: s, w: subW * scale, align: 'right', size: 7, colour: COLORS.inkSoft,
       render: (r) => {
@@ -184,22 +185,38 @@ export function buildClassReportPdf(d) {
         return c.score + '/' + c.max;
       }
     })),
-    { head: 'Total', w: numW, align: 'right', render: (r) => r.total, colour: COLORS.ink, size: 8 },
-    { head: 'Average', w: numW, align: 'right', render: (r) => r.average, colour: COLORS.inkSoft, size: 8 },
+    { head: 'Total', w: numW * scale, align: 'right', render: (r) => r.total || 0, colour: COLORS.ink, size: 8 },
+    { head: 'Average', w: numW * scale, align: 'right', render: (r) => r.average || 0, colour: COLORS.inkSoft, size: 8 },
     { head: 'Avg Lvl', w: lvlW * scale, align: 'right', render: (r) => (r.meanLevel === null || r.meanLevel === undefined ? '-' : r.meanLevel), size: 7.5, colour: COLORS.ink },
-    { head: 'Level', w: codeW * scale, align: 'right', size: 7.5, bold: true,
+    { head: 'Level', w: codeW * scale, align: 'right', size: 8, bold: true,
       render: (r) => (r.code || '-'),
       colourFor: (r) => LEVEL_FG[r.code || 'NA'] }
   ];
 
-  const perPage = 24;
+  // Calculate max header lines to determine table header height.
+  let maxHeaderLines = 1;
+  cols.forEach(c => {
+    const lines = wrapHeader(c.head, c.w, c.size || 8);
+    maxHeaderLines = Math.max(maxHeaderLines, lines.length);
+  });
+  const tableHeaderH = Math.max(20, maxHeaderLines * 10 + 4);
+
+  // Dynamic perPage: first page has full header, continuation pages are compact.
+  // Subtract 1 row as a safety margin to ensure all rows fit.
+  const firstPerPage = Math.max(6, calcRowsPerPage(true, tableHeaderH) - 1);
+  const contPerPage = Math.max(6, calcRowsPerPage(false, tableHeaderH) - 1);
+  const totalPages = Math.ceil((d.students.length - firstPerPage) / contPerPage) + 1;
+
   let pageNum = 0;
-  for (let from = 0; from < d.students.length; from += perPage) {
+  let from = 0;
+  while (from < d.students.length) {
     pageNum++;
+    const isFirst = pageNum === 1;
+    const perPage = isFirst ? firstPerPage : contPerPage;
     const to = Math.min(d.students.length, from + perPage);
     const page = new Page(W, H);
 
-    if (pageNum === 1) {
+    if (isFirst) {
       // Full header on first page
       const top = header(page, labelPeriod(d.period) + ' Class Results', [
         ['Grade', d.grade],
@@ -211,13 +228,13 @@ export function buildClassReportPdf(d) {
       ]);
 
       // Report title
-      page.text('CLASS RESULTS', M, top + 4, 15, COLORS.ink, { bold: true, align: 'center', width: W - M * 2 });
+      page.text('CLASS RESULTS', M, top + 6, 14, COLORS.ink, { bold: true, align: 'center', width: W - M * 2 });
 
       // Assessment info
-      const infoY = top - 16;
-      page.text(d.grade || '-', M, infoY, 10, COLORS.inkSoft);
+      const infoY = top - 14;
+      page.text(d.grade || '-', M, infoY, 9.5, COLORS.inkSoft);
       const infoRight = (d.period || '-') + '  ' + (d.type || '-') + '  ' + (d.name || '');
-      page.text(infoRight, W - M - 220, infoY, 10, COLORS.inkSoft, { align: 'right', width: 220 });
+      page.text(infoRight, W - M - 200, infoY, 9.5, COLORS.inkSoft, { align: 'right', width: 200 });
 
       // Summary strip
       const afterSummary = summaryStrip(page, [
@@ -227,24 +244,29 @@ export function buildClassReportPdf(d) {
         { label: 'Avg score', value: d.summary.meanAvg, colour: COLORS.gold },
         { label: 'Avg %', value: d.summary.meanPct + '%', colour: COLORS.blue },
         { label: 'Performance', value: d.summary.level, colour: LEVEL_FG[d.summary.code] || COLORS.ink }
-      ], infoY - 26);
+      ], infoY - 12);
 
       markSheetPage(page, {
         rows: d.students, cols, top: afterSummary,
         footerNote: labelPeriod(d.period) + '  -  Grade ' + d.grade,
-        from: from, to, pageNum, totalPages
+        from: from, to, pageNum, totalPages, tableHeaderH
       });
+      pages.push(page);
+      from = to;
     } else {
       // Compact header on continuation pages
       const top = compactHeader(page, labelPeriod(d.period) + ' Class Results - ' + d.grade);
       markSheetPage(page, {
         rows: d.students, cols, top,
         footerNote: labelPeriod(d.period) + '  -  Grade ' + d.grade,
-        from: from, to, pageNum, totalPages
+        from: from, to, pageNum, totalPages, tableHeaderH
       });
+      pages.push(page);
+      from = to;
     }
-    pages.push(page);
   }
+  return pages;
+}
   return pages;
 }
 
@@ -254,21 +276,20 @@ export function buildClassReportPdf(d) {
  */
 export function buildAllStudentsPdf(d) {
   const pages = [];
-  const totalPages = Math.ceil(d.rows.length / 22) || 1;
-
-   const posW = 28, nameW = 160, admW = 56, clsW = 48, numW = 44;
-  const lvlW = 62, codeW = 58;
   const subjectCount = d.columns.length;
-  const fixedW = posW + nameW + admW + clsW + numW * 2 + lvlW + codeW + 24;
+
+  const posW = 26, nameW = 155, admW = 54, clsW = 46, numW = 42;
+  const lvlW = 60, codeW = 56;
+  const fixedW = posW + nameW + admW + clsW + numW * 2 + lvlW + codeW + 20;
   const subjectAvail = W - M * 2 - fixedW;
-  const subW = Math.max(36, Math.floor(subjectAvail / Math.max(1, subjectCount)));
+  const subW = Math.max(34, Math.floor(subjectAvail / Math.max(1, subjectCount)));
   const used = fixedW + subW * subjectCount;
   const scale = used > (W - M * 2) ? (W - M * 2) / used : 1;
 
   const cols = [
-    { head: '#', w: posW * scale, align: 'right', render: (r) => r.position, size: 8 },
-    { head: 'Student', w: nameW * scale, render: (r) => r.name, size: 8 },
-    { head: 'Adm. No.', w: admW * scale, align: 'right', render: (r) => r.admissionNumber, size: 7.5, colour: COLORS.inkSoft },
+    { head: '#', w: posW * scale, align: 'right', render: (r) => r.position, size: 8.5 },
+    { head: 'Student', w: nameW * scale, render: (r) => r.name || '-', size: 8 },
+    { head: 'Adm. No.', w: admW * scale, align: 'right', render: (r) => r.admissionNumber || '-', size: 7.5, colour: COLORS.inkSoft },
     { head: 'Class', w: clsW * scale, align: 'right', render: (r) => r.grade || '-', size: 7.5, colour: COLORS.inkSoft },
     ...d.columns.map(s => ({
       head: s, w: subW * scale, align: 'right', size: 6.5, colour: COLORS.inkSoft,
@@ -278,22 +299,35 @@ export function buildAllStudentsPdf(d) {
         return c.score + '/' + c.max;
       }
     })),
-    { head: 'Total', w: numW * scale, align: 'right', render: (r) => r.total, colour: COLORS.ink, size: 8 },
-    { head: 'Average', w: numW * scale, align: 'right', render: (r) => r.average, colour: COLORS.inkSoft, size: 8 },
+    { head: 'Total', w: numW * scale, align: 'right', render: (r) => r.total || 0, colour: COLORS.ink, size: 8 },
+    { head: 'Average', w: numW * scale, align: 'right', render: (r) => r.average || 0, colour: COLORS.inkSoft, size: 8 },
     { head: 'Avg Lvl', w: lvlW * scale, align: 'right', render: (r) => (r.meanLevel === null || r.meanLevel === undefined ? '-' : r.meanLevel), size: 7.5, colour: COLORS.ink },
-    { head: 'Level', w: codeW * scale, align: 'right', size: 7.5, bold: true,
+    { head: 'Level', w: codeW * scale, align: 'right', size: 8, bold: true,
       render: (r) => (r.code || '-'),
       colourFor: (r) => LEVEL_FG[r.code || 'NA'] }
   ];
 
-  const perPage = 22;
+  let maxHeaderLines = 1;
+  cols.forEach(c => {
+    const lines = wrapHeader(c.head, c.w, c.size || 8);
+    maxHeaderLines = Math.max(maxHeaderLines, lines.length);
+  });
+  const tableHeaderH = Math.max(20, maxHeaderLines * 10 + 4);
+
+  const firstPerPage = calcRowsPerPage(true, tableHeaderH);
+  const contPerPage = calcRowsPerPage(false, tableHeaderH);
+  const totalPages = Math.ceil(d.rows.length / contPerPage) || 1;
+
   let pageNum = 0;
-  for (let from = 0; from < d.rows.length; from += perPage) {
+  let from = 0;
+  while (from < d.rows.length) {
     pageNum++;
+    const isFirst = pageNum === 1;
+    const perPage = isFirst ? firstPerPage : contPerPage;
     const to = Math.min(d.rows.length, from + perPage);
     const page = new Page(W, H);
 
-    if (pageNum === 1) {
+    if (isFirst) {
       const top = header(page, labelPeriod(d.period) + ' Results - All Students', [
         ['Period', d.period || '-'],
         ['Type', d.type || '-'],
@@ -302,34 +336,35 @@ export function buildAllStudentsPdf(d) {
         ['Grades', d.grades || '-']
       ]);
 
-      page.text('ALL STUDENTS RESULTS', M, top + 4, 15, COLORS.ink, { bold: true, align: 'center', width: W - M * 2 });
+      page.text('ALL STUDENTS RESULTS', M, top + 6, 14, COLORS.ink, { bold: true, align: 'center', width: W - M * 2 });
 
-      const infoY = top - 16;
-      page.text(labelPeriod(d.period) + '  -  All Grades', M, infoY, 10, COLORS.inkSoft);
+      const infoY = top - 14;
+      page.text(labelPeriod(d.period) + '  -  All Grades', M, infoY, 9.5, COLORS.inkSoft);
       const infoRight = (d.type || '-') + '  ' + (d.name || '');
-      page.text(infoRight, W - M - 220, infoY, 10, COLORS.inkSoft, { align: 'right', width: 220 });
+      page.text(infoRight, W - M - 200, infoY, 9.5, COLORS.inkSoft, { align: 'right', width: 200 });
 
       const afterSummary = summaryStrip(page, [
         { label: 'Total students', value: d.rows.length, colour: COLORS.ink },
         { label: 'Avg score', value: d.summary.meanAvg, colour: COLORS.gold },
         { label: 'Avg %', value: d.summary.meanPct + '%', colour: COLORS.blue },
         { label: 'Performance', value: d.summary.level, colour: LEVEL_FG[d.summary.code] || COLORS.ink }
-      ], infoY - 26);
+      ], infoY - 12);
 
       markSheetPage(page, {
         rows: d.rows, cols, top: afterSummary,
         footerNote: labelPeriod(d.period) + '  -  all students',
-        from: from, to, pageNum, totalPages
+        from: from, to, pageNum, totalPages, tableHeaderH
       });
     } else {
       const top = compactHeader(page, labelPeriod(d.period) + ' All Students Results');
       markSheetPage(page, {
         rows: d.rows, cols, top,
         footerNote: labelPeriod(d.period) + '  -  all students',
-        from: from, to, pageNum, totalPages
+        from: from, to, pageNum, totalPages, tableHeaderH
       });
     }
     pages.push(page);
+    from = to;
   }
   return pages;
 }
