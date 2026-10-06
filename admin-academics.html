@@ -2088,11 +2088,11 @@
 
     async function downloadReport(studentId) {
         if (!studentId) { showAlert('That student has no saved result yet.', 'error'); return; }
-        // The professional CBE result slip as a file the teacher can keep.
+        // Result slip showing the marks exactly as captured.
         const name = (studentsData.find(s => s._id === studentId) || {}).studentName || 'Student';
         const url = apiUrl('/api/assessments/student-report/') + encodeURIComponent(studentId) +
             '?' + reportFilterParams() + '&download=1';
-        saveReportFile(url, 'CBE-Result-' + name.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
+        saveReportFile(url, 'Result-' + name.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
     }
 
     // ============================================
@@ -2195,7 +2195,7 @@
       const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(grade) +
         '?period=' + encodeURIComponent(period) + '&type=' + encodeURIComponent(type) +
         (name ? '&name=' + encodeURIComponent(name) : '') + '&download=1');
-      saveReportFile(url, 'CBE-Class-Results-' + grade.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
+      saveReportFile(url, 'Class-Results-' + grade.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
     }
 
     /** Every student who has marks in that sitting, across all grades. */
@@ -2206,7 +2206,7 @@
       if (name) params.set('name', name);
       saveReportFile(
         apiUrl('/api/assessments/all-report?' + params.toString() + '&download=1'),
-        'CBE-Results-All-Students.pdf'
+        'All-Students-Results.pdf'
       );
     }
 
@@ -2227,7 +2227,7 @@
     // DOWNLOAD CLASS REPORT
     // ============================================
     /**
-     * Download the CBE class report as a PDF.
+     * Download the class report as a PDF.
      * The report is filtered by everything selected on this screen: grade,
      * assessment period, assessment type, assessment name and assessment date.
      */
@@ -2241,7 +2241,7 @@
         if (d) params.set('date', d);
         const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(currentGrade) +
             '?' + params.toString() + '&download=1');
-        saveReportFile(url, 'CBE-Class-Results-' + currentGrade.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
+        saveReportFile(url, 'Class-Results-' + currentGrade.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
     }
 
     /** Show exactly which filters a download will use. */
