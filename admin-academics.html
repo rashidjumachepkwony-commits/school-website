@@ -931,60 +931,6 @@
             <div class="empty-state"><i class="fas fa-calendar"></i><p>Loading history...</p></div>
         </div>
     </div>
-
-    <!-- ===== STUDENT LIST ===== -->
-    <div class="card">
-        <h2><i class="fas fa-list" style="color:#D4A017;"></i> All Students</h2>
-        <p class="desc">View all students and their assessment records</p>
-
-        <div class="filters">
-            <div class="form-group">
-                <label>Filter by Grade</label>
-                <select id="filterGrade" onchange="loadStudentList()">
-                    <option value="">All Grades</option>
-                    <option value="Play Group">Play Group</option>
-                    <option value="PP1">PP1</option>
-                    <option value="PP2">PP2</option>
-                    <option value="Grade 1">Grade 1</option>
-                    <option value="Grade 2">Grade 2</option>
-                    <option value="Grade 3">Grade 3</option>
-                    <option value="Grade 4">Grade 4</option>
-                    <option value="Grade 5">Grade 5</option>
-                    <option value="Grade 6">Grade 6</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Search Student</label>
-                <input type="text" id="searchStudent" placeholder="Search by name..." onkeyup="loadStudentList()">
-            </div>
-            <button class="btn btn-success" onclick="loadStudentList()"><i class="fas fa-sync"></i> Refresh</button>
-            <button class="btn-download green" onclick="downloadAllStudentsPDF()">
-                <i class="fas fa-file-pdf"></i> Download All Results (PDF)
-            </button>
-        </div>
-
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Student Name</th>
-                        <th>Grade</th>
-                        <th>Subjects</th>
-                        <th>Total Score</th>
-                    <th>Average Score</th>
-                    <th>Avg Level</th>
-                    <th>Average %</th>
-                        <th>Overall Performance Level</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="studentsTableBody">
-                    <tr><td colspan="8" style="text-align:center;color:#999;">Loading students...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
 
 <script>
