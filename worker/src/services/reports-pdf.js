@@ -136,14 +136,19 @@ function markSheetPage(page, { rows, cols, top, footerNote, from, to, pageNum, t
     const r = rows[i];
     const level = (r.code || 'NA').toUpperCase();
     page.rect(M, y - ROW_H + 2, W - M * 2, ROW_H - 3, LEVEL_BG[level] || [250, 251, 253]);
-    let x = M;
+     let x = M;
     for (const c of cols) {
       const cell = c.render(r, y);
       if (cell !== undefined && cell !== null) {
-        const tx = c.align === 'right' ? x + c.w - 5 : x + 5;
+        const pad = 5;
+        // Let page.text() handle alignment within the column box.
+        // For left align, start at x+pad; for center/right, start at x so the
+        // width-based alignment lands inside [x, x+c.w].
+        const textX = c.align === 'right' ? x : x + pad;
+        const textW = c.align === 'right' ? c.w - pad : c.w - pad * 2;
         const colour = c.colourFor ? c.colourFor(r) : (c.colour || COLORS.ink);
-        page.text(String(cell), tx, y - 3, c.size || 8, colour, {
-          bold: c.bold !== false, align: c.align || 'left', width: c.w - 10
+        page.text(String(cell), textX, y - 3, c.size || 8, colour, {
+          bold: c.bold !== false, align: c.align || 'left', width: textW
         });
       }
       x += c.w;
