@@ -416,64 +416,8 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* ===== CBE COMPETENCY-BASED ANALYSIS (integrated) ===== */
-        .cbe-distribution { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 18px; }
-        .cbe-distribution .dist-item {
-            display: inline-flex; align-items: center; gap: 6px;
-            font-size: 13px; color: #333;
-        }
-        .cbe-distribution .dist-item .dot {
-            width: 12px; height: 12px; border-radius: 50%; display: inline-block;
-        }
-        .cbe-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .cbe-summary-item {
-            background: #fafbfc;
-            border: 1px solid #e8ecf1;
-            border-radius: 10px;
-            padding: 14px;
-            text-align: center;
-        }
-        .cbe-summary-item .num { font-size: 24px; font-weight: 700; color: #0A1628; }
-        .cbe-summary-item .num.green { color: #28a745; }
-        .cbe-summary-item .num.blue { color: #17a2b8; }
-        .cbe-summary-item .num.orange { color: #d4a017; }
-        .cbe-summary-item .num.red { color: #dc3545; }
-        .cbe-summary-item .label {
-            font-size: 10px; color: #888; margin-top: 4px;
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .cbe-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-            gap: 12px;
-        }
-        .cbe-item {
-            background: white;
-            border: 1px solid #e8ecf1;
-            border-radius: 10px;
-            padding: 14px;
-        }
-        .cbe-item .competency { font-weight: 700; font-size: 14px; color: #0A1628; margin-bottom: 8px; }
-        .cbe-item .cbe-bar {
-            height: 8px; background: #e8ecf1; border-radius: 4px; overflow: hidden; margin: 8px 0;
-        }
-        .cbe-item .cbe-bar .cbe-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
-        .cbe-item .cbe-stats {
-            display: flex; justify-content: space-between; flex-wrap: wrap;
-            gap: 4px; font-size: 12px; color: #6c757d;
-        }
-        .cbe-item .cbe-stats .value { font-weight: 700; color: #0A1628; }
-        .cbe-item .cbe-levels {
-            margin-top: 8px; font-size: 11px; color: #6c757d;
-            display: flex; gap: 10px; flex-wrap: wrap;
-        }
-        /* ===== SCORE ENTRY: RESPONSIVE + ACTIONS =====
+ 
+        /* ===== SCORE ENTRY: RESPONSIVE + ACTIONS ======
            On a phone the wide marks table is unusable, so below 820px each
            student becomes a card with a labelled field per subject. */
         /* ===== DOWNLOAD BUTTONS =====
@@ -497,33 +441,6 @@
         .btn-download.green { background: #1c7a34; box-shadow: 0 4px 14px rgba(28,122,52,.35); }
         .btn-download.green:hover { background: #145926; }
         .dl-legend { display:flex; align-items:center; gap:8px; font-size:12px; color:#5a6b85; margin-top:10px; }
-
-        .cbe-results-line {
-            padding: 11px 14px; margin-bottom: 14px; font-size: 13px; color: #3c4d68;
-            background: #fff8e1; border-left: 5px solid #D4A017; border-radius: 8px;
-        }
-        .cbe-results-line i { margin-right: 7px; color: #D4A017; }
-        .cbe-results-line strong { color: #0A1628; }
-
-        /* ===== CBE LOOKUP BAR ===== */
-        .cbe-lookup {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 12px; padding: 16px; margin-bottom: 16px;
-            background: #f7f9fc; border: 2px solid #e0e6ef; border-radius: 12px;
-        }
-        .cl-field { display: flex; flex-direction: column; gap: 5px; }
-        .cl-field label { font-size: 11px; font-weight: 800; color: #3c4d68; text-transform: uppercase; letter-spacing: .3px; }
-        .cl-field label i { margin-right: 5px; color: #D4A017; }
-        .cl-field select, .cl-field input {
-            padding: 11px; font-size: 14px; font-family: inherit;
-            border: 2px solid #d5dce6; border-radius: 8px; background: #fff; color: #0A1628; width: 100%;
-        }
-        .cl-field select:focus, .cl-field input:focus { outline: none; border-color: #D4A017; }
-        .cl-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; gap: 10px; align-items: center; }
-        .cl-actions .btn { flex: 1 1 auto; justify-content: center; }
-        @media (max-width: 640px) {
-            .cl-actions .btn, .cl-actions .btn-download { width: 100%; }
-        }
 
         /* ===== ASSESSMENT HISTORY ===== */
         .hist-filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:16px; padding:14px; background:#f7f9fc; border:1px solid #e0e6ef; border-radius:12px; }
@@ -749,11 +666,6 @@
                 display: flex; justify-content: space-between; align-items: center;
             }
             .entry-hint { display: none; }
-        }
-
-        @media print {
-            .cbe-summary-item { border: 1px solid #ddd; }
-            .cbe-distribution, .cbe-summary, .cbe-grid { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
         }
 
         /* ===== SUBJECT CONFIGURATION EDITOR ===== */
@@ -984,102 +896,6 @@
         <div class="stat-card">
             <div class="number red" id="belowCount">0</div>
             <div class="label">Below Expectation</div>
-        </div>
-    </div>
-
-    <!-- ===== CBE COMPETENCY-BASED ANALYSIS ===== -->
-    <div class="card" id="cbeAnalysisCard">
-        <h2><i class="fas fa-bullseye" style="color:#D4A017;"></i> CBE Competency-Based Analysis <span style="background:#D4A017;color:white;font-size:10px;padding:2px 10px;border-radius:12px;vertical-align:middle;">Competency Assessment</span></h2>
-        <p class="desc">Choose what to analyse. This lookup works on its own, so you can produce a full CBE report for any grade, assessment type, assessment name, month and year.</p>
-
-        <!-- ===== CBE LOOKUP FIELDS ===== -->
-        <div class="cbe-lookup">
-            <div class="cl-field">
-                <label for="cbeLkGrade"><i class="fas fa-graduation-cap"></i> Grade</label>
-                <select id="cbeLkGrade">
-                    <option value="Play Group">Play Group</option>
-                    <option value="PP1">PP1</option>
-                    <option value="PP2">PP2</option>
-                    <option value="Grade 1">Grade 1</option>
-                    <option value="Grade 2">Grade 2</option>
-                    <option value="Grade 3">Grade 3</option>
-                    <option value="Grade 4">Grade 4</option>
-                    <option value="Grade 5">Grade 5</option>
-                    <option value="Grade 6">Grade 6</option>
-                </select>
-            </div>
-            <div class="cl-field">
-                <label for="cbeLkType"><i class="fas fa-clipboard-list"></i> Assessment Type</label>
-                <select id="cbeLkType"></select>
-            </div>
-            <div class="cl-field">
-                <label for="cbeLkName"><i class="fas fa-file-signature"></i> Name of Assessment</label>
-                <input type="text" id="cbeLkName" list="cbeLkNameList" placeholder="e.g. English &amp; Mathematics">
-                <datalist id="cbeLkNameList"></datalist>
-            </div>
-            <div class="cl-field">
-                <label for="cbeLkMonth"><i class="fas fa-calendar-alt"></i> Month</label>
-                <select id="cbeLkMonth">
-                    <option value="">Any month</option>
-                    <option>January</option><option>February</option><option>March</option>
-                    <option>April</option><option>May</option><option>June</option>
-                    <option>July</option><option>August</option><option>September</option>
-                    <option>October</option><option>November</option><option>December</option>
-                </select>
-            </div>
-            <div class="cl-field">
-                <label for="cbeLkYear"><i class="fas fa-calendar"></i> Year</label>
-                <select id="cbeLkYear"></select>
-            </div>
-            <div class="cl-field cl-actions">
-                <button class="btn btn-primary" onclick="runCbeLookup()"><i class="fas fa-magnifying-glass"></i> Analyse</button>
-                <button class="btn-download" onclick="cbeDownload('grade')"><i class="fas fa-file-pdf"></i> Download by Grade (PDF)</button>
-                <button class="btn-download alt" onclick="cbeDownload('all')"><i class="fas fa-users"></i> Download All Students (PDF)</button>
-            </div>
-        </div>
-
-        <div class="cbe-results-line" id="cbeResultsLine">
-            <i class="fas fa-chart-bar"></i>
-            Showing analysis for <strong id="cbeGradeLabel">-</strong> &mdash;
-            <strong id="cbePeriodLabel">-</strong>
-        </div>
-
-        <div class="cbe-distribution" id="cbeDistribution"></div>
-
-        <div class="cbe-summary">
-            <div class="cbe-summary-item">
-                <div class="num" id="cbeTotal">0</div>
-                <div class="label">Total Students</div>
-            </div>
-            <div class="cbe-summary-item">
-                <div class="num green" id="cbeExceeding">0</div>
-                <div class="label">Exceeding (EE)</div>
-            </div>
-            <div class="cbe-summary-item">
-                <div class="num blue" id="cbeMeeting">0</div>
-                <div class="label">Meeting (ME)</div>
-            </div>
-            <div class="cbe-summary-item">
-                <div class="num orange" id="cbeApproaching">0</div>
-                <div class="label">Approaching (AE)</div>
-            </div>
-            <div class="cbe-summary-item">
-                <div class="num red" id="cbeBelow">0</div>
-                <div class="label">Below (BE)</div>
-            </div>
-            <div class="cbe-summary-item">
-                <div class="num" id="cbeClassAvg" style="color:#6f42c1;">0%</div>
-                <div class="label">Class Average</div>
-            </div>
-        </div>
-
-        <div class="cbe-grid" id="cbeGrid">
-            <div class="cbe-item" style="grid-column:1/-1;text-align:center;color:#999;">Loading CBE analysis...</div>
-        </div>
-
-        <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-success" onclick="exportCBEResults()"><i class="fas fa-file-csv"></i> Export CBE Results (CSV)</button>
-            <button class="btn btn-info" onclick="window.print()"><i class="fas fa-print"></i> Print Analysis</button>
         </div>
     </div>
 
