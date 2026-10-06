@@ -2125,7 +2125,11 @@
             const data = await window.apiJson('/api/assessments/history?' + params.toString());
             if (!data.success) throw new Error(data.error || 'Could not load history');
 
-            fillHistoryFilter('histGrade', data.filters.grades, currentGrade);
+            // Always show all grade tabs in the dropdown, even if a grade has no
+            // history yet, so the teacher can browse any class.
+            const apiGrades = data.filters.grades || [];
+            const allGrades = [...new Set([...Object.keys(GRADE_CONFIGS), ...apiGrades])].sort();
+            fillHistoryFilter('histGrade', allGrades, '');
             fillHistoryFilter('histPeriod', data.filters.periods, period);
             fillHistoryFilter('histType', data.filters.types, type);
             fillHistoryFilter('histName', data.filters.names, name);

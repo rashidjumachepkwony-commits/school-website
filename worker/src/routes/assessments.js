@@ -318,7 +318,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
   *{box-sizing:border-box}
   @page{size:A4 landscape;margin:12mm 10mm}
   body{font-family:"Segoe UI",Arial,Helvetica,sans-serif;color:#12233f;margin:0;padding:18px;background:#eef1f5;font-size:11px}
-  .sheet{max-width:1400px;margin:0 auto;background:#fff;padding:26px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
+   .sheet{max-width:none;margin:0 auto;background:#fff;padding:26px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
   .hd{display:flex;align-items:center;gap:16px;border-bottom:3px solid #d4a017;padding-bottom:12px}
   .crest{width:60px;height:60px;flex:0 0 60px;border-radius:50%;background:linear-gradient(135deg,#0a1628,#1c3a6e);color:#d4a017;display:flex;align-items:center;justify-content:center;font-size:26px}
   .hd h1{margin:0;font-size:21px;color:#0a1628;letter-spacing:.5px}
@@ -327,8 +327,8 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
   .meta{display:flex;flex-wrap:wrap;gap:8px 26px;margin:14px 0 6px;padding:10px 14px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px}
   .meta div{font-size:11.5px}
   .meta b{color:#0a1628;margin-right:5px}
-  table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{border:1px solid #cfd8e6;padding:5px 7px;text-align:left;vertical-align:middle}
+   table{width:100%;border-collapse:collapse;margin-top:10px;table-layout:fixed}
+   th,td{border:1px solid #cfd8e6;padding:5px 7px;text-align:left;vertical-align:middle;word-break:break-word;overflow-wrap:break-word}
   thead th{background:#0a1628;color:#fff;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
   tbody tr:nth-child(even){background:#fafcff}
   .ctr{text-align:center}
@@ -368,8 +368,8 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
   .tip{margin:10px 0 0;font-size:11px;color:#5a6b85}
   .btn{display:inline-block;background:#d4a017;color:#12233f;border:0;border-radius:7px;padding:9px 18px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit;margin-right:8px}
   .btn.sec{background:#0a1628;color:#fff}
-  .toolbar{text-align:right;margin:0 auto 12px;max-width:1400px}
-  @media print{body{background:#fff;padding:0}.sheet{box-shadow:none;padding:0;max-width:none}.toolbar{display:none}thead{display:table-header-group}tr{page-break-inside:avoid}}
+   .toolbar{text-align:right;margin:0 auto 12px;max-width:none}
+   @media print{body{background:#fff;padding:0}.sheet{box-shadow:none;padding:0;max-width:none}.toolbar{display:none}thead{display:table-header-group}tr{page-break-inside:avoid}}
 </style></head>
 <body>
 <div class="toolbar">
@@ -530,9 +530,13 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
       updatedAt: now
     };
     const existing = record.studentId ? await db.collection('assessments').findOne({
-      studentId: record.studentId, assessmentPeriod: record.assessmentPeriod, assessmentType: record.assessmentType
+      studentId: record.studentId, grade: record.grade,
+      assessmentPeriod: record.assessmentPeriod, assessmentType: record.assessmentType,
+      assessmentName: record.assessmentName
     }) : await db.collection('assessments').findOne({
-      studentName: record.studentName, grade: record.grade, assessmentPeriod: record.assessmentPeriod, assessmentType: record.assessmentType
+      studentName: record.studentName, grade: record.grade,
+      assessmentPeriod: record.assessmentPeriod, assessmentType: record.assessmentType,
+      assessmentName: record.assessmentName
     });
     if (existing) {
       await db.collection('assessments').updateOne({ _id: existing._id }, { $set: record });
@@ -617,13 +621,26 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
       try {
         const existing = studentId
           ? await db.collection('assessments').findOne({
-              studentId, grade, assessmentPeriod: record.assessmentPeriod, assessmentType: record.assessmentType
+              studentId, grade, assessmentPeriod: record.assessmentPeriod, assessmentType: record.assessmentType,
+              assessmentName: record.assessmentName
             })
           : await db.collection('assessments').findOne({
-              studentName, grade, assessmentPeriod: record.assessmentPeriod, assessmentType: record.assessmentType
+              studentName, grade, assessmentPeriod: record.assessmentPeriod, assessmentType: record.assessmentType,
+              assessmentName: record.assessmentName
             });
 
         if (existing) {
+          // Merge: preserve assessment subjects that were already saved but are
+          // not in the current grid (e.g. uploaded scores). Only replace subjects
+          // that are being actively edited, and append any new ones.
+          const existingAssessments = existing.assessments || [];
+          const mergedAssessments = [...existingAssessments.map(a => ({ ...a }))];
+          for (const newA of record.assessments) {
+            const idx = mergedAssessments.findIndex(a => (a.subject || '') === (newA.subject || ''));
+            if (idx >= 0) mergedAssessments[idx] = newA;
+            else mergedAssessments.push(newA);
+          }
+          record.assessments = mergedAssessments;
           await db.collection('assessments').updateOne({ _id: existing._id }, { $set: record });
         } else {
           await db.collection('assessments').insertOne({ ...record, createdAt: now });
@@ -780,15 +797,15 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
 *{box-sizing:border-box}
 @page{size:A4 landscape;margin:12mm 10mm}
 body{font-family:"Segoe UI",Arial;margin:0;padding:18px;background:#eef1f5;color:#12233f;font-size:11px}
-.sheet{max-width:1400px;margin:0 auto;background:#fff;padding:26px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
+.sheet{max-width:none;margin:0 auto;background:#fff;padding:26px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
 .hd{display:flex;align-items:center;gap:16px;border-bottom:3px solid #d4a017;padding-bottom:12px}
 .crest{width:60px;height:60px;flex:0 0 60px;border-radius:50%;background:linear-gradient(135deg,#0a1628,#1c3a6e);color:#d4a017;display:flex;align-items:center;justify-content:center;font-size:26px}
 .hd h1{margin:0;font-size:21px;color:#0a1628}
 .hd .tag{font-size:11px;color:#5a6b85;text-transform:uppercase;letter-spacing:2px}
 .hd .motto{font-size:11px;color:#8a6d1f;font-style:italic;margin-top:2px}
 .meta{display:flex;flex-wrap:wrap;gap:8px 26px;margin:14px 0 6px;padding:10px 14px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #cfd8e6;padding:5px 7px;text-align:left}
+table{width:100%;border-collapse:collapse;margin-top:10px;table-layout:fixed}
+th,td{border:1px solid #cfd8e6;padding:5px 7px;text-align:left;word-break:break-word;overflow-wrap:break-word}
 thead th{background:#0a1628;color:#fff;font-size:10.5px;text-transform:uppercase}
 tbody tr:nth-child(even){background:#fafcff}
 .ctr{text-align:center}
@@ -806,7 +823,7 @@ tbody tr:nth-child(even){background:#fafcff}
 .foot{margin-top:14px;padding-top:8px;border-top:1px solid #e3e9f2;font-size:9.5px;color:#8a97ab;display:flex;justify-content:space-between}
 .btn{display:inline-block;background:#d4a017;color:#12233f;border:0;border-radius:7px;padding:9px 18px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit;margin-right:8px}
 .btn.sec{background:#0a1628;color:#fff}
-.toolbar{text-align:right;margin:0 auto 12px;max-width:1400px}
+.toolbar{text-align:right;margin:0 auto 12px;max-width:none}
 @media print{body{background:#fff;padding:0}.sheet{box-shadow:none;padding:0;max-width:none}.toolbar{display:none}thead{display:table-header-group}tr{page-break-inside:avoid}}
 </style></head><body>
 <div class="toolbar"><button class="btn" onclick="window.print()">&#128424; Save as PDF / Print</button><button class="btn sec" onclick="window.close()">Close</button></div>
@@ -956,12 +973,15 @@ tbody tr:nth-child(even){background:#fafcff}
     const policy = loadPolicy(policySetting && policySetting.value ? JSON.stringify(policySetting.value) : null);
 
     // One entry per sitting, aggregating what was actually entered.
+    // Grade is part of the key so that the same period/type/name in two
+    // different grades are shown as separate sittings, not merged.
     const map = new Map();
     for (const r of rows) {
       const period = r.assessmentPeriod || '';
       const type = r.assessmentType || '';
       const name = r.assessmentName || '';
-      const key = `${period}|${type}|${name}`;
+      const g = r.grade || '';
+      const key = `${period}|${type}|${name}|${g}`;
       if (!map.has(key)) {
         map.set(key, {
           key,
@@ -1175,7 +1195,7 @@ tbody tr:nth-child(even){background:#fafcff}
   *{box-sizing:border-box}
   @page{size:A4 landscape;margin:12mm 10mm}
   body{font-family:"Segoe UI",Arial;margin:0;padding:20px;background:#eef1f5;color:#12233f;font-size:12px}
-  .sheet{max-width:1200px;margin:0 auto;background:#fff;padding:26px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
+   .sheet{max-width:none;margin:0 auto;background:#fff;padding:26px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
   .hd{display:flex;align-items:center;gap:15px;border-bottom:3px solid #d4a017;padding-bottom:12px}
   .crest{width:58px;height:58px;flex:0 0 58px;border-radius:50%;background:linear-gradient(135deg,#0a1628,#1c3a6e);color:#d4a017;display:flex;align-items:center;justify-content:center;font-size:25px}
   .hd h1{margin:0;font-size:20px;color:#0a1628}
@@ -1193,8 +1213,8 @@ tbody tr:nth-child(even){background:#fafcff}
   .pill{display:inline-block;padding:4px 12px;border-radius:12px;font-weight:800;font-size:12px}
   .lv-exceed{background:#dff3e4;color:#136b2c}.lv-meet{background:#dbeafe;color:#12459b}
   .lv-approach{background:#fff3cd;color:#856404}.lv-below{background:#fbdcdc;color:#8c1c24}
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{border:1px solid #cfd8e6;padding:6px 8px;text-align:left}
+   table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed}
+   th,td{border:1px solid #cfd8e6;padding:6px 8px;text-align:left;word-break:break-word;overflow-wrap:break-word}
   thead th{background:#0a1628;color:#fff;font-size:10.5px;text-transform:uppercase}
   .ctr{text-align:center}.mx{color:#8a97ab;font-size:9px;margin-left:1px}
   .up{color:#136b2c;font-weight:700}.down{color:#8c1c24;font-weight:700}
@@ -1210,8 +1230,8 @@ tbody tr:nth-child(even){background:#fafcff}
   .foot{margin-top:12px;padding-top:8px;border-top:1px solid #e3e9f2;font-size:9.5px;color:#8a97ab;display:flex;justify-content:space-between}
   .btn{display:inline-block;background:#d4a017;color:#12233f;border:0;border-radius:7px;padding:9px 16px;font-weight:800;font-size:12.5px;cursor:pointer;font-family:inherit;margin-right:8px}
   .btn.sec{background:#0a1628;color:#fff}
-  .toolbar{text-align:right;margin:0 auto 12px;max-width:1200px}
-  @media print{body{background:#fff;padding:0}.sheet{box-shadow:none;padding:0}.toolbar{display:none}tr{page-break-inside:avoid}}
+   .toolbar{text-align:right;margin:0 auto 12px;max-width:none}
+   @media print{body{background:#fff;padding:0}.sheet{box-shadow:none;padding:0}.toolbar{display:none}tr{page-break-inside:avoid}}
 </style></head><body>
 <div class="toolbar"><button class="btn" onclick="window.print()">&#128424; Save as PDF / Print</button><button class="btn sec" onclick="window.close()">Close</button></div>
 <div class="sheet">
