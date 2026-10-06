@@ -315,23 +315,26 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CBE Class Report &mdash; ${escapeHtml(grade)}</title>
 <style>
-  *{box-sizing:border-box}
-  @page{size:A4 landscape;margin:12mm 10mm}
-  body{font-family:"Segoe UI",Arial,Helvetica,sans-serif;color:#12233f;margin:0;padding:18px;background:#eef1f5;font-size:11px}
-   .sheet{max-width:none;margin:0 auto;background:#fff;padding:26px 30px;box-shadow:0 6px 28px rgba(0,0,0,.12)}
-  .hd{display:flex;align-items:center;gap:16px;border-bottom:3px solid #d4a017;padding-bottom:12px}
-  .crest{width:60px;height:60px;flex:0 0 60px;border-radius:50%;background:linear-gradient(135deg,#0a1628,#1c3a6e);color:#d4a017;display:flex;align-items:center;justify-content:center;font-size:26px}
-  .hd h1{margin:0;font-size:21px;color:#0a1628;letter-spacing:.5px}
-  .hd .tag{font-size:11px;color:#5a6b85;text-transform:uppercase;letter-spacing:2px}
-  .hd .motto{font-size:11px;color:#8a6d1f;font-style:italic;margin-top:2px}
-  .meta{display:flex;flex-wrap:wrap;gap:8px 26px;margin:14px 0 6px;padding:10px 14px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px}
-  .meta div{font-size:11.5px}
-  .meta b{color:#0a1628;margin-right:5px}
-   table{width:100%;border-collapse:collapse;margin-top:10px;table-layout:fixed}
-   th,td{border:1px solid #cfd8e6;padding:5px 7px;text-align:left;vertical-align:middle;word-break:break-word;overflow-wrap:break-word}
-  thead th{background:#0a1628;color:#fff;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
-  tbody tr:nth-child(even){background:#fafcff}
-  .ctr{text-align:center}
+   *{box-sizing:border-box}
+   @page{size:A4 landscape;margin:10mm}
+   body{font-family:"Segoe UI",Arial,Helvetica,sans-serif;color:#12233f;margin:0;padding:10px;background:#eef1f5;font-size:10.5px}
+    .sheet{max-width:none;margin:0 auto;background:#fff;padding:18px 20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+   .hd{display:flex;align-items:center;gap:14px;border-bottom:3px solid #d4a017;padding-bottom:8px}
+   .crest{width:50px;height:50px;flex:0 0 50px;border-radius:50%;background:linear-gradient(135deg,#0a1628,#1c3a6e);color:#d4a017;display:flex;align-items:center;justify-content:center;font-size:22px}
+   .hd h1{margin:0;font-size:18px;color:#0a1628;letter-spacing:.3px}
+   .hd .tag{font-size:9.5px;color:#5a6b85;text-transform:uppercase;letter-spacing:1.5px}
+   .hd .motto{font-size:10px;color:#8a6d1f;font-style:italic}
+   .meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin:10px 0 6px;padding:8px 12px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:6px}
+   .meta div{font-size:10.5px}
+   .meta b{color:#0a1628;margin-right:4px}
+    table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed}
+    th,td{border:1px solid #d0dbe6;padding:4px 5px;text-align:left;vertical-align:middle;word-break:break-word;overflow-wrap:break-word;font-size:9px}
+   thead th{background:#0a1628;color:#fff;font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;padding:6px 5px;white-space:pre-line;line-height:1.2}
+   tbody tr:nth-child(even){background:#fafcff}
+   tbody tr:nth-child(odd){background:#fff}
+   .ctr{text-align:center}
+   .mx{color:#8a97ab;font-size:8px;margin-left:1px}
+   .na{color:#c3ccdb}
   .mx{color:#8a97ab;font-size:9px;margin-left:1px}
   .na{color:#c3ccdb}
   /* per-subject performance level shown under each mark */

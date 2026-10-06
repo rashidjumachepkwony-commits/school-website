@@ -267,8 +267,6 @@ export function buildClassReportPdf(d) {
   }
   return pages;
 }
-  return pages;
-}
 
 /**
  * All-students report: the same sheet for every grade that has marks.
@@ -314,9 +312,9 @@ export function buildAllStudentsPdf(d) {
   });
   const tableHeaderH = Math.max(20, maxHeaderLines * 10 + 4);
 
-  const firstPerPage = calcRowsPerPage(true, tableHeaderH);
-  const contPerPage = calcRowsPerPage(false, tableHeaderH);
-  const totalPages = Math.ceil(d.rows.length / contPerPage) || 1;
+  const firstPerPage = Math.max(6, calcRowsPerPage(true, tableHeaderH) - 1);
+  const contPerPage = Math.max(6, calcRowsPerPage(false, tableHeaderH) - 1);
+  const totalPages = Math.ceil((d.rows.length - firstPerPage) / contPerPage) + 1;
 
   let pageNum = 0;
   let from = 0;
