@@ -807,9 +807,6 @@
                 <button class="btn-download" onclick="downloadClassReport()">
                     <i class="fas fa-file-pdf"></i> Whole Class (this grade)
                 </button>
-                <button class="btn-download alt" onclick="downloadAllStudentsPDF()">
-                    <i class="fas fa-users"></i> All Students Results
-                </button>
                 <button class="btn-download green" onclick="downloadStudentPicker()">
                     <i class="fas fa-user"></i> One Student's Result
                 </button>
@@ -1142,14 +1139,12 @@
                 studentsData = data.students || [];
                 renderMarksTable();
                 loadStats();
-                renderCBEAnalysis();
                 showSaveStatus('Loaded', 'saved');
                 setTimeout(() => hideSaveStatus(), 1500);
             } else {
                 studentsData = [];
                 renderMarksTable();
                 loadStats();
-                renderCBEAnalysis();
                 showSaveStatus('No data', 'saved');
                 setTimeout(() => hideSaveStatus(), 1500);
             }
@@ -1158,7 +1153,6 @@
             studentsData = [];
             renderMarksTable();
             loadStats();
-            renderCBEAnalysis();
             showSaveStatus('Error loading', 'error');
             setTimeout(() => hideSaveStatus(), 2000);
         }
@@ -2028,91 +2022,6 @@
     }
 
     // ============================================
-    // LOAD STUDENT LIST
-    // ============================================
-    async function loadStudentList() {
-        const filterGrade = document.getElementById('filterGrade').value;
-        const searchTerm = document.getElementById('searchStudent').value.toLowerCase().trim();
-        const period = document.getElementById('assessmentPeriod').value;
-        const type = document.getElementById('assessmentType').value;
-        
-        try {
-            const params = new URLSearchParams();
-            if (period) params.set('period', period);
-            if (type) params.set('type', type);
-            const response = await fetch(`/api/assessments/all?${params.toString()}`);
-            const data = await response.json();
-
-            if (data.success) {
-                let students = data.students || [];
-                
-                if (filterGrade) {
-                    students = students.filter(s => s.grade === filterGrade);
-                }
-                if (searchTerm) {
-                    students = students.filter(s => s.studentName.toLowerCase().includes(searchTerm));
-                }
-
-                const tbody = document.getElementById('studentsTableBody');
-                if (students.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#999;">No students found</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = students.map((student, index) => {
-                    const performanceClass = {
-                        'Exceeding Expectation': 'status-exceeding',
-                        'Meeting Expectation': 'status-meeting',
-                        'Approaching Expectation': 'status-approaching',
-                        'Below Expectation': 'status-below'
-                    }[student.performanceLevel] || '';
-
-                    const list = student.assessments || [];
-                    const scored = list.filter(a => a.score !== null && a.score !== undefined && a.score !== '');
-                    const total = scored.reduce((s, a) => s + (Number(a.score) || 0), 0);
-                    const maxTotal = scored.reduce((s, a) => s + (Number(a.maxScore) || 0), 0);
-                    const avgScore = scored.length ? (total / scored.length) : 0;
-                    const avgPct = maxTotal > 0 ? ((total / maxTotal) * 100) : 0;
-
-                    // Per-subject levels, as a compact mix, from the stored codes.
-                    const mix = {};
-                    for (const a of scored) {
-                        const code = a.code || cbeLevelShort(gradeFor(a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0));
-                        if (code) mix[code] = (mix[code] || 0) + 1;
-                    }
-                    const mixText = Object.entries(mix).map(([c, n]) => n + '&times;' + c).join(' ');
-
-                    const id = student._id || '';
-
-                    return `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td><strong>${escapeHtml(student.studentName || '')}</strong></td>
-                            <td>${escapeHtml(student.grade || '-')}</td>
-                            <td>${list.length}</td>
-                            <td><strong>${total}</strong></td>
-                            <td><strong>${scored.length ? avgScore.toFixed(2) : '-'}</strong></td>
-                            <td>${maxTotal > 0 ? avgPct.toFixed(1) + '%' : '-'}</td>
-                            <td>
-                                <span class="${performanceClass}">${escapeHtml(student.performanceLevel || 'Not Assessed')}${student.performanceCode && student.performanceCode !== 'NA' ? ' (' + escapeHtml(student.performanceCode) + ')' : ''}</span>
-                                ${mixText ? '<div class="lv-mix" title="Subjects at each level">' + mixText + '</div>' : ''}
-                            </td>
-                            <td style="white-space:nowrap;">
-                                <button class="mini-btn view" title="View this student's result slip" onclick="viewStudentReport('${id}')"><i class="fas fa-file-alt"></i> View</button>
-                                <button class="mini-btn" title="Load into the marks grid to edit" onclick="editStudentFromList('${id}')"><i class="fas fa-pen"></i> Edit</button>
-                                <button class="mini-btn dl" title="Download this student's result" onclick="downloadReport('${id}')"><i class="fas fa-download"></i> PDF</button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            document.getElementById('studentsTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc3545;">Error loading students</td></tr>`;
-        }
-    }
-
-    // ============================================
     // EDIT STUDENT FROM LIST
     // ============================================
     async function editStudentFromList(studentId) {
@@ -2356,13 +2265,7 @@
         if (d) p.set('date', d);
         if (extra) for (const [k, v] of Object.entries(extra)) p.set(k, v);
         return p.toString();
-    }
-
-    /** All students who have marks, every grade, as one PDF. */
-    function downloadAllStudentsPDF() {
-      const url = apiUrl('/api/assessments/all-report?' + reportFilterParams() + '&download=1');
-      saveReportFile(url, 'CBE-Results-All-Students.pdf');
-    }
+}
 
     /** Let the teacher pick one student, then open that result slip. */
     function downloadStudentPicker() {
