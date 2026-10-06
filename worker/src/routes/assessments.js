@@ -1061,7 +1061,8 @@ tbody tr:nth-child(even){background:#fafcff}
     const query = {
       grade,
       ...(period ? { assessmentPeriod: period } : {}),
-      ...(type ? { assessmentType: type } : {})
+      ...(type ? { assessmentType: type } : {}),
+      ...(name ? { assessmentName: name } : {})
     };
     const records = await db.collection('assessments').find(query).toArray();
     const mine = records.find(r => String(r.studentId) === String(student._id.toString()))
@@ -1149,22 +1150,23 @@ tbody tr:nth-child(even){background:#fafcff}
 
     const levelClass = { 'Exceeding Expectation': 'lv-exceed', 'Meeting Expectation': 'lv-meet', 'Approaching Expectation': 'lv-approach', 'Below Expectation': 'lv-below' };
     const subjCells = subjectRows.map(s => {
-      const bar = s.mySubjPct === null ? 0 : Math.max(0, Math.min(100, s.mySubjPct));
+      const pct = s.mySubjPct === null || s.mySubjPct === undefined ? null : s.mySubjPct;
+      const bar = pct === null ? 0 : Math.max(0, Math.min(100, pct));
       const cls = s.level ? (levelClass[s.level.level] || '') : '';
       return `<tr>
-        <td>${escapeHtml(s.subject)}</td>
-        <td class="ctr"><strong>${s.score === null ? '-' : s.score}</strong><span class="mx">/${s.max}</span></td>
-        <td class="ctr">${s.mySubjPct === null ? '-' : s.mySubjPct + '%'}</td>
-        <td class="ctr">${s.classAvg === null ? '-' : s.classAvg}</td>
-        <td class="ctr ${s.delta === null ? '' : s.delta >= 0 ? 'up' : 'down'}">${s.delta === null ? '-' : (s.delta >= 0 ? '+' : '') + s.delta}</td>
+        <td>${escapeHtml(s.subject || '-')}</td>
+        <td class="ctr"><strong>${s.score === null || s.score === undefined ? '-' : s.score}</strong><span class="mx">/${s.max || 0}</span></td>
+        <td class="ctr">${pct === null ? '-' : pct + '%'}</td>
+        <td class="ctr">${s.classAvg === null || s.classAvg === undefined ? '-' : s.classAvg}</td>
+        <td class="ctr ${s.delta === null || s.delta === undefined ? '' : s.delta >= 0 ? 'up' : 'down'}">${s.delta === null || s.delta === undefined ? '-' : (s.delta >= 0 ? '+' : '') + s.delta}</td>
         <td class="barcell"><div class="bar"><i style="width:${bar}%"></i></div></td>
-        <td class="ctr ${cls}">${s.level ? escapeHtml(s.level.code) + '<br>' + escapeHtml(s.level.name) : '-'}</td>
+        <td class="ctr ${cls}">${s.level ? escapeHtml(s.level.code || '-') + '<br>' + escapeHtml(s.level.name || '') : '-'}</td>
       </tr>`;
     }).join('');
 
-    const strengthList = strengths.filter(s => s.delta !== null)
-      .map(s => `<li><b>${escapeHtml(s.subject)}</b> - ${s.delta > 0 ? 'above' : 'in line with'} the class average by ${Math.abs(s.delta)}%.</li>`).join('');
-    const focusList = focus.map(s => `<li><b>${escapeHtml(s.subject)}</b> - ${s.mySubjPct}% scored. More practice needed here.</li>`).join('');
+    const strengthList = strengths.filter(s => s.delta !== null && s.delta !== undefined)
+      .map(s => `<li><b>${escapeHtml(s.subject || '-')}</b> - ${s.delta > 0 ? 'above' : 'in line with'} the class average by ${Math.abs(s.delta)}%.</li>`).join('');
+    const focusList = focus.map(s => `<li><b>${escapeHtml(s.subject || '-')}</b> - ${(s.mySubjPct === null || s.mySubjPct === undefined ? '-' : s.mySubjPct + '%')} scored. More practice needed here.</li>`).join('');
 
     const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1181,6 +1183,8 @@ tbody tr:nth-child(even){background:#fafcff}
   .hd .motto{font-size:11px;color:#8a6d1f;font-style:italic}
   .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 22px;margin:14px 0;padding:11px 14px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px;font-size:12.5px}
   .meta b{color:#0a1628;margin-right:5px}
+  .who{display:flex;flex-wrap:wrap;gap:14px 26px;margin:12px 0;padding:12px 16px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px;font-size:12.5px;line-height:1.5}
+  .who b{color:#0a1628}
   .score{display:flex;align-items:center;gap:18px;margin:12px 0;padding:14px 16px;border:1px solid #e3e9f2;border-radius:10px;background:#fbfcfe}
   .score .ring{width:86px;height:86px;flex:0 0 86px;border-radius:50%;background:conic-gradient(#d4a017 var(--p), #e8edf5 0);display:flex;align-items:center;justify-content:center}
   .score .ring i{width:66px;height:66px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:20px;color:#0a1628}
@@ -1216,7 +1220,7 @@ tbody tr:nth-child(even){background:#fafcff}
     <div class="motto">&ldquo;Assurance for Excellence&rdquo;</div></div></div>
 
   <div class="who">
-    <div><b>Student:</b> ${escapeHtml(fullName)}</div>
+    <div><b>Student:</b> ${escapeHtml(fullName || '-')}</div>
     <div><b>Admission No:</b> ${escapeHtml(student.admissionNumber || '-')}</div>
     <div><b>Class:</b> ${escapeHtml(grade)}</div>
     <div><b>Period:</b> ${escapeHtml(period || '-')}</div>
@@ -1225,16 +1229,16 @@ tbody tr:nth-child(even){background:#fafcff}
   </div>
 
   <div class="score">
-    <div class="ring" style="--p:${Math.max(0, Math.min(100, myPct))}%"><i>${myPct}%</i></div>
+    <div class="ring" style="--p:${Math.max(0, Math.min(100, myPct || 0))}%"><i>${myPct || 0}%</i></div>
     <div class="meta">
-      <div><b>Total Score:</b> ${myTotal} / ${maxTotal}</div>
-      <div><b>Average Score:</b> ${myAvgScore} (over ${myScored} subject${myScored === 1 ? '' : 's'})</div>
-      <div><b>Average Percentage:</b> ${myPct}%</div>
-      <div><b>Overall Performance Level:</b> <span class="pill ${levelClass[graded.level] || ''}">${escapeHtml(graded.level)} (${escapeHtml(graded.code)})</span>
-        <span style="color:#8a97ab">&nbsp;from subject levels${myGrading.counts ? ' (' + Object.entries(myGrading.counts).map(([c, n]) => n + '&times;' + c).join(', ') + ')' : ''}</span></div>
-      <div><b>Position in class:</b> ${position} of ${outOf} <span style="color:#8a97ab">(by average score)</span></div>
-      <div><b>Class average score:</b> ${classMeanAvg} &nbsp;|&nbsp; <b>class average %:</b> ${classMean}%</div>
-      <div><b>Class performance:</b> <span class="pill ${levelClass[classLevel.level] || ''}">${escapeHtml(classLevel.level)}</span></div>
+      <div><b>Total Score:</b> ${myTotal || 0} / ${maxTotal || 0}</div>
+      <div><b>Average Score:</b> ${myAvgScore || 0} (over ${myScored || 0} subject${(myScored || 0) === 1 ? '' : 's'})</div>
+      <div><b>Average Percentage:</b> ${(myPct || 0)}%</div>
+      <div><b>Overall Performance Level:</b> <span class="pill ${levelClass[graded.level] || ''}">${escapeHtml(graded.level || 'NA')} (${escapeHtml(graded.code || 'NA')})</span>
+        <span style="color:#8a97ab">&nbsp;from subject levels${myGrading.counts && Object.keys(myGrading.counts).length ? ' (' + Object.entries(myGrading.counts).map(([c, n]) => n + '&times;' + c).join(', ') + ')' : ''}</span></div>
+      <div><b>Position in class:</b> ${position || 0} of ${outOf || 0} <span style="color:#8a97ab">(by average score)</span></div>
+      <div><b>Class average score:</b> ${classMeanAvg || 0} &nbsp;|&nbsp; <b>class average %:</b> ${(classMean || 0)}%</div>
+      <div><b>Class performance:</b> <span class="pill ${levelClass[classLevel.level] || ''}">${escapeHtml(classLevel.level || 'Not Assessed')}</span></div>
     </div>
   </div>
 

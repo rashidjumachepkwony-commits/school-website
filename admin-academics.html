@@ -440,6 +440,8 @@
         .btn-download.alt:hover { background: #16305c; }
         .btn-download.green { background: #1c7a34; box-shadow: 0 4px 14px rgba(28,122,52,.35); }
         .btn-download.green:hover { background: #145926; }
+        .btn-download.blue { background: #0a6ed1; box-shadow: 0 4px 14px rgba(10,110,209,.35); }
+        .btn-download.blue:hover { background: #085bb7; }
         .dl-legend { display:flex; align-items:center; gap:8px; font-size:12px; color:#5a6b85; margin-top:10px; }
 
         /* ===== ASSESSMENT HISTORY ===== */
@@ -810,6 +812,14 @@
                 <button class="btn-download green" onclick="downloadStudentPicker()">
                     <i class="fas fa-user"></i> One Student's Result
                 </button>
+                <button class="btn-download blue" onclick="downloadClassByGrade()">
+                    <i class="fas fa-graduation-cap"></i> Download by Grade
+                </button>
+            </div>
+            <div class="dl-grade-select" style="margin-top:12px;">
+                <select id="downloadGrade" onchange="downloadClassByGrade()" style="width:100%;padding:10px;border-radius:8px;border:2px solid #d4a017;font-size:13px;font-weight:600;background:#fff;">
+                    <option value="">— Select grade to download —</option>
+                </select>
             </div>
         </div>
 
@@ -2260,6 +2270,30 @@
         return p.toString();
 }
 
+    function downloadClassByGrade() {
+        const el = document.getElementById('downloadGrade');
+        if (!el) return;
+        const grade = el.value;
+        if (!grade) return;
+        const params = new URLSearchParams();
+        params.set('period', currentPeriod);
+        params.set('type', currentType);
+        const n = getCurrentAssessmentName();
+        if (n) params.set('name', n);
+        const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(grade) +
+            '?' + params.toString() + '&download=1');
+        saveReportFile(url, 'Class-Results-' + grade.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
+    }
+
+    /** Populate the "Download by Grade" dropdown on init. */
+    function populateDownloadGrades() {
+        const sel = document.getElementById('downloadGrade');
+        if (!sel) return;
+        const grades = Object.keys(GRADE_CONFIGS);
+        sel.innerHTML = '<option value="">— Select grade to download —</option>' +
+            grades.map(g => '<option value="' + escapeHtml(g) + '">' + escapeHtml(g) + '</option>').join('');
+    }
+
     /** Let the teacher pick one student, then open that result slip. */
     function downloadStudentPicker() {
         const list = studentsData.filter(s => s._id && !String(s._id).startsWith('new_'));
@@ -2287,6 +2321,7 @@
         updateAssessmentInfo();
         loadGradingPolicy();
         describeReportFilters();
+        populateDownloadGrades();
         loadSubjectConfig();
         loadGradeData();
         loadHistory();
