@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/js/config.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.min.js"></script>
     <title>Authentication Callback - Changara Star Academy</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,102 +37,81 @@
     </div>
 
     <script>
-        (async function() {
-            const alertEl = document.getElementById('alert');
-            const spinnerEl = document.getElementById('spinner');
-            const showAlert = function(msg, type) {
+        (function() {
+            var alertEl = document.getElementById('alert');
+            var spinnerEl = document.getElementById('spinner');
+            function showAlert(msg, type) {
                 spinnerEl.style.display = 'none';
                 alertEl.className = 'alert ' + type;
                 alertEl.style.display = 'block';
                 alertEl.textContent = msg;
-            };
+            }
 
-            // Fetch Supabase config from the Worker
-            let supabaseUrl = '', supabaseAnonKey = '';
-            try {
-                const cfg = await window.apiJson('/api/config');
-                supabaseUrl = cfg.supabaseUrl || '';
-                supabaseAnonKey = cfg.supabaseAnonKey || '';
-            } catch (e) {
-                showAlert('Could not load server configuration. Please try again.', 'error');
+            // ----------------------------------------------------------------
+            // Parse the OAuth response from the URL hash fragment.
+            //
+            // Supabase's implicit-flow redirect places the access_token (and
+            // other fields) in the hash.  We parse it directly rather than
+            // relying on supabase.auth.getSession(), which async-hydrates from
+            // localStorage and can hang when no session is stored locally.
+            // ----------------------------------------------------------------
+            var hash = window.location.hash.substring(1);
+            var params = new URLSearchParams(hash);
+
+            // Check for OAuth error
+            var errorDesc = params.get('error_description') || params.get('error');
+            if (errorDesc) {
+                showAlert('Authentication error: ' + errorDesc, 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
                 return;
             }
 
-            if (!supabaseUrl || !supabaseAnonKey) {
-                showAlert('Supabase is not configured on the server yet.', 'error');
-                return;
-            }
-
-            // Initialize Supabase client
-            const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
-
-            try {
-                // Attempt to retrieve the session via the SDK. It reads the
-                // URL hash for implicit-flow responses automatically.
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-                if (sessionError || !session) {
-                    // Fall back to parsing the hash directly (implicit flow).
-                    const hashParams = window.location.hash.substring(1);
-                    const params = new URLSearchParams(hashParams);
-                    const errorDesc = params.get('error_description') || params.get('error');
-
-                    if (errorDesc) {
-                        showAlert('Authentication error: ' + errorDesc, 'error');
-                        return;
-                    }
-
-                    const accessToken = params.get('access_token');
-                    if (!accessToken) {
-                        showAlert('No authentication session found. Please try signing in again.', 'error');
-                        return;
-                    }
-
-                    // Exchange the token for a Worker JWT
-                    const result = await window.apiJson('/api/admin/exchange-token', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ access_token: accessToken })
-                    });
-
-                    if (result.success) {
-                        localStorage.setItem('adminToken', result.token);
-                        localStorage.setItem('admin', JSON.stringify(result.admin));
-                        window.location.href = '/admin-dashboard.html';
-                    } else if (result.pending) {
-                        showAlert('Your account has been created and is pending admin approval. Please contact an administrator.', 'error');
-                    } else {
-                        showAlert(result.error || result.message || 'Login failed', 'error');
-                    }
-                    // Clean up URL hash
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    return;
+            var accessToken = params.get('access_token');
+            if (!accessToken) {
+                // No token in hash — could be a PKCE flow where the SDK already
+                // exchanged the code.  Try to read from localStorage as last resort.
+                var storedSession = localStorage.getItem('supabase.auth.token');
+                if (storedSession) {
+                    try {
+                        var parsed = JSON.parse(storedSession);
+                        accessToken = parsed.access_token || parsed.access_token;
+                    } catch (e) { /* fall through */ }
                 }
+            }
 
-                // Got a valid session from the SDK
-                const accessToken = session.access_token;
-                const result = await window.apiJson('/api/admin/exchange-token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ access_token: accessToken })
-                });
+            if (!accessToken) {
+                showAlert('No authentication session found. Please try signing in again.', 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
 
+            // ----------------------------------------------------------------
+            // Exchange the Supabase access token for a Worker JWT via the
+            // existing /api/admin/exchange-token endpoint.
+            // ----------------------------------------------------------------
+            showAlert('Verifying your account...', 'success');
+
+            window.apiJson('/api/admin/exchange-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ access_token: accessToken })
+            }).then(function(result) {
                 // Clean up URL hash
                 window.history.replaceState({}, document.title, window.location.pathname);
 
-                if (result.success) {
+                if (result.pending) {
+                    showAlert('Your account has been created and is pending admin approval. Please contact an administrator.', 'error');
+                } else if (result.success) {
                     localStorage.setItem('adminToken', result.token);
                     localStorage.setItem('admin', JSON.stringify(result.admin));
                     window.location.href = '/admin-dashboard.html';
-                } else if (result.pending) {
-                    // 202 — new Google user, profile created but pending approval
-                    showAlert('Your account has been created and is pending admin approval. Please contact an administrator.', 'error');
                 } else {
                     showAlert(result.error || result.message || 'Login failed', 'error');
                 }
-            } catch (err) {
+            }).catch(function(err) {
+                window.history.replaceState({}, document.title, window.location.pathname);
                 showAlert('Authentication error: ' + err.message, 'error');
-            }
+            });
         })();
     </script>
 </body>
