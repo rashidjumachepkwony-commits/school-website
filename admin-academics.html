@@ -811,7 +811,6 @@
                     <i class="fas fa-user"></i> One Student's Result
                 </button>
             </div>
-            <div class="dl-legend"><i class="fas fa-info-circle"></i> Filters above (grade, period, type, name, date) apply to every download.</div>
         </div>
 
         <div class="lvl-legend">
@@ -2229,7 +2228,7 @@
     /**
      * Download the class report as a PDF.
      * The report is filtered by everything selected on this screen: grade,
-     * assessment period, assessment type, assessment name and assessment date.
+     * assessment period, assessment type and assessment name.
      */
     function downloadClassReport() {
         const params = new URLSearchParams();
@@ -2237,8 +2236,6 @@
         params.set('type', currentType);
         const n = getCurrentAssessmentName();
         if (n) params.set('name', n);
-        const d = document.getElementById('assessmentDate').value;
-        if (d) params.set('date', d);
         const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(currentGrade) +
             '?' + params.toString() + '&download=1');
         saveReportFile(url, 'Class-Results-' + currentGrade.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf');
@@ -2248,10 +2245,8 @@
     function describeReportFilters() {
         const el = document.getElementById('reportFilterSummary');
         if (!el) return;
-        const d = document.getElementById('assessmentDate').value || 'not set';
         el.textContent = 'Grade: ' + currentGrade + '  |  Period: ' + (currentPeriod || '-') +
-            '  |  Type: ' + (currentType || '-') + '  |  Name: ' + (getCurrentAssessmentName() || '-') +
-            '  |  Date: ' + d;
+            '  |  Type: ' + (currentType || '-') + '  |  Name: ' + (getCurrentAssessmentName() || '-');
     }
 
     /** Current filter set as a query string, reused by every download. */
@@ -2261,8 +2256,6 @@
         p.set('type', currentType);
         const n = getCurrentAssessmentName();
         if (n) p.set('name', n);
-        const d = document.getElementById('assessmentDate').value;
-        if (d) p.set('date', d);
         if (extra) for (const [k, v] of Object.entries(extra)) p.set(k, v);
         return p.toString();
 }
