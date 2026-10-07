@@ -128,47 +128,64 @@ function calcRowsPerPage(firstPage, tableHeaderH) {
  * from/to specify the row range. Returns the index of the next unrendered row.
  */
 function markSheetPage(page, { rows, cols, top, footerNote, from, to, pageNum, totalPages, tableHeaderH }) {
-  // Header row
-  page.rect(M, top - tableHeaderH, W - M * 2, tableHeaderH, COLORS.headBg);
+  // Pre-compute column x positions for borders.
+  const colX = [];
   let cx = M;
-  cols.forEach(c => {
-    drawHeaderCell(page, c.head, cx, top, c.w, c.size || 7.5);
-    cx += c.w;
+  cols.forEach(c => { colX.push(cx); cx += c.w; });
+  const tableRight = M + cols.reduce((sum, c) => sum + c.w, 0);
+  const tableBottom = top - tableHeaderH - 2 - (to - from) * ROW_H + 2;
+
+  // Header row background
+  page.rect(M, top - tableHeaderH, W - M * 2, tableHeaderH, COLORS.headBg);
+  // Header bottom border
+  page.line(M, top - tableHeaderH, tableRight, top - tableHeaderH, COLORS.line, 0.6);
+  // Vertical column separators in header
+  colX.forEach(x => page.line(x, top - tableHeaderH, x, top, COLORS.lineSoft, 0.4));
+
+  cols.forEach((c, idx) => {
+    drawHeaderCell(page, c.head, colX[idx], top, c.w, c.size || 7.5);
   });
 
   let y = top - tableHeaderH - 2;
   let i = from;
   while (i < to) {
-    if (y < FOOTER_H) break;  // leave room for footer
+    if (y < FOOTER_H) break;
     const r = rows[i];
     const level = (r.code || 'NA').toUpperCase();
-     page.rect(M, y - ROW_H + 2, W - M * 2, ROW_H - 3, LEVEL_BG[level] || [250, 251, 253]);
-     let x = M;
+    const rowTop = y - ROW_H + 2;
+    const rowBottom = y - 1;
+
+    // Row background
+    page.rect(M, rowTop, tableRight - M, ROW_H - 3, LEVEL_BG[level] || [250, 251, 253]);
+
+    // Cell text
+    let x = M;
     for (const c of cols) {
       const cell = c.render(r, y);
       if (cell !== undefined && cell !== null) {
         const pad = 5;
-        // Let page.text() handle alignment within the column box.
-        // For left align, start at x+pad; for center/right, start at x so the
-        // width-based alignment lands inside [x, x+c.w].
         const textX = c.align === 'right' ? x : x + pad;
         const textW = c.align === 'right' ? c.w - pad : c.w - pad * 2;
         const colour = c.colourFor ? c.colourFor(r) : (c.colour || COLORS.ink);
+        // Vertically center text: baseline at row center + small offset
+        const baseline = y - ROW_H / 2 + 2;
         if (c.align === 'right' || c.align === 'center') {
-          page.text(String(cell), textX, y - 3, c.size || 8, colour, {
+          page.text(String(cell), textX, baseline, c.size || 8, colour, {
             bold: c.bold !== false, align: c.align || 'left', width: textW
           });
         } else {
-          // Left-aligned cells (e.g. student names): wrap to fit the column.
-          page.textBlock(String(cell), textX, y - 1, textW, {
+          page.textBlock(String(cell), textX, baseline, textW, {
             size: c.size || 8, color: colour, bold: c.bold !== false,
-            lineHeight: 9, maxLines: 2
+            lineHeight: Math.round((c.size || 8) * 1.3), maxLines: 2
           });
         }
       }
       x += c.w;
     }
-    if (i < to - 1) page.line(M, y - ROW_H + 1, W - M, y - ROW_H + 1, [255, 255, 255], 0.4);
+
+    // Horizontal separator line (subtle, visible on all backgrounds)
+    page.line(M, rowBottom, tableRight, rowBottom, COLORS.line, 0.5);
+
     y -= ROW_H;
     i++;
   }
