@@ -183,16 +183,20 @@
         const alertDiv = document.getElementById('alert');
         const kenyanTimeEl = document.getElementById('kenyanTime');
 
-        function getKenyanTime() {
-            const now = new Date();
-            return new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
+        function getKenyanHour(date = new Date()) {
+            return Number(new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi', hour12: false, hour: 'numeric'
+            }).format(date));
         }
 
         function updateKenyanTime() {
-            const k = getKenyanTime();
-            kenyanTimeEl.textContent = 'Kenya Time: ' + k.toLocaleTimeString('en-KE', {
-                hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
+            const options = {
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+            };
+            const timeStr = new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi', ...options
+            }).format(new Date());
+            kenyanTimeEl.textContent = 'Kenya Time: ' + timeStr;
         }
 
         function showAlert(message, type) {
@@ -234,7 +238,8 @@
             if (!teacher) return;
 
             document.getElementById('staffIdDisplay').textContent = teacher.employeeId;
-            document.getElementById('teacherName').textContent = 'Good ' + (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') + ', ' + teacher.name;
+            const hour = getKenyanHour();
+            document.getElementById('teacherName').textContent = 'Good ' + (hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening') + ', ' + teacher.name;
 
             try {
                 const response = await fetch(apiUrl('/api/teacher/attendance/today'), {

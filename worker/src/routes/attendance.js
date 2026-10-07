@@ -2,14 +2,17 @@
  * Attendance route handlers.
  */
 import { success, error, extractIntId } from '../utils/helpers.js';
-import { getKenyaTime, getKenyaHour, getKenyaDate, formatKenyaTime } from '../services/time.service.js';
 import { verifyPassword, hashPassword } from '../services/password.service.js';
+import {
+  getKenyaDate, getKenyaHour, getKenyaMinute, getKenyaWeekday,
+  formatKenyaTime, utcNow
+} from '../services/time.service.js';
 
 export async function handleAttendance(db, env, route, method, body, p, url) {
   // GET /api/students/attendance
   if (route === '/students/attendance' && method === 'GET') {
     const { searchParams } = url;
-    const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
+    const date = searchParams.get('date') || getKenyaDate();
     const branch = searchParams.get('branch');
 
     const records = await db.collection('attendances')
@@ -24,7 +27,7 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
   // GET /api/teachers/attendance
   if (route === '/teachers/attendance' && method === 'GET') {
     const { searchParams } = url;
-    const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
+    const date = searchParams.get('date') || getKenyaDate();
     const branch = searchParams.get('branch');
 
     const records = await db.collection('attendances')
@@ -154,9 +157,10 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
     }
     if (!validPin) return error('Invalid PIN. Please try again.', 401);
 
-    const kenyaNow = getKenyaTime();
-    const kenyaDate = kenyaNow.toISOString().slice(0, 10);
-    const dayOfWeek = kenyaNow.getDay();
+    const now = new Date();
+    const checkInTimestamp = now.toISOString();
+    const kenyaDate = getKenyaDate(now);
+    const dayOfWeek = getKenyaWeekday(now);
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       return error('Weekend! Check-in is only available on weekdays (Monday-Friday).', 400);
     }
@@ -166,54 +170,53 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
       if (!a || !a.date) return false;
       if (typeof a.date === 'string') return a.date.slice(0, 10) === kenyaDate;
       const d = new Date(a.date);
-      return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === kenyaDate;
+      return !Number.isNaN(d.getTime()) && getKenyaDate(d) === kenyaDate;
     });
     if (existing) {
       return error(`You already checked in today at ${existing.checkIn ? formatKenyaTime(new Date(existing.checkIn)) : 'earlier'}`, 409);
     }
 
-    const hour = kenyaNow.getHours();
-    const minute = kenyaNow.getMinutes();
+    const hour = getKenyaHour(now);
+    const minute = getKenyaMinute(now);
     if (hour >= 17) return error('Check-in is not allowed after 5:00 PM. Please try again tomorrow.', 400);
 
     const isLate = hour > 7 || (hour === 7 && minute > 0);
     const status = isLate ? 'Late' : 'Present';
     const record = {
       date: kenyaDate,
-      checkIn: kenyaNow.toISOString(),
+      checkIn: checkInTimestamp,
       checkOut: null,
       status,
       location,
       isLate,
-      notes: isLate ? `Late check-in at ${kenyaNow.toISOString()}` : `On-time check-in at ${kenyaNow.toISOString()}`,
+      notes: isLate ? `Late check-in at ${checkInTimestamp}` : `On-time check-in at ${checkInTimestamp}`,
       hoursWorked: 0
     };
 
     await db.collection('teachers').updateOne(
       { _id: teacher._id },
-      { $push: { attendance: record }, $set: { updatedAt: new Date().toISOString() } }
+      { $push: { attendance: record }, $set: { updatedAt: utcNow() } }
     );
 
-    // Keep the standalone attendance collection in sync for admin/reporting views.
     await db.collection('attendances').insertOne({
       teacherId: teacher.employeeId,
       teacherName: `${teacher.firstName} ${teacher.lastName}`,
       date: kenyaDate,
-      time: record.checkIn,
-      checkIn: record.checkIn,
+      time: checkInTimestamp,
+      checkIn: checkInTimestamp,
       checkOut: null,
       branch: 'main',
       status: 'present',
       type: 'teacher',
       isLate,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: utcNow(),
+      updatedAt: utcNow()
     });
 
     return success({
       message: isLate ? 'Check-in successful! (You are LATE - after 7:00 AM)' : 'Check-in successful! (On time)',
-      checkInTime: record.checkIn,
-      checkInTimeFormatted: formatKenyaTime(kenyaNow),
+      checkInTime: checkInTimestamp,
+      checkInTimeFormatted: formatKenyaTime(now),
       isLate,
       status,
       teacher: { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId }
@@ -242,41 +245,42 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
     }
     if (!validPin) return error('Invalid PIN. Please try again.', 401);
 
-    const kenyaNow = getKenyaTime();
-    const kenyaDate = kenyaNow.toISOString().slice(0, 10);
+    const now = new Date();
+    const checkOutTimestamp = now.toISOString();
+    const kenyaDate = getKenyaDate(now);
     const attendance = Array.isArray(teacher.attendance) ? teacher.attendance : [];
     const index = attendance.findIndex(a => {
       if (!a || !a.date) return false;
       if (typeof a.date === 'string') return a.date.slice(0, 10) === kenyaDate;
       const d = new Date(a.date);
-      return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === kenyaDate;
+      return !Number.isNaN(d.getTime()) && getKenyaDate(d) === kenyaDate;
     });
     if (index < 0) return error('No check-in found for today. Please check in first.', 400);
     if (attendance[index].checkOut) return error('You already checked out today.', 409);
-    if (kenyaNow.getHours() < 15) return error('Check-out is only allowed after 3:00 PM. Please continue working.', 400);
+    if (getKenyaHour(now) < 15) return error('Check-out is only allowed after 3:00 PM. Please continue working.', 400);
 
     const checkIn = new Date(attendance[index].checkIn);
-    const hoursWorked = Number(((kenyaNow.getTime() - checkIn.getTime()) / 3600000).toFixed(2));
+    const checkOut = new Date(checkOutTimestamp);
+    const hoursWorked = Number(((checkOut.getTime() - checkIn.getTime()) / 3600000).toFixed(2));
     const path = `attendance.${index}`;
     const updated = {
       ...attendance[index],
-      checkOut: kenyaNow.toISOString(),
+      checkOut: checkOutTimestamp,
       hoursWorked
     };
 
     await db.collection('teachers').updateOne(
       { _id: teacher._id },
-      { $set: { [path]: updated, updatedAt: new Date().toISOString() } }
+      { $set: { [path]: updated, updatedAt: utcNow() } }
     );
 
-    // Update the reporting record created at check-in.
     await db.collection('attendances').updateOne(
       { teacherId: teacher.employeeId, date: kenyaDate, type: 'teacher' },
       { $set: {
           checkOut: updated.checkOut,
           checkoutTime: updated.checkOut,
           hoursWorked,
-          updatedAt: new Date().toISOString()
+          updatedAt: utcNow()
         }
       }
     );
@@ -284,7 +288,7 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
     return success({
       message: 'Check-out successful!',
       checkOutTime: updated.checkOut,
-      checkOutTimeFormatted: formatKenyaTime(kenyaNow),
+      checkOutTimeFormatted: formatKenyaTime(now),
       hoursWorked,
       teacher: { name: `${teacher.firstName} ${teacher.lastName}`, employeeId: teacher.employeeId }
     });
@@ -292,7 +296,8 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
 
   // GET /api/teacher/attendance/today - used by teacher-checkin.html.
   if (route === '/teacher/attendance/today' && method === 'GET') {
-    const kenyaDate = getKenyaTime().toISOString().slice(0, 10);
+    const now = new Date();
+    const kenyaDate = getKenyaDate(now);
     const teachers = await db.collection('teachers').find({ isActive: { $ne: false } }).toArray();
     const attendance = teachers.map(teacher => {
       const records = Array.isArray(teacher.attendance) ? teacher.attendance : [];
@@ -300,7 +305,7 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
         if (!a || !a.date) return false;
         if (typeof a.date === 'string') return a.date.slice(0, 10) === kenyaDate;
         const d = new Date(a.date);
-        return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === kenyaDate;
+        return !Number.isNaN(d.getTime()) && getKenyaDate(d) === kenyaDate;
       });
       let status = 'Absent';
       if (record?.checkOut) status = 'Checked Out';
@@ -339,8 +344,8 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
     const teacher = await db.collection('teachers').findOne({ employeeId });
     if (!teacher) return error('Staff not found. Please check your Staff ID.', 404);
 
-    const now = getKenyaTime();
-    const todayStr = now.toISOString().slice(0, 10);
+    const now = new Date();
+    const todayStr = getKenyaDate(now);
 
     // Window start for the requested period.
     let startDate;
@@ -348,18 +353,17 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
       startDate = new Date(now);
     } else if (period === 'week') {
       startDate = new Date(now);
-      const dow = startDate.getUTCDay();               // 0 = Sunday
-      startDate.setUTCDate(startDate.getUTCDate() - dow);
+      const dow = getKenyaWeekday(now);
+      startDate.setDate(startDate.getDate() - dow);
     } else {
-      const first = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-      startDate = first;
+      startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
     }
-    const startStr = startDate.toISOString().slice(0, 10);
+    const startStr = getKenyaDate(startDate);
 
     const records = (Array.isArray(teacher.attendance) ? teacher.attendance : [])
       .filter(a => a && a.date)
       .map(a => {
-        const d = typeof a.date === 'string' ? a.date.slice(0, 10) : new Date(a.date).toISOString().slice(0, 10);
+        const d = typeof a.date === 'string' ? a.date.slice(0, 10) : getKenyaDate(new Date(a.date));
         return {
           date: d,
           checkIn: a.checkIn || null,
@@ -383,11 +387,11 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
     const totalHours = inRange.reduce((n, r) => n + r.hoursWorked, 0);
     const avgHours = present.length ? Number((totalHours / present.length).toFixed(2)) : 0;
 
-    // Workdays (Mon-Fri) in the window, so "absent" is measured properly.
+    // Workdays (Mon-Fri) in the Kenya timezone window, so "absent" is measured properly.
     let workdays = 0;
     const cursor = new Date(startStr + 'T00:00:00Z');
-    while (cursor.toISOString().slice(0, 10) <= todayStr) {
-      const dow = cursor.getUTCDay();
+    while (getKenyaDate(cursor) <= todayStr) {
+      const dow = getKenyaWeekday(cursor);
       if (dow !== 0 && dow !== 6) workdays++;
       cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
@@ -398,9 +402,9 @@ export async function handleAttendance(db, env, route, method, body, p, url) {
     // Per-day breakdown for the month view.
     const byDay = [];
     const d2 = new Date(startStr + 'T00:00:00Z');
-    while (d2.toISOString().slice(0, 10) <= todayStr) {
-      const key = d2.toISOString().slice(0, 10);
-      const dow = d2.getUTCDay();
+    while (getKenyaDate(d2) <= todayStr) {
+      const key = getKenyaDate(d2);
+      const dow = getKenyaWeekday(d2);
       const rec = inRange.find(r => r.date === key);
       byDay.push({
         date: key,
@@ -528,25 +532,25 @@ tbody tr:nth-child(even){background:#fafcff}
   if (route === '/admin/attendance/report' && method === 'GET') {
     const period = (url.searchParams.get('period') || 'day').toLowerCase();
     const format = (url.searchParams.get('format') || 'json').toLowerCase();
-    const now = getKenyaTime();
-    const todayStr = now.toISOString().slice(0, 10);
+    const now = new Date();
+    const todayStr = getKenyaDate(now);
 
     let startDate;
     if (period === 'week') {
       startDate = new Date(now);
-      startDate.setUTCDate(startDate.getUTCDate() - startDate.getUTCDay());
+      startDate.setDate(startDate.getDate() - getKenyaWeekday(now));
     } else if (period === 'month') {
       startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
     } else {
       startDate = new Date(now);
     }
-    const startStr = startDate.toISOString().slice(0, 10);
+    const startStr = getKenyaDate(startDate);
 
     const teachers = await db.collection('teachers').find({ isActive: { $ne: false } }).sort({ firstName: 1, lastName: 1 }).toArray();
 
     const norm = a => {
       if (!a || !a.date) return null;
-      return typeof a.date === 'string' ? a.date.slice(0, 10) : new Date(a.date).toISOString().slice(0, 10);
+      return typeof a.date === 'string' ? a.date.slice(0, 10) : getKenyaDate(new Date(a.date));
     };
 
     const rows = teachers.map(t => {
@@ -561,7 +565,7 @@ tbody tr:nth-child(even){background:#fafcff}
       const worked = inRange.filter(a => a.checkOut).length;
       // Staff count as present for the day if they have any record that day.
       const presentDays = days.length;
-      const expected = period === 'day' ? (now.getUTCDay() !== 0 && now.getUTCDay() !== 6 ? 1 : 0) : days.length || 1;
+      const expected = period === 'day' ? (getKenyaWeekday(now) !== 0 && getKenyaWeekday(now) !== 6 ? 1 : 0) : days.length || 1;
       return {
         employeeId: t.employeeId,
         name: `${t.firstName || ''} ${t.lastName || ''}`.trim(),
@@ -600,11 +604,11 @@ tbody tr:nth-child(even){background:#fafcff}
       rate: d.staff ? Number(((d.present / d.staff) * 100).toFixed(1)) : 0
     })).sort((a, b) => a.rate - b.rate);
 
-    // Per-day totals for week/month views
+    // Per-day totals for week/month views (in Kenya timezone)
     const dayTotals = [];
     const c = new Date(startStr + 'T00:00:00Z');
-    while (c.toISOString().slice(0, 10) <= todayStr) {
-      const key = c.toISOString().slice(0, 10);
+    while (getKenyaDate(c) <= todayStr) {
+      const key = getKenyaDate(c);
       let present = 0;
       for (const t of teachers) {
         const all = Array.isArray(t.attendance) ? t.attendance : [];
@@ -612,11 +616,11 @@ tbody tr:nth-child(even){background:#fafcff}
       }
       dayTotals.push({
         date: key,
-        dayName: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][c.getUTCDay()],
+        dayName: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][getKenyaWeekday(c)],
         present,
         absent: totalStaff - present,
         rate: totalStaff ? Number(((present / totalStaff) * 100).toFixed(1)) : 0,
-        weekend: c.getUTCDay() === 0 || c.getUTCDay() === 6
+        weekend: getKenyaWeekday(c) === 0 || getKenyaWeekday(c) === 6
       });
       c.setUTCDate(c.getUTCDate() + 1);
     }
@@ -740,7 +744,7 @@ tbody tr:nth-child(even){background:#fafcff}
         if (!a || !a.date) return false;
         if (typeof a.date === 'string') return a.date.slice(0, 10) === today;
         const d = new Date(a.date);
-        return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === today;
+        return !Number.isNaN(d.getTime()) && getKenyaDate(d) === today;
       });
       if (!rec) { absent++; continue; }
       if (rec.checkOut) { rec.isLate ? late++ : present++; }

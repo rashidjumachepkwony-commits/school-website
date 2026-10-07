@@ -243,154 +243,212 @@
                 flex-direction: column;
             }
         .myatt {
-            margin-top:22px; padding:18px; background:linear-gradient(160deg,#f8fafc,#eef2f8);
-            border:1px solid #dde5f0; border-radius:18px; text-align:left;
-            box-shadow:0 6px 20px rgba(10,22,40,.07);
+            margin-top: 22px; padding: 24px; background: linear-gradient(160deg, #f8fafc, #eef2f8);
+            border: 1px solid #dde5f0; border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(10, 22, 40, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.5);
         }
         .myatt h3 {
-            font-size:19px; color:#0A1628; margin-bottom:5px;
-            display:flex; align-items:center; gap:9px;
+            font-size: 20px; color: #0A1628; margin-bottom: 4px;
+            display: flex; align-items: center; gap: 10px;
         }
         .myatt h3::before {
-            content:""; width:5px; height:22px; border-radius:3px;
-            background:linear-gradient(180deg,#D4A017,#0A1628);
+            content: ""; width: 6px; height: 26px; border-radius: 4px;
+            background: linear-gradient(180deg, #D4A017, #0A1628);
+            box-shadow: 0 2px 8px rgba(212, 160, 23, 0.3);
         }
-        .myatt-hint { font-size:12.5px; color:#5f6f88; margin-bottom:16px; line-height:1.55; }
+        .myatt-hint {
+            font-size: 13px; color: #5f6f88; margin-bottom: 20px; line-height: 1.6;
+            padding: 10px 14px; background: rgba(255, 255, 255, 0.7); border-radius: 10px;
+            border-left: 3px solid #D4A017;
+        }
 
         /* Period selector: large touch targets, obvious selected state. */
-        .myatt-tabs { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
+        .myatt-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
         .myatt-tab {
-            position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
-            gap:2px; padding:14px 8px; min-height:88px; cursor:pointer; font-family:inherit;
-            background:#fff; border:2px solid #dbe3ef; border-radius:14px;
-            box-shadow:0 2px 6px rgba(10,22,40,.05);
-            transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+            position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 3px; padding: 16px 8px; min-height: 92px; cursor: pointer; font-family: inherit;
+            background: #fff; border: 2px solid #dbe3ef; border-radius: 16px;
+            box-shadow: 0 3px 10px rgba(10, 22, 40, 0.06);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .myatt-tab:hover { transform:translateY(-2px); box-shadow:0 8px 18px rgba(10,22,40,.12); border-color:#b9c7db; }
-        .myatt-tab:focus-visible { outline:3px solid #D4A017; outline-offset:2px; }
-        .myatt-ico { font-size:23px; line-height:1.1; font-style:normal; }
-        .myatt-txt { font-size:14px; font-weight:800; color:#0A1628; letter-spacing:.1px; }
-        .myatt-sub { font-size:10.5px; font-weight:600; color:#7d8ba3; text-transform:uppercase; letter-spacing:.4px; }
+        .myatt-tab:hover {
+            transform: translateY(-3px); box-shadow: 0 10px 24px rgba(10, 22, 40, 0.14);
+            border-color: #b9c7db;
+        }
+        .myatt-tab:focus-visible { outline: 3px solid #D4A017; outline-offset: 2px; border-radius: 18px; }
+        .myatt-ico { font-size: 25px; line-height: 1.1; font-style: normal; }
+        .myatt-txt { font-size: 14px; font-weight: 800; color: #0A1628; letter-spacing: 0.2px; }
+        .myatt-sub {
+            font-size: 10.5px; font-weight: 600; color: #7d8ba3;
+            text-transform: uppercase; letter-spacing: 0.4px;
+        }
 
         .myatt-tab.on {
-            background:linear-gradient(160deg,#0A1628,#1d3a6b);
-            border-color:#0A1628; color:#fff;
-            box-shadow:0 8px 22px rgba(10,22,40,.32);
+            background: linear-gradient(160deg, #0A1628, #1d3a6b);
+            border-color: #0A1628; color: #fff;
+            box-shadow: 0 10px 26px rgba(10, 22, 40, 0.32);
+            position: relative; overflow: hidden;
         }
-        .myatt-tab.on .myatt-txt { color:#fff; }
-        .myatt-tab.on .myatt-sub { color:#D4A017; }
+        .myatt-tab.on::before {
+            content: ""; position: absolute; inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(212, 160, 23, 0.15), transparent 70%);
+            opacity: 0.6;
+        }
+        .myatt-tab.on .myatt-txt { color: #fff; }
+        .myatt-tab.on .myatt-sub { color: #D4A017; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
         .myatt-tab.on::after {
-            content:""; position:absolute; inset:auto 0 0 0; height:5px;
-            background:linear-gradient(90deg,#D4A017,#F5C842); border-radius:0 0 12px 12px;
+            content: ""; position: absolute; inset: auto 0 0 0; height: 5px;
+            background: linear-gradient(90deg, #D4A017, #F5C842); border-radius: 0 0 16px 16px;
+            box-shadow: 0 1px 3px rgba(212, 160, 23, 0.4);
         }
 
-        .myatt-tab.myatt-pdf { background:#fff; border-color:#0b7a3b; }
-        .myatt-tab.myatt-pdf .myatt-ico { color:#0b7a3b; }
-        .myatt-tab.myatt-pdf:hover { background:#f2fbf5; }
-        .myatt-pdf-note { font-size:11px; color:#7d8ba3; text-align:center; margin-top:-8px; margin-bottom:14px; }
-
-        @media (max-width:640px){
-            .myatt-tabs { grid-template-columns:repeat(2,1fr); }
-            .myatt-tab { min-height:78px; }
+        .myatt-tab.myatt-pdf {
+            background: linear-gradient(160deg, #f0faf5, #e6f7ef);
+            border-color: #0b7a3b;
         }
-        @media (max-width:340px){
-            .myatt-tabs { grid-template-columns:1fr; }
+        .myatt-tab.myatt-pdf .myatt-ico { color: #0b7a3b; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1)); }
+        .myatt-tab.myatt-pdf:hover {
+            background: linear-gradient(160deg, #e6f7ef, #d1f0e2);
+            transform: translateY(-3px); box-shadow: 0 10px 24px rgba(11, 122, 59, 0.2);
         }
+        .myatt-pdf-note {
+            font-size: 11.5px; color: #7d8ba3; text-align: center;
+            margin-top: -4px; margin-bottom: 16px; font-style: italic;
+        }
+        @media (max-width:640px){ .myatt-tabs { grid-template-columns: repeat(2, 1fr); } }
         .btn-view {
-            width:100%; padding:15px; font-size:15px; font-weight:800; font-family:inherit; cursor:pointer;
-            border:2px solid #0b5394; background:#0b5394; color:#fff; border-radius:12px;
+            width: 100%; padding: 15px; font-size: 15px; font-weight: 800; font-family: inherit; cursor: pointer;
+            border: 2px solid #0b5394; background: #0b5394; color: #fff; border-radius: 12px;
+            transition: all 0.2s ease;
         }
-        .btn-view:hover { background:#093f6e; }
-        .btn-view:disabled { opacity:.6; cursor:not-allowed; }
-        .myatt-body { font-size:13.5px; color:#26364f; }
+        .btn-view:hover {
+            background: #093f6e; transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(11, 75, 108, 0.25);
+        }
+        .btn-view:disabled { opacity: .6; cursor: not-allowed; }
+        .myatt-body { font-size: 13.5px; color: #26364f; }
 
         /* ---------- Empty state ---------- */
         .ma-empty {
-            text-align:center; padding:34px 22px; background:#fff;
-            border:1px solid #e3e9f2; border-radius:16px;
-            box-shadow:0 2px 8px rgba(10,22,40,.05);
+            text-align: center; padding: 42px 24px; background: #fff;
+            border: 1px solid #e3e9f2; border-radius: 18px;
+            box-shadow: 0 4px 16px rgba(10, 22, 40, 0.06);
         }
-        .ma-empty-ico { font-size:44px; line-height:1; margin-bottom:12px; }
-        .ma-empty h4 { font-size:17px; color:#0A1628; margin-bottom:8px; }
-        .ma-empty > p { font-size:13.5px; color:#5f6f88; max-width:460px; margin:0 auto 18px; line-height:1.7; }
+        .ma-empty-ico { font-size: 56px; line-height: 1; margin-bottom: 16px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05)); }
+        .ma-empty h4 { font-size: 18px; color: #0A1628; margin-bottom: 10px; }
+        .ma-empty > p { font-size: 13.5px; color: #5f6f88; max-width: 480px; margin: 0 auto 20px; line-height: 1.7; }
         .ma-empty-hint {
-            display:inline-block; text-align:left; max-width:420px;
-            background:#f7f9fc; border:1px solid #e3e9f2; border-left:4px solid #D4A017;
-            border-radius:10px; padding:13px 16px; font-size:13px; color:#3c4d68; line-height:1.65;
+            display: inline-block; text-align: left; max-width: 420px;
+            background: linear-gradient(160deg, #f7f9fc, #eef2f8);
+            border: 1px solid #e3e9f2; border-left: 4px solid #D4A017;
+            border-radius: 12px; padding: 15px 18px; font-size: 13px; color: #3c4d68; line-height: 1.65;
         }
-        .ma-empty-hint b { color:#0A1628; }
+        .ma-empty-hint b { color: #0A1628; }
 
         /* ---------- Tiles ---------- */
-        .ma-tiles { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:16px; }
+        .ma-tiles { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 18px; }
         .ma-tile {
-            background:#fff; border:1px solid #e3e9f2; border-radius:14px;
-            padding:14px 10px; text-align:center; position:relative; overflow:hidden;
-            box-shadow:0 1px 4px rgba(10,22,40,.05);
+            background: #fff; border: 1px solid #e3e9f2; border-radius: 14px;
+            padding: 16px 10px; text-align: center; position: relative; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(10, 22, 40, 0.05);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
-        .ma-tile::before { content:""; position:absolute; inset:0 0 auto 0; height:4px; background:#c9d3e2; }
-        .ma-tile.accent::before  { background:linear-gradient(90deg,#0A1628,#1d3a6b); }
-        .ma-tile.accent2::before { background:linear-gradient(90deg,#D4A017,#F5C842); }
-        .ma-tile.good::before    { background:#0b7a3b; }
-        .ma-tile.warn::before    { background:#d97706; }
-        .ma-tile.bad::before     { background:#a4161a; }
-        .ma-tile-v { font-size:26px; font-weight:800; color:#0A1628; line-height:1.05; letter-spacing:-.6px; }
-        .ma-tile-k { font-size:10.5px; font-weight:700; color:#5f6f88; text-transform:uppercase; letter-spacing:.5px; margin-top:5px; }
-        .ma-tile-s { font-size:10px; color:#98a4b8; margin-top:2px; }
-        .ma-tile.good .ma-tile-v { color:#0b7a3b; }
-        .ma-tile.warn .ma-tile-v { color:#b45309; }
-        .ma-tile.bad  .ma-tile-v { color:#a4161a; }
+        .ma-tile:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(10, 22, 40, 0.08); }
+        .ma-tile::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: #c9d3e2; }
+        .ma-tile.accent::before { background: linear-gradient(90deg, #0A1628, #1d3a6b); }
+        .ma-tile.accent2::before { background: linear-gradient(90deg, #D4A017, #F5C842); }
+        .ma-tile.good::before { background: #0b7a3b; }
+        .ma-tile.warn::before { background: #d97706; }
+        .ma-tile.bad::before { background: #a4161a; }
+        .ma-tile-v {
+            font-size: 28px; font-weight: 800; color: #0A1628;
+            line-height: 1.05; letter-spacing: -0.6px; font-variant-numeric: tabular-nums;
+        }
+        .ma-tile-k { font-size: 10.5px; font-weight: 700; color: #5f6f88; text-transform: uppercase; letter-spacing: .5px; margin-top: 6px; }
+        .ma-tile-s { font-size: 10px; color: #98a4b8; margin-top: 3px; font-weight: 500; }
+        .ma-tile.good .ma-tile-v { color: #0b7a3b; }
+        .ma-tile.warn .ma-tile-v { color: #b45309; }
+        .ma-tile.bad .ma-tile-v { color: #a4161a; }
+        .ma-tile.accent .ma-tile-v { color: #0A1628; }
+        .ma-tile.accent2 .ma-tile-v { color: #8a5a00; }
 
         /* ---------- Verdict ---------- */
         .ma-verdict {
-            display:flex; gap:14px; align-items:flex-start;
-            padding:14px 16px; border-radius:12px; margin-bottom:14px;
-            background:#e9f7ee; border-left:5px solid #0b7a3b;
+            display: flex; gap: 16px; align-items: flex-start;
+            padding: 18px 20px; border-radius: 16px; margin-bottom: 18px;
+            background: linear-gradient(160deg, #e9f7ee, #d4f0e6);
+            border-left: 5px solid #0b7a3b;
+            box-shadow: 0 2px 10px rgba(10, 22, 40, 0.05);
         }
-        .ma-verdict.warn { background:#fff5e6; border-left-color:#d97706; }
-        .ma-verdict.bad  { background:#fdecec; border-left-color:#a4161a; }
-        .ma-verdict-ico { font-size:22px; line-height:1.2; }
-        .ma-verdict strong { display:block; font-size:15px; color:#0A1628; margin-bottom:3px; }
-        .ma-verdict p { font-size:13.5px; color:#3c4d68; margin:0; line-height:1.6; }
+        .ma-verdict.warn { background: linear-gradient(160deg, #fff5e6, #ffe8cc); border-left-color: #d97706; }
+        .ma-verdict.bad { background: linear-gradient(160deg, #fdecec, #fbdcdc); border-left-color: #a4161a; }
+        .ma-verdict-ico { font-size: 24px; line-height: 1.2; flex-shrink: 0; }
+        .ma-verdict strong { display: block; font-size: 16px; color: #0A1628; margin-bottom: 4px; font-weight: 700; }
+        .ma-verdict p { font-size: 13.5px; color: #3c4d68; margin: 0; line-height: 1.6; }
 
         /* ---------- Facts strip ---------- */
-        .ma-facts { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+        .ma-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
         .ma-fact {
-            display:flex; align-items:baseline; gap:7px;
-            background:#fff; border:1px solid #e3e9f2; border-radius:9px; padding:8px 13px;
+            display: flex; align-items: center; gap: 8px;
+            background: #fff; border: 1px solid #e3e9f2; border-radius: 12px; padding: 10px 15px;
+            box-shadow: 0 1px 3px rgba(10, 22, 40, 0.03);
         }
-        .ma-fact .k { font-size:10px; font-weight:800; color:#8a97ab; text-transform:uppercase; letter-spacing:.5px; }
-        .ma-fact .v { font-size:13.5px; font-weight:700; color:#0A1628; }
+        .ma-fact .k {
+            font-size: 10px; font-weight: 800; color: #8a97ab;
+            text-transform: uppercase; letter-spacing: .5px;
+        }
+        .ma-fact .v {
+            font-size: 13.5px; font-weight: 700; color: #0A1628;
+            display: flex; align-items: center; gap: 4px;
+        }
 
         /* ---------- Table ---------- */
         .ma-table-wrap {
-            background:#fff; border:1px solid #e3e9f2; border-radius:14px;
-            overflow:hidden; max-height:420px; overflow-y:auto;
-            box-shadow:0 1px 4px rgba(10,22,40,.05);
+            background: #fff; border: 1px solid #e3e9f2; border-radius: 16px;
+            overflow: hidden; max-height: 440px; overflow-y: auto;
+            box-shadow: 0 2px 12px rgba(10, 22, 40, 0.06);
         }
-        .ma-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13.5px; }
+        .ma-table {
+            width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px;
+        }
         .ma-table thead th {
-            position:sticky; top:0; z-index:2;
-            background:#0A1628; color:#fff; text-align:left;
-            font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.5px;
-            padding:12px 14px; white-space:nowrap;
+            position: sticky; top: 0; z-index: 2;
+            background: linear-gradient(135deg, #0A1628, #1d3a6b); color: #fff;
+            text-align: left;
+            font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+            padding: 12px 14px; white-space: nowrap;
         }
-        .ma-table tbody td { padding:12px 14px; border-bottom:1px solid #eef2f7; }
-        .ma-table tbody tr:last-child td { border-bottom:0; }
-        .ma-table .c-day { font-weight:700; color:#0A1628; }
-        .ma-table .c-day span { display:block; font-weight:500; font-size:11.5px; color:#98a4b8; }
-        .ma-table .c-time { font-variant-numeric:tabular-nums; color:#3c4d68; }
-        .ma-table .c-hrs { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; color:#0A1628; }
-        .ma-table tbody tr:nth-child(even) td { background:#fafbfe; }
-        .ma-table tbody tr.absent td { background:#fdf0f0 !important; }
-        .ma-table tbody tr.open   td { background:#fff8ec !important; }
-        .ma-table tbody tr.we     td { color:#9aa6b8; background:#f8fafc !important; font-style:italic; }
-        .ma-table tbody tr.present td { color:#0b5e2c; }
+        .ma-table tbody td {
+            padding: 12px 14px; border-bottom: 1px solid #eef2f7;
+        }
+        .ma-table tbody tr:last-child td { border-bottom: 0; }
+        .ma-table tbody tr:hover td { background: #f0f4fa; }
+        .ma-table .c-day { font-weight: 700; color: #0A1628; }
+        .ma-table .c-day span { display: block; font-weight: 500; font-size: 11.5px; color: #98a4b8; }
+        .ma-table .c-time {
+            font-variant-numeric: tabular-nums; color: #3c4d68;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .ma-table .c-hrs {
+            text-align: right; font-variant-numeric: tabular-nums;
+            font-weight: 700; color: #0A1628;
+        }
+        .ma-table tbody tr:nth-child(even) td { background: #fafbfe; }
+        .ma-table tbody tr.absent td { background: #fdf0f0 !important; }
+        .ma-table tbody tr.open td { background: #fff8ec !important; }
+        .ma-table tbody tr.we td { color: #9aa6b8; background: #f8fafc !important; font-style: italic; }
+        .ma-table tbody tr.present td { color: #0b5e2c; }
 
-        .chip { display:inline-block; padding:3px 11px; border-radius:11px; font-size:11px; font-weight:800; letter-spacing:.2px; }
-        .chip-good { background:#dff3e4; color:#136b2c; }
-        .chip-warn { background:#fff0d6; color:#8a5200; }
-        .chip-bad  { background:#fbdcdc; color:#8c1c24; }
-        .chip-muted{ background:#eceff4; color:#8a97ab; }
+        .chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 800; letter-spacing: .2px;
+            backdrop-filter: blur(2px);
+        }
+        .chip-good { background: #d1f0e2; color: #0b5e2c; border: 1px solid rgba(11, 122, 59, 0.1); }
+        .chip-warn { background: #ffecd6; color: #8a5200; border: 1px solid rgba(217, 119, 6, 0.1); }
+        .chip-bad { background: #fbdcdc; color: #8c1c24; border: 1px solid rgba(164, 22, 26, 0.1); }
+        .chip-muted { background: #eceff4; color: #8a97ab; border: 1px solid rgba(138, 151, 171, 0.15); }
 
         @media (max-width:900px){ .ma-tiles { grid-template-columns:repeat(3,1fr); } }
         @media (max-width:560px){
@@ -510,61 +568,93 @@
 
         // ============================================
         // KENYAN TIME HELPERS (EAT - UTC+3)
+        // Uses Intl.DateTimeFormat with explicit timeZone — no manual Date shifting.
         // ============================================
-        function getKenyanTime() {
-            const now = new Date();
-            const nairobiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
-            return nairobiTime;
-        }
-
-        function formatKenyanTime(date) {
-            if (!date) return '--:--:--';
+        function formatKenyanDate(date) {
             const d = new Date(date);
-            return d.toLocaleTimeString('en-KE', {
-                timeZone: 'Africa/Nairobi',
-                hour12: true,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-        }
-
-        function formatKenyanTimeShort(date) {
-            if (!date) return '--:--';
-            const d = new Date(date);
-            return d.toLocaleTimeString('en-KE', {
-                timeZone: 'Africa/Nairobi',
-                hour12: true,
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function getKenyanDate() {
-            const kenyanTime = getKenyanTime();
-            return kenyanTime.toLocaleDateString('en-KE', {
+            return new Intl.DateTimeFormat('en-KE', {
                 timeZone: 'Africa/Nairobi',
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
-            });
+            }).format(d);
         }
 
-        function getKenyanDayOfWeek() {
-            const kenyanTime = getKenyanTime();
-            return kenyanTime.getDay();
+        function formatKenyanDayOfWeek(date) {
+            const d = new Date(date);
+            return new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi',
+                weekday: 'long'
+            }).format(d);
+        }
+
+        function getKenyanDateParts(date) {
+            const d = new Date(date);
+            const df = new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi',
+                hour12: false
+            });
+            const parts = df.formatToParts(d);
+            const result = {};
+            for (const p of parts) {
+                if (p.type !== 'literal') result[p.type] = p.value;
+            }
+            return result;
+        }
+
+        function formatKenyanTime(date) {
+            if (!date) return '--:--:--';
+            const d = new Date(date);
+            return new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi',
+                hour12: true,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).format(d);
+        }
+
+        function formatKenyanTimeShort(date) {
+            if (!date) return '--:--';
+            const d = new Date(date);
+            return new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi',
+                hour12: true,
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(d);
+        }
+
+        function getKenyanHour(date) {
+            const d = new Date(date);
+            return Number(new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi',
+                hour12: false,
+                hour: 'numeric'
+            }).format(d));
+        }
+
+        function getKenyanDayOfWeekNum(date) {
+            const d = new Date(date);
+            const parts = new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi',
+                weekday: 'short'
+            }).formatToParts(d);
+            const wd = parts.find(p => p.type === 'weekday').value;
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return days.indexOf(wd);
         }
 
         function updateKenyanTime() {
-            const kenyanTime = getKenyanTime();
             const options = { 
                 hour: '2-digit', 
                 minute: '2-digit', 
                 second: '2-digit',
                 hour12: true
             };
-            kenyanTimeEl.textContent = '🕐 Kenya Time: ' + kenyanTime.toLocaleTimeString('en-KE', options);
+            const timeStr = new Intl.DateTimeFormat('en-KE', { timeZone: 'Africa/Nairobi', ...options }).format(new Date());
+            kenyanTimeEl.textContent = '🕐 Kenya Time: ' + timeStr;
         }
 
         // Update time every second
@@ -574,12 +664,12 @@
         // CHECK DAY (Kenyan Time)
         // ============================================
         function updateDayUI() {
-            const kenyanTime = getKenyanTime();
+            const now = new Date();
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const dayOfWeek = kenyanTime.getDay();
+            const dayOfWeek = getKenyanDayOfWeekNum(now);
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
             
-            dayInfo.textContent = `${days[dayOfWeek]}, ${kenyanTime.toLocaleDateString('en-KE', { timeZone: 'Africa/Nairobi', year: 'numeric', month: 'long', day: 'numeric' })}`;
+            dayInfo.textContent = `${days[dayOfWeek]}, ${formatKenyanDate(now)}`;
             
             if (isWeekend) {
                 weekendMessage.style.display = 'block';
@@ -833,7 +923,7 @@
         // HANDLE CHECK IN / CHECK OUT
         // ============================================
         async function handleAction(action) {
-            const dayOfWeek = getKenyanDayOfWeek();
+            const dayOfWeek = getKenyanDayOfWeekNum(new Date());
             if (dayOfWeek === 0 || dayOfWeek === 6) {
                 showAlert('📅 Check-in/out is only available on weekdays (Monday-Friday)', 'error');
                 return;

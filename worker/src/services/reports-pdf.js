@@ -11,12 +11,12 @@ const W = A4.h;           // landscape width  (841.89)
 const H = A4.w;           // landscape height (595.28)
 const M = 24;             // print margin (~9mm at 96dpi)
 
-const ROW_H = 20;          // data row height (taller for wrapped names)
+const ROW_H = 22;          // data row height (taller for wrapped names and comfortable text centering)
 const FOOTER_H = 30;      // footer space at bottom
 const HEADER_H_FULL = 50; // full header band height (first page)
 const META_H = 20;        // meta strip height
 const TITLE_H = 30;       // report title + assessment info
-const SUMMARY_H = 40;     // summary card strip height
+const SUMMARY_H = 44;     // summary card strip height (room for label + value stack)
 const COMPACT_H = 36;     // compact header band height (continuation pages)
 
 const LEVEL_BG = {
@@ -40,12 +40,16 @@ function wrapHeader(text, maxWidth, size = 7.5) {
   return { lines: lines.length ? lines : [String(text)], size: actualSize };
 }
 
-/** Draw a wrapped, centered multi-line header cell. Returns { lines, size }. */
-function drawHeaderCell(page, text, x, y, colW, size = 7.5) {
+/** Draw a wrapped, centered multi-line header cell inside a header band.
+ * The header band spans from (top - tableHeaderH) to (top) in PDF coords.
+ * Returns { lines, size }.
+ */
+function drawHeaderCell(page, text, x, y, colW, tableHeaderH, size = 7.5) {
   const { lines, size: actualSize } = wrapHeader(text, colW, size);
   const lineHeight = actualSize * 1.4;
   const totalH = lines.length * lineHeight;
-  const startY = y + (ROW_H - totalH) / 2 + totalH - lineHeight;
+  // Centre text vertically within the header band [y - tableHeaderH, y]
+  const startY = (y - tableHeaderH) + (tableHeaderH - totalH) / 2 + totalH - lineHeight;
   lines.forEach((l, i) =>
     page.text(l, x, startY - i * lineHeight, actualSize, COLORS.headText, { bold: true, align: 'center', width: colW })
   );
@@ -93,12 +97,15 @@ function summaryStrip(page, tiles, y) {
     const x = M + i * (tw + gap);
     page.rect(x, y - cardH, tw, cardH, [250, 251, 253]);
     page.rect(x, y - cardH, tw, 3, t.colour || COLORS.gold);
-    page.text(String(t.label).toUpperCase(), x + 5, y - cardH - 2, 6, COLORS.grey, { bold: true });
-    page.textBlock(String(t.value), x + 5, y - 6, tw - 10, {
-      size: 10.5, colour: t.colour || COLORS.ink, bold: true, lineHeight: 11, maxLines: 1
-    });
+    // Label: centered in card width
+    page.text(String(t.label).toUpperCase(), x, y - cardH - 2, 6, COLORS.grey, { bold: true, align: 'center', width: tw });
+    // Value: centered in card
+    const valStr = String(t.value);
+    const valSize = 10.5;
+    const valTw = textWidth(valStr, valSize, true);
+    page.text(valStr, x + (tw - valTw) / 2, y - 6, valSize, t.colour || COLORS.ink, { bold: true });
   });
-  return y - cardH - 6;
+  return y - cardH - 12;
 }
 
 /** Footer with dynamic page numbering. */
@@ -128,22 +135,30 @@ function calcRowsPerPage(firstPage, tableHeaderH) {
  * from/to specify the row range. Returns the index of the next unrendered row.
  */
 function markSheetPage(page, { rows, cols, top, footerNote, from, to, pageNum, totalPages, tableHeaderH }) {
-  // Pre-compute column x positions for borders.
+  // ONE authoritative column position table — used by header, body, and grid lines.
   const colX = [];
   let cx = M;
   cols.forEach(c => { colX.push(cx); cx += c.w; });
   const tableRight = M + cols.reduce((sum, c) => sum + c.w, 0);
   const tableBottom = top - tableHeaderH - 2 - (to - from) * ROW_H + 2;
 
-  // Header row background
-  page.rect(M, top - tableHeaderH, W - M * 2, tableHeaderH, COLORS.headBg);
+  // Vertical grid lines: every boundary is continuous from header bottom through the last body row.
+  const gridX = [...colX, tableRight];
+  gridX.forEach((gx, idx) => {
+    const y1 = top - tableHeaderH;
+    const y2 = tableBottom;
+    page.line(gx, y1, gx, y2, COLORS.lineSoft, 0.4);
+  });
+
+  // Header row background — width matches the table exactly (tableRight - M)
+  page.rect(M, top - tableHeaderH, tableRight - M, tableHeaderH, COLORS.headBg);
   // Header bottom border
   page.line(M, top - tableHeaderH, tableRight, top - tableHeaderH, COLORS.line, 0.6);
-  // Vertical column separators in header
-  colX.forEach(x => page.line(x, top - tableHeaderH, x, top, COLORS.lineSoft, 0.4));
+  // Top border of header
+  page.line(M, top, tableRight, top, COLORS.line, 0.6);
 
   cols.forEach((c, idx) => {
-    drawHeaderCell(page, c.head, colX[idx], top, c.w, c.size || 7.5);
+    drawHeaderCell(page, c.head, colX[idx], top, c.w, tableHeaderH, c.size || 7.5);
   });
 
   let y = top - tableHeaderH - 2;
@@ -155,20 +170,19 @@ function markSheetPage(page, { rows, cols, top, footerNote, from, to, pageNum, t
     const rowTop = y - ROW_H + 2;
     const rowBottom = y - 1;
 
-    // Row background
+    // Row background — width matches the table exactly (tableRight - M)
     page.rect(M, rowTop, tableRight - M, ROW_H - 3, LEVEL_BG[level] || [250, 251, 253]);
 
-    // Cell text
-    let x = M;
-    for (const c of cols) {
+    // Cell text — uses the ONE colX table, no independent x accumulation
+    for (let idx = 0; idx < cols.length; idx++) {
+      const c = cols[idx];
       const cell = c.render(r, y);
       if (cell !== undefined && cell !== null) {
         const pad = 5;
-        const textX = c.align === 'right' ? x : x + pad;
+        const textX = c.align === 'right' ? colX[idx] : colX[idx] + pad;
         const textW = c.align === 'right' ? c.w - pad : c.w - pad * 2;
         const colour = c.colourFor ? c.colourFor(r) : (c.colour || COLORS.ink);
-        // Vertically center text: baseline at row center + small offset
-        const baseline = y - ROW_H / 2 + 2;
+        const baseline = y - ROW_H / 2 + 1;
         if (c.align === 'right' || c.align === 'center') {
           page.text(String(cell), textX, baseline, c.size || 8, colour, {
             bold: c.bold !== false, align: c.align || 'left', width: textW
@@ -180,7 +194,6 @@ function markSheetPage(page, { rows, cols, top, footerNote, from, to, pageNum, t
           });
         }
       }
-      x += c.w;
     }
 
     // Horizontal separator line (subtle, visible on all backgrounds)

@@ -450,6 +450,39 @@
         let filteredData = [];
         let selectedDate = null;
 
+        function formatDateKenya(date) {
+            const d = new Date(date);
+            return new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi',
+                weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+            }).format(d);
+        }
+
+        function formatDateKenyaShort(date) {
+            const d = new Date(date);
+            return new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi',
+                year: 'numeric', month: 'short', day: 'numeric'
+            }).format(d);
+        }
+
+        function getKenyanDayOfWeek(date) {
+            const d = new Date(date);
+            const parts = new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi', weekday: 'short'
+            }).formatToParts(d);
+            const wd = parts.find(p => p.type === 'weekday').value;
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return days.indexOf(wd);
+        }
+
+        function getKenyanHour(date) {
+            const d = new Date(date);
+            return Number(new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi', hour12: false, hour: 'numeric'
+            }).format(d));
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('adminToken');
             if (!token) { window.location.href = 'admin-login.html'; return; }
@@ -457,10 +490,14 @@
             document.getElementById('adminName').textContent = admin.fullName || 'Admin';
             document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
             
-            // Set default date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('datePicker').value = today;
-            selectedDate = new Date();
+            // Set default date to today (Kenya timezone)
+            const todayStr = new Intl.DateTimeFormat('en-KE', {
+                timeZone: 'Africa/Nairobi',
+                year: 'numeric', month: 'numeric', day: 'numeric'
+            }).format(new Date());
+            const today = new Date(todayStr.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$2-$1'));
+            document.getElementById('datePicker').value = today.toISOString().split('T')[0];
+            selectedDate = today;
             
             loadAttendance();
         });
@@ -535,25 +572,25 @@
             if (currentTab === 'daily') {
                 const today = new Date();
                 data = getDailyReport(today);
-                document.getElementById('reportTitle').textContent = '📅 Daily Attendance Report - ' + today.toLocaleDateString();
+                document.getElementById('reportTitle').textContent = '📅 Daily Attendance Report - ' + formatDateKenyaShort(today);
             } else if (currentTab === 'weekly') {
                 const today = new Date();
                 data = getWeeklyReport(today);
-                document.getElementById('reportTitle').textContent = '📆 Weekly Attendance Report - Week of ' + getWeekStart(today).toLocaleDateString();
+                document.getElementById('reportTitle').textContent = '📆 Weekly Attendance Report - Week of ' + formatDateKenyaShort(getWeekStart(today));
             } else if (currentTab === 'monthly') {
                 const today = new Date();
                 data = getMonthlyReport(today);
-                document.getElementById('reportTitle').textContent = '📊 Monthly Attendance Report - ' + today.toLocaleString('default', { month: 'long', year: 'numeric' });
+                document.getElementById('reportTitle').textContent = '📊 Monthly Attendance Report - ' + new Intl.DateTimeFormat('default', { month: 'long', year: 'numeric' }).format(today);
             } else if (currentTab === 'datepicker') {
                 const datePicker = document.getElementById('datePicker');
                 if (datePicker.value) {
                     const selectedDate = new Date(datePicker.value + 'T00:00:00');
                     data = getDailyReport(selectedDate);
-                    document.getElementById('reportTitle').textContent = '📅 Attendance Report - ' + selectedDate.toLocaleDateString();
+                    document.getElementById('reportTitle').textContent = '📅 Attendance Report - ' + formatDateKenyaShort(selectedDate);
                 } else {
                     const today = new Date();
                     data = getDailyReport(today);
-                    document.getElementById('reportTitle').textContent = '📅 Daily Attendance Report - ' + today.toLocaleDateString();
+                    document.getElementById('reportTitle').textContent = '📅 Daily Attendance Report - ' + formatDateKenyaShort(today);
                 }
             }
 
