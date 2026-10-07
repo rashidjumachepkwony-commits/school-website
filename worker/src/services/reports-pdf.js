@@ -27,22 +27,29 @@ const LEVEL_FG = {
   EE: COLORS.green, ME: COLORS.blue, AE: COLORS.amber, BE: COLORS.red, NA: COLORS.grey
 };
 
-/** Wrap a header label to fit within a column width, returning lines. */
+/** Wrap a header label to fit within a column width, returning lines and size. */
 function wrapHeader(text, maxWidth, size = 7.5) {
-  const lines = wrapText(text, size, maxWidth - 4, true);
-  return lines.length ? lines : [String(text)];
+  const result = wrapText(text, size, maxWidth - 6, true);
+  // Fallback: if any single word is wider than the column, shrink font
+  let actualSize = size;
+  let lines = result;
+  while (actualSize > 5 && lines.some(l => textWidth(l, actualSize, true) > maxWidth - 6)) {
+    actualSize -= 0.5;
+    lines = wrapText(text, actualSize, maxWidth - 6, true);
+  }
+  return { lines: lines.length ? lines : [String(text)], size: actualSize };
 }
 
-/** Draw a wrapped, centered multi-line header cell. Returns line count. */
+/** Draw a wrapped, centered multi-line header cell. Returns { lines, size }. */
 function drawHeaderCell(page, text, x, y, colW, size = 7.5) {
-  const lines = wrapHeader(text, colW, size);
-  const lineHeight = 9;
+  const { lines, size: actualSize } = wrapHeader(text, colW, size);
+  const lineHeight = actualSize * 1.4;
   const totalH = lines.length * lineHeight;
-   const startY = y + (ROW_H - totalH) / 2 + totalH - lineHeight;
+  const startY = y + (ROW_H - totalH) / 2 + totalH - lineHeight;
   lines.forEach((l, i) =>
-    page.text(l, x, startY - i * lineHeight, size, COLORS.headText, { bold: true, align: 'center', width: colW })
+    page.text(l, x, startY - i * lineHeight, actualSize, COLORS.headText, { bold: true, align: 'center', width: colW })
   );
-  return lines.length;
+  return { lines: lines.length, size: actualSize };
 }
 
 /** Shared full header band for the first page. Returns y just below the meta strip. */
@@ -212,7 +219,7 @@ export function buildClassReportPdf(d) {
   // Calculate max header lines to determine table header height.
   let maxHeaderLines = 1;
   cols.forEach(c => {
-    const lines = wrapHeader(c.head, c.w, c.size || 8);
+    const { lines } = wrapHeader(c.head, c.w, c.size || 8);
     maxHeaderLines = Math.max(maxHeaderLines, lines.length);
   });
   const tableHeaderH = Math.max(20, maxHeaderLines * 10 + 4);
@@ -323,7 +330,7 @@ export function buildAllStudentsPdf(d) {
 
   let maxHeaderLines = 1;
   cols.forEach(c => {
-    const lines = wrapHeader(c.head, c.w, c.size || 8);
+    const { lines } = wrapHeader(c.head, c.w, c.size || 8);
     maxHeaderLines = Math.max(maxHeaderLines, lines.length);
   });
   const tableHeaderH = Math.max(20, maxHeaderLines * 10 + 4);

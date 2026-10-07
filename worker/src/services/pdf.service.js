@@ -78,24 +78,24 @@ export function wrapText(text, size, maxWidth, bold = false) {
     else line = test;
   }
   if (line) lines.push(line);
+  return lines.length ? lines : [String(text)];
+}
 
-  // Words longer than the column: split at character boundaries so no text
-  // overflows its cell.
-  const result = [];
-  for (let l of lines) {
-    if (textWidth(l, size, bold) <= maxWidth) { result.push(l); continue; }
-    let seg = '';
-    for (const ch of l) {
-      const test = seg + ch;
-      if (textWidth(test, size, bold) > maxWidth && seg) {
-        result.push(seg); seg = ch;
-      } else {
-        seg = test;
-      }
-    }
-    if (seg) result.push(seg);
+/**
+ * Wrap text with word-based wrapping, then reduce font size if any single
+ * word is wider than the column. Returns { lines, size }. Never splits
+ * words — long words get a smaller font instead of character fragments.
+ */
+export function wrapHeader(text, maxWidth, startSize = 7.5, bold = true) {
+  let size = startSize;
+  let lines = wrapText(text, size, maxWidth - 6, bold);
+  // If any single word is wider than the column, shrink until it fits or
+  // we hit 5pt (the smallest readable size).
+  while (size > 5 && lines.some(l => textWidth(l, size, bold) > maxWidth - 6)) {
+    size -= 0.5;
+    lines = wrapText(text, size, maxWidth - 6, bold);
   }
-  return result.length ? result : [String(text)];
+  return { lines, size };
 }
 
 const escapePdf = s => String(s)
