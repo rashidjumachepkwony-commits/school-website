@@ -20,6 +20,7 @@ import { handleUpload } from './routes/upload.js';
 import { handleHolidayAssignments } from './routes/holidayAssignments.js';
 import { handleClerk } from './routes/clerk.js';
 import { handlePortal } from './routes/portal.js';
+import { handleCertificates } from './routes/certificates.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -88,6 +89,7 @@ export default {
         () => handleHolidayAssignments(db, env, route, method, body, pathParts, request),
         () => handleClerk(db, env, route, method, body, pathParts, url),
         () => handlePortal(db, env, route, method, body, pathParts, url),
+        () => handleCertificates(db, env, route, method, body, pathParts, request),
       ];
 
       for (const handler of handlers) {

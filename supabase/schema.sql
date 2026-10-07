@@ -88,6 +88,13 @@ create table if not exists holidayassignments (
   data  jsonb not null default '{}'::jsonb
 );
 
+-- ============================================================
+create table if not exists graduation_certificates (
+  _id   text primary key,
+  data  jsonb not null default '{}'::jsonb
+);
+-- ============================================================
+
 -- ---------------------------------------------------------- RLS lockdown
 alter table admins            enable row level security;
 alter table contents          enable row level security;
@@ -103,6 +110,7 @@ alter table grades            enable row level security;
 alter table subjects          enable row level security;
 alter table syllabus          enable row level security;
 alter table holidayassignments enable row level security;
+alter table graduation_certificates enable row level security;
 
 -- No public policies are created on purpose: the backend Worker connects with
 -- the service_role key (BYPASSRLS), so only it can access school data.
@@ -154,6 +162,12 @@ create index if not exists idx_syllabus_createdat     on syllabus      ((data->>
 create index if not exists idx_holiday_grade          on holidayassignments ((data->>'grade'));
 create index if not exists idx_holiday_isactive       on holidayassignments ((data->>'isActive'));
 create index if not exists idx_holiday_createdat      on holidayassignments ((data->>'createdAt'));
+
+-- Graduation certificate indexes
+create index if not exists idx_graduation_cert_student    on graduation_certificates ((data->>'studentId'));
+create index if not exists idx_graduation_cert_number     on graduation_certificates ((data->>'certificateNumber'));
+create index if not exists idx_graduation_cert_class      on graduation_certificates ((data->>'class'));
+create index if not exists idx_graduation_cert_year       on graduation_certificates ((data->>'graduationYear'));
 
 -- Generic JSONB index (speeds up ad-hoc jsonb filters).
 create index if not exists idx_attendances_data_gin   on attendances   using gin (data);
