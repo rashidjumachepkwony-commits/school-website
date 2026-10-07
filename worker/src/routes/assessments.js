@@ -135,6 +135,7 @@ export async function handleAssessments(db, env, route, method, body, p, url) {
 
     const getRecord = s =>
       byStudent.get(String(s._id.toString())) ||
+      byStudent.get(String(s.admissionNumber || '')) ||
       byName.get(`${s.firstName || ''} ${s.lastName || ''}`.trim().toLowerCase()) || null;
 
     const rows = students.map(s => {
