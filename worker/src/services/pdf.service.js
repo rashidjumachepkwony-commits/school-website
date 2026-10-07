@@ -78,7 +78,24 @@ export function wrapText(text, size, maxWidth, bold = false) {
     else line = test;
   }
   if (line) lines.push(line);
-  return lines;
+
+  // Words longer than the column: split at character boundaries so no text
+  // overflows its cell.
+  const result = [];
+  for (let l of lines) {
+    if (textWidth(l, size, bold) <= maxWidth) { result.push(l); continue; }
+    let seg = '';
+    for (const ch of l) {
+      const test = seg + ch;
+      if (textWidth(test, size, bold) > maxWidth && seg) {
+        result.push(seg); seg = ch;
+      } else {
+        seg = test;
+      }
+    }
+    if (seg) result.push(seg);
+  }
+  return result.length ? result : [String(text)];
 }
 
 const escapePdf = s => String(s)

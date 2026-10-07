@@ -11,7 +11,7 @@ const W = A4.h;           // landscape width  (841.89)
 const H = A4.w;           // landscape height (595.28)
 const M = 24;             // print margin (~9mm at 96dpi)
 
-const ROW_H = 16;         // fixed data row height (compact)
+const ROW_H = 20;          // data row height (taller for wrapped names)
 const FOOTER_H = 30;      // footer space at bottom
 const HEADER_H_FULL = 50; // full header band height (first page)
 const META_H = 20;        // meta strip height
@@ -38,7 +38,7 @@ function drawHeaderCell(page, text, x, y, colW, size = 7.5) {
   const lines = wrapHeader(text, colW, size);
   const lineHeight = 9;
   const totalH = lines.length * lineHeight;
-  const startY = y + (16 - totalH) / 2 + totalH - lineHeight;
+   const startY = y + (ROW_H - totalH) / 2 + totalH - lineHeight;
   lines.forEach((l, i) =>
     page.text(l, x, startY - i * lineHeight, size, COLORS.headText, { bold: true, align: 'center', width: colW })
   );
@@ -135,7 +135,7 @@ function markSheetPage(page, { rows, cols, top, footerNote, from, to, pageNum, t
     if (y < FOOTER_H) break;  // leave room for footer
     const r = rows[i];
     const level = (r.code || 'NA').toUpperCase();
-    page.rect(M, y - ROW_H + 2, W - M * 2, ROW_H - 3, LEVEL_BG[level] || [250, 251, 253]);
+     page.rect(M, y - ROW_H + 2, W - M * 2, ROW_H - 3, LEVEL_BG[level] || [250, 251, 253]);
      let x = M;
     for (const c of cols) {
       const cell = c.render(r, y);
@@ -147,9 +147,17 @@ function markSheetPage(page, { rows, cols, top, footerNote, from, to, pageNum, t
         const textX = c.align === 'right' ? x : x + pad;
         const textW = c.align === 'right' ? c.w - pad : c.w - pad * 2;
         const colour = c.colourFor ? c.colourFor(r) : (c.colour || COLORS.ink);
-        page.text(String(cell), textX, y - 3, c.size || 8, colour, {
-          bold: c.bold !== false, align: c.align || 'left', width: textW
-        });
+        if (c.align === 'right' || c.align === 'center') {
+          page.text(String(cell), textX, y - 3, c.size || 8, colour, {
+            bold: c.bold !== false, align: c.align || 'left', width: textW
+          });
+        } else {
+          // Left-aligned cells (e.g. student names): wrap to fit the column.
+          page.textBlock(String(cell), textX, y - 1, textW, {
+            size: c.size || 8, color: colour, bold: c.bold !== false,
+            lineHeight: 9, maxLines: 2
+          });
+        }
       }
       x += c.w;
     }
@@ -169,12 +177,15 @@ export function buildClassReportPdf(d) {
   const pages = [];
   const subjectCount = d.subjects.length;
 
-  // Column widths: fixed narrow columns + flexible subject + student name.
-  const posW = 26, nameW = 170, admW = 54, numW = 42;
-  const lvlW = 60, codeW = 56;
+   // Column widths: fixed columns + dynamic subject columns.
+  // Fixed columns are kept narrow but always readable; subjects get the
+  // remaining space. The scale factor (when needed) shrinks all columns
+  // uniformly so the table always fits within the page width.
+  const posW = 22, nameW = 150, admW = 50, numW = 38;
+  const lvlW = 50, codeW = 46;
   const fixedW = posW + nameW + admW + numW * 2 + lvlW + codeW + 20;
   const subjectAvail = W - M * 2 - fixedW;
-  const subW = Math.max(36, Math.floor(subjectAvail / Math.max(1, subjectCount)));
+  const subW = Math.max(30, Math.floor(subjectAvail / Math.max(1, subjectCount)));
   const used = fixedW + subW * subjectCount;
   const scale = used > (W - M * 2) ? (W - M * 2) / used : 1;
 
@@ -281,11 +292,11 @@ export function buildAllStudentsPdf(d) {
   const pages = [];
   const subjectCount = d.columns.length;
 
-  const posW = 26, nameW = 155, admW = 54, clsW = 46, numW = 42;
-  const lvlW = 60, codeW = 56;
+  const posW = 22, nameW = 150, admW = 50, clsW = 40, numW = 38;
+  const lvlW = 50, codeW = 46;
   const fixedW = posW + nameW + admW + clsW + numW * 2 + lvlW + codeW + 20;
   const subjectAvail = W - M * 2 - fixedW;
-  const subW = Math.max(34, Math.floor(subjectAvail / Math.max(1, subjectCount)));
+  const subW = Math.max(28, Math.floor(subjectAvail / Math.max(1, subjectCount)));
   const used = fixedW + subW * subjectCount;
   const scale = used > (W - M * 2) ? (W - M * 2) / used : 1;
 
