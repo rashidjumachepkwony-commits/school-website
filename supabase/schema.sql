@@ -169,6 +169,13 @@ create index if not exists idx_graduation_cert_number     on graduation_certific
 create index if not exists idx_graduation_cert_class      on graduation_certificates ((data->>'class'));
 create index if not exists idx_graduation_cert_year       on graduation_certificates ((data->>'graduationYear'));
 
+-- Certificate templates (saved designs for Certificate Studio)
+create table if not exists certificate_templates (
+  _id   text primary key,
+  data  jsonb not null default '{}'::jsonb
+);
+create index if not exists idx_templates_name on certificate_templates ((data->>'name'));
+
 -- Generic JSONB index (speeds up ad-hoc jsonb filters).
 create index if not exists idx_attendances_data_gin   on attendances   using gin (data);
 create index if not exists idx_students_data_gin      on students      using gin (data);

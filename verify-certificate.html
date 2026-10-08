@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/config.js"></script>
+    <title>Verify Certificate - Changara Star Academy</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #001f5c 0%, #0b5394 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+        .verify-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .verify-header {
+            background: linear-gradient(135deg, #d4a017, #ffeb99);
+            padding: 30px;
+            text-align: center;
+        }
+        .verify-header h1 {
+            color: #001f5c;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .verify-header p {
+            color: #8a5a00;
+            font-size: 14px;
+        }
+        .verify-body { padding: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block; font-weight: 600; color: #333;
+            margin-bottom: 6px; font-size: 13px;
+        }
+        .form-group input {
+            width: 100%; padding: 12px 16px; border: 2px solid #e3e9f2;
+            border-radius: 10px; font-size: 15px; font-family: 'Courier New', monospace;
+            transition: 0.3s;
+        }
+        .form-group input:focus {
+            border-color: #d4a017; outline: none;
+            box-shadow: 0 0 0 4px rgba(212,160,23,0.1);
+        }
+        .btn {
+            padding: 12px 24px; border: none; border-radius: 10px;
+            font-weight: 600; font-size: 15px; cursor: pointer;
+            width: 100%; display: inline-flex;
+            align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: linear-gradient(135deg, #d4a017, #f5c842); color: #001f5c; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,160,23,0.35); }
+        .result-info {
+            margin-top: 25px; padding: 20px;
+            background: #f8f9fc; border-radius: 10px;
+            border: 1px solid #e3e9f2;
+        }
+        .result-info h3 {
+            color: #001f5c; font-size: 16px; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 10px 20px;
+            font-size: 13px;
+        }
+        .result-label { font-weight: 600; color: #888; }
+        .result-value { font-weight: 600; color: #26364f; }
+        .valid-badge {
+            display: inline-block; padding: 4px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 700;
+            background: #d4edda; color: #155724;
+        }
+        .invalid-badge {
+            display: inline-block; padding: 4px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 700;
+            background: #f8d7da; color: #721c24;
+        }
+        .error-msg {
+            color: #dc3545; font-size: 13px; margin-top: 10px;
+            display: none;
+        }
+        .footer {
+            text-align: center; padding-top: 20px;
+            border-top: 1px solid #e3e9f2; margin-top: 20px;
+            font-size: 12px; color: #999;
+        }
+    </style>
+</head>
+<body>
+
+<div class="verify-card">
+    <div class="verify-header">
+        <h1><i class="fas fa-trophy"></i> Changara Star Academy</h1>
+        <p>Certificate Verification</p>
+    </div>
+    <div class="verify-body">
+        <form onsubmit="verify(); return false;">
+            <div class="form-group">
+                <label for="certNumber">Certificate Number</label>
+                <input type="text" id="certNumber" placeholder="e.g. CSA/CERT/PP2/2026/0001" required autofocus>
+                <div class="error-msg" id="errorMsg"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i> Verify Certificate
+            </button>
+        </form>
+
+        <div id="resultSection" style="display:none;">
+            <div class="result-info">
+                <h3>Verification Result</h3>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                    <span class="result-label">Status:</span>
+                    <span id="statusBadge" class="valid-badge">Valid</span>
+                </div>
+                <div class="result-grid" id="resultGrid"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Changara Star Academy. All rights reserved.
+        </div>
+    </div>
+</div>
+
+<script>
+    function escapeHtml(text) {
+        if (!text) return '—';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function getUrlParam(name) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+    }
+
+    // Auto-verify if certificate number is in URL
+    const urlCert = getUrlParam('number');
+    if (urlCert) {
+        document.getElementById('certNumber').value = urlCert;
+        verify();
+    }
+
+    async function verify() {
+        const number = document.getElementById('certNumber').value.trim();
+        const errorMsg = document.getElementById('errorMsg');
+        const resultSection = document.getElementById('resultSection');
+        const statusBadge = document.getElementById('statusBadge');
+        const resultGrid = document.getElementById('resultGrid');
+
+        errorMsg.style.display = 'none';
+        errorMsg.textContent = '';
+
+        if (!number) {
+            errorMsg.textContent = 'Please enter a certificate number.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+
+        try {
+            const data = await apiJson('/api/certificates/verify?number=' + encodeURIComponent(number));
+            if (data.success && data.valid) {
+                const c = data.certificate;
+                statusBadge.textContent = 'Valid';
+                statusBadge.className = 'valid-badge';
+                resultGrid.innerHTML = `
+                    <div class="result-label">Certificate No.</div>
+                    <div class="result-value">${escapeHtml(c.certificateNumber)}</div>
+                    <div class="result-label">Student Name</div>
+                    <div class="result-value">${escapeHtml(c.studentName)}</div>
+                    <div class="result-label">Admission No.</div>
+                    <div class="result-value">${escapeHtml(c.admissionNumber)}</div>
+                    <div class="result-label">Class</div>
+                    <div class="result-value">${escapeHtml(c.class)}</div>
+                    <div class="result-label">Event</div>
+                    <div class="result-value">${escapeHtml(c.eventName)}</div>
+                    <div class="result-label">Date</div>
+                    <div class="result-value">${escapeHtml(c.eventDate)}</div>
+                    <div class="result-label">Year</div>
+                    <div class="result-value">${escapeHtml(c.graduationYear)}</div>
+                `;
+                resultSection.style.display = 'block';
+                window.scrollTo(0, document.body.scrollHeight);
+            } else {
+                statusBadge.textContent = 'Invalid or Not Found';
+                statusBadge.className = 'invalid-badge';
+                resultGrid.innerHTML = '<div class="result-value" style="color:#dc3545;">This certificate number could not be verified. Please check the number and try again.</div>';
+                resultSection.style.display = 'block';
+            }
+        } catch (err) {
+            errorMsg.textContent = 'Error: ' + err.message;
+            errorMsg.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

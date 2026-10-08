@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="js/config.js"></script>
-    <title>Graduation Certificates - Changara Star Academy</title>
+    <title>Certificate Studio - Changara Star Academy</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -101,31 +101,110 @@
         .btn-block { width: 100%; padding: 14px; font-size: 16px; justify-content: center; margin-top: 10px; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* ===== Student Info Display ===== */
-        .student-info-grid {
+        /* ===== School Settings ===== */
+        .settings-grid {
             display: grid;
-            grid-template-columns: 120px 1fr;
-            gap: 10px 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
             margin-top: 15px;
         }
-        .student-info-grid label { font-weight: 700; color: #001f5c; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .student-info-grid .value {
-            padding: 8px 12px; background: #f8f9fc; border: 1px solid #e3e9f2;
-            border-radius: 6px; font-size: 14px; font-weight: 600; color: #26364f;
+        .setting-group { grid-column: 1 / -1; }
+        .setting-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .setting-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+
+        /* ===== Student Selection ===== */
+        .student-search-box { position: relative; }
+        .student-search-box i {
+            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            color: #999; font-size: 14px;
         }
-        .student-photo-display {
-            grid-column: 1 / -1; text-align: center; margin-top: 10px;
+        .student-search-box input { padding-left: 36px; }
+
+        .student-list {
+            border: 1px solid #e3e9f2; border-radius: 8px;
+            max-height: 320px; overflow-y: auto; margin-top: 8px;
         }
-        .student-photo-display img {
-            width: 120px; height: 120px; object-fit: cover;
-            border: 3px solid #e3e9f2; border-radius: 8px;
+        .student-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f0f2f5;
+            transition: background 0.2s;
         }
-        .photo-placeholder {
-            width: 120px; height: 120px; margin: 0 auto;
-            border: 2px dashed #d4a017; border-radius: 8px;
+        .student-item:hover { background: #f8f9fc; }
+        .student-item:last-child { border-bottom: none; }
+        .student-checkbox { width: 16px; height: 16px; }
+        .student-info { flex: 1; }
+        .student-name { font-weight: 600; font-size: 13px; }
+        .student-details { font-size: 11px; color: #888; }
+        .student-photo-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #e3e9f2; }
+        .photo-placeholder-thumb {
+            width: 40px; height: 40px; border: 1px dashed #d4a017; border-radius: 4px;
             display: flex; align-items: center; justify-content: center;
-            background: #fffbeb; color: #8a5a00; font-size: 12px;
+            background: #fffbeb; color: #8a5a00; font-size: 16px;
         }
+
+        .selection-summary {
+            margin-top: 12px; padding: 10px 14px; background: #f8f9fc;
+            border-radius: 8px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .selection-count { font-weight: 600; color: #001f5c; }
+        .clear-selection { background: #e9ecef; color: #333; }
+
+        /* ===== Template Editor ===== */
+        .template-selector {
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+        }
+        .template-selector select { flex: 1; min-width: 150px; }
+
+        .editor-tabs {
+            display: flex; gap: 0; border-bottom: 2px solid #e8ecf1; margin-bottom: 0;
+        }
+        .editor-tab {
+            padding: 10px 20px; background: #f8f9fc; cursor: pointer;
+            font-weight: 600; color: #666; border-radius: 8px 8px 0 0;
+            transition: all 0.2s;
+        }
+        .editor-tab.active { background: #001f5c; color: white; }
+        .editor-tab:hover:not(.active) { background: #e8ecf1; }
+
+        .editor-pane { display: none; padding: 15px 0; }
+        .editor-pane.active { display: block; }
+
+        .template-variables {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+        }
+        .var-chip {
+            background: #e8ecf1; color: #001f5c; padding: 4px 10px;
+            border-radius: 12px; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .var-chip:hover { background: #001f5c; color: #d4a017; }
+
+        .design-canvas {
+            border: 2px dashed #e3e9f2; border-radius: 8px;
+            min-height: 500px; position: relative;
+            background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+            font-family: 'Georgia', 'Times New Roman', serif;
+            overflow: hidden;
+        }
+        .design-canvas.active-element { outline: 2px dashed #d4a017; }
+
+        .canvas-element {
+            position: absolute; padding: 4px 8px;
+            cursor: move; user-select: none;
+            border: 1px dashed transparent;
+        }
+        .canvas-element:hover { border-color: #d4a017; }
+        .canvas-element.active { border: 2px dashed #d4a017; background: rgba(212,160,23,0.05); }
+        .canvas-text { border: none; font-family: inherit; resize: none; overflow: hidden; }
+        .canvas-text:focus { outline: 2px dashed #d4a017; border: 1px dashed #d4a017; }
+
+        .element-toolbar {
+            display: flex; gap: 6px; margin-top: 10px;
+            background: #f8f9fc; padding: 8px; border-radius: 8px;
+            border: 1px solid #e3e9f2;
+        }
+        .element-toolbar button { padding: 6px 12px; font-size: 12px; }
+        .font-controls { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
 
         /* ===== Certificate Preview ===== */
         .preview-section { margin-top: 20px; }
@@ -136,12 +215,8 @@
         .preview-label { font-size: 12px; color: #888; margin-bottom: 10px; }
         .certificate-preview {
             width: 100%; max-width: 900px; margin: 0 auto;
-            border: 3px solid #001f5c; border-radius: 8px;
             background: white; position: relative;
             aspect-ratio: 297 / 210;
-        }
-        .no-preview {
-            padding: 40px; color: #999; font-style: italic;
         }
 
         .actions-bar {
@@ -149,9 +224,38 @@
             justify-content: center;
         }
 
+        /* ===== Certificate Record Table ===== */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #e3e9f2; }
+        th { background: #f8f9fc; color: #001f5c; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        tr:hover td { background: #f8f9fc; }
+
+        .status-badge {
+            display: inline-block; padding: 4px 10px; border-radius: 12px;
+            font-size: 11px; font-weight: 600;
+        }
+        .status-generated { background: #d4edda; color: #155724; }
+        .status-issued { background: #cce5ff; color: #004085; }
+
+        /* ===== Tabs ===== */
+        .tab-bar {
+            display: flex; gap: 2px; margin-bottom: 20px;
+            border-bottom: 2px solid #e8ecf1;
+        }
+        .tab {
+            padding: 12px 24px; background: white; cursor: pointer;
+            font-weight: 600; color: #666; border-radius: 8px 8px 0 0;
+            transition: all 0.2s; border: 1px solid transparent;
+        }
+        .tab.active { background: #001f5c; color: white; }
+        .tab:hover:not(.active) { background: #f8f9fc; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
         @media (max-width: 768px) {
             .main-content { margin-left: 0; padding: 15px; }
             .form-row { grid-template-columns: 1fr; }
+            .settings-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -172,7 +276,7 @@
         <a href="admin-cms.html"><i class="fas fa-edit"></i> CMS</a>
 
         <div class="menu-label" style="font-size:10px; text-transform:uppercase; color:rgba(255,255,255,0.3); padding:10px; margin-top:10px;">Reports & Certificates</div>
-        <a href="admin-certificates.html" class="active"><i class="fas fa-trophy"></i> Graduation Certificates</a>
+        <a href="admin-certificates.html" class="active"><i class="fas fa-trophy"></i> Certificate Studio</a>
         <a href="admin-academics.html"><i class="fas fa-chart-bar"></i> Assessments</a>
         <a href="admin-holiday-assignments.html"><i class="fas fa-file-alt"></i> Assignments</a>
         <a href="admin-students.html"><i class="fas fa-chart-line"></i> Student Attendance</a>
@@ -186,7 +290,7 @@
 
 <div class="main-content">
     <div class="header">
-        <h1><i class="fas fa-trophy"></i> Graduation Certificates</h1>
+        <h1><i class="fas fa-trophy"></i> Certificate Studio</h1>
         <div class="admin-info" style="display:flex;align-items:center;gap:12px;background:white;padding:8px 16px;border-radius:50px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
             <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#d4a017,#f5c842);display:flex;align-items:center;justify-content:center;color:#001f5c;font-weight:700;" id="adminAvatar">A</div>
             <span id="adminName">Admin</span>
@@ -195,111 +299,321 @@
 
     <div id="alert" class="alert"></div>
 
-    <!-- ===== GENERATOR ===== -->
-    <div class="card">
-        <h2><i class="fas fa-certificate"></i> PP2 Certificate Generator</h2>
-        <p class="desc">Select a class, search for a PP2 student, and generate a professional graduation certificate. Preview, download PDF, or print.</p>
+    <!-- Tab navigation -->
+    <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('studio')">🎨 Certificate Studio</div>
+        <div class="tab" onclick="switchTab('templates')">📁 Saved Templates</div>
+        <div class="tab" onclick="switchTab('records')">📋 Certificate Records</div>
+        <div class="tab" onclick="switchTab('verify')">✓ Verify Certificate</div>
+    </div>
 
-        <div class="form-row">
-            <div class="form-group full">
-                <label for="classSelect">Class</label>
-                <select id="classSelect" onchange="updateClassInfo()">
-                    <option value="PP2">PP2 (Pre-Primary 2)</option>
-                </select>
+    <!-- ===== Studio Tab ===== -->
+    <div id="studio-pane" class="tab-pane active">
+        <!-- School Settings Section -->
+        <div class="card">
+            <h2><i class="fas fa-school"></i> School Settings</h2>
+            <p class="desc">School information is stored centrally and automatically inserted into every certificate. Update once, use everywhere.</p>
+            <div class="settings-grid">
+                <div class="setting-pair">
+                    <div class="form-group">
+                        <label for="schoolName">School Name</label>
+                        <input type="text" id="schoolName">
+                    </div>
+                    <div class="form-group">
+                        <label for="schoolMotto">Motto</label>
+                        <input type="text" id="schoolMotto">
+                    </div>
+                </div>
+                <div class="setting-pair">
+                    <div class="form-group">
+                        <label for="schoolAddress">Address</label>
+                        <input type="text" id="schoolAddress">
+                    </div>
+                    <div class="form-group">
+                        <label for="schoolPhone">Phone</label>
+                        <input type="text" id="schoolPhone">
+                    </div>
+                </div>
+                <div class="setting-pair">
+                    <div class="form-group">
+                        <label for="schoolEmail">Email</label>
+                        <input type="text" id="schoolEmail">
+                    </div>
+                    <div class="form-group">
+                        <label for="schoolLogo">Logo URL</label>
+                        <input type="text" id="schoolLogo" placeholder="https://.../logo.png">
+                    </div>
+                </div>
+                <div class="setting-pair">
+                    <div class="form-group">
+                        <label for="schoolStamp">Stamp URL</label>
+                        <input type="text" id="schoolStamp" placeholder="https://.../stamp.png">
+                    </div>
+                    <div class="form-group">
+                        <label for="headteacherName">Headteacher Name</label>
+                        <input type="text" id="headteacherName">
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="studentSearch">Search Student</label>
-                <input type="text" id="studentSearch" placeholder="Enter admission number or name..." onkeyup="filterStudents()" oninput="clearSelection()">
+            <div style="margin-top:15px;">
+                <button class="btn btn-success" onclick="saveSchoolSettings()"><i class="fas fa-save"></i> Save School Settings</button>
             </div>
-            <div class="form-group" style="margin-top:22px;">
-                <button class="btn btn-success" onclick="searchStudent()" style="width:100%;">
-                    <i class="fas fa-search"></i> Search
+        </div>
+
+        <!-- Student Selection Section -->
+        <div class="card">
+            <h2><i class="fas fa-user-search"></i> Select Students</h2>
+            <p class="desc">Search from existing Student Management records. Students are NOT re-entered — they come directly from the school database.</p>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="studentSearch">Search by name or admission number</label>
+                    <div class="student-search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="studentSearch" placeholder="e.g. Brian or CSA0067..." onkeyup="filterStudents()" oninput="filterStudents()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="classFilter">Class / Grade</label>
+                    <select id="classFilter" onchange="filterStudents()">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="streamFilter">Stream</label>
+                    <select id="streamFilter" onchange="filterStudents()">
+                        <option value="">All Streams</option>
+                    </select>
+                </div>
+                <div class="form-group" style="align-content:flex-end;">
+                    <button class="btn btn-secondary" onclick="clearAllSelections()" style="width:100%;">
+                        <i class="fas fa-trash-alt"></i> Clear All
+                    </button>
+                </div>
+            </div>
+
+            <div class="student-list" id="studentList">
+                <div style="padding:16px;text-align:center;color:#999;">
+                    <i class="fas fa-info-circle"></i> Start typing to search students.
+                </div>
+            </div>
+
+            <div class="selection-summary" id="selectionSummary" style="display:none;">
+                <span class="selection-count" id="selectionCount">Selected: 0 students</span>
+                <button class="btn btn-sm clear-selection" onclick="clearAllSelections()">
+                    <i class="fas fa-times"></i> Clear
                 </button>
             </div>
         </div>
 
-        <!-- Student Search Results -->
-        <div id="searchResults" style="margin-top:15px;max-height:200px;overflow-y:auto;border:1px solid #e3e9f2;border-radius:8px;display:none;">
-            <div id="resultsList"></div>
+        <!-- Event Info Section -->
+        <div class="card">
+            <h2><i class="fas fa-calendar-alt"></i> Certificate Details</h2>
+            <p class="desc">Only enter event-specific information. Student and school data come automatically from the system.</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="eventName">Event / Certificate Type</label>
+                    <input type="text" id="eventName" placeholder="e.g. PP2 Graduation, End of Term 1, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="certDate">Date</label>
+                    <input type="date" id="certDate">
+                </div>
+                <div class="form-group">
+                    <label for="gradYear">Year</label>
+                    <input type="number" id="gradYear" min="2000" max="2100">
+                </div>
+                <div class="form-group" style="align-content:flex-end;">
+                    <button class="btn btn-primary" onclick="generateBulk()" style="width:100%;">
+                        <i class="fas fa-bolt"></i> Generate All Selected
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Student Info (populated after selection) -->
-        <div id="studentInfoSection" style="display:none;">
-            <h3 style="color:#001f5c;font-size:16px;margin-bottom:12px;">Student Information</h3>
-            <div class="student-info-grid">
-                <label>Full Name</label>
-                <div class="value" id="studentName"> — </div>
+        <!-- Template Editor Section -->
+        <div class="card">
+            <h2><i class="fas fa-paint-brush"></i> Certificate Template</h2>
 
-                <label>Admission No.</label>
-                <div class="value" id="studentAdmission"> — </div>
+            <div class="template-selector">
+                <select id="templateSelect" onchange="loadTemplate()">
+                    <option value="">-- Choose a saved template --</option>
+                </select>
+                <input type="text" id="templateName" placeholder="Template name for saving..." style="flex:1;min-width:150px;">
+                <button class="btn btn-success btn-sm" onclick="saveTemplate()"><i class="fas fa-save"></i> Save Template</button>
+            </div>
 
-                <label>Student ID</label>
-                <div class="value" id="studentId"> — </div>
+            <div class="editor-tabs">
+                <div class="editor-tab active" onclick="switchEditorTab('designer')">Visual Designer</div>
+                <div class="editor-tab" onclick="switchEditorTab('html')">HTML Source</div>
+            </div>
 
-                <label>Class</label>
-                <div class="value" id="studentClass"> — </div>
+            <div id="editor-content">
+                <!-- Visual Designer Tab -->
+                <div id="designer-tab" class="editor-pane active">
+                    <div class="template-variables">
+                        <div class="var-chip" onclick="insertVariable('{{student_name}}')">Student Name</div>
+                        <div class="var-chip" onclick="insertVariable('{{admission_number}}')">Admission No.</div>
+                        <div class="var-chip" onclick="insertVariable('{{class}}')">Class</div>
+                        <div class="var-chip" onclick="insertVariable('{{stream}}')">Stream</div>
+                        <div class="var-chip" onclick="insertVariable('{{gender}}')">Gender</div>
+                        <div class="var-chip" onclick="insertVariable('{{student_address}}')">Student Address</div>
+                        <div class="var-chip" onclick="insertVariable('{{school_name}}')">School Name</div>
+                        <div class="var-chip" onclick="insertVariable('{{school_motto}}')">School Motto</div>
+                        <div class="var-chip" onclick="insertVariable('{{school_address}}')">School Address</div>
+                        <div class="var-chip" onclick="insertVariable('{{school_phone}}')">School Phone</div>
+                        <div class="var-chip" onclick="insertVariable('{{school_email}}')">School Email</div>
+                        <div class="var-chip" onclick="insertVariable('{{school_logo}}')">School Logo</div>
+                        <div class="var-chip" onclick="insertVariable('{{school_stamp}}')">School Stamp</div>
+                        <div class="var-chip" onclick="insertVariable('{{headteacher_name}}')">Headteacher</div>
+                        <div class="var-chip" onclick="insertVariable('{{event_name}}')">Event Name</div>
+                        <div class="var-chip" onclick="insertVariable('{{date}}')">Date</div>
+                        <div class="var-chip" onclick="insertVariable('{{certificate_number}}')">Certificate No.</div>
+                    </div>
 
-                <label>Graduation Year</label>
-                <div class="value">
-                    <input type="number" id="gradYear" value="" min="2020" max="2100" style="width:100%;padding:8px;border:2px solid #e3e9f2;border-radius:6px;font-size:14px;">
-                </div>
+                    <div style="margin-bottom:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="btn btn-sm btn-secondary" onclick="addCanvasText('Heading Text')">Add Text</button>
+                        <button class="btn btn-sm btn-secondary" onclick="addCanvasImage()">Add Image</button>
+                        <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('signature')">Add Signature Line</button>
+                        <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('seal')">Add Seal</button>
+                        <button class="btn btn-sm btn-warning" onclick="loadPP2Background()">
+                            <i class="fas fa-image"></i> Load PP2 Certificate Design
+                        </button>
+                        <button class="btn btn-sm btn-info" onclick="clearBackground()">
+                            <i class="fas fa-trash"></i> Clear Background
+                        </button>
+                    </div>
 
-                <label>Graduation Date</label>
-                <div class="value">
-                    <input type="date" id="gradDate" value="" style="width:100%;padding:8px;border:2px solid #e3e9f2;border-radius:6px;font-size:14px;">
-                </div>
-
-                <label>Certificate No.</label>
-                <div class="value" id="certNumber">—</div>
-
-                <div class="student-photo-display">
-                    <label>Photo</label>
-                    <div id="photoContainer">
-                        <div class="photo-placeholder" id="photoPlaceholder">
-                            <div><i class="fas fa-info-circle"></i><br>Search a student to view photo</div>
+                    <div class="design-canvas" id="designCanvas" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+                        <div style="padding:40px;text-align:center;" id="canvasContent">
+                            <div style="font-size:36px;color:#001f5c;font-weight:800;margin-bottom:10px;">
+                                {{school_name}}
+                            </div>
+                            <div style="font-size:14px;color:#8a5a00;font-style:italic;margin-bottom:20px;">
+                                {{school_motto}}
+                            </div>
+                            <div style="font-size:28px;color:#001f5c;font-weight:700;margin:20px 0;">
+                                CERTIFICATE OF {{event_name}}
+                            </div>
+                            <div style="font-size:16px;color:#333;line-height:1.8;margin:20px 0;">
+                                This certificate is proudly awarded to
+                            </div>
+                            <div style="font-size:32px;color:#001f5c;font-weight:800;margin:15px 0;">
+                                {{student_name}}
+                            </div>
+                            <div style="font-size:16px;color:#333;line-height:1.8;margin:20px 0;">
+                                Admission No: {{admission_number}} &nbsp;|&nbsp; Class: {{class}}
+                            </div>
+                            <div style="font-size:16px;color:#333;line-height:1.8;margin:30px 0;">
+                                In recognition of successful completion.
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- HTML Source Tab -->
+                <div id="html-tab" class="editor-pane">
+                    <textarea id="htmlSource" style="width:100%;height:500px;font-family:'Courier New',monospace;font-size:13px;padding:10px;border:2px solid #e3e9f2;border-radius:8px;"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview & Generate Section -->
+        <div class="card preview-section">
+            <h2><i class="fas fa-eye"></i> Live Preview</h2>
+            <p class="desc">Preview the certificate with the selected student's data. Download as PDF or print.</p>
+
+            <div class="preview-wrapper">
+                <div class="preview-label">A4 Landscape (297mm × 210mm)</div>
+                <div id="certificatePreview" class="certificate-preview">
+                    <div style="padding:40px;text-align:center;color:#999;">
+                        <i class="fas fa-search" style="font-size:32px;margin-bottom:10px;"></i>
+                        <p>Select students and set event details to preview.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-bar">
+                <button class="btn btn-info" onclick="previewFirstStudent()" id="previewBtn"><i class="fas fa-eye"></i> Preview with First Student</button>
+                <button class="btn btn-danger" onclick="downloadAllPDFs()" id="downloadBtn"><i class="fas fa-download"></i> Download All as PDF</button>
+                <button class="btn btn-secondary" onclick="printAll()" id="printBtn"><i class="fas fa-print"></i> Print All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Templates Tab ===== -->
+    <div id="templates-pane" class="tab-pane">
+        <div class="card">
+            <h2><i class="fas fa-folder"></i> Saved Templates</h2>
+            <p class="desc">Your saved certificate templates. Select one to load into the studio.</p>
+            <div id="templatesList">
+                <div style="text-align:center;padding:30px;color:#999;">
+                    <i class="fas fa-folder-open" style="font-size:32px;margin-bottom:10px;"></i>
+                    <p>No saved templates yet. Create one in the Studio tab and save it.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ===== PREVIEW ===== -->
-    <div class="card preview-section">
-        <h2><i class="fas fa-eye"></i> Certificate Preview</h2>
-        <p class="desc">Live preview of the A4 landscape graduation certificate.</p>
+    <!-- ===== Records Tab ===== -->
+    <div id="records-pane" class="tab-pane">
+        <div class="card">
+            <h2><i class="fas fa-list"></i> Certificate Records</h2>
+            <p class="desc">All certificates generated through Certificate Studio.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Certificate No.</th>
+                        <th>Student Name</th>
+                        <th>Admission No.</th>
+                        <th>Class</th>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsBody">
+                    <tr><td colspan="8" style="text-align:center;padding:30px;color:#999;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-        <div class="preview-wrapper">
-            <div class="preview-label">A4 Landscape (297mm × 210mm)</div>
-            <div id="certificatePreview" class="certificate-preview">
-                <div class="no-preview">
-                    <p><i class="fas fa-search" style="font-size:32px;margin-bottom:10px;"></i></p>
-                    <p>Select and search a student to see the certificate preview.</p>
+    <!-- ===== Verify Tab ===== -->
+    <div id="verify-pane" class="tab-pane">
+        <div class="card">
+            <h2><i class="fas fa-check-circle"></i> Verify Certificate</h2>
+            <p class="desc">Enter a certificate number to verify its authenticity (public verification).</p>
+            <div class="form-row">
+                <div class="form-group full">
+                    <label for="verifyNumber">Certificate Number</label>
+                    <input type="text" id="verifyNumber" placeholder="e.g. CSA/CERT/PP2/2026/0001">
+                </div>
+                <div class="form-group full">
+                    <button class="btn btn-primary" onclick="verifyCertificate()" style="width:100%;"><i class="fas fa-search"></i> Verify</button>
                 </div>
             </div>
-        </div>
-
-        <div class="actions-bar">
-            <button class="btn btn-secondary" onclick="generatePreview()" disabled id="previewBtn">
-                <i class="fas fa-eye"></i> Preview Certificate
-            </button>
-            <button class="btn btn-info" onclick="printCertificate()" disabled id="printBtn">
-                <i class="fas fa-print"></i> Print
-            </button>
-            <button class="btn btn-primary" onclick="downloadPDF()" disabled id="downloadBtn">
-                <i class="fas fa-download"></i> Download PDF
-            </button>
+            <div id="verifyResult" style="display:none;margin-top:20px;">
+                <table>
+                    <tbody id="verifyTable"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
     let allStudents = [];
-    let selectedStudent = null;
+    let filteredStudents = [];
+    let selectedStudents = [];
+    let schoolSettings = {};
+    let savedTemplates = [];
+    let canvasElements = [];
     let currentYear = new Date().getFullYear();
-    let photoMissing = false;
-    let lastSearchQuery = '';
+    let activeElement = null;
 
+    // ---- Auth ----
     function showAlert(message, type) {
         const el = document.getElementById('alert');
         el.className = 'alert ' + type;
@@ -316,40 +630,116 @@
 
     function checkAuth() {
         const token = localStorage.getItem('adminToken');
-        if (!token) {
-            window.location.href = 'admin-login.html';
-            return false;
-        }
+        if (!token) { window.location.href = 'admin-login.html'; return false; }
         const admin = JSON.parse(localStorage.getItem('admin') || '{}');
         document.getElementById('adminName').textContent = admin.fullName || 'Admin';
         document.getElementById('adminAvatar').textContent = (admin.fullName || 'A')[0];
         return true;
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        if (!checkAuth()) return;
-        setDefaults();
-        loadStudents();
-    });
-
-    function setDefaults() {
-        document.getElementById('gradYear').value = currentYear;
-        const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
-        document.getElementById('gradDate').value = todayStr;
+    // ---- Tab switching ----
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-pane').forEach(p => {
+            p.classList.toggle('active', p.id === tab + '-pane');
+        });
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        const tabMap = { studio: 0, templates: 1, records: 2, verify: 3 };
+        const tabs = document.querySelectorAll('.tab');
+        if (tabs[tabMap[tab]]) tabs[tabMap[tab]].classList.add('active');
     }
 
+    // Fix the tab switching function
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!checkAuth()) return;
+        document.getElementById('gradYear').value = currentYear;
+        const today = new Date();
+        document.getElementById('certDate').value = today.toISOString().split('T')[0];
+        loadSchoolSettings();
+        loadStudents();
+        loadTemplates();
+        loadRecords();
+    });
+
+    // Proper tab switching
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-pane').forEach(p => {
+            p.classList.toggle('active', p.id === tabName + '-pane');
+        });
+    }
+
+    // Switch editor sub-tab
+    function switchEditorTab(tab) {
+        document.querySelectorAll('.editor-tab').forEach(t => t.classList.toggle('active', t.textContent.includes(tab)));
+        document.querySelectorAll('.editor-pane').forEach(p => {
+            p.classList.toggle('active', (tab === 'designer' && p.id === 'designer-tab') || (tab === 'html' && p.id === 'html-tab'));
+        });
+        // Sync HTML source when switching to designer
+        if (tab === 'designer') syncFromHTML();
+        else syncToHTML();
+    }
+
+    // ---- School Settings ----
+    async function loadSchoolSettings() {
+        try {
+            const data = await apiJson('/api/certificates/school-settings');
+            if (data.success) {
+                schoolSettings = data.settings || {};
+                document.getElementById('schoolName').value = schoolSettings.school_name || 'Changara Star Academy';
+                document.getElementById('schoolMotto').value = schoolSettings.school_motto || 'Assurance to Excellence';
+                document.getElementById('schoolAddress').value = schoolSettings.school_address || '';
+                document.getElementById('schoolPhone').value = schoolSettings.school_phone || '';
+                document.getElementById('schoolEmail').value = schoolSettings.school_email || '';
+                document.getElementById('schoolLogo').value = schoolSettings.school_logo || '';
+                document.getElementById('schoolStamp').value = schoolSettings.school_stamp || '';
+                document.getElementById('headteacherName').value = schoolSettings.headteacher_name || '';
+            }
+        } catch (err) {
+            console.error(err);
+            // Use defaults
+            document.getElementById('schoolName').value = 'Changara Star Academy';
+            document.getElementById('schoolMotto').value = 'Assurance to Excellence';
+        }
+    }
+
+    async function saveSchoolSettings() {
+        const settings = {
+            school_name: document.getElementById('schoolName').value,
+            school_motto: document.getElementById('schoolMotto').value,
+            school_address: document.getElementById('schoolAddress').value,
+            school_phone: document.getElementById('schoolPhone').value,
+            school_email: document.getElementById('schoolEmail').value,
+            school_logo: document.getElementById('schoolLogo').value,
+            school_stamp: document.getElementById('schoolStamp').value,
+            headteacher_name: document.getElementById('headteacherName').value
+        };
+        try {
+            const data = await apiJson('/api/certificates/school-settings', {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') },
+                body: JSON.stringify(settings)
+            });
+            if (data.success) {
+                schoolSettings = data.settings;
+                showAlert('School settings saved successfully!', 'success');
+            } else {
+                showAlert(data.error || 'Failed to save school settings', 'error');
+            }
+        } catch (err) {
+            showAlert('Error saving settings: ' + err.message, 'error');
+        }
+    }
+
+    // ---- Student Loading & Filtering ----
     async function loadStudents() {
         try {
-            const res = await fetch(apiUrl('/api/certificates/pp2/students'), {
+            const data = await apiJson('/api/certificates/students', {
                 headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') }
             });
-            const data = await res.json();
             if (data.success) {
                 allStudents = data.students || [];
-                if (allStudents.length === 0) {
-                    showAlert('No PP2 students found in the system.', 'info');
-                }
+                buildClassOptions();
+                buildStreamOptions();
+                filterStudents();
             } else {
                 showAlert(data.error || 'Failed to load students', 'error');
             }
@@ -358,232 +748,405 @@
         }
     }
 
+    function buildClassOptions() {
+        const classes = [...new Set(allStudents.map(s => s.grade || s.class))]
+            .filter(Boolean).sort();
+        const select = document.getElementById('classFilter');
+        select.innerHTML = '<option value="">All Classes</option>' +
+            classes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    }
+
+    function buildStreamOptions() {
+        const streams = [...new Set(allStudents.map(s => s.stream))]
+            .filter(Boolean).sort();
+        const select = document.getElementById('streamFilter');
+        select.innerHTML = '<option value="">All Streams</option>' +
+            streams.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    }
+
     function filterStudents() {
         const query = (document.getElementById('studentSearch').value || '').toLowerCase().trim();
-        lastSearchQuery = query;
-        const resultsDiv = document.getElementById('searchResults');
-        const resultsList = document.getElementById('resultsList');
+        const cls = (document.getElementById('classFilter').value || '').trim();
+        const stream = (document.getElementById('streamFilter').value || '').trim();
 
-        if (!query) {
-            resultsDiv.style.display = 'none';
+        filteredStudents = allStudents.filter(s => {
+            const name = ((s.firstName || '') + ' ' + (s.lastName || '')).toLowerCase();
+            const adm = (s.admissionNumber || '').toLowerCase();
+            const grade = (s.grade || '').toLowerCase();
+            const sStream = (s.stream || '').toLowerCase();
+
+            const matchesQuery = !query || name.includes(query) || adm.includes(query);
+            const matchesClass = !cls || grade === cls.toLowerCase();
+            const matchesStream = !stream || sStream === stream.toLowerCase();
+
+            return matchesQuery && matchesClass && matchesStream;
+        });
+
+        renderStudentList();
+        updateSelectionSummary();
+    }
+
+    function renderStudentList() {
+        const container = document.getElementById('studentList');
+        if (!filteredStudents.length) {
+            container.innerHTML = '<div style="padding:16px;text-align:center;color:#999;">No students found.</div>';
             return;
         }
 
-        const matches = allStudents.filter(s =>
-            (s.fullName || '').toLowerCase().includes(query) ||
-            (s.admissionNumber || '').toLowerCase().includes(query) ||
-            String(s._id || '').toLowerCase().includes(query)
-        ).slice(0, 20);
+        container.innerHTML = filteredStudents.map(s => {
+            const alreadySelected = selectedStudents.some(sel => sel.admissionNumber === s.admissionNumber);
+            const photo = s.photoUrl
+                ? `<img src="${escapeHtml(s.photoUrl)}" class="student-photo-thumb" alt="${escapeHtml(s.fullName)}">`
+                : `<div class="photo-placeholder-thumb"><i class="fas fa-user"></i></div>`;
 
-        if (matches.length === 0) {
-            resultsList.innerHTML = '<p style="padding:10px;color:#999;">No students found.</p>';
-            resultsDiv.style.display = 'block';
-            return;
-        }
-
-        resultsList.innerHTML = matches.map((s, idx) => `
-            <div style="padding:10px;cursor:pointer;border-bottom:1px solid #eee;" onclick="selectStudentFromList(${idx})">
-                <div style="font-weight:600;">${escapeHtml(s.fullName)}</div>
-                <div style="font-size:12px;color:#666;">Admission: ${escapeHtml(s.admissionNumber)} | ID: ${escapeHtml(s.studentId || s._id || '')}</div>
-            </div>
-        `).join('');
-        resultsDiv.style.display = 'block';
+            return `
+                <div class="student-item" onclick="toggleStudentSelection('${escapeHtml(s.admissionNumber)}')">
+                    ${photo}
+                    <div class="student-info">
+                        <div class="student-name">${escapeHtml(s.fullName)}</div>
+                        <div class="student-details">Adm: ${escapeHtml(s.admissionNumber)} | Class: ${escapeHtml(s.grade || s.class || '')} | Stream: ${escapeHtml(s.stream || '—')}</div>
+                    </div>
+                    <input type="checkbox" class="student-checkbox" ${alreadySelected ? 'checked' : ''}
+                           onchange="toggleStudentSelection('${escapeHtml(s.admissionNumber)}')"
+                           onclick="event.stopPropagation()">
+                </div>
+            `;
+        }).join('');
     }
 
-    function selectStudentFromList(index) {
-        selectStudent(allStudents.filter(s =>
-            (s.fullName || '').toLowerCase().includes(lastSearchQuery) ||
-            (s.admissionNumber || '').toLowerCase().includes(lastSearchQuery)
-        )[index]);
-    }
-
-    function selectStudent(student) {
-        selectedStudent = student;
-        document.getElementById('searchResults').style.display = 'none';
-        document.getElementById('studentSearch').value = student.fullName;
-        document.getElementById('studentName').textContent = student.fullName;
-        document.getElementById('studentAdmission').textContent = student.admissionNumber;
-        document.getElementById('studentId').textContent = student.studentId || student._id || '-';
-        document.getElementById('studentClass').textContent = student.grade || student.class || 'PP2';
-        document.getElementById('studentInfoSection').style.display = 'block';
-        document.getElementById('previewBtn').disabled = false;
-
-        // Check for photo
-        photoMissing = false;
-        const photoContainer = document.getElementById('photoContainer');
-        if (student.photoUrl) {
-            photoMissing = false;
-            photoContainer.innerHTML = `<img src="${student.photoUrl}" alt="${student.fullName}" style="width:120px;height:120px;object-fit:cover;border:3px solid #e3e9f2;border-radius:8px;">`;
+    function toggleStudentSelection(admissionNumber) {
+        const student = allStudents.find(s => s.admissionNumber === admissionNumber);
+        if (!student) return;
+        const existing = selectedStudents.findIndex(s => s.admissionNumber === admissionNumber);
+        if (existing >= 0) {
+            selectedStudents.splice(existing, 1);
         } else {
-            photoMissing = true;
-            photoContainer.innerHTML = `<div class="photo-placeholder" id="photoPlaceholder"><div><i class="fas fa-exclamation-triangle" style="font-size:24px;"></i><br>Photo Not Available</div></div>`;
+            selectedStudents.push(student);
         }
-
-        // Generate certificate number
-        generateCertNumber();
+        renderStudentList();
+        updateSelectionSummary();
+        updatePreview();
     }
 
-    function clearSelection() {
-        selectedStudent = null;
-        document.getElementById('studentInfoSection').style.display = 'none';
-        document.getElementById('studentName').textContent = '—';
-        document.getElementById('studentAdmission').textContent = '—';
-        document.getElementById('studentId').textContent = '—';
-        document.getElementById('studentClass').textContent = '—';
-        document.getElementById('photoContainer').innerHTML = '<div class="photo-placeholder"><div><i class="fas fa-info-circle"></i><br>Search a student to view photo</div></div>';
-        document.getElementById('previewBtn').disabled = true;
-        document.getElementById('downloadBtn').disabled = true;
-        document.getElementById('printBtn').disabled = true;
-        photoMissing = false;
+    function clearAllSelections() {
+        selectedStudents = [];
+        renderStudentList();
+        updateSelectionSummary();
+        updatePreview();
     }
 
-    function updateClassInfo() {
-        const cls = document.getElementById('classSelect').value;
-        if (cls === 'PP2') {
-            document.getElementById('classSelect').selectedIndex = 0;
+    function updateSelectionSummary() {
+        const summary = document.getElementById('selectionSummary');
+        const count = document.getElementById('selectionCount');
+        if (selectedStudents.length > 0) {
+            summary.style.display = 'block';
+            count.textContent = `Selected: ${selectedStudents.length} student${selectedStudents.length === 1 ? '' : 's'}`;
+        } else {
+            summary.style.display = 'none';
         }
     }
 
-    async function generateCertNumber() {
-        if (!selectedStudent) return;
-        const year = document.getElementById('gradYear').value;
-        const certNumberEl = document.getElementById('certNumber');
-        certNumberEl.textContent = 'Generating...';
+    // ---- Dynamic field substitution ----
+    let backgroundImageUrl = null;
 
+    // ---- PP2 Background ----
+    function loadPP2Background() {
+        backgroundImageUrl = 'PP2%20CERTIFICATE.png';
+        const canvas = document.getElementById('designCanvas');
+        canvas.style.backgroundImage = `url('PP2 CERTIFICATE.png')`;
+        canvas.style.backgroundSize = 'cover';
+        canvas.style.backgroundPosition = 'center';
+        canvas.style.backgroundRepeat = 'no-repeat';
+        // Make canvas content transparent so background shows through
+        canvas.style.background = 'transparent';
+
+        // Replace canvasContent with an overlay that allows absolute positioning
+        const content = document.getElementById('canvasContent');
+        content.style.position = 'relative';
+        content.style.width = '100%';
+        content.style.height = '100%';
+        content.style.padding = '0';
+
+        showAlert('PP2 certificate design loaded as background. Drag fields over it.', 'info');
+        syncToHTML();
+    }
+
+    function clearBackground() {
+        backgroundImageUrl = null;
+        const canvas = document.getElementById('designCanvas');
+        canvas.style.backgroundImage = 'none';
+        canvas.style.background = 'linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%)';
+        showAlert('Background cleared.', 'info');
+    }
+
+    function substituteFields(template, student, settings, event, certNumber) {
+        const studentName = student.fullName || '';
+        const admissionNumber = student.admissionNumber || '';
+        const studentClass = student.grade || student.class || '';
+        const stream = student.stream || '';
+        const gender = student.gender || '';
+        const studentAddress = student.address || student.studentAddress || '';
+
+        const replacements = {
+            '{{student_name}}': studentName,
+            '{{admission_number}}': admissionNumber,
+            '{{student_id}}': admissionNumber,
+            '{{class}}': studentClass,
+            '{{grade}}': studentClass,
+            '{{stream}}': stream,
+            '{{gender}}': gender,
+            '{{student_address}}': studentAddress,
+            '{{school_name}}': settings.school_name || '',
+            '{{school_motto}}': settings.school_motto || '',
+            '{{school_address}}': settings.school_address || '',
+            '{{school_phone}}': settings.school_phone || '',
+            '{{school_email}}': settings.school_email || '',
+            '{{school_logo}}': settings.school_logo || '',
+            '{{school_stamp}}': settings.school_stamp || '',
+            '{{headteacher_name}}': settings.headteacher_name || '',
+            '{{event_name}}': event || '',
+            '{{date}}': event || '',
+            '{{certificate_number}}': certNumber || ''
+        };
+
+        let result = template;
+        for (const [key, value] of Object.entries(replacements)) {
+            result = result.split(key).join(value);
+        }
+        return result;
+    }
+
+    // ---- Template management ----
+    async function loadTemplates() {
         try {
-            const res = await fetch(apiUrl('/api/certificates/pp2/generate'), {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('adminToken'),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    studentId: selectedStudent.admissionNumber,
-                    graduationYear: year
-                })
+            const data = await apiJson('/api/certificates/templates', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') }
             });
-            const data = await res.json();
             if (data.success) {
-                const cert = data.certificate;
-                certNumberEl.textContent = cert.certificateNumber;
-            } else {
-                certNumberEl.textContent = 'Error generating number';
-                showAlert(data.error || 'Failed to generate certificate number', 'error');
+                savedTemplates = data.templates || [];
+                const select = document.getElementById('templateSelect');
+                select.innerHTML = '<option value="">-- Choose a saved template --</option>' +
+                    savedTemplates.map(t => `<option value="${escapeHtml(t._id)}">${escapeHtml(t.name)}</option>`).join('');
+
+                // Render templates list in Templates tab
+                const list = document.getElementById('templatesList');
+                if (!savedTemplates.length) {
+                    list.innerHTML = '<div style="text-align:center;padding:30px;color:#999;"><i class="fas fa-folder-open" style="font-size:32px;margin-bottom:10px;"></i><p>No saved templates yet. Create one in the Studio tab and save it.</p></div>';
+                } else {
+                    list.innerHTML = savedTemplates.map(t => `
+                        <div style="padding:12px;border:1px solid #e3e9f2;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-weight:600;color:#001f5c;">${escapeHtml(t.name)}</div>
+                                <div style="font-size:11px;color:#999;">Created: ${t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '—'}</div>
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="loadTemplateById('${escapeHtml(t._id)}')"><i class="fas fa-edit"></i> Load</button>
+                        </div>
+                    `).join('');
+                }
             }
         } catch (err) {
-            certNumberEl.textContent = 'Error';
+            console.error('Templates load error:', err);
+        }
+    }
+
+    function loadTemplateById(id) {
+        const tpl = savedTemplates.find(t => t._id === id);
+        if (tpl) {
+            document.getElementById('templateName').value = tpl.name;
+            document.getElementById('htmlSource').value = tpl.template;
+            if (tpl.backgroundImageUrl) {
+                backgroundImageUrl = tpl.backgroundImageUrl;
+                const canvas = document.getElementById('designCanvas');
+                canvas.style.backgroundImage = `url('${decodeURIComponent(tpl.backgroundImageUrl)}')`;
+                canvas.style.backgroundSize = 'cover';
+                canvas.style.backgroundPosition = 'center';
+                canvas.style.backgroundRepeat = 'no-repeat';
+                canvas.style.background = 'transparent';
+            } else {
+                clearBackground();
+            }
+            syncFromHTML();
+            switchTab('studio');
+        }
+    }
+
+    async function saveTemplate() {
+        const name = document.getElementById('templateName').value.trim();
+        const html = document.getElementById('htmlSource').value;
+        if (!name || !html) {
+            showAlert('Please enter a template name and design some content.', 'error');
+            return;
+        }
+        try {
+            const data = await apiJson('/api/certificates/templates', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') },
+                body: JSON.stringify({
+                    name,
+                    template: html,
+                    backgroundImageUrl: backgroundImageUrl
+                })
+            });
+            if (data.success) {
+                showAlert('Template saved!', 'success');
+                loadTemplates();
+            } else {
+                showAlert(data.error || 'Failed to save template', 'error');
+            }
+        } catch (err) {
             showAlert('Error: ' + err.message, 'error');
         }
     }
 
-    function validateStudent() {
-        if (!selectedStudent) {
-            showAlert('Please search and select a PP2 student first.', 'error');
-            return false;
+    function loadTemplate() {
+        const select = document.getElementById('templateSelect');
+        const selectedId = select.value;
+        if (!selectedId) return;
+        const tpl = savedTemplates.find(t => t._id === selectedId);
+        if (tpl) {
+            document.getElementById('templateName').value = tpl.name;
+            document.getElementById('htmlSource').value = tpl.template;
+            // Restore background if the template has one
+            if (tpl.backgroundImageUrl) {
+                backgroundImageUrl = tpl.backgroundImageUrl;
+                const canvas = document.getElementById('designCanvas');
+                const decodedUrl = decodeURIComponent(tpl.backgroundImageUrl);
+                canvas.style.backgroundImage = `url('${decodedUrl}')`;
+                canvas.style.backgroundSize = 'cover';
+                canvas.style.backgroundPosition = 'center';
+                canvas.style.backgroundRepeat = 'no-repeat';
+                canvas.style.background = 'transparent';
+            } else {
+                clearBackground();
+            }
+            syncFromHTML();
         }
-        if (!selectedStudent.fullName) {
-            showAlert('Student name not found in the record.', 'error');
-            return false;
-        }
-        const year = document.getElementById('gradYear').value;
-        if (!year || isNaN(Number(year)) || Number(year) < 2000 || Number(year) > 2100) {
-            showAlert('Please enter a valid graduation year.', 'error');
-            return false;
-        }
-        const date = document.getElementById('gradDate').value;
-        if (!date) {
-            showAlert('Please enter a graduation date.', 'error');
-            return false;
-        }
-        return true;
     }
 
-    function generatePreview() {
-        if (!validateStudent()) return;
-        if (photoMissing) {
-            showAlert('Warning: This student does not have a photograph. The certificate will show a "Photo Not Available" placeholder.', 'warning');
-        }
-        renderCertificate();
-        document.getElementById('downloadBtn').disabled = false;
-        document.getElementById('printBtn').disabled = false;
+    // ---- Template Editor ----
+    function syncToHTML() {
+        const canvas = document.getElementById('canvasContent');
+        document.getElementById('htmlSource').value = canvas.innerHTML;
     }
 
-    function renderCertificate() {
-        const student = selectedStudent;
-        const year = document.getElementById('gradYear').value;
-        const date = document.getElementById('gradDate').value;
-        const certNumber = document.getElementById('certNumber').textContent || 'CSA/GRAD/PP2/' + year + '/0001';
+    function syncFromHTML() {
+        const html = document.getElementById('htmlSource').value;
+        document.getElementById('canvasContent').innerHTML = html;
+    }
 
-        const photoUrl = student.photoUrl;
-        const photoHtml = photoUrl
-            ? `<img src="${photoUrl}" class="cert-photo" alt="${student.fullName}">`
-            : `<div class="cert-photo-placeholder"><span class="cert-photo-text">PHOTO<br>NOT<br>AVAILABLE</span></div>`;
+    function insertVariable(variable) {
+        const htmlTab = document.getElementById('html-tab');
+        if (htmlTab.classList.contains('active')) {
+            const ta = document.getElementById('htmlSource');
+            const start = ta.selectionStart;
+            const end = ta.selectionEnd;
+            ta.value = ta.value.substring(0, start) + variable + ta.value.substring(end);
+            ta.focus();
+        } else {
+            document.getElementById('canvasContent').insertAdjacentHTML('beforeend',
+                `<div style="font-size:16px;color:#333;margin:10px 0;">${variable}</div>`);
+            syncToHTML();
+        }
+    }
 
-        const formattedDate = date ? new Date(date).toLocaleDateString('en-GB', {
+    function addCanvasText(text) {
+        const div = document.createElement('div');
+        div.className = 'canvas-element canvas-text';
+        div.contentEditable = true;
+        div.textContent = text;
+        div.style.left = '50%';
+        div.style.top = '50%';
+        div.style.transform = 'translate(-50%, -50%)';
+        div.style.fontSize = '20px';
+        div.style.color = '#001f5c';
+        document.getElementById('designCanvas').appendChild(div);
+        setupCanvasElement(div);
+        syncToHTML();
+    }
+
+    function addCanvasImage() {
+        const url = prompt('Enter image URL (e.g. the school logo URL):');
+        if (!url) return;
+        const img = document.createElement('img');
+        img.className = 'canvas-element';
+        img.src = url;
+        img.alt = 'Certificate image';
+        img.style.left = '50%';
+        img.style.top = '50%';
+        img.style.transform = 'translate(-50%, -50%)';
+        img.style.maxWidth = '150px';
+        img.style.maxHeight = '150px';
+        document.getElementById('designCanvas').appendChild(img);
+        setupCanvasElement(img);
+        syncToHTML();
+    }
+
+    function addCanvasShape(type) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'canvas-element';
+        wrapper.style.left = '50%';
+        wrapper.style.top = '50%';
+        wrapper.style.transform = 'translate(-50%, -50%)';
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.gap = '40px';
+        wrapper.style.padding = '0 20px';
+
+        if (type === 'signature') {
+            wrapper.innerHTML = '<div style="width:200px;height:2px;background:#001f5c;"></div><div style="font-size:12px;color:#666;text-align:center;">Signature</div>';
+        } else if (type === 'seal') {
+            wrapper.innerHTML = '<div style="width:70px;height:70px;border:4px solid #d4a017;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ffeb99,#d4a017);color:#001f5c;font-size:10px;font-weight:800;text-align:center;line-height:1.2;">SCHOOL SEAL</div>';
+        }
+        document.getElementById('designCanvas').appendChild(wrapper);
+        setupCanvasElement(wrapper);
+        syncToHTML();
+    }
+
+    function setupCanvasElement(el) {
+        el.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            activeElement = el;
+            el.classList.add('active');
+        });
+    }
+
+    // ---- Preview ----
+    function getTemplateContent() {
+        return document.getElementById('htmlSource').value || document.getElementById('canvasContent').innerHTML;
+    }
+
+    function renderCertificate(student, settings, eventName, eventDate, certNumber) {
+        let template = getTemplateContent();
+        template = substituteFields(template, student, settings, eventName, eventDate, certNumber);
+
+        // Replace {{school_logo}} with actual image
+        template = template.replace('{{school_logo}}',
+            settings.school_logo ? `<img src="${settings.school_logo}" class="cert-logo-img" alt="${settings.school_name}">` : '<span style="font-size:48px;">🏫</span>');
+        template = template.replace('{{school_stamp}}',
+            settings.school_stamp ? `<img src="${settings.school_stamp}" class="cert-seal-img" alt="School Seal">` : '');
+
+        const formattedDate = eventDate ? new Date(eventDate).toLocaleDateString('en-GB', {
             day: 'numeric', month: 'long', year: 'numeric'
         }) : new Date().toLocaleDateString('en-GB', {
             day: 'numeric', month: 'long', year: 'numeric'
         });
 
-        const preview = `
-            <div class="certificate">
+        // Background image support: if a background is set, render it as absolute-positioned div
+        const bgStyle = backgroundImageUrl
+            ? `background-image: url('${decodeURIComponent(backgroundImageUrl)}'); background-size: cover; background-position: center; background-repeat: no-repeat;`
+            : '';
+
+        // Build the full certificate wrapper
+        return `
+            <div class="certificate" style="${bgStyle}">
                 <div class="cert-border"></div>
                 <div class="cert-shield"></div>
-                <div class="cert-content">
-                    <div class="cert-logo">🏫</div>
-                    <div class="cert-school">CHANGARA STAR ACADEMY</div>
-                    <div class="cert-motto">"Excellence • Discipline • Success"</div>
-
-                    <div class="cert-heading">CERTIFICATE OF GRADUATION</div>
-                    <div class="cert-level">PRE-PRIMARY 2 (PP2)</div>
-
-                    <div class="cert-body-text">
-                        This certificate is proudly awarded to
-                    </div>
-                    <div class="cert-student-name">${escapeHtml(student.fullName)}</div>
-                    ${photoHtml}
-                    <div class="cert-body-text">
-                        for successfully completing the PP2 programme and demonstrating
-                        growth, learning and readiness for the next stage of their
-                        educational journey.
-                    </div>
-
-                    <div class="cert-graduation">
-                        Graduation<br>
-                        <span class="cert-year">${year}</span>
-                    </div>
-
-                    <div class="cert-signatures">
-                        <div class="cert-sig">
-                            <div class="cert-sig-line"></div>
-                            <div class="cert-sig-label">Class Teacher</div>
-                        </div>
-                        <div class="cert-seal">
-                            <div class="cert-seal-circle">
-                                <span class="cert-seal-text">SCHOOL<br>SEAL</span>
-                            </div>
-                        </div>
-                        <div class="cert-sig">
-                            <div class="cert-sig-line"></div>
-                            <div class="cert-sig-label">Headteacher</div>
-                        </div>
-                    </div>
-
-                    <div class="cert-meta">
-                        <div class="cert-meta-item">
-                            <span class="cert-meta-label">Date of Issue:</span>
-                            <span class="cert-meta-value">${formattedDate}</span>
-                        </div>
-                        <div class="cert-meta-item">
-                            <span class="cert-meta-label">Certificate No:</span>
-                            <span class="cert-meta-value">${certNumber}</span>
-                        </div>
-                    </div>
+                <div class="cert-content" style="${backgroundImageUrl ? 'background: transparent;' : ''}">
+                    ${template}
                 </div>
             </div>
         `;
-
-        document.getElementById('certificatePreview').innerHTML = preview;
     }
 
     function escapeHtml(text) {
@@ -592,126 +1155,277 @@
         return div.innerHTML;
     }
 
-    function downloadPDF() {
-        if (!selectedStudent) {
-            showAlert('Please select a student first.', 'error');
+    function updatePreview() {
+        const preview = document.getElementById('certificatePreview');
+        if (selectedStudents.length === 0) {
+            preview.innerHTML = `
+                <div style="padding:40px;text-align:center;color:#999;">
+                    <i class="fas fa-search" style="font-size:32px;margin-bottom:10px;"></i>
+                    <p>Select students and set event details to preview.</p>
+                </div>
+            `;
             return;
         }
-        if (!validateStudent()) return;
-        renderCertificate();
 
-        const previewEl = document.querySelector('.certificate-preview');
-        const original = previewEl.innerHTML;
+        const eventName = document.getElementById('eventName').value || 'Certificate';
+        const eventDate = document.getElementById('certDate').value || new Date().toISOString().split('T')[0];
+        const certNumber = 'CSA/CERT/0000/0000';
 
-        const opt = {
-            margin:       [0, 0, 0, 0],
-            filename:     `PP2_Certificate_${escapeHtml(selectedStudent.fullName).replace(/\s+/g, '_')}_${document.getElementById('gradYear').value}.pdf`,
-            image:        { type: 'jpeg', quality: 1.0 },
-            html2canvas:  {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                letterRendering: true,
-                width: 1247,
-                windowWidth: 1247,
-                windowHeight: 879,
-                height: 879
-            },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
+        // Temporarily replace placeholders for preview
+        const previewHtml = renderCertificate(selectedStudents[0], schoolSettings, eventName, eventDate, certNumber);
+        preview.innerHTML = previewHtml;
+        document.getElementById('previewBtn').disabled = false;
+        document.getElementById('downloadBtn').disabled = false;
+        document.getElementById('printBtn').disabled = false;
+    }
 
-        const alertCopy = document.getElementById('alert').cloneNode(true);
+    // Auto-update preview when event fields change
+    document.getElementById('eventName').addEventListener('input', updatePreview);
+    document.getElementById('certDate').addEventListener('input', updatePreview);
 
-        html2pdf().set(opt).from(previewEl).save().then(() => {
-            document.getElementById('certificatePreview').innerHTML = original;
-            const savedAlert = alertCopy.cloneNode(true);
-            savedAlert.className = 'alert success';
-            savedAlert.textContent = 'PDF downloaded successfully!';
-            savedAlert.style.display = 'block';
-            document.getElementById('alert').after(savedAlert);
-            setTimeout(() => { if (savedAlert.parentNode) savedAlert.remove(); }, 4000);
-        }).catch(err => {
-            showAlert('PDF generation failed: ' + err.message, 'error');
+    async function previewFirstStudent() {
+        if (selectedStudents.length === 0) {
+            showAlert('Please select at least one student.', 'error');
+            return;
+        }
+        updatePreview();
+    }
+
+    async function generateBulk() {
+        if (selectedStudents.length === 0) {
+            showAlert('Please select at least one student.', 'error');
+            return;
+        }
+        const eventName = document.getElementById('eventName').value;
+        if (!eventName) {
+            showAlert('Please enter an event/certificate type.', 'error');
+            return;
+        }
+        const eventDate = document.getElementById('certDate').value || getKenyaDate();
+        const gradYear = document.getElementById('gradYear').value || currentYear;
+
+        const studentIds = selectedStudents.map(s => s.admissionNumber);
+        showAlert(`Generating ${studentIds.length} certificate(s)...`, 'info');
+
+        try {
+            const data = await apiJson('/api/certificates/bulk-generate', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') },
+                body: JSON.stringify({
+                    studentIds,
+                    eventName,
+                    eventDate,
+                    graduationYear: gradYear,
+                    templateName: document.getElementById('templateName').value || eventName
+                })
+            });
+            if (data.success) {
+                showAlert(`Generated ${data.certificates?.length || 0} certificate(s). Skipped ${data.skipped?.length || 0}.`, 'success');
+                loadRecords();
+                loadTemplates();
+            } else {
+                showAlert(data.error || 'Bulk generation failed', 'error');
+            }
+        } catch (err) {
+            showAlert('Error: ' + err.message, 'error');
+        }
+    }
+
+    async function downloadAllPDFs() {
+        if (selectedStudents.length === 0) {
+            showAlert('Please select at least one student and generate preview first.', 'error');
+            return;
+        }
+        const eventName = document.getElementById('eventName').value || 'Certificate';
+        const eventDate = document.getElementById('certDate').value;
+        const gradYear = document.getElementById('gradYear').value || currentYear;
+
+        showAlert(`Generating ${selectedStudents.length} PDF(s)...`, 'info');
+
+        let successCount = 0;
+        let failureCount = 0;
+
+        for (let i = 0; i < selectedStudents.length; i++) {
+            const student = selectedStudents[i];
+            const certNumber = 'CSA/CERT/' + (student.grade || 'GEN') + '/' + gradYear + '/' + String(i + 1).padStart(4, '0');
+
+            try {
+                const rendered = renderCertificate(student, schoolSettings, eventName, eventDate, certNumber);
+                const filename = (student.fullName || 'student').replace(/[^A-Za-z0-9]+/g, '_') + '_' + gradYear + '.pdf';
+
+                await html2pdf().set({
+                    margin: [0, 0, 0, 0],
+                    filename: filename,
+                    image: { type: 'jpeg', quality: 1.0 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false, width: 1247, windowWidth: 1247, windowHeight: 879, height: 879 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                }).from(rendered).save();
+
+                successCount++;
+            } catch (err) {
+                failureCount++;
+                console.error('Failed to generate PDF for', student.fullName, err);
+            }
+        }
+
+        showAlert(`Generated ${successCount} PDF(s)${failureCount > 0 ? `, ${failureCount} failed` : ''}.`, 'success');
+    }
+
+    function printAll() {
+        if (selectedStudents.length === 0) {
+            showAlert('Please select at least one student.', 'error');
+            return;
+        }
+        showAlert('Printing will open each certificate in a new window. Please print from the browser.', 'info');
+        const eventName = document.getElementById('eventName').value || 'Certificate';
+        const eventDate = document.getElementById('certDate').value;
+        const gradYear = document.getElementById('gradYear').value || currentYear;
+
+        selectedStudents.forEach((student, i) => {
+            const certNumber = 'CSA/CERT/' + (student.grade || 'GEN') + '/' + gradYear + '/' + String(i + 1).padStart(4, '0');
+            const rendered = renderCertificate(student, schoolSettings, eventName, eventDate, certNumber);
+
+            const w = window.open('', '_blank');
+            w.document.write(`<html><head><style>
+                @page { size: A4 landscape; margin: 0; }
+                body { margin: 0; padding: 0; font-family: Georgia, serif; }
+                .certificate { width: 100vw; height: 100vh; }
+            </style></head><body>${rendered}</body></html>`);
+            w.document.close();
+            setTimeout(() => w.print(), 500);
         });
     }
 
-    function printCertificate() {
-        if (!selectedStudent) {
-            showAlert('Please select a student first.', 'error');
-            return;
-        }
-        if (!validateStudent()) return;
-        renderCertificate();
-
-        const printContents = document.querySelector('.certificate-preview').innerHTML;
-        const originalBody = document.body.innerHTML;
-
-        const printStyles = `
-            <style>
-                @page { size: A4 landscape; margin: 0; }
-                body { margin: 0; padding: 0; }
-                .certificate { width: 100vw; height: 100vh; }
-            </style>
-        `;
-
-        document.body.innerHTML = printStyles + printContents;
-        window.print();
-        document.body.innerHTML = originalBody;
-        location.reload();
-    }
-
-    function searchStudent() {
-        const query = (document.getElementById('studentSearch').value || '').toLowerCase().trim();
-        if (!query) {
-            showAlert('Please enter an admission number or name to search.', 'error');
-            return;
-        }
-        filterStudents();
-        const resultsDiv = document.getElementById('searchResults');
-        if (resultsDiv.style.display !== 'block' || !resultsDiv.querySelector('#resultsList')) {
-        }
-
-        // Try direct lookup if it looks like an admission number
-        if (allStudents.length === 0) {
-            showAlert('Students not loaded yet. Please wait and try again.', 'error');
-            return;
-        }
-
-        const exact = allStudents.find(s =>
-            (s.admissionNumber || '').toLowerCase() === query ||
-            (s.studentId || '').toLowerCase() === query
-        );
-        if (exact) {
-            selectStudent(exact);
-            return;
-        }
-
-        const partial = allStudents.filter(s =>
-            (s.fullName || '').toLowerCase().includes(query) ||
-            (s.admissionNumber || '').toLowerCase().includes(query)
-        );
-        if (partial.length > 0) {
-            selectStudent(partial[0]);
-        } else if (!resultsDiv.style.display || resultsDiv.style.display === 'none') {
-            // Already handled by filterStudents
+    // ---- Records ----
+    async function loadRecords() {
+        try {
+            const data = await apiJson('/api/certificates/records', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') }
+            });
+            if (data.success) {
+                const tbody = document.getElementById('recordsBody');
+                const records = data.records || [];
+                if (!records.length) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#999;">No certificates generated yet.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = records.map(r => `
+                    <tr>
+                        <td>${escapeHtml(r.certificateNumber || '—')}</td>
+                        <td>${escapeHtml(r.studentName || '—')}</td>
+                        <td>${escapeHtml(r.admissionNumber || '—')}</td>
+                        <td>${escapeHtml(r.class || r.grade || '—')}</td>
+                        <td>${escapeHtml(r.eventName || '—')}</td>
+                        <td>${escapeHtml(r.eventDate || r.generatedAt?.split('T')[0] || '—')}</td>
+                        <td><span class="status-badge status-${r.status || 'generated'}">${escapeHtml(r.status || 'generated')}</span></td>
+                        <td><button class="btn btn-sm btn-info" onclick="viewCertificate('${escapeHtml(r.certificateNumber)}')"><i class="fas fa-eye"></i> View</button></td>
+                    </tr>
+                `).join('');
+            } else {
+                showAlert(data.error || 'Failed to load records', 'error');
+            }
+        } catch (err) {
+            showAlert('Error loading records: ' + err.message, 'error');
         }
     }
+
+    function viewCertificate(certNumber) {
+        window.open('/verify-certificate.html?number=' + encodeURIComponent(certNumber), '_blank');
+    }
+
+    async function verifyCertificate() {
+        const number = document.getElementById('verifyNumber').value.trim();
+        if (!number) {
+            showAlert('Please enter a certificate number.', 'error');
+            return;
+        }
+        try {
+            const data = await apiJson('/api/certificates/verify?number=' + encodeURIComponent(number));
+            if (data.success && data.valid) {
+                const c = data.certificate;
+                const html = `
+                    <div style="display:grid;grid-template-columns:120px 1fr;gap:8px 20px;margin-top:15px;">
+                        <div style="font-weight:600;color:#001f5c;">Certificate Number:</div>
+                        <div style="font-weight:600;">${escapeHtml(c.certificateNumber)}</div>
+                        <div style="font-weight:600;color:#001f5c;">Student Name:</div>
+                        <div>${escapeHtml(c.studentName)}</div>
+                        <div style="font-weight:600;color:#001f5c;">Admission No.:</div>
+                        <div>${escapeHtml(c.admissionNumber)}</div>
+                        <div style="font-weight:600;color:#001f5c;">Class:</div>
+                        <div>${escapeHtml(c.class)}</div>
+                        <div style="font-weight:600;color:#001f5c;">Event:</div>
+                        <div>${escapeHtml(c.eventName)}</div>
+                        <div style="font-weight:600;color:#001f5c;">Date:</div>
+                        <div>${escapeHtml(c.eventDate)}</div>
+                        <div style="font-weight:600;color:#001f5c;">Year:</div>
+                        <div>${escapeHtml(c.graduationYear)}</div>
+                        <div style="font-weight:600;color:#001f5c;">Status:</div>
+                        <div><span style="color:green;font-weight:600;">✓ Verified</span></div>
+                    </div>
+                `;
+                document.getElementById('verifyTable').innerHTML = html;
+                document.getElementById('verifyResult').style.display = 'block';
+            } else {
+                document.getElementById('verifyTable').innerHTML = '<tr><td style="color:#dc3545;padding:10px;">Certificate not found or invalid.</td></tr>';
+                document.getElementById('verifyResult').style.display = 'block';
+            }
+        } catch (err) {
+            showAlert('Error verifying: ' + err.message, 'error');
+        }
+    }
+
+    // ---- Canvas drag handling (basic) ----
+    function handleDragOver(e) {
+        e.preventDefault();
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        if (activeElement) {
+            const rect = document.getElementById('designCanvas').getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            activeElement.style.left = x + 'px';
+            activeElement.style.top = y + 'px';
+            activeElement.style.transform = 'none';
+            syncToHTML();
+            activeElement.classList.remove('active');
+            activeElement = null;
+        }
+    }
+
+    function getKenyaDate() {
+        const now = new Date();
+        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const kenya = new Date(utc + (3 * 3600000));
+        return kenya.toISOString().split('T')[0];
+    }
+
+    // Make functions globally available
+    window.toggleStudentSelection = toggleStudentSelection;
+    window.filterStudents = filterStudents;
+    window.clearAllSelections = clearAllSelections;
+    window.insertVariable = insertVariable;
+    window.addCanvasText = addCanvasText;
+    window.addCanvasImage = addCanvasImage;
+    window.addCanvasShape = addCanvasShape;
+    window.updatePreview = updatePreview;
+    window.previewFirstStudent = previewFirstStudent;
+    window.generateBulk = generateBulk;
+    window.downloadAllPDFs = downloadAllPDFs;
+    window.printAll = printAll;
+    window.saveTemplate = saveTemplate;
+    window.loadTemplate = loadTemplate;
+    window.switchEditorTab = switchEditorTab;
+    window.switchTab = switchTab;
+    window.saveSchoolSettings = saveSchoolSettings;
+    window.loadRecords = loadRecords;
+    window.verifyCertificate = verifyCertificate;
+    window.viewCertificate = viewCertificate;
 </script>
 
-<!-- ===== CERTIFICATE STYLES ===== -->
 <style>
-    /* A4 landscape: 297mm x 210mm, ratio 297/210 = 1.414 */
-    .certificate-preview {
-        width: 100%;
-        max-width: 980px;
-        margin: 0 auto;
-        background: white;
-        border: 1px solid #e3e9f2;
-        border-radius: 6px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-
+    /* ===== Certificate Styles (rendered in preview + PDF) ===== */
     .certificate {
         position: relative;
         width: 100%;
@@ -719,35 +1433,28 @@
         aspect-ratio: 297 / 210;
         background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
         border: 8px solid #001f5c;
-        border-radius: 0;
-        padding: 40px;
-        box-sizing: border-box;
         font-family: 'Georgia', 'Times New Roman', serif;
         display: flex;
         flex-direction: column;
         align-items: center;
         position: relative;
         overflow: hidden;
+        padding: 40px;
+        box-sizing: border-box;
     }
 
     .cert-border {
         position: absolute;
-        top: 12px;
-        left: 12px;
-        right: 12px;
-        bottom: 12px;
+        top: 12px; left: 12px; right: 12px; bottom: 12px;
         border: 4px solid #d4a017;
-        border-radius: 6px;
         z-index: 1;
         pointer-events: none;
     }
 
     .cert-shield {
         position: absolute;
-        top: 30px;
-        right: 30px;
-        width: 100px;
-        height: 120px;
+        top: 30px; right: 30px;
+        width: 100px; height: 120px;
         background: linear-gradient(135deg, #001f5c, #0b5394);
         clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
         z-index: 1;
@@ -765,219 +1472,26 @@
         align-items: center;
     }
 
-    .cert-logo {
-        font-size: 56px;
-        margin-bottom: 10px;
-    }
-
-    .cert-school {
-        font-size: 36px;
-        font-weight: 800;
-        color: #001f5c;
-        letter-spacing: 3px;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-    }
-
-    .cert-motto {
-        font-size: 14px;
-        color: #8a5a00;
-        font-style: italic;
-        letter-spacing: 2px;
-        margin-bottom: 25px;
-    }
-
-    .cert-heading {
-        font-size: 36px;
-        font-weight: 700;
-        color: #001f5c;
-        letter-spacing: 4px;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
-    }
-
-    .cert-level {
-        font-size: 18px;
-        color: #d4a017;
-        font-weight: 700;
-        letter-spacing: 3px;
-        margin-bottom: 30px;
-    }
-
-    .cert-body-text {
-        font-size: 16px;
-        color: #333;
-        line-height: 1.8;
-        margin: 20px 0;
-        max-width: 700px;
-    }
-
-    .cert-student-name {
-        font-size: 32px;
-        font-weight: 800;
-        color: #001f5c;
-        letter-spacing: 1px;
-        margin: 15px 0;
-        text-transform: uppercase;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
-        word-break: break-word;
-        hyphens: auto;
-        max-width: 800px;
-    }
+    .cert-logo-img { max-width: 120px; margin-bottom: 10px; }
+    .cert-seal-img { max-width: 80px; }
 
     .cert-photo {
-        width: 120px;
-        height: 120px;
-        object-fit: cover;
-        border: 3px solid #d4a017;
-        border-radius: 5px;
-        margin: 15px 0;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        width: 120px; height: 120px; object-fit: cover;
+        border: 3px solid #d4a017; border-radius: 5px;
+        margin: 15px 0; box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
 
     .cert-photo-placeholder {
-        width: 120px;
-        height: 120px;
-        border: 3px dashed #d4a017;
-        border-radius: 5px;
-        margin: 15px 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #fffbeb;
-        color: #8a5a00;
-        font-size: 12px;
-        font-weight: 700;
-        text-align: center;
+        width: 120px; height: 120px;
+        border: 3px dashed #d4a017; border-radius: 5px;
+        margin: 15px 0; display: flex;
+        align-items: center; justify-content: center;
+        background: #fffbeb; color: #8a5a00;
+        font-size: 12px; font-weight: 700; text-align: center;
     }
 
-    .cert-photo-text {
-        display: block;
-        line-height: 1.3;
-    }
-
-    .cert-graduation {
-        font-size: 20px;
-        color: #001f5c;
-        font-weight: 700;
-        margin: 30px 0 6px;
-        letter-spacing: 2px;
-    }
-
-    .cert-year {
-        font-size: 42px;
-        font-weight: 800;
-        color: #d4a017;
-        letter-spacing: 6px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .cert-signatures {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        width: 100%;
-        max-width: 600px;
-        margin: 40px 0 20px;
-        gap: 20px;
-    }
-
-    .cert-sig {
-        flex: 1;
-        text-align: center;
-    }
-
-    .cert-sig-line {
-        width: 100%;
-        height: 2px;
-        background: #001f5c;
-        margin-bottom: 6px;
-        position: relative;
-    }
-
-    .cert-sig-line::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 40px;
-        height: 40px;
-        border: 2px dashed #d4a017;
-        border-radius: 50%;
-        background: rgba(212, 160, 23, 0.1);
-    }
-
-    .cert-sig-label {
-        font-size: 13px;
-        color: #001f5c;
-        font-weight: 600;
-        margin-top: 8px;
-    }
-
-    .cert-seal {
-        flex: 0 0 auto;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .cert-seal-circle {
-        width: 70px;
-        height: 70px;
-        border: 4px solid #d4a017;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #ffeb99, #d4a017);
-        color: #001f5c;
-        font-size: 10px;
-        font-weight: 800;
-        text-align: center;
-        line-height: 1.2;
-    }
-
-    .cert-meta {
-        width: 100%;
-        max-width: 650px;
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px solid #d4a017;
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 10px;
-        font-size: 12px;
-        color: #555;
-    }
-
-    .cert-meta-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .cert-meta-label {
-        font-weight: 600;
-        color: #8a5a00;
-        margin-bottom: 2px;
-    }
-
-    .cert-meta-value {
-        color: #001f5c;
-        font-weight: 700;
-        font-family: 'Courier New', monospace;
-    }
-
-    /* Responsive for smaller screens */
     @media (max-width: 768px) {
         .certificate-preview { max-width: 100%; }
-        .cert-school { font-size: 28px; }
-        .cert-heading { font-size: 28px; }
-        .cert-student-name { font-size: 26px; }
-        .cert-year { font-size: 32px; }
     }
 </style>
 

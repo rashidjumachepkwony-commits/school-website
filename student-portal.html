@@ -427,10 +427,85 @@ function showView(view) {
   document.getElementById('step3').style.display = 'block';
 
   const body = document.getElementById('viewBody');
-  if (view === 'results') { document.getElementById('viewTitle').textContent = 'Assessment Results'; body.innerHTML = renderResults(current); }
+  if (view === 'results') { 
+    document.getElementById('viewTitle').textContent = 'Assessment Results'; 
+    loadStudentResults();
+  }
   if (view === 'assignments') { document.getElementById('viewTitle').textContent = 'Holiday Assignments'; body.innerHTML = renderAssignments(current); }
   if (view === 'fees') { document.getElementById('viewTitle').textContent = 'Fees Balance'; body.innerHTML = renderFees(current); }
   window.scrollTo(0, 0);
+}
+
+async function loadStudentResults() {
+  const body = document.getElementById('viewBody');
+  body.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:32px;color:#d4a017;"></i><p style="margin-top:12px;color:#666;">Loading results...</p></div>';
+  
+  if (!current || !current.student) return;
+  
+  try {
+    // Get the latest assessment for this student
+    const assessments = current.assessments || [];
+    if (!assessments.length) {
+      body.innerHTML = '<div class="note">There are no assessment results for this child yet. Results appear here as soon as the teacher enters them.</div>';
+      return;
+    }
+    
+    // Use the most recent assessment
+    const latest = assessments[0];
+    const params = new URLSearchParams();
+    if (latest.period) params.set('period', latest.period);
+    if (latest.type) params.set('type', latest.type);
+    if (latest.name) params.set('name', latest.name);
+    
+    const url = apiUrl('/api/assessments/student-report/' + encodeURIComponent(current.student.id) + (params.toString() ? '?' + params.toString() : ''));
+    
+    // Load the professional result slip in an iframe for consistent rendering
+    body.innerHTML = `
+      <div style="width:100%;">
+        <div style="text-align:right;padding:8px 0;">
+          <button class="btn" onclick="downloadStudentResult('${encodeURIComponent(current.student.id)}', '${encodeURIComponent(latest.period || '')}', '${encodeURIComponent(latest.type || '')}', '${encodeURIComponent(latest.name || '')}')" style="background:#a4161a;color:#fff;border:0;">
+            <i class="fas fa-download"></i> Save PDF to Device
+          </button>
+          <button class="btn" onclick="printStudentResult('${encodeURIComponent(current.student.id)}', '${encodeURIComponent(latest.period || '')}', '${encodeURIComponent(latest.type || '')}', '${encodeURIComponent(latest.name || '')}')" style="background:#0a1628;color:#fff;border:0;margin-left:8px;">
+            <i class="fas fa-print"></i> View / Print
+          </button>
+        </div>
+        <iframe id="resultFrame" src="${url}" style="width:100%;height:800px;border:none;border-radius:12px;background:#fff;" onload="this.style.height = this.contentWindow.document.body.scrollHeight + 'px'"></iframe>
+      </div>
+    `;
+  } catch (e) {
+    console.error(e);
+    body.innerHTML = '<div class="note" style="color:#a4161a;">Could not load results. Please try again.</div>';
+  }
+}
+
+function downloadStudentResult(studentId, period, type, name) {
+  const params = new URLSearchParams();
+  if (period) params.set('period', period);
+  if (type) params.set('type', type);
+  if (name) params.set('name', name);
+  params.set('download', '1');
+  
+  const url = apiUrl('/api/assessments/student-report/' + studentId + '?' + params.toString());
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'CBE-Result-' + (current.student.name || 'student').replace(/[^A-Za-z0-9]+/g, '-') + '.pdf';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  showMsg('Saving result to your device.', 'ok');
+}
+
+function printStudentResult(studentId, period, type, name) {
+  const params = new URLSearchParams();
+  if (period) params.set('period', period);
+  if (type) params.set('type', type);
+  if (name) params.set('name', name);
+  
+  const url = apiUrl('/api/assessments/student-report/' + studentId + '?' + params.toString());
+  const w = window.open(url, '_blank');
+  if (!w) { showMsg('Please allow popups to view the result.', 'err'); return; }
 }
 
 function renderResults(d) {
