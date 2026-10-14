@@ -834,11 +834,11 @@ function renderAssignments(d) {
   return d.assignments.map(a =>
     '<div class="pupil">' +
       '<div class="nm">' + esc(a.title) + '</div>' +
-      '<div class="mt">' + esc(a.subject || '') + (a.term ? ' &middot; ' + esc(a.term) : ') + '</div>' +
-      (a.description ? '<div class="mt" style="margin-top:6px">' + esc(a.description) + '</div>' : ') +
+      '<div class="mt">' + esc(a.subject || '') + (a.term ? ' &middot; ' + esc(a.term) : '') + '</div>' +
+      (a.description ? '<div class="mt" style="margin-top:6px">' + esc(a.description) + '</div>' : '') +
       (a.fileUrl ? '<a class="dl" href="' + esc(a.fileUrl) + '" target="_blank" rel="noopener"><i class="fas fa-download"></i> Download ' + esc(a.fileName || 'the file') + '</a>' : '<div class="mt">No file attached.</div>') +
     '</div>'
-  ).join(');
+  ).join('');
 }
 
 function renderFees(d) {
@@ -856,21 +856,21 @@ function renderFees(d) {
       : '<div class="msg ok show">All fees are fully paid. Thank you.</div>') +
     (f.structure && f.structure.length
       ? '<h3 style="margin:18px 0 6px;font-size:1.1rem">Fee breakdown</h3><table><tr><th>Type</th><th>Term</th><th class="num">Amount</th></tr>' +
-        f.structure.map(s => '<tr><td>' + esc(s.type || '-') + '</td><td>' + esc(s.term || '-') + '</td><td class="num">' + f.currency + ' ' + s.amount.toLocaleString() + '</td></tr>').join(') +
+        f.structure.map(s => '<tr><td>' + esc(s.type || '-') + '</td><td>' + esc(s.term || '-') + '</td><td class="num">' + f.currency + ' ' + s.amount.toLocaleString() + '</td></tr>').join('') +
         '</table>'
-      : ') +
+: '') +
     '</div>';
 }
 
 function gradingKeyHtml(key) {
-  if (!key || !key.length) return ';
+  if (!key || !key.length) return '';
   return '<div class="note"><b>What the levels mean</b><br>' +
     key.map(k => '<b>' + esc(k.code) + '</b> ' + esc(k.name) + ' (' + k.min + '&ndash;' + k.max + '%)').join('<br>') +
     '</div>';
 }
 
 function levelBadge(level, code) {
-  const cls = { 'Exceeding Expectation': 'ee', 'Meeting Expectation': 'me', 'Approaching Expectation': 'ae', 'Below Expectation': 'be' }[level] || ';
+  const cls = { 'Exceeding Expectation': 'ee', 'Meeting Expectation': 'me', 'Approaching Expectation': 'ae', 'Below Expectation': 'be' }[level] || '';
   return '<span class="lvl ' + cls + '">' + esc(level) + (code && code !== 'NA' ? ' (' + esc(code) + ')' : ') + '</span>';
 }
 
