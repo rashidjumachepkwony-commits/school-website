@@ -389,9 +389,22 @@ function filterStudents() {
   const box = document.getElementById('suggest');
 
   if (q.length < 1) {
-    box.innerHTML = ';
+    box.innerHTML = '';
     box.hidden = true;
     input.setAttribute('aria-expanded', 'false');
+    return;
+  }
+
+  // If students haven't loaded yet, try to load them now
+  if (!allStudents.length) {
+    box.innerHTML = '<div class="loading">Loading students...</div>';
+    box.hidden = false;
+    loadStudents().then(() => {
+      // Re-run filter after loading
+      filterStudents();
+    }).catch(() => {
+      box.innerHTML = '<div class="none">Could not load students. Please try again.</div>';
+    });
     return;
   }
 
@@ -411,9 +424,9 @@ function filterStudents() {
     '<button type="button" role="option" data-id="' + s.id + '">' +
       '<span class="nm">' + esc(s.name) + '</span>' +
       '<span class="s-adm">' + esc(s.admissionNumber || 'no adm. no.') + '</span>' +
-      (s.grade ? '<span class="s-gr">' + esc(s.grade) + '</span>') : '')
+      (s.grade ? '<span class="s-gr">' + esc(s.grade) + '</span>' : '')
     '</button>'
-  ).join(');
+  ).join('');
   box.hidden = false;
   input.setAttribute('aria-expanded', 'true');
 }
