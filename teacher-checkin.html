@@ -908,8 +908,8 @@
             const pdfUrl = apiUrl('/api/teacher/attendance/history?employeeId=' + encodeURIComponent(id) +
                 '&period=' + myAttPeriod + '&format=pdf');
             const w = window.open(pdfUrl, '_blank');
-                if (!w) showAlert('Please allow popups to download the PDF.', 'error');
-            }
+            if (!w) showAlert('Please allow popups to download the PDF.', 'error');
+        }
 
         async function loadMyAttendance(period) {
             myAttPeriod = period;
@@ -1184,13 +1184,34 @@
         }
 
         // ============================================
-        // PRESS ENTER TO SUBMIT (Check In by default)
+        // PRESS ENTER TO SUBMIT
+        // Uses the currently-focused button so that tapping "Check Out"
+        // on a mobile device and then pressing the keyboard submit key
+        // triggers a checkout rather than a check-in.
         // ============================================
         document.getElementById('checkinForm').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                handleAction('checkin');
+                // Detect which button the user most recently interacted with.
+                // If the checkout button (or any element inside it) is focused,
+                // perform a checkout; otherwise default to check-in.
+                const active = document.activeElement;
+                const isCheckoutFocused = active && (
+                    active.id === 'checkoutBtn' ||
+                    (active.closest && active.closest('#checkoutBtn'))
+                );
+                const lastAction = document.getElementById('checkinForm').dataset.lastAction || 'checkin';
+                handleAction(isCheckoutFocused ? 'checkout' : lastAction);
             }
+        });
+
+        // Track the last clicked action so the Enter handler can fall back to it
+        // on mobile where the virtual keyboard's enter key may not carry focus info.
+        checkinBtn.addEventListener('click', () => {
+            document.getElementById('checkinForm').dataset.lastAction = 'checkin';
+        });
+        checkoutBtn.addEventListener('click', () => {
+            document.getElementById('checkinForm').dataset.lastAction = 'checkout';
         });
 
         // ============================================

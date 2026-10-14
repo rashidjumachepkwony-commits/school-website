@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/config.js"></script>
+    <title>Score Sheet - Changara Star Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @page {
+            size: A4 landscape;
+            margin: 15mm 10mm 15mm 10mm;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { padding-top: 0; }
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Helvetica Neue', Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #000;
+            background: white;
+            padding-top: 70px;
+        }
+        .download-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #001f5c, #0b5394);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .download-bar .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .download-bar .brand img {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+        }
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: #d4a017;
+            color: #001f5c;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .download-btn:hover {
+            background: #f5c842;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212,160,23,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #001f5c;
+        }
+        .school-name {
+            font-size: 22px;
+            font-weight: 800;
+            color: #001f5c;
+            letter-spacing: 1px;
+        }
+        .school-motto {
+            font-size: 12px;
+            color: #d4a017;
+            font-style: italic;
+            margin-top: 4px;
+        }
+        .sheet-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #001f5c;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+        .sheet-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #555;
+        }
+        .meta-item { display: flex; gap: 6px; }
+        .meta-label { font-weight: 700; }
+        .meta-value { font-weight: 400; }
+
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td { border: 1px solid #ccc; padding: 8px 6px; text-align: center; vertical-align: middle; }
+        th { background: #001f5c; color: white; font-weight: 700; font-size: 10px; }
+        .num-cell { width: 4%; background: #f5f5f5; font-weight: 700; font-size: 11px; }
+        .name-cell { width: 16%; background: #fafafa; text-align: left; padding-left: 8px; font-weight: 600; font-size: 11px; }
+        .subject-col { background: #e8f0fe; }
+        .subject-name { font-weight: 700; font-size: 9px; line-height: 1.2; color: #001f5c; }
+        .subject-max { font-size: 8px; color: #666; }
+        .score-cell { background: #fdfdfd; min-height: 32px; font-size: 12px; }
+        .total-cell { background: #fff8e1; font-weight: 700; font-size: 11px; }
+        .avg-cell { background: #e8f5e9; font-weight: 700; font-size: 11px; }
+        .rank-cell { background: #f3e5f5; font-weight: 700; font-size: 11px; }
+
+        .footer {
+            margin-top: 12px;
+            font-size: 9px;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .footer-note { background: #fff3e0; padding: 4px 8px; border-radius: 4px; }
+
+        .instructions {
+            margin-top: 10px;
+            padding: 8px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 9px;
+            line-height: 1.5;
+        }
+        .instructions strong { color: #001f5c; }
+        .class-info {
+            background: #e8f0fe;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #001f5c;
+            font-size: 13px;
+        }
+
+        @media print {
+            .student-name-input { border-bottom: 1px dotted #ccc; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="download-bar no-print">
+        <div class="brand">
+            <img src="/images/school-compound.jpg" alt="Changara Star Academy Logo" loading="lazy">
+            <span>CHANGARA STAR ACADEMY</span>
+        </div>
+        <button class="download-btn no-print" onclick="downloadAsPDF()" aria-label="Download as PDF" id="downloadBtn">
+            <i class="fas fa-download"></i> <span id="downloadText">Download as PDF</span>
+        </button>
+    </div>
+    <div class="header">
+        <div class="school-name">CHANGARA STAR ACADEMY</div>
+        <div class="school-motto">Assurance to Excellence</div>
+        <div class="sheet-title" id="sheetTitle">Score Sheet</div>
+        <div class="sheet-meta">
+            <div class="meta-item"><span class="meta-label">Term:</span> <span class="meta-value" id="metaTerm">____________________</span></div>
+            <div class="meta-item"><span class="meta-label">Assessment:</span> <span class="meta-value" id="metaAssessment">____________________</span></div>
+            <div class="meta-item"><span class="meta-label">Date:</span> <span class="meta-value" id="metaDate"></span></div>
+            <div class="meta-item"><span class="meta-label">Teacher:</span> <span class="meta-value">____________________</span></div>
+        </div>
+    </div>
+
+    <div class="class-info" id="classInfo">Loading class information...</div>
+
+    <div id="loadingIndicator" style="display: flex; align-items: center; justify-content: center; padding: 40px; color: #666;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-right: 12px; color: #d4a017;"></i>
+        <span style="font-size: 16px;">Loading student names from school register...</span>
+    </div>
+
+    <div id="errorIndicator" style="display: none; padding: 20px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; color: #856404; text-align: center; margin: 20px;">
+        <i class="fas fa-exclamation-triangle" style="margin-right: 10px;"></i>
+        <span id="errorMessage">Failed to load student names. Click <button onclick="location.reload()" style="background: #856404; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer;">Retry</button></span>
+    </div>
+
+    <table id="scoreTable" style="display: none;">
+        <thead>
+            <tr id="tableHeader">
+                <th class="num-cell" rowspan="2">No.</th>
+                <th class="name-cell" rowspan="2">Student Name</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+
+    <div class="instructions">
+        <strong>Instructions for Teachers:</strong>
+        1. Student names are pre-filled from the school register for the selected class.<br>
+        2. Enter marks for each subject in the corresponding cell. Max scores are shown for reference.<br>
+        3. <strong>Do NOT calculate</strong> Total, Average, or Rank — the system calculates these automatically when marks are entered online.<br>
+        4. Bring this sheet to the admin portal for digital entry.<br>
+        5. Use blue/black pen. Write clearly.
+    </div>
+
+    <div class="footer">
+        <div>Changara Star Academy — Score Sheet</div>
+        <div class="footer-note">Generated: <span id="genDate"></span></div>
+        <div>Page 1 of 1</div>
+    </div>
+
+    <script>
+        let dataLoaded = false;
+
+        function updateDownloadButton() {
+            const btn = document.getElementById('downloadBtn');
+            const text = document.getElementById('downloadText');
+            if (dataLoaded) {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                text.textContent = 'Download as PDF';
+            } else {
+                btn.style.opacity = '0.6';
+                btn.style.pointerEvents = 'none';
+                text.textContent = 'Loading student data...';
+            }
+        }
+
+        function downloadAsPDF() {
+            if (!dataLoaded) {
+                alert('Please wait for student data to load before downloading.');
+                return;
+            }
+            window.print();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                downloadAsPDF();
+            }
+        });
+
+        // Initial button state
+        updateDownloadButton();
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                className: params.get('class') || '',
+                term: params.get('term') || '',
+                assessment: params.get('assessment') || ''
+            };
+        }
+
+        async function fetchStudentsForClass(className) {
+            try {
+                const url = '/api/certificates/students/class/' + encodeURIComponent(className);
+                console.log('Fetching students from:', url);
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                }
+                const data = await response.json();
+                console.log('API response:', data);
+                if (data.success) return data.students;
+                throw new Error(data.error || 'API returned success: false');
+            } catch (e) {
+                console.error('Failed to fetch students:', e);
+            }
+            return [];
+        }
+
+        function buildTableHeader(subjects) {
+            const headerRow = document.getElementById('tableHeader');
+            headerRow.innerHTML = `
+                <th class="num-cell" rowspan="2">No.</th>
+                <th class="name-cell" rowspan="2">Student Name</th>
+                ${subjects.map(s => `
+                    <th class="subject-col" title="Max: ${s.max}">
+                        <div class="subject-name">${escapeHtml(s.name)}</div>
+                        <div class="subject-max">Max: ${s.max}</div>
+                    </th>
+                `).join('')}
+                <th class="total-cell" rowspan="2">Total</th>
+                <th class="avg-cell" rowspan="2">Avg</th>
+                <th class="rank-cell" rowspan="2">Rank</th>
+            `;
+        }
+
+        function buildTableBody(students, subjects) {
+            const tbody = document.getElementById('tableBody');
+            if (!students.length) {
+                tbody.innerHTML = '<tr><td colspan="' + (4 + subjects.length) + '" style="text-align:center;padding:40px;color:#999;">No students found for this class.</td></tr>';
+                return;
+            }
+
+            const emptyCells = subjects.map(() => '<td class="score-cell"></td>').join('');
+
+            tbody.innerHTML = students.map((student, i) => `
+                <tr>
+                    <td class="num-cell">${i + 1}</td>
+                    <td class="name-cell">${escapeHtml(student.fullName || student.name || '')}</td>
+                    ${emptyCells}
+                    <td class="total-cell"></td>
+                    <td class="avg-cell"></td>
+                    <td class="rank-cell"></td>
+                </tr>
+            `).join('');
+        }
+
+        async function init() {
+            const params = getUrlParams();
+            document.getElementById('metaDate').textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+            document.getElementById('genDate').textContent = new Date().toISOString().split('T')[0];
+
+            if (!params.className) {
+                document.getElementById('classInfo').innerHTML = '<span style="color:#a4161a;">Please specify a class. Example: <code>?class=Grade%201</code></span>';
+                document.getElementById('loadingIndicator').style.display = 'none';
+                return;
+            }
+
+            // Subject configs from the assessment portal
+            const SUBJECT_CONFIGS = {
+                'Play Group': [
+                    { name: 'MATH', max: 10 },
+                    { name: 'LANG', max: 10 },
+                    { name: 'LIT', max: 10 },
+                    { name: 'KUS', max: 10 },
+                    { name: 'ENVI/CRE', max: 10 },
+                    { name: 'C/A', max: 10 }
+                ],
+                'PP1': [
+                    { name: 'MATH', max: 10 },
+                    { name: 'LANG', max: 10 },
+                    { name: 'LIT', max: 10 },
+                    { name: 'KIS', max: 10 },
+                    { name: 'KUS', max: 10 },
+                    { name: 'ENV', max: 10 },
+                    { name: 'CRE/I.R.E', max: 10 },
+                    { name: 'C/A', max: 10 }
+                ],
+                'PP2': [
+                    { name: 'MATH', max: 10 },
+                    { name: 'LANG', max: 10 },
+                    { name: 'LIT', max: 10 },
+                    { name: 'KIS', max: 10 },
+                    { name: 'KUS', max: 10 },
+                    { name: 'ENV', max: 10 },
+                    { name: 'CRE/I.R.E', max: 10 },
+                    { name: 'C/A', max: 10 }
+                ],
+                'Grade 1': [
+                    { name: 'MATH', max: 30 },
+                    { name: 'LIST/SPEAKING', max: 20 },
+                    { name: 'READING', max: 20 },
+                    { name: 'GRAMMAR', max: 20 },
+                    { name: 'KUSOMA', max: 20 },
+                    { name: 'SARUFI', max: 20 },
+                    { name: 'ENV', max: 30 },
+                    { name: 'C.R.E', max: 20 },
+                    { name: 'CREATIVE ARTS', max: 20 }
+                ],
+                'Grade 2': [
+                    { name: 'LIST & SPEAKING', max: 20 },
+                    { name: 'READING ALOUD', max: 20 },
+                    { name: 'GRAMMAR', max: 20 },
+                    { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 20 },
+                    { name: 'KUSOMA KWA SAUTI', max: 20 },
+                    { name: 'LUGHA', max: 20 },
+                    { name: 'MATH', max: 30 },
+                    { name: 'ENVIRONMENTAL', max: 30 },
+                    { name: 'C/A', max: 20 },
+                    { name: 'RE', max: 20 }
+                ],
+                'Grade 3': [
+                    { name: 'LIST & SPEAKING', max: 20 },
+                    { name: 'READING ALOUD', max: 20 },
+                    { name: 'GRAMMAR', max: 20 },
+                    { name: 'KUSIKILIZA NA KUZUNGUMZA', max: 20 },
+                    { name: 'KUSOMA KWA SAUTI', max: 20 },
+                    { name: 'SARUFI', max: 20 },
+                    { name: 'MATHS', max: 30 },
+                    { name: 'ENVIRONMENTAL', max: 30 },
+                    { name: 'C.R.E', max: 20 },
+                    { name: 'I.R.E', max: 20 },
+                    { name: 'C/A', max: 20 }
+                ],
+                'Grade 4': [
+                    { name: 'MATHS ACTIVITIES', max: 30 },
+                    { name: 'ENGLISH ACTIVITIES', max: 50 },
+                    { name: 'SCI & TECH', max: 30 },
+                    { name: 'KISW LUGHA', max: 50 },
+                    { name: 'SST', max: 20 },
+                    { name: 'RELIGIOUS EDUCATION', max: 20 },
+                    { name: 'AGRICULTURE', max: 20 },
+                    { name: 'CREATIVE ART', max: 35 }
+                ],
+                'Grade 5': [
+                    { name: 'MATHS ACTIVITIES', max: 30 },
+                    { name: 'ENGLISH ACTIVITIES', max: 50 },
+                    { name: 'SCI & TECH', max: 30 },
+                    { name: 'KISW LUGHA', max: 50 },
+                    { name: 'SST', max: 20 },
+                    { name: 'RELIGIOUS EDUCATION', max: 20 },
+                    { name: 'AGRICULTURE', max: 20 },
+                    { name: 'CREATIVE ART', max: 35 }
+                ],
+                'Grade 6': [
+                    { name: 'MATHS ACTIVITIES', max: 50 },
+                    { name: 'ENGLISH ACTIVITIES', max: 50 },
+                    { name: 'SCI & TECH', max: 30 },
+                    { name: 'KISW LUGHA', max: 50 },
+                    { name: 'SST', max: 20 },
+                    { name: 'RELIGIOUS EDUCATION', max: 20 },
+                    { name: 'AGRICULTURE', max: 20 },
+                    { name: 'CREATIVE ART', max: 35 }
+                ]
+            };
+
+            const subjects = SUBJECT_CONFIGS[params.className];
+            if (!subjects) {
+                document.getElementById('classInfo').innerHTML = '<span style="color:#a4161a;">Unknown class: ' + escapeHtml(params.className) + '</span>';
+                return;
+            }
+
+            // Update page title
+            document.getElementById('sheetTitle').textContent = 'Score Sheet — ' + escapeHtml(params.className);
+            if (params.term) document.getElementById('metaTerm').textContent = params.term;
+            if (params.assessment) document.getElementById('metaAssessment').textContent = params.assessment;
+
+            // Update class info
+            document.getElementById('classInfo').innerHTML = '<i class="fas fa-chalkboard"></i> ' + escapeHtml(params.className) + ' — ' + subjects.length + ' subjects';
+
+            // Build table
+            buildTableHeader(subjects);
+
+            // Try to fetch students from API
+            let students = [];
+            let fetchFailed = false;
+            try {
+                students = await fetchStudentsForClass(params.className);
+            } catch (e) {
+                console.log('Could not fetch students from API, using empty rows');
+                fetchFailed = true;
+            }
+
+            // If no students from API, create empty rows (teachers will fill names manually)
+            if (!students.length) {
+                students = Array.from({ length: 40 }, (_, i) => ({ fullName: '' }));
+                if (fetchFailed) {
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    document.getElementById('errorIndicator').style.display = 'block';
+                }
+            }
+
+            buildTableBody(students, subjects);
+
+            // Hide loading, show table, enable download
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('scoreTable').style.display = 'table';
+            dataLoaded = true;
+            updateDownloadButton();
+        }
+
+        init();
+    </script>
+</body>
+</html>

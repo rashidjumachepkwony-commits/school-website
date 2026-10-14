@@ -57,11 +57,11 @@
             padding: 0 20px;
         }
 
-        /* ========================================
-           KENYAN FLAG STRIP - MADE THICKER
-           ======================================== */
+/* ========================================
+            KENYAN FLAG STRIP
+            ======================================== */
         .kenya-flag-strip {
-            height: 6px;
+            height: 4px;
             background: linear-gradient(to right, 
                 var(--kenya-black) 0%, var(--kenya-black) 20%,
                 var(--kenya-red) 20%, var(--kenya-red) 40%,
@@ -74,132 +74,264 @@
         }
 
         /* ========================================
-           HEADER - LARGER, FIXED AT TOP
-           ======================================== */
+            HEADER - CLEAN PROFESSIONAL DESIGN
+            ======================================== */
         .main-header {
-            background: rgba(10, 22, 40, 0.97);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            color: white;
-            padding: 15px 0;
+            background: #ffffff;
+            color: #1a1a2e;
+            padding: 12px 0;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            border-bottom: 2px solid rgba(212, 160, 23, 0.2);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid rgba(0, 31, 92, 0.08);
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
         }
         .main-header .container {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            gap: 16px;
         }
         .main-header .logo-section {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
+            flex-shrink: 0;
         }
-        .main-header .school-icon {
-            font-size: 38px;
-            animation: float 3s ease-in-out infinite;
+        .main-header .school-logo {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--school-blue), var(--school-blue-dark));
+            padding: 6px;
         }
         .main-header .logo-section .brand-text h1 {
             font-family: var(--font-primary);
-            font-size: 26px;
+            font-size: 22px;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.1;
+            color: var(--school-blue-dark);
+            line-height: 1.2;
+            white-space: nowrap;
         }
         .main-header .logo-section .brand-text .subtitle {
             font-size: 11px;
-            color: rgba(255,255,255,0.5);
+            color: var(--school-gold);
             display: block;
-            letter-spacing: 3px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            -webkit-text-fill-color: rgba(255,255,255,0.5);
-            font-weight: 300;
+            font-weight: 600;
+            white-space: nowrap;
         }
         .main-header .nav-links {
             display: flex;
-            gap: 8px;
+            gap: 4px;
             align-items: center;
         }
         .main-header .nav-links a {
-            color: rgba(255,255,255,0.7);
+            color: #4a5568;
             text-decoration: none;
             font-weight: 500;
-            padding: 8px 18px;
-            border-radius: 50px;
-            transition: all 0.3s ease;
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: all 0.25s ease;
             font-size: 14px;
             position: relative;
+            white-space: nowrap;
         }
         .main-header .nav-links a::after {
             content: '';
             position: absolute;
-            bottom: 4px;
+            bottom: 6px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 2px;
             background: var(--school-gold);
-            transition: width 0.3s ease;
+            transition: width 0.25s ease;
         }
         .main-header .nav-links a:hover::after,
         .main-header .nav-links a.active::after {
-            width: 40%;
+            width: 60%;
         }
         .main-header .nav-links a:hover {
-            color: white;
+            color: var(--school-blue-dark);
+            background: rgba(212, 160, 23, 0.06);
         }
         .main-header .nav-links a.active {
-            background: rgba(212, 160, 23, 0.12);
             color: var(--school-gold);
+            background: rgba(212, 160, 23, 0.1);
         }
         .main-header .nav-links a.portal-link {
             background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
             color: var(--kenya-black);
-            font-weight: 700;
-            padding: 8px 22px;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            font-size: 13px;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 8px;
+            transition: all 0.25s ease;
+            font-size: 14px;
+            margin-left: 8px;
         }
         .main-header .nav-links a.portal-link:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(212, 160, 23, 0.4);
+            box-shadow: 0 6px 20px rgba(212, 160, 23, 0.3);
+            color: var(--kenya-black);
         }
         .main-header .nav-links a.portal-link::after { display: none; }
         .main-header .mobile-menu-btn {
             display: none;
             background: none;
             border: none;
-            color: white;
-            font-size: 28px;
+            color: var(--school-blue-dark);
+            font-size: 24px;
             cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        .main-header .mobile-menu-btn:hover {
+            background: rgba(0, 31, 92, 0.06);
         }
 
         /* ========================================
-           NOTICE ALERT BAR
-           ======================================== */
+            MOBILE NAVIGATION MENU
+            ======================================== */
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .mobile-nav-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+        .mobile-nav-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 280px;
+            max-width: 85vw;
+            background: #ffffff;
+            z-index: 1002;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-nav-panel.show {
+            transform: translateX(0);
+        }
+        .mobile-nav-overlay.show .mobile-nav-panel {
+            transform: translateX(0);
+        }
+        .mobile-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 31, 92, 0.08);
+        }
+        .mobile-nav-header .brand-text h1 {
+            font-family: var(--font-primary);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--school-blue-dark);
+            line-height: 1.2;
+        }
+        .mobile-nav-header .brand-text .subtitle {
+            font-size: 10px;
+            color: var(--school-gold);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .mobile-nav-close {
+            background: none;
+            border: none;
+            color: #4a5568;
+            font-size: 26px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .mobile-nav-close:hover {
+            background: rgba(0, 31, 92, 0.06);
+            color: var(--school-blue-dark);
+        }
+        .mobile-nav-links {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .mobile-nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 14px 16px;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .mobile-nav-links a:hover,
+        .mobile-nav-links a.active {
+            background: rgba(212, 160, 23, 0.1);
+            color: var(--school-gold);
+        }
+        .mobile-nav-links a.portal-link {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            font-weight: 600;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .mobile-nav-links a.portal-link:hover {
+            color: var(--kenya-black);
+        }
+        .mobile-nav-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(0, 31, 92, 0.08);
+            text-align: center;
+        }
+        .mobile-nav-footer p {
+            font-size: 12px;
+            color: #888;
+        }
+
+/* ========================================
+            NOTICE ALERT BAR
+            ======================================== */
         .notice-alert-bar {
             background: linear-gradient(135deg, var(--kenya-red), #8B0000);
             color: white;
             padding: 8px 0;
             position: fixed;
-            top: 82px;
+            top: 74px;
             left: 0;
             right: 0;
             z-index: 1001;
-            border-bottom: 3px solid var(--school-gold);
+            border-bottom: 2px solid var(--school-gold);
             display: none;
             animation: slideDownNotice 0.6s ease forwards;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
         .notice-alert-bar.show { display: block; }
         .notice-alert-bar .container {
@@ -257,25 +389,25 @@
         }
 
         /* ========================================
-           NEWS TICKER - LARGER, COVERS WHITE SPACE
-           ======================================== */
+            NEWS TICKER
+            ======================================== */
         .news-ticker-section {
             background: linear-gradient(135deg, var(--school-blue-dark), var(--school-blue));
             color: white;
-            padding: 10px 0;
-            border-bottom: 3px solid var(--school-gold);
+            padding: 8px 0;
+            border-bottom: 2px solid var(--school-gold);
             position: fixed;
-            top: 82px;
+            top: 74px;
             left: 0;
             right: 0;
             z-index: 999;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
-            min-height: 48px;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+            min-height: 42px;
             display: flex;
             align-items: center;
         }
         .news-ticker-section.show-notice {
-            top: 118px;
+            top: 110px;
         }
         .news-ticker-section .container {
             display: flex;
@@ -286,10 +418,10 @@
         .news-ticker-section .ticker-label {
             background: var(--kenya-red);
             color: white;
-            padding: 4px 20px;
+            padding: 4px 18px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             white-space: nowrap;
             display: flex;
@@ -297,13 +429,13 @@
             gap: 8px;
             letter-spacing: 1.5px;
             flex-shrink: 0;
-            height: 36px;
+            height: 34px;
         }
-        .news-ticker-section .ticker-label .icon { font-size: 14px; }
+        .news-ticker-section .ticker-label .icon { font-size: 13px; }
         .news-ticker-section .ticker-wrapper {
             flex: 1;
             overflow: hidden;
-            height: 36px;
+            height: 34px;
             position: relative;
         }
         .news-ticker-section .ticker-content {
@@ -312,11 +444,11 @@
             animation: tickerScroll 16s infinite;
         }
         .news-ticker-section .ticker-content .ticker-item {
-            height: 36px;
+            height: 34px;
             display: flex;
             align-items: center;
             padding: 0 12px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
@@ -334,19 +466,18 @@
             letter-spacing: 0.5px;
         }
 
-        /* ========================================
-           HERO SECTION - Adjusted for larger header
-           ======================================== */
+/* ========================================
+            HERO SECTION - SPLIT LAYOUT
+            ======================================== */
         .hero-section {
-            min-height: calc(100vh - 130px);
-            margin-top: 130px;
+            min-height: calc(100vh - 74px);
+            margin-top: 74px;
             display: flex;
             align-items: center;
-            text-align: center;
             color: white;
             position: relative;
             overflow: hidden;
-            padding: 60px 0;
+            padding: 80px 0;
         }
         
         .hero-video-bg {
@@ -373,18 +504,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(10, 22, 40, 0.6) 50%, rgba(187, 0, 0, 0.3) 100%);
+            background: linear-gradient(135deg, rgba(0, 31, 92, 0.9) 0%, rgba(10, 22, 40, 0.85) 50%, rgba(0, 0, 0, 0.7) 100%);
             z-index: 1;
-        }
-        .hero-video-bg .video-overlay-kenya {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(187, 0, 0, 0.15) 50%, rgba(0, 102, 0, 0.15) 100%);
-            z-index: 2;
         }
         
         .hero-section .hero-bg-pattern {
@@ -392,28 +513,39 @@
             inset: 0;
             z-index: 1;
             background-image: 
-                radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(212, 160, 23, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(212, 160, 23, 0.06) 0%, transparent 50%);
         }
-        .hero-section .hero-content {
+        
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
             position: relative;
             z-index: 3;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+        }
+        
+        .hero-school-content {
+            text-align: left;
+            animation: fadeInUp 1s ease forwards;
         }
         
         .hero-flag-badge {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            background: rgba(255,255,255,0.1);
+            gap: 10px;
+            background: rgba(255,255,255,0.12);
             backdrop-filter: blur(10px);
-            padding: 6px 20px 6px 6px;
+            padding: 8px 18px 8px 8px;
             border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.15);
-            margin-bottom: 20px;
-            animation: fadeInUp 1s ease forwards;
+            border: 1px solid rgba(255,255,255,0.18);
+            margin-bottom: 24px;
+            animation: fadeInUp 1s ease forwards 0.2s;
+            animation-fill-mode: both;
         }
         .hero-flag-badge .flag-strip {
             display: flex;
@@ -423,6 +555,205 @@
             overflow: hidden;
         }
         .hero-flag-badge .flag-strip span { flex: 1; height: 100%; }
+        .hero-flag-badge .flag-strip .b { background: #000000; }
+        .hero-flag-badge .flag-strip .r { background: #BB0000; }
+        .hero-flag-badge .flag-strip .g { background: #006600; }
+        .hero-flag-badge .flag-strip .w { background: #FFFFFF; }
+        .hero-flag-badge .flag-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        
+        .hero-school-content h1 {
+            font-family: var(--font-primary);
+            font-size: 48px;
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 18px;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1.2s ease forwards 0.3s;
+            animation-fill-mode: both;
+        }
+        .hero-school-content h1 .highlight {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-school-content .motto {
+            font-size: 20px;
+            font-weight: 500;
+            font-style: italic;
+            color: var(--school-gold-light);
+            margin-bottom: 20px;
+            line-height: 1.4;
+            animation: fadeInUp 1.3s ease forwards 0.4s;
+            animation-fill-mode: both;
+        }
+        
+        .hero-school-content .supporting-text {
+            font-size: 17px;
+            opacity: 0.92;
+            line-height: 1.8;
+            margin-bottom: 28px;
+            max-width: 520px;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 1.4s ease forwards 0.5s;
+            animation-fill-mode: both;
+        }
+        
+        .hero-school-content .btn-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: fadeInUp 1.5s ease forwards 0.6s;
+            animation-fill-mode: both;
+        }
+        
+        .btn-primary-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 38px;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 24px rgba(212, 160, 23, 0.35);
+        }
+        .btn-primary-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(212, 160, 23, 0.45);
+            color: var(--kenya-black);
+        }
+        
+        .btn-secondary-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 38px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary-hero:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--school-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(212, 160, 23, 0.25);
+            color: white;
+        }
+        
+        /* Computer Studies Programme Advertisement */
+        .hero-programme-advert {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 36px 32px;
+            animation: fadeInRight 1s ease forwards 0.4s;
+            animation-fill-mode: both;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-programme-advert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--school-gold), var(--school-gold-light), var(--school-gold));
+        }
+        .hero-programme-advert .proposed-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(187, 0, 0, 0.18);
+            color: var(--kenya-red);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(187, 0, 0, 0.3);
+        }
+        .hero-programme-advert .programme-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--school-blue), var(--school-blue-dark));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 24px rgba(0, 31, 92, 0.3);
+        }
+        .hero-programme-advert .programme-icon i {
+            font-size: 24px;
+            color: var(--school-gold);
+        }
+        .hero-programme-advert h2 {
+            font-family: var(--font-primary);
+            font-size: 26px;
+            font-weight: 800;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+        .hero-programme-advert .programme-tagline {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--school-gold-light);
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+        .hero-programme-advert .programme-description {
+            font-size: 14px;
+            line-height: 1.7;
+            opacity: 0.85;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 24px;
+        }
+        .btn-programme-enquire {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 24px rgba(212, 160, 23, 0.35);
+        }
+        .btn-programme-enquire:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(212, 160, 23, 0.45);
+            color: var(--kenya-black);
+        }
+        
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
         .hero-flag-badge .flag-strip .b { background: #000000; }
         .hero-flag-badge .flag-strip .r { background: #BB0000; }
         .hero-flag-badge .flag-strip .g { background: #006600; }
@@ -1358,37 +1689,53 @@
             100% { transform: translateY(0); }
         }
 
-        /* ========================================
-           RESPONSIVE
-           ======================================== */
+/* ========================================
+            RESPONSIVE
+            ======================================== */
+        @media (max-width: 992px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+            .hero-programme-advert {
+                max-width: 480px;
+                margin: 0 auto;
+            }
+            .hero-school-content {
+                text-align: center;
+            }
+            .hero-school-content .btn-group {
+                justify-content: center;
+            }
+            .hero-school-content .supporting-text {
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
         @media (max-width: 768px) {
-            .main-header .nav-links {
-                display: none;
-                flex-direction: column;
-                width: 100%;
-                padding: 15px 0;
-                gap: 5px;
-            }
-            .main-header .nav-links.show { display: flex; }
-            .main-header .mobile-menu-btn { display: block; }
+            .main-header .nav-links { display: none; }
+            .main-header .mobile-menu-btn { display: flex; }
             
-            .main-header .logo-section .brand-text h1 {
-                font-size: 20px;
-            }
-            .main-header .school-icon {
-                font-size: 30px;
-            }
+            .main-header .logo-section .brand-text h1 { font-size: 20px; }
+            .main-header .school-logo { width: 44px; height: 44px; }
             
-            body { padding-top: 120px; }
-            .notice-alert-bar { top: 100px; }
-            .news-ticker-section { top: 100px; }
-            .hero-section { margin-top: 150px; }
-
-            .hero-section h1 { font-size: 32px; }
-            .hero-section p { font-size: 16px; }
-            .hero-section .btn-group { flex-direction: column; align-items: center; }
-            .btn-scroll-down, .btn-outline { width: 100%; justify-content: center; }
-
+            body { padding-top: 74px; }
+            .notice-alert-bar { top: 74px; }
+            .news-ticker-section { top: 74px; }
+            .news-ticker-section.show-notice { top: 110px; }
+            .hero-section { margin-top: 74px; min-height: calc(100vh - 74px); padding: 60px 0; }
+            
+            .hero-school-content h1 { font-size: 36px; }
+            .hero-school-content .motto { font-size: 18px; }
+            .hero-school-content .supporting-text { font-size: 16px; }
+            .hero-school-content .btn-group { flex-direction: column; align-items: center; }
+            .btn-primary-hero, .btn-secondary-hero { width: 100%; justify-content: center; }
+            
+            .hero-programme-advert { padding: 28px 24px; }
+            .hero-programme-advert h2 { font-size: 22px; }
+            .hero-programme-advert .programme-description { font-size: 13px; }
+            
             .gallery-section .section-title { font-size: 26px; }
             .content-cards-section .section-title { font-size: 26px; }
             
@@ -1403,41 +1750,30 @@
             .video-modal { padding: 20px; }
             .video-modal .close-modal { top: -40px; font-size: 20px; width: 36px; height: 36px; }
             
-            .hero-video-play { bottom: 70px; padding: 6px 14px 6px 6px; }
-            .hero-video-play .play-icon { width: 30px; height: 30px; font-size: 12px; }
-            .hero-video-play .play-text { font-size: 10px; }
-
             .swiper-button-next,
-            .swiper-button-prev {
-                display: none !important;
-            }
+            .swiper-button-prev { display: none !important; }
             
             .features-grid { grid-template-columns: 1fr 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .news-grid { grid-template-columns: 1fr; }
-            
-            .main-header .nav-links a { font-size: 13px; padding: 6px 14px; }
-            .main-header .nav-links a.portal-link { font-size: 12px; padding: 6px 18px; }
         }
 
         @media (max-width: 480px) {
             .features-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
-            .hero-section h1 { font-size: 26px; }
+            .hero-school-content h1 { font-size: 28px; }
+            .hero-school-content .motto { font-size: 16px; }
             .gallery-section .section-title { font-size: 22px; }
             .content-cards-section .section-title { font-size: 22px; }
             
-            .main-header .logo-section .brand-text h1 { font-size: 17px; }
-            .main-header .school-icon { font-size: 24px; }
-            .main-header .logo-section .brand-text .subtitle { font-size: 9px; }
+            .main-header .logo-section .brand-text h1 { font-size: 18px; }
+            .main-header .school-logo { width: 40px; height: 40px; }
+            .main-header .logo-section .brand-text .subtitle { font-size: 10px; }
             
-            body { padding-top: 105px; }
-            .notice-alert-bar { top: 90px; }
-            .news-ticker-section { top: 90px; }
-            .hero-section { margin-top: 130px; }
-            
-            .hero-video-play { bottom: 60px; }
-            .gallery-card .image-wrapper { height: 200px; }
+            .hero-school-content h1 { font-size: 30px; }
+            .hero-school-content .motto { font-size: 15px; }
+            .hero-programme-advert h2 { font-size: 20px; }
+            .btn-primary-hero, .btn-secondary-hero { padding: 14px 28px; font-size: 14px; }
             
             .news-ticker-section .ticker-label { font-size: 8px; padding: 3px 10px; height: 28px; }
             .news-ticker-section .ticker-wrapper { height: 28px; }
@@ -1494,31 +1830,62 @@
     </div>
 
     <!-- ======================================== -->
-    <!-- HEADER - LARGER -->
+    <!-- HEADER - CLEAN PROFESSIONAL DESIGN -->
     <!-- ======================================== -->
     <header class="main-header">
-        <div class="kenya-flag-strip"></div>
         <div class="container">
             <div class="logo-section">
-                <span class="school-icon">🏫</span>
+                <img src="/images/school-compound.jpg" alt="Changara Star Academy Logo" class="school-logo" loading="lazy">
                 <div class="brand-text">
-                    <h1>Changara Star Academy</h1>
+                    <h1>CHANGARA STAR ACADEMY</h1>
                     <span class="subtitle">Assurance to Excellence</span>
                 </div>
             </div>
-            <nav class="nav-links" id="navLinks">
+            <nav class="nav-links" id="navLinks" aria-label="Main navigation">
                 <a href="index.html" class="active">Home</a>
-                <a href="about.html">About</a>
+                <a href="about.html">About Us</a>
+                <a href="academics.html">Academics</a>
+                <a href="admissions.html">Admissions</a>
+                <a href="facilities.html">Facilities</a>
+                <a href="contact.html">Contact Us</a>
+                <a href="portal.html" class="portal-link">🔐 Staff Portal</a>
+                <a href="downloads.html" class="portal-link">📥 Downloads</a>
                 <a href="student-portal.html" class="portal-link">🎓 Student Portal</a>
-                <a href="portal.html">🔐 Staff Portal</a>
-                <a href="contact.html">Contact</a>
             </nav>
-            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileNavPanel">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
     </header>
 
+    <!-- Mobile Navigation Overlay & Panel -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileMenu()" aria-hidden="true"></div>
+    <aside class="mobile-nav-panel" id="mobileNavPanel" role="navigation" aria-label="Mobile navigation">
+        <div class="mobile-nav-header">
+            <div class="brand-text">
+                <h1>CHANGARA STAR ACADEMY</h1>
+                <span class="subtitle">Assurance to Excellence</span>
+            </div>
+            <button class="mobile-nav-close" onclick="closeMobileMenu()" aria-label="Close navigation menu"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="mobile-nav-links" aria-label="Mobile menu">
+            <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+            <a href="about.html"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="academics.html"><i class="fas fa-book"></i> Academics</a>
+            <a href="admissions.html"><i class="fas fa-user-plus"></i> Admissions</a>
+            <a href="facilities.html"><i class="fas fa-building"></i> Facilities</a>
+            <a href="contact.html"><i class="fas fa-envelope"></i> Contact Us</a>
+            <a href="portal.html" class="portal-link"><i class="fas fa-sign-in-alt"></i> Staff Portal</a>
+            <a href="downloads.html" class="portal-link"><i class="fas fa-download"></i> Downloads</a>
+            <a href="student-portal.html" class="portal-link"><i class="fas fa-graduation-cap"></i> Student Portal</a>
+        </nav>
+        <div class="mobile-nav-footer">
+            <p>Changara Star Academy · Changara Market, Teso North, Busia County, Kenya</p>
+        </div>
+    </aside>
+
     <!-- ======================================== -->
-    <!-- HERO SECTION -->
+    <!-- HERO SECTION - SPLIT LAYOUT -->
     <!-- ======================================== -->
     <section class="hero-section" id="slide-hero">
         <div class="hero-video-bg">
@@ -1526,39 +1893,50 @@
                 <source src="/videos/school-hero.mp4" type="video/mp4">
             </video>
             <div class="video-overlay"></div>
-            <div class="video-overlay-kenya"></div>
         </div>
 
         <div class="hero-bg-pattern"></div>
 
-        <div class="hero-video-play" onclick="openVideoModal()">
-            <div class="play-icon"><i class="fas fa-play"></i></div>
-            <span class="play-text">▶ Watch Our Story</span>
-        </div>
-
-        <div class="hero-content">
-            <div class="hero-flag-badge">
-                <div class="flag-strip">
-                    <span class="b"></span><span class="r"></span>
-                    <span class="g"></span><span class="w"></span>
+        <div class="hero-grid">
+            <!-- School Message Content -->
+            <div class="hero-school-content">
+                <div class="hero-flag-badge">
+                    <div class="flag-strip">
+                        <span class="b"></span><span class="r"></span>
+                        <span class="g"></span><span class="w"></span>
+                    </div>
+                    <span class="flag-text">🇰🇪 Proudly Kenyan</span>
                 </div>
-                <span class="flag-text">🇰🇪 Proudly Kenyan</span>
+                <h1 id="heroTitle">
+                    Welcome to <br><span class="highlight">Changara Star Academy</span>
+                </h1>
+                <p class="motto" id="heroMotto">"Assurance to Excellence"</p>
+                <p class="supporting-text" id="heroSubtitle">
+                    Providing quality education, nurturing talent, building confidence, and preparing learners for a successful future.
+                </p>
+                <div class="btn-group">
+                    <a href="academics.html" class="btn-primary-hero">
+                        <i class="fas fa-book-open"></i> Explore Our School
+                    </a>
+                    <a href="contact.html" class="btn-secondary-hero">
+                        <i class="fas fa-envelope"></i> Admission Enquiries
+                    </a>
+                </div>
             </div>
-            <h1 id="heroTitle">
-                Welcome to <br><span class="highlight">Changara Star Academy</span>
-            </h1>
-            <p id="heroSubtitle">
-                Nurturing young minds through quality education, discipline, innovation, and strong moral values.
-                We provide a safe and supportive learning environment where every child is encouraged to discover
-                their potential and achieve academic excellence.
-            </p>
-            <div class="btn-group">
-                <button class="btn-scroll-down" onclick="scrollToContent()">
-                    <span>Scroll Down</span>
-                    <span class="arrow"><i class="fas fa-chevron-down"></i></span>
-                </button>
-                <a href="admissions.html" class="btn-outline">
-                    <i class="fas fa-pen-fancy"></i> Apply Now
+
+            <!-- Computer Studies Programme Advertisement -->
+            <div class="hero-programme-advert" id="computerStudiesAdvert">
+                <span class="proposed-badge"><i class="fas fa-info-circle"></i> PROPOSED PROGRAMME</span>
+                <div class="programme-icon">
+                    <i class="fas fa-laptop-code"></i>
+                </div>
+                <h2>COMPUTER STUDIES PROGRAMME</h2>
+                <p class="programme-tagline">"Preparing learners for a digital future."</p>
+                <p class="programme-description">
+                    An exciting proposed programme designed to introduce learners to computers, digital literacy, responsible technology use, and essential practical ICT skills.
+                </p>
+                <a href="contact.html" class="btn-programme-enquire">
+                    <i class="fas fa-arrow-right"></i> ENQUIRE ABOUT THE PROGRAMME
                 </a>
             </div>
         </div>
@@ -2038,9 +2416,47 @@
         // MOBILE MENU
         // ============================================
         function toggleMobileMenu() {
-            const nav = document.getElementById('navLinks');
-            if (nav) nav.classList.toggle('show');
+            const overlay = document.getElementById('mobileNavOverlay');
+            const panel = document.getElementById('mobileNavPanel');
+            const btn = document.getElementById('mobileMenuBtn');
+            
+            if (overlay && panel) {
+                const isOpen = overlay.classList.toggle('show');
+                panel.classList.toggle('show');
+                
+                if (btn) {
+                    btn.innerHTML = isOpen ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+                    btn.setAttribute('aria-expanded', isOpen);
+                    btn.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+                }
+                
+                document.body.style.overflow = isOpen ? 'hidden' : '';
+            }
         }
+
+        function closeMobileMenu() {
+            const overlay = document.getElementById('mobileNavOverlay');
+            const panel = document.getElementById('mobileNavPanel');
+            const btn = document.getElementById('mobileMenuBtn');
+            
+            if (overlay && panel) {
+                overlay.classList.remove('show');
+                panel.classList.remove('show');
+                
+                if (btn) {
+                    btn.innerHTML = '<i class="fas fa-bars"></i>';
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.setAttribute('aria-label', 'Open navigation menu');
+                }
+                
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close mobile menu when a link is clicked
+        document.querySelectorAll('.mobile-nav-links a').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
 
         // ============================================
         // SCROLL TO CONTENT
@@ -2059,25 +2475,25 @@
         // ============================================
         function closeNotice() {
             const bar = document.getElementById('noticeAlertBar');
+            const ticker = document.getElementById('newsTicker');
             bar.classList.remove('show');
             localStorage.setItem('noticeClosed', 'true');
-            const ticker = document.getElementById('newsTicker');
             if (ticker) {
-                ticker.style.top = '82px';
+                ticker.classList.remove('show-notice');
             }
         }
 
         function showNotice(message) {
             const bar = document.getElementById('noticeAlertBar');
             const msgEl = document.getElementById('noticeMessage');
+            const ticker = document.getElementById('newsTicker');
             if (message) {
                 msgEl.innerHTML = message;
             }
             bar.classList.add('show');
             localStorage.removeItem('noticeClosed');
-            const ticker = document.getElementById('newsTicker');
             if (ticker) {
-                ticker.style.top = '118px';
+                ticker.classList.add('show-notice');
             }
         }
 
@@ -2088,7 +2504,7 @@
             if (!closed) {
                 bar.classList.add('show');
                 if (ticker) {
-                    ticker.style.top = '118px';
+                    ticker.classList.add('show-notice');
                 }
             }
         }

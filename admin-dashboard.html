@@ -1617,7 +1617,18 @@
                             <div class="form-group"><label>Name</label><input type="text" class="field-name" value="${item.name || ''}"></div>
                             <div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="${item.icon || '📄'}"></div>
                         </div>
-                        <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Category</label>
+                                <select class="field-category">
+                                    <option value="forms" ${item.category === 'forms' ? 'selected' : ''}>📝 Forms</option>
+                                    <option value="academic" ${item.category === 'academic' ? 'selected' : ''}>📚 Academic</option>
+                                    <option value="general" ${item.category === 'general' ? 'selected' : ''}>📄 General</option>
+                                    <option value="events" ${item.category === 'events' ? 'selected' : ''}>🎉 Events</option>
+                                    <option value="media" ${item.category === 'media' ? 'selected' : ''}>🖼️ Media</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>File URL</label><input type="text" class="field-file" value="${item.file || ''}"></div>
+                        </div>
                         <div class="form-group"><label>Description</label><input type="text" class="field-description" value="${item.description || ''}"></div>
                     `;
                     break;
@@ -1749,7 +1760,18 @@
                 <div class="form-group"><label>Name</label><input type="text" class="field-name" placeholder="Download name"></div>
                 <div class="form-group"><label>Icon</label><input type="text" class="field-icon" value="📄"></div>
             </div>
-            <div class="form-group"><label>File URL</label><input type="text" class="field-file" placeholder="/downloads/file.pdf"></div>
+            <div class="form-row">
+                <div class="form-group"><label>Category</label>
+                    <select class="field-category">
+                        <option value="forms">📝 Forms</option>
+                        <option value="academic">📚 Academic</option>
+                        <option value="general">📄 General</option>
+                        <option value="events">🎉 Events</option>
+                        <option value="media">🖼️ Media</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>File URL</label><input type="text" class="field-file" placeholder="/downloads/file.pdf"></div>
+            </div>
             <div class="form-group"><label>Description</label><input type="text" class="field-description" placeholder="File description"></div>
         `;
         container.appendChild(div);
@@ -1822,6 +1844,7 @@
                     item = {
                         name: box.querySelector('.field-name')?.value || '',
                         icon: box.querySelector('.field-icon')?.value || '📄',
+                        category: box.querySelector('.field-category')?.value || 'general',
                         file: box.querySelector('.field-file')?.value || '',
                         description: box.querySelector('.field-description')?.value || ''
                     };

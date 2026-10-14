@@ -146,6 +146,24 @@ async function verifyCertificateRecord(db, certNumber) {
 export async function handleCertificates(db, env, route, method, body, p, request) {
   const secret = env.JWT_SECRET || env.jwt_secret;
 
+  // ---- Public: get students by class (for score sheets) ----
+  if (p[0] === 'certificates' && p[1] === 'students' && p[2] === 'class' && p[3] && method === 'GET') {
+    const cls = decodeURIComponent(p[3]);
+    const stream = p[4] ? decodeURIComponent(p[4]) : '';
+    
+    const { results } = await db.collection('students').find({ isActive: { $ne: false } }).toArray();
+    let students = results;
+
+    if (cls) students = students.filter(s => {
+      const c = (s.grade || s.class || s.std || s.level || '').toLowerCase();
+      return c === cls.toLowerCase();
+    });
+
+    if (stream) students = students.filter(s => (s.stream || '').toLowerCase() === stream.toLowerCase());
+
+    return success({ students: students.map(publicStudent), count: students.length });
+  }
+
   // ---- Public: verify a certificate number ----
   // The certificate number contains slashes (CSA/CERT/PP2/2026/0001), so we
   // accept it as a query parameter instead of a path segment.

@@ -1,10 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="js/config.js"></script>
-<title>Student Portal - Changara Star Academy</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/config.js"></script>
+    <script>
+        // Fallback API functions in case config.js fails to load
+        if (!window.__API_BASE_URL__) {
+            window.__API_BASE_URL__ = 'https://csa-api.rashidjumachepkwony.workers.dev';
+        }
+        if (!window.apiUrl) {
+            window.apiUrl = function (path) {
+                if (!path) return path;
+                if (window.__API_BASE_URL__) {
+                    return window.__API_BASE_URL__ + (path.charAt(0) === '/' ? path : '/' + path);
+                }
+                return path;
+            };
+        }
+        if (!window.apiJson) {
+            window.apiJson = async function (path, options) {
+                var url = window.apiUrl(path);
+                var opts = options || {};
+                var headers = Object.assign({}, opts.headers || {});
+                if (opts.body && typeof opts.body === 'string' && !headers['Content-Type']) {
+                    headers['Content-Type'] = 'application/json';
+                }
+                var response;
+                try {
+                    response = await window.fetch(url, Object.assign({}, opts, { headers: headers }));
+                } catch (networkErr) {
+                    throw new Error('Could not reach the API at ' + url + '. Check your connection.');
+                }
+                var type = response.headers.get('content-type') || '';
+                var text = await response.text();
+                if (type.indexOf('html') !== -1 || text.trim().charAt(0) === '<') {
+                    throw new Error('The API did not return JSON (got an HTML page, HTTP ' + response.status + ') for ' + url);
+                }
+                try {
+                    return JSON.parse(text);
+                } catch (parseErr) {
+                    throw new Error('The API returned an unreadable response for ' + url + ': ' + text.slice(0, 200));
+                }
+            };
+        }
+        if (!window._autoDetectApiBase) {
+            window._autoDetectApiBase = function () {
+                if (!window.__API_BASE_URL__) {
+                    window.__API_BASE_URL__ = 'https://csa-api.rashidjumachepkwony.workers.dev';
+                }
+            };
+        }
+    </script>
+    <title>Student Portal - Changara Star Academy</title>
 <meta name="description" content="Parent and student portal. Check assessment results, holiday assignments and fees balance at Changara Star Academy.">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -341,7 +389,7 @@ function filterStudents() {
   const box = document.getElementById('suggest');
 
   if (q.length < 1) {
-    box.innerHTML = '';
+    box.innerHTML = ';
     box.hidden = true;
     input.setAttribute('aria-expanded', 'false');
     return;
@@ -363,9 +411,9 @@ function filterStudents() {
     '<button type="button" role="option" data-id="' + s.id + '">' +
       '<span class="nm">' + esc(s.name) + '</span>' +
       '<span class="s-adm">' + esc(s.admissionNumber || 'no adm. no.') + '</span>' +
-      (s.grade ? '<span class="s-gr">' + esc(s.grade) + '</span>' : '') +
+      (s.grade ? '<span class="s-gr">' + esc(s.grade) + '</span>') : '')
     '</button>'
-  ).join('');
+  ).join(');
   box.hidden = false;
   input.setAttribute('aria-expanded', 'true');
 }
@@ -379,14 +427,14 @@ function filterStudents() {
 /** Close the suggestion panel when tapping away or pressing Escape. */
 function closeSuggest() {
   const box = document.getElementById('suggest');
-  if (box) { box.hidden = true; box.innerHTML = ''; }
+  if (box) { box.hidden = true; box.innerHTML = '; }
   const input = document.getElementById('topSearch');
   if (input) input.setAttribute('aria-expanded', 'false');
 }
 
 async function openStudent(id) {
   if (!id) { showMsg('Please tap your child\'s name from the list.', 'err'); return; }
-  showMsg('', '');
+  showMsg(', ');
   document.getElementById('step2').style.display = 'block';
   document.getElementById('step3').style.display = 'none';
   window.scrollTo(0, 0);
@@ -399,7 +447,7 @@ async function openStudent(id) {
       '<div class="nm">' + esc(s.name) + '</div>' +
       '<div class="mt">Admission No: ' + esc(s.admissionNumber || '-') + ' &middot; ' + esc(s.grade) +
       ' &middot; ' + esc(s.studentType) + '</div>' +
-      (s.guardianPhone ? '<div class="mt">Parent contact: ' + esc(s.guardianPhone) + '</div>' : '');
+      (s.guardianPhone ? '<div class="mt">Parent contact: ' + esc(s.guardianPhone) + '</div>' : ');
     showView('results');
   } catch (e) {
     showMsg('Could not open this student. Please try again.', 'err');
@@ -411,7 +459,7 @@ function backToSearch() {
   document.getElementById('step3').style.display = 'none';
   closeSuggest();
   const top = document.getElementById('topSearch');
-  top.value = '';
+  top.value = ';
   top.focus();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -443,43 +491,142 @@ async function loadStudentResults() {
   if (!current || !current.student) return;
   
   try {
-    // Get the latest assessment for this student
+    // Get all assessments for this student
     const assessments = current.assessments || [];
     if (!assessments.length) {
       body.innerHTML = '<div class="note">There are no assessment results for this child yet. Results appear here as soon as the teacher enters them.</div>';
       return;
     }
     
-    // Use the most recent assessment
+    // Sort by date (newest first)
+    assessments.sort((a, b) => {
+      const dateA = new Date(a.date || a.createdAt || 0);
+      const dateB = new Date(b.date || b.createdAt || 0);
+      return dateB - dateA;
+    });
+    
+    // Extract unique periods and types for filtering
+    const periods = [...new Set(assessments.map(a => a.period || a.assessmentPeriod || ').filter(Boolean))].sort();
+    const types = [...new Set(assessments.map(a => a.type || a.assessmentType || ').filter(Boolean))].sort();
+    const names = [...new Set(assessments.map(a => a.name || a.assessmentName || ').filter(Boolean))].sort();
+    
+    // Default to latest assessment
     const latest = assessments[0];
-    const params = new URLSearchParams();
-    if (latest.period) params.set('period', latest.period);
-    if (latest.type) params.set('type', latest.type);
-    if (latest.name) params.set('name', latest.name);
+    const defaultPeriod = latest.period || latest.assessmentPeriod || ';
+    const defaultType = latest.type || latest.assessmentType || ';
+    const defaultName = latest.name || latest.assessmentName || ';
     
-    const url = apiUrl('/api/assessments/student-report/' + encodeURIComponent(current.student.id) + (params.toString() ? '?' + params.toString() : ''));
-    
-    // Load the professional result slip in an iframe for consistent rendering
-    body.innerHTML = `
-      <div style="width:100%;">
-        <div style="text-align:right;padding:8px 0;">
-          <button class="btn" onclick="downloadStudentResult('${encodeURIComponent(current.student.id)}', '${encodeURIComponent(latest.period || '')}', '${encodeURIComponent(latest.type || '')}', '${encodeURIComponent(latest.name || '')}')" style="background:#a4161a;color:#fff;border:0;">
-            <i class="fas fa-download"></i> Save PDF to Device
-          </button>
-          <button class="btn" onclick="printStudentResult('${encodeURIComponent(current.student.id)}', '${encodeURIComponent(latest.period || '')}', '${encodeURIComponent(latest.type || '')}', '${encodeURIComponent(latest.name || '')}')" style="background:#0a1628;color:#fff;border:0;margin-left:8px;">
-            <i class="fas fa-print"></i> View / Print
-          </button>
+    // Build assessment selector
+    let selectorHtml = `
+      <div style="margin-bottom:16px;padding:16px;background:#f8f9fa;border-radius:10px;border:1px solid #e8e8e8;">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+          <div style="flex:1;min-width:180px;">
+            <label style="display:block;font-weight:600;color:#001f5c;margin-bottom:6px;font-size:14px;">Assessment Period</label>
+            <select id="assessmentPeriod" style="width:100%;padding:10px 14px;border:2px solid #e3e9f1;border-radius:8px;font-size:14px;background:white;color:#333;" onchange="loadSelectedAssessment()">
+              <option value="">-- Select Period --</option>
+              ${periods.map(p => `<option value="${escapeHtml(p)}" ${p === defaultPeriod ? 'selected' : '}>${escapeHtml(p)}</option>`).join(')}
+            </select>
+          </div>
+          <div style="flex:1;min-width:180px;">
+            <label style="display:block;font-weight:600;color:#001f5c;margin-bottom:6px;font-size:14px;">Assessment Type</label>
+            <select id="assessmentType" style="width:100%;padding:10px 14px;border:2px solid #e3e9f1;border-radius:8px;font-size:14px;background:white;color:#333;" onchange="loadSelectedAssessment()">
+              <option value="">-- Select Type --</option>
+              ${types.map(t => `<option value="${escapeHtml(t)}" ${t === defaultType ? 'selected' : '}>${escapeHtml(t)}</option>`).join(')}
+            </select>
+          </div>
+          <div style="flex:1;min-width:180px;">
+            <label style="display:block;font-weight:600;color:#001f5c;margin-bottom:6px;font-size:14px;">Assessment Name</label>
+            <select id="assessmentName" style="width:100%;padding:10px 14px;border:2px solid #e3e9f1;border-radius:8px;font-size:14px;background:white;color:#333;" onchange="loadSelectedAssessment()">
+              <option value="">-- Select Name --</option>
+              ${names.map(n => `<option value="${escapeHtml(n)}" ${n === defaultName ? 'selected' : '}>${escapeHtml(n)}</option>`).join(')}
+            </select>
+          </div>
         </div>
-        <iframe id="resultFrame" src="${url}" style="width:100%;height:800px;border:none;border-radius:12px;background:#fff;" onload="this.style.height = this.contentWindow.document.body.scrollHeight + 'px'"></iframe>
+        <div style="margin-top:12px;padding:10px 16px;background:#fff3e0;border-radius:8px;border-left:4px solid #d4a017;font-size:13px;color:#8a5a00;">
+          <i class="fas fa-info-circle"></i> Select the assessment period, type, and name to view the corresponding result slip.
+        </div>
       </div>
     `;
+    
+    // Build the result viewer with action buttons
+    const params = new URLSearchParams();
+    if (defaultPeriod) params.set('period', defaultPeriod);
+    if (defaultType) params.set('type', defaultType);
+    if (defaultName) params.set('name', defaultName);
+    
+    const url = apiUrl('/api/assessments/student-report/' + encodeURIComponent(current.student.id) + (params.toString() ? '?' + params.toString() : '));
+    
+    body.innerHTML = `
+      ${selectorHtml}
+      <div style="width:100%;">
+        <div style="text-align:right;padding:12px 0;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
+          <button class="btn" onclick="downloadSelectedResult()" style="background:#a4161a;color:#fff;border:0;padding:12px 22px;border-radius:8px;font-weight:600;font-size:14px;">
+            <i class="fas fa-download"></i> Save PDF to Device
+          </button>
+          <button class="btn" onclick="viewSelectedResult()" style="background:#001f5c;color:#fff;border:0;padding:12px 22px;border-radius:8px;font-weight:600;font-size:14px;">
+            <i class="fas fa-eye"></i> View Full Result
+          </button>
+          <button class="btn" onclick="printSelectedResult()" style="background:#0a1628;color:#fff;border:0;padding:12px 22px;border-radius:8px;font-weight:600;font-size:14px;">
+            <i class="fas fa-print"></i> Print
+          </button>
+        </div>
+        <div id="resultPlaceholder" style="width:100%;min-height:400px;background:#f8f9fa;border:2px dashed #d4a017;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;color:#666;">
+          <i class="fas fa-file-alt" style="font-size:48px;margin-bottom:16px;color:#d4a017;"></i>
+          <h3 style="color:#001f5c;margin-bottom:8px;">Result Slip Ready</h3>
+          <p style="font-size:16px;margin-bottom:8px;">Select the assessment period, type, and name above.</p>
+          <p style="font-size:14px;color:#888;">Then click <strong>View</strong>, <strong>Download</strong>, or <strong>Print</strong> to open the result slip.</p>
+        </div>
+      </div>
+    `;
+    
+    // Store current selection globally for buttons
+    window.currentAssessmentSelection = {
+      studentId: current.student.id,
+      period: defaultPeriod,
+      type: defaultType,
+      name: defaultName
+    };
+    
   } catch (e) {
-    console.error(e);
-    body.innerHTML = '<div class="note" style="color:#a4161a;">Could not load results. Please try again.</div>';
+    console.error('loadStudentResults error:', e);
+    body.innerHTML = '<div class="note" style="color:#a4161a;">Could not load results: ' + escapeHtml(e.message) + '. Please try again.</div>';
   }
 }
 
-function downloadStudentResult(studentId, period, type, name) {
+function loadSelectedAssessment() {
+  const period = document.getElementById('assessmentPeriod')?.value || ';
+  const type = document.getElementById('assessmentType')?.value || ';
+  const name = document.getElementById('assessmentName')?.value || ';
+  
+  if (!period && !type && !name) return;
+  
+  // Update global selection
+  window.currentAssessmentSelection = {
+    studentId: current?.student?.id || ',
+    period,
+    type,
+    name
+  };
+  
+  // Update placeholder text to show selected assessment
+  const placeholder = document.getElementById('resultPlaceholder');
+  if (placeholder) {
+    placeholder.innerHTML = `
+      <i class="fas fa-file-alt" style="font-size:48px;margin-bottom:16px;color:#d4a017;"></i>
+      <h3 style="color:#001f5c;margin-bottom:8px;">${escapeHtml(name || 'Assessment Result')}</h3>
+      <p style="font-size:16px;margin-bottom:8px;">
+        <span style="color:#001f5c;">Period:</span> ${escapeHtml(period || '—')} &nbsp;|&nbsp;
+        <span style="color:#001f5c;">Type:</span> ${escapeHtml(type || '—')}
+      </p>
+      <p style="font-size:14px;color:#888;">Click <strong>View</strong>, <strong>Download</strong>, or <strong>Print</strong> to open the result slip.</p>
+    `;
+  }
+}
+
+function downloadSelectedResult() {
+  const { studentId, period, type, name } = window.currentAssessmentSelection || {};
+  if (!studentId) return;
+  
   const params = new URLSearchParams();
   if (period) params.set('period', period);
   if (type) params.set('type', type);
@@ -487,17 +634,35 @@ function downloadStudentResult(studentId, period, type, name) {
   params.set('download', '1');
   
   const url = apiUrl('/api/assessments/student-report/' + studentId + '?' + params.toString());
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'CBE-Result-' + (current.student.name || 'student').replace(/[^A-Za-z0-9]+/g, '-') + '.pdf';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  showMsg('Saving result to your device.', 'ok');
+  const fileName = 'CBE-Result-' + (current?.student?.name || 'student').replace(/[^A-Za-z0-9]+/g, '-') + '-' + (name || 'result').replace(/[^A-Za-z0-9]+/g, '-') + '.pdf';
+  
+  fetch(url, { credentials: 'include' })
+    .then(response => {
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.blob();
+    })
+    .then(blob => {
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = fileName;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
+      showMsg('Saving ' + fileName + ' to your device.', 'ok');
+    })
+    .catch(err => {
+      const w = window.open(url, '_blank');
+      if (!w) { showMsg('Could not download the result. Please allow popups.', 'err'); return; }
+    });
 }
 
-function printStudentResult(studentId, period, type, name) {
+function viewSelectedResult() {
+  const { studentId, period, type, name } = window.currentAssessmentSelection || {};
+  if (!studentId) return;
+  
   const params = new URLSearchParams();
   if (period) params.set('period', period);
   if (type) params.set('type', type);
@@ -508,12 +673,26 @@ function printStudentResult(studentId, period, type, name) {
   if (!w) { showMsg('Please allow popups to view the result.', 'err'); return; }
 }
 
+function printSelectedResult() {
+  const { studentId, period, type, name } = window.currentAssessmentSelection || {};
+  if (!studentId) return;
+  
+  const params = new URLSearchParams();
+  if (period) params.set('period', period);
+  if (type) params.set('type', type);
+  if (name) params.set('name', name);
+  
+  const url = apiUrl('/api/assessments/student-report/' + studentId + '?' + params.toString());
+  const w = window.open(url, '_blank');
+  if (!w) { showMsg('Please allow popups to print the result.', 'err'); return; }
+}
+
 function renderResults(d) {
   if (!d.assessments.length) {
     return empty('There are no assessment results for this child yet. Results appear here as soon as the teacher enters them.');
   }
 
-  let html = '';
+  let html = ';
   for (const a of d.assessments) {
     // Mean performance level on the 01-04 scale, from the subject levels.
     const mix = a.subjectMix || {};
@@ -525,9 +704,9 @@ function renderResults(d) {
       : null;
 
     const rows = a.subjects.map(s => {
-      const code = s.code || '';
+      const code = s.code || ';
       const pct = (s.score !== null && s.max > 0) ? (s.score / s.max) * 100 : null;
-      const cls = code ? ' lv-' + code.toLowerCase() : '';
+      const cls = code ? ' lv-' + code.toLowerCase() : ';
       return '<tr class="' + cls + '">' +
         '<td class="c-subj">' + esc(s.subject) + '</td>' +
         '<td class="c-score">' + (s.score === null ? '–' : '<b>' + s.score + '</b>') + '</td>' +
@@ -535,12 +714,12 @@ function renderResults(d) {
         '<td class="c-pct">' + (pct === null ? '–' : pct.toFixed(1) + '%') + '</td>' +
         '<td class="c-lv">' + (code ? '<span class="tag ' + cls + '">' + code + '</span>' : '–') + '</td>' +
       '</tr>';
-    }).join('');
+    }).join(');
 
     const chips = ['EE', 'ME', 'AE', 'BE']
       .filter(c => mix[c])
       .map(c => '<span class="mchip ' + c.toLowerCase() + '">' + mix[c] + ' × ' + c + '</span>')
-      .join('');
+      .join(');
 
     html += '<article class="res-card">' +
       '<header class="res-head">' +
@@ -562,7 +741,7 @@ function renderResults(d) {
         figure('Average level', avgLevel === null ? '–' : avgLevel + ' / 4') +
       '</div>' +
 
-      (chips ? '<div class="res-mix">' + chips + '</div>' : '') +
+      (chips ? '<div class="res-mix">' + chips + '</div>' : ') +
 
       '<div class="res-table-wrap"><table class="res-table">' +
         '<thead><tr><th>Subject</th><th class="c-score">Score</th><th class="c-out">Out of</th>' +
@@ -601,7 +780,7 @@ function resultUrl(extra) {
   }
   if (extra) p.set(extra, '1');
   const base = '/api/assessments/student-report/' + encodeURIComponent(current.student.id);
-  return apiUrl(base + (p.toString() ? '?' + p.toString() : ''));
+  return apiUrl(base + (p.toString() ? '?' + p.toString() : '));
 }
 
 /**
@@ -609,18 +788,36 @@ function resultUrl(extra) {
  * phone saves it to its Files or Downloads folder, instead of opening a print
  * dialog that a parent then has to work out.
  */
+/**
+ * Save the student's result as a PDF.
+ *
+ * Mobile browsers ignore the `download` attribute on plain <a> tags, so we
+ * fetch the file as a blob first and then use a blob URL — this works on
+ * both desktop and mobile.
+ */
 async function downloadResult() {
   if (!current || !current.student) return;
   const url = resultUrl('download');
   const name = 'CBE-Result-' + current.student.name.replace(/[^A-Za-z0-9]+/g, '-') + '.pdf';
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = name;
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  showMsg('Saving ' + name + ' to your device.', 'ok');
+  try {
+    const response = await fetch(url, { credentials: 'include' });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = name;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
+    showMsg('Saving ' + name + ' to your device.', 'ok');
+  } catch (err) {
+    // Fallback: open in a new window if the fetch fails.
+    const w = window.open(url, '_blank');
+    if (!w) { showMsg('Could not download the result. Please allow popups.', 'err'); return; }
+  }
 }
 
 function printResult() {
@@ -637,11 +834,11 @@ function renderAssignments(d) {
   return d.assignments.map(a =>
     '<div class="pupil">' +
       '<div class="nm">' + esc(a.title) + '</div>' +
-      '<div class="mt">' + esc(a.subject || '') + (a.term ? ' &middot; ' + esc(a.term) : '') + '</div>' +
-      (a.description ? '<div class="mt" style="margin-top:6px">' + esc(a.description) + '</div>' : '') +
+      '<div class="mt">' + esc(a.subject || '') + (a.term ? ' &middot; ' + esc(a.term) : ') + '</div>' +
+      (a.description ? '<div class="mt" style="margin-top:6px">' + esc(a.description) + '</div>' : ') +
       (a.fileUrl ? '<a class="dl" href="' + esc(a.fileUrl) + '" target="_blank" rel="noopener"><i class="fas fa-download"></i> Download ' + esc(a.fileName || 'the file') + '</a>' : '<div class="mt">No file attached.</div>') +
     '</div>'
-  ).join('');
+  ).join(');
 }
 
 function renderFees(d) {
@@ -659,22 +856,22 @@ function renderFees(d) {
       : '<div class="msg ok show">All fees are fully paid. Thank you.</div>') +
     (f.structure && f.structure.length
       ? '<h3 style="margin:18px 0 6px;font-size:1.1rem">Fee breakdown</h3><table><tr><th>Type</th><th>Term</th><th class="num">Amount</th></tr>' +
-        f.structure.map(s => '<tr><td>' + esc(s.type || '-') + '</td><td>' + esc(s.term || '-') + '</td><td class="num">' + f.currency + ' ' + s.amount.toLocaleString() + '</td></tr>').join('') +
+        f.structure.map(s => '<tr><td>' + esc(s.type || '-') + '</td><td>' + esc(s.term || '-') + '</td><td class="num">' + f.currency + ' ' + s.amount.toLocaleString() + '</td></tr>').join(') +
         '</table>'
-      : '') +
+      : ') +
     '</div>';
 }
 
 function gradingKeyHtml(key) {
-  if (!key || !key.length) return '';
+  if (!key || !key.length) return ';
   return '<div class="note"><b>What the levels mean</b><br>' +
     key.map(k => '<b>' + esc(k.code) + '</b> ' + esc(k.name) + ' (' + k.min + '&ndash;' + k.max + '%)').join('<br>') +
     '</div>';
 }
 
 function levelBadge(level, code) {
-  const cls = { 'Exceeding Expectation': 'ee', 'Meeting Expectation': 'me', 'Approaching Expectation': 'ae', 'Below Expectation': 'be' }[level] || '';
-  return '<span class="lvl ' + cls + '">' + esc(level) + (code && code !== 'NA' ? ' (' + esc(code) + ')' : '') + '</span>';
+  const cls = { 'Exceeding Expectation': 'ee', 'Meeting Expectation': 'me', 'Approaching Expectation': 'ae', 'Below Expectation': 'be' }[level] || ';
+  return '<span class="lvl ' + cls + '">' + esc(level) + (code && code !== 'NA' ? ' (' + esc(code) + ')' : ') + '</span>';
 }
 
 function empty(msg) { return '<div class="note">' + esc(msg) + '</div>'; }
@@ -686,8 +883,11 @@ function showMsg(text, type) {
 }
 
 function esc(v) {
-  return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": "'" }[c]));
 }
-</script>
+
+function escapeHtml(v) {
+  return esc(v);
+}</script>
 </body>
 </html>

@@ -2077,18 +2077,33 @@
     // DOWNLOAD REPORT
     // ============================================
 
-    /**
-     * Save a report as a file on this device. Used instead of opening the
-     * report in a tab, which only offers a print dialog.
+/**
+     * Save a report as a file on this device.
+     *
+     * Mobile browsers ignore the `download` attribute on plain <a> tags, so
+     * we fetch the file as a blob first and then use a blob URL — this works
+     * on both desktop and mobile.
      */
-    function saveReportFile(url, filename) {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+    async function saveReportFile(url, filename) {
+      try {
+        const response = await fetch(url, { credentials: 'include' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        // Revoke the blob URL after a short delay so the download can start.
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
+      } catch (err) {
+        // Fallback: open in a new window if the fetch fails (e.g. CORS issue).
+        const w = window.open(url, '_blank');
+        if (!w) showAlert('Could not download the report. Please allow popups.', 'error');
+      }
     }
 
     /** Keep the readable report available for viewing on a big screen. */

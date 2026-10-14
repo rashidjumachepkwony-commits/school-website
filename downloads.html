@@ -878,6 +878,17 @@
                         <i class="fas fa-folder-open"></i> Browse
                     </a>
                 </div>
+                
+                <!-- Score Sheets Card - static, always visible -->
+                <div class="download-card" data-aos="fade-up" data-aos-delay="100">
+                    <span class="download-icon">📊</span>
+                    <span class="category-badge academic">Academic</span>
+                    <h4>Score Sheets for All Classes</h4>
+                    <p>Printable score sheets for Play Group to Grade 6 with student names pre-populated from school register</p>
+                    <a href="score-sheets-index.html" class="download-btn">
+                        <i class="fas fa-table"></i> Select Class
+                    </a>
+                </div>
             </div>
         </div>
     </section>
@@ -1050,9 +1061,13 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Ensure API base URL is set before any API calls
+            if (!window.__API_BASE_URL__) {
+                window.__API_BASE_URL__ = 'https://csa-api.rashidjumachepkwony.workers.dev';
+            }
+            _autoDetectApiBase();
             loadNewsTicker();
             loadDownloads();
-            _autoDetectApiBase();
         });
 
         // ============================================
