@@ -3,8 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="js/config.js"></script>
     <script>
+        // Fetch interceptor - MUST run before any API calls
+        (function() {
+            if (window.__CSA_FETCH_INTERCEPTED__) return;
+            window.__CSA_FETCH_INTERCEPTED__ = true;
+            
+            if (!window.__API_BASE_URL__) {
+                window.__API_BASE_URL__ = 'https://csa-api.rashidjumachepkwony.workers.dev';
+            }
+            
+            var _origFetch = window.fetch;
+            window.fetch = function(input, init) {
+                if (typeof input === 'string' && input.startsWith('/api/')) {
+                    input = window.__API_BASE_URL__ + input;
+                }
+                return _origFetch(input, init);
+            };
+        })();
+        
         // Fallback API functions in case config.js fails to load
         if (!window.__API_BASE_URL__) {
             window.__API_BASE_URL__ = 'https://csa-api.rashidjumachepkwony.workers.dev';
@@ -52,6 +69,7 @@
             };
         }
     </script>
+    <script src="js/config.js"></script>
     <title>Student Portal - Changara Star Academy</title>
 <meta name="description" content="Parent and student portal. Check assessment results, holiday assignments and fees balance at Changara Star Academy.">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -424,7 +442,7 @@ function filterStudents() {
     '<button type="button" role="option" data-id="' + s.id + '">' +
       '<span class="nm">' + esc(s.name) + '</span>' +
       '<span class="s-adm">' + esc(s.admissionNumber || 'no adm. no.') + '</span>' +
-      (s.grade ? '<span class="s-gr">' + esc(s.grade) + '</span>' : '')
+      (s.grade ? '<span class="s-gr">' + esc(s.grade) + '</span>' : '') +
     '</button>'
   ).join('');
   box.hidden = false;
@@ -440,14 +458,14 @@ function filterStudents() {
 /** Close the suggestion panel when tapping away or pressing Escape. */
 function closeSuggest() {
   const box = document.getElementById('suggest');
-  if (box) { box.hidden = true; box.innerHTML = '; }
+  if (box) { box.hidden = true; box.innerHTML = ''; }
   const input = document.getElementById('topSearch');
   if (input) input.setAttribute('aria-expanded', 'false');
 }
 
 async function openStudent(id) {
   if (!id) { showMsg('Please tap your child\'s name from the list.', 'err'); return; }
-  showMsg(', ');
+  showMsg('Opening student details...', 'ok');
   document.getElementById('step2').style.display = 'block';
   document.getElementById('step3').style.display = 'none';
   window.scrollTo(0, 0);
@@ -460,7 +478,7 @@ async function openStudent(id) {
       '<div class="nm">' + esc(s.name) + '</div>' +
       '<div class="mt">Admission No: ' + esc(s.admissionNumber || '-') + ' &middot; ' + esc(s.grade) +
       ' &middot; ' + esc(s.studentType) + '</div>' +
-      (s.guardianPhone ? '<div class="mt">Parent contact: ' + esc(s.guardianPhone) + '</div>' : ');
+      (s.guardianPhone ? '<div class="mt">Parent contact: ' + esc(s.guardianPhone) + '</div>' : '');
     showView('results');
   } catch (e) {
     showMsg('Could not open this student. Please try again.', 'err');
@@ -472,7 +490,7 @@ function backToSearch() {
   document.getElementById('step3').style.display = 'none';
   closeSuggest();
   const top = document.getElementById('topSearch');
-  top.value = ';
+  top.value = '';
   top.focus();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -519,15 +537,15 @@ async function loadStudentResults() {
     });
     
     // Extract unique periods and types for filtering
-    const periods = [...new Set(assessments.map(a => a.period || a.assessmentPeriod || ').filter(Boolean))].sort();
-    const types = [...new Set(assessments.map(a => a.type || a.assessmentType || ').filter(Boolean))].sort();
-    const names = [...new Set(assessments.map(a => a.name || a.assessmentName || ').filter(Boolean))].sort();
+    const periods = [...new Set(assessments.map(a => a.period || a.assessmentPeriod || '').filter(Boolean))].sort();
+    const types = [...new Set(assessments.map(a => a.type || a.assessmentType || '').filter(Boolean))].sort();
+    const names = [...new Set(assessments.map(a => a.name || a.assessmentName || '').filter(Boolean))].sort();
     
     // Default to latest assessment
     const latest = assessments[0];
-    const defaultPeriod = latest.period || latest.assessmentPeriod || ';
-    const defaultType = latest.type || latest.assessmentType || ';
-    const defaultName = latest.name || latest.assessmentName || ';
+    const defaultPeriod = latest.period || latest.assessmentPeriod || '';
+    const defaultType = latest.type || latest.assessmentType || '';
+    const defaultName = latest.name || latest.assessmentName || '';
     
     // Build assessment selector
     let selectorHtml = `
@@ -537,21 +555,21 @@ async function loadStudentResults() {
             <label style="display:block;font-weight:600;color:#001f5c;margin-bottom:6px;font-size:14px;">Assessment Period</label>
             <select id="assessmentPeriod" style="width:100%;padding:10px 14px;border:2px solid #e3e9f1;border-radius:8px;font-size:14px;background:white;color:#333;" onchange="loadSelectedAssessment()">
               <option value="">-- Select Period --</option>
-              ${periods.map(p => `<option value="${escapeHtml(p)}" ${p === defaultPeriod ? 'selected' : '}>${escapeHtml(p)}</option>`).join(')}
+              ${periods.map(p => `<option value="${escapeHtml(p)}" ${p === defaultPeriod ? 'selected' : ''}>${escapeHtml(p)}</option>`).join('')}
             </select>
           </div>
           <div style="flex:1;min-width:180px;">
             <label style="display:block;font-weight:600;color:#001f5c;margin-bottom:6px;font-size:14px;">Assessment Type</label>
             <select id="assessmentType" style="width:100%;padding:10px 14px;border:2px solid #e3e9f1;border-radius:8px;font-size:14px;background:white;color:#333;" onchange="loadSelectedAssessment()">
               <option value="">-- Select Type --</option>
-              ${types.map(t => `<option value="${escapeHtml(t)}" ${t === defaultType ? 'selected' : '}>${escapeHtml(t)}</option>`).join(')}
+              ${types.map(t => `<option value="${escapeHtml(t)}" ${t === defaultType ? 'selected' : ''}>${escapeHtml(t)}</option>`).join('')}
             </select>
           </div>
           <div style="flex:1;min-width:180px;">
             <label style="display:block;font-weight:600;color:#001f5c;margin-bottom:6px;font-size:14px;">Assessment Name</label>
             <select id="assessmentName" style="width:100%;padding:10px 14px;border:2px solid #e3e9f1;border-radius:8px;font-size:14px;background:white;color:#333;" onchange="loadSelectedAssessment()">
               <option value="">-- Select Name --</option>
-              ${names.map(n => `<option value="${escapeHtml(n)}" ${n === defaultName ? 'selected' : '}>${escapeHtml(n)}</option>`).join(')}
+              ${names.map(n => `<option value="${escapeHtml(n)}" ${n === defaultName ? 'selected' : ''}>${escapeHtml(n)}</option>`).join('')}
             </select>
           </div>
         </div>
@@ -567,7 +585,7 @@ async function loadStudentResults() {
     if (defaultType) params.set('type', defaultType);
     if (defaultName) params.set('name', defaultName);
     
-    const url = apiUrl('/api/assessments/student-report/' + encodeURIComponent(current.student.id) + (params.toString() ? '?' + params.toString() : '));
+    const url = apiUrl('/api/assessments/student-report/' + encodeURIComponent(current.student.id) + (params.toString() ? '?' + params.toString() : ''));
     
     body.innerHTML = `
       ${selectorHtml}
@@ -607,15 +625,15 @@ async function loadStudentResults() {
 }
 
 function loadSelectedAssessment() {
-  const period = document.getElementById('assessmentPeriod')?.value || ';
-  const type = document.getElementById('assessmentType')?.value || ';
-  const name = document.getElementById('assessmentName')?.value || ';
+  const period = document.getElementById('assessmentPeriod')?.value || '';
+  const type = document.getElementById('assessmentType')?.value || '';
+  const name = document.getElementById('assessmentName')?.value || '';
   
   if (!period && !type && !name) return;
   
   // Update global selection
   window.currentAssessmentSelection = {
-    studentId: current?.student?.id || ',
+    studentId: current?.student?.id || '',
     period,
     type,
     name
@@ -705,7 +723,7 @@ function renderResults(d) {
     return empty('There are no assessment results for this child yet. Results appear here as soon as the teacher enters them.');
   }
 
-  let html = ';
+  let html = '';
   for (const a of d.assessments) {
     // Mean performance level on the 01-04 scale, from the subject levels.
     const mix = a.subjectMix || {};
@@ -717,9 +735,9 @@ function renderResults(d) {
       : null;
 
     const rows = a.subjects.map(s => {
-      const code = s.code || ';
+      const code = s.code || '';
       const pct = (s.score !== null && s.max > 0) ? (s.score / s.max) * 100 : null;
-      const cls = code ? ' lv-' + code.toLowerCase() : ';
+      const cls = code ? ' lv-' + code.toLowerCase() : '';
       return '<tr class="' + cls + '">' +
         '<td class="c-subj">' + esc(s.subject) + '</td>' +
         '<td class="c-score">' + (s.score === null ? '–' : '<b>' + s.score + '</b>') + '</td>' +
@@ -727,12 +745,12 @@ function renderResults(d) {
         '<td class="c-pct">' + (pct === null ? '–' : pct.toFixed(1) + '%') + '</td>' +
         '<td class="c-lv">' + (code ? '<span class="tag ' + cls + '">' + code + '</span>' : '–') + '</td>' +
       '</tr>';
-    }).join(');
+    }).join('');
 
     const chips = ['EE', 'ME', 'AE', 'BE']
       .filter(c => mix[c])
       .map(c => '<span class="mchip ' + c.toLowerCase() + '">' + mix[c] + ' × ' + c + '</span>')
-      .join(');
+      .join('');
 
     html += '<article class="res-card">' +
       '<header class="res-head">' +
@@ -754,7 +772,7 @@ function renderResults(d) {
         figure('Average level', avgLevel === null ? '–' : avgLevel + ' / 4') +
       '</div>' +
 
-      (chips ? '<div class="res-mix">' + chips + '</div>' : ') +
+      (chips ? '<div class="res-mix">' + chips + '</div>' : '') +
 
       '<div class="res-table-wrap"><table class="res-table">' +
         '<thead><tr><th>Subject</th><th class="c-score">Score</th><th class="c-out">Out of</th>' +
@@ -793,7 +811,7 @@ function resultUrl(extra) {
   }
   if (extra) p.set(extra, '1');
   const base = '/api/assessments/student-report/' + encodeURIComponent(current.student.id);
-  return apiUrl(base + (p.toString() ? '?' + p.toString() : '));
+  return apiUrl(base + (p.toString() ? '?' + p.toString() : ''));
 }
 
 /**
@@ -884,7 +902,7 @@ function gradingKeyHtml(key) {
 
 function levelBadge(level, code) {
   const cls = { 'Exceeding Expectation': 'ee', 'Meeting Expectation': 'me', 'Approaching Expectation': 'ae', 'Below Expectation': 'be' }[level] || '';
-  return '<span class="lvl ' + cls + '">' + esc(level) + (code && code !== 'NA' ? ' (' + esc(code) + ')' : ') + '</span>';
+  return '<span class="lvl ' + cls + '">' + esc(level) + (code && code !== 'NA' ? ' (' + esc(code) + ')' : '') + '</span>';
 }
 
 function empty(msg) { return '<div class="note">' + esc(msg) + '</div>'; }
@@ -901,6 +919,26 @@ function esc(v) {
 
 function escapeHtml(v) {
   return esc(v);
-}</script>
+}
+// ============================================
+// FETCH INTERCEPTOR - runs after config.js loads
+// ============================================
+(function() {
+  if (window.__CSA_FETCH_INTERCEPTED_V2__) return;
+  window.__CSA_FETCH_INTERCEPTED_V2__ = true;
+
+  if (!window.__API_BASE_URL__) {
+    window.__API_BASE_URL__ = 'https://csa-api.rashidjumachepkwony.workers.dev';
+  }
+
+  var _origFetch = window.fetch;
+  window.fetch = function(input, init) {
+    if (typeof input === 'string' && input.startsWith('/api/')) {
+      input = window.__API_BASE_URL__ + input;
+    }
+    return _origFetch(input, init);
+  };
+})();
+</script>
 </body>
 </html>
