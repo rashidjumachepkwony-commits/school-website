@@ -21,6 +21,7 @@ import { handleHolidayAssignments } from './routes/holidayAssignments.js';
 import { handleClerk } from './routes/clerk.js';
 import { handlePortal } from './routes/portal.js';
 import { handleCertificates } from './routes/certificates.js';
+import { handleTuition } from './routes/tuition.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -90,6 +91,7 @@ export default {
         () => handleClerk(db, env, route, method, body, pathParts, url),
         () => handlePortal(db, env, route, method, body, pathParts, url),
         () => handleCertificates(db, env, route, method, body, pathParts, request),
+        () => handleTuition(db, env, route, method, body, pathParts, url, request),
       ];
 
       for (const handler of handlers) {

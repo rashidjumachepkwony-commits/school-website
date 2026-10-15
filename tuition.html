@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/config.js"></script>
+    <title>Computer Studies Holiday Tuition Registration - Changara Star Academy</title>
+    <meta name="description" content="Register for the November-December 2026 Computer Studies Holiday Tuition Programme at Changara Star Academy, Changara, Kenya.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            line-height: 1.6;
+        }
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* ===== HEADER ===== */
+        .main-header {
+            background: #ffffff;
+            padding: 10px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .main-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon { font-size: 32px; }
+        .logo-text { color: #001f5c; font-size: 24px; font-weight: 700; font-family: 'Playfair Display', serif; }
+        .logo-text .highlight { color: #d4a017; }
+        .back-link {
+            color: #0b5394;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 24px 16px 40px;
+            flex: 1;
+        }
+        /* ===== HERO PROGRAMME INFO ===== */
+        .programme-hero {
+            background: linear-gradient(135deg, #001f5c 0%, #0b5394 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .programme-hero .badge {
+            background: #ffeb99;
+            color: #001f5c;
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+        .programme-hero h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .programme-hero .tagline {
+            font-size: 15px;
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+        .programme-hero .info-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .info-card {
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+        }
+        .info-card .label { font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-card .value { font-size: 16px; font-weight: 700; margin-top: 4px; }
+        /* ===== STATUS BANNERS ===== */
+        .status-banner {
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .status-closed { background: #fff3e0; color: #8a5a00; border: 1px solid #ffd54f; }
+        .status-capacity { background: #fce4e4; color: #c62828; border: 1px solid #ef9a9a; }
+        /* ===== FORM ===== */
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+        .form-card h2 {
+            color: #001f5c;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        .form-card .desc {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .form-section {
+            margin-bottom: 28px;
+        }
+        .form-section h3 {
+            color: #0b5394;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e8f0fe;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        .form-group label .required { color: #dc3545; }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #0b5394;
+            outline: none;
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-group .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .form-group .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-top: 2px;
+        }
+        .form-group .checkbox-group label {
+            font-weight: 400;
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        .checkbox-label .checkmark {
+            display: none;
+        }
+        .checkbox-label .checkmark:after {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: #d4a017;
+            border-radius: 3px;
+            margin-left: 8px;
+        }
+        .checkbox-label input:checked + .checkmark {
+            display: block;
+        }
+        .error-msg {
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            color: #c53030;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .success-msg {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #276749;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        /* ===== BUTTONS ===== */
+        .btn-submit {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #001f5c, #0b5394);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 31, 92, 0.3);
+        }
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            color: #0b5394;
+            border: 2px solid #0b5394;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        .btn-secondary:hover {
+            background: #e8f0fe;
+        }
+        /* ===== SUMMARY ===== */
+        .summary-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .summary-card h3 {
+            color: #001f5c;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #e8e8e8;
+            font-size: 14px;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-row .label { color: #666; }
+        .summary-row .value { font-weight: 600; color: #001f5c; }
+        .summary-row .value.free { color: #28a745; }
+        .summary-row .value.fee { color: #d4a017; }
+        .note-box {
+            background: #fff3e0;
+            border-left: 4px solid #d4a017;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #8a5a00;
+            margin-top: 12px;
+        }
+        /* ===== CONFIRMATION ===== */
+        .confirmation-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+        .confirm-icon {
+            font-size: 64px;
+            color: #28a745;
+            margin-bottom: 16px;
+        }
+        .confirm-title {
+            color: #001f5c;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .confirm-ref {
+            font-size: 28px;
+            font-family: 'Courier New', monospace;
+            color: #0b5394;
+            font-weight: 700;
+            margin: 16px 0;
+            letter-spacing: 1px;
+            word-break: break-all;
+        }
+        .confirm-detail {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .confirm-detail .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e8e8e8;
+            font-size: 14px;
+        }
+        .confirm-detail .row:last-child { border-bottom: none; }
+        .confirm-message {
+            background: #e8f0fe;
+            border-radius: 10px;
+            padding: 16px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #0b5394;
+        }
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .loading-spinner i {
+            font-size: 32px;
+            color: #d4a017;
+            margin-bottom: 10px;
+        }
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #001f5c;
+            color: #a0c4e8;
+            text-align: center;
+            padding: 16px;
+            font-size: 13px;
+            margin-top: auto;
+        }
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .form-card { padding: 20px 16px; }
+            .programme-hero h1 { font-size: 20px; }
+            .info-cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrapper">
+    <header class="main-header">
+        <div class="container">
+            <div class="logo-section">
+                <span class="logo-icon">🏫</span>
+                <span class="logo-text">Changara Star Academy<span class="highlight">.</span></span>
+            </div>
+            <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Programme info loaded dynamically or shown as fallback -->
+        <div id="programmeHero">
+            <div class="programme-hero">
+                <span class="badge">NOW ACCEPTING REGISTRATIONS</span>
+                <h1>Digital Skills for the Future!</h1>
+                <p class="tagline">November–December 2026 Computer Studies Holiday Programme</p>
+                <div class="info-cards">
+                    <div class="info-card">
+                        <div class="label">Dates</div>
+                        <div class="value">2 Nov – 20 Dec 2026</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="label">Weekly Fee</div>
+                        <div class="value">KSh 500</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="label">Registration</div>
+                        <div class="value">FREE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status banner (shown when closed/capacity) -->
+        <div id="statusBanner" style="display:none;"></div>
+
+        <!-- Registration form -->
+        <div id="formContainer">
+            <div class="form-card">
+                <h2>Registration Form</h2>
+                <p class="desc">Complete this form to apply for the Computer Studies Holiday Tuition Programme. All fields marked * are required.</p>
+
+                <div class="form-section">
+                    <h3>Section A: Student Information</h3>
+                    <div class="form-group">
+                        <label>Student's full name <span class="required">*</span></label>
+                        <input type="text" id="studentName" placeholder="e.g., John Otieno">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Current school <span class="required">*</span></label>
+                            <input type="text" id="currentSchool" placeholder="e.g., Changara Primary">
+                        </div>
+                        <div class="form-group">
+                            <label>Grade/Class <span class="required">*</span></label>
+                            <input type="text" id="gradeClass" placeholder="e.g., Grade 6">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Age (completed years) <span class="required">*</span></label>
+                            <input type="number" id="age" min="1" max="100" placeholder="e.g., 12">
+                        </div>
+                        <div class="form-group">
+                            <label>Previous computer experience</label>
+                            <select id="computerExperience">
+                                <option value="">-- Select --</option>
+                                <option value="beginner">Beginner</option>
+                                <option value="some">Some experience</option>
+                                <option value="experienced">Experienced</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Section B: Parent / Guardian Information</h3>
+                    <div class="form-group">
+                        <label>Parent or guardian's full name <span class="required">*</span></label>
+                        <input type="text" id="guardianName" placeholder="e.g., Mary Atieno">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Primary phone number <span class="required">*</span></label>
+                            <input type="tel" id="guardianPhone" placeholder="e.g., 0712345678">
+                        </div>
+                        <div class="form-group">
+                            <label>Alternative phone number</label>
+                            <input type="tel" id="alternativePhone" placeholder="e.g., 0722333444">
+                        </div>
+                    </div>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="phoneConfirmed" required>
+                        <span class="checkmark"></span>
+                        I confirm this phone number belongs to or is authorized by the parent or guardian.
+                    </label>
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label>Village / area of residence</label>
+                        <input type="text" id="residence" placeholder="e.g., Changara Market">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Section C: Learning Preferences (Optional)</h3>
+                    <div class="form-group">
+                        <label>What would you like the student to learn?</label>
+                        <div class="checkbox-label">
+                            <input type="checkbox" name="pref" value="computer_basics" id="pref_basics">
+                            <span class="checkmark"></span> Computer basics
+                        </div>
+                        <div class="checkbox-label">
+                            <input type="checkbox" name="pref" value="typing" id="pref_typing">
+                            <span class="checkmark"></span> Typing skills
+                        </div>
+                        <div class="checkbox-label">
+                            <input type="checkbox" name="pref" value="word" id="pref_word">
+                            <span class="checkmark"></span> Microsoft Word / document creation
+                        </div>
+                        <div class="checkbox-label">
+                            <input type="checkbox" name="pref" value="digital_literacy" id="pref_digital">
+                            <span class="checkmark"></span> Internet and digital literacy
+                        </div>
+                        <div class="checkbox-label">
+                            <input type="checkbox" name="pref" value="other" id="pref_other">
+                            <span class="checkmark"></span> Other
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="additionalGoals">Additional learning goals (optional)</label>
+                        <textarea id="additionalGoals" placeholder="Any specific goals or interests..."></textarea>
+                    </div>
+                </div>
+
+                <div id="scheduleSection" style="display:none;">
+                    <div class="form-section">
+                        <h3>Schedule Preference</h3>
+                        <div class="form-group">
+                            <select id="schedulePreference">
+                                <option value="">-- No preference --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Section D: Parental Consent</h3>
+                    <div class="checkbox-label" style="margin-bottom: 12px;">
+                        <input type="checkbox" id="consentGiven" required>
+                        <span class="checkmark"></span>
+                        <span style="font-size: 14px;">
+                            I confirm that I am the student's parent or authorized guardian and that the information provided is accurate.
+                            I consent to Changara Star Academy using the information supplied to process this application and contact me
+                            about registration, programme arrangements and tuition payments.
+                        </span>
+                    </div>
+                    <div style="font-size:13px; color:#666; margin-top:8px;">
+                        <a href="privacy-policy.html" style="color:#0b5394;">Privacy Notice</a>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Section E: Registration Summary</h3>
+                    <div class="summary-card">
+                        <div class="summary-row"><span class="label">Programme</span><span class="value">Computer Studies Holiday Tuition</span></div>
+                        <div class="summary-row"><span class="label">Dates</span><span class="value">2 Nov – 20 Dec 2026</span></div>
+                        <div class="summary-row"><span class="label">Venue</span><span class="value">Changara Star Academy</span></div>
+                        <div class="summary-row"><span class="label">Tuition fee</span><span class="value fee">KSh 500 per week</span></div>
+                        <div class="summary-row"><span class="label">Registration fee</span><span class="value free">FREE</span></div>
+                        <div class="note-box">
+                            Online registration is FREE. Tuition costs KSh 500 per week.
+                            Submitting this form does not guarantee admission. Your application will be reviewed
+                            by Changara Star Academy, and the school will contact your parent or guardian with the outcome.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="formError" class="error-msg" style="display:none;"></div>
+                <button class="btn-submit" id="submitBtn" onclick="submitRegistration()">
+                    <i class="fas fa-paper-plane"></i> SUBMIT REGISTRATION
+                </button>
+            </div>
+
+            <button class="btn-secondary" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> EDIT DETAILS
+            </button>
+        </div>
+
+        <!-- Loading state -->
+        <div id="loadingState" class="loading-spinner" style="display:none;">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Submitting your registration...</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Changara Star Academy &middot; Changara, Teso North Sub-County, Busia County, Kenya</p>
+    </footer>
+</div>
+
+<script>
+    let programmeData = null;
+    let schedules = [];
+    let isSubmitting = false;
+
+    // Load programme settings
+    async function loadProgramme() {
+        try {
+            const res = await fetch(apiUrl('/api/tuition/programme'));
+            const data = await res.json();
+            if (data.success) {
+                programmeData = data.programme;
+                schedules = data.schedules || [];
+                updateProgrammeDisplay(data);
+            }
+        } catch(e) {
+            console.log('Using default programme data');
+        }
+    }
+
+    function updateProgrammeDisplay(data) {
+        // Hide hero if settings say not to show it
+        if (!data.showHomepageAdvert) return;
+
+        // Update schedule section
+        if (schedules.length > 0) {
+            const section = document.getElementById('scheduleSection');
+            const select = document.getElementById('schedulePreference');
+            select.innerHTML = '<option value="">-- No preference --</option>';
+            schedules.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.label;
+                select.appendChild(opt);
+            });
+            section.style.display = 'block';
+        }
+
+        // Update summary card
+        const summary = document.querySelector('.summary-card');
+        summary.innerHTML =
+            '<div class="summary-row"><span class="label">Programme</span><span class="value">' + (data.programme.title || 'Computer Studies Holiday Tuition') + '</span></div>' +
+            '<div class="summary-row"><span class="label">Dates</span><span class="value">' + (data.programme.startDate || '2 Nov 2026') + ' – ' + (data.programme.endDate || '20 Dec 2026') + '</span></div>' +
+            '<div class="summary-row"><span class="label">Venue</span><span class="value">' + (data.programme.venue || 'Changara Star Academy') + '</span></div>' +
+            '<div class="summary-row"><span class="label">Tuition fee</span><span class="value fee">' + (data.programme.currency || 'KSh') + ' ' + (data.programme.weeklyFee || 500) + ' per week</span></div>' +
+            '<div class="summary-row"><span class="label">Registration fee</span><span class="value free">FREE</span></div>' +
+            '<div class="note-box">' +
+            'Online registration is FREE. Tuition costs KSh 500 per week. ' +
+            'Submitting this form does not guarantee admission. Your application will be reviewed ' +
+            'by Changara Star Academy, and the school will contact your parent or guardian with the outcome.' +
+            '</div>';
+    }
+
+    // Collect learning preferences
+    function getLearningPreferences() {
+        const prefs = [];
+        document.querySelectorAll('input[name="pref"]:checked').forEach(cb => prefs.push(cb.value));
+        return prefs;
+    }
+
+    // Validation
+    function validate() {
+        const errors = [];
+        if (!document.getElementById('studentName').value.trim()) errors.push('Student name is required.');
+        if (!document.getElementById('currentSchool').value.trim()) errors.push('Current school is required.');
+        if (!document.getElementById('gradeClass').value.trim()) errors.push('Grade/class is required.');
+        if (!document.getElementById('age').value.trim()) errors.push('Age is required.');
+
+        if (!document.getElementById('guardianName').value.trim()) errors.push('Parent/guardian name is required.');
+        if (!document.getElementById('guardianPhone').value.trim()) errors.push('Phone number is required.');
+        if (!document.getElementById('phoneConfirmed').checked) errors.push('Please confirm the phone number.');
+
+        if (!document.getElementById('consentGiven').checked) errors.push('You must accept the parental consent.');
+
+        // Phone validation
+        const phone = document.getElementById('guardianPhone').value.trim();
+        if (phone && !isValidKenyanPhone(phone)) errors.push('Please enter a valid Kenyan phone number.');
+
+        const altPhone = document.getElementById('alternativePhone').value.trim();
+        if (altPhone && !isValidKenyanPhone(altPhone)) errors.push('Alternative phone number is not valid.');
+
+        // Age validation
+        const age = parseInt(document.getElementById('age').value);
+        if (age && (isNaN(age) || age < 1 || age > 100)) errors.push('Age must be between 1 and 100.');
+
+        return errors;
+    }
+
+    function isValidKenyanPhone(phone) {
+        const digits = phone.replace(/\D/g, '');
+        return /^(?:\+?(254)|0)(7|1)\d{8}$/.test(phone) ||
+               /^(254|0)(7|1)\d{8}$/.test(digits);
+    }
+
+    // Submit registration
+    async function submitRegistration() {
+        if (isSubmitting) return;
+        if (!programmeData) return;
+
+        // Check if registration is closed
+        const banner = document.getElementById('statusBanner');
+        if (banner.style.display !== 'none') return;
+
+        const errors = validate();
+        if (errors.length > 0) {
+            showError(errors.join('\n'));
+            return;
+        }
+
+        isSubmitting = true;
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+        const formData = {
+            studentName: document.getElementById('studentName').value.trim(),
+            currentSchool: document.getElementById('currentSchool').value.trim(),
+            gradeClass: document.getElementById('gradeClass').value.trim(),
+            age: document.getElementById('age').value.trim(),
+            computerExperience: document.getElementById('computerExperience').value || null,
+            guardianName: document.getElementById('guardianName').value.trim(),
+            guardianPhone: document.getElementById('guardianPhone').value.trim(),
+            alternativePhone: document.getElementById('alternativePhone').value.trim() || null,
+            residence: document.getElementById('residence').value.trim() || null,
+            learningPreferences: getLearningPreferences(),
+            additionalGoals: document.getElementById('additionalGoals').value.trim() || null,
+            schedulePreference: document.getElementById('schedulePreference').value || null,
+            consentGiven: document.getElementById('consentGiven').checked
+        };
+
+        try {
+            const res = await fetch(apiUrl('/api/tuition/register'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const data = await res.json();
+            if (data.success) {
+                showConfirmation(data);
+            } else {
+                showError(data.error || 'Submission failed. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT REGISTRATION';
+            }
+        } catch(e) {
+            showError('Network error. Please check your connection and try again.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT REGISTRATION';
+        }
+        isSubmitting = false;
+    }
+
+    function showError(message) {
+        const el = document.getElementById('formError');
+        el.textContent = message;
+        el.style.display = 'block';
+        el.style.background = '#fff5f5';
+        el.className = 'error-msg';
+        setTimeout(() => { el.style.display = 'none'; }, 8000);
+    }
+
+    function showConfirmation(data) {
+        document.getElementById('formContainer').style.display = 'none';
+        document.getElementById('loadingState').style.display = 'block';
+
+        setTimeout(() => {
+            document.getElementById('loadingState').style.display = 'none';
+            const container = document.getElementById('formContainer');
+            container.innerHTML =
+                '<div class="confirmation-card">' +
+                '  <div class="confirm-icon"><i class="fas fa-check-circle"></i></div>' +
+                '  <div class="confirm-title">Registration Successful!</div>' +
+                '  <div class="confirm-ref" id="regNumber">' + data.registrationNumber + '</div>' +
+                '  <div class="confirm-detail">' +
+                '    <div class="row"><span>Student</span><strong>' + data.studentName + '</strong></div>' +
+                '    <div class="row"><span>Status</span><span style="color:#d4a017;font-weight:700;">PENDING REVIEW</span></div>' +
+                '    <div class="row"><span>Dates</span><span>' + (data.programme.startDate || '2 Nov 2026') + ' – ' + (data.programme.endDate || '20 Dec 2026') + '</span></div>' +
+                '    <div class="row"><span>Venue</span><span>Changara Star Academy</span></div>' +
+                '    <div class="row"><span>Weekly tuition</span><span>KSh ' + (data.programme.weeklyFee || 500) + '</span></div>' +
+                '    <div class="row"><span>Registration fee</span><span>FREE</span></div>' +
+                '  </div>' +
+                '  <div class="confirm-message">' +
+                '    Thank you for registering with Changara Star Academy. Your Computer Studies Holiday Tuition ' +
+                '    application has been received successfully. Your application is pending review. ' +
+                '    Please keep your registration reference for future communication. ' +
+                '    The school will contact your parent or guardian regarding the application outcome.' +
+                '  </div>' +
+                '  <div style="display:flex; gap:12px; margin-top:20px;">' +
+                '    <button class="btn-submit" onclick="window.print()" style="flex:1;">' +
+                '      <i class="fas fa-print"></i> Print Confirmation' +
+                '    </button>' +
+                '    <button class="btn-secondary" onclick="window.location.href=\'index.html\'" style="flex:1;">' +
+                '      <i class="fas fa-home"></i> Back to Home' +
+                '    </button>' +
+                '  </div>' +
+                '</div>';
+            container.style.display = 'block';
+        }, 800);
+    }
+
+    function goBack() {
+        window.location.href = 'index.html';
+    }
+
+    // Init
+    (async function() {
+        await loadProgramme();
+    })();
+</script>
+</body>
+</html>

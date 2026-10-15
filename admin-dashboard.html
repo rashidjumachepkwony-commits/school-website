@@ -507,6 +507,7 @@
         <a onclick="window.location.href='admin-academics.html'"><i class="fas fa-chart-bar"></i> Assessments</a>
         <a onclick="window.location.href='admin-holiday-assignments.html'"><i class="fas fa-file-alt"></i> Holiday Assignments</a>
         <a onclick="window.location.href='admin-holiday-assignments-manage.html'"><i class="fas fa-tasks"></i> Manage Assignments</a>
+        <a onclick="showSection('tuitionRegistrations')"><i class="fas fa-laptop-code"></i> Computer Tuition Registrations</a>
         <!-- ===== END ACADEMIC MANAGEMENT ===== -->
 
         <!-- ===== STUDENT MANAGEMENT ===== -->
@@ -1227,6 +1228,45 @@
         </div>
     </div>
 
+    <!-- ======================================== -->
+    <!-- COMPUTER TUITION REGISTRATIONS SECTION -->
+    <!-- ======================================== -->
+    <div id="section-tuitionRegistrations" class="editor-container">
+        <h2><i class="fas fa-laptop-code"></i> Computer Studies Tuition Registrations</h2>
+        <p class="desc">Manage holiday tuition registrations, track payments, and update status.</p>
+
+        <div id="tuitionDashboardCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px;"></div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;">
+            <button class="btn btn-info" onclick="loadTuitionRegistrations()"><i class="fas fa-sync"></i> Refresh</button>
+            <button class="btn btn-warning" onclick="exportTuitionCSV()">Export CSV</button>
+            <button class="btn btn-secondary" onclick="exportTuitionJSON()">Export JSON</button>
+        </div>
+
+        <div class="data-table-wrapper" style="overflow-x:auto;">
+            <table class="data-table" id="tuitionTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Reg. No.</th>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Parent/Guardian</th>
+                        <th>Phone</th>
+                        <th>Fee</th>
+                        <th>Paid</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tuitionTableBody">
+                    <tr><td colspan="11" style="text-align:center;color:#999;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- ===== SAVE BUTTON ===== -->
     <button class="btn btn-success btn-block" onclick="saveAllContent()">
         <i class="fas fa-save"></i> Save All Content
@@ -1342,6 +1382,7 @@
         if (section === 'attendance') loadAttendance();
         if (section === 'visitors') loadVisitors();
         if (section === 'users') loadPendingUsers();
+        if (section === 'tuitionRegistrations') { loadTuitionDashboard(); loadTuitionRegistrations(); }
     }
 
     // ============================================
@@ -2467,6 +2508,94 @@
         const url = apiUrl('/api/admin/attendance/report?period=' + repPeriod + '&format=pdf');
         const w = window.open(url, '_blank');
         if (!w) alert('Please allow popups to open the report');
+    }
+
+    // ============================================
+    // TUITION REGISTRATIONS
+    // ============================================
+    function escTuition(v) {
+        return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    async function loadTuitionDashboard() {
+        const container = document.getElementById('tuitionDashboardCards');
+        if (!container) return;
+        container.innerHTML = '<p style="color:#999;text-align:center;padding:14px;">Loading summary...</p>';
+        try {
+            const res = await fetch(apiUrl('/api/tuition/summary'));
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Failed to load summary');
+            const s = data.summary;
+            const stat = (v, k) => '<div style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);">' +
+                '<div style="font-size:32px;font-weight:700;color:#001f5c;">' + escTuition(v) + '</div>' +
+                '<div style="font-size:13px;color:#666;margin-top:4px;">' + escTuition(k) + '</div></div>';
+            container.innerHTML = stat(s.total, 'Total Registrations') +
+                stat(s.pending, 'Pending') +
+                stat(s.approved, 'Approved') +
+                stat(s.rejected, 'Rejected') +
+                stat(s.totalPaid, 'Total Paid (KSh)') +
+                stat(s.totalOutstanding, 'Outstanding (KSh)');
+        } catch (err) {
+            container.innerHTML = '<p style="color:#a4161a;">' + escTuition(err.message) + '</p>';
+        }
+    }
+
+    async function loadTuitionRegistrations() {
+        const tbody = document.getElementById('tuitionTableBody');
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#999;">Loading...</td></tr>';
+        try {
+            const res = await fetch(apiUrl('/api/tuition/registrations'));
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Failed to load');
+            if (!data.registrations || data.registrations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#999;">No registrations found.</td></tr>';
+                return;
+            }
+            let i = 0;
+            tbody.innerHTML = data.registrations.map(r => {
+                i++;
+                const paid = parseFloat(r.totalPaid || 0);
+                const fee = parseFloat(r.fee || 0);
+                return '<tr>' +
+                    '<td>' + i + '</td>' +
+                    '<td>' + escTuition(r.registrationNumber) + '</td>' +
+                    '<td>' + escTuition(r.studentName) + '</td>' +
+                    '<td>' + escTuition(r.gradeClass) + '</td>' +
+                    '<td>' + escTuition(r.guardianName) + '</td>' +
+                    '<td>' + escTuition(r.guardianPhone) + '</td>' +
+                    '<td>KSh ' + fee.toFixed(0) + '</td>' +
+                    '<td>KSh ' + paid.toFixed(0) + '</td>' +
+                    '<td><span style="padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;' +
+                        (r.applicationStatus === 'approved' ? 'background:#d4edda;color:#155724;' :
+                         r.applicationStatus === 'rejected' ? 'background:#f8d7da;color:#721c24;' :
+                         'background:#fff3cd;color:#856404;') + '">' +
+                        escTuition(r.applicationStatus || 'pending') + '</span></td>' +
+                    '<td>' + escTuition(r.createdAt || '') + '</td>' +
+                    '<td><div style="display:flex;gap:4px;flex-wrap:wrap;">' +
+                        '<button class="btn btn-info btn-sm" onclick="editTuitionRegistration(' + "'" + r.id + "'" + ')"><i class="fas fa-edit"></i> Edit</button>' +
+                        '</div></td>' +
+                    '</tr>';
+            }).join('');
+        } catch (err) {
+            tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#a4161a;">' + escTuition(err.message) + '</td></tr>';
+        }
+    }
+
+    function editTuitionRegistration(id) {
+        showSection('tuitionRegistrations');
+        window.location.href = 'admin-tuition-detail.html?id=' + id;
+    }
+
+    async function exportTuitionCSV() {
+        const url = apiUrl('/api/tuition/export?format=csv');
+        window.open(url, '_blank');
+    }
+
+    async function exportTuitionJSON() {
+        const url = apiUrl('/api/tuition/export?format=json');
+        window.open(url, '_blank');
     }
 
     function renderReport(d) {

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/config.js"></script>
+    <title>Privacy Policy - Changara Star Academy</title>
+    <meta name="description" content="Privacy policy for Changara Star Academy and the Computer Studies Holiday Tuition Registration system.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #1a1a2e; line-height: 1.7; }
+        .main-header {
+            background: #ffffff; padding: 10px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .main-header .container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .logo-section { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { font-size: 32px; }
+        .logo-text { color: #001f5c; font-size: 24px; font-weight: 700; font-family: 'Playfair Display', serif; }
+        .logo-text .highlight { color: #d4a017; }
+        .back-link { color: #0b5394; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .main-content { max-width: 800px; margin: 0 auto; padding: 40px 16px; }
+        .page-title { color: #001f5c; font-size: 32px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+        .page-subtitle { color: #666; font-size: 15px; margin-bottom: 30px; text-align: center; }
+        .content-block { background: white; border-radius: 12px; padding: 30px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .content-block h2 { color: #0b5394; font-size: 20px; margin-bottom: 16px; border-bottom: 2px solid #e8f0fe; padding-bottom: 8px; }
+        .content-block h3 { color: #001f5c; font-size: 16px; margin: 16px 0 8px; font-weight: 600; }
+        .content-block p, .content-block li { margin-bottom: 10px; }
+        .content-block ul { padding-left: 20px; }
+        .content-block .last-updated { font-size: 13px; color: #999; margin-top: 20px; }
+        .school-footer { text-align: center; color: #001f5c; padding: 20px; }
+        .school-footer p { font-size: 13px; color: #666; }
+    </style>
+</head>
+<body>
+<div class="main-header">
+    <div class="container">
+        <div class="logo-section">
+            <span class="logo-icon">🏫</span>
+            <span class="logo-text">Changara Star Academy<span class="highlight">.</span></span>
+        </div>
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <h1 class="page-title">Privacy Policy</h1>
+    <p class="page-subtitle">Last updated: 15 October 2026</p>
+
+    <div class="content-block">
+        <h2>1. Introduction</h2>
+        <p>Changara Star Academy ("we", "us", or "our") is committed to protecting the personal information of students, parents, guardians and visitors. This Privacy Policy explains what information we collect, why we collect it, and how we use it.</p>
+        <p>This policy covers the Computer Studies Holiday Tuition Registration system and all associated school services.</p>
+    </div>
+
+    <div class="content-block">
+        <h2>2. Information We Collect</h2>
+        <h3>During registration for the Computer Studies Holiday Tuition:</h3>
+        <ul>
+            <li><strong>Student name, current school, grade/class, and age</strong> — used to identify and place the student correctly.</li>
+            <li><strong>Parent/guardian name and phone number</strong> — used solely to contact the guardian about the application, payment, and programme arrangements.</li>
+            <li><strong>Optional fields</strong> (alternative phone, residence, computer experience, learning preferences) — used to improve the learning experience.</li>
+            <li><strong>Consent timestamp and IP address</strong> — recorded to verify that consent was given.</li>
+        </ul>
+        <h3>We do NOT collect:</h3>
+        <ul>
+            <li>National ID numbers</li>
+            <li>Birth certificate numbers</li>
+            <li>Financial information beyond what is needed for payment records</li>
+            <li>Passwords or device identifiers</li>
+        </ul>
+    </div>
+
+    <div class="content-block">
+        <h2>3. How We Use Information</h2>
+        <ul>
+            <li>To process and review your application for the Computer Studies Holiday Tuition.</li>
+            <li>To contact the parent or guardian regarding registration status, payment, and programme arrangements.</li>
+            <li>To issue a unique registration reference for future communication.</li>
+            <li>To record tuition payments and maintain a payment ledger.</li>
+            <li>To send SMS notifications (only if enabled by the school and when SMS configuration is complete).</li>
+        </ul>
+        <p>We do not use this information for marketing or share it with third parties, except where required by law.</p>
+    </div>
+
+    <div class="content-block">
+        <h2>4. Data Storage and Security</h2>
+        <p>All registration data is stored in a secure Supabase PostgreSQL database. Access is restricted to authorized school administrators via JWT-based authentication. The database uses Row Level Security with no public access policies — only the school's backend Worker (using a service-role key) can read or write data.</p>
+        <p>Nevertheless, no method of transmission over the internet or electronic storage is 100% secure. We strive to use commercially acceptable means to protect your data but cannot guarantee absolute security.</p>
+    </div>
+
+    <div class="content-block">
+        <h2>5. Retention</h2>
+        <p>Registration records are retained for the duration of the programme plus seven years, in line with Kenyan educational record-keeping expectations. Parents may request deletion of their child's record by contacting the school office.</p>
+    </div>
+
+    <div class="content-block">
+        <h2>6. Cookies and Tracking</h2>
+        <p>This website does not use tracking cookies or analytics scripts that follow visitors across sessions. Any temporary session data needed for the registration form is discarded after the session ends.</p>
+    </div>
+
+    <div class="content-block">
+        <h2>7. Changes to This Policy</h2>
+        <p>We may update this policy from time to time. Any changes will be posted on this page with an updated "Last updated" date.</p>
+    </div>
+
+    <div class="content-block">
+        <h2>8. Contact Us</h2>
+        <p>If you have questions about this Privacy Policy or your personal data, please contact:</p>
+        <p>Changara Star Academy<br>
+        Changara, Teso North Sub-County, Busia County, Kenya<br>
+        Email: info@changarastaracademy.co.ke<br>
+        Phone: +254 700 000 000</p>
+    </div>
+
+    <p class="last-updated">This policy was created for Changara Star Academy and applies specifically to the Computer Studies Holiday Tuition Registration system.</p>
+</div>
+
+<div class="school-footer">
+    <p>Changara Star Academy &middot; Changara, Teso North Sub-County, Busia County, Kenya</p>
+</div>
+</body>
+</html>

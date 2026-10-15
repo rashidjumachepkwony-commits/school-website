@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/config.js"></script>
+    <title>Tuition Registration Detail - Changara Star Academy</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        .main-header { background: #ffffff; padding: 12px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
+        .main-header .container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; gap: 12px; }
+        .logo-section { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { font-size: 28px; }
+        .logo-text { color: #001f5c; font-size: 22px; font-weight: 700; }
+        .logo-text .highlight { color: #d4a017; }
+        .back-link { color: #0b5394; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .main-content { max-width: 900px; margin: 0 auto; padding: 30px 16px; }
+        .page-title { color: #001f5c; font-size: 26px; font-weight: 700; margin-bottom: 20px; }
+        .detail-card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .detail-card h2 { color: #0b5394; font-size: 18px; margin-bottom: 16px; border-bottom: 2px solid #e8f0fe; padding-bottom: 8px; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .detail-grid .field { display: flex; flex-direction: column; gap: 4px; }
+        .detail-grid .field .label { font-size: 11px; text-transform: uppercase; color: #999; letter-spacing: 0.5px; }
+        .detail-grid .field .value { font-size: 14px; color: #1a1a2e; font-weight: 500; }
+        .full-width { grid-column: 1 / -1; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        .btn { padding: 8px 18px; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-warning { background: #ffc107; color: #001f5c; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+        .payment-form { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #ddd; }
+        .payment-history { list-style: none; }
+        .payment-history li { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .payment-history .method { color: #666; font-size: 12px; }
+        .admin-notes { margin-top: 12px; }
+        .admin-notes textarea { width: 100%; padding: 8px 12px; border: 2px solid #e8ecf1; border-radius: 6px; font-size: 13px; min-height: 80px; }
+        .alert { position: fixed; top: 70px; right: 20px; padding: 12px 20px; border-radius: 8px; color: white; font-weight: 600; z-index: 1000; display: none; }
+        .alert.success { background: #28a745; }
+        .alert.error { background: #dc3545; }
+        .spinner { display: none; }
+        @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="main-header">
+    <div class="main-content-wrapper" style="max-width:1200px;margin:0 auto;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="logo-section">
+                <span class="logo-icon">🏫</span>
+                <span class="logo-text">Changara Star Academy<span class="highlight">.</span></span>
+            </div>
+            <a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <h1 class="page-title">Registration Detail</h1>
+    <div id="alert" class="alert"></div>
+    <div id="detailCard" class="detail-card">Loading...</div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const regId = params.get('id');
+if (!regId) {
+    window.location.href = 'admin-dashboard.html';
+}
+
+function showAlert(msg, type) {
+    const a = document.getElementById('alert');
+    a.textContent = msg;
+    a.className = 'alert ' + type;
+    a.style.display = 'block';
+    setTimeout(() => a.style.display = 'none', 3000);
+}
+
+async function loadRegistration() {
+    try {
+        const res = await fetch(apiUrl('/api/tuition/registrations/' + regId));
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to load');
+        const d = data.registration;
+        const paid = parseFloat(d.totalPaid || 0);
+        const fee = parseFloat(d.fee || 0);
+        const outstanding = fee - paid;
+        const statusClass = d.applicationStatus === 'approved' ? 'status-approved' : d.applicationStatus === 'rejected' ? 'status-rejected' : 'status-pending';
+        const payHistory = d.payments || [];
+
+        let payHistoryHTML = '';
+        if (payHistory.length > 0) {
+            payHistoryHTML = '<ul class="payment-history">';
+            payHistory.forEach(p => {
+                payHistoryHTML += '<li><span class="method">' + escAttr(p.paymentMethod || 'cash') + '</span>: KSh ' + parseFloat(p.amount || 0).toFixed(0) + ' on ' + escAttr(p.paymentDate || '') + '</li>';
+            });
+            payHistoryHTML += '</ul>';
+        } else {
+            payHistoryHTML = '<p style="color:#999;font-size:13px;">No payments recorded.</p>';
+        }
+
+        document.getElementById('detailCard').innerHTML =
+            '<h2>' + escAttr(d.studentName || 'Student') + ' <span class="status-badge ' + statusClass + '">' + escAttr(d.applicationStatus || 'pending') + '</span></h2>' +
+            '<div class="detail-grid">' +
+            '<div class="field"><div class="label">Registration No.</div><div class="value">' + escAttr(d.registrationNumber || '') + '</div></div>' +
+            '<div class="field"><div class="label">Student Name</div><div class="value">' + escAttr(d.studentName || '') + '</div></div>' +
+            '<div class="field"><div class="label">Age</div><div class="value">' + escAttr(d.age || '') + '</div></div>' +
+            '<div class="field"><div class="label">Grade/Class</div><div class="value">' + escAttr(d.gradeClass || '') + '</div></div>' +
+            '<div class="field"><div class="label">Current School</div><div class="value">' + escAttr(d.currentSchool || 'Changara Star Academy') + '</div></div>' +
+            '<div class="field"><div class="label">Computer Experience</div><div class="value">' + escAttr(d.computerExperience || 'None') + '</div></div>' +
+            '<div class="field"><div class="label">Parent/Guardian</div><div class="value">' + escAttr(d.guardianName || '') + '</div></div>' +
+            '<div class="field"><div class="label">Phone</div><div class="value">' + escAttr(d.guardianPhone || '') + '</div></div>' +
+            '<div class="field"><div class="label">Alternative Phone</div><div class="value">' + escAttr(d.alternativePhone || '') + '</div></div>' +
+            '<div class="field"><div class="label">Residence</div><div class="value">' + escAttr(d.residence || '') + '</div></div>' +
+            '<div class="field"><div class="label">Fee</div><div class="value">KSh ' + fee.toFixed(0) + '</div></div>' +
+            '<div class="field"><div class="label">Total Paid</div><div class="value">KSh ' + paid.toFixed(0) + '</div></div>' +
+            '<div class="field"><div class="label">Outstanding</div><div class="value" style="color:' + (outstanding > 0 ? '#dc3545' : '#28a745') + ';">KSh ' + outstanding.toFixed(0) + '</div></div>' +
+            '<div class="field"><div class="label">Consent Given</div><div class="value">' + (d.consentGiven ? 'Yes' : 'No') + '</div></div>' +
+            '<div class="field"><div class="label">Submitted At</div><div class="value">' + escAttr(d.createdAt || '') + '</div></div>' +
+            '<div class="field full-width"><div class="label">Learning Preferences</div><div class="value">' + escAttr((d.learningPreferences || []).join(', ')) + '</div></div>' +
+            '<div class="field full-width"><div class="label">Additional Learning Goals</div><div class="value">' + escAttr(d.additionalLearningGoals || '') + '</div></div>' +
+            '<div class="field full-width"><div class="label">Admin Notes</div><div class="admin-notes"><textarea id="adminNote" placeholder="Add admin notes...">' + escAttr(d.adminNotes || '') + '</textarea></div></div>' +
+            '</div>' +
+            '<div class="payment-form">' +
+            '<h3 style="color:#001f5c;margin-bottom:10px;">Record Payment</h3>' +
+            '<div class="detail-grid">' +
+            '<div class="field"><div class="label">Amount (KSh)</div><input type="number" id="paymentAmount" step="0.01" min="0" value="0"></div>' +
+            '<div class="field"><div class="label">Method</div><select id="paymentMethod"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="bank">Bank Transfer</option><option value="cheque">Cheque</option></select></div>' +
+            '<div class="field full-width"><div class="label">Notes</div><input type="text" id="paymentNotes" placeholder="Optional..."></div>' +
+            '</div>' +
+            '<button class="btn btn-success" onclick="recordPayment()">Record Payment</button>' +
+            '</div>' +
+            '<div style="margin-top:16px;">' +
+            '<h3 style="color:#001f5c;margin-bottom:10px;">Payment History</h3>' + payHistoryHTML + '</div>' +
+            '<div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">' +
+            '<button class="btn btn-success" onclick="updateStatus(\'approved\')"><i class="fas fa-check"></i> Approve</button>' +
+            '<button class="btn btn-warning" onclick="updateStatus(\'pending\')"><i class="fas fa-clock"></i> Pending</button>' +
+            '<button class="btn btn-danger" onclick="updateStatus(\'rejected\')"><i class="fas fa-times"></i> Reject</button>' +
+            '<button class="btn btn-secondary" onclick="saveNote()">Save Note</button>' +
+            '</div>';
+    } catch (err) {
+        document.getElementById('detailCard').innerHTML = '<p style="color:#a4161a;">Error: ' + escAttr(err.message) + '</p>';
+    }
+}
+
+function escAttr(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+async function updateStatus(status) {
+    try {
+        const res = await fetch(apiUrl('/api/tuition/registrations/' + regId + '/status'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status, updatedBy: JSON.parse(localStorage.getItem('admin') || '{}').username || 'admin' })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to update status');
+        showAlert('Status updated to ' + status, 'success');
+        loadRegistration();
+    } catch (err) {
+        showAlert(err.message, 'error');
+    }
+}
+
+async function recordPayment() {
+    const amount = document.getElementById('paymentAmount').value;
+    const method = document.getElementById('paymentMethod').value;
+    const notes = document.getElementById('paymentNotes').value;
+    if (!amount || parseFloat(amount) <= 0) {
+        showAlert('Please enter a valid amount', 'error');
+        return;
+    }
+    try {
+        const res = await fetch(apiUrl('/api/tuition/registrations/' + regId + '/payment'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: parseFloat(amount), paymentMethod: method, notes: notes })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to record payment');
+        showAlert('Payment recorded', 'success');
+        document.getElementById('paymentAmount').value = '0';
+        document.getElementById('paymentNotes').value = '';
+        loadRegistration();
+    } catch (err) {
+        showAlert(err.message, 'error');
+    }
+}
+
+async function saveNote() {
+    const note = document.getElementById('adminNote').value;
+    try {
+        const res = await fetch(apiUrl('/api/tuition/registrations/' + regId), {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ adminNote: note })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to save note');
+        showAlert('Note saved', 'success');
+    } catch (err) {
+        showAlert(err.message, 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('adminToken');
+    if (!token) window.location.href = 'admin-login.html';
+    loadRegistration();
+});
+</script>
+</body>
+</html>
