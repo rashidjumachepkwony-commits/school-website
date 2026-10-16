@@ -8,6 +8,7 @@
     <meta name="description" content="Register for the November-December 2026 Computer Studies Holiday Tuition Programme at Changara Star Academy, Changara, Kenya.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -588,6 +589,7 @@
     let programmeData = null;
     let schedules = [];
     let isSubmitting = false;
+    let registrationData = null;
 
     // Load programme settings
     async function loadProgramme() {
@@ -743,6 +745,8 @@
             consentGiven: document.getElementById('consentGiven').checked
         };
 
+        registrationData = formData;
+
         try {
             const res = await fetch(apiUrl('/api/tuition/register'), {
                 method: 'POST',
@@ -751,7 +755,7 @@
             });
             const data = await res.json();
             if (data.success) {
-                showConfirmation(data);
+                showConfirmation(data, formData);
             } else {
                 showError(data.error || 'Submission failed. Please try again.');
                 btn.disabled = false;
@@ -775,9 +779,20 @@
         setTimeout(() => { el.style.display = 'none'; }, 8000);
     }
 
-    function showConfirmation(data) {
+    function showConfirmation(data, formData) {
         document.getElementById('formContainer').style.display = 'none';
         document.getElementById('loadingState').style.display = 'block';
+
+        const prefsText = (formData && formData.learningPreferences && formData.learningPreferences.length > 0)
+            ? formData.learningPreferences.join(', ')
+            : 'None specified';
+        const expText = (formData && formData.computerExperience) ? formData.computerExperience : 'None';
+        const regDate = new Date().toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'long', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+
+        window.receiptData = { data: data, formData: formData, prefsText: prefsText, expText: expText, regDate: regDate };
 
         setTimeout(() => {
             document.getElementById('loadingState').style.display = 'none';
@@ -801,17 +816,146 @@
                 '    Please keep your registration reference for future communication. ' +
                 '    The school will contact your parent or guardian regarding the application outcome.' +
                 '  </div>' +
-                '  <div style="display:flex; gap:12px; margin-top:20px;">' +
-                '    <button class="btn-submit" onclick="window.print()" style="flex:1;">' +
+                '  <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:20px;">' +
+                '    <button class="btn-submit" onclick="downloadReceipt()" style="flex:1; min-width:140px;">' +
+                '      <i class="fas fa-file-pdf"></i> Download PDF Receipt' +
+                '    </button>' +
+                '    <button class="btn-submit" onclick="window.print()" style="flex:1; min-width:140px;">' +
                 '      <i class="fas fa-print"></i> Print Confirmation' +
                 '    </button>' +
-                '    <button class="btn-secondary" onclick="window.location.href=\'index.html\'" style="flex:1;">' +
+                '    <button class="btn-secondary" onclick="window.location.href=\'index.html\'" style="flex:1; min-width:140px;">' +
                 '      <i class="fas fa-home"></i> Back to Home' +
                 '    </button>' +
                 '  </div>' +
                 '</div>';
             container.style.display = 'block';
         }, 800);
+    }
+
+    function buildReceiptHTML() {
+        const r = window.receiptData;
+        if (!r) return '';
+        const d = r.data;
+        const f = r.formData || {};
+        const currency = d.programme.currency || 'KSh';
+        const weeklyFee = d.programme.weeklyFee || 500;
+        const startDate = d.programme.startDate || '2 Nov 2026';
+        const endDate = d.programme.endDate || '20 Dec 2026';
+        const venue = d.programme.venue || 'Changara Star Academy';
+        const weeks = Math.ceil((new Date(endDate) - new Date(startDate)) / (7 * 24 * 60 * 60 * 1000));
+        const totalTuition = weeklyFee * weeks;
+
+        return '<div id="receipt" style="font-family:\'Segoe UI\',Arial,sans-serif; font-size:13px; color:#1a1a2e; max-width:700px; margin:0 auto; padding:20px;">' +
+            '<div style="border: 2px solid #001f5c; border-radius: 12px; padding: 24px;">' +
+
+            '  <div style="text-align:center; border-bottom: 2px solid #d4a017; padding-bottom: 12px; margin-bottom: 16px;">' +
+            '    <div style="font-size: 24px; font-weight: 700; color: #001f5c;">Changara Star Academy</div>' +
+            '    <div style="font-size: 12px; color: #666; margin-top: 4px;">Changara, Teso North Sub-County, Busia County, Kenya</div>' +
+            '    <div style="font-size: 11px; color: #999; margin-top: 2px;">P.O. Box 123-30100, Changara, Kenya | info@changarastaracademy.co.ke</div>' +
+            '  </div>' +
+
+            '  <div style="text-align:center; margin: 20px 0;">' +
+            '    <div style="font-size: 18px; font-weight: 700; color: #001f5c; letter-spacing: 1px;">COMPUTER STUDIES HOLIDAY TUITION</div>' +
+            '    <div style="font-size: 14px; color: #666; margin-top: 4px;">Registration Receipt</div>' +
+            '  </div>' +
+
+            '  <div style="background: #f8f9fa; border-radius: 8px; padding: 14px; text-align: center; margin-bottom: 18px;">' +
+            '    <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Registration Number</div>' +
+            '    <div style="font-size: 20px; font-family: \'Courier New\', monospace; font-weight: 700; color: #0b5394; letter-spacing: 1px;">' + d.registrationNumber + '</div>' +
+            '  </div>' +
+
+            '  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">' +
+
+            '    <div><div style="font-size:11px;color:#999;text-transform:uppercase;">Student Name</div><div style="font-weight:600;margin-top:2px;">' + escReceipt(d.studentName || f.studentName || '') + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;text-transform:uppercase;">Registration No.</div><div style="font-weight:600;margin-top:2px;">' + escReceipt(d.registrationNumber || '') + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;text-transform:uppercase;">Grade/Class</div><div style="font-weight:600;margin-top:2px;">' + escReceipt(f.gradeClass || '') + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;text-transform:uppercase;">Current School</div><div style="font-weight:600;margin-top:2px;">' + escReceipt(f.currentSchool || '') + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;text-transform:uppercase;">Age</div><div style="font-weight:600;margin-top:2px;">' + escReceipt(f.age || '') + ' years</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;text-transform:uppercase;">Computer Experience</div><div style="font-weight:600;margin-top:2px;">' + escReceipt(r.expText) + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;text-transform:uppercase;">Parent/Guardian</div><div style="font-weight:600;margin-top:2px;">' + escReceipt(f.guardianName || '') + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;text-transform:uppercase;">Phone</div><div style="font-weight:600;margin-top:2px;">' + escReceipt(f.guardianPhone || '') + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;text-transform:uppercase;">Learning Preferences</div><div style="font-weight:600;margin-top:2px;">' + escReceipt(r.prefsText) + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;text-transform:uppercase;">Schedule Preference</div><div style="font-weight:600;margin-top:2px;">' + escReceipt(f.schedulePreference || 'None') + '</div></div>' +
+            '  </div>' +
+
+            '  <div style="border-top: 2px dashed #ddd; margin: 16px 0;"></div>' +
+
+            '  <div style="font-size:14px; font-weight:700; color:#001f5c; margin-bottom:10px;">Programme Details</div>' +
+            '  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">' +
+            '    <div><div style="font-size:11px;color:#999;">Start Date</div><div style="font-weight:600;">' + escReceipt(startDate) + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;">End Date</div><div style="font-weight:600;">' + escReceipt(endDate) + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;">Venue</div><div style="font-weight:600;">' + escReceipt(venue) + '</div></div>' +
+            '    <div><div style="font-size:11px;color:#999;">Total Weeks</div><div style="font-weight:600;">' + weeks + '</div></div>' +
+            '  </div>' +
+
+            '  <div style="font-size:14px; font-weight:700; color:#001f5c; margin-bottom:10px;">Fee Summary</div>' +
+            '  <table style="width:100%; border-collapse: collapse; margin-bottom: 16px;">' +
+            '    <tr><td style="padding:6px 0;border-bottom:1px solid #eee;">Registration Fee</td><td style="padding:6px 0;border-bottom:1px solid #eee;text-align:right;">' + currency + ' 0.00</td></tr>' +
+            '    <tr><td style="padding:6px 0;border-bottom:1px solid #eee;">Tuition (' + weeklyFee + ' x ' + weeks + ' weeks)</td><td style="padding:6px 0;border-bottom:1px solid #eee;text-align:right;">' + currency + ' ' + totalTuition.toFixed(2) + '</td></tr>' +
+            '    <tr style="font-weight:700;font-size:14px;"><td style="padding:10px 0;border-top:2px solid #001f5c;">Total Amount</td><td style="padding:10px 0;border-top:2px solid #001f5c;text-align:right;">' + currency + ' ' + totalTuition.toFixed(2) + '</td></tr>' +
+            '  </table>' +
+
+            '  <div style="border-top: 2px dashed #ddd; margin: 16px 0;"></div>' +
+
+            '  <div style="background:#fff3cd; border:1px solid #ffe680; border-radius:8px; padding:12px; margin-bottom:14px;">' +
+            '    <div style="display:flex;align-items:center;gap:8px;">' +
+            '      <i class="fas fa-info-circle" style="color:#856404;"></i>' +
+            '      <div style="font-size:13px; color:#856404; font-weight:600;">Application Status: PENDING REVIEW</div>' +
+            '    </div>' +
+            '    <div style="font-size:12px; color:#856404; margin-top:4px;">' +
+            '      Your application is pending review. The school will contact your parent or guardian with the outcome.' +
+            '    </div>' +
+            '  </div>' +
+
+            '  <div style="font-size:12px; color:#666; margin-bottom:8px;">' +
+            '    <i class="fas fa-check" style="color:#28a745;"></i> Parental consent: <strong>Given</strong> on ' + r.regDate +
+            '  </div>' +
+
+            '  <div style="text-align:center; margin-top:20px; padding-top:14px; border-top:2px solid #001f5c; font-size:11px; color:#999;">' +
+            '    This receipt was generated online after successful submission of the registration form.<br>' +
+            '    Registration reference: ' + escReceipt(d.registrationNumber || '') + ' | Generated: ' + r.regDate +
+            '  </div>' +
+            '  </div>' +
+            '</div>';
+    }
+
+    function escReceipt(v) {
+        return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    function downloadReceipt() {
+        if (!window.receiptData) return;
+        const receiptEl = document.createElement('div');
+        receiptEl.innerHTML = buildReceiptHTML();
+        document.body.appendChild(receiptEl);
+
+        const opt = {
+            margin:       0,
+            filename:     'CSA-Computer-Tuition-Receipt-' + window.receiptData.data.registrationNumber + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html: {
+                stylesheet: [],
+                javascript:   []
+            },
+            pdfCallback: function (pdf) {
+                return pdf;
+            },
+            pdf:          { unit: 'pt', format: 'a4', putPages: false }
+        };
+
+        const el = receiptEl.querySelector('#receipt');
+        if (!el) {
+            document.body.removeChild(receiptEl);
+            return;
+        }
+
+        html2pdf().set(opt).from(el).save().then(() => {
+            document.body.removeChild(receiptEl);
+        }).catch(() => {
+            document.body.removeChild(receiptEl);
+        });
     }
 
     function goBack() {

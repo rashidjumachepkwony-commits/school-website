@@ -2683,6 +2683,7 @@
                     '<td>' + escTuition(r.createdAt || '') + '</td>' +
                     '<td><div style="display:flex;gap:4px;flex-wrap:wrap;">' +
                     '<button class="btn btn-info btn-sm" onclick="editTuitionRegistration(' + "'" + r.id + "'" + ')"><i class="fas fa-edit"></i> Edit</button>' +
+                    '<button class="btn btn-danger btn-sm" onclick="deleteTuitionRegistration(' + "'" + r.id + "'" + ', ' + "'" + r.registrationNumber + "'" + ')" title="Delete registration"><i class="fas fa-trash"></i> Delete</button>' +
                     '<select style="padding:2px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px;" onchange="changeTuitionStatus(' + "'" + r.id + "'" + ', this.value)" title="Quick status change">' +
                     '<option value="">Status</option>' +
                     '<option value="pending">Pending</option>' +
@@ -2741,6 +2742,25 @@
     function editTuitionRegistration(id) {
         showSection('tuitionRegistrations');
         window.location.href = 'admin-tuition-detail.html?id=' + id;
+    }
+
+    async function deleteTuitionRegistration(id, regNumber) {
+        if (!confirm('Delete registration ' + regNumber + '?\nThis action cannot be undone.')) return;
+        const token = localStorage.getItem('adminToken');
+        try {
+            const res = await fetch(apiUrl('/api/tuition/registrations/' + encodeURIComponent(id)), {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (checkAuth(res)) return;
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Failed to delete');
+            alert('Registration ' + regNumber + ' deleted successfully');
+            loadTuitionRegistrations(tuitionCurrentPage);
+            loadTuitionDashboard();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
     }
 
     async function exportTuitionCSV() {
