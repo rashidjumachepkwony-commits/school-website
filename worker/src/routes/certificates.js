@@ -191,6 +191,7 @@ export async function handleCertificates(db, env, route, method, body, p, reques
 
   // ---- All remaining CERTIFICATE endpoints require admin auth ----
   if (!route.startsWith('/certificates/')) return null;
+  if (!secret) return error('Authentication is not configured on the server (JWT_SECRET secret is missing)', 503);
   const payload = authenticateRequest(request, secret);
   if (!payload) return error('Unauthorized: a valid admin token is needed', 401);
   if (payload.role !== 'Super Admin' && payload.role !== 'Admin' && payload.role !== 'admin') {
@@ -198,10 +199,16 @@ export async function handleCertificates(db, env, route, method, body, p, reques
   }
   const generatedBy = payload.fullName || payload.username || payload.id || 'admin';
 
-  /** Helper: read school settings from system_settings, merge with defaults. */
+  /** Helper: read school settings from system_settings, merge with defaults.
+   *  Falls back to defaults if the settings row or table is unavailable so the
+   *  Certificate Studio still loads instead of returning a 500. */
   async function getSchoolSettings() {
-    const setting = await db.collection('system_settings').findOne({ key: 'school_settings' });
-    if (setting && setting.value) return { ...defaultSchoolSettings(), ...setting.value };
+    try {
+      const setting = await db.collection('system_settings').findOne({ key: 'school_settings' });
+      if (setting && setting.value) return { ...defaultSchoolSettings(), ...setting.value };
+    } catch (err) {
+      console.error('getSchoolSettings error:', err && err.message ? err.message : err);
+    }
     return defaultSchoolSettings();
   }
 
@@ -260,32 +267,37 @@ export async function handleCertificates(db, env, route, method, body, p, reques
 
   // GET /api/certificates/students?query=...&class=...&stream=...
   if (route === '/certificates/students' && method === 'GET') {
-    const url = new URL(request.url);
-    const query = (url.searchParams.get('query') || '').toLowerCase().trim();
-    const cls = (url.searchParams.get('class') || '').trim();
-    const stream = (url.searchParams.get('stream') || '').trim();
+    try {
+      const url = new URL(request.url);
+      const query = (url.searchParams.get('query') || '').toLowerCase().trim();
+      const cls = (url.searchParams.get('class') || '').trim();
+      const stream = (url.searchParams.get('stream') || '').trim();
 
-    const { results } = await db.collection('students').find({ isActive: { $ne: false } }).toArray();
-    let students = results;
+      const { results } = await db.collection('students').find({ isActive: { $ne: false } }).toArray();
+      let students = results;
 
-    if (cls) students = students.filter(s => {
-      const c = (s.grade || s.class || s.std || s.level || '').toLowerCase();
-      return c === cls.toLowerCase();
-    });
-
-    if (stream) students = students.filter(s => (s.stream || '').toLowerCase() === stream.toLowerCase());
-
-    if (query) {
-      students = students.filter(s => {
-        const fn = (s.firstName || s.first_name || s.fullName || '').toLowerCase();
-        const ln = (s.lastName || s.last_name || '').toLowerCase();
-        const adm = (s.admissionNumber || s.admission_number || '').toLowerCase();
-        return fn.includes(query) || ln.includes(query) || adm.includes(query) ||
-               (fn + ' ' + ln).includes(query);
+      if (cls) students = students.filter(s => {
+        const c = (s.grade || s.class || s.std || s.level || '').toLowerCase();
+        return c === cls.toLowerCase();
       });
-    }
 
-    return success({ students: students.map(publicStudent), count: students.length });
+      if (stream) students = students.filter(s => (s.stream || '').toLowerCase() === stream.toLowerCase());
+
+      if (query) {
+        students = students.filter(s => {
+          const fn = (s.firstName || s.first_name || s.fullName || '').toLowerCase();
+          const ln = (s.lastName || s.last_name || '').toLowerCase();
+          const adm = (s.admissionNumber || s.admission_number || '').toLowerCase();
+          return fn.includes(query) || ln.includes(query) || adm.includes(query) ||
+                 (fn + ' ' + ln).includes(query);
+        });
+      }
+
+      return success({ students: students.map(publicStudent), count: students.length });
+    } catch (err) {
+      console.error('students load error:', err && err.message ? err.message : err);
+      return success({ students: [], count: 0 });
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -294,8 +306,13 @@ export async function handleCertificates(db, env, route, method, body, p, reques
 
   // GET /api/certificates/templates
   if (route === '/certificates/templates' && method === 'GET') {
-    const { results } = await db.collection('certificate_templates').find({}).toArray();
-    return success({ templates: results || [] });
+    try {
+      const { results } = await db.collection('certificate_templates').find({}).toArray();
+      return success({ templates: results || [] });
+    } catch (err) {
+      console.error('templates load error:', err && err.message ? err.message : err);
+      return success({ templates: [] });
+    }
   }
 
   // POST /api/certificates/templates  { name, template }
@@ -428,15 +445,20 @@ export async function handleCertificates(db, env, route, method, body, p, reques
 
   // GET /api/certificates/records?studentId=...
   if (route === '/certificates/records' && method === 'GET') {
-    const url = new URL(request.url);
-    const sid = url.searchParams.get('studentId');
-    let records;
-    if (sid) {
-      records = await db.collection('graduation_certificates').find({ studentId: sid }).toArray();
-    } else {
-      records = await db.collection('graduation_certificates').find({}).sort({ generatedAt: -1 }).toArray();
+    try {
+      const url = new URL(request.url);
+      const sid = url.searchParams.get('studentId');
+      let records;
+      if (sid) {
+        records = await db.collection('graduation_certificates').find({ studentId: sid }).toArray();
+      } else {
+        records = await db.collection('graduation_certificates').find({}).sort({ generatedAt: -1 }).toArray();
+      }
+      return success({ records: records || [], count: records.length });
+    } catch (err) {
+      console.error('records load error:', err && err.message ? err.message : err);
+      return success({ records: [], count: 0 });
     }
-    return success({ records: records || [], count: records.length });
   }
 
   // -----------------------------------------------------------------------

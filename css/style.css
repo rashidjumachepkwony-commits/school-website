@@ -104,6 +104,17 @@ body {
     transform: scale(1.05);
 }
 
+.nav-links a.fees-btn {
+    background: #d4a017;
+    color: #001f5c;
+    font-weight: bold;
+}
+
+.nav-links a.fees-btn:hover {
+    background: #ffeb99;
+    transform: scale(1.05);
+}
+
 .mobile-menu-btn {
     display: none;
     background: none;

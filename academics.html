@@ -297,6 +297,20 @@
             box-shadow: 0 8px 25px rgba(212, 160, 23, 0.3);
         }
         .main-header .nav-links a.portal-link::after { display: none; }
+        .main-header .nav-links a.fees-btn {
+            background: linear-gradient(135deg, var(--school-gold), var(--school-gold-dark));
+            color: var(--kenya-black);
+            font-weight: 600;
+            padding: 6px 18px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+        .main-header .nav-links a.fees-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212,160,23,0.3);
+        }
+        .main-header .nav-links a.fees-btn::after { display: none; }
         .main-header .mobile-menu-btn {
             display: none;
             background: none;
@@ -1134,13 +1148,14 @@
                     <span class="subtitle">Assurance to Excellence</span>
                 </div>
             </div>
-            <nav class="nav-links" id="navLinks">
-                <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-                <a href="academics.html" class="active">Academics</a>
-                <a href="portal.html">🔐 Portal</a>
-                <a href="contact.html">Contact</a>
-            </nav>
+<nav class="nav-links" id="navLinks">
+                    <a href="index.html">Home</a>
+                    <a href="about.html">About</a>
+                    <a href="academics.html" class="active">Academics</a>
+                    <a href="fees.html" class="fees-btn">💰 Fees</a>
+                    <a href="portal.html">🔐 Portal</a>
+                    <a href="contact.html">Contact</a>
+                </nav>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         </div>
     </header>

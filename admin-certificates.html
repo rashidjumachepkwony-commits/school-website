@@ -180,13 +180,21 @@
         .var-chip:hover { background: #001f5c; color: #d4a017; }
 
         .design-canvas {
-            border: 2px dashed #e3e9f2; border-radius: 8px;
-            min-height: 500px; position: relative;
+            position: relative;
+            width: 100%;
+            height: auto;
+            /* Exact A4 (landscape) proportions, matching the printed certificate */
+            aspect-ratio: 297 / 210;
+            min-height: 320px;
             background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
-            font-family: 'Georgia', 'Times New Roman', serif;
+            border: 1px solid #e3e9f2;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 31, 92, 0.12);
             overflow: hidden;
+            font-family: 'Georgia', 'Times New Roman', serif;
         }
-        .design-canvas.active-element { outline: 2px dashed #d4a017; }
+        .design-canvas.active-element { border-color: #d4a017; box-shadow: 0 0 0 3px rgba(212,160,23,0.25); }
+        .canvas-remove-btn { position:absolute; width:20px; height:20px; padding:0; border:none; border-radius:3px; background:#d4a017; color:#fff; font-size:12px; line-height:1; cursor:pointer; z-index:10; }
 
         .canvas-element {
             position: absolute; padding: 4px 8px;
@@ -195,8 +203,11 @@
         }
         .canvas-element:hover { border-color: #d4a017; }
         .canvas-element.active { border: 2px dashed #d4a017; background: rgba(212,160,23,0.05); }
-        .canvas-text { border: none; font-family: inherit; resize: none; overflow: hidden; }
-        .canvas-text:focus { outline: 2px dashed #d4a017; border: 1px dashed #d4a017; }
+         .canvas-text { border: none; font-family: inherit; resize: none; overflow: hidden; }
+         .canvas-text:focus { outline: 2px dashed #d4a017; border: 1px dashed #d4a017; }
+         .flex { display: flex; }
+         /* Active drawing tool in the palette */
+         #toolPalette .active-tool { background: #001f5c !important; color: #d4a017 !important; border-color: #d4a017; }
 
         .element-toolbar {
             display: flex; gap: 6px; margin-top: 10px;
@@ -444,8 +455,8 @@
             </div>
 
             <div class="editor-tabs">
-                <div class="editor-tab active" onclick="switchEditorTab('designer')">Visual Designer</div>
-                <div class="editor-tab" onclick="switchEditorTab('html')">HTML Source</div>
+                <div class="editor-tab active" data-tab="designer" onclick="switchEditorTab('designer')">Visual Designer</div>
+                <div class="editor-tab" data-tab="html" onclick="switchEditorTab('html')">HTML Source</div>
             </div>
 
             <div id="editor-content">
@@ -471,21 +482,53 @@
                         <div class="var-chip" onclick="insertVariable('{{certificate_number}}')">Certificate No.</div>
                     </div>
 
-                    <div style="margin-bottom:10px; display:flex; gap:8px; flex-wrap:wrap;">
-                        <button class="btn btn-sm btn-secondary" onclick="addCanvasText('Heading Text')">Add Text</button>
-                        <button class="btn btn-sm btn-secondary" onclick="addCanvasImage()">Add Image</button>
-                        <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('signature')">Add Signature Line</button>
-                        <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('seal')">Add Seal</button>
-                        <button class="btn btn-sm btn-warning" onclick="loadPP2Background()">
-                            <i class="fas fa-image"></i> Load PP2 Certificate Design
-                        </button>
-                        <button class="btn btn-sm btn-info" onclick="clearBackground()">
-                            <i class="fas fa-trash"></i> Clear Background
-                        </button>
-                    </div>
+                    <div style="margin-bottom:10px;">
+                        <!-- Tool Palette (canvas-like) -->
+                        <div id="toolPalette" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:10px;background:#f8f9fc;border:1px solid #e3e9f2;border-radius:8px;">
+                            <div style="display:flex;gap:4px;border-right:1px solid #e3e9f2;padding-right:8px;">
+                                <button class="btn btn-sm btn-secondary" id="toolSelect" onclick="setTool('select')"><i class="fas fa-mouse-pointer"></i> Select</button>
+                                <button class="btn btn-sm btn-secondary" id="toolHand" onclick="setTool('hand')"><i class="fas fa-hand-paper"></i> Hand</button>
+                            </div>
+                            <div style="display:flex;gap:4px;border-right:1px solid #e3e9f2;padding:0 8px;">
+                                <button class="btn btn-sm btn-secondary" id="toolPen" onclick="setTool('pen')"><i class="fas fa-pen"></i> Pen</button>
+                                <button class="btn btn-sm btn-secondary" id="toolMarker" onclick="setTool('marker')"><i class="fas fa-marker"></i> Marker</button>
+                                <button class="btn btn-sm btn-secondary" id="toolEraser" onclick="setTool('eraser')"><i class="fas fa-eraser"></i> Eraser</button>
+                            </div>
+                            <div style="display:flex;gap:4px;border-right:1px solid #e3e9f2;padding:0 8px;">
+                                <button class="btn btn-sm btn-secondary" onclick="addCanvasText('Heading Text')"><i class="fas fa-font"></i> Text</button>
+                                <button class="btn btn-sm btn-secondary" onclick="addCanvasImage()"><i class="fas fa-image"></i> Image</button>
+                                <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('seal')"><i class="fas fa-award"></i> Seal</button>
+                                <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('signature')"><i class="fas fa-signature"></i> Signature</button>
+                                <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('line')"><i class="fas fa-minus"></i> Line</button>
+                                <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('rect')"><i class="fas fa-square"></i> Rect</button>
+                                <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('circle')"><i class="fas fa-circle"></i> Circle</button>
+                            </div>
+                            <div style="display:flex;gap:4px;border-right:1px solid #e3e9f2;padding:0 8px;">
+                                <button class="btn btn-sm btn-warning" onclick="openTemplatePicker()" title="Upload the PP2 certificate PNG (or any image) from your computer or phone"><i class="fas fa-image"></i> Load PP2 Design</button>
+                                <button class="btn btn-sm btn-secondary" onclick="loadBackgroundPrompt()"><i class="fas fa-upload"></i> Background</button>
+                                <button class="btn btn-sm btn-secondary" onclick="clearBackground()"><i class="fas fa-trash"></i> Clear Bg</button>
+                            </div>
+                            <!-- Drawing controls (shown when pen/marker/eraser active) -->
+                            <div id="drawControls" style="display:none;align-items:center;padding:0 8px;border-right:1px solid #e3e9f2;gap:8px;">
+                                <label style="font-size:12px;font-weight:600;color:#333;">Color:</label>
+                                <input type="color" id="drawColorPicker" value="#001f5c" onchange="setDrawColor(this.value)" style="width:40px;height:32px;border:1px solid #e3e9f2;border-radius:6px;cursor:pointer;background:none;">
+                                <label style="font-size:12px;font-weight:600;color:#333;">Size:</label>
+                                <input type="range" id="drawWidthSlider" min="1" max="20" value="3" oninput="setDrawWidth(this.value)" style="width:100px;">
+                                <span id="drawWidthLabel" style="font-size:12px;color:#666;">3px</span>
+                                <button class="btn btn-sm btn-secondary" onclick="setTool('select')"><i class="fas fa-mouse-pointer"></i> Done</button>
+                            </div>
+                            <div style="display:flex;gap:4px;padding-left:8px;">
+                                <button class="btn btn-sm btn-danger" onclick="eraseDrawings()"><i class="fas fa-trash"></i> Clear Drawing</button>
+                                <button class="btn btn-sm btn-info tool-btn" id="toolCrop" onclick="cropCanvas()"><i class="fas fa-crop"></i> Crop</button>
+                                <button class="btn btn-sm btn-secondary" onclick="undoDrawing()"><i class="fas fa-undo"></i> Undo</button>
+                            </div>
+                        </div>
 
-                    <div class="design-canvas" id="designCanvas" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
-                        <div style="padding:40px;text-align:center;" id="canvasContent">
+                        <!-- Design canvas -->
+                        <div class="design-canvas" id="designCanvas" onclick="clearCanvasSelection(event)" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+                            <canvas id="drawCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none;"></canvas>
+                            <input type="file" id="bgFileInput" accept="image/*" style="display:none" onchange="onBgFileSelected(this)">
+                            <div style="padding:40px;text-align:center;" id="canvasContent">
                             <div style="font-size:36px;color:#001f5c;font-weight:800;margin-bottom:10px;">
                                 {{school_name}}
                             </div>
@@ -506,6 +549,7 @@
                             </div>
                             <div style="font-size:16px;color:#333;line-height:1.8;margin:30px 0;">
                                 In recognition of successful completion.
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -612,6 +656,7 @@
     let canvasElements = [];
     let currentYear = new Date().getFullYear();
     let activeElement = null;
+    let removeBtn = null;
 
     // ---- Auth ----
     function showAlert(message, type) {
@@ -660,16 +705,9 @@
         loadRecords();
     });
 
-    // Proper tab switching
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-pane').forEach(p => {
-            p.classList.toggle('active', p.id === tabName + '-pane');
-        });
-    }
-
     // Switch editor sub-tab
     function switchEditorTab(tab) {
-        document.querySelectorAll('.editor-tab').forEach(t => t.classList.toggle('active', t.textContent.includes(tab)));
+        document.querySelectorAll('.editor-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
         document.querySelectorAll('.editor-pane').forEach(p => {
             p.classList.toggle('active', (tab === 'designer' && p.id === 'designer-tab') || (tab === 'html' && p.id === 'html-tab'));
         });
@@ -681,7 +719,9 @@
     // ---- School Settings ----
     async function loadSchoolSettings() {
         try {
-            const data = await apiJson('/api/certificates/school-settings');
+            const data = await apiJson('/api/certificates/school-settings', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') }
+            });
             if (data.success) {
                 schoolSettings = data.settings || {};
                 document.getElementById('schoolName').value = schoolSettings.school_name || 'Changara Star Academy';
@@ -850,26 +890,58 @@
     let backgroundImageUrl = null;
 
     // ---- PP2 Background ----
-    function loadPP2Background() {
-        backgroundImageUrl = 'PP2%20CERTIFICATE.png';
+    // Apply any background-image data-URL/URL onto the design surface.
+    function loadCanvasBackground(dataUrl) {
+        backgroundImageUrl = dataUrl;
         const canvas = document.getElementById('designCanvas');
-        canvas.style.backgroundImage = `url('PP2 CERTIFICATE.png')`;
-        canvas.style.backgroundSize = 'cover';
-        canvas.style.backgroundPosition = 'center';
-        canvas.style.backgroundRepeat = 'no-repeat';
-        // Make canvas content transparent so background shows through
-        canvas.style.background = 'transparent';
-
-        // Replace canvasContent with an overlay that allows absolute positioning
+        if (canvas) {
+            canvas.style.backgroundImage = `url('${dataUrl}')`;
+            canvas.style.backgroundSize = 'cover';
+            canvas.style.backgroundPosition = 'center';
+            canvas.style.backgroundRepeat = 'no-repeat';
+            canvas.style.backgroundColor = '#ffffff';
+        }
         const content = document.getElementById('canvasContent');
-        content.style.position = 'relative';
-        content.style.width = '100%';
-        content.style.height = '100%';
-        content.style.padding = '0';
-
-        showAlert('PP2 certificate design loaded as background. Drag fields over it.', 'info');
+        if (content) {
+            content.style.position = 'relative';
+            content.style.width = '100%';
+            content.style.height = '100%';
+            content.style.padding = '0';
+        }
+        initDrawCanvas();
         syncToHTML();
     }
+
+    // Open the file picker so the user can upload the PP2 certificate (or any
+    // image) directly from their computer / phone memory.
+    function openTemplatePicker() {
+        const input = document.getElementById('bgFileInput');
+        if (input) input.click();
+    }
+
+    function onBgFileSelected(input) {
+        const file = input.files && input.files[0];
+        if (file) loadBackgroundFromComputer(file);
+        input.value = '';
+    }
+
+    function loadBackgroundFromComputer(file) {
+        if (!file || !file.type.startsWith('image/')) {
+            showAlert('Please select an image file (PNG/JPG of the PP2 certificate).', 'error');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            loadCanvasBackground(e.target.result);
+            showAlert('Image uploaded from your device. Drag fields over the design.', 'info');
+        };
+        reader.onerror = function () { showAlert('Could not read the selected image.', 'error'); };
+        reader.readAsDataURL(file);
+    }
+
+    // Backwards-compatible entry point. "Load PP2 Design" now uploads the PNG
+    // from the device instead of relying on a served URL that 404'd here.
+    function loadPP2Background() { openTemplatePicker(); }
 
     function clearBackground() {
         backgroundImageUrl = null;
@@ -879,7 +951,7 @@
         showAlert('Background cleared.', 'info');
     }
 
-    function substituteFields(template, student, settings, event, certNumber) {
+    function substituteFields(template, student, settings, eventName, eventDate, certNumber) {
         const studentName = student.fullName || '';
         const admissionNumber = student.admissionNumber || '';
         const studentClass = student.grade || student.class || '';
@@ -904,8 +976,8 @@
             '{{school_logo}}': settings.school_logo || '',
             '{{school_stamp}}': settings.school_stamp || '',
             '{{headteacher_name}}': settings.headteacher_name || '',
-            '{{event_name}}': event || '',
-            '{{date}}': event || '',
+            '{{event_name}}': eventName || '',
+            '{{date}}': eventDate || '',
             '{{certificate_number}}': certNumber || ''
         };
 
@@ -961,7 +1033,7 @@
                 canvas.style.backgroundSize = 'cover';
                 canvas.style.backgroundPosition = 'center';
                 canvas.style.backgroundRepeat = 'no-repeat';
-                canvas.style.background = 'transparent';
+                canvas.style.backgroundColor = '#ffffff';
             } else {
                 clearBackground();
             }
@@ -978,17 +1050,27 @@
             return;
         }
         try {
+            // Locally-uploaded backgrounds live in memory as data-URLs for the preview
+            // and certificate generation. They are NOT persisted: a ~2 MB data-URL would
+            // exceed the Workers request-body limit, so it stays session-only and is
+            // re-uploaded when editing. Public URLs are persisted as before.
+            const persistsBackground = backgroundImageUrl && !String(backgroundImageUrl).startsWith('data:')
+                ? backgroundImageUrl : null;
             const data = await apiJson('/api/certificates/templates', {
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') },
                 body: JSON.stringify({
                     name,
                     template: html,
-                    backgroundImageUrl: backgroundImageUrl
+                    backgroundImageUrl: persistsBackground
                 })
             });
             if (data.success) {
-                showAlert('Template saved!', 'success');
+                if (backgroundImageUrl && String(backgroundImageUrl).startsWith('data:')) {
+                    showAlert('Template saved. The uploaded image stays in this session only (re-upload to persist).', 'info');
+                } else {
+                    showAlert('Template saved!', 'success');
+                }
                 loadTemplates();
             } else {
                 showAlert(data.error || 'Failed to save template', 'error');
@@ -1015,7 +1097,7 @@
                 canvas.style.backgroundSize = 'cover';
                 canvas.style.backgroundPosition = 'center';
                 canvas.style.backgroundRepeat = 'no-repeat';
-                canvas.style.background = 'transparent';
+                canvas.style.backgroundColor = '#ffffff';
             } else {
                 clearBackground();
             }
@@ -1031,7 +1113,10 @@
 
     function syncFromHTML() {
         const html = document.getElementById('htmlSource').value;
-        document.getElementById('canvasContent').innerHTML = html;
+        const content = document.getElementById('canvasContent');
+        content.innerHTML = html;
+        // Re-attach drag handlers to elements restored from HTML source
+        content.querySelectorAll('.canvas-element').forEach(el => setupCanvasElement(el));
     }
 
     function insertVariable(variable) {
@@ -1094,8 +1179,24 @@
 
         if (type === 'signature') {
             wrapper.innerHTML = '<div style="width:200px;height:2px;background:#001f5c;"></div><div style="font-size:12px;color:#666;text-align:center;">Signature</div>';
+            wrapper.style.gap = '10px';
+            wrapper.style.padding = '10px 20px';
         } else if (type === 'seal') {
             wrapper.innerHTML = '<div style="width:70px;height:70px;border:4px solid #d4a017;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ffeb99,#d4a017);color:#001f5c;font-size:10px;font-weight:800;text-align:center;line-height:1.2;">SCHOOL SEAL</div>';
+            wrapper.style.gap = '0';
+            wrapper.style.padding = '0';
+        } else if (type === 'line') {
+            wrapper.innerHTML = '<div style="width:200px;height:2px;background:#001f5c;"></div>';
+            wrapper.style.gap = '0';
+            wrapper.style.padding = '0';
+        } else if (type === 'rect') {
+            wrapper.innerHTML = '<div style="width:140px;height:90px;border:3px solid #001f5c;"></div>';
+            wrapper.style.gap = '0';
+            wrapper.style.padding = '0';
+        } else if (type === 'circle') {
+            wrapper.innerHTML = '<div style="width:90px;height:90px;border:3px solid #001f5c;border-radius:50%;"></div>';
+            wrapper.style.gap = '0';
+            wrapper.style.padding = '0';
         }
         document.getElementById('designCanvas').appendChild(wrapper);
         setupCanvasElement(wrapper);
@@ -1103,13 +1204,452 @@
     }
 
     function setupCanvasElement(el) {
-        el.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+        el.style.cursor = 'grab';
+        function selectEl() {
+            clearCanvasSelection();
             activeElement = el;
             el.classList.add('active');
+            el.style.cursor = 'grabbing';
+            showRemoveButton(el);
+        }
+        el.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (currentTool !== 'select' && currentTool !== 'hand') return;
+            selectEl();
+
+            const designCanvas = document.getElementById('designCanvas');
+            const rect = designCanvas.getBoundingClientRect();
+            const offsetX = e.clientX - (el.getBoundingClientRect().left + el.offsetWidth / 2);
+            const offsetY = e.clientY - (el.getBoundingClientRect().top + el.offsetHeight / 2);
+
+            function onMove(ev) {
+                if ((currentTool !== 'select' && currentTool !== 'hand') || !activeElement) return;
+                el.style.left = (ev.clientX - rect.left - offsetX) + 'px';
+                el.style.top = (ev.clientY - rect.top - offsetY) + 'px';
+                el.style.transform = 'none';
+                positionRemoveButton(el);
+            }
+            function onUp() {
+                if (activeElement === el) {
+                    el.style.cursor = 'grab';
+                    syncToHTML();
+                }
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
         });
     }
+
+    // Persistent selection + an on-canvas ✕ "Remove" button so any object can be
+    // deleted instantly (plus the Delete/Backspace key).
+    function showRemoveButton(el) {
+        if (!removeBtn) {
+            removeBtn = document.createElement('button');
+            removeBtn.className = 'canvas-remove-btn';
+            removeBtn.innerHTML = '✕';
+            removeBtn.title = 'Delete selected element (or press Delete)';
+            removeBtn.addEventListener('mousedown', function (e) { e.stopPropagation(); e.preventDefault(); });
+            removeBtn.addEventListener('click', function () { removeSelected(); });
+            const dc = document.getElementById('designCanvas');
+            if (dc) dc.appendChild(removeBtn);
+        }
+        positionRemoveButton(el);
+    }
+
+    function positionRemoveButton(el) {
+        if (!removeBtn || !activeElement) return;
+        const dc = document.getElementById('designCanvas');
+        if (!dc) return;
+        const pr = dc.getBoundingClientRect();
+        const er = el.getBoundingClientRect();
+        removeBtn.style.left = (er.right - pr.left - 18) + 'px';
+        removeBtn.style.top = (er.top - pr.top) + 'px';
+        removeBtn.style.display = 'block';
+    }
+
+    function clearCanvasSelection(e) {
+        if (e && e.target !== e.currentTarget) return;
+        if (activeElement) {
+            activeElement.classList.remove('active');
+            activeElement.style.cursor = 'grab';
+            activeElement = null;
+        }
+        if (removeBtn) removeBtn.style.display = 'none';
+    }
+
+    function removeSelected() {
+        if (activeElement) {
+            activeElement.remove();
+            syncToHTML();
+        }
+        clearCanvasSelection();
+    }
+
+    // Keyboard-friendly deletion of the selected element
+    document.addEventListener('keydown', function (e) {
+        if ((e.key === 'Delete' || e.key === 'Backspace') && activeElement) {
+            e.preventDefault();
+            removeSelected();
+        }
+    });
+
+    // ===================== DRAWING / ERASER TOOLS =====================
+    // A real canvas overlay that lets you draw directly on the certificate
+    // design, just like a drawing app. Works with mouse and touch.
+
+    let drawCanvas = null;
+    let drawCtx = null;
+    let drawDpr = 1;
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let drawColor = '#001f5c';
+    let drawWidth = 3;
+    let currentTool = 'select';            // select | hand | pen | marker | eraser | crop
+    let drawHistory = [];
+    let maxHistory = 20;
+
+    // Crop state
+    let cropping = false;
+    let cropStart = { x: 0, y: 0 };
+    let cropRect = null;
+    let cropBaseImg = null;
+
+    function isDrawingTool() {
+        return currentTool === 'pen' || currentTool === 'marker' || currentTool === 'eraser';
+    }
+
+    function canvasReady() {
+        return !!drawCanvas && !!drawCtx;
+    }
+
+    function initDrawCanvas() {
+        const canvas = document.getElementById('drawCanvas');
+        if (!canvas) return;
+        const wrapper = document.getElementById('designCanvas');
+        if (!wrapper) return;
+        const rect = wrapper.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
+        // Preserve existing strokes across re-sizes by snapshotting first
+        const snapshot = canvasReady() && drawCanvas.width ? drawCanvas.toDataURL('image/png') : null;
+
+        drawDpr = window.devicePixelRatio || 1;
+        canvas.width = Math.max(1, Math.round(rect.width * drawDpr));
+        canvas.height = Math.max(1, Math.round(rect.height * drawDpr));
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        drawCtx = canvas.getContext('2d');
+        drawCtx.setTransform(drawDpr, 0, 0, drawDpr, 0, 0);
+        drawCtx.lineCap = 'round';
+        drawCtx.lineJoin = 'round';
+        drawCanvas = canvas;
+
+        if (snapshot) {
+            const img = new Image();
+            img.onload = () => drawCtx.drawImage(img, 0, 0);
+            img.src = snapshot;
+        }
+
+        applyCanvasToolState();
+    }
+
+    function resetCtx() {
+        if (!drawCtx) return;
+        drawCtx.globalCompositeOperation = 'source-over';
+        drawCtx.globalAlpha = 1;
+        drawCtx.setTransform(drawDpr, 0, 0, drawDpr, 0, 0);
+        drawCtx.lineCap = 'round';
+        drawCtx.lineJoin = 'round';
+    }
+
+    function applyStrokeStyle() {
+        if (!drawCtx) return;
+        drawCtx.lineWidth = drawWidth;
+        if (currentTool === 'eraser') {
+            drawCtx.globalCompositeOperation = 'destination-out';
+            drawCtx.globalAlpha = 1;
+            drawCtx.strokeStyle = 'rgba(0,0,0,1)';
+        } else {
+            drawCtx.globalCompositeOperation = 'source-over';
+            drawCtx.globalAlpha = currentTool === 'marker' ? 0.65 : 1;
+            drawCtx.strokeStyle = drawColor;
+        }
+        drawCtx.lineCap = 'round';
+        drawCtx.lineJoin = 'round';
+    }
+
+    // Refresh canvas pointer-events/cursor and highlight the active tool button
+    function applyCanvasToolState() {
+        const canvas = drawCanvas || document.getElementById('drawCanvas');
+        if (canvas) {
+            if (isDrawingTool() || currentTool === 'crop') {
+                canvas.style.pointerEvents = 'auto';
+                canvas.style.cursor = currentTool === 'eraser' ? 'cell' : 'crosshair';
+            } else {
+                canvas.style.pointerEvents = 'none';
+                canvas.style.cursor = 'default';
+            }
+        }
+        const controls = document.getElementById('drawControls');
+        if (controls) controls.style.display = isDrawingTool() ? 'flex' : 'none';
+        document.querySelectorAll('#toolPalette button[id^="tool"]').forEach(b => b.classList.toggle('active-tool', false));
+        const name = 'tool' + currentTool.charAt(0).toUpperCase() + currentTool.slice(1);
+        const activeBtn = document.getElementById(name);
+        if (activeBtn) activeBtn.classList.add('active-tool');
+    }
+
+    function toolLabel(t) {
+        return { select: 'Select', hand: 'Hand', pen: 'Pen', marker: 'Marker', eraser: 'Eraser', crop: 'Crop' }[t] || t;
+    }
+
+    function setTool(tool) {
+        currentTool = tool;
+        if (!canvasReady()) initDrawCanvas();
+        applyCanvasToolState();
+        if (isDrawingTool()) {
+            showAlert(toolLabel(currentTool) + ' active. Draw on the certificate.', 'info');
+        } else if (currentTool === 'crop') {
+            startCrop();
+        } else {
+            showAlert('Select/position elements. Choose a drawing tool to draw.', 'info');
+        }
+    }
+
+    function setDrawColor(hex) {
+        drawColor = hex || '#001f5c';
+        const picker = document.getElementById('drawColorPicker');
+        if (picker) picker.value = drawColor;
+    }
+
+    function setDrawWidth(w) {
+        drawWidth = parseInt(w) || 3;
+        const label = document.getElementById('drawWidthLabel');
+        if (label) label.textContent = drawWidth + 'px';
+    }
+
+    function startDraw(clientX, clientY) {
+        if (!canvasReady()) initDrawCanvas();
+        if (!canvasReady()) return;
+
+        if (currentTool === 'crop') {
+            const rect = drawCanvas.getBoundingClientRect();
+            cropStart = { x: clientX - rect.left, y: clientY - rect.top };
+            cropping = true;
+            cropRect = { x: cropStart.x, y: cropStart.y, w: 0, h: 0 };
+            redrawCrop();
+            return;
+        }
+
+        if (!isDrawingTool()) return;
+        saveDrawState();
+        const rect = drawCanvas.getBoundingClientRect();
+        lastX = clientX - rect.left;
+        lastY = clientY - rect.top;
+        isDrawing = true;
+        resetCtx();
+        applyStrokeStyle();
+        drawCtx.beginPath();
+        drawCtx.moveTo(lastX, lastY);
+    }
+
+    function moveDraw(clientX, clientY) {
+        if (!canvasReady()) return;
+        const rect = drawCanvas.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        if (cropping) {
+            cropRect = {
+                x: Math.min(cropStart.x, x),
+                y: Math.min(cropStart.y, y),
+                w: Math.abs(x - cropStart.x),
+                h: Math.abs(y - cropStart.y)
+            };
+            redrawCrop();
+            return;
+        }
+
+        if (!isDrawing) return;
+        applyStrokeStyle();
+        drawCtx.lineTo(x, y);
+        drawCtx.stroke();
+        lastX = x;
+        lastY = y;
+    }
+
+    function endDraw() {
+        if (cropping) {
+            cropping = false;
+            if (cropRect && cropRect.w > 10 && cropRect.h > 10) {
+                cropCanvasTo(cropRect);
+            } else {
+                redrawLast();
+            }
+            currentTool = 'select';
+            cropRect = null;
+            cropBaseImg = null;
+            applyCanvasToolState();
+            return;
+        }
+        if (isDrawing) {
+            isDrawing = false;
+            resetCtx();
+        }
+    }
+
+    // ---- Crop helpers ----
+    function startCrop() {
+        cropping = true;
+        cropRect = null;
+        cropBaseImg = new Image();
+        cropBaseImg.onload = () => redrawCrop();
+        cropBaseImg.src = drawHistory.length ? drawHistory[drawHistory.length - 1] : '';
+        redrawCrop();
+    }
+
+    function redrawCrop() {
+        if (!canvasReady()) return;
+        resetCtx();
+        if (cropBaseImg && cropBaseImg.complete) {
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            drawCtx.drawImage(cropBaseImg, 0, 0);
+        }
+        if (cropRect && cropRect.w > 0 && cropRect.h > 0) {
+            drawCtx.save();
+            drawCtx.setLineDash([5, 4]);
+            drawCtx.strokeStyle = '#d4a017';
+            drawCtx.lineWidth = Math.max(1, 2 / drawDpr);
+            drawCtx.globalCompositeOperation = 'source-over';
+            drawCtx.globalAlpha = 1;
+            drawCtx.strokeRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+            drawCtx.restore();
+        }
+    }
+
+    function redrawLast() {
+        if (!canvasReady()) return;
+        resetCtx();
+        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        if (drawHistory.length) {
+            const img = new Image();
+            img.onload = () => drawCtx.drawImage(img, 0, 0);
+            img.src = drawHistory[drawHistory.length - 1];
+        }
+    }
+
+    function cropCanvasTo(rect) {
+        if (!canvasReady()) return;
+        const src = drawHistory.length ? drawHistory[drawHistory.length - 1] : drawCanvas.toDataURL('image/png');
+        const img = new Image();
+        img.onload = function () {
+            const sw = Math.abs(rect.w) * drawDpr;
+            const sh = Math.abs(rect.h) * drawDpr;
+            const sx = rect.x * drawDpr;
+            const sy = rect.y * drawDpr;
+            if (sw <= 0 || sh <= 0) return;
+            drawCanvas.width = Math.max(1, sw);
+            drawCanvas.height = Math.max(1, sh);
+            canvas.style.width = rect.w + 'px';
+            canvas.style.height = rect.h + 'px';
+            resetCtx();
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            drawCtx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+            drawHistory.push(drawCanvas.toDataURL('image/png'));
+            if (drawHistory.length > maxHistory) drawHistory.shift();
+            showAlert('Canvas cropped.', 'info');
+        };
+        img.src = src;
+    }
+
+    function eraseDrawings() {
+        if (!canvasReady()) return;
+        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        drawHistory = [];
+        showAlert('Drawing cleared.', 'info');
+    }
+
+    function saveDrawState() {
+        if (!canvasReady()) return;
+        try {
+            drawHistory.push(drawCanvas.toDataURL('image/png'));
+            if (drawHistory.length > maxHistory) drawHistory.shift();
+        } catch (_) {}
+    }
+
+    function undoDrawing() {
+        if (!canvasReady() || !drawHistory.length) {
+            showAlert('Nothing to undo.', 'info');
+            return;
+        }
+        drawHistory.pop();
+        redrawLast();
+        showAlert('Undo applied.', 'info');
+    }
+
+    function cropCanvas() {
+        if (!canvasReady()) {
+            showAlert('Nothing to crop yet.', 'info');
+            return;
+        }
+        if (!drawHistory.length) {
+            showAlert('Draw something first, then crop.', 'info');
+            return;
+        }
+        setTool('crop');
+    }
+
+    function loadBackgroundPrompt() {
+        const url = prompt('Enter an image URL to use as the certificate background:', '');
+        if (!url) return;
+        backgroundImageUrl = url;
+        const canvas = document.getElementById('designCanvas');
+        canvas.style.backgroundImage = `url("${url}")`;
+        canvas.style.backgroundSize = 'cover';
+        canvas.style.backgroundPosition = 'center';
+        canvas.style.backgroundRepeat = 'no-repeat';
+        canvas.style.backgroundColor = '#ffffff';
+        showAlert('Background image loaded. Position elements over it.', 'info');
+        syncToHTML();
+    }
+
+    // Wire up pointer events on the drawing canvas
+    document.addEventListener('DOMContentLoaded', function () {
+        const canvas = document.getElementById('drawCanvas');
+        if (!canvas) return;
+        canvas.addEventListener('pointerdown', function (e) {
+            e.preventDefault();
+            canvas.setPointerCapture(e.pointerId);
+            startDraw(e.clientX, e.clientY);
+        });
+        canvas.addEventListener('pointermove', function (e) {
+            if (!isDrawing && !cropping) return;
+            e.preventDefault();
+            moveDraw(e.clientX, e.clientY);
+        });
+        canvas.addEventListener('pointerup', function (e) {
+            endDraw();
+            try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+        });
+        canvas.addEventListener('pointercancel', function () { endDraw(); });
+        // Re-size (and preserve) the drawing canvas when the layout changes
+        window.addEventListener('resize', function () { setTimeout(initDrawCanvas, 100); });
+        // CSS may not have applied at DOMContentLoaded, so defer sizing until load
+        window.addEventListener('load', function () { setTimeout(initDrawCanvas, 50); });
+        applyCanvasToolState();
+    });
+
+    // Expose functions used by inline HTML onclick handlers
+    window.setTool = setTool;
+    window.setDrawColor = setDrawColor;
+    window.setDrawWidth = setDrawWidth;
+    window.eraseDrawings = eraseDrawings;
+    window.undoDrawing = undoDrawing;
+    window.cropCanvas = cropCanvas;
+    window.loadBackgroundPrompt = loadBackgroundPrompt;
 
     // ---- Preview ----
     function getTemplateContent() {
@@ -1138,6 +1678,12 @@
             : '';
 
         // Build the full certificate wrapper
+        // Include any hand-drawn content as an overlay image so it appears in
+        // the preview, PDF download and print output.
+        const drawOverlay = drawCanvas
+            ? `<img src="${drawCanvas.toDataURL('image/png')}" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:6;">`
+            : '';
+
         return `
             <div class="certificate" style="${bgStyle}">
                 <div class="cert-border"></div>
@@ -1145,6 +1691,7 @@
                 <div class="cert-content" style="${backgroundImageUrl ? 'background: transparent;' : ''}">
                     ${template}
                 </div>
+                ${drawOverlay}
             </div>
         `;
     }
@@ -1381,6 +1928,11 @@
 
     function handleDrop(e) {
         e.preventDefault();
+        // Dropping an image file (from computer/phone) uploads it as the background.
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+            loadBackgroundFromComputer(e.dataTransfer.files[0]);
+            return;
+        }
         if (activeElement) {
             const rect = document.getElementById('designCanvas').getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -1389,8 +1941,7 @@
             activeElement.style.top = y + 'px';
             activeElement.style.transform = 'none';
             syncToHTML();
-            activeElement.classList.remove('active');
-            activeElement = null;
+            clearCanvasSelection();
         }
     }
 
@@ -1417,6 +1968,8 @@
     window.saveTemplate = saveTemplate;
     window.loadTemplate = loadTemplate;
     window.switchEditorTab = switchEditorTab;
+    window.openTemplatePicker = openTemplatePicker;
+    window.loadBackgroundFromComputer = loadBackgroundFromComputer;
     window.switchTab = switchTab;
     window.saveSchoolSettings = saveSchoolSettings;
     window.loadRecords = loadRecords;
