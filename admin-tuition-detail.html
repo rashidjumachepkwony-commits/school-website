@@ -70,6 +70,31 @@
 </div>
 
 <script>
+function isTokenExpired(token) {
+    if (!token || typeof token !== 'string') return true;
+    const parts = token.split('.');
+    if (parts.length !== 3) return true;
+    try {
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return true;
+        return false;
+    } catch { return true; }
+}
+
+function redirectToLogin() {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('admin');
+    window.location.href = 'admin-login.html';
+}
+
+function checkAuth(res) {
+    if (res.status === 401 || res.status === 403) {
+        redirectToLogin();
+        return true;
+    }
+    return false;
+}
+
 const params = new URLSearchParams(window.location.search);
 const regId = params.get('id');
 if (!regId) {
@@ -86,7 +111,11 @@ function showAlert(msg, type) {
 
 async function loadRegistration() {
     try {
-        const res = await fetch(apiUrl('/api/tuition/registrations/' + regId));
+        const token = localStorage.getItem('adminToken');
+        const res = await fetch(apiUrl('/api/tuition/registrations/' + regId), {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (checkAuth(res)) return;
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Failed to load');
         const d = data.registration;
@@ -159,11 +188,13 @@ function escAttr(v) {
 
 async function updateStatus(status) {
     try {
+        const token = localStorage.getItem('adminToken');
         const res = await fetch(apiUrl('/api/tuition/registrations/' + regId + '/status'), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
             body: JSON.stringify({ status, updatedBy: JSON.parse(localStorage.getItem('admin') || '{}').username || 'admin' })
         });
+        if (checkAuth(res)) return;
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Failed to update status');
         showAlert('Status updated to ' + status, 'success');
@@ -182,11 +213,13 @@ async function recordPayment() {
         return;
     }
     try {
+        const token = localStorage.getItem('adminToken');
         const res = await fetch(apiUrl('/api/tuition/registrations/' + regId + '/payment'), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
             body: JSON.stringify({ amount: parseFloat(amount), paymentMethod: method, notes: notes })
         });
+        if (checkAuth(res)) return;
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Failed to record payment');
         showAlert('Payment recorded', 'success');
@@ -201,11 +234,13 @@ async function recordPayment() {
 async function saveNote() {
     const note = document.getElementById('adminNote').value;
     try {
+        const token = localStorage.getItem('adminToken');
         const res = await fetch(apiUrl('/api/tuition/registrations/' + regId), {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
             body: JSON.stringify({ adminNote: note })
         });
+        if (checkAuth(res)) return;
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Failed to save note');
         showAlert('Note saved', 'success');
@@ -216,7 +251,10 @@ async function saveNote() {
 
 document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('adminToken');
-    if (!token) window.location.href = 'admin-login.html';
+    if (!token || isTokenExpired(token)) {
+        window.location.href = 'admin-login.html';
+        return;
+    }
     loadRegistration();
 });
 </script>

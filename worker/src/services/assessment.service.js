@@ -8,20 +8,20 @@
  * key `grading_policy`:
  *   {
  *     "levels": [
- *       { "code": "BE", "name": "Below Expectation", "min": 0,    "max": 39 },
- *       { "code": "AE", "name": "Approaching Expectation", "min": 40, "max": 59 },
- *       { "code": "ME", "name": "Meeting Expectation",   "min": 60, "max": 79 },
- *       { "code": "EE", "name": "Exceeding Expectation", "min": 80, "max": 100 }
+ *       { "code": "BE", "name": "Below Expectation", "min": 0,   "max": 25 },
+ *       { "code": "AE", "name": "Approaching Expectation", "min": 26, "max": 49 },
+ *       { "code": "ME", "name": "Meeting Expectation",   "min": 50, "max": 74 },
+ *       { "code": "EE", "name": "Exceeding Expectation", "min": 75, "max": 100 }
  *     ]
  *   }
- * If absent, the default Kenya CBE-style 80/60/40 boundaries are used.
+ * If absent, the default CBC 75/50/26 boundaries are used.
  */
 export const DEFAULT_POLICY = {
   levels: [
-    { code: 'BE', name: 'Below Expectation', min: 0, max: 39 },
-    { code: 'AE', name: 'Approaching Expectation', min: 40, max: 59 },
-    { code: 'ME', name: 'Meeting Expectation', min: 60, max: 79 },
-    { code: 'EE', name: 'Exceeding Expectation', min: 80, max: 100 }
+    { code: 'BE', name: 'Below Expectation', min: 0, max: 25 },
+    { code: 'AE', name: 'Approaching Expectation', min: 26, max: 49 },
+    { code: 'ME', name: 'Meeting Expectation', min: 50, max: 74 },
+    { code: 'EE', name: 'Exceeding Expectation', min: 75, max: 100 }
   ]
 };
 

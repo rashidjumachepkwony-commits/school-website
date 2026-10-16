@@ -66,23 +66,29 @@ const VALID_PAYMENT_METHODS = ['cash', 'mpesa', 'bank', 'cheque', 'other'];
 function normalizeKenyanPhone(raw) {
   if (!raw || typeof raw !== 'string') return null;
   const digits = raw.replace(/\D/g, '');
+  // 13 digits: +254712345678 -> 254712345678 (12 digits after removing +)
   if (digits.length === 13 && digits.startsWith('254')) {
-    return '+254' + digits.slice(3);
+    return '+' + digits;
   }
-  if (digits.length === 12 && digits.startsWith('2540')) {
-    return '+254' + digits.slice(4);
+  // 12 digits: 254712345678 or 2540712345678
+  if (digits.length === 12) {
+    if (digits.startsWith('254')) {
+      return '+' + digits;
+    }
+    if (digits.startsWith('2540')) {
+      return '+254' + digits.slice(4);
+    }
   }
+  // 10 digits: 0712345678 or 0112345678
+  if (digits.length === 10 && (digits.startsWith('07') || digits.startsWith('01'))) {
+    return '+254' + digits.slice(1);
+  }
+  // 9 digits: 712345678 or 112345678 or 071234567 or 011234567
   if (digits.length === 9 && (digits.startsWith('7') || digits.startsWith('1'))) {
     return '+254' + digits;
   }
-  if (digits.length === 10 && digits.startsWith('07')) {
-    return '+254' + digits.slice(1);
-  }
-  if (digits.length === 10 && digits.startsWith('01')) {
-    return '+254' + digits.slice(1);
-  }
   if (digits.length === 9 && (digits.startsWith('07') || digits.startsWith('01'))) {
-    return '+254' + digits.slice(2);
+    return '+254' + digits.slice(1);
   }
   return null;
 }

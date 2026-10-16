@@ -1076,6 +1076,21 @@ tbody tr:nth-child(even){background:#fafcff}
     return success({ message: 'Assessment records deleted', deleted: rows.length });
   }
 
+  // DELETE /api/assessments/sitting?grade=&period=&type=&name=
+  // Deletes a specific assessment sitting across all students.
+  if (route === '/assessments/sitting' && method === 'DELETE') {
+    const grade = url.searchParams.get('grade') || '';
+    const period = url.searchParams.get('period') || '';
+    const type = url.searchParams.get('type') || '';
+    const name = url.searchParams.get('name') || '';
+    if (!grade || !period || !type) return error('grade, period, and type are required', 400);
+    const query = { grade, assessmentPeriod: period, assessmentType: type };
+    if (name) query.assessmentName = name;
+    const rows = await db.collection('assessments').find(query).toArray();
+    for (const r of rows) await db.collection('assessments').deleteOne({ _id: r._id });
+    return success({ message: 'Assessment sitting deleted', deleted: rows.length });
+  }
+
   // GET /api/assessments
   // GET /api/assessments/student-report/:id?period&type&name
   // A single learner's professional CBE result slip, with subject analysis,

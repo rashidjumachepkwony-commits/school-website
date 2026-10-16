@@ -189,7 +189,8 @@ export async function handleCertificates(db, env, route, method, body, p, reques
     });
   }
 
-  // ---- All remaining endpoints require admin auth ----
+  // ---- All remaining CERTIFICATE endpoints require admin auth ----
+  if (!route.startsWith('/certificates/')) return null;
   const payload = authenticateRequest(request, secret);
   if (!payload) return error('Unauthorized: a valid admin token is needed', 401);
   if (payload.role !== 'Super Admin' && payload.role !== 'Admin' && payload.role !== 'admin') {

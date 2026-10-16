@@ -634,7 +634,7 @@
             <div id="statusHours"></div>
         </div>
 
-        <form id="checkinForm">
+        <form id="checkinForm" onsubmit="return handleFormSubmit(event)">
             <div class="form-group">
                 <label>Staff ID</label>
                 <div class="input-wrapper">
@@ -1213,6 +1213,14 @@
         checkoutBtn.addEventListener('click', () => {
             document.getElementById('checkinForm').dataset.lastAction = 'checkout';
         });
+
+        // Form submit handler for mobile "Go" key
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const lastAction = document.getElementById('checkinForm').dataset.lastAction || 'checkin';
+            handleAction(lastAction);
+            return false;
+        }
 
         // ============================================
         // INIT

@@ -58,6 +58,8 @@ async function storeUpload(buffer, filename, mimetype, folder, env) {
 }
 
 export async function handleUpload(db, env, route, method, body, p, request) {
+  if (!route.startsWith('/upload')) return null;
+
   const authHeader = request.headers.get('authorization') || '';
   if (authHeader.startsWith('Bearer ')) {
     const payload = verifyToken(authHeader.slice(7), env.JWT_SECRET);

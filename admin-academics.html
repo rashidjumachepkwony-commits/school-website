@@ -472,6 +472,7 @@
         .hbtn.view { border-color:#0b5394; color:#0b5394; }
         .hbtn.pdf { border-color:#a4161a; color:#a4161a; }
         .hbtn.all { border-color:#0b7a3b; color:#0b7a3b; }
+        .hbtn.del { border-color:#dc3545; color:#dc3545; }
 
         /* ===== MOBILE CAPTURE BAR ===== */
         .cap-bar {
@@ -2175,10 +2176,11 @@
                     '<td class="num">' + (p.meanLevel === null ? '-' : p.meanLevel.toFixed(2)) + '</td>' +
                     '<td class="num">' + p.meanTotal.toFixed(2) + '</td>' +
                     '<td class="chips">' + chips + '</td>' +
-                    '<td class="acts">' +
+'<td class="acts">' +
                         '<button class="hbtn view" onclick="loadPeriod(\'' + escAttr(p.assessmentPeriod) + '\', \'' + escAttr(p.assessmentType) + '\', \'' + escAttr(p.assessmentName) + '\')">View</button>' +
                         '<button class="hbtn pdf" onclick="downloadHistoryPDF(\'' + escAttr(p.grade) + '\', \'' + escAttr(p.assessmentPeriod) + '\', \'' + escAttr(p.assessmentType) + '\', \'' + escAttr(p.assessmentName) + '\')">PDF</button>' +
                         '<button class="hbtn all" onclick="downloadAllHistoryPDF(\'' + escAttr(p.grade) + '\', \'' + escAttr(p.assessmentPeriod) + '\', \'' + escAttr(p.assessmentType) + '\', \'' + escAttr(p.assessmentName) + '\')">All</button>' +
+                        '<button class="hbtn del" onclick="deleteHistorySitting(\'' + escAttr(p.grade) + '\', \'' + escAttr(p.assessmentPeriod) + '\', \'' + escAttr(p.assessmentType) + '\', \'' + escAttr(p.assessmentName) + '\')">Delete</button>' +
                     '</td>' +
                 '</tr>';
             }).join('');
@@ -2221,7 +2223,7 @@
     }
 
     /** Open one sitting in the marks grid. */
-    function downloadHistoryPDF(grade, period, type, name) {
+function downloadHistoryPDF(grade, period, type, name) {
       const url = apiUrl('/api/assessments/class-report/' + encodeURIComponent(grade) +
         '?period=' + encodeURIComponent(period) + '&type=' + encodeURIComponent(type) +
         (name ? '&name=' + encodeURIComponent(name) : '') + '&download=1');
@@ -2238,6 +2240,34 @@
         apiUrl('/api/assessments/all-report?' + params.toString() + '&download=1'),
         'All-Students-Results.pdf'
       );
+    }
+
+    /** Delete an assessment sitting from history. */
+    async function deleteHistorySitting(grade, period, type, name) {
+      if (!confirm('Delete all results for this assessment sitting?\n\n' +
+        'Grade: ' + grade + '\n' +
+        'Period: ' + period + '\n' +
+        'Type: ' + type + '\n' +
+        'Name: ' + (name || '(uses type name)') + '\n\n' +
+        'This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('adminToken');
+        const params = new URLSearchParams({ grade, period, type });
+        if (name) params.set('name', name);
+        const res = await fetch(apiUrl('/api/assessments/sitting?' + params.toString()), {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Delete failed');
+        alert('Deleted ' + data.deleted + ' student record(s)');
+        loadHistory();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
     }
 
     function loadPeriod(period, type, name) {

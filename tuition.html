@@ -561,10 +561,10 @@
                     </div>
                 </div>
 
-                <div id="formError" class="error-msg" style="display:none;"></div>
-                <button class="btn-submit" id="submitBtn" onclick="submitRegistration()">
-                    <i class="fas fa-paper-plane"></i> SUBMIT REGISTRATION
-                </button>
+<div id="formError" class="error-msg" style="display:none;"></div>
+        <button class="btn-submit" id="submitBtn" type="button" onclick="submitRegistration()" disabled>
+            <i class="fas fa-spinner fa-spin"></i> Loading...
+        </button>
             </div>
 
             <button class="btn-secondary" onclick="goBack()">
@@ -598,9 +598,25 @@
                 programmeData = data.programme;
                 schedules = data.schedules || [];
                 updateProgrammeDisplay(data);
+            } else {
+                throw new Error(data.error || 'Failed to load programme');
             }
         } catch(e) {
             console.log('Using default programme data');
+            // Set fallback data so form can still work
+            programmeData = {
+                title: 'Computer Studies Holiday Tuition',
+                startDate: '2 Nov 2026',
+                endDate: '20 Dec 2026',
+                venue: 'Changara Star Academy',
+                weeklyFee: 500,
+                currency: 'KSh'
+            };
+        } finally {
+            // Enable submit button
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT REGISTRATION';
         }
     }
 
@@ -681,7 +697,20 @@
     // Submit registration
     async function submitRegistration() {
         if (isSubmitting) return;
-        if (!programmeData) return;
+        
+        // Ensure programme data is loaded
+        if (!programmeData) {
+            try {
+                await loadProgramme();
+            } catch (e) {
+                showError('Failed to load programme settings. Please refresh the page and try again.');
+                return;
+            }
+            if (!programmeData) {
+                showError('Programme settings not available. Please refresh the page and try again.');
+                return;
+            }
+        }
 
         // Check if registration is closed
         const banner = document.getElementById('statusBanner');
@@ -729,6 +758,7 @@
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT REGISTRATION';
             }
         } catch(e) {
+            console.error('Submit error:', e);
             showError('Network error. Please check your connection and try again.');
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT REGISTRATION';

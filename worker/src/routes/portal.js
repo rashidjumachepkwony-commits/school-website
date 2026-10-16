@@ -57,18 +57,32 @@ export async function handlePortal(db, env, route, method, body, p, url) {
 
     const grade = student.grade || student.class || '';
     const id = student._id.toString();
+    const admissionNumber = student.admissionNumber || '';
+    const lowerName = fullNameOf(student).toLowerCase();
 
     // ---- Results ----
     const policySetting = await db.collection('system_settings').findOne({ key: 'grading_policy' });
     const policy = loadPolicy(policySetting && policySetting.value ? JSON.stringify(policySetting.value) : null);
 
     const allRecords = await db.collection('assessments').find({}).toArray();
-    const lowerName = fullNameOf(student).toLowerCase();
-    const mine = allRecords.filter(r =>
-      (r.studentId && String(r.studentId) === id) ||
-      (r.studentId && r.admissionNumber && String(r.studentId) === String(r.admissionNumber)) ||
-      (r.studentName || '').trim().toLowerCase() === lowerName
-    );
+
+    // Match assessments by multiple possible identifiers:
+    // 1. MongoDB _id (studentId === student._id)
+    // 2. Admission number (studentId === admissionNumber)
+    // 3. Exact name match
+    // 4. Admission number in assessment record
+    const mine = allRecords.filter(r => {
+      const rStudentId = r.studentId ? String(r.studentId) : '';
+      const rAdmissionNumber = r.admissionNumber ? String(r.admissionNumber) : '';
+      const rStudentName = (r.studentName || '').trim().toLowerCase();
+      
+      return (
+        rStudentId === id ||
+        rStudentId === admissionNumber ||
+        rAdmissionNumber === admissionNumber ||
+        rStudentName === lowerName
+      );
+    });
 
     // Group by assessment sitting, so the portal shows one card per period.
     const groups = new Map();

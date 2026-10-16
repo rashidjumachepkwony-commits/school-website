@@ -1238,6 +1238,20 @@
         <div id="tuitionDashboardCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px;"></div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;">
+            <input type="text" id="tuitionSearch" placeholder="Search by student name, reg #, or guardian..." style="flex:1;min-width:240px;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;" oninput="filterTuitionTable()">
+            <select id="tuitionStatusFilter" onchange="filterTuitionTable()" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;background:#fff;">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="waitlisted">Waitlisted</option>
+            </select>
+            <select id="tuitionPaymentFilter" onchange="filterTuitionTable()" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;background:#fff;">
+                <option value="">All Payment Statuses</option>
+                <option value="paid">Paid</option>
+                <option value="partially_paid">Partially Paid</option>
+                <option value="unpaid">Unpaid</option>
+            </select>
             <button class="btn btn-info" onclick="loadTuitionRegistrations()"><i class="fas fa-sync"></i> Refresh</button>
             <button class="btn btn-warning" onclick="exportTuitionCSV()">Export CSV</button>
             <button class="btn btn-secondary" onclick="exportTuitionJSON()">Export JSON</button>
@@ -1255,16 +1269,19 @@
                         <th>Phone</th>
                         <th>Fee</th>
                         <th>Paid</th>
-                        <th>Status</th>
+                        <th>Payment Status</th>
+                        <th>Application Status</th>
                         <th>Date</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tuitionTableBody">
-                    <tr><td colspan="11" style="text-align:center;color:#999;">Loading...</td></tr>
+                    <tr><td colspan="12" style="text-align:center;color:#999;">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
+
+        <div id="tuitionPagination" style="display:none;margin-top:16px;padding:10px 0;border-top:1px solid #eee;font-size:14px;color:#666;"></div>
     </div>
 
     <!-- ===== SAVE BUTTON ===== -->
@@ -1278,12 +1295,45 @@
 <!-- ======================================== -->
 <script>
     // ============================================
+    // AUTH UTILITIES
+    // ============================================
+
+    function isTokenExpired(token) {
+        if (!token || typeof token !== 'string') return true;
+        const parts = token.split('.');
+        if (parts.length !== 3) return true;
+        try {
+            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return true;
+            return false;
+        } catch { return true; }
+    }
+
+    function redirectToLogin() {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('admin');
+        window.location.href = 'admin-login.html';
+    }
+
+    function checkAuth(res) {
+        if (res.status === 401 || res.status === 403) {
+            redirectToLogin();
+            return true;
+        }
+        return false;
+    }
+
+    // ============================================
     // CHECK AUTH
     // ============================================
     (function() {
         const token = localStorage.getItem('adminToken');
         if (!token) {
             window.location.href = 'admin-login.html';
+            return;
+        }
+        if (isTokenExpired(token)) {
+            redirectToLogin();
             return;
         }
         const admin = JSON.parse(localStorage.getItem('admin') || '{}');
@@ -1382,7 +1432,19 @@
         if (section === 'attendance') loadAttendance();
         if (section === 'visitors') loadVisitors();
         if (section === 'users') loadPendingUsers();
-        if (section === 'tuitionRegistrations') { loadTuitionDashboard(); loadTuitionRegistrations(); }
+        if (section === 'tuitionRegistrations') {
+            const token = localStorage.getItem('adminToken');
+            if (!token || isTokenExpired(token)) {
+                redirectToLogin();
+                return;
+            }
+            document.getElementById('tuitionStatusFilter').value = '';
+            document.getElementById('tuitionPaymentFilter').value = '';
+            document.getElementById('tuitionSearch').value = '';
+            loadTuitionDashboard();
+            tuitionCurrentPage = 1;
+            loadTuitionRegistrations();
+        }
     }
 
     // ============================================
@@ -2524,7 +2586,11 @@
         if (!container) return;
         container.innerHTML = '<p style="color:#999;text-align:center;padding:14px;">Loading summary...</p>';
         try {
-            const res = await fetch(apiUrl('/api/tuition/summary'));
+            const token = localStorage.getItem('adminToken');
+            const res = await fetch(apiUrl('/api/tuition/summary'), {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (checkAuth(res)) return;
             const data = await res.json();
             if (!data.success) throw new Error(data.error || 'Failed to load summary');
             const s = data.summary;
@@ -2542,44 +2608,133 @@
         }
     }
 
-    async function loadTuitionRegistrations() {
+    let tuitionCurrentPage = 1;
+    let tuitionData = { registrations: [], total: 0, totalPages: 1, page: 1 };
+
+    function maskPhone(phone) {
+        if (!phone) return '-';
+        const digits = phone.replace(/\D/g, '');
+        if (digits.length <= 6) return phone;
+        return phone.slice(0, -5) + '***' + phone.slice(-2);
+    }
+
+    function statusColor(status) {
+        const colors = {
+            pending: 'background:#fff3cd;color:#856404;',
+            approved: 'background:#d4edda;color:#155724;',
+            rejected: 'background:#f8d7da;color:#721c24;',
+            waitlisted: 'background:#d1ecf1;color:#0c5460;'
+        };
+        return colors[status] || 'background:#e2e3e5;color:#383d41;';
+    }
+
+    function paymentStatusColor(paymentStatus) {
+        const colors = {
+            paid: 'background:#d4edda;color:#155724;',
+            partially_paid: 'background:#fff3cd;color:#856404;',
+            unpaid: 'background:#f8d7da;color:#721c24;'
+        };
+        return colors[paymentStatus] || 'background:#e2e3e5;color:#383d41;';
+    }
+
+    async function loadTuitionRegistrations(page) {
         const tbody = document.getElementById('tuitionTableBody');
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#999;">Loading...</td></tr>';
+        if (!page) page = tuitionCurrentPage;
+        tuitionCurrentPage = page;
+        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#999;">Loading...</td></tr>';
         try {
-            const res = await fetch(apiUrl('/api/tuition/registrations'));
+            const token = localStorage.getItem('adminToken');
+            const params = new URLSearchParams({ page: page, limit: 50 });
+            const q = document.getElementById('tuitionSearch')?.value.trim();
+            if (q) params.set('q', q);
+            const sf = document.getElementById('tuitionStatusFilter')?.value;
+            if (sf) params.set('status', sf);
+            const pf = document.getElementById('tuitionPaymentFilter')?.value;
+            if (pf) params.set('payment', pf);
+            const res = await fetch(apiUrl('/api/tuition/registrations?' + params.toString()), {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (checkAuth(res)) return;
             const data = await res.json();
             if (!data.success) throw new Error(data.error || 'Failed to load');
+            tuitionData = data;
             if (!data.registrations || data.registrations.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#999;">No registrations found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#999;">No registrations found.</td></tr>';
+                document.getElementById('tuitionPagination').style.display = 'none';
                 return;
             }
-            let i = 0;
             tbody.innerHTML = data.registrations.map(r => {
-                i++;
                 const paid = parseFloat(r.totalPaid || 0);
                 const fee = parseFloat(r.fee || 0);
+                const remaining = fee > 0 ? fee - paid : 0;
                 return '<tr>' +
-                    '<td>' + i + '</td>' +
-                    '<td>' + escTuition(r.registrationNumber) + '</td>' +
-                    '<td>' + escTuition(r.studentName) + '</td>' +
+                    '<td>' + escTuition(r.id) + '</td>' +
+                    '<td><b>' + escTuition(r.registrationNumber) + '</b></td>' +
+                    '<td><b>' + escTuition(r.studentName) + '</b></td>' +
                     '<td>' + escTuition(r.gradeClass) + '</td>' +
                     '<td>' + escTuition(r.guardianName) + '</td>' +
-                    '<td>' + escTuition(r.guardianPhone) + '</td>' +
+                    '<td>' + escTuition(maskPhone(r.guardianPhone)) + '</td>' +
                     '<td>KSh ' + fee.toFixed(0) + '</td>' +
                     '<td>KSh ' + paid.toFixed(0) + '</td>' +
-                    '<td><span style="padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;' +
-                        (r.applicationStatus === 'approved' ? 'background:#d4edda;color:#155724;' :
-                         r.applicationStatus === 'rejected' ? 'background:#f8d7da;color:#721c24;' :
-                         'background:#fff3cd;color:#856404;') + '">' +
-                        escTuition(r.applicationStatus || 'pending') + '</span></td>' +
+                    '<td><span style="padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;' + paymentStatusColor(r.paymentStatus) + '">' +
+                    escTuition(r.paymentStatus || 'unpaid') + '</span></td>' +
+                    '<td><span style="padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;' + statusColor(r.applicationStatus) + '">' +
+                    escTuition(r.applicationStatus || 'pending') + '</span></td>' +
                     '<td>' + escTuition(r.createdAt || '') + '</td>' +
                     '<td><div style="display:flex;gap:4px;flex-wrap:wrap;">' +
-                        '<button class="btn btn-info btn-sm" onclick="editTuitionRegistration(' + "'" + r.id + "'" + ')"><i class="fas fa-edit"></i> Edit</button>' +
-                        '</div></td>' +
+                    '<button class="btn btn-info btn-sm" onclick="editTuitionRegistration(' + "'" + r.id + "'" + ')"><i class="fas fa-edit"></i> Edit</button>' +
+                    '<select style="padding:2px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px;" onchange="changeTuitionStatus(' + "'" + r.id + "'" + ', this.value)" title="Quick status change">' +
+                    '<option value="">Status</option>' +
+                    '<option value="pending">Pending</option>' +
+                    '<option value="approved">Approve</option>' +
+                    '<option value="rejected">Reject</option>' +
+                    '<option value="waitlisted">Waitlist</option>' +
+                    '</select>' +
+                    '</div></td>' +
                     '</tr>';
             }).join('');
+            renderTuitionPagination();
         } catch (err) {
-            tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#a4161a;">' + escTuition(err.message) + '</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#a4161a;">' + escTuition(err.message) + '</td></tr>';
+        }
+    }
+
+    function filterTuitionTable() {
+        tuitionCurrentPage = 1;
+        loadTuitionRegistrations();
+    }
+
+    function renderTuitionPagination() {
+        const pg = document.getElementById('tuitionPagination');
+        if (!pg) return;
+        const d = tuitionData;
+        if (d.totalPages <= 1) { pg.style.display = 'none'; return; }
+        pg.style.display = 'block';
+        const start = (d.page - 1) * d.limit + 1;
+        const end = Math.min(d.page * d.limit, d.total);
+        pg.innerHTML = 'Showing ' + start + '–' + end + ' of ' + d.total + ' registration(s) &nbsp;|&nbsp; ';
+        if (d.hasPrev) pg.innerHTML += '<a href="#" onclick="loadTuitionRegistrations(' + (d.page - 1) + ');return false;">← Prev</a> &nbsp; ';
+        pg.innerHTML += ' Page ' + d.page + ' of ' + d.totalPages + ' ';
+        if (d.hasNext) pg.innerHTML += '<a href="#" onclick="loadTuitionRegistrations(' + (d.page + 1) + ');return false;">Next →</a>';
+    }
+
+    async function changeTuitionStatus(id, status) {
+        if (!id || !status) return;
+        const token = localStorage.getItem('adminToken');
+        if (!confirm('Change status to "' + status + '"?')) { return; }
+        try {
+            const res = await fetch(apiUrl('/api/tuition/registrations/' + encodeURIComponent(id) + '/status'), {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: status })
+            });
+            if (checkAuth(res)) return;
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Failed to update status');
+            alert('Status updated to "' + status + '"');
+            loadTuitionRegistrations(tuitionCurrentPage);
+        } catch (err) {
+            alert('Error: ' + err.message);
         }
     }
 
@@ -2589,13 +2744,33 @@
     }
 
     async function exportTuitionCSV() {
+        const token = localStorage.getItem('adminToken');
         const url = apiUrl('/api/tuition/export?format=csv');
-        window.open(url, '_blank');
+        const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (checkAuth(res)) return;
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = 'computer-tuition-registrations.csv';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
     }
 
     async function exportTuitionJSON() {
-        const url = apiUrl('/api/tuition/export?format=json');
-        window.open(url, '_blank');
+        const token = localStorage.getItem('adminToken');
+        const res = await fetch(apiUrl('/api/tuition/export?format=json'), {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (checkAuth(res)) return;
+        const data = await res.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = 'computer-tuition-registrations.json';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
     }
 
     function renderReport(d) {
@@ -2709,4 +2884,4 @@
     });
 </script>
 </body>
-</html>
+</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               

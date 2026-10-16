@@ -47,6 +47,8 @@ function getExtension(filename) {
 }
 
 export async function handleHolidayAssignments(db, env, route, method, body, p, request) {
+  if (!route.startsWith('/holiday-assignments')) return null;
+
   const authHeader = request.headers.get('authorization') || '';
   if (authHeader.startsWith('Bearer ')) {
     const payload = verifyToken(authHeader.slice(7), env.JWT_SECRET);
