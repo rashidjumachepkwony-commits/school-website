@@ -1531,7 +1531,19 @@
     // placeholder-based template available for restore. Never fabricates
     // signature/seal data — only the editable field text is substituted.
     function captureBaseTemplate() {
-        baseTemplateHtml = document.getElementById('htmlSource').value || '';
+        // Capture directly from the canvas DOM to preserve absolute positioning
+        // (htmlSource may have been normalized by syncToHTML and lost positioning).
+        const cc = document.getElementById('canvasContent');
+        if (cc) {
+            baseTemplateHtml = cc.innerHTML.replace(
+                /<div class="cert-shield"><\/div>/, ''
+            ).replace(
+                /<div class="canvas-border"><\/div>/, ''
+            );
+        }
+        if (!baseTemplateHtml) {
+            baseTemplateHtml = document.getElementById('htmlSource').value || '';
+        }
     }
 
     // ---- PowerPoint-like slides IN THE VISUAL DESIGNER (Phase 6) ----
@@ -2346,13 +2358,17 @@
             el.classList.add('canvas-element', 'canvas-text');
             el.contentEditable = true;
             el.style.textAlign = el.style.textAlign || 'center';
-            const r = el.getBoundingClientRect();
-            el.style.position = 'absolute';
-            el.style.left = (r.left - drect.left + r.width / 2) + 'px';
-            el.style.top = (r.top - drect.top) + 'px';
-            el.style.transform = 'translateX(-50%)';
-            el.style.margin = '0';
-            el.style.width = 'auto';
+            // Only reposition if the element doesn't already have absolute positioning
+            // (template HTML from built-in templates has pre-set positions we should preserve).
+            if (!el.style.position || el.style.position === 'static') {
+                const r = el.getBoundingClientRect();
+                el.style.position = 'absolute';
+                el.style.left = (r.left - drect.left + r.width / 2) + 'px';
+                el.style.top = (r.top - drect.top) + 'px';
+                el.style.transform = 'translateX(-50%)';
+                el.style.margin = '0';
+                el.style.width = 'auto';
+            }
             setupCanvasElement(el);
         });
     }
