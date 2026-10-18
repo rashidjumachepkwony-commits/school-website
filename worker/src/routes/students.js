@@ -17,7 +17,8 @@ function serializeStudentFields(s, isBoarding, boardingLabel) {
     dateAdded: s.dateAdded || s.createdAt || null,
     status: s.status || 'ACTIVE',
     dateOfBirth: s.dateOfBirth, parentId: s.parentId,
-    isActive: s.isActive !== false, createdAt: s.createdAt
+    isActive: s.isActive !== false, createdAt: s.createdAt,
+    photoUrl: s.photoUrl || null
   };
 }
 
@@ -27,9 +28,10 @@ function serializeStudentFields(s, isBoarding, boardingLabel) {
 import { success, error } from '../utils/helpers.js';
 import { hashPassword, verifyPassword } from '../services/password.service.js';
 import { getKenyaTime, getKenyaDate, formatKenyaTime } from '../services/time.service.js';
-import { createToken } from '../utils/auth.js';
+import { createToken, verifyToken } from '../utils/auth.js';
+import { storeUpload } from './upload.js';
 
-export async function handleStudents(db, env, route, method, body, p) {
+export async function handleStudents(db, env, route, method, body, p, request) {
   const now = new Date().toISOString();
 
   // Boarding status is stored under a few different keys depending on which
@@ -162,7 +164,7 @@ export async function handleStudents(db, env, route, method, body, p) {
     const updates = {};
     const fields = ['firstName', 'lastName', 'admissionNumber', 'class', 'age', 'gender',
       'dateOfBirth', 'email', 'phone', 'parentId', 'grade', 'stream', 'isActive',
-      'guardianName', 'dateAdded', 'status'];
+      'guardianName', 'dateAdded', 'status', 'photoUrl'];
     fields.forEach(f => { if (body[f] !== undefined) updates[f] = body[f]; });
 
     // Keep the three boarding keys in agreement whichever one the client sent.
@@ -180,6 +182,54 @@ export async function handleStudents(db, env, route, method, body, p) {
     updates.updatedAt = now;
     await db.collection('students').updateOne({ _id: p[1] }, { $set: updates });
     return success({ message: 'Student updated successfully!' });
+  }
+
+  // POST /api/students/:id/photo — upload a portrait photo for a student
+  if (p[0] === 'students' && p[1] && p[2] === 'photo' && method === 'POST') {
+    const secret = env.JWT_SECRET || env.jwt_secret;
+    if (!secret) return error('Authentication is not configured on the server (JWT_SECRET secret is missing)', 503);
+    const authHeader = request.headers.get('authorization') || '';
+    if (!authHeader.startsWith('Bearer ')) return error('Unauthorized: a valid admin token is needed', 401);
+    const payload = verifyToken(authHeader.slice(7), secret);
+    if (!payload) return error('Unauthorized: a valid admin token is needed', 401);
+    if (payload.role !== 'Super Admin' && payload.role !== 'Admin' && payload.role !== 'admin') {
+      return error('Forbidden: admin access required', 403);
+    }
+
+    const studentId = p[1];
+    const formData = await request.formData().catch(() => null);
+    if (!formData) return error('No form data provided', 400);
+
+    const file = formData.get('photo') || formData.get('file');
+    if (!file) return error('No photo file provided', 400);
+
+    const allowedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+    if (!allowedImageTypes.has(file.type)) {
+      return error('Only JPG, PNG, and WebP images are allowed for student photos.', 400);
+    }
+    if (file.size > 5 * 1024 * 1024) return error('Photo too large (max 5 MB).', 400);
+
+    // Find the student by id or admission number — never attach a photo to the
+    // wrong record.
+    const student = await db.collection('students').findOne({
+      $or: [{ _id: studentId }, { admissionNumber: studentId }]
+    });
+    if (!student) return error('Student not found.', 404);
+
+    const fileBuffer = await file.arrayBuffer();
+
+    const uploaded = await storeUpload(fileBuffer, file.name || 'photo.jpg', file.type, 'student_photos', env);
+
+    await db.collection('students').updateOne(
+      { _id: student._id },
+      { $set: { photoUrl: uploaded.url, updatedAt: new Date().toISOString() } }
+    );
+
+    return success({
+      message: 'Student photo uploaded successfully!',
+      photoUrl: uploaded.url,
+      student: serializeStudent(student)
+    });
   }
 
   // DELETE /api/students/:id

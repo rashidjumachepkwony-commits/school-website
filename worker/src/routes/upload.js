@@ -41,7 +41,7 @@ function getExtension(filename) {
  * goes to Supabase Storage, so media uploads work without a Cloudinary
  * account. Both return the same field names, normalised here.
  */
-async function storeUpload(buffer, filename, mimetype, folder, env) {
+export async function storeUpload(buffer, filename, mimetype, folder, env) {
   if (hasCloudinary(env)) {
     const up = await uploadToCloudinary(buffer, filename, mimetype, { folder }, env);
     return { ...up, fileName: up.fileName || filename, size: up.size, type: up.type, mimetype: up.mimetype };

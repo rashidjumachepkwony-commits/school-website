@@ -654,6 +654,7 @@
                 <input type="text" id="templateName" placeholder="Template name for saving..." style="flex:1;min-width:150px;">
                 <button class="btn btn-success btn-sm" onclick="saveTemplate()"><i class="fas fa-save"></i> Save Template</button>
                 <button class="btn btn-sm btn-info" id="mergeDesignerBtn" onclick="applyDesignerSlide()" title="Merge the current slide student's data into the designer canvas (placeholders replaced with real, editable, movable text). Original template is kept and can be restored."><i class="fas fa-magic"></i> Merge Student</button>
+                <button class="btn btn-sm btn-primary" id="uploadPhotoBtn" onclick="uploadStudentPhoto()" title="Upload a portrait photo for the selected learner (stored on the student record, reused on all certificates)."><i class="fas fa-camera"></i> Upload Photo</button>
                 <button class="btn btn-sm btn-warning" id="genCertNumBtn" onclick="generateDesignerCertNumber()" title="Generate the certificate number for the current slide's student and place it on the design."><i class="fas fa-hashtag"></i> Generate #</button>
                 <button class="btn btn-sm btn-secondary" id="restoreTemplateBtn" onclick="restoreTemplate()" title="Restore the original template (with placeholders) into the designer." style="display:none;"><i class="fas fa-undo"></i> Restore</button>
                 <span class="merge-status" id="mergeStatus" style="display:none;font-size:11px;font-weight:600;color:#001f5c;background:#fff8e1;border:1px dashed #d4a017;border-radius:6px;padding:4px 8px;">Merged with live student data</span>
@@ -688,6 +689,7 @@
                         <div class="var-chip" onclick="insertVariable('{{school_email}}')">School Email</div>
                         <div class="var-chip" onclick="insertVariable('{{school_logo}}')">School Logo</div>
                         <div class="var-chip" onclick="insertVariable('{{school_stamp}}')">School Stamp</div>
+                        <div class="var-chip" onclick="insertVariable('{{student_photo}}')">Student Photo</div>
                         <div class="var-chip" onclick="insertVariable('{{headteacher_name}}')">Headteacher</div>
                         <div class="var-chip" onclick="insertVariable('{{event_name}}')">Event Name</div>
                         <div class="var-chip" onclick="insertVariable('{{date}}')">Date</div>
@@ -1369,17 +1371,21 @@
             '{{stream}}': stream,
             '{{gender}}': gender,
             '{{student_address}}': studentAddress,
+            '{{student_photo}}': (student.photoUrl)
+                ? `<img src="${student.photoUrl}" class="cert-photo-frame" alt="${studentName || 'Learner'}">`
+                : '<div class="cert-photo-placeholder"><span>Photo<br>Not Available</span></div>',
             '{{school_name}}': settings.school_name || '',
             '{{school_motto}}': settings.school_motto || '',
             '{{school_address}}': settings.school_address || '',
             '{{school_phone}}': settings.school_phone || '',
             '{{school_email}}': settings.school_email || '',
-            '{{school_logo}}': settings.school_logo ? `<img src="${settings.school_logo}" class="cert-logo-img" alt="${settings.school_name || ''}">` : '<span style="font-size:48px;">🏫</span>',
+            '{{school_logo}}': settings.school_logo ? `<img src="${settings.school_logo}" class="cert-logo-img" alt="${settings.school_name || ''}">` : '<span class="cert-logo-emoji" role="img" aria-label="school">🏫</span>',
             '{{school_stamp}}': settings.school_stamp ? `<img src="${settings.school_stamp}" class="cert-seal-img" alt="School Seal">` : '',
             '{{headteacher_name}}': settings.headteacher_name || '',
             '{{event_name}}': eventName || '',
             '{{date}}': eventDate || '',
-            '{{certificate_number}}': certNumber || ''
+            '{{certificate_number}}': certNumber || '',
+            '{{graduation_year}}': (document.getElementById('gradYear') ? document.getElementById('gradYear').value : '') || currentYear
         };
 
         let result = template;
@@ -1655,6 +1661,79 @@
         const r = document.getElementById('restoreTemplateBtn');
         if (m) m.style.display = 'none';
         if (r) r.style.display = 'none';
+    }
+
+    async function uploadStudentPhoto() {
+        if (selectedStudents.length === 0) {
+            showAlert('Select a student first, then click Upload Photo.', 'error');
+            return;
+        }
+        const student = selectedStudents[currentSlide];
+        const studentId = student.id || student._id || student.admissionNumber;
+        if (!studentId) {
+            showAlert('Selected student has no ID — cannot upload photo.', 'error');
+            return;
+        }
+
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/jpeg,image/png,image/webp';
+        input.maxSize = 5 * 1024 * 1024;
+
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showAlert('Please select a valid image file (JPEG, PNG, or WebP).', 'error');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showAlert('Image is too large (max 5 MB).', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('uploadPhotoBtn');
+            if (btn) btn.disabled = true;
+            btn && (btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Uploading...');
+
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            try {
+                const token = localStorage.getItem('adminToken');
+                const res = await fetch(serverConfig.apiBase + '/api/students/' + encodeURIComponent(studentId) + '/photo', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Upload failed');
+                }
+
+                student.photoUrl = data.photoUrl;
+                showAlert('Photo uploaded for ' + (student.fullName || 'student') + '.', 'success');
+
+                if (designerMerged) {
+                    _renderDesignerSlide();
+                } else {
+                    applyDesignerSlide();
+                }
+            } catch (err) {
+                showAlert('Photo upload failed: ' + (err.message || 'Unknown error'), 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-camera"></i> Upload Photo';
+                }
+                input.value = '';
+            }
+        };
+
+        input.click();
     }
 
     function insertVariable(variable) {
@@ -2852,7 +2931,7 @@
     // certificate number, date, signatures, footer). It is a flat list of direct-child
     // .canvas-text rows so the designer can select/drag/resize/restyle each field, and
     // normalizeTemplateForRender keeps the exported PDF/print layout intact.
-    const PP2_TEXT_HTML = '<!-- canvas-border: decorations rendered via background image --><div style="text-align:center;padding:10px 0;font-size:13px;color:#001f5c;font-weight:700;letter-spacing:2px;text-transform:uppercase;">{{school_name}}</div><div style="text-align:center;padding:4px 0;">{{school_logo}}</div><div style="text-align:center;font-size:11px;color:#8a5a00;font-style:italic;margin-bottom:6px;">Excellence  •  Discipline  •  Success</div><div style="text-align:center;font-size:12px;color:#001f5c;margin-bottom:12px;">{{school_motto}}</div><div style="text-align:center;font-size:26px;color:#001f5c;font-weight:800;font-family:Georgia,serif;letter-spacing:1px;margin:16px 0;">CERTIFICATE OF GRADUATION</div><div style="display:inline-block;background:linear-gradient(135deg,#f5c842,#d4a017);color:#001f5c;font-size:15px;font-weight:700;border-radius:20px;padding:6px 20px;margin:8px 0 18px;box-shadow:0 2px 6px rgba(0,0,0,.12);">PRE-PRIMARY 2 (PP2)</div><div style="text-align:center;font-size:16px;color:#333;margin:22px 0 10px;">This certificate is proudly awarded to</div><div style="text-align:center;font-size:32px;color:#001f5c;font-weight:800;font-family:Georgia,serif;word-break:break-word;margin:10px 0;">{{student_name}}</div><div style="text-align:center;font-size:13px;color:#555;margin:6px 0;">Admission No: <strong>{{admission_number}}</strong> — Class: <strong>{{class}}</strong></div><div style="text-align:center;font-size:15px;color:#333;line-height:1.7;margin:26px auto;max-width:760px;">for successfully completing the PP2 programme and<br>demonstrating growth, learning and readiness<br>for the next stage of their educational journey.</div><div style="text-align:center;margin:26px auto 18px;"><svg width="22" height="14" style="vertical-align:middle;"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/></svg><span style="font-size:15px;color:#001f5c;font-weight:600;margin:0 6px;">Graduation</span><span style="font-size:20px;font-weight:800;color:#001f5c;margin:0 6px;">{{graduation_year}}</span><svg width="44" height="14" style="vertical-align:middle;"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/><circle cx="24" cy="7" r="4" fill="#d4a017"/><polygon points="24,3 27,11 21,11" fill="#d4a017"/></svg><svg width="22" height="14" style="vertical-align:middle;"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/><circle cx="15" cy="7" r="4" fill="#d4a017"/><path d="M15 3 L18 11" stroke="#d4a017" stroke-width="2"/></svg></div><div style="text-align:center;margin-top:34px;"><span style="display:inline-block;width:60px;border-top:1px solid #001f5c;"></span></div><div style="text-align:center;display:flex;justify-content:space-around;margin-top:28px;"><div style="text-align:center;"><div style="border-top:1px solid #001f5c;width:130px;margin:0 auto;"></div><div style="font-size:12px;color:#001f5c;"><strong>Class Teacher</strong></div></div><div style="text-align:center;"><div style="border-top:1px solid #001f5c;width:130px;margin:0 auto;"></div><div style="font-size:12px;color:#001f5c;"><strong>Headteacher</strong></div><div style="font-size:11px;color:#555;">{{headteacher_name}}</div></div></div><div style="text-align:center;font-size:11px;color:#555;margin-top:22px;">Date of Issue: {{date}} &nbsp;|&nbsp; Certificate No.: {{certificate_number}}</div>';
+    const PP2_TEXT_HTML = '<!-- canvas-border: decorations rendered via background image --><div style="text-align:center;padding:10px 0;font-size:13px;color:#001f5c;font-weight:700;letter-spacing:2px;text-transform:uppercase;">{{school_name}}</div><div style="text-align:center;padding:4px 0;">{{school_logo}}</div><div style="text-align:center;font-size:11px;color:#8a5a00;font-style:italic;margin-bottom:6px;">{{school_motto}}</div><div style="text-align:center;font-size:26px;color:#001f5c;font-weight:800;font-family:Georgia,serif;letter-spacing:1px;margin:16px 0;">CERTIFICATE OF GRADUATION</div><div style="display:inline-block;background:linear-gradient(135deg,#f5c842,#d4a017);color:#001f5c;font-size:15px;font-weight:700;border-radius:20px;padding:6px 20px;margin:8px 0 18px;box-shadow:0 2px 6px rgba(0,0,0,.12);">PRE-PRIMARY 2 (PP2)</div><div style="text-align:center;font-size:16px;color:#333;margin:22px 0 10px;">This certificate is proudly awarded to</div><div style="text-align:center;font-size:32px;color:#001f5c;font-weight:800;font-family:Georgia,serif;word-break:break-word;margin:10px 0;">{{student_name}}</div><div style="text-align:center;font-size:13px;color:#555;margin:6px 0;">Admission No: <strong>{{admission_number}}</strong> — Class: <strong>{{class}}</strong></div><div style="text-align:center;font-size:15px;color:#333;line-height:1.7;margin:26px auto;max-width:760px;">for successfully completing the PP2 programme and<br>demonstrating growth, learning and readiness<br>for the next stage of their educational journey.</div><div style="text-align:center;margin:26px auto 18px;"><svg width="22" height="14" style="vertical-align:middle;"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/></svg><span style="font-size:15px;color:#001f5c;font-weight:600;margin:0 6px;">Graduation</span><span style="font-size:20px;font-weight:800;color:#001f5c;margin:0 6px;">{{graduation_year}}</span><svg width="44" height="14" style="vertical-align:middle;"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/><circle cx="24" cy="7" r="4" fill="#d4a017"/><polygon points="24,3 27,11 21,11" fill="#d4a017"/></svg><svg width="22" height="14" style="vertical-align:middle;"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/><circle cx="15" cy="7" r="4" fill="#d4a017"/><path d="M15 3 L18 11" stroke="#d4a017" stroke-width="2"/></svg></div><div style="text-align:center;margin-top:34px;"><span style="display:inline-block;width:60px;border-top:1px solid #001f5c;"></span></div><div style="text-align:center;display:flex;justify-content:space-around;margin-top:28px;"><div style="text-align:center;"><div style="border-top:1px solid #001f5c;width:130px;margin:0 auto;"></div><div style="font-size:12px;color:#001f5c;"><strong>Class Teacher</strong></div></div><div style="text-align:center;"><div style="border-top:1px solid #001f5c;width:130px;margin:0 auto;"></div><div style="font-size:12px;color:#001f5c;"><strong>Headteacher</strong></div><div style="font-size:11px;color:#555;">{{headteacher_name}}</div></div></div><div style="text-align:center;font-size:11px;color:#555;margin-top:22px;">Date of Issue: {{date}} &nbsp;|&nbsp; Certificate No.: {{certificate_number}}</div>';
     const CERT_TEMPLATES = [
         { id: 'pp2-graduation-2026', name: 'Changara Star Academy — PP2 Graduation 2026', category: 'Graduation', orientation: 'landscape',
           bg: ['#fdf8f0', '#ffffff'],
@@ -2945,8 +3024,81 @@
                 '<div style="font-size:13px;color:#555;margin:12px 0;">Admission No: {{admission_number}} | Class: {{class}}</div>' +
                 '<div style="font-size:14px;color:#333;margin:24px 0;">Has demonstrated outstanding merit in <strong>{{event_name}}</strong> scouting activities.</div>' +
                 '<div style="font-size:11px;color:#666;">Certificate No: {{certificate_number}} | Date: {{date}}</div>' +
-                '<div style="margin-top:18px;"><svg width="90" height="20"><circle cx="10" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/><circle cx="28" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/><circle cx="46" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/></svg></div>' }
-    ];
+                '<div style="margin-top:18px;"><svg width="90" height="20"><circle cx="10" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/><circle cx="28" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/><circle cx="46" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/></svg></div>' },
+        { id: 'pp2-graduation-2026-premium', name: 'Changara Star Academy — Premium PP2 Graduation 2026', category: 'Graduation', orientation: 'landscape',
+          bg: ['#fffdf7', '#ffffff'],
+          decorationSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 630" width="1000" height="630"><rect x="0" y="0" width="1000" height="630" fill="#fffdf7"/><defs><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#d4a017"/><stop offset="1" stop-color="#b8860b"/></linearGradient><linearGradient id="navyGrad" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#001f5c"/><stop offset="1" stop-color="#0b5394"/></linearGradient></defs>' +
+            '<g stroke="#001f5c" stroke-width="3" fill="none" opacity="0.85"><path d="M30 30 L970 30"/><path d="M30 600 L970 600"/><path d="M30 30 L30 600"/><path d="M970 30 L970 600"/></g>' +
+            '<g stroke="#d4a017" stroke-width="1.5" fill="none"><path d="M36 36 L964 36"/><path d="M36 594 L964 594"/><path d="M36 36 L36 594"/><path d="M964 36 L964 594"/></g>' +
+            '<g fill="#d4a017"><path d="M30 30 L44 18 M44 30 L30 44 Z"/><path d="M970 30 L956 18 M956 30 L970 44 Z"/><path d="M30 600 L44 614 M44 600 L30 586 Z"/><path d="M970 600 L956 614 M956 600 L970 586 Z"/></g>' +
+            '<g fill="#001f5c" opacity="0.15"><path d="M100 80 Q200 60 300 80 T500 80 T700 80 T900 80" stroke="#001f5c" stroke-width="1" fill="none"/><path d="M100 550 Q200 570 300 550 T500 550 T700 550 T900 550" stroke="#001f5c" stroke-width="1" fill="none"/></g>' +
+            '<g fill="#d4a017" opacity="0.12"><circle cx="180" cy="140" r="3"/><circle cx="820" cy="140" r="3"/><circle cx="500" cy="580" r="4"/><circle cx="140" cy="420" r="2.5"/><circle cx="860" cy="420" r="2.5"/></g>' +
+            '<g fill="none" stroke="#d4a017" stroke-width="2" opacity="0.25"><ellipse cx="500" cy="100" rx="120" ry="3"/><ellipse cx="500" cy="530" rx="80" ry="2.5"/></g>' +
+            '<g fill="#001f5c" opacity="0.08"><rect x="50" y="470" width="40" height="28" rx="4"/><rect x="56" y="474" width="30" height="20" rx="3"/></g>' +
+            '<g fill="#0b5394" opacity="0.08"><rect x="910" y="470" width="40" height="28" rx="4"/><rect x="916" y="474" width="30" height="20" rx="3"/></g>' +
+            '<g fill="none" stroke="#b8860b" stroke-width="1" opacity="0.2"><path d="M440 580 C460 560 540 560 560 580"/><path d="M440 580 L560 580"/></g>' +
+            '<circle cx="500" cy="300" r="32" fill="none" stroke="#d4a017" stroke-width="1.5" opacity="0.08"/><g fill="#d4a017" opacity="0.05"><path d="M470 285 L500 315 L530 285 Z"/><path d="M500 268 L500 332"/></g>' +
+          '</svg>',
+          html: '<!-- canvas-border: decorations rendered via background image -->' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">' +
+              '<div style="flex:0 0 58%;">' +
+                '<div style="font-size:14px;color:#001f5c;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;">{{school_name}}</div>' +
+                '<div style="margin:4px 0 10px;">{{school_logo}}</div>' +
+                '<div style="font-size:11px;color:#8a5a00;font-style:italic;margin-bottom:10px;">Assurance for Excellence</div>' +
+              '</div>' +
+              '<div style="flex:0 0 38%;text-align:right;">' +
+                '<div style="font-size:11px;color:#647489;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Certificate No.</div>' +
+                '<div style="font-size:13px;color:#001f5c;font-weight:700;word-break:break-all;">{{certificate_number}}</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="text-align:center;margin:28px 0 18px;">' +
+              '<div style="display:inline-block;background:linear-gradient(135deg,#001f5c,#0b5394);color:#fff;padding:12px 40px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">' +
+                '<span style="font-size:28px;font-family:Georgia,serif;font-weight:700;letter-spacing:2px;">CERTIFICATE OF GRADUATION</span>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin:30px 0;">' +
+              '<div style="flex:0 0 58%;text-align:left;">' +
+                '<div style="display:inline-block;background:linear-gradient(135deg,#d4a017,#b8860b);color:#001f5c;font-size:14px;font-weight:700;border-radius:30px;padding:5px 18px;margin-bottom:24px;box-shadow:0 2px 6px rgba(0,0,0,0.1);">PRE-PRIMARY 2 (PP2)</div>' +
+                '<div style="font-size:16px;color:#333;line-height:1.8;margin-bottom:14px;">This certificate is proudly awarded to</div>' +
+                '<div style="font-size:34px;color:#001f5c;font-family:Georgia,serif;font-weight:800;word-break:break-word;line-height:1.1;margin:8px 0 4px;">{{student_name}}</div>' +
+                '<div style="font-size:13px;color:#647489;margin-bottom:4px;">Admission No: <strong style="color:#001f5c;">{{admission_number}}</strong> &nbsp;|&nbsp; Class: <strong style="color:#001f5c;">{{class}}</strong></div>' +
+              '</div>' +
+              '<div style="flex:0 0 38%;display:flex;justify-content:flex-end;">' +
+                '{{student_photo}}' +
+              '</div>' +
+            '</div>' +
+            '<div style="font-size:15px;color:#333;line-height:1.8;text-align:center;margin:28px auto;max-width:640px;">' +
+              'for successfully completing the PP2 programme and<br>' +
+              'demonstrating growth, learning and readiness<br>' +
+              'for the next stage of their educational journey.' +
+            '</div>' +
+            '<div style="text-align:center;margin:30px 0;">' +
+              '<svg width="120" height="40" style="vertical-align:middle;"><defs><linearGradient id="laurelGrad" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#d4a017"/><stop offset="1" stop-color="#b8860b"/></linearGradient></defs>' +
+              '<path d="M10 30 C20 15 40 10 50 20 C60 5 80 10 90 20 C100 5 120 15 130 25 C140 15 160 10 170 20 C180 5 200 15 210 25" fill="none" stroke="url(#laurelGrad)" stroke-width="2" opacity="0.8"/>' +
+              '<path d="M40 30 C50 15 70 10 80 20 C90 5 110 10 120 20" fill="none" stroke="url(#laurelGrad)" stroke-width="2" opacity="0.8"/>' +
+              '<path d="M210 30 C200 15 180 10 170 20 C160 5 140 15 130 25" fill="none" stroke="url(#laurelGrad)" stroke-width="2" opacity="0.8"/>' +
+              '</svg>' +
+              '<span style="font-size:16px;color:#001f5c;font-weight:600;margin:0 12px;vertical-align:middle;">Graduation {{graduation_year}}</span>' +
+              '<svg width="120" height="40" style="vertical-align:middle;transform:scaleX(-1);"><defs><linearGradient id="laurelGrad2" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#d4a017"/><stop offset="1" stop-color="#b8860b"/></linearGradient></defs>' +
+              '<path d="M10 30 C20 15 40 10 50 20 C60 5 80 10 90 20 C100 5 120 15 130 25 C140 15 160 10 170 20 C180 5 200 15 210 25" fill="none" stroke="url(#laurelGrad2)" stroke-width="2" opacity="0.8"/>' +
+              '<path d="M40 30 C50 15 70 10 80 20 C90 5 110 10 120 20" fill="none" stroke="url(#laurelGrad2)" stroke-width="2" opacity="0.8"/>' +
+              '<path d="M210 30 C200 15 180 10 170 20 C160 5 140 15 130 25" fill="none" stroke="url(#laurelGrad2)" stroke-width="2" opacity="0.8"/>' +
+              '</svg>' +
+            '</div>' +
+            '<div style="display:flex;justify-content:space-around;margin:30px 0 14px;">' +
+              '<div style="text-align:center;">' +
+                '<div style="border-top:1px solid #001f5c;width:130px;margin:0 auto;padding-top:4px;"></div>' +
+                '<div style="font-size:12px;color:#001f5c;margin-top:4px;font-style:italic;">Class Teacher</div>' +
+              '</div>' +
+              '<div style="text-align:center;">' +
+                '<div style="border-top:1px solid #001f5c;width:130px;margin:0 auto;padding-top:4px;"></div>' +
+                '<div style="font-size:12px;color:#001f5c;margin-top:4px;font-style:italic;">Headteacher</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="text-align:center;font-size:11px;color:#647489;padding-top:10px;border-top:1px solid #e3e9f2;">' +
+              'Date of Issue: {{date}} &nbsp;|&nbsp; Certificate No.: {{certificate_number}}' +
+            '</div>'
+        }
 
     // Bake an inline SVG into a PNG data-URL so html2canvas/raster exporters
     // render decorative artwork reliably (avoids full-bleed SVG sizing issues).
@@ -3754,22 +3906,31 @@
     }
 
     .cert-logo-img { max-width: 120px; margin-bottom: 10px; }
+    .cert-logo-emoji { font-size: 48px; }
     .cert-seal-img { max-width: 80px; }
 
-    .cert-photo {
-        width: 120px; height: 120px; object-fit: cover;
-        border: 3px solid #d4a017; border-radius: 5px;
-        margin: 15px 0; box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    .cert-photo-frame {
+        width: 160px; height: 213px;
+        object-fit: cover;
+        border: 4px solid;
+        border-image: linear-gradient(135deg, #d4a017, #b8860b) 1;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 31, 92, 0.15);
+        flex-shrink: 0;
     }
 
     .cert-photo-placeholder {
-        width: 120px; height: 120px;
-        border: 3px dashed #d4a017; border-radius: 5px;
-        margin: 15px 0; display: flex;
-        align-items: center; justify-content: center;
-        background: #fffbeb; color: #8a5a00;
+        width: 160px; height: 213px;
+        border: 3px dashed #d4a017; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, #fffbeb 0%, #fff8f0 100%);
+        color: #8a5a00;
         font-size: 12px; font-weight: 700; text-align: center;
+        line-height: 1.3;
+        box-shadow: 0 4px 12px rgba(0, 31, 92, 0.08);
     }
+
+    .cert-photo-placeholder span { display: block; }
 
 @media (max-width: 768px) {
     .certificate-preview { max-width: 100%; }

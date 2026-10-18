@@ -83,7 +83,7 @@ export default {
         () => handleStaff(db, env, route, method, body, pathParts),
         () => handleAttendance(db, env, route, method, body, pathParts, url),
         () => handleVisitors(db, env, route, method, body, pathParts),
-        () => handleStudents(db, env, route, method, body, pathParts),
+        () => handleStudents(db, env, route, method, body, pathParts, request),
         () => handleAssessments(db, env, route, method, body, pathParts, url),
         () => handleCurriculum(db, env, route, method, body, pathParts, url),
         () => handleUpload(db, env, route, method, body, pathParts, request),
