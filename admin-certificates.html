@@ -2785,7 +2785,7 @@
         const eventName = document.getElementById('eventName').value || 'Certificate';
         const eventDate = document.getElementById('certDate').value || new Date().toISOString().split('T')[0];
         const gradYear = document.getElementById('gradYear').value || (typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear());
-        const certNumber = (studentCertNumbers && studentCertNumbers[student.admissionNumber]) || generateCertificateNumber(student, gradYear, 0);
+        const certNumber = await getPersistentCertNumber(student, gradYear, eventName, eventDate);
         const rendered = renderCertificate(student, schoolSettings || {}, eventName, eventDate, certNumber);
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'position:fixed;top:-9999px;left:-9999px;background:#ffffff;width:auto;';
@@ -2849,6 +2849,82 @@
     }
 
     const CERT_TEMPLATES = [
+        { id: 'pp2-graduation-2026', name: 'Changara Star Academy — PP2 Graduation 2026', category: 'Graduation', orientation: 'landscape',
+          bg: ['#fdf8f0', '#fbeef1'],
+          html:
+            + '<div class="cert-pp2">'
+            + '<div style="position:absolute;inset:0;width:100%;height:100%;box-sizing:border-box;border:6px double #d4a017;border-radius:12px;"></div>'
+            + '<div style="position:absolute;inset:14px;box-sizing:border-box;border:2px solid #d4a017;border-radius:10px;"></div>'
+            + '<svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1" viewBox="0 0 1000 630" preserveAspectRatio="none">'+
+              // thin gold border insets
+              '<rect x="26" y="26" width="948" height="578" rx="6" fill="none" stroke="#d4a017" stroke-width="2" opacity="0.6"/>'+
+              // corner flourishes
+              '<path d="M44 44a30 30 0 0 0 0 42" stroke="#d4a017" stroke-width="3" fill="none"/>'+
+              '<path d="M956 44a30 30 0 0 1 0 42" stroke="#d4a017" stroke-width="3" fill="none"/>'+
+              '<path d="M44 586a30 30 0 0 1 0-42" stroke="#d4a017" stroke-width="3" fill="none"/>'+
+              '<path d="M956 586a30 30 0 0 0 0-42" stroke="#d4a017" stroke-width="3" fill="none"/>'+
+              // upper-middle gold ribbon
+              '<defs><linearGradient id="gRibbon" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f5c842"/><stop offset="1" stop-color="#d4a017"/></linearGradient></defs>'+
+              '<path d="M220 90 H780 a14 14 0 0 1 12 12 v20 a14 14 0 0 1-12 12 H370 a10 10 0 0 1-9-6 l-12-26 a14 14 0 0 0-12-8z" fill="url(#gRibbon)" stroke="#d4a017" stroke-width="1"/>'+
+              // navy brush stroke behind ribbon
+              '<ellipse cx="500" cy="120" rx="300" ry="14" fill="#001f5c" opacity="0.18"/>'+
+              // upper-right: graduation cap + rolled diploma
+              '<rect x="790" y="70" width="42" height="52" fill="#001f5c" stroke="#d4a017" stroke-width="2" rx="4"/>'+
+              '<polygon points="811,68 780,96 842,96" fill="#001f5c" stroke="#d4a017" stroke-width="2"/>'+
+              '<rect x="848" y="76" width="26" height="56" fill="#0b5394" stroke="#d4a017" stroke-width="2" rx="3"/>'+
+              '<rect x="851" y="86" width="20" height="16" fill="#fff7"/>'+
+              // laurel + stars around Graduation 2026 (left/right)
+              '<path d="M170 470 C150 440 150 410 170 380" stroke="#d4a017" stroke-width="3" fill="none"/>'+
+              '<path d="M830 470 C850 440 850 410 830 380" stroke="#d4a017" stroke-width="3" fill="none"/>'+
+              '<path d="M170 380 C150 350 150 320 170 290" stroke="#0b5394" stroke-width="3" fill="none"/>'+
+              '<path d="M830 380 C850 350 850 320 830 290" stroke="#0b5394" stroke-width="3" fill="none"/>'+
+              // books + pencils bottom-left
+              '<rect x="50" y="500" width="56" height="34" fill="#001f5c" rx="3"/>'+
+              '<rect x="56" y="498" width="46" height="30" fill="#0b5394" rx="3"/>'+
+              '<line x1="58" y1="528" x2="100" y2="528" stroke="#d4a017" stroke-width="6" stroke-linecap="round"/>'+
+              '<line x1="62" y1="536" x2="104" y2="536" stroke="#001f5c" stroke-width="6" stroke-linecap="round"/>'+
+              // sweeping navy bottom-right
+              '<path d="M700 560 Q820 520 940 560" stroke="#001f5c" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.35"/>'+
+              '<circle cx="860" cy="430" r="22" fill="none" stroke="#d4a017" stroke-width="3" opacity="0.7"/>'+
+              '<circle cx="860" cy="430" r="34" fill="none" stroke="#0b5394" stroke-width="2" opacity="0.45"/>'+
+              // scattered gold stars
+              '<text x="120" y="120" font-size="16" fill="#d4a017">★</text>'+
+              '<text x="880" y="150" font-size="14" fill="#d4a017">★</text>'+
+              '<text x="200" y="90" font-size="12" fill="#d4a017">★</text>'+
+              '<text x="800" y="110" font-size="14" fill="#d4a017">★</text>'+
+              '</svg>'
+            + '<div style="position:relative;z-index:2;width:100%;max-width:920px;margin:0 auto;text-align:center;">'
+            + '<div style="font-size:13px;color:#001f5c;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:14px;">{{school_name}}</div>'
+            + '<div style="margin:6px 0;">{{school_logo}}</div>'
+            + '<div style="font-size:11px;color:#8a5a00;font-style:italic;margin-bottom:4px;">Excellence  •  Discipline  •  Success</div>'
+            + '<div style="font-size:12px;color:#001f5c;margin-bottom:4px;">{{school_motto}}</div>'
+            + '<div style="font-size:26px;color:#001f5c;font-weight:800;font-family:Georgia,serif;letter-spacing:1px;margin:14px 0;">CERTIFICATE OF GRADUATION</div>'
+            + '<div style="display:inline-block;background:linear-gradient(135deg,#f5c842,#d4a017);color:#001f5c;font-size:15px;font-weight:700;border-radius:20px;padding:6px 20px;margin-bottom:16px;box-shadow:0 2px 6px rgba(0,0,0,.12);">PRE-PRIMARY 2 (PP2)</div>'
+            + '<div style="font-size:16px;color:#333;margin:22px 0 10px;">This certificate is proudly awarded to</div>'
+            + '<div style="font-size:32px;color:#001f5c;font-weight:800;font-family:Georgia,serif;word-break:break-word;margin:10px 0;">{{student_name}}</div>'
+            + '<div style="font-size:13px;color:#555;margin:6px 0;">Admission No: <strong>{{admission_number}}</strong> — Class: <strong>{{class}}</strong></div>'
+            + '<div style="font-size:15px;color:#333;line-height:1.7;margin:26px auto;max-width:760px;">for successfully completing the PP2 programme and<br>demonstrating growth, learning and readiness<br>for the next stage of their educational journey.</div>'
+            + '<div style="margin:26px auto 18px;display:inline-flex;align-items:center;gap:10px;font-size:13px;color:#001f5c;">'
+            + '<svg width="22" height="14"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/></svg>'
+            + '<span>Graduation</span>'
+            + '<span style="font-weight:800;color:#001f5c;">{{graduation_year}}</span>'
+            + '<svg width="44" height="14"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/><circle cx="24" cy="7" r="4" fill="#d4a017"/><polygon points="24,3 27,11 21,11" fill="#d4a017"/></svg>'
+            + '<svg width="22" height="14"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/><circle cx="15" cy="7" r="4" fill="#d4a017"/><path d="M15 3 L18 11" stroke="#d4a017" stroke-width="2"/></svg>'
+            + '</div>'
+            + '<div style="margin-top:34px;">'
+            + '<span style="display:inline-block;width:60px;border-top:1px solid #001f5c;"></span>'
+            + '</div>'
+            + '<div style="display:flex;justify-content:space-around;margin-top:28px;">'
+            + '<div style="text-align:center;"><div style="border-top:1px solid #001f5c;width:130px;margin:0 auto;"></div><div style="font-size:12px;color:#001f5c;"><strong>Class Teacher</strong></div></div>'
+            + '<div style="text-align:center;"><div style="border-top:1px solid #001f5c;width:130px;margin:0 auto;"></div><div style="font-size:12px;color:#001f5c;"><strong>Headteacher</strong></div>' +
+              '<div style="font-size:11px;color:#555;">{{headteacher_name}}</div></div>'
+            + '</div>'
+            + '<div style="font-size:11px;color:#555;margin-top:22px;display:flex;justify-content:center;gap:32px;flex-wrap:wrap;">'
+            + '<span>Date of Issue: {{date}}</span>'
+            + '<span>Certificate No.: {{certificate_number}}</span>'
+            + '</div>'
+            + '</div></div>'
+        },
         { id: 'classic', name: 'Classic Gold', category: 'Academic Excellence', orientation: 'landscape',
           bg: ['#001f5c', '#0b5394'],
           html: '<div class="canvas-border" style="position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;border:4px solid #d4a017;border-radius:8px;"></div>' +
@@ -2970,6 +3046,12 @@
         const title = document.getElementById('designTitle');
         if (title) title.value = t.name + ' – Certificate (' + t.orientation + ')';
         draftKey = 'csa_cert_draft_' + t.id;
+        if (t.id === 'pp2-graduation-2026') {
+            const gy = document.getElementById('gradYear'); if (gy) gy.value = '2026';
+            const ev = document.getElementById('eventName'); if (ev) ev.value = 'PP2 Graduation';
+            const cf = document.getElementById('classFilter'); if (cf) cf.value = 'PP2';
+            setTimeout(function () { filterStudents(); updateSelectionSummary(); }, 50);
+        }
         setSaveStatus('saved', 'Template: ' + t.name);
         showAlert('Template "' + t.name + '" applied. Edit fields, then Save/Export.', 'info');
     }
@@ -3140,6 +3222,7 @@
     function renderCertificate(student, settings, eventName, eventDate, certNumber) {
         let template = getTemplateContent();
         template = substituteFields(template, student, settings, eventName, eventDate, certNumber);
+        template = template.replace('{{graduation_year}}', (document.getElementById('gradYear').value || currentYear));
 
         // Replace {{school_logo}} with actual image
         template = template.replace('{{school_logo}}',
@@ -3201,6 +3284,37 @@
         if (selectedStudents.length === 0) return '';
         const gradYear = document.getElementById('gradYear').value || currentYear;
         return generateCertificateNumber(selectedStudents[0], gradYear, 0);
+    }
+
+    // ---- Persistent certificate numbering (server-backed) ----
+    // Issues a real, persistent certificate number via the backend
+    // POST /api/certificates/generate (reuses an existing record for the same
+    // student+year+event instead of minting a new one). Cached on the client so
+    // repeated preview/export/download/print reuse the same issued number.
+    async function getPersistentCertNumber(student, gradYear, eventName, eventDate) {
+        if (!student || !student.admissionNumber) return generateCertificateNumber(student, gradYear, 0);
+        if (studentCertNumbers[student.admissionNumber]) return studentCertNumbers[student.admissionNumber];
+        const payload = {
+            studentId: student.admissionNumber,
+            eventName: eventName || (document.getElementById('eventName').value || 'Certificate'),
+            eventDate: eventDate || (document.getElementById('certDate').value || new Date().toISOString().split('T')[0]),
+            graduationYear: String(gradYear || document.getElementById('gradYear').value || currentYear),
+            templateName: 'Changara Star Academy — PP2 Graduation 2026'
+        };
+        try {
+            const data = await apiJson('/api/certificates/generate', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') },
+                body: JSON.stringify(payload)
+            });
+            if (data && data.certificate && data.certificate.certificateNumber) {
+                studentCertNumbers[student.admissionNumber] = data.certificate.certificateNumber;
+                return data.certificate.certificateNumber;
+            }
+        } catch (err) {
+            console.error('getPersistentCertNumber error:', err && err.message ? err.message : err);
+        }
+        return generateCertificateNumber(student, gradYear, 0);
     }
 
     // ---- Slide carousel (PowerPoint-like) for previewing all selected students ----
@@ -3430,7 +3544,7 @@
 
         for (let i = 0; i < selectedStudents.length; i++) {
             const student = selectedStudents[i];
-            const certNumber = studentCertNumbers[student.admissionNumber] || generateCertificateNumber(student, gradYear, i);
+            const certNumber = await getPersistentCertNumber(student, gradYear, eventName, eventDate);
 
             try {
                 const rendered = renderCertificate(student, schoolSettings, eventName, eventDate, certNumber);
@@ -3465,17 +3579,19 @@
         const gradYear = document.getElementById('gradYear').value || currentYear;
 
         selectedStudents.forEach((student, i) => {
-            const certNumber = studentCertNumbers[student.admissionNumber] || generateCertificateNumber(student, gradYear, i);
-            const rendered = renderCertificate(student, schoolSettings, eventName, eventDate, certNumber);
+            (async () => {
+                const certNumber = await getPersistentCertNumber(student, gradYear, eventName, eventDate);
+                const rendered = renderCertificate(student, schoolSettings, eventName, eventDate, certNumber);
 
-            const w = window.open('', '_blank');
-            w.document.write(`<html><head><style>
+                const w = window.open('', '_blank');
+                w.document.write(`<html><head><style>
                 @page { size: A4 ${pdfOrientation}; margin: 0; }
                 body { margin: 0; padding: 0; font-family: Georgia, serif; }
                 .certificate { width: 100vw; height: 100vh; }
             </style></head><body>${rendered}</body></html>`);
-            w.document.close();
-            setTimeout(() => w.print(), 500);
+                w.document.close();
+                setTimeout(() => w.print(), 500);
+            })();
         });
     }
 
