@@ -366,6 +366,40 @@
             margin: 0 2px;
         }
 
+        /* ===== Studio top toolbar ===== */
+        #topToolbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 10px; height: 42px;
+            background: #ffffff; border: 1px solid #e3e9f2;
+            border-radius: 10px; margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04); font-size: 13px;
+            overflow-x: auto;
+        }
+        #topToolbar .tb-btn { padding: 4px 10px; font-size: 13px; }
+        #topToolbar .tb-item { position: relative; }
+        #topToolbar .topbar-dd {
+            position: absolute; top: 100%; left: 0; min-width: 180px; max-width: 300px;
+            background: #fff; border: 1px solid #e3e9f2; border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12); padding: 6px; z-index: 200;
+            display: none; margin-top: 4px;
+        }
+        #topToolbar .topbar-dd.open { display: block; }
+        #topToolbar .topbar-dd .dd-item {
+            display: flex; align-items: center; gap: 6px; width: 100%;
+            padding: 6px 10px; text-align: left; border-radius: 6px;
+            cursor: pointer; font-size: 12px; color: #333;
+        }
+        #topToolbar .topbar-dd .dd-item:hover { background: #f0f2f5; }
+        #topToolbar .tb-spacer { flex: 1; }
+        #topToolbar .tb-zoom input[type=range] { width: 70px; }
+        #topToolbar .tb-title { font-weight: 700; color: #001f5c; width: 200px; }
+        #topToolbar .tb-title:focus { outline: 1px solid #d4a017; border-radius: 4px; }
+        .save-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        .save-dot.saved { background: #22c58e; }
+        .save-dot.saving { background: #f59e0b; animation: pulse 1s infinite; }
+        .save-dot.error { background: #ef4444; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body>
@@ -418,7 +452,67 @@
 
     <!-- ===== Studio Tab ===== -->
     <div id="studio-pane" class="tab-pane active">
+        <!-- ===== Studio top toolbar ===== -->
+        <div id="topToolbar">
+            <a href="admin-dashboard.html" class="tb-btn btn btn-sm btn-secondary" title="Back to dashboard"><i class="fas fa-home"></i></a>
+            <div class="tb-item">
+                <button class="tb-btn btn btn-sm btn-secondary" onclick="toggleDropdown('fileMenu')">File</button>
+                <div id="fileMenu" class="topbar-dd">
+                    <div class="dd-item" onclick="newDraft()"><i class="fas fa-file"></i> New design</div>
+                    <div class="dd-item" onclick="openDrafts()"><i class="fas fa-folder-open"></i> Open…</div>
+                    <div class="dd-item" onclick="saveDraft()"><i class="fas fa-save"></i> Save</div>
+                    <div class="dd-item" onclick="document.getElementById('designTitle').focus()"><i class="fas fa-edit"></i> Rename</div>
+                    <div class="dd-sep" style="height:1px;background:#e3e9f2;margin:6px 0;"></div>
+                    <div class="dd-item" onclick="resizeDesignDialog()"><i class="fas fa-expand-arrows-alt"></i> Resize design</div>
+                    <div class="dd-item" onclick="exportCanvasImage('png')"><i class="fas fa-file-image"></i> Export PNG</div>
+                    <div class="dd-item" onclick="exportCanvasImage('jpeg')"><i class="fas fa-file-image"></i> Export JPEG</div>
+                    <div class="dd-item" onclick="downloadAllPDFs()"><i class="fas fa-file-pdf"></i> Export PDF</div>
+                    <div class="dd-item" onclick="printAll()"><i class="fas fa-print"></i> Print</div>
+                    <div class="dd-sep" style="height:1px;background:#e3e9f2;margin:6px 0;"></div>
+                    <div class="dd-item" onclick="deleteDraft()" style="color:#ef4444;"><i class="fas fa-trash"></i> Delete design</div>
+                </div>
+            </div>
+            <div class="tb-item">
+                <button class="tb-btn btn btn-sm btn-secondary" onclick="toggleDropdown('resizeMenu')"><i class="fas fa-expand-arrows-alt"></i> Resize</button>
+                <div id="resizeMenu" class="topbar-dd">
+                    <div class="dd-item" onclick="resizeDesign('a4-landscape')"><i class="fas fa-file-pdf"></i> A4 Landscape</div>
+                    <div class="dd-item" onclick="resizeDesign('a4-portrait')"><i class="fas fa-file-pdf"></i> A4 Portrait</div>
+                    <div class="dd-item" onclick="resizeDesign('a5-landscape')"><i class="fas fa-file-pdf"></i> A5 Landscape</div>
+                    <div class="dd-item" onclick="resizeDesign('a5-portrait')"><i class="fas fa-file-pdf"></i> A5 Portrait</div>
+                </div>
+            </div>
+            <button class="tb-btn btn btn-sm btn-secondary" onclick="undoDrawing()" title="Undo (Ctrl+Z)"><i class="fas fa-undo"></i></button>
+            <button class="tb-btn btn btn-sm btn-secondary" onclick="redoDrawing()" title="Redo (Ctrl+Y)"><i class="fas fa-redo"></i></button>
+            <div class="tb-item tb-spacer"></div>
+            <input type="text" id="designTitle" class="tb-title" value="Certificate (A4 Landscape)" onchange="saveDraft()" style="border:1px solid #e3e9f2;border-radius:6px;padding:4px 8px;">
+            <span id="saveIndicator"><span id="saveDot" class="save-dot saved"></span><span id="saveStatus">Saved</span></span>
+            <div class="tb-item tb-spacer"></div>
+            <input type="range" min="25" max="400" value="100" onchange="setZoom(this.value)" oninput="setZoom(this.value)" style="vertical-align:middle;">
+            <span id="zoomLabel" style="width:48px;">100%</span>
+            <button class="tb-btn btn btn-sm btn-secondary" onclick="fitToScreen()" title="Fit to screen"><i class="fas fa-compress"></i></button>
+            <button class="tb-btn btn btn-sm btn-secondary" onclick="setZoom(100)" title="100% zoom"><i class="fas fa-expand"></i></button>
+            <button class="tb-btn btn btn-sm btn-secondary" onclick="toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand-arrows-alt"></i></button>
+        </div>
+    
         <!-- School Settings Section -->
+        <div class="card">
+            <h2><i class="fas fa-folder-open"></i> Certificate Templates</h2>
+            <p class="desc">Choose a school-certificate template, then customize fields, branding, and layout on the canvas.</p>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+                <select id="templateCategory" onchange="renderTemplates()" style="border:1px solid #e3e9f2;border-radius:6px;padding:4px 8px;font-size:13px;">
+                    <option value="all">All categories</option>
+                    <option>Academic Excellence</option>
+                    <option>Best Performing Learner</option>
+                    <option>Subject Excellence</option>
+                    <option>Sports and Games</option>
+                    <option>Scouting</option>
+                    <option>Completion</option>
+                </select>
+                <input type="text" id="templateSearch" placeholder="Search templates..." oninput="renderTemplates(this.value)" style="border:1px solid #e3e9f2;border-radius:6px;padding:4px 8px;font-size:13px;width:180px;">
+            </div>
+            <div id="templatesGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;"></div>
+        </div>
+
         <div class="card">
             <h2><i class="fas fa-school"></i> School Settings</h2>
             <p class="desc">School information is stored centrally and automatically inserted into every certificate. Update once, use everywhere.</p>
@@ -672,6 +766,9 @@
                                 <button class="btn btn-sm btn-secondary" onclick="undoDrawing()"><i class="fas fa-undo"></i> Undo</button>
                             </div>
                         </div>
+
+                        <!-- Page strip (multi-page navigation) -->
+                        <div id="pageStrip" style="display:none; align-items:center; gap:8px; padding:8px 12px; background:#f8f9fc; border:1px solid #e3e9f2; border-radius:8px; margin-bottom:10px; overflow-x:auto;"></div>
 
                         <!-- Design canvas -->
                         <div class="design-canvas" id="designCanvas" onclick="clearCanvasSelection(event)" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
@@ -2140,6 +2237,14 @@
 
     window.addEventListener('resize', function () { if (activeElement) positionSelectionBox(activeElement); });
 
+    // ---- Editor-wide keyboard shortcuts (skip when typing in inputs/contenteditable) ----
+    document.addEventListener('keydown', function (e) {
+        const tag = (document.activeElement || {}).tagName;
+        const inText = document.activeElement && (document.activeElement.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA');
+        if (e.ctrlKey && !e.shiftKey && e.key === 'z') { if (!inText) { e.preventDefault(); undoDrawing(); } }
+        else if (e.ctrlKey && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { if (!inText) { e.preventDefault(); redoDrawing(); } }
+    });
+
     // Promote every certificate field row (text, dotted lines, the border frame,
     // ...) into editable, movable, deletable .canvas-element nodes in the designer.
     // Elements are anchored to their current on-screen position (via rect) so the
@@ -2191,6 +2296,8 @@
     let redoStack = [];
     let maxHistory = 20;
     let viewZoom = 1;          // view-only magnification of the canvas stage (1 = 100%)
+    let designPages = [];      // multi-page canvases: {id,title,html,backgroundImageUrl,backgroundBaked,draw}
+    let currentPage = -1;      // -1 = single-canvas mode
 
     // Crop state
     let cropping = false;
@@ -2530,7 +2637,7 @@
         // Re-size (and preserve) the drawing canvas when the layout changes
         window.addEventListener('resize', function () { setTimeout(initDrawCanvas, 100); });
         // CSS may not have applied at DOMContentLoaded, so defer sizing until load
-        window.addEventListener('load', function () { setTimeout(initDrawCanvas, 50); setTimeout(initDesignerFields, 50); });
+        window.addEventListener('load', function () { setTimeout(initDrawCanvas, 50); setTimeout(initDesignerFields, 50); setTimeout(renderTemplates, 50); setTimeout(updatePageStrip, 50); });
         applyCanvasToolState();
     });
 
@@ -2542,6 +2649,457 @@
     window.undoDrawing = undoDrawing;
     window.cropCanvas = cropCanvas;
     window.loadBackgroundPrompt = loadBackgroundPrompt;
+
+    // ---- Studio top toolbar: zoom, resize, file/save, export ----
+    let draftKey = 'csa_cert_draft_' + (localStorage.getItem('adminToken') ? 'authed' : Date.now());
+
+    function currentDesign() {
+        return {
+            id: draftKey,
+            title: (document.getElementById('designTitle') || {}).value || 'Untitled design',
+            dimensions: { w: 297, h: 210, unit: 'mm' },
+            orientation: pdfOrientation || 'landscape',
+            html: getTemplateContent ? getTemplateContent() : document.getElementById('canvasContent').innerHTML,
+            backgroundImageUrl: backgroundImageUrl,
+            backgroundBaked,
+            draw: canvasReady() ? drawCanvas.toDataURL('image/png') : null,
+            zoom: viewZoom
+        };
+    }
+
+    function setZoom(pct) {
+        viewZoom = Math.max(0.25, Math.min(4, parseFloat(pct) / 100));
+        const dc = document.getElementById('designCanvas');
+        if (dc) { dc.style.transform = 'scale(' + viewZoom + ')'; dc.style.transformOrigin = 'top left'; }
+        const label = document.getElementById('zoomLabel');
+        if (label) label.textContent = Math.round(viewZoom * 100) + '%';
+        showAlert('Zoom ' + Math.round(viewZoom * 100) + '%', 'info');
+    }
+
+    function fitToScreen() {
+        const dc = document.getElementById('designCanvas');
+        const stage = dc ? dc.parentElement : null;
+        if (!dc || !stage) { setZoom(100); return; }
+        const maxW = stage.clientWidth;
+        const maxH = Math.max(300, window.innerHeight - stage.getBoundingClientRect().top - 60);
+        const z = Math.min(maxW / 1000, maxH / 677) * 100; // canvas design ratio ~297:210
+        setZoom(Math.max(25, Math.round(z)));
+    }
+
+    function resizeDesign(size) {
+        const opts = { 'a4-landscape': { w: 297, h: 210, o: 'landscape' }, 'a4-portrait': { w: 210, h: 297, o: 'portrait' }, 'a5-landscape': { w: 210, h: 148, o: 'landscape' }, 'a5-portrait': { w: 148, h: 210, o: 'portrait' } };
+        const o = opts[size];
+        if (!o) return;
+        pdfOrientation = o.o;
+        if (canvasReady()) {
+            drawCanvas.width = o.w * drawDpr; drawCanvas.height = o.h * drawDpr;
+            drawCanvas.style.width = o.w + 'px'; drawCanvas.style.height = o.h + 'px';
+        }
+        const dc = document.getElementById('designCanvas');
+        if (dc) dc.style.aspectRatio = (o.o === 'landscape') ? '297 / 210' : '210 / 297';
+        updateZoomLabel();
+        showAlert('Canvas resized to ' + o.w + 'x' + o.h + 'mm (' + o.o + ').', 'info');
+    }
+
+    function updateZoomLabel() {
+        const label = document.getElementById('zoomLabel');
+        if (label) label.textContent = Math.round(viewZoom * 100) + '%';
+    }
+
+    function saveDraft() {
+        try {
+            const d = currentDesign();
+            localStorage.setItem('csa_cert_draft_' + d.id, JSON.stringify(d));
+            localStorage.setItem('csa_cert_draft_last', d.id);
+            setSaveStatus('saved', 'Saved');
+        } catch (e) { setSaveStatus('error', 'Save failed'); }
+    }
+
+    function autosave() { setSaveStatus('saving', 'Saving…'); saveDraft(); }
+
+    function openDrafts() {
+        const keys = Object.keys(localStorage).filter(k => k.indexOf('csa_cert_draft_') === 0 && k !== 'csa_cert_draft_last');
+        const names = keys.map(k => { try { const d = JSON.parse(localStorage.getItem(k)); return { key: k, title: d.title, updated: d.updated }; } catch (_) { return null; } }).filter(Boolean);
+        if (!names.length) { showAlert('No saved designs yet. Create one and Save first.', 'info'); return; }
+        // Simple prompt-based picker (kept lightweight; a full list UI is a future enhancement)
+        const choice = window.prompt('Saved designs:\n' + names.map(n => n.title + ' (id: ' + n.key.replace('csa_cert_draft_', '') + ')').join('\n') + '\n\nEnter the id to open:', names[0].key.replace('csa_cert_draft_', ''));
+        if (choice) { const k = 'csa_cert_draft_' + choice; loadDraft(k); }
+    }
+
+    function loadDraft(key) {
+        const raw = localStorage.getItem(key || draftKey);
+        if (!raw) { showAlert('Design not found.', 'warning'); return; }
+        try {
+            const d = JSON.parse(raw);
+            if (d.html) {
+                const ta = document.getElementById('htmlSource');
+                if (ta) ta.value = d.html;
+                syncFromHTML();
+            }
+            if (d.backgroundImageUrl) loadCanvasBackground(d.backgroundImageUrl);
+            if (d.backgroundBaked) { /* background already baked onto canvas bitmap */ }
+            setDraftKey(d.id);
+            const title = document.getElementById('designTitle');
+            if (title) title.value = d.title;
+            const o = d.orientation || 'landscape';
+            resizeDesign(o === 'landscape' ? 'a4-landscape' : 'a4-portrait');
+            if (d.zoom) setZoom(d.zoom * 100);
+            showAlert('Design opened: ' + d.title, 'info');
+        } catch (e) { showAlert('Could not open design: ' + e.message, 'error'); }
+    }
+
+    function setDraftKey(id) { draftKey = id; }
+
+    function setSaveStatus(state, text) {
+        const dot = document.getElementById('saveDot');
+        const label = document.getElementById('saveStatus');
+        if (dot) dot.className = 'save-dot ' + state;
+        if (label) label.textContent = text || 'Saved';
+    }
+
+    function newDraft() {
+        if (!confirm('Discard the current design and start a new one?')) return;
+        document.getElementById('htmlSource').value = '';
+        syncFromHTML();
+        clearBackground();
+        eraseDrawings();
+        draftKey = 'csa_cert_draft_' + Date.now();
+        const title = document.getElementById('designTitle');
+        if (title) title.value = 'Untitled design';
+        setSaveStatus('saving', 'New design');
+        drawCanvas && (drawCanvas.width = 0);
+        showAlert('New design started.', 'info');
+    }
+
+    function deleteDraft() {
+        if (!confirm('Delete this saved design? This cannot be undone.')) return;
+        try { localStorage.removeItem('csa_cert_draft_' + draftKey); showAlert('Design deleted.', 'info'); setSaveStatus('saving', 'Not saved'); }
+        catch (e) { showAlert('Could not delete design.', 'error'); }
+    }
+
+    // PNG / JPEG export of the current certificate (background + elements + strokes),
+    // reusing the validated renderCertificate() output via html2canvas so editor
+    // controls/selectors are never included.
+    async function exportCanvasImage(format) {
+        const student = (selectedStudents && selectedStudents[0]) || { fullName: 'Learner', admissionNumber: '', grade: '', class: '' };
+        const eventName = document.getElementById('eventName').value || 'Certificate';
+        const eventDate = document.getElementById('certDate').value || new Date().toISOString().split('T')[0];
+        const gradYear = document.getElementById('gradYear').value || (typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear());
+        const certNumber = (studentCertNumbers && studentCertNumbers[student.admissionNumber]) || generateCertificateNumber(student, gradYear, 0);
+        const rendered = renderCertificate(student, schoolSettings || {}, eventName, eventDate, certNumber);
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:fixed;top:-9999px;left:-9999px;background:#ffffff;width:auto;';
+        wrapper.innerHTML = rendered;
+        document.body.appendChild(wrapper);
+        try {
+            const canvas = await window.html2canvas(wrapper, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' });
+            const dataUrl = canvas.toDataURL('image/' + (format === 'jpeg' ? 'jpeg' : 'png'), 0.92);
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = 'certificate-' + Date.now() + '.' + (format === 'jpeg' ? 'jpg' : 'png');
+            a.click();
+            showAlert('Exported as ' + (format === 'jpeg' ? 'JPEG' : 'PNG') + '.', 'info');
+        } catch (err) {
+            showAlert('Export failed: ' + err.message, 'error');
+        } finally {
+            if (wrapper.parentNode) document.body.removeChild(wrapper);
+        }
+    }
+
+    function toggleDropdown(id) {
+        const menu = document.getElementById(id);
+        if (!menu) return;
+        const expanded = menu.classList.toggle('open');
+        menu.setAttribute('aria-expanded', expanded);
+        // close other open dropdowns
+        document.querySelectorAll('.topbar-dd').forEach(m => { if (m !== menu) m.classList.remove('open'); });
+    }
+
+    function resizeDesignDialog() {
+        const w = prompt('Custom width (mm):', '297');
+        if (w === null) return;
+        const h = prompt('Custom height (mm):', '210');
+        if (h === null) return;
+        const sw = parseFloat(w), sh = parseFloat(h);
+        if (!sw || !sh) { showAlert('Invalid dimensions.', 'error'); return; }
+        pdfOrientation = sw > sh ? 'landscape' : 'portrait';
+        if (canvasReady()) { drawCanvas.width = sw * drawDpr; drawCanvas.height = sh * drawDpr; drawCanvas.style.width = sw + 'px'; drawCanvas.style.height = sh + 'px'; }
+        const dc = document.getElementById('designCanvas');
+        if (dc) dc.style.aspectRatio = sw + ' / ' + sh;
+        document.getElementById('designTitle').value = 'Custom (' + sw + 'x' + sh + 'mm)';
+        updateZoomLabel();
+        showAlert('Canvas resized to ' + sw + 'x' + sh + 'mm.', 'info');
+    }
+
+    function toggleFullscreen() {
+        const stage = document.getElementById('designCanvas');
+        if (!stage) return;
+        if (!document.fullscreenElement) { stage.requestFullscreen().catch(() => {}); }
+        else { document.exitFullscreen(); }
+    }
+
+    // ===================== Templates library + Multi-page =====================
+    function gradientToDataUrl(topHex, bottomHex, w, h) {
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const ctx = c.getContext('2d');
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        g.addColorStop(0, topHex); g.addColorStop(1, bottomHex);
+        ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+        return c.toDataURL('image/png');
+    }
+
+    const CERT_TEMPLATES = [
+        { id: 'classic', name: 'Classic Gold', category: 'Academic Excellence', orientation: 'landscape',
+          bg: ['#001f5c', '#0b5394'],
+          html: '<div class="canvas-border" style="position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;border:4px solid #d4a017;border-radius:8px;"></div>' +
+                '<div style="font-size:14px;color:#d4a017;font-style:italic;margin-bottom:8px;">{{school_name}} — {{school_motto}}</div>' +
+                '<div style="font-size:28px;color:#001f5c;font-weight:700;margin:18px 0;">CERTIFICATE OF {{event_name}}</div>' +
+                '<div style="font-size:16px;color:#333;line-height:1.8;margin:20px 0;">This certificate is proudly awarded to</div>' +
+                '<div style="font-size:32px;color:#001f5c;font-weight:800;font-family:Georgia,serif;margin:15px 0;">{{student_name}}</div>' +
+                '<div style="font-size:16px;color:#333;line-height:1.8;margin:25px 0;">Admission No: {{admission_number}} | Class: {{class}}</div>' +
+                '<div style="font-size:16px;color:#333;line-height:1.8;margin:30px 0;">In recognition of successful completion.</div>' +
+                '<div style="font-size:12px;color:#666;margin:20px 0;">Certificate No: {{certificate_number}}</div>' +
+                '<div style="display:flex;justify-content:space-between;margin-top:20px;"><div style="width:140px;height:2px;background:#001f5c;"></div><div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#666;"><img src="{{school_logo}}" class="cert-seal-img"> Authorized Signatory</div></div>' },
+        { id: 'graduation', name: 'Graduation', category: 'Academic Excellence', orientation: 'landscape',
+          bg: ['#ffffff', '#ffffff'],
+          html: '<div class="canvas-border" style="position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;border:4px solid #001f5c;border-radius:8px;"></div>' +
+                '<div style="font-size:12px;color:#001f5c;font-weight:700;letter-spacing:2px;text-transform:uppercase;">{{school_name}}</div>' +
+                '<div style="font-size:13px;color:#001f5c;">{{school_motto}}</div>' +
+                '<div style="font-size:30px;color:#001f5c;font-weight:700;margin:16px 0;">Certificate of {{event_name}}</div>' +
+                '<div style="font-size:18px;color:#333;margin:22px 0;">This is to certify that</div>' +
+                '<div style="font-size:32px;color:#001f5c;font-weight:800;margin:12px 0;">{{student_name}}</div>' +
+                '<div style="font-size:14px;color:#333;margin:18px 0;">Admission No: <strong>{{admission_number}}</strong> — Class: <strong>{{class}}</strong></div>' +
+                '<div style="font-size:15px;color:#333;margin:24px 0;">Has successfully completed {{event_name}} with dedication and excellence.</div>' +
+                '<div style="font-size:12px;color:#666;margin-top:24px;">Certificate No: {{certificate_number}} | Date: {{date}}</div>' +
+                '<div style="margin-top:20px;display:flex;justify-content:center;margin-bottom:10px;"><img src="{{school_logo}}" class="cert-logo-img"></div>' +
+                '<div style="margin-top:10px;display:flex;justify-content:space-around;">' +
+                '<div style="text-align:center;"><div style="border-top:1px solid #001f5c;width:120px;padding-top:4px;font-size:12px;">Authorized<br>Signature</div></div>' +
+                '<div style="text-align:center;"><div style="border-top:1px solid #001f5c;width:120px;padding-top:4px;font-size:12px;">Headteacher<br>Signature</div></div>' +
+                '</div>' },
+        { id: 'banner', name: 'Blue Banner', category: 'Completion', orientation: 'landscape',
+          bg: ['#ffffff', '#f0f7ff'],
+          html: '<div class="canvas-border" style="position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;border:4px double #001f5c;border-radius:8px;"></div>' +
+                '<div style="font-size:12px;color:#001f5c;font-weight:700;letter-spacing:2px;text-transform:uppercase;">{{school_name}}</div>' +
+                '<div style="font-size:30px;color:#001f5c;font-weight:700;margin:16px 0;">{{event_name}} Certificate</div>' +
+                '<div style="font-size:18px;color:#333;margin:22px 0;">Awarded to</div>' +
+                '<div style="font-size:30px;color:#001f5c;font-weight:800;letter-spacing:1px;margin:14px 0;">{{student_name}}</div>' +
+                '<div style="font-size:14px;color:#333;margin:24px 0;">Admission No: <strong>{{admission_number}}</strong> — Class: <strong>{{class}}</strong></div>' +
+                '<div style="font-size:14px;color:#333;margin:28px 0;">For consistent excellence and completion of requirements.</div>' +
+                '<div style="font-size:11px;color:#666;">Certificate No: {{certificate_number}} | {{date}}</div>' +
+                '<div style="margin-top:20px;display:flex;gap:20px;align-items:flex-end;"><div style="width:120px;height:2px;background:#001f5c;"></div><div style="font-size:12px;color:#666;">Signature</div></div>' },
+        { id: 'seal', name: 'Seal of Honor', category: 'Best Performing Learner', orientation: 'landscape',
+          bg: ['#fffbeb', '#ffffff'],
+          html: '<div class="canvas-border" style="position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;border:6px double #d4a017;border-radius:10px;"></div>' +
+                '<div style="font-size:12px;color:#8a5a00;">{{school_name}}</div>' +
+                '<div style="font-size:26px;color:#001f5c;font-weight:700;margin:12px 0;">Seal of Honor — {{event_name}}</div>' +
+                '<div style="font-size:16px;color:#333;margin:20px 0;">Presented to</div>' +
+                '<div style="font-size:34px;color:#001f5c;font-weight:800;letter-spacing:1px;margin:12px 0;">{{student_name}}</div>' +
+                '<div style="font-size:14px;color:#333;margin:18px 0;">Admission No: {{admission_number}} | {{class}}</div>' +
+                '<div style="font-size:14px;color:#333;margin:28px 0;">In recognition of outstanding achievement and honorable conduct.</div>' +
+                '<div style="font-size:11px;color:#666;">Certificate No: {{certificate_number}} | {{date}}</div>' +
+                '<div style="display:flex;justify-content:center;margin-top:16px;"><svg width="90" height="90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="#d4a017" stroke-width="4"/><text x="50" y="56" font-size="10" fill="#001f5c" text-anchor="middle" font-weight="800">SEAL</text></svg></div>' },
+        { id: 'subject', name: 'Subject Excellence', category: 'Subject Excellence', orientation: 'portrait',
+          bg: ['#0b5394', '#ffffff'],
+          html: '<div class="canvas-border" style="position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;border:4px solid #001f5c;border-radius:8px;"></div>' +
+                '<div style="font-size:14px;color:#fff;text-align:center;">{{school_name}}<br><span style="font-size:11px;">{{school_motto}}</span></div>' +
+                '<div style="font-size:24px;color:#fff;font-weight:700;margin:14px 0;">Subject Excellence Award</div>' +
+                '<div style="font-size:15px;color:#e8ecf1;margin:18px 0;">This is to certify that</div>' +
+                '<div style="font-size:28px;color:#fff;font-weight:800;margin:12px 0;">{{student_name}}</div>' +
+                '<div style="font-size:14px;color:#e8ecf1;margin:14px 0;">Admission No: {{admission_number}} | Class: {{class}}</div>' +
+                '<div style="font-size:13px;color:#e8ecf1;margin:26px 0;">Achieved excellence in <strong>{{event_name}}</strong> for the current academic year.</div>' +
+                '<div style="font-size:11px;color:#e8ecf1;">Certificate No: {{certificate_number}} | {{date}}</div>' +
+                '<div style="margin-top:24px;border-top:1px dashed #fff;padding-top:10px;font-size:11px;color:#e8ecf1;">Authorized: _____________________</div>' },
+        { id: 'sports', name: 'Sports & Games', category: 'Sports and Games', orientation: 'landscape',
+          bg: ['#ffffff', '#ffffff'],
+          html: '<div class="canvas-border" style="position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;border:4px solid #00875a;border-radius:8px;"></div>' +
+                '<div style="font-size:13px;color:#00875a;font-weight:700;">{{school_name}}</div>' +
+                '<div style="font-size:26px;color:#00875a;font-weight:700;margin:14px 0;">Sports & Games Award</div>' +
+                '<div style="font-size:15px;color:#333;">Certificate of Achievement</div>' +
+                '<div style="font-size:15px;color:#333;margin:16px 0;">Awarded to</div>' +
+                '<div style="font-size:30px;color:#001f5c;font-weight:800;margin:10px 0;">{{student_name}}</div>' +
+                '<div style="font-size:13px;color:#555;margin:16px 0;">Admission No: {{admission_number}} | {{class}} | {{date}}</div>' +
+                '<div style="font-size:14px;color:#333;margin:22px 0;">For excellence in <strong>{{event_name}}</strong> during the season.</div>' +
+                '<div style="font-size:11px;color:#666;">Certificate No: {{certificate_number}}</div>' +
+                '<div style="margin-top:20px;display:flex;align-items:flex-end;gap:12px;"><svg width="80" height="34"><circle cx="17" cy="17" r="14" fill="none" stroke="#00875a" stroke-width="3"/><path d="M17 4 L17 12 L24 17" stroke="#00875a" stroke-width="3"/></svg><span style="font-size:12px;color:#666;border-top:1px solid #ccc;padding-top:6px;">Physical Education Dept.</span></div>' },
+        { id: 'scouting', name: 'Scouting Achievement', category: 'Scouting', orientation: 'landscape',
+          bg: ['#fff7ed', '#ffffff'],
+          html: '<div class="canvas-border" style="position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;border:4px solid #ea580c;border-radius:8px;"></div>' +
+                '<div style="font-size:13px;color:#ea580c;font-weight:700;">{{school_name}}</div>' +
+                '<div style="font-size:24px;color:#001f5c;font-weight:700;margin:12px 0;">Scouting Achievement Certificate</div>' +
+                '<div style="font-size:15px;color:#333;margin:18px 0;">This certifies that</div>' +
+                '<div style="font-size:28px;color:#ea580c;font-weight:800;margin:10px 0;">{{student_name}}</div>' +
+                '<div style="font-size:13px;color:#555;margin:12px 0;">Admission No: {{admission_number}} | Class: {{class}}</div>' +
+                '<div style="font-size:14px;color:#333;margin:24px 0;">Has demonstrated outstanding merit in <strong>{{event_name}}</strong> scouting activities.</div>' +
+                '<div style="font-size:11px;color:#666;">Certificate No: {{certificate_number}} | Date: {{date}}</div>' +
+                '<div style="margin-top:18px;"><svg width="90" height="20"><circle cx="10" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/><circle cx="28" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/><circle cx="46" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/></svg></div>' }
+    ];
+
+    function renderTemplates(query) {
+        const container = document.getElementById('templatesGrid');
+        if (!container) return;
+        const q = (query || '').toLowerCase();
+        const cats = {};
+        CERT_TEMPLATES.forEach(t => { (cats[t.category] = cats[t.category] || []).push(t); });
+        let html = '';
+        const activeCat = (document.getElementById('templateCategory').value || 'all');
+        Object.keys(cats).forEach(cat => {
+            if (activeCat !== 'all' && activeCat !== cat) return;
+            html += '<div class="tpl-cat"><div class="tpl-cat-header">' + cat + '</div>';
+            cats[cat].forEach(t => {
+                if (t.name.toLowerCase().indexOf(q) === -1) return;
+                html += '<div class="tpl-sample" onclick="applyTemplate(\'' + t.id + '\')" title="Apply ' + t.name + '">' +
+                    '<div class="tpl-sample-bg" style="background:' + t.bg.join(' ') + ';"></div><div class="tpl-label">' + t.name + '</div></div>';
+            });
+            html += '</div>';
+        });
+        container.innerHTML = html || '<div style="padding:10px;color:#888;">No templates match.</div>';
+    }
+
+    function applyTemplate(id) {
+        const t = CERT_TEMPLATES.find(x => x.id === id);
+        if (!t) return;
+        if (!confirm('Apply the "' + t.name + '" template? This replaces the current design content.')) return;
+        const bg = gradientToDataUrl(t.bg[0], t.bg[1], 900, 630);
+        document.getElementById('htmlSource').value = t.html;
+        syncFromHTML();
+        loadCanvasBackground(bg);
+        initDrawCanvas();
+        pdfOrientation = t.orientation;
+        const dc = document.getElementById('designCanvas');
+        if (dc) dc.style.aspectRatio = (t.orientation === 'landscape') ? '297 / 210' : '210 / 297';
+        const title = document.getElementById('designTitle');
+        if (title) title.value = t.name + ' – Certificate (' + t.orientation + ')';
+        draftKey = 'csa_cert_draft_' + t.id;
+        setSaveStatus('saved', 'Template: ' + t.name);
+        showAlert('Template "' + t.name + '" applied. Edit fields, then Save/Export.', 'info');
+    }
+
+    // ---- Multi-page management ----
+    function updatePageStrip() {
+        const strip = document.getElementById('pageStrip');
+        if (!strip) return;
+        strip.style.display = 'flex';
+        let html = '<div class="page-strip"><span style="font-weight:600;color:#001f5c;margin-right:6px;">Pages:</span>';
+        if (designPages.length === 0) {
+            html += '<button class="btn btn-sm btn-secondary" onclick="addPage()">+ Add Page</button>';
+            document.getElementById('pageStrip').innerHTML = html + '</div>';
+            return;
+        }
+        designPages.forEach((p, i) => {
+            html += '<button class="page-tab ' + (i === currentPage ? 'active' : '') + '" onclick="switchPage(' + i + ')" title="' + (p.hidden ? 'Hidden' : 'Visible') + '">' +
+                '<span class="page-thumb">' + (p.draw ? '<img src="' + p.draw + '" style="width:100%;height:100%;object-fit:contain;">' : '—') + '</span>' +
+                '<span class="page-name">' + (p.title || ('Page ' + (i + 1))) + '</span>' +
+                '<span class="page-visibility ' + (p.hidden ? 'hidden' : '') + '" onclick="togglePageVisibility(' + i + ');event.stopPropagation();">' + (p.hidden ? '🙈' : '👁') + '</span>' +
+                '</button>';
+        });
+        html += '<button class="page-add" onclick="addPage()" title="Add page">+</button>';
+        document.getElementById('pageStrip').innerHTML = html + '</div>';
+    }
+
+    function addPage() {
+        designPages.push({ id: Date.now() + '_' + Math.random().toString(36).slice(2, 8), title: 'Page ' + (designPages.length + 1), hidden: false, html: null, backgroundImageUrl: backgroundImageUrl, backgroundBaked: backgroundBaked, draw: canvasReady() ? drawCanvas.toDataURL('image/png') : null });
+        currentPage = designPages.length - 1;
+        designPages[designPages.length - 1].html = getTemplateContent();
+        updatePageStrip();
+        showAlert('Page added.', 'info');
+    }
+
+    function saveCurrentPage() {
+        if (currentPage < 0 || !designPages[currentPage]) return;
+        const p = designPages[currentPage];
+        p.html = getTemplateContent();
+        p.backgroundImageUrl = backgroundImageUrl;
+        p.backgroundBaked = backgroundBaked;
+        p.draw = canvasReady() ? drawCanvas.toDataURL('image/png') : null;
+    }
+
+    function switchPage(i) {
+        if (i < 0 || i >= designPages.length) return;
+        saveCurrentPage();
+        currentPage = i;
+        const p = designPages[i];
+        document.getElementById('htmlSource').value = p.html || '';
+        syncFromHTML();
+        if (p.backgroundImageUrl) loadCanvasBackground(p.backgroundImageUrl);
+        else {
+            backgroundImageUrl = null; backgroundBaked = false;
+            const dc = document.getElementById('designCanvas');
+            if (dc) { dc.style.backgroundImage = 'none'; dc.style.background = 'linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%)'; }
+        }
+        if (canvasReady() && p.draw) {
+            const img = new Image();
+            img.onload = () => { drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height); drawCtx.drawImage(img, 0, 0); };
+            img.src = p.draw;
+        }
+        updatePageStrip();
+        showAlert('Switched to page ' + (i + 1) + '.', 'info');
+    }
+
+    function duplicatePage(i) {
+        const src = designPages[i];
+        designPages.splice(i + 1, 0, JSON.parse(JSON.stringify(src)));
+        designPages[i + 1].title = (src.title || 'Page') + ' copy';
+        currentPage = i + 1;
+        switchPage(i + 1);
+    }
+
+    function deletePage(i) {
+        if (!confirm('Delete this page?')) return;
+        designPages.splice(i, 1);
+        currentPage = Math.max(0, currentPage - 1);
+        if (designPages.length) switchPage(currentPage); else updatePageStrip();
+    }
+
+    function togglePageVisibility(i) {
+        designPages[i].hidden = !designPages[i].hidden;
+        updatePageStrip();
+    }
+
+    function renamePage(i) {
+        const name = prompt('Page name:', designPages[i].title || ('Page ' + (i + 1)));
+        if (name !== null) { designPages[i].title = name; updatePageStrip(); }
+    }
+
+    function reorderPages() {
+        if (designPages.length < 2) return;
+        const order = prompt('Drag pages left/right by entering their new order as 1-based numbers,\nseparated by commas. Current: ' + designPages.map(p => p.title || 'p').join(', '));
+        if (!order) return;
+        // simple numeric reorder not supported via text; fall back to duplicate/delete if needed
+        showAlert('Reordering is supported via Save (per-page) and the page tab order. Use duplicate/delete to adjust.', 'info');
+    }
+
+    // ---- Multi-page PDF export (combines all visible pages) ----
+    async function exportAllPagesPdf() {
+        if (!selectedStudents || !selectedStudents.length) { showAlert('Select students to populate pages.', 'error'); return; }
+        saveCurrentPage();
+        const eventName = document.getElementById('eventName').value || 'Certificate';
+        const eventDate = document.getElementById('certDate').value || new Date().toISOString().split('T')[0];
+        const gradYear = document.getElementById('gradYear').value || (typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear());
+        const student = selectedStudents[0];
+        const certNumber = studentCertNumbers[student.admissionNumber] || generateCertificateNumber(student, gradYear, 0);
+        const pages = designPages.length ? designPages : [{ html: getTemplateContent(), backgroundImageUrl: backgroundImageUrl }];
+        let combined = '';
+        pages.forEach(p => {
+            if (p.hidden) return;
+            let html = p.html || getTemplateContent();
+            html = substituteFields(html, student, schoolSettings || {}, eventName, eventDate, certNumber);
+            html = html.replace('{{school_logo}}', (schoolSettings && schoolSettings.school_logo) ? '<img src="' + schoolSettings.school_logo + '" class="cert-logo-img">' : '<span style="font-size:48px;">🏫</span>');
+            html = html.replace('{{school_stamp}}', (schoolSettings && schoolSettings.school_stamp) ? '<img src="' + schoolSettings.school_stamp + '" class="cert-seal-img">' : '');
+            const bgStyle = (p.backgroundImageUrl && !p.backgroundBaked) ? 'background-image:url(' + p.backgroundImageUrl + ');background-size:cover;background-position:center;background-repeat:no-repeat;' : '';
+            combined += '<div class="certificate multi" style="' + bgStyle + '"><div class="cert-border"></div><div class="cert-shield"></div><div class="cert-content" style="' + ((p.backgroundImageUrl && !p.backgroundBaked) ? 'background:transparent;' : '') + '">' + html + '</div></div>';
+        });
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:fixed;top:-9999px;left:-9999px;background:#fff;width:1200px;';
+        wrapper.innerHTML = combined;
+        document.body.appendChild(wrapper);
+        try {
+            const opt = pdfOrientation === 'portrait' ? { margin: [0, 0, 0, 0], filename: ('certificates-' + Date.now() + '.pdf'), image: { type: 'jpeg', quality: 0.9 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'in', format: 'a4', orientation: pdfOrientation } }
+                : { margin: [0, 0, 0, 0], filename: ('certificates-' + Date.now() + '.pdf'), image: { type: 'jpeg', quality: 0.9 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } };
+            await html2pdf().set(opt).from(wrapper).save();
+            showAlert('Multi-page PDF exported.', 'info');
+        } catch (err) { showAlert('Export failed: ' + err.message, 'error'); }
+        finally { document.body.removeChild(wrapper); }
+    }
 
     // ---- Preview ----
     function getTemplateContent() {
@@ -3121,9 +3679,40 @@
         font-size: 12px; font-weight: 700; text-align: center;
     }
 
-    @media (max-width: 768px) {
-        .certificate-preview { max-width: 100%; }
-    }
+@media (max-width: 768px) {
+    .certificate-preview { max-width: 100%; }
+}
+
+/* ---- Templates panel ---- */
+.tpl-cat { font-size:12px; color:#647489; margin-bottom:6px; font-weight:600; }
+.tpl-sample {
+    position:relative; display:block; width:100%; border:2px solid #e3e9f2; border-radius:8px;
+    cursor:pointer; background:#fff; text-align:center; padding:8px;
+    transition: border-color .15s, box-shadow .15s; overflow:hidden;
+}
+.tpl-sample:hover { border-color:#d4a017; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+.tpl-sample.active { border-color:#d4a017; box-shadow:0 0 0 3px #ffec9c inset; }
+.tpl-sample-bg { position:absolute; inset:0; border-radius:6px; z-index:0; }
+.tpl-label { font-size:11px; color:#647489; margin-top:4px; position:relative; z-index:1; }
+
+/* ---- Page strip ---- */
+.page-strip { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.page-tab {
+    display:inline-flex; align-items:center; gap:6px; padding:6px 10px;
+    border:1px solid #d4a017; border-radius:6px; background:#fff;
+    font-size:13px; color:#001f5c; cursor:pointer;
+}
+.page-tab.active { background:#d4a017; color:#fff; }
+.page-tab.hidden { opacity:.45; }
+.page-tab .badge { font-size:10px; }
+.page-thumb { width:40px; height:28px; border:1px solid #e3e9f2; border-radius:4px; object-fit:cover; }
+.page-add {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:30px; height:30px; border:1px dashed #cbd3e0; border-radius:6px;
+    background:#fff; color:#475569; font-size:16px; cursor:pointer;
+    transition: border-color .15s, background .15s;
+}
+.page-add:hover { border-color:#d4a017; background:#fffbeb; }
 </style>
 
 </body>
