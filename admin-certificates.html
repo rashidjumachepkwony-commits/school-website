@@ -1521,6 +1521,11 @@
         // Persist a CLEAN (flow-layout) version - never the editor's absolute coords
         // - so saved templates and the HTML source reopen correctly in preview/export.
         document.getElementById('htmlSource').value = normalizeTemplateForRender(canvas.innerHTML);
+        // Invalidate cached slides so preview reflects the latest edits
+        slidesHtml = [];
+        if (selectedStudents && selectedStudents.length > 0) {
+            updatePreview();
+        }
     }
 
     function syncFromHTML() {
