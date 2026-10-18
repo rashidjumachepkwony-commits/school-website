@@ -354,7 +354,7 @@
             gap: 4px;
             align-items: center;
             padding: 8px 10px;
-            background: #f8f9fc;
+            background: #fff;
             border: 1px solid #e3e9f2;
             border-radius: 8px;
             margin-top: 8px;
@@ -363,6 +363,11 @@
         #designerActions .sep {
             width: 1px; height: 22px; background: #e3e9f2;
             margin: 0 2px;
+        }
+        #designerActions button.active {
+            background: #071D49 !important;
+            color: #D4AF37 !important;
+            border-color: #D4AF37;
         }
 
         /* ===== Studio top toolbar ===== */
@@ -727,7 +732,22 @@
                                 <input type="file" id="imageUploadInput" accept="image/*" style="display:none" onchange="onImageUploadSelected(this)">
                             </div>
                             <!-- Layers & alignment (Canva-style top bar), shown when an element is selected -->
-                            <div id="designerActions" class="designer-actions-bar" style="display:none;align-items:center;gap:4px;">
+                        <div id="designerActions" class="designer-actions-bar" style="display:none;align-items:center;gap:4px;">
+                                <div class="sep"></div>
+                                <span style="font-size:11px;font-weight:600;color:#666;">Text:</span>
+                                <select id="textFontFamily" onchange="setFontFamily(this.value)" style="width:120px;font-size:12px;"><option value="">Font</option></select>
+                                <input type="number" id="textFontSize" min="8" max="120" step="1" placeholder="14" onchange="setFontSize(this.value)" style="width:60px;font-size:12px;">
+                                <div class="btn-group" style="display:flex;gap:2px;">
+                                    <button class="btn btn-sm btn-secondary" id="textBold" onclick="setTextStyle('bold')" title="Bold (Ctrl+B)"><i class="fas fa-bold"></i></button>
+                                    <button class="btn btn-sm btn-secondary" id="textItalic" onclick="setTextStyle('italic')" title="Italic (Ctrl+I)"><i class="fas fa-italic"></i></button>
+                                    <button class="btn btn-sm btn-secondary" id="textUnderline" onclick="setTextStyle('underline')" title="Underline (Ctrl+U)"><i class="fas fa-underline"></i></button>
+                                </div>
+                                <input type="color" id="textColorPicker" onchange="setTextColor(this.value)" title="Text color" style="width:28px;height:24px;border:1px solid #e3e9f2;border-radius:4px;">
+                                <div class="btn-group" style="display:flex;gap:2px;">
+                                    <button class="btn btn-sm btn-secondary" onclick="setTextAlign('left')" title="Align left"><i class="fas fa-align-left"></i></button>
+                                    <button class="btn btn-sm btn-secondary" onclick="setTextAlign('center')" title="Align center"><i class="fas fa-align-center"></i></button>
+                                    <button class="btn btn-sm btn-secondary" onclick="setTextAlign('right')" title="Align right"><i class="fas fa-align-right"></i></button>
+                                </div>
                                 <div class="sep"></div>
                                 <button class="btn btn-sm btn-secondary" onclick="zOrder('front')" title="Bring to front (Ctrl+Shift+])"><i class="fas fa-layer-group"></i></button>
                                 <button class="btn btn-sm btn-secondary" onclick="zOrder('back')" title="Send to back (Ctrl+Shift+[)"><i class="fas fa-compress-arrows-alt"></i></button>
@@ -2199,53 +2219,67 @@
         }
     }
 
-    // ---- Text styling toolbar ----
+    // ---- Text styling toolbar (permanent ribbon in designerActions) ----
     function ensureTextToolbar() {
-        if (textToolbar) return;
         const dc = document.getElementById('designCanvas');
         if (!dc) return;
-        const bar = document.createElement('div');
-        bar.id = 'textToolbar';
-        let html = '<select onchange="setFontFamily(this.value)" style="width:130px;">';
-        html += '<option value="">Font</option>';
-        FONT_STACKS.forEach(f => { html += '<option value="' + f[1] + '">' + f[0] + '</option>'; });
-        html += '</select>';
-        html += '<input type="number" min="8" max="120" step="1" placeholder="14" onchange="setFontSize(this.value)" style="width:70px;">';
-        html += '<button class="btn btn-sm btn-secondary" onclick="setTextStyle(\'bold\')" title="Bold (Ctrl+B)"><i class="fas fa-bold"></i></button>';
-        html += '<button class="btn btn-sm btn-secondary" onclick="setTextStyle(\'italic\')" title="Italic (Ctrl+I)"><i class="fas fa-italic"></i></button>';
-        html += '<button class="btn btn-sm btn-secondary" onclick="setTextStyle(\'underline\')" title="Underline (Ctrl+U)"><i class="fas fa-underline"></i></button>';
-        html += '<input type="color" onchange="setTextColor(this.value)" title="Text color">';
-        html += '<button class="btn btn-sm btn-secondary" onclick="setTextAlign(\'left\')" title="Align left"><i class="fas fa-align-left"></i></button>';
-        html += '<button class="btn btn-sm btn-secondary" onclick="setTextAlign(\'center\')" title="Align center"><i class="fas fa-align-center"></i></button>';
-        html += '<button class="btn btn-sm btn-secondary" onclick="setTextAlign(\'right\')" title="Align right"><i class="fas fa-align-right"></i></button>';
-        bar.innerHTML = html;
-        dc.appendChild(bar);
-        textToolbar = bar;
+        const select = document.getElementById('textFontFamily');
+        if (select && select.options.length > 0) return;
+        if (select) {
+            select.innerHTML = '<option value="">Font</option>';
+            FONT_STACKS.forEach(f => { select.innerHTML += '<option value="' + f[1] + '">' + f[0] + '</option>'; });
+        }
     }
 
     function showTextToolbarFor(el) {
         ensureTextToolbar();
-        if (!textToolbar || !el) return;
+        const actions = document.getElementById('designerActions');
+        if (!actions || !el) return;
         if (el.classList.contains('canvas-text')) {
-            positionTextToolbar(el);
-            textToolbar.style.display = 'block';
-        } else {
-            textToolbar.style.display = 'none';
+            // Sync toolbar controls with the selected element's current styles
+            const select = document.getElementById('textFontFamily');
+            if (select) select.value = el.style.fontFamily || '';
+            const sizeInput = document.getElementById('textFontSize');
+            if (sizeInput) {
+                const sizeStr = el.style.fontSize || '';
+                sizeInput.value = sizeStr ? sizeStr.replace('px', '') : '';
+            }
+            const colorInput = document.getElementById('textColorPicker');
+            if (colorInput) {
+                const color = (window.getComputedStyle(el).color || '#071D49');
+                colorInput.value = rgbToHex(color);
+            }
+            if (el.style.fontWeight === 'bold') {
+                document.getElementById('textBold').classList.add('active');
+            } else {
+                document.getElementById('textBold').classList.remove('active');
+            }
+            if (el.style.fontStyle === 'italic') {
+                document.getElementById('textItalic').classList.add('active');
+            } else {
+                document.getElementById('textItalic').classList.remove('active');
+            }
+            if ((el.style.textDecoration || '').indexOf('underline') !== -1) {
+                document.getElementById('textUnderline').classList.add('active');
+            } else {
+                document.getElementById('textUnderline').classList.remove('active');
+            }
+            // Show the designer actions bar (includes text controls)
+            actions.style.display = 'flex';
         }
     }
 
     function hideTextToolbar() {
-        if (textToolbar) textToolbar.style.display = 'none';
+        const actions = document.getElementById('designerActions');
+        if (actions) actions.style.display = 'none';
     }
 
-    function positionTextToolbar(el) {
-        if (!textToolbar || !el) return;
-        const dc = document.getElementById('designCanvas');
-        const dcr = dc.getBoundingClientRect();
-        const er = el.getBoundingClientRect();
-        textToolbar.style.left = (er.left - dcr.left) + 'px';
-        textToolbar.style.top = (er.top - dcr.top - 40) + 'px';
-        textToolbar.style.display = 'block';
+    function rgbToHex(rgb) {
+        if (!rgb || rgb.indexOf('rgb') !== 0) return '#071D49';
+        const vals = rgb.match(/\d+/g);
+        if (!vals || vals.length < 3) return '#071D49';
+        const hex = (r, g, b) => '#' + [r, g, b].map(x => { const h = parseInt(x).toString(16); return h.length === 1 ? '0' + h : h; }).join('');
+        return hex(vals[0], vals[1], vals[2]);
     }
 
     // ---- Text toolbar actions ----
@@ -2922,6 +2956,20 @@
     // .canvas-text rows so the designer can select/drag/resize/restyle each field, and
     // normalizeTemplateForRender keeps the exported PDF/print layout intact.
     const PP2_TEXT_HTML = '<!-- canvas-border: decorations rendered via background image --><div style="text-align:center;padding:10px 0;font-size:13px;color:#001f5c;font-weight:700;letter-spacing:2px;text-transform:uppercase;">{{school_name}}</div><div style="text-align:center;padding:4px 0;">{{school_logo}}</div><div style="text-align:center;font-size:11px;color:#8a5a00;font-style:italic;margin-bottom:6px;">{{school_motto}}</div><div style="text-align:center;font-size:26px;color:#001f5c;font-weight:800;font-family:Georgia,serif;letter-spacing:1px;margin:16px 0;">CERTIFICATE OF GRADUATION</div><div style="display:inline-block;background:linear-gradient(135deg,#f5c842,#d4a017);color:#001f5c;font-size:15px;font-weight:700;border-radius:20px;padding:6px 20px;margin:8px 0 18px;box-shadow:0 2px 6px rgba(0,0,0,.12);">PRE-PRIMARY 2 (PP2)</div><div style="text-align:center;font-size:16px;color:#333;margin:22px 0 10px;">This certificate is proudly awarded to</div><div style="text-align:center;font-size:32px;color:#001f5c;font-weight:800;font-family:Georgia,serif;word-break:break-word;margin:10px 0;">{{student_name}}</div><div style="text-align:center;font-size:13px;color:#555;margin:6px 0;">Admission No: <strong>{{admission_number}}</strong> — Class: <strong>{{class}}</strong></div><div style="text-align:center;font-size:15px;color:#333;line-height:1.7;margin:26px auto;max-width:760px;">for successfully completing the PP2 programme and<br>demonstrating growth, learning and readiness<br>for the next stage of their educational journey.</div><div style="text-align:center;margin:26px auto 18px;"><svg width="22" height="14" style="vertical-align:middle;"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/></svg><span style="font-size:15px;color:#001f5c;font-weight:600;margin:0 6px;">Graduation</span><span style="font-size:20px;font-weight:800;color:#001f5c;margin:0 6px;">{{graduation_year}}</span><svg width="44" height="14" style="vertical-align:middle;"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/><circle cx="24" cy="7" r="4" fill="#d4a017"/><polygon points="24,3 27,11 21,11" fill="#d4a017"/></svg><svg width="22" height="14" style="vertical-align:middle;"><circle cx="7" cy="7" r="4" fill="#d4a017"/><polygon points="7,3 10,11 4,11" fill="#d4a017"/><circle cx="15" cy="7" r="4" fill="#d4a017"/><path d="M15 3 L18 11" stroke="#d4a017" stroke-width="2"/></svg></div><div style="text-align:center;margin-top:34px;"><span style="display:inline-block;width:60px;border-top:1px solid #001f5c;"></span></div><div style="text-align:center;display:flex;justify-content:space-around;margin-top:28px;"><div style="text-align:center;"><div style="border-top:1px solid #001f5c;width:130px;margin:0 auto;"></div><div style="font-size:12px;color:#001f5c;"><strong>Class Teacher</strong></div></div><div style="text-align:center;"><div style="border-top:1px solid #001f5c;width:130px;margin:0 auto;"></div><div style="font-size:12px;color:#001f5c;"><strong>Headteacher</strong></div><div style="font-size:11px;color:#555;">{{headteacher_name}}</div></div></div><div style="text-align:center;font-size:11px;color:#555;margin-top:22px;">Date of Issue: {{date}} &nbsp;|&nbsp; Certificate No.: {{certificate_number}}</div>';
+    <!-- 
+      ChatGPT Prompt for Certificate Background Designers:
+      "Create a professional certificate background image as a PNG. 
+      Dimensions: 1491×1055 pixels (A4 landscape at 300 DPI). 
+      Background color: warm ivory (#FFFCF4). 
+      Color palette: midnight navy (#071D49) and champagne gold (#D4AF37). 
+      Decorate with subtle geometric borders, corner flourishes, and a 
+      shield or crest motif near the top. Leave a generous white (ivory) 
+      central area for text. Add light decorative elements in the margins 
+      and bottom border. No text on the background — placeholders will be 
+      overlaid by the designer tool. Export as high-quality PNG with 
+      transparent background where appropriate. Save as 'Your Design Name 
+      Certificate Template.png'."
+    -->
     const CERT_TEMPLATES = [
         { id: 'pp2-graduation-2026', name: 'Changara Star Academy — PP2 Graduation 2026', category: 'Graduation', orientation: 'landscape',
           bg: ['#fdf8f0', '#ffffff'],
@@ -3120,6 +3168,29 @@
             '<div style="position:absolute;bottom:50px;left:50%;transform:translateX(-50%);font-size:11px;color:#666;text-align:center;">Graduation {{graduation_year}} &nbsp;|&nbsp; Certificate No: {{certificate_number}} &nbsp;|&nbsp; Date: {{date}}</div>'
         }
 
+        { id: 'changara-star-academy-2026', name: 'Changara Star Academy Certificate', category: 'Graduation', orientation: 'landscape',
+          bg: ['#FFFCF4', '#ffffff'],
+          backgroundImage: 'images/Changara Star Academy Certificate Template.png',
+          html: '<!-- canvas-border: decorations rendered via background image -->' +
+            '<div style="position:absolute;top:65px;left:50%;transform:translateX(-50%);font-size:14px;color:#071D49;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-align:center;">{{school_name}}</div>' +
+            '<div style="position:absolute;top:90px;left:50%;transform:translateX(-50%);font-size:11px;color:#8A5A00;font-style:italic;text-align:center;">{{school_motto}}</div>' +
+            '<div style="position:absolute;top:120px;left:50%;transform:translateX(-50%);font-size:22px;color:#071D49;font-family:Georgia,serif;font-weight:800;letter-spacing:2px;text-transform:uppercase;text-align:center;">CERTIFICATE OF GRADUATION</div>' +
+            '<div style="position:absolute;top:155px;left:50%;transform:translateX(-50%);font-size:16px;color:#666;line-height:1.8;text-align:center;">This certificate is proudly awarded to</div>' +
+            '<div style="position:absolute;top:185px;left:50%;transform:translateX(-50%);font-size:36px;color:#071D49;font-family:Georgia,serif;font-weight:800;word-break:break-word;text-align:center;">{{student_name}}</div>' +
+            '<div style="position:absolute;top:235px;left:50%;transform:translateX(-50%);font-size:13px;color:#666;text-align:center;">Admission No: <strong style="color:#071D49;">{{admission_number}}</strong> &nbsp;|&nbsp; Class: <strong style="color:#071D49;">{{class}}</strong></div>' +
+            '<div style="position:absolute;top:265px;left:50%;transform:translateX(-50%);font-size:13px;color:#333;line-height:1.7;text-align:center;max-width:680px;">for successfully completing the PP2 programme and demonstrating growth,<br>learning and readiness for the next stage of their educational journey.</div>' +
+            '<div style="position:absolute;top:360px;left:34%;transform:translateX(-50%);text-align:center;">' +
+              '<div style="display:inline-block;background:linear-gradient(135deg,#D4AF37,#b8860b);color:#071D49;font-size:11px;font-weight:700;border-radius:12px;padding:4px 14px;">Class Teacher</div>' +
+              '<div style="border-top:2px solid #071D49;width:130px;margin:4px auto 0;"></div>' +
+            '</div>' +
+            '<div style="position:absolute;top:375px;left:43%;transform:translateX(-50%);">{{student_photo}}</div>' +
+            '<div style="position:absolute;top:360px;left:66%;transform:translateX(-50%);text-align:center;">' +
+              '<div style="display:inline-block;background:linear-gradient(135deg,#D4AF37,#b8860b);color:#071D49;font-size:11px;font-weight:700;border-radius:12px;padding:4px 14px;">Headteacher</div>' +
+              '<div style="border-top:2px solid #071D49;width:130px;margin:4px auto 0;"></div>' +
+            '</div>' +
+            '<div style="position:absolute;bottom:50px;left:50%;transform:translateX(-50%);font-size:11px;color:#666;text-align:center;">Graduation {{graduation_year}} &nbsp;|&nbsp; Certificate No: {{certificate_number}} &nbsp;|&nbsp; Date: {{date}}</div>'
+        }
+
     ];
 
     // Bake an inline SVG into a PNG data-URL so html2canvas/raster exporters
@@ -3183,7 +3254,7 @@
         const title = document.getElementById('designTitle');
         if (title) title.value = t.name + ' – Certificate (' + t.orientation + ')';
         draftKey = 'csa_cert_draft_' + t.id;
-                if (t.id === 'pp2-graduation-2026' || t.id === 'pp2-graduation-2026-premium' || t.id === 'pp2-graduation-2026-pp2image' || t.id === 'elegant-navy-gold-2026') {
+                if (t.id === 'pp2-graduation-2026' || t.id === 'pp2-graduation-2026-premium' || t.id === 'pp2-graduation-2026-pp2image' || t.id === 'elegant-navy-gold-2026' || t.id === 'changara-star-academy-2026') {
             const gy = document.getElementById('gradYear'); if (gy) gy.value = '2026';
             const ev = document.getElementById('eventName'); if (ev) ev.value = 'PP2 Graduation';
             const cf = document.getElementById('classFilter'); if (cf) cf.value = 'PP2';
@@ -3306,7 +3377,7 @@
             html = html.replace('{{school_logo}}', (schoolSettings && schoolSettings.school_logo) ? '<img src="' + schoolSettings.school_logo + '" class="cert-logo-img">' : '<span style="font-size:48px;">🏫</span>');
             html = html.replace('{{school_stamp}}', (schoolSettings && schoolSettings.school_stamp) ? '<img src="' + schoolSettings.school_stamp + '" class="cert-seal-img">' : '');
             const bgStyle = (p.backgroundImageUrl && !p.backgroundBaked) ? 'background-image:url(' + p.backgroundImageUrl + ');background-size:cover;background-position:center;background-repeat:no-repeat;' : '';
-            combined += '<div class="certificate multi" style="' + bgStyle + '"><div class="cert-border"></div><div class="cert-shield"></div><div class="cert-content" style="' + ((p.backgroundImageUrl && !p.backgroundBaked) ? 'background:transparent;' : '') + '">' + html + '</div></div>';
+            combined += '<div class="certificate multi" style="' + bgStyle + '">' + (html.includes('canvas-border') ? '' : '<div class="cert-border"></div>') + '<div class="cert-shield"></div><div class="cert-content" style="' + ((p.backgroundImageUrl && !p.backgroundBaked) ? 'background:transparent;' : '') + '">' + html + '</div></div>';
         });
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'position:fixed;top:-9999px;left:-9999px;background:#fff;width:1200px;';
@@ -3705,14 +3776,20 @@
                 const rendered = renderCertificate(student, schoolSettings, eventName, eventDate, certNumber);
                 const filename = (student.fullName || 'student').replace(/[^A-Za-z0-9]+/g, '_') + '_' + gradYear + '.pdf';
 
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'position:fixed;top:-9999px;left:-9999px;background:#fff;width:1247px;';
+                wrapper.innerHTML = rendered;
+                document.body.appendChild(wrapper);
+
                 await html2pdf().set({
                     margin: [0, 0, 0, 0],
                     filename: filename,
                     image: { type: 'jpeg', quality: 1.0 },
                     html2canvas: { scale: 2, useCORS: true, logging: false, width: canvasW, windowWidth: canvasW, windowHeight: canvasH, height: canvasH },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: pdfOrientation }
-                }).from(rendered).save();
+                }).from(wrapper).save();
 
+                document.body.removeChild(wrapper);
                 successCount++;
             } catch (err) {
                 failureCount++;
