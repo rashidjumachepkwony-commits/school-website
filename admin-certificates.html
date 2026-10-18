@@ -1531,7 +1531,7 @@
     // placeholder-based template available for restore. Never fabricates
     // signature/seal data — only the editable field text is substituted.
     function captureBaseTemplate() {
-        baseTemplateHtml = getTemplateContent();
+        baseTemplateHtml = document.getElementById('htmlSource').value || '';
     }
 
     // ---- PowerPoint-like slides IN THE VISUAL DESIGNER (Phase 6) ----
