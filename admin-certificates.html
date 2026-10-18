@@ -1145,14 +1145,19 @@
         }
         renderStudentList();
         updateSelectionSummary();
-        updatePreview();
+        // When a student is selected, immediately merge their data into the designer canvas
+        if (selectedStudents.length > 0) {
+            currentSlide = 0;
+            buildSlides();
+            applyDesignerSlide();
+        }
     }
 
     function clearAllSelections() {
         selectedStudents = [];
         renderStudentList();
         updateSelectionSummary();
-        updatePreview();
+        // Don't clear the template from the designer
     }
 
     function updateSelectionSummary() {
@@ -3400,14 +3405,25 @@
                 el.style.transform = 'rotate(' + dr + 'deg)';
             }
         });
-        // Also strip the class from any non-text canvas elements (borders, images, shapes).
-        tmp.querySelectorAll('.canvas-element').forEach(el => {
-            el.classList.remove('canvas-element');
-            el.style.position = '';
-            el.style.left = ''; el.style.right = '';
-            el.style.top = ''; el.style.bottom = '';
-            el.style.transform = '';
-        });
+         // Also strip the class from any non-text canvas elements (borders, images, shapes).
+         tmp.querySelectorAll('.canvas-element').forEach(el => {
+             el.classList.remove('canvas-element');
+             el.style.position = '';
+             el.style.left = ''; el.style.right = '';
+             el.style.top = ''; el.style.bottom = '';
+             el.style.transform = '';
+         });
+         // Strip editor inline positioning from ALL child elements (built-in templates
+         // use position:absolute for the designer, but preview/export needs flow layout).
+         tmp.querySelectorAll('div[style*="position:absolute"], div[style*="position: absolute"]').forEach(el => {
+             el.style.position = '';
+             el.style.left = ''; el.style.right = '';
+             el.style.top = ''; el.style.bottom = '';
+             el.style.transform = '';
+             el.style.width = '';
+             el.style.display = '';
+             el.style.margin = '0.5em 0';
+         });
         // Remove editor-only decorative elements (cert-shield, canvas-border) that
         // syncFromHTML re-adds on load; they must not persist in the template source.
         tmp.querySelectorAll('.cert-shield').forEach(el => el.remove());
@@ -3436,7 +3452,7 @@
         // editing), it is carried by the drawOverlay <img>, so the wrapper CSS
         // background is intentionally NOT applied to avoid rendering it twice.
         const bgStyle = (backgroundImageUrl && !backgroundBaked)
-            ? `background-image: url('${decodeURIComponent(backgroundImageUrl)}'); background-size: cover; background-position: center; background-repeat: no-repeat;`
+            ? `background-image: url('${encodeURIComponent(decodeURIComponent(backgroundImageUrl))}`); background-size: cover; background-position: center; background-repeat: no-repeat;`
             : '';
 
         // Build the full certificate wrapper
@@ -3537,11 +3553,10 @@
     }
 
     function updatePreview() {
-        // Preview is now the designer canvas itself
+        // Preview is the designer canvas itself - re-merge current student if already merged
         if (selectedStudents.length > 0 && designerMerged) {
-            // Re-render current slide with any changes to event fields
             currentSlide = 0;
-            _renderDesignerSlide();
+            applyDesignerSlide();
         }
     }
 
