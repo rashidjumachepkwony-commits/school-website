@@ -3162,7 +3162,12 @@
         if (!html) return html;
         const tmp = document.createElement('div');
         tmp.innerHTML = html;
+        // Strip editor-only classes. `.canvas-element` (CSS: position:absolute) and
+        // `.canvas-text` (CSS: overflow:hidden) are designer affordances; their
+        // CSS rules override the inline resets below and keep elements out of flow
+        // in the preview/PDF/print output, producing blank certificates.
         tmp.querySelectorAll('.canvas-text').forEach(el => {
+            el.classList.remove('canvas-text', 'canvas-element');
             el.style.position = '';
             el.style.left = ''; el.style.right = '';
             el.style.top = ''; el.style.bottom = '';
@@ -3178,6 +3183,14 @@
                 el.style.transformOrigin = 'center center';
                 el.style.transform = 'rotate(' + dr + 'deg)';
             }
+        });
+        // Also strip the class from any non-text canvas elements (borders, images, shapes).
+        tmp.querySelectorAll('.canvas-element').forEach(el => {
+            el.classList.remove('canvas-element');
+            el.style.position = '';
+            el.style.left = ''; el.style.right = '';
+            el.style.top = ''; el.style.bottom = '';
+            el.style.transform = '';
         });
         return tmp.innerHTML;
     }
