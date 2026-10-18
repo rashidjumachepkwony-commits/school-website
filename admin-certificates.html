@@ -196,28 +196,27 @@
             /* Exact A4 (landscape) proportions, matching the printed certificate */
             aspect-ratio: 297 / 210;
             min-height: 320px;
-            background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+            background: linear-gradient(135deg, #FFFCF4 0%, #ffffff 100%);
             border: 1px solid #e3e9f2;
             border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 31, 92, 0.12);
+            box-shadow: 0 10px 30px rgba(7, 29, 73, 0.12);
             overflow: hidden;
             font-family: 'Georgia', 'Times New Roman', serif;
         }
-        .design-canvas.active-element { border-color: #d4a017; box-shadow: 0 0 0 3px rgba(212,160,23,0.25); }
-        .canvas-remove-btn { position:absolute; width:20px; height:20px; padding:0; border:none; border-radius:3px; background:#d4a017; color:#fff; font-size:12px; line-height:1; cursor:pointer; z-index:10; }
+        .design-canvas.active-element { border-color: #D4AF37; box-shadow: 0 0 0 3px rgba(212,175,55,0.25); }
+        .canvas-remove-btn { position:absolute; width:20px; height:20px; padding:0; border:none; border-radius:3px; background:#D4AF37; color:#fff; font-size:12px; line-height:1; cursor:pointer; z-index:10; }
 
         .canvas-element {
             position: absolute; padding: 4px 8px;
             cursor: move; user-select: none;
             border: 1px dashed transparent;
         }
-        .canvas-element:hover { border-color: #d4a017; }
-        .canvas-element.active { border: 2px dashed #d4a017; background: rgba(212,160,23,0.05); }
-         .canvas-text { border: none; font-family: inherit; resize: none; overflow: hidden; }
-         .canvas-text:focus { outline: 2px dashed #d4a017; border: 1px dashed #d4a017; }
-         .flex { display: flex; }
-         /* Active drawing tool in the palette */
-         #toolPalette .active-tool { background: #001f5c !important; color: #d4a017 !important; border-color: #d4a017; }
+        .canvas-element:hover { border-color: #D4AF37; }
+        .canvas-element.active { border: 2px dashed #D4AF37; background: rgba(212,175,55,0.05); }
+        .canvas-text:focus { outline: 2px dashed #D4AF37; border: 1px dashed #D4AF37; }
+        .flex { display: flex; }
+        /* Active drawing tool in the palette */
+        #toolPalette .active-tool { background: #071D49 !important; color: #D4AF37 !important; border-color: #D4AF37; }
 
         .element-toolbar {
             display: flex; gap: 6px; margin-top: 10px;
@@ -757,7 +756,7 @@
                             <!-- Drawing controls (shown when pen/marker/eraser active) -->
                             <div id="drawControls" style="display:none;align-items:center;padding:0 8px;border-right:1px solid #e3e9f2;gap:8px;">
                                 <label style="font-size:12px;font-weight:600;color:#333;">Color:</label>
-                                <input type="color" id="drawColorPicker" value="#001f5c" onchange="setDrawColor(this.value)" style="width:40px;height:32px;border:1px solid #e3e9f2;border-radius:6px;cursor:pointer;background:none;">
+                                <input type="color" id="drawColorPicker" value="#071D49" onchange="setDrawColor(this.value)" style="width:40px;height:32px;border:1px solid #e3e9f2;border-radius:6px;cursor:pointer;background:none;">
                                 <label style="font-size:12px;font-weight:600;color:#333;">Size:</label>
                                 <input type="range" id="drawWidthSlider" min="1" max="20" value="3" oninput="setDrawWidth(this.value)" style="width:100px;">
                                 <span id="drawWidthLabel" style="font-size:12px;color:#666;">3px</span>
@@ -778,31 +777,6 @@
                             <canvas id="drawCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none;"></canvas>
                             <input type="file" id="bgFileInput" accept="image/*" style="display:none" onchange="onBgFileSelected(this)">
                             <div style="padding:40px;text-align:center;" id="canvasContent">
-                            <div class="canvas-border" style="position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;border:4px solid #d4a017;border-radius:8px;"></div>
-                            <div style="font-size:36px;color:#001f5c;font-weight:800;margin-bottom:10px;">
-                                {{school_name}}
-                            </div>
-                            <div style="font-size:14px;color:#8a5a00;font-style:italic;margin-bottom:20px;">
-                                {{school_motto}}
-                            </div>
-                            <div style="font-size:28px;color:#001f5c;font-weight:700;margin:20px 0;">
-                                CERTIFICATE OF {{event_name}}
-                            </div>
-                            <div style="font-size:16px;color:#333;line-height:1.8;margin:20px 0;">
-                                This certificate is proudly awarded to
-                            </div>
-                            <div style="font-size:32px;color:#001f5c;font-weight:800;margin:15px 0;">
-                                {{student_name}}
-                            </div>
-                            <div style="font-size:16px;color:#333;line-height:1.8;margin:20px 0;">
-                                Admission No: {{admission_number}} &nbsp;|&nbsp; Class: {{class}}
-                            </div>
-                            <div style="font-size:16px;color:#333;line-height:1.8;margin:30px 0;">
-                                In recognition of successful completion.
-                            </div>
-                            <div style="font-size:12px;color:#666;margin:20px 0;">
-                                Certificate No: {{certificate_number}}
-                            </div>
                             </div>
                         </div>
                     </div>
@@ -1211,7 +1185,7 @@
             canvas.style.backgroundSize = 'cover';
             canvas.style.backgroundPosition = 'center';
             canvas.style.backgroundRepeat = 'no-repeat';
-            canvas.style.backgroundColor = '#ffffff';
+            canvas.style.backgroundColor = '#FFFCF4';
         }
         const content = document.getElementById('canvasContent');
         if (content) {
@@ -1260,7 +1234,7 @@
         backgroundBaked = false;
         const canvas = document.getElementById('designCanvas');
         canvas.style.backgroundImage = 'none';
-        canvas.style.background = 'linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%)';
+        canvas.style.background = 'linear-gradient(135deg, #FFFCF4 0%, #ffffff 100%)';
         if (canvasReady() && backgroundBaked) {
             drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
             drawHistory = [];
@@ -1512,7 +1486,7 @@
                 canvas.style.backgroundSize = 'cover';
                 canvas.style.backgroundPosition = 'center';
                 canvas.style.backgroundRepeat = 'no-repeat';
-                canvas.style.backgroundColor = '#ffffff';
+                canvas.style.backgroundColor = '#FFFCF4';
             } else {
                 clearBackground();
             }
@@ -1532,7 +1506,19 @@
     function syncFromHTML() {
         const html = document.getElementById('htmlSource').value;
         const content = document.getElementById('canvasContent');
-        content.innerHTML = html;
+        const templateHtml = (html || '').trim();
+        if (!templateHtml) {
+            // No template applied: designer canvas is completely blank.
+            content.innerHTML = '';
+            return;
+        }
+        const hasBgDecorations = templateHtml.includes('canvas-border');
+        // Mirror the preview's wrapper: .cert-border (unless template SVG has its own)
+        // and .cert-shield diamond are always present in both designer and preview.
+        content.innerHTML =
+            (hasBgDecorations ? '' : '<div class="canvas-border"></div>') +
+            '<div class="cert-shield"></div>' +
+            templateHtml;
         // Re-attach drag handlers to elements restored from HTML source
         content.querySelectorAll('.canvas-element').forEach(el => setupCanvasElement(el));
         // Promote any plain field rows (e.g. dotted lines, border frame) that the
@@ -2339,6 +2325,9 @@
         cc.querySelectorAll(':scope > div').forEach(function (el) {
             if (el.dataset.inited === '1') return;
             el.dataset.inited = '1';
+            if (el.classList.contains('cert-shield')) {
+                return;
+            }
             if (el.classList.contains('canvas-border')) {
                 el.classList.add('canvas-element');
                 setupCanvasElement(el);
@@ -2369,7 +2358,7 @@
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
-    let drawColor = '#001f5c';
+    let drawColor = '#071D49';
     let drawWidth = 3;
     let currentTool = 'select';            // select | hand | pen | marker | eraser | crop
     let drawHistory = [];
@@ -3084,6 +3073,53 @@
             '</div>' +
             '<div style="text-align:center;font-size:12px;color:#666;margin-top:14px;">Graduation {{graduation_year}} &nbsp;|&nbsp; Certificate No: {{certificate_number}} &nbsp;|&nbsp; Date: {{date}}</div>'
         }
+
+        { id: 'pp2-graduation-2026-pp2image', name: 'Changara Star — PP2 Certificate (Pre-designed Background)', category: 'Graduation', orientation: 'landscape',
+          bg: ['#FFFCF4', '#ffffff'],
+          backgroundImage: 'images/pp2-certificate.png',
+          html: '<!-- canvas-border: decorations rendered via background image -->' +
+            '<div style="position:absolute;top:65px;left:50%;transform:translateX(-50%);font-size:14px;color:#071D49;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-align:center;">{{school_name}}</div>' +
+            '<div style="position:absolute;top:90px;left:50%;transform:translateX(-50%);font-size:11px;color:#8A5A00;font-style:italic;text-align:center;">{{school_motto}}</div>' +
+            '<div style="position:absolute;top:120px;left:50%;transform:translateX(-50%);font-size:22px;color:#071D49;font-family:Georgia,serif;font-weight:800;letter-spacing:2px;text-transform:uppercase;text-align:center;">CERTIFICATE OF GRADUATION</div>' +
+            '<div style="position:absolute;top:155px;left:50%;transform:translateX(-50%);font-size:16px;color:#666;line-height:1.8;text-align:center;">This certificate is proudly awarded to</div>' +
+            '<div style="position:absolute;top:185px;left:50%;transform:translateX(-50%);font-size:36px;color:#071D49;font-family:Georgia,serif;font-weight:800;word-break:break-word;text-align:center;">{{student_name}}</div>' +
+            '<div style="position:absolute;top:235px;left:50%;transform:translateX(-50%);font-size:13px;color:#666;text-align:center;">Admission No: <strong style="color:#071D49;">{{admission_number}}</strong> &nbsp;|&nbsp; Class: <strong style="color:#071D49;">{{class}}</strong></div>' +
+            '<div style="position:absolute;top:265px;left:50%;transform:translateX(-50%);font-size:13px;color:#333;line-height:1.7;text-align:center;max-width:680px;">for successfully completing the PP2 programme and demonstrating growth,<br>learning and readiness for the next stage of their educational journey.</div>' +
+            '<div style="position:absolute;top:360px;left:34%;transform:translateX(-50%);text-align:center;">' +
+              '<div style="display:inline-block;background:linear-gradient(135deg,#D4AF37,#b8860b);color:#071D49;font-size:11px;font-weight:700;border-radius:12px;padding:4px 14px;">Class Teacher</div>' +
+              '<div style="border-top:2px solid #071D49;width:130px;margin:4px auto 0;"></div>' +
+            '</div>' +
+            '<div style="position:absolute;top:375px;left:43%;transform:translateX(-50%);">{{student_photo}}</div>' +
+            '<div style="position:absolute;top:360px;left:66%;transform:translateX(-50%);text-align:center;">' +
+              '<div style="display:inline-block;background:linear-gradient(135deg,#D4AF37,#b8860b);color:#071D49;font-size:11px;font-weight:700;border-radius:12px;padding:4px 14px;">Headteacher</div>' +
+              '<div style="border-top:2px solid #071D49;width:130px;margin:4px auto 0;"></div>' +
+            '</div>' +
+            '<div style="position:absolute;bottom:50px;left:50%;transform:translateX(-50%);font-size:11px;color:#666;text-align:center;">Graduation {{graduation_year}} &nbsp;|&nbsp; Certificate No: {{certificate_number}} &nbsp;|&nbsp; Date: {{date}}</div>'
+        }
+
+        { id: 'elegant-navy-gold-2026', name: 'Elegant Navy & Gold Certificate', category: 'Graduation', orientation: 'landscape',
+          bg: ['#FFFCF4', '#ffffff'],
+          backgroundImage: 'images/Elegant Navy and Gold Certificate Template.png',
+          html: '<!-- canvas-border: decorations rendered via background image -->' +
+            '<div style="position:absolute;top:65px;left:50%;transform:translateX(-50%);font-size:14px;color:#071D49;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-align:center;">{{school_name}}</div>' +
+            '<div style="position:absolute;top:90px;left:50%;transform:translateX(-50%);font-size:11px;color:#8A5A00;font-style:italic;text-align:center;">{{school_motto}}</div>' +
+            '<div style="position:absolute;top:120px;left:50%;transform:translateX(-50%);font-size:22px;color:#071D49;font-family:Georgia,serif;font-weight:800;letter-spacing:2px;text-transform:uppercase;text-align:center;">CERTIFICATE OF GRADUATION</div>' +
+            '<div style="position:absolute;top:155px;left:50%;transform:translateX(-50%);font-size:16px;color:#666;line-height:1.8;text-align:center;">This certificate is proudly awarded to</div>' +
+            '<div style="position:absolute;top:185px;left:50%;transform:translateX(-50%);font-size:36px;color:#071D49;font-family:Georgia,serif;font-weight:800;word-break:break-word;text-align:center;">{{student_name}}</div>' +
+            '<div style="position:absolute;top:235px;left:50%;transform:translateX(-50%);font-size:13px;color:#666;text-align:center;">Admission No: <strong style="color:#071D49;">{{admission_number}}</strong> &nbsp;|&nbsp; Class: <strong style="color:#071D49;">{{class}}</strong></div>' +
+            '<div style="position:absolute;top:265px;left:50%;transform:translateX(-50%);font-size:13px;color:#333;line-height:1.7;text-align:center;max-width:680px;">for successfully completing the PP2 programme and demonstrating growth,<br>learning and readiness for the next stage of their educational journey.</div>' +
+            '<div style="position:absolute;top:360px;left:34%;transform:translateX(-50%);text-align:center;">' +
+              '<div style="display:inline-block;background:linear-gradient(135deg,#D4AF37,#b8860b);color:#071D49;font-size:11px;font-weight:700;border-radius:12px;padding:4px 14px;">Class Teacher</div>' +
+              '<div style="border-top:2px solid #071D49;width:130px;margin:4px auto 0;"></div>' +
+            '</div>' +
+            '<div style="position:absolute;top:375px;left:43%;transform:translateX(-50%);">{{student_photo}}</div>' +
+            '<div style="position:absolute;top:360px;left:66%;transform:translateX(-50%);text-align:center;">' +
+              '<div style="display:inline-block;background:linear-gradient(135deg,#D4AF37,#b8860b);color:#071D49;font-size:11px;font-weight:700;border-radius:12px;padding:4px 14px;">Headteacher</div>' +
+              '<div style="border-top:2px solid #071D49;width:130px;margin:4px auto 0;"></div>' +
+            '</div>' +
+            '<div style="position:absolute;bottom:50px;left:50%;transform:translateX(-50%);font-size:11px;color:#666;text-align:center;">Graduation {{graduation_year}} &nbsp;|&nbsp; Certificate No: {{certificate_number}} &nbsp;|&nbsp; Date: {{date}}</div>'
+        }
+
     ];
 
     // Bake an inline SVG into a PNG data-URL so html2canvas/raster exporters
@@ -3147,7 +3183,7 @@
         const title = document.getElementById('designTitle');
         if (title) title.value = t.name + ' – Certificate (' + t.orientation + ')';
         draftKey = 'csa_cert_draft_' + t.id;
-                if (t.id === 'pp2-graduation-2026' || t.id === 'pp2-graduation-2026-premium') {
+                if (t.id === 'pp2-graduation-2026' || t.id === 'pp2-graduation-2026-premium' || t.id === 'pp2-graduation-2026-pp2image' || t.id === 'elegant-navy-gold-2026') {
             const gy = document.getElementById('gradYear'); if (gy) gy.value = '2026';
             const ev = document.getElementById('eventName'); if (ev) ev.value = 'PP2 Graduation';
             const cf = document.getElementById('classFilter'); if (cf) cf.value = 'PP2';
@@ -3208,7 +3244,7 @@
         else {
             backgroundImageUrl = null; backgroundBaked = false;
             const dc = document.getElementById('designCanvas');
-            if (dc) { dc.style.backgroundImage = 'none'; dc.style.background = 'linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%)'; }
+            if (dc) { dc.style.backgroundImage = 'none'; dc.style.background = 'linear-gradient(135deg, #FFFCF4 0%, #ffffff 100%)'; }
         }
         if (canvasReady() && p.draw) {
             const img = new Image();
@@ -3331,6 +3367,10 @@
             el.style.top = ''; el.style.bottom = '';
             el.style.transform = '';
         });
+        // Remove editor-only decorative elements (cert-shield, canvas-border) that
+        // syncFromHTML re-adds on load; they must not persist in the template source.
+        tmp.querySelectorAll('.cert-shield').forEach(el => el.remove());
+        tmp.querySelectorAll('.canvas-border').forEach(el => el.remove());
         return tmp.innerHTML;
     }
 
