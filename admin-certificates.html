@@ -251,6 +251,9 @@
             flex-wrap: wrap; margin-top: 10px;
         }
         .slide-count { font-size: 13px; font-weight: 600; color: #001f5c; }
+        .designer-slide-nav {
+            display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+        }
         #orientationToggle button.active {
             background: linear-gradient(135deg, #d4a017, #f5c842); color: #001f5c;
             border-color: #d4a017;
@@ -289,6 +292,80 @@
             .form-row { grid-template-columns: 1fr; }
             .settings-grid { grid-template-columns: 1fr; }
         }
+
+        /* ===== Canva-like designer chrome ===== */
+        #selectionBox {
+            position: absolute;
+            border: 2px dashed #001f5c;
+            border-radius: 6px;
+            pointer-events: none;
+            z-index: 999;
+            box-sizing: border-box;
+        }
+        .resize-handle {
+            position: absolute;
+            width: 12px; height: 12px;
+            background: #fff;
+            border: 2px solid #001f5c;
+            border-radius: 50%;
+            box-sizing: border-box;
+            pointer-events: auto;
+            cursor: nwse-resize;
+            z-index: 1000;
+        }
+        .resize-handle.n, .resize-handle.s { cursor: ns-resize; }
+        .resize-handle.e, .resize-handle.w { cursor: ew-resize; }
+        .resize-handle.ne, .resize-handle.sw { cursor: nesw-resize; }
+        .resize-handle.se, .resize-handle.nw { cursor: nwse-resize; }
+        .resize-handle.rotate {
+            width: 22px; height: 22px;
+            border: 2px solid #001f5c;
+            border-radius: 50%;
+            background: #001f5c;
+            cursor: grab;
+            top: -36px;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: auto;
+            z-index: 1000;
+        }
+        #textToolbar {
+            position: absolute;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            background: #fff;
+            border: 1px solid #e3e9f2;
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-size: 13px;
+        }
+        #textToolbar input, #textToolbar select {
+            height: 26px;
+            border: 1px solid #e3e9f2;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        #textToolbar .btn-sm { min-width: 24px; height: 26px; padding: 0 6px; }
+        #designerActions {
+            display: none;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+            padding: 8px 10px;
+            background: #f8f9fc;
+            border: 1px solid #e3e9f2;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        #designerActions button { min-width: 28px; }
+        #designerActions .sep {
+            width: 1px; height: 22px; background: #e3e9f2;
+            margin: 0 2px;
+        }
+
     </style>
 </head>
 <body>
@@ -482,9 +559,17 @@
                 </select>
                 <input type="text" id="templateName" placeholder="Template name for saving..." style="flex:1;min-width:150px;">
                 <button class="btn btn-success btn-sm" onclick="saveTemplate()"><i class="fas fa-save"></i> Save Template</button>
-                <button class="btn btn-sm btn-info" id="mergeDesignerBtn" onclick="mergeIntoDesigner()" title="Merge the first selected student's data into the designer canvas (placeholders replaced with real text). Original template is kept and can be restored."><i class="fas fa-magic"></i> Merge</button>
+                <button class="btn btn-sm btn-info" id="mergeDesignerBtn" onclick="applyDesignerSlide()" title="Merge the current slide student's data into the designer canvas (placeholders replaced with real, editable, movable text). Original template is kept and can be restored."><i class="fas fa-magic"></i> Merge Student</button>
+                <button class="btn btn-sm btn-warning" id="genCertNumBtn" onclick="generateDesignerCertNumber()" title="Generate the certificate number for the current slide's student and place it on the design."><i class="fas fa-hashtag"></i> Generate #</button>
                 <button class="btn btn-sm btn-secondary" id="restoreTemplateBtn" onclick="restoreTemplate()" title="Restore the original template (with placeholders) into the designer." style="display:none;"><i class="fas fa-undo"></i> Restore</button>
                 <span class="merge-status" id="mergeStatus" style="display:none;font-size:11px;font-weight:600;color:#001f5c;background:#fff8e1;border:1px dashed #d4a017;border-radius:6px;padding:4px 8px;">Merged with live student data</span>
+                <div id="designerSlideNav" class="designer-slide-nav" style="display:none;align-items:center;gap:6px;margin-left:auto;padding-left:8px;border-left:1px solid #e3e9f2;">
+                    <span style="font-size:12px;font-weight:600;color:#001f5c;">Slide</span>
+                    <button class="btn btn-sm btn-secondary" id="prevDesignerSlideBtn" onclick="prevDesignerSlide()"><i class="fas fa-chevron-left"></i></button>
+                    <span id="designerSlideCounter" style="font-size:12px;font-weight:600;">1 of 1</span>
+                    <button class="btn btn-sm btn-secondary" id="nextDesignerSlideBtn" onclick="nextDesignerSlide()"><i class="fas fa-chevron-right"></i></button>
+                    <span id="designerSlideStudent" style="font-size:12px;color:#555;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                </div>
             </div>
 
             <div class="editor-tabs">
@@ -535,6 +620,37 @@
                                 <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('line')"><i class="fas fa-minus"></i> Line</button>
                                 <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('rect')"><i class="fas fa-square"></i> Rect</button>
                                 <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('circle')"><i class="fas fa-circle"></i> Circle</button>
+                                <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('arrow')"><i class="fas fa-arrow-right"></i> Arrow</button>
+                                <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('star')"><i class="fas fa-star"></i> Star</button>
+                                <button class="btn btn-sm btn-secondary" onclick="addCanvasShape('polygon')"><i class="fas fa-genderless"></i> Polygon</button>
+                            </div>
+                            <div style="display:flex;gap:4px;border-right:1px solid #e3e9f2;padding:0 8px;">
+                                <button class="btn btn-sm btn-info" onclick="uploadCanvasImage()" title="Upload an image from your device (Canva Uploads)"><i class="fas fa-upload"></i> Upload Image</button>
+                                <button class="btn btn-sm btn-secondary" onclick="bakeBackgroundToCanvas()" title="Bake background onto the canvas so Pen/Marker/Eraser can edit it (Paint mode)"><i class="fas fa-burn"></i> Bake Bg</button>
+                                <button class="btn btn-sm btn-warning" onclick="bakeSelectedImageToCanvas()" title="Bake the selected image onto the canvas so it is paint-editable"><i class="fas fa-compress-arrows-alt"></i> Bake to Canvas</button>
+                                <input type="file" id="imageUploadInput" accept="image/*" style="display:none" onchange="onImageUploadSelected(this)">
+                            </div>
+                            <!-- Layers & alignment (Canva-style top bar), shown when an element is selected -->
+                            <div id="designerActions" class="designer-actions-bar" style="display:none;align-items:center;gap:4px;">
+                                <div class="sep"></div>
+                                <button class="btn btn-sm btn-secondary" onclick="zOrder('front')" title="Bring to front (Ctrl+Shift+])"><i class="fas fa-layer-group"></i></button>
+                                <button class="btn btn-sm btn-secondary" onclick="zOrder('back')" title="Send to back (Ctrl+Shift+[)"><i class="fas fa-compress-arrows-alt"></i></button>
+                                <button class="btn btn-sm btn-secondary" onclick="zOrder('forward')" title="Bring forward (Ctrl+])"><i class="fas fa-arrow-up"></i></button>
+                                <button class="btn btn-sm btn-secondary" onclick="zOrder('backward')" title="Send backward (Ctrl+[)"><i class="fas fa-arrow-down"></i></button>
+                                <div class="sep"></div>
+                                <button class="btn btn-sm btn-secondary" onclick="alignSelection('left')" title="Align left"><i class="fas fa-align-left"></i></button>
+                                <button class="btn btn-sm btn-secondary" onclick="alignSelection('center')" title="Align horizontal center"><i class="fas fa-align-center"></i></button>
+                                <button class="btn btn-sm btn-secondary" onclick="alignSelection('right')" title="Align right"><i class="fas fa-align-right"></i></button>
+                                <button class="btn btn-sm btn-secondary" onclick="alignSelection('top')" title="Align top"><i class="fas fa-arrows-alt-h"></i></button>
+                                <button class="btn btn-sm btn-secondary" onclick="alignSelection('middle')" title="Align vertical center"><i class="fas fa-align-center"></i></button>
+                                <button class="btn btn-sm btn-secondary" onclick="alignSelection('bottom')" title="Align bottom"><i class="fas fa-arrows-alt-v"></i></button>
+                                <div class="sep"></div>
+                                <button class="btn btn-sm btn-secondary" onclick="distributeSelection('h')" title="Distribute horizontal spacing"><i class="fas fa-stream"></i></button>
+                                <button class="btn btn-sm btn-secondary" onclick="distributeSelection('v')" title="Distribute vertical spacing"><i class="fas fa-th"></i></button>
+                                <div class="sep"></div>
+                                <button class="btn btn-sm btn-secondary" onclick="rotateElement(90)" title="Rotate 90° CW (+)"><i class="fas fa-undo-alt" style="transform:rotate(-20deg)"></i> CW</button>
+                                <button class="btn btn-sm btn-secondary" onclick="rotateElement(-90)" title="Rotate 90° CCW (−)"><i class="fas fa-undo-alt" style="transform:rotate(20deg)"></i> CCW</button>
+                                <button class="btn btn-sm btn-danger" onclick="removeSelected()" title="Delete (Delete/Backspace)"><i class="fas fa-trash"></i></button>
                             </div>
                             <div style="display:flex;gap:4px;border-right:1px solid #e3e9f2;padding:0 8px;">
                                 <button class="btn btn-sm btn-warning" onclick="openTemplatePicker()" title="Upload the PP2 certificate PNG (or any image) from your computer or phone"><i class="fas fa-image"></i> Load PP2 Design</button>
@@ -583,6 +699,9 @@
                             </div>
                             <div style="font-size:16px;color:#333;line-height:1.8;margin:30px 0;">
                                 In recognition of successful completion.
+                            </div>
+                            <div style="font-size:12px;color:#666;margin:20px 0;">
+                                Certificate No: {{certificate_number}}
                             </div>
                             </div>
                         </div>
@@ -980,6 +1099,7 @@
 
     // ---- Dynamic field substitution ----
     let backgroundImageUrl = null;
+    let backgroundBaked = false;
 
     // ---- PP2 Background ----
     // Apply any background-image data-URL/URL onto the design surface.
@@ -1037,10 +1157,102 @@
 
     function clearBackground() {
         backgroundImageUrl = null;
+        backgroundBaked = false;
         const canvas = document.getElementById('designCanvas');
         canvas.style.backgroundImage = 'none';
         canvas.style.background = 'linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%)';
+        if (canvasReady() && backgroundBaked) {
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            drawHistory = [];
+        }
+        backgroundBaked = false;
         showAlert('Background cleared.', 'info');
+    }
+
+    // Bake the current background into the drawCanvas bitmap so the eraser, pen
+    // and marker can edit it just like MS Paint (erase reveals transparency).
+    // The wrapper CSS background is disabled for export when baked, and the
+    // drawOverlay already carries the baked pixels, so nothing renders twice.
+    function bakeBackgroundToCanvas() {
+        if (!backgroundImageUrl) { showAlert('No background set to bake.', 'warning'); return; }
+        if (!canvasReady()) initDrawCanvas();
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function () {
+            try {
+                const c = drawCanvas;
+                const scale = Math.max(c.width / img.width, c.height / img.height);
+                const sw = img.width * scale, sh = img.height * scale;
+                const sx = (c.width - sw) / 2, sy = (c.height - sh) / 2;
+                // Preserve any strokes already drawn (history snapshots carry a transparent bg).
+                const snap = drawHistory.length ? drawHistory[drawHistory.length - 1] : null;
+                drawCtx.clearRect(0, 0, c.width, c.height);
+                drawCtx.drawImage(img, sx, sy, sw, sh);
+                const finish = () => {
+                    saveDrawState(); // snapshot now = background + strokes
+                    backgroundBaked = true;
+                    const dc = document.getElementById('designCanvas');
+                    if (dc) dc.style.backgroundImage = 'none';
+                    showAlert('Background baked onto canvas (strokes preserved). Pen/Marker/Eraser now edit it like Paint.', 'info');
+                };
+                if (snap) {
+                    const s = new Image();
+                    s.crossOrigin = 'anonymous';
+                    s.onload = () => { drawCtx.drawImage(s, 0, 0); finish(); };
+                    s.src = snap;
+                } else {
+                    finish();
+                }
+            } catch (err) {
+                showAlert('Could not bake background (CORS on the image). Use an uploaded image instead.', 'error');
+            }
+        };
+        img.onerror = function () { showAlert('Background image could not be loaded for baking.', 'error'); };
+        img.src = backgroundImageUrl;
+    }
+
+    // Bake the selected image element onto the drawCanvas so it becomes part of
+    // the paintable surface (eraser can erase it, pen/marker draw over it).
+    function bakeSelectedImageToCanvas() {
+        if (!activeElement) { showAlert('Select an image element to bake.', 'warning'); return; }
+        const el = activeElement;
+        const src = el.tagName === 'IMG' ? el.src : (el.querySelector ? ((el.querySelector('img') || {}).src) : null);
+        if (!src) { showAlert('Select an image element to bake.', 'warning'); return; }
+        if (!canvasReady()) initDrawCanvas();
+        const dc = document.getElementById('designCanvas');
+        const dr = dc.getBoundingClientRect();
+        const er = el.getBoundingClientRect();
+        const canvasRect = drawCanvas.getBoundingClientRect();
+        const ratio = drawCanvas.width / Math.max(1, canvasRect.width);
+        const dx = (er.left - canvasRect.left) * ratio;
+        const dy = (er.top - canvasRect.top) * ratio;
+        const dw = er.width * ratio;
+        const dh = er.height * ratio;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function () {
+            try {
+                saveDrawState();
+                const deg = parseFloat(el.dataset && el.dataset.rotate) || 0;
+                if (deg) {
+                    drawCtx.save();
+                    drawCtx.translate(dx + dw / 2, dy + dh / 2);
+                    drawCtx.rotate(deg * Math.PI / 180);
+                    drawCtx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+                    drawCtx.restore();
+                } else {
+                    drawCtx.drawImage(img, dx, dy, dw, dh);
+                }
+                saveDrawState();
+                el.remove();
+                syncToHTML();
+                showAlert('Image baked onto canvas. Now editable with Pen/Marker/Eraser like Paint.', 'info');
+            } catch (err) {
+                showAlert('Could not bake image (CORS on the image).', 'error');
+            }
+        };
+        img.onerror = function () { showAlert('Image could not be loaded for baking.', 'error'); };
+        img.src = src;
     }
 
     function substituteFields(template, student, settings, eventName, eventDate, certNumber) {
@@ -1065,8 +1277,8 @@
             '{{school_address}}': settings.school_address || '',
             '{{school_phone}}': settings.school_phone || '',
             '{{school_email}}': settings.school_email || '',
-            '{{school_logo}}': settings.school_logo || '',
-            '{{school_stamp}}': settings.school_stamp || '',
+            '{{school_logo}}': settings.school_logo ? `<img src="${settings.school_logo}" class="cert-logo-img" alt="${settings.school_name || ''}">` : '<span style="font-size:48px;">🏫</span>',
+            '{{school_stamp}}': settings.school_stamp ? `<img src="${settings.school_stamp}" class="cert-seal-img" alt="School Seal">` : '',
             '{{headteacher_name}}': settings.headteacher_name || '',
             '{{event_name}}': eventName || '',
             '{{date}}': eventDate || '',
@@ -1232,29 +1444,99 @@
         baseTemplateHtml = getTemplateContent();
     }
 
-    function mergeIntoDesigner() {
-        if (selectedStudents.length === 0) {
-            showAlert('Select a student first, then merge to preview their data in the designer.', 'error');
-            return;
-        }
-        // Snapshot the pristine placeholder template once, before the first merge.
-        if (!designerMerged && !baseTemplateHtml) captureBaseTemplate();
+    // ---- PowerPoint-like slides IN THE VISUAL DESIGNER (Phase 6) ----
+    // Each selected student is a "slide": their data is merged into the designer
+    // canvas as editable, movable text (student name, class, cert #, etc.).
+    // Navigate with Prev/Next; the live preview stays in sync. Original template
+    // (with {{placeholders}}) is snapshotted so Restore returns to placeholders.
 
-        const student = selectedStudents[0];
+    function showDesignerSlideNav(show) {
+        const nav = document.getElementById('designerSlideNav');
+        if (nav) nav.style.display = show ? 'flex' : 'none';
+    }
+
+    function updateDesignerSlideUI() {
+        const counter = document.getElementById('designerSlideCounter');
+        const label = document.getElementById('designerSlideStudent');
+        const prev = document.getElementById('prevDesignerSlideBtn');
+        const next = document.getElementById('nextDesignerSlideBtn');
+        if (counter) counter.textContent = (currentSlide + 1) + ' of ' + selectedStudents.length;
+        if (label) label.textContent = selectedStudents[currentSlide] ? (selectedStudents[currentSlide].fullName || '') : '';
+        if (prev) prev.disabled = currentSlide <= 0 || selectedStudents.length <= 1;
+        if (next) next.disabled = currentSlide >= selectedStudents.length - 1 || selectedStudents.length <= 1;
+    }
+
+    // Re-merge the designer canvas for the student at the current slide index.
+    function _renderDesignerSlide() {
+        if (selectedStudents.length === 0) return;
+        const student = selectedStudents[currentSlide];
+        if (!student) return;
         const eventName = document.getElementById('eventName').value || 'Certificate';
         const eventDate = document.getElementById('certDate').value || new Date().toISOString().split('T')[0];
         const gradYear = document.getElementById('gradYear').value || currentYear;
-        const certNumber = generateCertificateNumber(student, gradYear, 0);
+        const certNumber = studentCertNumbers[student.admissionNumber] || generateCertificateNumber(student, gradYear, currentSlide);
+        studentCertNumbers[student.admissionNumber] = certNumber;
 
-        const merged = substituteFields(baseTemplateHtml || getTemplateContent(), student, schoolSettings, eventName, eventDate, certNumber);
-
+        // Always re-merge from the pristine placeholder snapshot so positions
+        // and styles stay consistent across slides (no drift).
+        const src = baseTemplateHtml || getTemplateContent();
+        const merged = substituteFields(src, student, schoolSettings, eventName, eventDate, certNumber);
         document.getElementById('htmlSource').value = merged;
         syncFromHTML();
         designerMerged = true;
-        document.getElementById('mergeStatus').style.display = 'inline-block';
-        document.getElementById('restoreTemplateBtn').style.display = 'inline-flex';
-        document.getElementById('previewBtn').disabled = false;
-        showAlert('Designer now shows live data for ' + (student.fullName || 'the selected student') + '. Click Restore to go back to placeholders.', 'info');
+        const m = document.getElementById('mergeStatus');
+        const r = document.getElementById('restoreTemplateBtn');
+        if (m) m.style.display = 'inline-block';
+        if (r) r.style.display = 'inline-flex';
+        showDesignerSlideNav(true);
+        updateDesignerSlideUI();
+        refreshCertNumberDisplay();
+        syncPreviewToDesigner();
+        showAlert('Slide ' + (currentSlide + 1) + ': ' + (student.fullName || 'student') + ' — data merged into designer.', 'info');
+    }
+
+    function setCurrentSlide(idx) {
+        currentSlide = Math.max(0, Math.min(idx, Math.max(0, selectedStudents.length - 1)));
+        _renderDesignerSlide();
+    }
+
+    function applyDesignerSlide() {
+        if (selectedStudents.length === 0) {
+            showAlert('Select at least one student (from the list or by class), then click Merge Student.', 'error');
+            return;
+        }
+        if (!baseTemplateHtml) captureBaseTemplate();
+        // Start at the currently-previewed slide so designer and preview agree.
+        if (slidesCount === 0) slidesCount = selectedStudents.length;
+        _renderDesignerSlide();
+    }
+
+    function prevDesignerSlide() { if (currentSlide > 0) { currentSlide--; _renderDesignerSlide(); } }
+    function nextDesignerSlide() { if (currentSlide < selectedStudents.length - 1) { currentSlide++; _renderDesignerSlide(); } }
+
+    // Keep the live-preview carousel aligned with the designer's current slide.
+    function syncPreviewToDesigner() {
+        slidesCount = selectedStudents.length;
+        const controls = document.getElementById('carouselControls');
+        if (controls) controls.style.display = slidesCount > 1 ? 'flex' : 'none';
+        renderSlide();
+    }
+
+    // Generate the certificate number for the current slide's student and place it
+    // on the design (via {{certificate_number}}). This also merges the current
+    // student's data into the designer so the number is immediately visible.
+    function generateDesignerCertNumber() {
+        if (selectedStudents.length === 0) {
+            showAlert('Select a student first.', 'error');
+            return;
+        }
+        const student = selectedStudents[currentSlide];
+        const gradYear = document.getElementById('gradYear').value || currentYear;
+        const certNumber = generateCertificateNumber(student, gradYear, currentSlide);
+        studentCertNumbers[student.admissionNumber] = certNumber;
+        refreshCertNumberDisplay();
+        applyDesignerSlide();
+        showAlert('Certificate number for ' + (student.fullName || 'this student') + ':\n' + certNumber + '\n\nThis is an estimate; the server issues the final unique number at generation time.', 'info');
     }
 
     function restoreTemplate() {
@@ -1264,12 +1546,14 @@
         designerMerged = false;
         document.getElementById('mergeStatus').style.display = 'none';
         document.getElementById('restoreTemplateBtn').style.display = 'none';
+        showDesignerSlideNav(false);
         showAlert('Template restored with placeholders.', 'info');
     }
 
     function resetDesignerMergeState() {
         designerMerged = false;
         baseTemplateHtml = '';
+        showDesignerSlideNav(false);
         const m = document.getElementById('mergeStatus');
         const r = document.getElementById('restoreTemplateBtn');
         if (m) m.style.display = 'none';
@@ -1306,9 +1590,11 @@
         syncToHTML();
     }
 
-    function addCanvasImage() {
-        const url = prompt('Enter image URL (e.g. the school logo URL):');
-        if (!url) return;
+    function addCanvasImage(url) {
+        if (!url) {
+            url = prompt('Enter image URL (e.g. the school logo URL):');
+            if (!url) return;
+        }
         const img = document.createElement('img');
         img.className = 'canvas-element';
         img.src = url;
@@ -1321,6 +1607,30 @@
         document.getElementById('designCanvas').appendChild(img);
         setupCanvasElement(img);
         syncToHTML();
+    }
+
+    // Upload an image file from the device into the visual designer (Canva "Uploads").
+    function uploadCanvasImage() {
+        const input = document.getElementById('imageUploadInput');
+        if (input) input.click();
+    }
+
+    function onImageUploadSelected(input) {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            showAlert('Please select an image file (PNG/JPG).', 'error');
+            input.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            addCanvasImage(e.target.result);
+            showAlert('Image uploaded and placed on the design. Drag to position; click "Bake to Canvas" to make it paint-editable.', 'info');
+        };
+        reader.onerror = function () { showAlert('Could not read the selected image.', 'error'); };
+        reader.readAsDataURL(file);
+        input.value = '';
     }
 
     function addCanvasShape(type) {
@@ -1354,6 +1664,38 @@
             wrapper.innerHTML = '<div style="width:90px;height:90px;border:3px solid #001f5c;border-radius:50%;"></div>';
             wrapper.style.gap = '0';
             wrapper.style.padding = '0';
+        } else if (type === 'arrow') {
+            // Canva-style straight arrow: shaft + triangular arrowhead
+            const color = drawColor;
+            wrapper.innerHTML = '<svg width="220" height="40" viewBox="0 0 220 40" style="display:block"><line x1="10" y1="20" x2="155" y2="20" stroke="' + color + '" stroke-width="3" /><polygon points="155,12 195,20 155,28" fill="' + color + '" /></svg>';
+            wrapper.style.gap = '0';
+            wrapper.style.padding = '0';
+        } else if (type === 'star') {
+            const color = drawColor;
+            // 5-point star via SVG path (math-driven, scales cleanly)
+            const R = 46, r = 22, cx = 70, cy = 50;
+            const pts = [];
+            for (let i = 0; i < 5; i++) {
+                const a1 = (i * 72 - 90) * Math.PI / 180;
+                const a2 = (i * 72 + 36 - 90) * Math.PI / 180;
+                pts.push((cx + R * Math.cos(a1)) + ',' + (cy + R * Math.sin(a1)));
+                pts.push((cx + r * Math.cos(a2)) + ',' + (cy + r * Math.sin(a2)));
+            }
+            wrapper.innerHTML = '<svg width="160" height="100" viewBox="0 0 140 100" style="display:block"><polygon points="' + pts.join(' ') + '" fill="' + color + '" stroke="' + color + '" stroke-width="2" /></svg>';
+            wrapper.style.gap = '0';
+            wrapper.style.padding = '0';
+        } else if (type === 'polygon') {
+            const color = drawColor;
+            // Regular hexagon (6-gon) — Canva "elements" shape
+            const R = 44, cx = 60, cy = 50;
+            const pts = [];
+            for (let i = 0; i < 6; i++) {
+                const a = (i * 60 - 90) * Math.PI / 180;
+                pts.push((cx + R * Math.cos(a)) + ',' + (cy + R * Math.sin(a)));
+            }
+            wrapper.innerHTML = '<svg width="140" height="110" viewBox="0 0 120 100" style="display:block"><polygon points="' + pts.join(' ') + '" fill="none" stroke="' + color + '" stroke-width="3" /></svg>';
+            wrapper.style.gap = '0';
+            wrapper.style.padding = '0';
         }
         document.getElementById('designCanvas').appendChild(wrapper);
         setupCanvasElement(wrapper);
@@ -1368,6 +1710,7 @@
             el.classList.add('active');
             el.style.cursor = 'grabbing';
             showRemoveButton(el);
+            showSelectionBox(el);
         }
         el.addEventListener('mousedown', function (e) {
             e.preventDefault();
@@ -1388,10 +1731,11 @@
                 positionRemoveButton(el);
             }
             function onUp() {
-                if (activeElement === el) {
-                    el.style.cursor = 'grab';
-                    syncToHTML();
-                }
+            if (activeElement === el) {
+                el.style.cursor = 'grab';
+                syncToHTML();
+                positionSelectionBox(el);
+            }
                 document.removeEventListener('mousemove', onMove);
                 document.removeEventListener('mouseup', onUp);
             }
@@ -1435,6 +1779,7 @@
             activeElement = null;
         }
         if (removeBtn) removeBtn.style.display = 'none';
+        hideSelectionBox();
     }
 
     function removeSelected() {
@@ -1452,6 +1797,348 @@
             removeSelected();
         }
     });
+
+    // ===================== Canva-like designer chrome =====================
+    // Selection transform box (resize handles), rotation, a text-styling
+    // toolbar, z-order/alignment controls and keyboard shortcuts. Mirrors the
+    // core select-and-transform UX from Canva, built on the existing absolute
+    // positioned .canvas-element nodes (no extra layout engine required).
+    let selectionBox = null;
+    let selectionHandles = {};
+    let textToolbar = null;
+    let resizeHandle = null;
+    let resizeStart = null;
+    const FONT_STACKS = [
+        ['System', 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif'],
+        ['Arial', 'Arial, Helvetica, sans-serif'],
+        ['Georgia', 'Georgia, Times New Roman, serif'],
+        ['Monospace', "'Courier New', monospace"]
+    ];
+
+    // ---- Selection transform box ----
+    function ensureSelectionBox() {
+        if (selectionBox) return;
+        const dc = document.getElementById('designCanvas');
+        if (!dc) return;
+        const box = document.createElement('div');
+        box.id = 'selectionBox';
+        box.style.display = 'none';
+        dc.appendChild(box);
+        selectionBox = box;
+        const names = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+        names.forEach(n => {
+            const h = document.createElement('div');
+            h.className = 'resize-handle ' + n;
+            h.dataset.handle = n;
+            h.addEventListener('mousedown', function (ev) { startResize(ev, n); });
+            box.appendChild(h);
+            selectionHandles[n] = h;
+        });
+        const rh = document.createElement('div');
+        rh.className = 'resize-handle rotate';
+        rh.dataset.handle = 'rotate';
+        rh.title = 'Rotate 90° CW (Ctrl+E) / CCW (Ctrl+Shift+E)';
+        rh.addEventListener('mousedown', function (ev) { ev.preventDefault(); ev.stopPropagation(); });
+        box.appendChild(rh);
+    }
+
+    function positionSelectionBox(el) {
+        if (!selectionBox || !el) return;
+        const dc = document.getElementById('designCanvas');
+        if (!dc) return;
+        const dcr = dc.getBoundingClientRect();
+        const er = el.getBoundingClientRect();
+        if (er.width < 1 || er.height < 1) { selectionBox.style.display = 'none'; return; }
+        const x = er.left - dcr.left;
+        const y = er.top - dcr.top;
+        selectionBox.style.left = x + 'px';
+        selectionBox.style.top = y + 'px';
+        selectionBox.style.width = er.width + 'px';
+        selectionBox.style.height = er.height + 'px';
+        Object.keys(selectionHandles).forEach(n => {
+            const h = selectionHandles[n];
+            if (n === 'n') { h.style.left = '50%'; h.style.top = '-6px'; h.style.transform = 'translateX(-50%)'; }
+            else if (n === 's') { h.style.left = '50%'; h.style.bottom = '-6px'; h.style.transform = 'translateX(-50%)'; }
+            else if (n === 'e') { h.style.right = '-6px'; h.style.top = '50%'; h.style.transform = 'translateY(-50%)'; }
+            else if (n === 'w') { h.style.left = '-6px'; h.style.top = '50%'; h.style.transform = 'translateY(-50%)'; }
+            else if (n === 'nw') { h.style.left = '-6px'; h.style.top = '-6px'; }
+            else if (n === 'ne') { h.style.right = '-6px'; h.style.top = '-6px'; }
+            else if (n === 'sw') { h.style.left = '-6px'; h.style.bottom = '-6px'; }
+            else if (n === 'se') { h.style.right = '-6px'; h.style.bottom = '-6px'; }
+        });
+        if (selectionHandles.rotate) {
+            selectionHandles.rotate.style.top = '-36px';
+            selectionHandles.rotate.style.left = '50%';
+            selectionHandles.rotate.style.transform = 'translateX(-50%) rotate(' + ((parseFloat(activeElement && activeElement.dataset.rotate || 0) || 0)) + 'deg)';
+        }
+        selectionBox.style.display = 'block';
+    }
+
+    function showSelectionBox(el) {
+        ensureSelectionBox();
+        if (selectionBox) selectionBox.style.display = 'block';
+        positionSelectionBox(el);
+        positionDesignerActions();
+        showTextToolbarFor(el);
+    }
+
+    function hideSelectionBox() {
+        if (selectionBox) selectionBox.style.display = 'none';
+        const bar = document.getElementById('designerActions');
+        if (bar) bar.style.display = 'none';
+        hideTextToolbar();
+    }
+
+    function startResize(e, handle) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (!activeElement || !selectionBox) return;
+        resizeHandle = handle;
+        const dc = document.getElementById('designCanvas');
+        const dcr = dc.getBoundingClientRect();
+        const er = activeElement.getBoundingClientRect();
+        const curLeft = parseFloat(activeElement.style.left) || (er.left - dcr.left);
+        const curTop = parseFloat(activeElement.style.top) || (er.top - dcr.top);
+        resizeStart = {
+            x: e.clientX - dcr.left,
+            y: e.clientY - dcr.top,
+            w: er.width, h: er.height,
+            left: curLeft, top: curTop,
+            aspect: !!e.shiftKey
+        };
+        activeElement.style.cursor = 'grabbing';
+        document.addEventListener('mousemove', doResize);
+        document.addEventListener('mouseup', stopResize);
+    }
+
+    function doResize(e) {
+        if (!resizeHandle || !activeElement || !resizeStart) return;
+        e.preventDefault();
+        const dc = document.getElementById('designCanvas');
+        const dcr = dc.getBoundingClientRect();
+        const mx = e.clientX - dcr.left;
+        const my = e.clientY - dcr.top;
+        const s = resizeStart;
+        let w = s.w, h = s.h, left = s.left, top = s.top;
+        const dx = mx - s.x, dy = my - s.y;
+        switch (resizeHandle) {
+            case 'e': w = s.w + dx; break;
+            case 'w': w = s.w - dx; left = s.left + dx; break;
+            case 's': h = s.h + dy; break;
+            case 'n': h = s.h - dy; top = s.top + dy; break;
+            case 'se': w = s.w + dx; h = s.h + dy; break;
+            case 'sw': w = s.w - dx; h = s.h + dy; left = s.left + dx; break;
+            case 'ne': w = s.w + dx; h = s.h - dy; top = s.top + dy; break;
+            case 'nw': w = s.w - dx; h = s.h - dy; left = s.left + dx; top = s.top + dy; break;
+        }
+        if (s.aspect || e.shiftKey) {
+            const ratio = s.w / s.h;
+            if (resizeHandle.indexOf('e') !== -1 || resizeHandle.indexOf('w') !== -1) h = w / ratio;
+            else w = h * ratio;
+        }
+        w = Math.max(20, Math.round(w));
+        h = Math.max(20, Math.round(h));
+        activeElement.style.left = Math.round(left) + 'px';
+        activeElement.style.top = Math.round(top) + 'px';
+        activeElement.style.width = w + 'px';
+        activeElement.style.height = h + 'px';
+        positionSelectionBox(activeElement);
+    }
+
+    function stopResize() {
+        if (resizeHandle) {
+            resizeHandle = null;
+            resizeStart = null;
+            if (activeElement) {
+                activeElement.style.cursor = activeElement.classList.contains('canvas-text') ? 'text' : 'grab';
+                syncToHTML();
+            }
+        }
+        document.removeEventListener('mousemove', doResize);
+        document.removeEventListener('mouseup', stopResize);
+    }
+
+    // ---- Rotation (90° increments, exported via normalizeTemplateForRender) ----
+    function rotateElement(deltaDeg) {
+        if (!activeElement) return;
+        const el = activeElement;
+        let cur = parseFloat(el.dataset.rotate || 0);
+        cur = ((cur + deltaDeg) % 360 + 360) % 360;
+        el.dataset.rotate = cur;
+        el.style.transformOrigin = '50% 50%';
+        let t = (el.style.transform || '').replace(/\s*rotate\([^)]*\)/gi, '').trim();
+        t = (t === 'none' || t === '') ? '' : t;
+        t = t + (cur ? ' rotate(' + cur + 'deg)' : '');
+        el.style.transform = t;
+        syncToHTML();
+        positionSelectionBox(el);
+    }
+
+    // ---- Z-order / layers ----
+    function zOrder(level) {
+        if (!activeElement) return;
+        let z = parseInt(window.getComputedStyle(activeElement).zIndex) || 1;
+        if (level === 'front') z = 1000;
+        else if (level === 'back') z = -1000;
+        else if (level === 'forward') z += 1;
+        else if (level === 'backward') z -= 1;
+        activeElement.style.zIndex = z;
+        syncToHTML();
+    }
+
+    // ---- Alignment (single selected element, relative to canvas) ----
+    function alignSelection(alignment) {
+        if (!activeElement) return;
+        const dc = document.getElementById('designCanvas');
+        const dcr = dc.getBoundingClientRect();
+        const el = activeElement;
+        if (!el.style.position) el.style.position = 'absolute';
+        const er = el.getBoundingClientRect();
+        switch (alignment) {
+            case 'left': el.style.left = (er.left - dcr.left) + 'px'; break;
+            case 'center': el.style.left = ((dcr.width - er.width) / 2) + 'px'; break;
+            case 'right': el.style.left = ((dcr.width - er.width) + (er.left - dcr.left)) + 'px'; break;
+            case 'top': el.style.top = (er.top - dcr.top) + 'px'; break;
+            case 'middle': el.style.top = ((dcr.height - er.height) / 2) + 'px'; break;
+            case 'bottom': el.style.top = ((dcr.height - er.height) + (er.top - dcr.top)) + 'px'; break;
+        }
+        syncToHTML();
+        positionSelectionBox(el);
+    }
+
+    function distributeSelection(axis) {
+        const items = Array.from(document.getElementById('designCanvas').querySelectorAll('.canvas-element.active'))
+            .filter(el => el.classList.contains('canvas-text') === false && !el.classList.contains('canvas-border'));
+        if (items.length < 2) { showAlert('Select multiple elements (Shift+click) to distribute.', 'warning'); return; }
+        const dc = document.getElementById('designCanvas');
+        const dcr = dc.getBoundingClientRect();
+        items.sort((a, b) => (axis === 'h' ? a.getBoundingClientRect().left - b.getBoundingClientRect().left : a.getBoundingClientRect().top - b.getBoundingClientRect().top));
+        const first = items[0].getBoundingClientRect();
+        const last = items[items.length - 1].getBoundingClientRect();
+        const start = axis === 'h' ? (first.left - dcr.left) : (first.top - dcr.top);
+        const end = axis === 'h' ? (last.right - dcr.right) : (last.bottom - dcr.bottom);
+        const step = (end - start) / (items.length - 1);
+        items.forEach((el, i) => {
+            if (axis === 'h') el.style.left = (start + step * i) + 'px';
+            else el.style.top = (start + step * i) + 'px';
+        });
+        syncToHTML();
+    }
+
+    // ---- Designer actions bar ----
+    function positionDesignerActions() {
+        const bar = document.getElementById('designerActions');
+        if (!bar) return;
+        if (activeElement) {
+            bar.style.display = 'flex';
+        } else {
+            bar.style.display = 'none';
+        }
+    }
+
+    // ---- Text styling toolbar ----
+    function ensureTextToolbar() {
+        if (textToolbar) return;
+        const dc = document.getElementById('designCanvas');
+        if (!dc) return;
+        const bar = document.createElement('div');
+        bar.id = 'textToolbar';
+        let html = '<select onchange="setFontFamily(this.value)" style="width:130px;">';
+        html += '<option value="">Font</option>';
+        FONT_STACKS.forEach(f => { html += '<option value="' + f[1] + '">' + f[0] + '</option>'; });
+        html += '</select>';
+        html += '<input type="number" min="8" max="120" step="1" placeholder="14" onchange="setFontSize(this.value)" style="width:70px;">';
+        html += '<button class="btn btn-sm btn-secondary" onclick="setTextStyle(\'bold\')" title="Bold (Ctrl+B)"><i class="fas fa-bold"></i></button>';
+        html += '<button class="btn btn-sm btn-secondary" onclick="setTextStyle(\'italic\')" title="Italic (Ctrl+I)"><i class="fas fa-italic"></i></button>';
+        html += '<button class="btn btn-sm btn-secondary" onclick="setTextStyle(\'underline\')" title="Underline (Ctrl+U)"><i class="fas fa-underline"></i></button>';
+        html += '<input type="color" onchange="setTextColor(this.value)" title="Text color">';
+        html += '<button class="btn btn-sm btn-secondary" onclick="setTextAlign(\'left\')" title="Align left"><i class="fas fa-align-left"></i></button>';
+        html += '<button class="btn btn-sm btn-secondary" onclick="setTextAlign(\'center\')" title="Align center"><i class="fas fa-align-center"></i></button>';
+        html += '<button class="btn btn-sm btn-secondary" onclick="setTextAlign(\'right\')" title="Align right"><i class="fas fa-align-right"></i></button>';
+        bar.innerHTML = html;
+        dc.appendChild(bar);
+        textToolbar = bar;
+    }
+
+    function showTextToolbarFor(el) {
+        ensureTextToolbar();
+        if (!textToolbar || !el) return;
+        if (el.classList.contains('canvas-text')) {
+            positionTextToolbar(el);
+            textToolbar.style.display = 'block';
+        } else {
+            textToolbar.style.display = 'none';
+        }
+    }
+
+    function hideTextToolbar() {
+        if (textToolbar) textToolbar.style.display = 'none';
+    }
+
+    function positionTextToolbar(el) {
+        if (!textToolbar || !el) return;
+        const dc = document.getElementById('designCanvas');
+        const dcr = dc.getBoundingClientRect();
+        const er = el.getBoundingClientRect();
+        textToolbar.style.left = (er.left - dcr.left) + 'px';
+        textToolbar.style.top = (er.top - dcr.top - 40) + 'px';
+        textToolbar.style.display = 'block';
+    }
+
+    // ---- Text toolbar actions ----
+    function setFontFamily(family) {
+        if (!activeElement || !activeElement.classList.contains('canvas-text')) return;
+        activeElement.style.fontFamily = family;
+        syncToHTML();
+    }
+    function setFontSize(size) {
+        if (!activeElement || !activeElement.classList.contains('canvas-text')) return;
+        activeElement.style.fontSize = size + 'px';
+        syncToHTML();
+    }
+    function setTextStyle(kind) {
+        if (!activeElement || !activeElement.classList.contains('canvas-text')) return;
+        if (kind === 'bold') activeElement.style.fontWeight = activeElement.style.fontWeight === 'bold' ? 'normal' : 'bold';
+        else if (kind === 'italic') activeElement.style.fontStyle = activeElement.style.fontStyle === 'italic' ? 'normal' : 'italic';
+        else if (kind === 'underline') activeElement.style.textDecoration = (activeElement.style.textDecoration || '').indexOf('underline') !== -1 ? '' : 'underline';
+        syncToHTML();
+    }
+    function setTextColor(hex) {
+        if (!activeElement || !activeElement.classList.contains('canvas-text')) return;
+        activeElement.style.color = hex;
+        syncToHTML();
+    }
+    function setTextAlign(a) {
+        if (!activeElement || !activeElement.classList.contains('canvas-text')) return;
+        activeElement.style.textAlign = a;
+        syncToHTML();
+    }
+
+    // ---- Keyboard shortcuts for the selected element ----
+    document.addEventListener('keydown', function (e) {
+        if (!activeElement) return;
+        if (e.ctrlKey && e.shiftKey && (e.key === ']' || e.key === '[')) {
+            e.preventDefault(); zOrder(e.key === ']' ? 'front' : 'back'); return;
+        }
+        if (e.ctrlKey && (e.key === ']' || e.key === '[')) {
+            e.preventDefault(); zOrder(e.key === ']' ? 'forward' : 'backward'); return;
+        }
+        if (e.ctrlKey && e.key === 'e' && !e.shiftKey) { e.preventDefault(); rotateElement(90); return; }
+        if (e.ctrlKey && e.shiftKey && e.key === 'E') { e.preventDefault(); rotateElement(-90); return; }
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) !== -1) {
+            e.preventDefault();
+            const step = e.shiftKey ? 10 : 2;
+            const el = activeElement;
+            if (!el.style.position) el.style.position = 'absolute';
+            let l = parseFloat(el.style.left) || 0, t = parseFloat(el.style.top) || 0;
+            if (e.key === 'ArrowUp') t -= step; if (e.key === 'ArrowDown') t += step;
+            if (e.key === 'ArrowLeft') l -= step; if (e.key === 'ArrowRight') l += step;
+            el.style.left = l + 'px'; el.style.top = t + 'px';
+            positionSelectionBox(el); syncToHTML();
+        }
+    });
+
+    window.addEventListener('resize', function () { if (activeElement) positionSelectionBox(activeElement); });
 
     // Promote every certificate field row (text, dotted lines, the border frame,
     // ...) into editable, movable, deletable .canvas-element nodes in the designer.
@@ -1501,7 +2188,9 @@
     let drawWidth = 3;
     let currentTool = 'select';            // select | hand | pen | marker | eraser | crop
     let drawHistory = [];
+    let redoStack = [];
     let maxHistory = 20;
+    let viewZoom = 1;          // view-only magnification of the canvas stage (1 = 100%)
 
     // Crop state
     let cropping = false;
@@ -1559,7 +2248,7 @@
 
     function applyStrokeStyle() {
         if (!drawCtx) return;
-        drawCtx.lineWidth = drawWidth;
+        drawCtx.lineWidth = drawWidth / viewZoom;
         if (currentTool === 'eraser') {
             drawCtx.globalCompositeOperation = 'destination-out';
             drawCtx.globalAlpha = 1;
@@ -1638,8 +2327,8 @@
         if (!isDrawingTool()) return;
         saveDrawState();
         const rect = drawCanvas.getBoundingClientRect();
-        lastX = clientX - rect.left;
-        lastY = clientY - rect.top;
+        lastX = (clientX - rect.left) / viewZoom;
+        lastY = (clientY - rect.top) / viewZoom;
         isDrawing = true;
         resetCtx();
         applyStrokeStyle();
@@ -1666,7 +2355,7 @@
 
         if (!isDrawing) return;
         applyStrokeStyle();
-        drawCtx.lineTo(x, y);
+        drawCtx.lineTo(x / viewZoom, y / viewZoom);
         drawCtx.stroke();
         lastX = x;
         lastY = y;
@@ -1776,9 +2465,21 @@
             showAlert('Nothing to undo.', 'info');
             return;
         }
+        redoStack.push(drawCanvas.toDataURL('image/png'));
+        if (redoStack.length > maxHistory) redoStack.shift();
         drawHistory.pop();
         redrawLast();
         showAlert('Undo applied.', 'info');
+    }
+
+    function redoDrawing() {
+        if (!canvasReady() || !redoStack.length) {
+            showAlert('Nothing to redo.', 'info');
+            return;
+        }
+        drawHistory.push(redoStack.pop());
+        redrawLast();
+        showAlert('Redo applied.', 'info');
     }
 
     function cropCanvas() {
@@ -1867,6 +2568,13 @@
             // Promotion zeroed the original margins; restore vertical rhythm for the stack.
             el.style.margin = '0.5em 0';
             el.style.display = '';
+            // Preserve any designer-applied rotation on export (drop the editor
+            // centering translate so the row stays in natural flow).
+            const dr = el.dataset && el.dataset.rotate;
+            if (dr && parseFloat(dr)) {
+                el.style.transformOrigin = 'center center';
+                el.style.transform = 'rotate(' + dr + 'deg)';
+            }
         });
         return tmp.innerHTML;
     }
@@ -1887,8 +2595,10 @@
             day: 'numeric', month: 'long', year: 'numeric'
         });
 
-        // Background image support: if a background is set, render it as absolute-positioned div
-        const bgStyle = backgroundImageUrl
+        // When the background has been baked onto the drawCanvas (paint-like
+        // editing), it is carried by the drawOverlay <img>, so the wrapper CSS
+        // background is intentionally NOT applied to avoid rendering it twice.
+        const bgStyle = (backgroundImageUrl && !backgroundBaked)
             ? `background-image: url('${decodeURIComponent(backgroundImageUrl)}'); background-size: cover; background-position: center; background-repeat: no-repeat;`
             : '';
 
@@ -1903,7 +2613,7 @@
             <div class="certificate" style="${bgStyle}">
                 ${template.includes('canvas-border') ? '' : '<div class="cert-border"></div>'}
                 <div class="cert-shield"></div>
-                <div class="cert-content" style="${backgroundImageUrl ? 'background: transparent;' : ''}">
+                <div class="cert-content" style="${(backgroundImageUrl && !backgroundBaked) ? 'background: transparent;' : ''}">
                     ${template}
                 </div>
                 ${drawOverlay}
@@ -2040,6 +2750,7 @@
             renderStudentPaginationControls(false);
             document.getElementById('carouselControls').style.display = 'none';
             document.getElementById('slideCounter').style.display = 'none';
+            showDesignerSlideNav(false);
             return;
         }
         buildSlides();
@@ -2067,13 +2778,16 @@
         showAlert('Certificate numbers are issued server-side on generation. The number shown is an estimate for the first selected student.', 'info');
     }
 
-    // Keyboard arrow navigation for the slide carousel
+    // Keyboard arrow navigation for slides (carousel + designer)
     document.addEventListener('keydown', function (e) {
-        const controls = document.getElementById('carouselControls');
-        if (!controls || controls.style.display === 'none') return;
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
-        else if (e.key === 'ArrowRight') { e.preventDefault(); nextSlide(); }
+        const carousel = document.getElementById('carouselControls');
+        const nav = document.getElementById('designerSlideNav');
+        const inCarousel = carousel && carousel.style.display !== 'none';
+        const inDesigner = nav && nav.style.display !== 'none';
+        if (!inCarousel && !inDesigner) return;
+        if (e.key === 'ArrowLeft') { e.preventDefault(); if (inDesigner) prevDesignerSlide(); else prevSlide(); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); if (inDesigner) nextDesignerSlide(); else nextSlide(); }
     });
 
     // Auto-update preview when event fields change
