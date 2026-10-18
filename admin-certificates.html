@@ -501,6 +501,7 @@
             <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
                 <select id="templateCategory" onchange="renderTemplates()" style="border:1px solid #e3e9f2;border-radius:6px;padding:4px 8px;font-size:13px;">
                     <option value="all">All categories</option>
+                    <option>Graduation</option>
                     <option>Academic Excellence</option>
                     <option>Best Performing Learner</option>
                     <option>Subject Excellence</option>
@@ -3099,6 +3100,7 @@
               'Date of Issue: {{date}} &nbsp;|&nbsp; Certificate No.: {{certificate_number}}' +
             '</div>'
         }
+    ];
 
     // Bake an inline SVG into a PNG data-URL so html2canvas/raster exporters
     // render decorative artwork reliably (avoids full-bleed SVG sizing issues).
@@ -3161,11 +3163,12 @@
         const title = document.getElementById('designTitle');
         if (title) title.value = t.name + ' – Certificate (' + t.orientation + ')';
         draftKey = 'csa_cert_draft_' + t.id;
-        if (t.id === 'pp2-graduation-2026') {
+                if (t.id === 'pp2-graduation-2026' || t.id === 'pp2-graduation-2026-premium') {
             const gy = document.getElementById('gradYear'); if (gy) gy.value = '2026';
             const ev = document.getElementById('eventName'); if (ev) ev.value = 'PP2 Graduation';
             const cf = document.getElementById('classFilter'); if (cf) cf.value = 'PP2';
-            setTimeout(function () { filterStudents(); updateSelectionSummary(); }, 50);
+            setTimeout(function () { filterStudents(); updateSelectionSummary(); },
+ 50);
         }
         setSaveStatus('saved', 'Template: ' + t.name);
         showAlert('Template "' + t.name + '" applied. Edit fields, then Save/Export.', 'info');
