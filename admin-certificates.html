@@ -3452,7 +3452,7 @@
         // editing), it is carried by the drawOverlay <img>, so the wrapper CSS
         // background is intentionally NOT applied to avoid rendering it twice.
         const bgStyle = (backgroundImageUrl && !backgroundBaked)
-            ? `background-image: url('${encodeURIComponent(decodeURIComponent(backgroundImageUrl))}`); background-size: cover; background-position: center; background-repeat: no-repeat;`
+            ? 'background-image: url(' + encodeURIComponent(decodeURIComponent(backgroundImageUrl)) + '); background-size: cover; background-position: center; background-repeat: no-repeat;'
             : '';
 
         // Build the full certificate wrapper
