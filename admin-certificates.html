@@ -3027,41 +3027,59 @@
                 '<div style="font-size:11px;color:#666;">Certificate No: {{certificate_number}} | Date: {{date}}</div>' +
                 '<div style="margin-top:18px;"><svg width="90" height="20"><circle cx="10" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/><circle cx="28" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/><circle cx="46" cy="10" r="8" fill="none" stroke="#ea580c" stroke-width="2"/></svg></div>' },
         { id: 'pp2-graduation-2026-premium', name: 'Changara Star Academy — Premium PP2 Graduation 2026', category: 'Graduation', orientation: 'landscape',
-          bg: ['#ffffff', '#fffdf7'],
-          decorationSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 630" width="1000" height="630"><rect x="0" y="0" width="1000" height="630" fill="#ffffff"/><defs><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#d4a017"/><stop offset="1" stop-color="#b8860b"/></linearGradient><linearGradient id="navyGrad" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#001f5c"/><stop offset="1" stop-color="#0b5394"/></linearGradient></defs>' +
-            '<g stroke="#001f5c" stroke-width="4" fill="none" opacity="0.9"><path d="M25 25 L975 25"/><path d="M25 605 L975 605"/><path d="M25 25 L25 605"/><path d="M975 25 L975 605"/></g>' +
-            '<g stroke="#d4a017" stroke-width="2" fill="none" opacity="0.8"><path d="M35 35 L965 35"/><path d="M35 595 L965 595"/><path d="M35 35 L35 595"/><path d="M965 35 L965 595"/></g>' +
-            '<g fill="#d4a017"><path d="M25 25 L42 8 M42 25 L25 42 Z"/><path d="M975 25 L958 8 M958 25 L975 42 Z"/><path d="M25 605 L42 598 Z M42 605 L25 588 Z"/><path d="M975 605 L958 598 Z M958 605 L975 588 Z"/></g>' +
-            '<g fill="none" stroke="#d4a017" stroke-width="1.5" opacity="0.15">' +
-            '<path d="M100 100 Q180 85 260 100 T420 100 T580 100 T740 100 T900 100"/>' +
-            '<path d="M100 530 Q180 545 260 530 T420 530 T580 530 T740 530 T900 530"/>' +
+          bg: ['#FFFCF4', '#ffffff'],
+          decorationSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 630" width="1000" height="630"><rect x="0" y="0" width="1000" height="630" fill="#FFFCF4"/>' +
+            '<defs><linearGradient id="goldGlow" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#D4AF37" stop-opacity="0.15"/><stop offset="1" stop-color="#D4AF37" stop-opacity="0.05"/></linearGradient></defs>' +
+            '<g stroke="#071D49" stroke-width="5" fill="none" stroke-linecap="round"><path d="M28 28 H972"/><path d="M28 602 H972"/><path d="M28 28 V602"/><path d="M972 28 V602"/></g>' +
+            '<g stroke="#D4AF37" stroke-width="2" fill="none" stroke-linejoin="round"><path d="M38 38 H962"/><path d="M38 592 H962"/><path d="M38 38 V592"/><path d="M962 38 V592"/></g>' +
+            '<g fill="#D4AF37" opacity="0.8">' +
+            '<path d="M28 28 L40 16 M40 28 L28 40 Z"/>' +
+            '<path d="M972 28 L960 16 M960 28 L972 40 Z"/>' +
+            '<path d="M28 602 L40 614 M40 602 L28 590 Z"/>' +
+            '<path d="M972 602 L960 614 M960 602 L972 590 Z"/>' +
             '</g>' +
-            '<g fill="#d4a017" opacity="0.08"><circle cx="150" cy="160" r="2"/><circle cx="850" cy="160" r="2"/><circle cx="500" cy="585" r="3"/><circle cx="100" cy="450" r="1.5"/><circle cx="900" cy="450" r="1.5"/></g>' +
-            '<g fill="none" stroke="#001f5c" stroke-width="2" opacity="0.12"><ellipse cx="500" cy="90" rx="100" ry="2.5"/><ellipse cx="500" cy="540" rx="70" ry="2"/></g>' +
+            '<g fill="none" stroke="#D4AF37" stroke-width="1.5" opacity="0.25">' +
+            '<path d="M120 100 C160 90 200 110 240 100 C280 90 320 110 360 100 C400 90 440 110 480 100 C520 90 560 110 600 100 C640 90 680 110 720 100 C760 90 800 110 840 100 C880 90 920 110 960 100"/>' +
+            '<path d="M120 530 C160 540 200 520 240 530 C280 540 320 520 360 530 C400 540 440 520 480 530 C520 540 560 520 600 530 C640 540 680 520 720 530 C760 540 800 520 840 530 C880 540 920 520 960 530"/>' +
+            '</g>' +
+            '<g fill="none" stroke="#D4AF37" stroke-width="1.5" opacity="0.15">' +
+            '<path d="M120 160 Q500 130 880 160"/>' +
+            '<path d="M120 470 Q500 500 880 470"/>' +
+            '</g>' +
+            '<g fill="#071D49" opacity="0.06">' +
+            '<rect x="80" y="240" width="120" height="3" rx="1.5"/><rect x="800" y="240" width="120" height="3" rx="1.5"/>' +
+            '<rect x="200" y="200" width="10" height="60" rx="5"/><rect x="800" y="200" width="10" height="60" rx="5"/>' +
+            '<rect x="500" y="570" width="20" height="10" rx="5"/>' +
+            '</g>' +
+            '<g fill="#D4AF37" opacity="0.08">' +
+            '<circle cx="280" cy="140" r="2"/><circle cx="720" cy="140" r="2"/>' +
+            '<circle cx="200" cy="500" r="1.5"/><circle cx="800" cy="500" r="1.5"/>' +
+            '</g>' +
+            '<rect x="0" y="0" width="1000" height="630" fill="url(#goldGlow)"/>' +
             '</svg>',
           html: '<!-- canvas-border: decorations rendered via background image -->' +
-            '<div style="text-align:center;font-size:12px;color:#001f5c;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;">{{school_name}}</div>' +
+            '<div style="text-align:center;font-size:12px;color:#071D49;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">{{school_name}}</div>' +
             '<div style="text-align:center;margin:6px 0 8px;">{{school_logo}}</div>' +
-            '<div style="text-align:center;font-size:11px;color:#8a5a00;font-style:italic;margin-bottom:10px;">{{school_motto}}</div>' +
+            '<div style="font-size:11px;color:#8A5A00;font-style:italic;">{{school_motto}}</div>' +
             '<div style="text-align:center;margin:22px 0 12px;">' +
-              '<span style="display:inline-block;background:linear-gradient(135deg,#001f5c,#0b5394);color:#fff;font-size:24px;font-family:Georgia,serif;font-weight:800;letter-spacing:2px;padding:10px 32px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">CERTIFICATE OF GRADUATION</span>' +
+              '<span style="display:inline-block;background:linear-gradient(135deg,#071D49,#123B78);color:#fff;font-size:24px;font-family:Georgia,serif;font-weight:800;letter-spacing:2px;padding:10px 32px;border-radius:8px;box-shadow:0 2px 8px rgba(7,29,73,0.2);">CERTIFICATE OF GRADUATION</span>' +
             '</div>' +
             '<div style="text-align:center;margin:12px 0 16px;">' +
-              '<span style="display:inline-block;background:linear-gradient(135deg,#d4a017,#b8860b);color:#001f5c;font-size:14px;font-weight:700;border-radius:30px;padding:5px 18px;box-shadow:0 2px 6px rgba(0,0,0,0.1);">PRE-PRIMARY 2 (PP2)</span>' +
+              '<span style="display:inline-block;background:linear-gradient(135deg,#D4AF37,#b8860b);color:#071D49;font-size:14px;font-weight:700;border-radius:30px;padding:5px 18px;box-shadow:0 2px 6px rgba(7,29,73,0.15);">PRE-PRIMARY 2 (PP2)</span>' +
             '</div>' +
             '<div style="text-align:center;font-size:15px;color:#444;line-height:1.8;margin:18px 0 12px;">This certificate is proudly awarded to</div>' +
-            '<div style="text-align:center;font-size:32px;color:#001f5c;font-family:Georgia,serif;font-weight:800;word-break:break-word;line-height:1.2;margin:10px 0 4px;">{{student_name}}</div>' +
-            '<div style="text-align:center;font-size:12px;color:#666;margin-bottom:12px;">Admission No: <strong style="color:#001f5c;">{{admission_number}}</strong> &nbsp;|&nbsp; Class: <strong style="color:#001f5c;">{{class}}</strong></div>' +
+            '<div style="text-align:center;font-size:32px;color:#071D49;font-family:Georgia,serif;font-weight:800;word-break:break-word;line-height:1.2;margin:10px 0 4px;">{{student_name}}</div>' +
+            '<div style="text-align:center;font-size:12px;color:#666;margin-bottom:12px;">Admission No: <strong style="color:#071D49;">{{admission_number}}</strong> &nbsp;|&nbsp; Class: <strong style="color:#071D49;">{{class}}</strong></div>' +
             '<div style="text-align:center;font-size:15px;color:#333;line-height:1.7;margin:24px auto;max-width:680px;">for successfully completing the PP2 programme and demonstrating growth,<br>learning and readiness for the next stage of their educational journey.</div>' +
-            '<div style="text-align:center;margin:30px 0;">' +
+              '<div style="text-align:center;margin:30px 0;">' +
               '<span style="display:inline-block;text-align:center;">' +
-                '<span style="display:inline-block;background:linear-gradient(135deg,#f5c842,#d4a017);color:#001f5c;font-size:12px;font-weight:700;border-radius:12px;padding:4px 14px;box-shadow:0 2px 6px rgba(0,0,0,0.1);">Class Teacher</span><br>' +
-                '<span style="display:inline-block;border-top:1px solid #001f5c;width:130px;height:1px;"></span>' +
+                '<span style="display:inline-block;background:linear-gradient(135deg,#D4AF37,#b8860b);color:#071D49;font-size:12px;font-weight:700;border-radius:12px;padding:4px 14px;box-shadow:0 2px 6px rgba(7,29,73,0.15);">Class Teacher</span><br>' +
+                '<span style="display:inline-block;border-top:2px solid #071D49;width:130px;height:1px;"></span>' +
               '</span>' +
               '{{student_photo}}' +
               '<span style="display:inline-block;text-align:center;">' +
-                '<span style="display:inline-block;background:linear-gradient(135deg,#f5c842,#d4a017);color:#001f5c;font-size:12px;font-weight:700;border-radius:12px;padding:4px 14px;box-shadow:0 2px 6px rgba(0,0,0,0.1);">Headteacher</span><br>' +
-                '<span style="display:inline-block;border-top:1px solid #001f5c;width:130px;height:1px;"></span>' +
+                '<span style="display:inline-block;background:linear-gradient(135deg,#D4AF37,#b8860b);color:#071D49;font-size:12px;font-weight:700;border-radius:12px;padding:4px 14px;box-shadow:0 2px 6px rgba(7,29,73,0.15);">Headteacher</span><br>' +
+                '<span style="display:inline-block;border-top:2px solid #071D49;width:130px;height:1px;"></span>' +
               '</span>' +
             '</div>' +
             '<div style="text-align:center;font-size:12px;color:#666;margin-top:14px;">Graduation {{graduation_year}} &nbsp;|&nbsp; Certificate No: {{certificate_number}} &nbsp;|&nbsp; Date: {{date}}</div>'
@@ -3080,7 +3098,7 @@
                     const c = document.createElement('canvas'); c.width = w; c.height = h;
                     const ctx = c.getContext('2d');
                     ctx.clearRect(0, 0, w, h);
-                    ctx.fillStyle = '#fdf8f0'; ctx.fillRect(0, 0, w, h);
+                    ctx.fillStyle = '#FFFCF4'; ctx.fillRect(0, 0, w, h);
                     ctx.drawImage(img, 0, 0, w, h);
                     resolve(c.toDataURL('image/png'));
                 };
@@ -3833,8 +3851,8 @@
         width: 100%;
         height: 100%;
         aspect-ratio: 297 / 210;
-        background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
-        border: 8px solid #001f5c;
+        background: linear-gradient(135deg, #FFFCF4 0%, #ffffff 100%);
+        border: 8px solid #071D49;
         font-family: 'Georgia', 'Times New Roman', serif;
         display: flex;
         flex-direction: column;
@@ -3848,7 +3866,7 @@
     .cert-border {
         position: absolute;
         top: 12px; left: 12px; right: 12px; bottom: 12px;
-        border: 4px solid #d4a017;
+        border: 4px solid #D4AF37;
         z-index: 1;
         pointer-events: none;
     }
@@ -3857,7 +3875,7 @@
         position: absolute;
         top: 30px; right: 30px;
         width: 100px; height: 120px;
-        background: linear-gradient(135deg, #001f5c, #0b5394);
+        background: linear-gradient(135deg, #071D49, #123B78);
         clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
         z-index: 1;
         opacity: 0.15;
@@ -3882,21 +3900,21 @@
         width: 160px; height: 213px;
         object-fit: cover;
         border: 4px solid;
-        border-image: linear-gradient(135deg, #d4a017, #b8860b) 1;
+        border-image: linear-gradient(135deg, #D4AF37, #b8860b) 1;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 31, 92, 0.15);
+        box-shadow: 0 4px 12px rgba(7, 29, 73, 0.15);
         flex-shrink: 0;
     }
 
     .cert-photo-placeholder {
         width: 160px; height: 213px;
-        border: 3px dashed #d4a017; border-radius: 8px;
+        border: 3px dashed #D4AF37; border-radius: 8px;
         display: flex; align-items: center; justify-content: center;
         background: linear-gradient(135deg, #fffbeb 0%, #fff8f0 100%);
-        color: #8a5a00;
+        color: #8A5A00;
         font-size: 12px; font-weight: 700; text-align: center;
         line-height: 1.3;
-        box-shadow: 0 4px 12px rgba(0, 31, 92, 0.08);
+        box-shadow: 0 4px 12px rgba(7, 29, 73, 0.08);
     }
 
     .cert-photo-placeholder span { display: block; }
