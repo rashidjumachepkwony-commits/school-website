@@ -809,40 +809,16 @@
             </div>
         </div>
 
-        <!-- Preview & Generate Section -->
-        <div class="card preview-section">
-            <h2><i class="fas fa-eye"></i> Live Preview</h2>
-            <p class="desc">Preview the certificate with the selected student's data. Download as PDF or print.</p>
-
-             <div class="preview-wrapper">
-                <div class="preview-label" id="previewLabel">A4 Landscape (297mm × 210mm)
-                    <span id="slideCounter" style="float:right;font-size:12;color:#888;display:none;">Slide 1 of 1</span>
-                </div>
-                <div id="orientationToggle" style="margin:6px 0;" role="radiogroup" aria-label="Page orientation">
-                    <button class="btn btn-sm btn-secondary" id="orientLandscape" onclick="setOrientation('landscape')" style="margin-right:4px;">Landscape</button>
-                    <button class="btn btn-sm btn-secondary" id="orientPortrait" onclick="setOrientation('portrait')">Portrait</button>
-                </div>
-                <div id="certificatePreview" class="certificate-preview landscape">
-                    <div style="padding:40px;text-align:center;color:#999;">
-                        <i class="fas fa-search" style="font-size:32px;margin-bottom:10px;"></i>
-                        <p>Select students and set event details to preview.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="carousel-controls" id="carouselControls" style="display:none;margin:8px 0;align-items:center;gap:8px;">
-                <button class="btn btn-sm btn-secondary" id="prevSlideBtn" onclick="prevSlide()"><i class="fas fa-chevron-left"></i> Prev</button>
-                <span class="slide-count" id="slideCountLabel">Slide 1 of 1</span>
-                <button class="btn btn-sm btn-secondary" id="nextSlideBtn" onclick="nextSlide()">Next <i class="fas fa-chevron-right"></i></button>
-                <span style="margin-left:auto;font-size:12;color:#888;" id="slideStudentLabel"></span>
-                <button class="btn btn-sm btn-secondary" onclick="buildSlides()" title="Refresh slide previews"><i class="fas fa-redo"></i></button>
-            </div>
+        <!-- Generate Actions Section -->
+        <div class="card generate-section">
+            <h2><i class="fas fa-download"></i> Generate & Export</h2>
+            <p class="desc">Merge student data into the designer canvas below, then download as PDF or print.</p>
 
             <div class="actions-bar">
-                <button class="btn btn-warning" onclick="showNextCertNumber()" id="certNumberBtn"><i class="fas fa-hashtag"></i> Generate Certificate Number</button>
+                <button class="btn btn-info" onclick="previewFirstStudent()" id="previewBtn"><i class="fas fa-user"></i> Merge First Student</button>
+                <button class="btn btn-warning" onclick="showNextCertNumber()" id="certNumberBtn"><i class="fas fa-hashtag"></i> Certificate Number</button>
                 <span class="cert-number-display" id="certNumberDisplay" style="display:none;"></span>
-                <button class="btn btn-info" onclick="previewFirstStudent()" id="previewBtn"><i class="fas fa-eye"></i> Preview with First Student</button>
-                <button class="btn btn-danger" onclick="downloadAllPDFs()" id="downloadBtn"><i class="fas fa-download"></i> Download All as PDF</button>
+                <button class="btn btn-danger" onclick="downloadAllPDFs()" id="downloadBtn"><i class="fas fa-file-pdf"></i> Download All as PDF</button>
                 <button class="btn btn-secondary" onclick="printAll()" id="printBtn"><i class="fas fa-print"></i> Print All</button>
             </div>
         </div>
@@ -927,11 +903,10 @@
     let STUDENTS_PER_PAGE = 15;
     let totalStudentPages = 1;
     let currentSlide = 0;
-    let slidesHtml = [];
     let studentCertNumbers = {};
     let designerMerged = false;
     let baseTemplateHtml = '';
-    let pdfOrientation = 'landscape'; // 'landscape' | 'portrait' (Phase 5)
+    let pdfOrientation = 'landscape'; // 'landscape' | 'portrait'
 
     // ---- Auth ----
     function showAlert(message, type) {
@@ -1521,11 +1496,6 @@
         // Persist a CLEAN (flow-layout) version - never the editor's absolute coords
         // - so saved templates and the HTML source reopen correctly in preview/export.
         document.getElementById('htmlSource').value = normalizeTemplateForRender(canvas.innerHTML);
-        // If the designer has been merged with student data, update the live preview
-        // so style/color/bold/italic edits appear immediately.
-        if (designerMerged && selectedStudents && selectedStudents.length > 0) {
-            renderDesignerPreview(currentSlide);
-        }
     }
 
     function syncFromHTML() {
@@ -1629,44 +1599,8 @@
     function prevDesignerSlide() { if (currentSlide > 0) { currentSlide--; _renderDesignerSlide(); } }
     function nextDesignerSlide() { if (currentSlide < selectedStudents.length - 1) { currentSlide++; _renderDesignerSlide(); } }
 
-    // Keep the live-preview carousel aligned with the designer's current slide.
     function syncPreviewToDesigner() {
         slidesCount = selectedStudents.length;
-        const controls = document.getElementById('carouselControls');
-        if (controls) controls.style.display = slidesCount > 1 ? 'flex' : 'none';
-        renderSlide();
-    }
-
-    // Re-render the live preview with the current designer's edited content + student data.
-    // Called after syncToHTML() when the designer has been merged with student data.
-    function renderDesignerPreview(idx) {
-        if (!selectedStudents || selectedStudents.length === 0) return;
-        const i = idx >= 0 ? idx : currentSlide;
-        const student = selectedStudents[i];
-        if (!student) return;
-        const eventName = document.getElementById('eventName').value || 'Certificate';
-        const eventDate = document.getElementById('certDate').value || new Date().toISOString().split('T')[0];
-        const gradYear = document.getElementById('gradYear').value || currentYear;
-        const certNumber = studentCertNumbers[student.admissionNumber] || generateCertificateNumber(student, gradYear, i);
-        studentCertNumbers[student.admissionNumber] = certNumber;
-        // Use the CURRENT htmlSource (with edits applied by syncToHTML) and substitute student fields
-        const template = getTemplateContent();
-        const rendered = renderCertificate(student, schoolSettings, eventName, eventDate, certNumber);
-        const preview = document.getElementById('certificatePreview');
-        if (preview) preview.innerHTML = rendered;
-        // Update slide counter
-        const counter = document.getElementById('slideCounter');
-        const countLabel = document.getElementById('slideCountLabel');
-        const studentLabel = document.getElementById('slideStudentLabel');
-        if (counter) { counter.style.display = 'inline'; counter.textContent = 'Slide ' + (i + 1) + ' of ' + selectedStudents.length; }
-        if (countLabel) countLabel.textContent = 'Slide ' + (i + 1) + ' of ' + selectedStudents.length;
-        if (studentLabel) studentLabel.textContent = 'Student: ' + (student.fullName || '');
-        const controls = document.getElementById('carouselControls');
-        if (controls) controls.style.display = 'flex';
-        const prev = document.getElementById('prevSlideBtn');
-        const next = document.getElementById('nextSlideBtn');
-        if (prev) prev.disabled = i <= 0;
-        if (next) next.disabled = i >= selectedStudents.length - 1;
     }
 
     // Generate the certificate number for the current slide's student and place it
@@ -3579,115 +3513,36 @@
         return generateCertificateNumber(student, gradYear, 0);
     }
 
-    // ---- Slide carousel (PowerPoint-like) for previewing all selected students ----
-    // Slides are rendered lazily on navigation so a large selection (e.g. a whole
-    // class) does not freeze the browser with N drawCanvas.toDataURL() calls at once.
+    // ---- Designer slide navigation (merges student data into designer canvas) ----
     let slidesCount = 0;
-
-    function getSlideHtml(index) {
-        if (index < 0 || index >= selectedStudents.length) return '';
-        if (!slidesHtml[index]) {
-            const student = selectedStudents[index];
-            const eventName = document.getElementById('eventName').value || 'Certificate';
-            const eventDate = document.getElementById('certDate').value || new Date().toISOString().split('T')[0];
-            slidesHtml[index] = renderCertificate(student, schoolSettings, eventName, eventDate, studentCertNumbers[student.admissionNumber]);
-        }
-        return slidesHtml[index];
-    }
 
     function buildSlides() {
         const eventName = document.getElementById('eventName').value || 'Certificate';
         const gradYear = document.getElementById('gradYear').value || currentYear;
-
-        // Compute cert numbers for ALL selected students (cheap string ops) up front.
         selectedStudents.forEach((s, i) => { studentCertNumbers[s.admissionNumber] = generateCertificateNumber(s, gradYear, i); });
-
-        // Reset the carousel; slides render on demand as you navigate.
-        slidesHtml = [];
         slidesCount = selectedStudents.length;
         currentSlide = 0;
-        renderSlide();
     }
 
-    function renderSlide() {
-        const preview = document.getElementById('certificatePreview');
-        const controls = document.getElementById('carouselControls');
-        const countLabel = document.getElementById('slideCountLabel');
-        const counter = document.getElementById('slideCounter');
-        const studentLabel = document.getElementById('slideStudentLabel');
+    function prevSlide() { if (currentSlide > 0) { currentSlide--; _renderDesignerSlide(); } }
+    function nextSlide() { if (currentSlide < selectedStudents.length - 1) { currentSlide++; _renderDesignerSlide(); } }
 
-        if (slidesCount === 0) {
-            preview.innerHTML = `
-                <div style="padding:40px;text-align:center;color:#999;">
-                    <i class="fas fa-search" style="font-size:32px;margin-bottom:10px;"></i>
-                    <p>Select students and set event details to preview.</p>
-                </div>
-            `;
-            controls.style.display = 'none';
-            counter.style.display = 'none';
-            return;
-        }
-
-        preview.innerHTML = getSlideHtml(currentSlide);
-        const showNav = slidesCount > 1;
-        controls.style.display = showNav ? 'flex' : 'none';
-        if (counter) counter.style.display = showNav ? 'inline' : 'none';
-        if (countLabel) countLabel.textContent = 'Slide ' + (currentSlide + 1) + ' of ' + slidesCount;
-        if (counter) counter.textContent = 'Slide ' + (currentSlide + 1) + ' of ' + slidesCount;
-        document.getElementById('previewBtn').disabled = false;
-        document.getElementById('downloadBtn').disabled = false;
-        document.getElementById('printBtn').disabled = false;
-        refreshCertNumberDisplay();
-
-        if (selectedStudents[currentSlide]) {
-            studentLabel.textContent = 'Student: ' + (selectedStudents[currentSlide].fullName || '');
-        }
-    }
-
-    function prevSlide() { if (currentSlide > 0) { currentSlide--; if (designerMerged) renderDesignerPreview(currentSlide); else renderSlide(); } }
-    function nextSlide() { if (currentSlide < selectedStudents.length - 1) { currentSlide++; if (designerMerged) renderDesignerPreview(currentSlide); else renderSlide(); } }
-
-    // ---- Page orientation (Phase 5) ----
     function setOrientation(ori) {
         pdfOrientation = ori === 'portrait' ? 'portrait' : 'landscape';
-        const preview = document.getElementById('certificatePreview');
-        if (preview) {
-            preview.classList.remove('landscape', 'portrait');
-            preview.classList.add(pdfOrientation);
+        const dc = document.getElementById('designCanvas');
+        if (dc) dc.style.aspectRatio = pdfOrientation === 'landscape' ? '297 / 210' : '210 / 297';
+        if (selectedStudents.length > 0) {
+            _renderDesignerSlide();
         }
-        const label = document.getElementById('previewLabel');
-        if (label) {
-            if (pdfOrientation === 'portrait') label.textContent = 'A4 Portrait (210mm × 297mm)';
-            else label.textContent = 'A4 Landscape (297mm × 210mm)';
-            // re-append the slide counter that shares the label line
-            const counter = document.getElementById('slideCounter');
-            if (counter) label.appendChild(counter);
-        }
-        document.getElementById('orientLandscape').classList.toggle('active', pdfOrientation === 'landscape');
-        document.getElementById('orientPortrait').classList.toggle('active', pdfOrientation === 'portrait');
-        // Re-render so dimensions/counters reflect orientation immediately
-        renderSlide();
     }
 
     function updatePreview() {
-        const preview = document.getElementById('certificatePreview');
-        if (selectedStudents.length === 0) {
-            slidesHtml = [];
-            slidesCount = 0;
+        // Preview is now the designer canvas itself
+        if (selectedStudents.length > 0 && designerMerged) {
+            // Re-render current slide with any changes to event fields
             currentSlide = 0;
-            preview.innerHTML = `
-                <div style="padding:40px;text-align:center;color:#999;">
-                    <i class="fas fa-search" style="font-size:32px;margin-bottom:10px;"></i>
-                    <p>Select students and set event details to preview.</p>
-                </div>
-            `;
-            renderStudentPaginationControls(false);
-            document.getElementById('carouselControls').style.display = 'none';
-            document.getElementById('slideCounter').style.display = 'none';
-            showDesignerSlideNav(false);
-            return;
+            _renderDesignerSlide();
         }
-        buildSlides();
     }
 
     function refreshCertNumberDisplay() {
@@ -3712,19 +3567,16 @@
         showAlert('Certificate numbers are issued server-side on generation. The number shown is an estimate for the first selected student.', 'info');
     }
 
-    // Keyboard arrow navigation for slides (carousel + designer)
+    // Keyboard arrow navigation for designer slides
     document.addEventListener('keydown', function (e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        const carousel = document.getElementById('carouselControls');
         const nav = document.getElementById('designerSlideNav');
-        const inCarousel = carousel && carousel.style.display !== 'none';
-        const inDesigner = nav && nav.style.display !== 'none';
-        if (!inCarousel && !inDesigner) return;
-        if (e.key === 'ArrowLeft') { e.preventDefault(); if (inDesigner) prevDesignerSlide(); else prevSlide(); }
-        else if (e.key === 'ArrowRight') { e.preventDefault(); if (inDesigner) nextDesignerSlide(); else nextSlide(); }
+        if (!nav || nav.style.display === 'none') return;
+        if (e.key === 'ArrowLeft') { e.preventDefault(); prevDesignerSlide(); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); nextDesignerSlide(); }
     });
 
-    // Auto-update preview when event fields change
+    // Auto-update designer when event fields change
     document.getElementById('eventName').addEventListener('input', updatePreview);
     document.getElementById('certDate').addEventListener('input', updatePreview);
 
@@ -3733,7 +3585,8 @@
             showAlert('Please select at least one student.', 'error');
             return;
         }
-        updatePreview();
+        buildSlides();
+        applyDesignerSlide();
     }
 
     async function generateBulk() {
