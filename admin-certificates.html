@@ -3429,16 +3429,16 @@
              el.style.top = ''; el.style.bottom = '';
              el.style.transform = '';
          });
-         // Strip editor inline positioning from ALL child elements (built-in templates
-         // use position:absolute for the designer, but preview/export needs flow layout).
-         tmp.querySelectorAll('div[style*="position:absolute"], div[style*="position: absolute"]').forEach(el => {
-             el.style.position = '';
-             el.style.left = ''; el.style.right = '';
-             el.style.top = ''; el.style.bottom = '';
-             el.style.transform = '';
-             el.style.width = '';
-             el.style.display = '';
-             el.style.margin = '0.5em 0';
+         // Strip editor inline positioning from ALL child divs (built-in templates
+         // and designer-promoted elements use position:absolute, but preview/export
+         // needs normal flow so .cert-content's flex container doesn't collapse).
+         tmp.querySelectorAll('div').forEach(el => {
+             if (el.style.position === 'absolute' || el.style.position === 'fixed') {
+                 el.style.position = '';
+                 el.style.left = ''; el.style.right = '';
+                 el.style.top = ''; el.style.bottom = '';
+                 el.style.transform = '';
+             }
          });
         // Remove editor-only decorative elements (cert-shield, canvas-border) that
         // syncFromHTML re-adds on load; they must not persist in the template source.
@@ -3729,20 +3729,30 @@
         const eventName = document.getElementById('eventName').value || 'Certificate';
         const eventDate = document.getElementById('certDate').value;
         const gradYear = document.getElementById('gradYear').value || currentYear;
+        // Collect all CSS from the page to include in the print window
+        const cssText = Array.from(document.styleSheets).map(function(sheet) {
+            try {
+                return Array.from(sheet.cssRules || []).map(function(rule) {
+                    return rule.cssText;
+                }).join('\n');
+            } catch (e) {
+                return '';
+            }
+        }).join('\n');
 
-        selectedStudents.forEach((student, i) => {
+        selectedStudents.forEach(function (student, i) {
             const w = window.open('', '_blank');
             if (!w) { showAlert('Pop-up blocked for printing ' + (student.fullName || 'student') + '. Allow pop-ups and retry.', 'error'); return; }
-            (async () => {
+            (async function () {
                 const certNumber = await getPersistentCertNumber(student, gradYear, eventName, eventDate);
                 const rendered = renderCertificate(student, schoolSettings, eventName, eventDate, certNumber);
-                w.document.write(`<html><head><style>
-                @page { size: A4 ${pdfOrientation}; margin: 0; }
-                body { margin: 0; padding: 0; font-family: Georgia, serif; }
-                .certificate { width: 100vw; height: 100vh; }
-            </style></head><body>${rendered}</body></html>`);
+                w.document.write('<html><head><style>\n' +
+                    '@page { size: A4 ' + pdfOrientation + '; margin: 0; }\n' +
+                    'body { margin: 0; padding: 0; font-family: Georgia, serif; }\n' +
+                    '.certificate { width: 100vw; height: 100vh; }\n' +
+                    cssText + '\n</style></head><body>' + rendered + '</body></html>');
                 w.document.close();
-                setTimeout(() => w.print(), 500);
+                setTimeout(function () { w.print(); }, 500);
             })();
         });
     }
